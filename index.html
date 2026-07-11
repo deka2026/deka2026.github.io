@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>사교원 관계 사이트 허브</title>
+<meta name="description" content="사회혁신교육원 사회적협동조합의 모든 사이트로 연결되는 관문 페이지">
+<meta property="og:title" content="사교원 관계 사이트 허브">
+<meta property="og:description" content="사교원의 모든 사이트를 한곳에서 — 홈페이지, 아카데미, 위키, 프로젝트">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%234a6741'/><text x='16' y='22' text-anchor='middle' font-size='14' fill='%23f7f3ee'>社</text></svg>">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #f4f7f2;
+    --bg-card: #ffffff;
+    --text-primary: #1e2b1c;
+    --text-secondary: #3d5238;
+    --text-muted: #6e8469;
+    --accent-green: #4a6741;
+    --accent-green-light: #5d7f54;
+    --border-subtle: rgba(60, 80, 50, 0.12);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-md: 0 6px 20px rgba(30,43,28,0.12);
+    --font-serif: Georgia, 'Noto Serif KR', serif;
+    --font-body: 'Pretendard Variable', 'Pretendard', -apple-system, sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 56px 20px 40px; width: 100%; flex: 1; }
+  header { text-align: center; margin-bottom: 44px; }
+  .logo {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--accent-green); color: #f7f3ee;
+    font-size: 26px; font-family: var(--font-serif);
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+  }
+  h1 { font-family: var(--font-serif); font-size: clamp(24px, 5vw, 32px); font-weight: 700; letter-spacing: -0.01em; }
+  .subtitle { margin-top: 10px; font-size: 15px; color: var(--text-muted); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
+  .site-btn {
+    display: flex; flex-direction: column; gap: 6px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    padding: 22px 22px 18px;
+    text-decoration: none;
+    color: var(--text-primary);
+    box-shadow: var(--shadow-sm);
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  }
+  .site-btn:hover, .site-btn:focus-visible {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent-green-light);
+    outline: none;
+  }
+  .site-btn .icon { font-size: 26px; line-height: 1; margin-bottom: 4px; }
+  .site-btn .name { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
+  .site-btn .name .arrow { color: var(--accent-green); font-weight: 400; }
+  .site-btn .desc { font-size: 13.5px; color: var(--text-secondary); }
+  .site-btn .url { margin-top: auto; padding-top: 10px; font-size: 12px; color: var(--text-muted); word-break: break-all; }
+
+  .section-label {
+    font-size: 13px; font-weight: 700; color: var(--accent-green);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin: 36px 0 14px; padding-left: 2px;
+  }
+  .section-label:first-of-type { margin-top: 0; }
+
+  footer { text-align: center; padding: 28px 16px 36px; font-size: 12.5px; color: var(--text-muted); border-top: 1px solid var(--border-subtle); }
+  footer .fname { font-family: var(--font-serif); font-weight: 700; color: var(--text-secondary); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">社</div>
+    <h1>사교원 관계 사이트</h1>
+    <p class="subtitle">사회혁신교육원 사회적협동조합의 모든 사이트를 한곳에서</p>
+  </header>
+
+  <!--
+    ★ 새 사이트 추가하는 법 ★
+    아래 <a class="site-btn"> 블록 하나를 통째로 복사해서
+    알맞은 섹션 그리드 안에 붙여넣고 아이콘·이름·설명·주소(href, .url)만 바꾸면 됩니다.
+  -->
+
+  <div class="section-label">공식</div>
+  <div class="grid">
+    <a class="site-btn" href="https://sakyowon.poomasi.org" target="_blank" rel="noopener">
+      <span class="icon">🏛️</span>
+      <span class="name">사교원 홈페이지 <span class="arrow">↗</span></span>
+      <span class="desc">사회혁신교육원 공식 홈 — 소개·사업·문의</span>
+      <span class="url">sakyowon.poomasi.org</span>
+    </a>
+    <a class="site-btn" href="https://deka2026.github.io/academy-site/" target="_blank" rel="noopener">
+      <span class="icon">🎓</span>
+      <span class="name">연대지능활동가 아카데미 <span class="arrow">↗</span></span>
+      <span class="desc">활동가 교육·평가·지식 검증 플랫폼</span>
+      <span class="url">deka2026.github.io/academy-site</span>
+    </a>
+  </div>
+
+  <div class="section-label">위키 · 지식</div>
+  <div class="grid">
+    <a class="site-btn" href="https://wiki.poomasi.org" target="_blank" rel="noopener">
+      <span class="icon">🤝</span>
+      <span class="name">연대지능 위키 <span class="arrow">↗</span></span>
+      <span class="desc">활동가들이 함께 만드는 공동 지식 저장소</span>
+      <span class="url">wiki.poomasi.org</span>
+    </a>
+    <a class="site-btn" href="https://deka2026.github.io/sakyowon-wiki/" target="_blank" rel="noopener">
+      <span class="icon">📚</span>
+      <span class="name">사교원 위키 <span class="arrow">↗</span></span>
+      <span class="desc">학습 기록·프로젝트·로컬리스트 자료 아카이브</span>
+      <span class="url">deka2026.github.io/sakyowon-wiki</span>
+    </a>
+  </div>
+
+  <div class="section-label">프로젝트</div>
+  <div class="grid">
+    <a class="site-btn" href="https://deka2026.github.io/mangnam-site/" target="_blank" rel="noopener">
+      <span class="icon">🌊</span>
+      <span class="name">망남마을 <span class="arrow">↗</span></span>
+      <span class="desc">완도 망남마을 어촌신활력증진사업</span>
+      <span class="url">deka2026.github.io/mangnam-site</span>
+    </a>
+  </div>
+</div>
+
+<footer>
+  <span class="fname">사회혁신교육원 사회적협동조합</span><br>
+  광주광역시 · 전라남도 · 전북특별자치도
+</footer>
+</body>
+</html>
