@@ -9,6 +9,13 @@
 <meta property="og:description" content="사교원의 모든 사이트를 한곳에서 — 홈페이지, 아카데미, 위키, 프로젝트">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%234a6741'/><text x='16' y='22' text-anchor='middle' font-size='14' fill='%23f7f3ee'>社</text></svg>">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#4a6741">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="사교원 허브">
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
 <style>
   :root {
@@ -80,6 +87,20 @@
 
   footer { text-align: center; padding: 28px 16px 36px; font-size: 12.5px; color: var(--text-muted); border-top: 1px solid var(--border-subtle); }
   footer .fname { font-family: var(--font-serif); font-weight: 700; color: var(--text-secondary); }
+
+  /* 홈 화면 추가 안내 */
+  .install-bar { display: none; text-align: center; margin: 36px 0 0; }
+  .install-bar.show { display: block; }
+  .install-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--accent-green); color: #f7f3ee;
+    border: none; border-radius: 12px; padding: 12px 26px;
+    font-size: 15px; font-weight: 700; font-family: var(--font-body);
+    cursor: pointer; box-shadow: var(--shadow-sm);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .install-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .install-note { margin-top: 10px; font-size: 13px; color: var(--text-muted); line-height: 1.7; }
 </style>
 </head>
 <body>
@@ -143,11 +164,69 @@
       <span class="url">deka2026.github.io/teamlearning-site</span>
     </a>
   </div>
+
+  <div class="install-bar" id="installBar">
+    <button class="install-btn" id="installBtn">&#128241; 홈 화면에 바로가기 추가</button>
+    <p class="install-note" id="installNote"></p>
+  </div>
 </div>
 
 <footer>
   <span class="fname">사회혁신교육원 사회적협동조합</span><br>
   광주광역시 · 전라남도 · 전북특별자치도
 </footer>
+
+<script>
+// 서비스워커 등록 (PWA 설치 요건)
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(function () {});
+}
+
+(function () {
+  var bar = document.getElementById('installBar');
+  var btn = document.getElementById('installBtn');
+  var note = document.getElementById('installNote');
+
+  // 이미 홈 화면 앱으로 열려 있으면 안내를 숨긴다
+  var standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  if (standalone) return;
+
+  var deferredPrompt = null;
+
+  // 안드로이드 크롬 등: 설치 프롬프트를 잡아두었다가 버튼으로 실행
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    bar.classList.add('show');
+  });
+
+  window.addEventListener('appinstalled', function () {
+    bar.classList.remove('show');
+  });
+
+  btn.addEventListener('click', function () {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt = null;
+    } else {
+      showManualGuide();
+    }
+  });
+
+  function showManualGuide() {
+    var ua = navigator.userAgent;
+    if (/iPhone|iPad|iPod/.test(ua)) {
+      note.innerHTML = 'Safari 하단의 <b>공유 버튼(&#11014;&#65039;)</b>을 누른 뒤<br><b>"홈 화면에 추가"</b>를 선택하세요.';
+    } else {
+      note.innerHTML = '브라우저 메뉴(&#8942;)에서 <b>"홈 화면에 추가"</b> 또는 <b>"앱 설치"</b>를 선택하세요.';
+    }
+  }
+
+  // iOS는 beforeinstallprompt가 없으므로 버튼을 항상 보여주고 수동 안내
+  if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+    bar.classList.add('show');
+  }
+})();
+</script>
 </body>
 </html>
