@@ -3,11 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>사교원 관계 사이트 허브</title>
-<meta name="description" content="사회혁신교육원 사회적협동조합의 모든 사이트로 연결되는 관문 페이지">
-<meta property="og:title" content="사교원 관계 사이트 허브">
+<title>사회혁신교육원 사회적협동조합 | 사교원 관계 사이트 허브</title>
+<meta name="description" content="사회혁신교육원 사회적협동조합(사교원)의 공식 홈페이지·아카데미·위키·프로젝트 사이트로 연결되는 관문 페이지. 광주광역시·전라남도·전북특별자치도를 중심으로 활동합니다.">
+<link rel="canonical" href="https://sakyowon.co.kr/">
+<meta property="og:title" content="사회혁신교육원 사회적협동조합 | 사교원 관계 사이트 허브">
 <meta property="og:description" content="사교원의 모든 사이트를 한곳에서 — 홈페이지, 아카데미, 위키, 프로젝트">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://sakyowon.co.kr/">
+<meta property="og:image" content="https://sakyowon.co.kr/icon-512.png">
+<meta property="og:locale" content="ko_KR">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "사회혁신교육원 사회적협동조합",
+  "alternateName": ["사교원", "사회혁신교육원", "Sakyowon"],
+  "url": "https://sakyowon.co.kr/",
+  "logo": "https://sakyowon.co.kr/icon-512.png",
+  "areaServed": ["광주광역시", "전라남도", "전북특별자치도"],
+  "sameAs": [
+    "https://www.instagram.com/sakyowon/",
+    "https://sakyowon.poomasi.org"
+  ]
+}
+</script>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%234a6741'/><text x='16' y='22' text-anchor='middle' font-size='14' fill='%23f7f3ee'>社</text></svg>">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -45,12 +64,11 @@
   .wrap { max-width: 880px; margin: 0 auto; padding: 56px 20px 40px; width: 100%; flex: 1; }
   header { text-align: center; margin-bottom: 44px; }
   .logo {
-    width: 56px; height: 56px; border-radius: 50%;
-    background: var(--accent-green); color: #f7f3ee;
-    font-size: 26px; font-family: var(--font-serif);
-    display: inline-flex; align-items: center; justify-content: center;
+    width: 170px; height: 170px;
+    display: inline-block;
     margin-bottom: 16px;
   }
+  .logo svg { width: 100%; height: 100%; display: block; }
   h1 { font-family: var(--font-serif); font-size: clamp(24px, 5vw, 32px); font-weight: 700; letter-spacing: -0.01em; }
   .subtitle { margin-top: 10px; font-size: 15px; color: var(--text-muted); }
 
@@ -106,9 +124,43 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="logo">社</div>
-    <h1>사교원 관계 사이트</h1>
-    <p class="subtitle">사회혁신교육원 사회적협동조합의 모든 사이트를 한곳에서</p>
+    <div class="logo" aria-label="사교원 로고 — coop change beyound, social meta platform">
+      <svg viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg" role="img">
+        <defs>
+          <path id="arcTop" d="M 58 300 A 242 242 0 0 1 542 300" fill="none"/>
+          <path id="arcBottom" d="M 48 300 A 252 252 0 0 0 552 300" fill="none"/>
+        </defs>
+        <!-- 바깥 파란 원 -->
+        <circle cx="300" cy="300" r="200" fill="none" stroke="#1e3d98" stroke-width="12"/>
+        <!-- 노랑: 아치 + 우상단 연결선 -->
+        <g fill="none" stroke="#f2cf5b" stroke-width="13" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M 210 262 L 210 180 Q 210 132 258 132 L 262 132 Q 310 132 310 180 L 310 196"/>
+          <path d="M 310 196 L 425 196 L 425 144"/>
+        </g>
+        <!-- 빨강: 좌측 곡선 + 기둥 2개 + 수평선 -->
+        <g fill="none" stroke="#e2342b" stroke-width="13" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M 107 246 L 158 246 Q 182 246 182 270 L 182 316"/>
+          <path d="M 133 312 L 133 352"/>
+          <path d="M 165 312 L 165 352"/>
+          <path d="M 107 352 L 322 352"/>
+        </g>
+        <!-- 초록: 고리 + 연결선 + 하단 선/곡선 -->
+        <g fill="none" stroke="#0a9d49" stroke-width="13" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="392" cy="278" r="33"/>
+          <path d="M 425 278 L 499 278"/>
+          <path d="M 322 352 L 322 499"/>
+          <path d="M 322 392 L 478 392"/>
+          <path d="M 440 392 Q 440 460 390 478"/>
+        </g>
+        <!-- 원형 문구 -->
+        <g fill="#1e3d98" font-family="'Trebuchet MS','Segoe UI',Verdana,sans-serif" font-weight="700" letter-spacing="4">
+          <text font-size="42"><textPath href="#arcTop" startOffset="50%" text-anchor="middle">coop change beyound</textPath></text>
+          <text font-size="42"><textPath href="#arcBottom" startOffset="50%" text-anchor="middle">social meta platform</textPath></text>
+        </g>
+      </svg>
+    </div>
+    <h1>사회혁신교육원 사회적협동조합</h1>
+    <p class="subtitle">사교원 관계 사이트 허브 — 모든 사이트를 한곳에서</p>
   </header>
 
   <!--
