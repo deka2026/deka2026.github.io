@@ -1,0 +1,713 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>사교원 통합 관리자 — 사회혁신교육원 사회적협동조합</title>
+<meta name="theme-color" content="#4a6741">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%234a6741'/><text x='16' y='22' text-anchor='middle' font-size='11' fill='%23faf6ec' font-family='Georgia'>L%26L</text></svg>">
+<style>
+:root{
+  --paper:#FAF6EC;
+  --paper-soft:#F1EBD9;
+  --card:#FFFFFF;
+  --ink:#1C2621;
+  --ink-soft:#4F5A50;
+  --ink-faint:#8B9188;
+  --green-900:#0D3B2C;
+  --green-700:#2C5842;
+  --green-600:#4A6741;
+  --green-500:#6B8560;
+  --green-100:#DBE4D0;
+  --green-50:#EDF2E5;
+  --gold-600:#B47D14;
+  --gold-100:#F6EAC9;
+  --danger:#B03A3A;
+  --success:#2E8B57;
+  --line:#D9D2C0;
+  --line-soft:#EBE5D5;
+  --shadow-sm:0 1px 2px rgba(28,38,33,.05), 0 3px 10px rgba(28,38,33,.05);
+  --shadow-md:0 3px 8px rgba(28,38,33,.07), 0 14px 32px rgba(28,38,33,.10);
+  --radius:14px;
+  --radius-sm:10px;
+  --font-serif:'Nanum Myeongjo', Georgia, 'Times New Roman', serif;
+  --font-sans:'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,'Malgun Gothic',sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-sans);font-size:15px;line-height:1.65;}
+a{color:var(--green-700);text-decoration:none;}
+button{font-family:inherit;cursor:pointer;}
+input,select,textarea{font-family:inherit;font-size:14.5px;}
+.serif{font-family:var(--font-serif);}
+.hidden{display:none !important;}
+
+/* ── 공통 폼 ── */
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--ink-soft);margin-bottom:5px;}
+.field input,.field select,.field textarea{
+  width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:var(--radius-sm);
+  background:#fff;color:var(--ink);
+}
+.field input:focus,.field select:focus,.field textarea:focus{outline:2px solid var(--green-100);border-color:var(--green-500);}
+.btn{display:inline-block;padding:10px 18px;border:none;border-radius:var(--radius-sm);font-size:14.5px;font-weight:600;}
+.btn-primary{background:var(--green-700);color:#fff;}
+.btn-primary:hover{background:var(--green-900);}
+.btn-primary:disabled{opacity:.55;cursor:default;}
+.btn-ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--line);}
+.btn-ghost:hover{background:var(--green-50);color:var(--green-700);}
+.btn-sm{padding:6px 12px;font-size:13px;}
+.msg{margin-top:12px;padding:10px 12px;border-radius:var(--radius-sm);font-size:13.5px;display:none;}
+.msg.error{display:block;background:#F9ECEC;color:var(--danger);}
+.msg.okay{display:block;background:var(--green-50);color:var(--green-700);}
+
+/* ── 로그인 화면 ── */
+#login-view{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.login-card{
+  width:100%;max-width:400px;background:var(--card);border:1px solid var(--line-soft);
+  border-radius:var(--radius);box-shadow:var(--shadow-md);padding:36px 32px;
+}
+.login-card .logo{text-align:center;margin-bottom:24px;}
+.login-card .logo .mark{
+  display:inline-flex;width:52px;height:52px;border-radius:50%;background:var(--green-600);
+  color:var(--paper);font-family:Georgia,serif;font-size:17px;align-items:center;justify-content:center;margin-bottom:10px;
+}
+.login-card h1{font-family:var(--font-serif);font-size:21px;margin:0;color:var(--green-900);}
+.login-card .sub{font-size:13px;color:var(--ink-faint);margin-top:4px;}
+.login-card form button[type=submit]{width:100%;margin-top:6px;}
+.login-switch{text-align:center;margin-top:18px;font-size:13.5px;color:var(--ink-soft);}
+.login-switch a{font-weight:600;}
+.login-home{text-align:center;margin-top:14px;font-size:13px;}
+
+/* ── 대시보드 ── */
+#dash-view{max-width:1080px;margin:0 auto;padding:0 20px 60px;}
+.dash-header{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  padding:20px 0 16px;border-bottom:1px solid var(--line);margin-bottom:20px;
+}
+.dash-header .title{display:flex;align-items:center;gap:10px;}
+.dash-header .mark{
+  display:inline-flex;width:36px;height:36px;border-radius:50%;background:var(--green-600);
+  color:var(--paper);font-family:Georgia,serif;font-size:12px;align-items:center;justify-content:center;
+}
+.dash-header h1{font-family:var(--font-serif);font-size:19px;margin:0;color:var(--green-900);}
+.dash-user{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--ink-soft);}
+.role-badge{background:var(--green-50);color:var(--green-700);border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600;}
+
+.tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+.tab-btn{
+  padding:9px 18px;border:1px solid var(--line);border-radius:24px;background:#fff;
+  font-size:14px;font-weight:600;color:var(--ink-soft);
+}
+.tab-btn.active{background:var(--green-700);border-color:var(--green-700);color:#fff;}
+.tab-btn .cnt{margin-left:6px;font-size:12px;background:rgba(255,255,255,.25);border-radius:10px;padding:1px 7px;}
+.tab-btn:not(.active) .cnt{background:var(--gold-100);color:var(--gold-600);}
+
+.filters{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.chip{
+  padding:5px 13px;border:1px solid var(--line);border-radius:20px;background:#fff;
+  font-size:13px;color:var(--ink-soft);
+}
+.chip.active{background:var(--green-50);border-color:var(--green-500);color:var(--green-700);font-weight:600;}
+
+.panel{background:var(--card);border:1px solid var(--line-soft);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;}
+.empty{padding:40px;text-align:center;color:var(--ink-faint);font-size:14px;}
+
+/* 회원 테이블 */
+table.members{width:100%;border-collapse:collapse;font-size:14px;}
+table.members th{
+  text-align:left;padding:11px 14px;background:var(--paper-soft);color:var(--ink-soft);
+  font-size:12.5px;font-weight:600;border-bottom:1px solid var(--line-soft);white-space:nowrap;
+}
+table.members td{padding:11px 14px;border-bottom:1px solid var(--line-soft);vertical-align:middle;}
+table.members tr:last-child td{border-bottom:none;}
+.status-pill{display:inline-block;padding:2px 10px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap;}
+.st-pending{background:var(--gold-100);color:var(--gold-600);}
+.st-approved{background:var(--green-50);color:var(--success);}
+.st-rejected{background:#F9ECEC;color:var(--danger);}
+.st-미확인{background:var(--gold-100);color:var(--gold-600);}
+.st-검토중{background:#EAF0F7;color:#3A6BB0;}
+.st-반영{background:var(--green-50);color:var(--success);}
+.st-보류{background:var(--paper-soft);color:var(--ink-faint);}
+.row-actions{display:flex;gap:6px;flex-wrap:wrap;}
+.act-approve{background:var(--green-700);color:#fff;border:none;}
+.act-reject{background:#fff;color:var(--danger);border:1px solid #E4C6C6;}
+.act-pending{background:#fff;color:var(--ink-soft);border:1px solid var(--line);}
+
+/* 사이트 현황판 */
+.site-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;padding:16px;}
+.site-card{border:1px solid var(--line-soft);border-radius:var(--radius-sm);padding:16px;background:#fff;display:flex;flex-direction:column;gap:8px;}
+.site-card .site-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
+.site-card h3{margin:0;font-size:15.5px;font-family:var(--font-serif);color:var(--green-900);}
+.site-card .site-desc{font-size:13px;color:var(--ink-soft);margin:0;}
+.site-card .site-meta{font-size:12px;color:var(--ink-faint);}
+.site-card .site-links{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:6px;}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--line);vertical-align:middle;}
+.dot.up{background:var(--success);}
+.dot.down{background:var(--danger);}
+.dot.pending{background:var(--gold-500,#D3A03A);}
+.site-note{padding:14px 18px;border-top:1px solid var(--line-soft);font-size:13px;color:var(--ink-soft);background:var(--paper-soft);}
+
+/* 피드백 카드 */
+.fb-list{display:flex;flex-direction:column;}
+.fb-item{padding:18px 20px;border-bottom:1px solid var(--line-soft);}
+.fb-item:last-child{border-bottom:none;}
+.fb-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:6px;}
+.fb-meta{font-size:12.5px;color:var(--ink-faint);}
+.fb-msg{font-size:14.5px;white-space:pre-wrap;word-break:break-word;}
+.fb-orig{margin-top:6px;font-size:13px;color:var(--ink-faint);white-space:pre-wrap;word-break:break-word;border-left:3px solid var(--line);padding-left:10px;}
+.fb-controls{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:flex-start;}
+.fb-controls select{padding:7px 10px;border:1px solid var(--line);border-radius:var(--radius-sm);background:#fff;}
+.fb-controls textarea{flex:1;min-width:220px;min-height:40px;padding:8px 10px;border:1px solid var(--line);border-radius:var(--radius-sm);resize:vertical;}
+.fb-reply-saved{margin-top:8px;font-size:13px;color:var(--green-700);background:var(--green-50);border-radius:var(--radius-sm);padding:8px 10px;white-space:pre-wrap;}
+
+/* 모달 (비밀번호 변경) */
+.modal-back{position:fixed;inset:0;background:rgba(28,38,33,.45);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50;}
+.modal{width:100%;max-width:380px;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow-md);padding:28px;}
+.modal h2{font-family:var(--font-serif);font-size:17px;margin:0 0 16px;color:var(--green-900);}
+.modal .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
+
+.loading{padding:40px;text-align:center;color:var(--ink-faint);}
+@media (max-width:640px){
+  table.members thead{display:none;}
+  table.members tr{display:block;border-bottom:1px solid var(--line-soft);padding:8px 0;}
+  table.members td{display:block;border:none;padding:4px 14px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ 진입 가드 로딩 ══ -->
+<div id="boot-view" class="loading">확인 중…</div>
+
+<!-- ══ 로그인 / 가입 신청 ══ -->
+<div id="login-view" class="hidden">
+  <div class="login-card">
+    <div class="logo">
+      <span class="mark">L&amp;L</span>
+      <h1>사교원 통합 관리자</h1>
+      <div class="sub">사회혁신교육원 사회적협동조합</div>
+    </div>
+
+    <!-- 로그인 폼 -->
+    <form id="login-form">
+      <div class="field">
+        <label for="login-username">아이디</label>
+        <input id="login-username" name="username" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label for="login-password">비밀번호</label>
+        <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn btn-primary">로그인</button>
+      <div id="login-msg" class="msg"></div>
+    </form>
+
+    <!-- 가입 신청 폼 -->
+    <form id="signup-form" class="hidden">
+      <div class="field">
+        <label for="su-username">아이디 <span style="font-weight:400;color:var(--ink-faint)">(3자 이상)</span></label>
+        <input id="su-username" name="username" autocomplete="username" required minlength="3">
+      </div>
+      <div class="field">
+        <label for="su-password">비밀번호 <span style="font-weight:400;color:var(--ink-faint)">(8자 이상)</span></label>
+        <input id="su-password" name="password" type="password" autocomplete="new-password" required minlength="8">
+      </div>
+      <div class="field">
+        <label for="su-name">이름</label>
+        <input id="su-name" name="name">
+      </div>
+      <div class="field">
+        <label for="su-contact">연락처</label>
+        <input id="su-contact" name="contact" placeholder="전화번호 또는 이메일">
+      </div>
+      <div class="field">
+        <label for="su-org">소속</label>
+        <input id="su-org" name="org">
+      </div>
+      <button type="submit" class="btn btn-primary">가입 신청</button>
+      <div id="signup-msg" class="msg"></div>
+    </form>
+
+    <div class="login-switch">
+      <span id="switch-to-signup">아직 계정이 없으신가요? <a href="#" data-switch="signup">가입 신청</a></span>
+      <span id="switch-to-login" class="hidden">가입 후 관리자 승인이 필요합니다. <a href="#" data-switch="login">로그인으로</a></span>
+    </div>
+    <div class="login-home"><a href="index.html">← 사교원 홈으로</a></div>
+  </div>
+</div>
+
+<!-- ══ 관리자 대시보드 ══ -->
+<div id="dash-view" class="hidden">
+  <div class="dash-header">
+    <div class="title">
+      <span class="mark">L&amp;L</span>
+      <h1>사교원 통합 관리자</h1>
+    </div>
+    <div class="dash-user">
+      <span id="user-name"></span>
+      <span id="user-role" class="role-badge"></span>
+      <button id="btn-pw" class="btn btn-ghost btn-sm">비밀번호 변경</button>
+      <button id="btn-logout" class="btn btn-ghost btn-sm">로그아웃</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="sites">사이트 관리</button>
+    <button class="tab-btn" data-tab="members">회원 승인 <span id="cnt-members" class="cnt hidden"></span></button>
+    <button class="tab-btn" data-tab="feedback">개선의견 <span id="cnt-feedback" class="cnt hidden"></span></button>
+  </div>
+
+  <!-- 사이트 관리 탭 -->
+  <div id="tab-sites">
+    <div class="panel">
+      <div id="sites-body" class="loading">불러오는 중…</div>
+      <div class="site-note">
+        콘텐츠 수정·새 페이지·디자인 변경은 <strong>데카</strong>에게 지시하시면 처리됩니다.
+        서버·배포·키 관련은 <strong>지미(본부)</strong> 담당입니다.
+      </div>
+    </div>
+  </div>
+
+  <!-- 회원 승인 탭 -->
+  <div id="tab-members" class="hidden">
+    <div class="filters" id="member-filters">
+      <button class="chip active" data-status="pending">대기</button>
+      <button class="chip" data-status="approved">승인됨</button>
+      <button class="chip" data-status="rejected">거절됨</button>
+      <button class="chip" data-status="">전체</button>
+    </div>
+    <div class="panel">
+      <div id="members-body" class="loading">불러오는 중…</div>
+    </div>
+  </div>
+
+  <!-- 개선의견 탭 -->
+  <div id="tab-feedback" class="hidden">
+    <div class="filters" id="fb-filters">
+      <button class="chip active" data-status="미확인">미확인</button>
+      <button class="chip" data-status="검토중">검토중</button>
+      <button class="chip" data-status="반영">반영</button>
+      <button class="chip" data-status="보류">보류</button>
+      <button class="chip" data-status="">전체</button>
+    </div>
+    <div class="panel">
+      <div id="feedback-body" class="loading">불러오는 중…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 비밀번호 변경 모달 ══ -->
+<div id="pw-modal" class="modal-back hidden">
+  <div class="modal">
+    <h2>비밀번호 변경</h2>
+    <form id="pw-form">
+      <div class="field">
+        <label for="pw-old">현재 비밀번호</label>
+        <input id="pw-old" type="password" autocomplete="current-password" required>
+      </div>
+      <div class="field">
+        <label for="pw-new">새 비밀번호 <span style="font-weight:400;color:var(--ink-faint)">(8자 이상)</span></label>
+        <input id="pw-new" type="password" autocomplete="new-password" required minlength="8">
+      </div>
+      <div class="field">
+        <label for="pw-new2">새 비밀번호 확인</label>
+        <input id="pw-new2" type="password" autocomplete="new-password" required minlength="8">
+      </div>
+      <div id="pw-msg" class="msg"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="pw-cancel">닫기</button>
+        <button type="submit" class="btn btn-primary">변경</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* 인증은 HttpOnly 쿠키(sk_session) 기반 — 토큰을 JS로 다루지 않는다.
+   모든 응답은 {ok:true|false, ...} 래핑. res.ok(바디) 먼저 확인 후 데이터를 읽는다. */
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+async function api(path, opts = {}) {
+  const res = await fetch(path, {
+    credentials: 'same-origin',
+    headers: opts.body ? { 'Content-Type': 'application/json' } : {},
+    ...opts,
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  });
+  let data = {};
+  try { data = await res.json(); } catch (_) {}
+  return { status: res.status, ...data };
+}
+
+const ERROR_TEXT = {
+  invalid_credentials: '아이디 또는 비밀번호가 올바르지 않습니다.',
+  not_approved: '가입 승인 대기 중입니다. 관리자 승인 후 로그인할 수 있습니다.',
+  username_taken: '이미 사용 중인 아이디입니다.',
+  weak_password: '비밀번호는 8자 이상이어야 합니다.',
+  invalid_username: '아이디는 3자 이상이어야 합니다.',
+  forbidden: '관리자 권한이 필요합니다.',
+};
+function errText(r, fallback) {
+  if (r.status === 429) return '요청이 잠시 제한되었습니다. 1분 후 다시 시도해 주세요.';
+  return ERROR_TEXT[r.error] || fallback || '처리하지 못했습니다. 잠시 후 다시 시도해 주세요.';
+}
+function showMsg(el, text, kind) { el.textContent = text; el.className = 'msg ' + kind; }
+function clearMsg(el) { el.textContent = ''; el.className = 'msg'; }
+
+/* ── 화면 전환 ── */
+function show(view) {
+  ['boot-view', 'login-view', 'dash-view'].forEach(id => $('#' + id).classList.add('hidden'));
+  $('#' + view).classList.remove('hidden');
+}
+
+/* ── 진입 가드 ── */
+async function boot() {
+  const r = await api('/api/auth/me');
+  if (r.ok && r.user) {
+    if (r.user.role === 'admin' || r.user.role === 'staff') return enterDash(r.user);
+    // member 계정 — 관리자 화면 아님
+    await api('/api/auth/logout', { method: 'POST' });
+    show('login-view');
+    showMsg($('#login-msg'), '관리자·직원 계정만 이용할 수 있습니다.', 'error');
+    return;
+  }
+  show('login-view');
+}
+
+/* ── 로그인 / 가입 ── */
+document.querySelectorAll('[data-switch]').forEach(a => a.addEventListener('click', e => {
+  e.preventDefault();
+  const toSignup = a.dataset.switch === 'signup';
+  $('#login-form').classList.toggle('hidden', toSignup);
+  $('#signup-form').classList.toggle('hidden', !toSignup);
+  $('#switch-to-signup').classList.toggle('hidden', toSignup);
+  $('#switch-to-login').classList.toggle('hidden', !toSignup);
+  clearMsg($('#login-msg')); clearMsg($('#signup-msg'));
+}));
+
+$('#login-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = e.target.querySelector('[type=submit]'); btn.disabled = true;
+  clearMsg($('#login-msg'));
+  const r = await api('/api/auth/login', { method: 'POST', body: {
+    username: $('#login-username').value.trim(),
+    password: $('#login-password').value,
+  }});
+  btn.disabled = false;
+  if (r.ok && r.user) {
+    if (r.user.role === 'admin' || r.user.role === 'staff') return enterDash(r.user);
+    await api('/api/auth/logout', { method: 'POST' });
+    return showMsg($('#login-msg'), '관리자·직원 계정만 이용할 수 있습니다.', 'error');
+  }
+  showMsg($('#login-msg'), errText(r), 'error');
+});
+
+$('#signup-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = e.target.querySelector('[type=submit]'); btn.disabled = true;
+  clearMsg($('#signup-msg'));
+  const body = {
+    username: $('#su-username').value.trim(),
+    password: $('#su-password').value,
+  };
+  const name = $('#su-name').value.trim(); if (name) body.name = name;
+  const contact = $('#su-contact').value.trim(); if (contact) body.contact = contact;
+  const org = $('#su-org').value.trim(); if (org) body.org = org;
+  const r = await api('/api/auth/signup', { method: 'POST', body });
+  btn.disabled = false;
+  if (r.ok) {
+    e.target.reset();
+    return showMsg($('#signup-msg'), '가입 신청이 접수되었습니다. 관리자 승인 후 로그인할 수 있습니다.', 'okay');
+  }
+  showMsg($('#signup-msg'), errText(r), 'error');
+});
+
+/* ── 대시보드 ── */
+let currentUser = null;
+let memberStatus = 'pending';
+let fbStatus = '미확인';
+
+function enterDash(user) {
+  currentUser = user;
+  $('#user-name').textContent = user.name || '';
+  $('#user-role').textContent = user.role === 'admin' ? '이사장·관리자' : '직원';
+  show('dash-view');
+  loadSites();
+  loadMembers();
+  loadFeedback();
+}
+
+/* ── 사이트 관리 탭 ── */
+const SITES = [
+  { name: '사교원 메인', desc: '법인 소개 · 문의 접수 · 햇빛소득마을 업무도우미',
+    url: 'https://sakyowon.poomasi.org/', repo: 'haeory-cyber/sakyowon-site',
+    manage: '회원 승인 · 개선의견 탭에서 관리' },
+  { name: '사교원 허브', desc: '사교원 관련 사이트 모음 대문 (sakyowon.co.kr)',
+    url: 'https://sakyowon.co.kr/', repo: 'deka2026/sakyowon-hub' },
+  { name: '연대지능 공동위키', desc: '지식베이스 (Quartz) — 문서 검토·머지는 데카 담당',
+    url: 'https://wiki.poomasi.org/', repo: 'deka2026/sakyowon-wiki' },
+  { name: '망남마을협동조합', desc: '마을 협동조합 홍보 사이트',
+    url: 'https://sakyowon.co.kr/mangnam-coop/', repo: 'deka2026/mangnam-coop' },
+  { name: '망남 어촌신활력', desc: '어촌신활력증진사업 홍보·업무자동화 — 정식 주소(mangnam.poomasi.org)는 본부 배포 대기, 지금은 임시 홍보판이 열립니다',
+    url: 'https://sakyowon.co.kr/mangnam-vitality/', urlLabel: '사이트 열기 (임시)',
+    repo: 'deka2026/mangnam-vitality',
+    adminUrl: 'https://mangnam.poomasi.org/admin', adminPending: true, pending: true },
+  { name: '고향사랑기부제', desc: '27개 시군구 정보 — 2주 1회 정기 갱신',
+    url: 'https://sakyowon.co.kr/hometown-love/', repo: 'deka2026/hometown-love' },
+  { name: '입찰메이트', desc: '나라장터 용역 제안서 자동화 (본부 배포 대기)',
+    url: 'https://bid.poomasi.org/', urlPending: true, repo: 'deka2026/bid-helper', pending: true },
+];
+
+const relTime = iso => {
+  const d = new Date(iso); if (isNaN(d)) return '';
+  const days = Math.floor((Date.now() - d.getTime()) / 86400000);
+  if (days <= 0) return '오늘';
+  if (days < 30) return `${days}일 전`;
+  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+};
+
+function loadSites() {
+  const box = $('#sites-body');
+  box.className = 'site-grid';
+  box.innerHTML = SITES.map((s, i) => `
+    <div class="site-card" id="site-${i}">
+      <div class="site-top">
+        <h3>${esc(s.name)}</h3>
+        <span><span class="dot${s.pending ? ' pending' : ''}" data-dot></span></span>
+      </div>
+      <p class="site-desc">${esc(s.desc)}</p>
+      <div class="site-meta" data-commit>최근 변경 확인 중…</div>
+      ${s.manage ? `<div class="site-meta">${esc(s.manage)}</div>` : ''}
+      <div class="site-links">
+        ${s.urlPending
+          ? `<span class="btn btn-ghost btn-sm" style="opacity:.45;cursor:not-allowed" title="본부(지미) 배포 후 열립니다: ${esc(s.url)}">사이트 열기 ⏳ 배포 대기</span>`
+          : `<a class="btn btn-ghost btn-sm" href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.urlLabel || '사이트 열기')}</a>`}
+        ${s.adminUrl ? (s.adminPending
+          ? `<span class="btn btn-ghost btn-sm" style="opacity:.45;cursor:not-allowed" title="본부(지미) 배포 후 열립니다: ${esc(s.adminUrl)}">자체 관리자 ⏳ 배포 대기</span>`
+          : `<a class="btn btn-ghost btn-sm" href="${esc(s.adminUrl)}" target="_blank" rel="noopener">자체 관리자</a>`) : ''}
+        <a class="btn btn-ghost btn-sm" href="https://github.com/${esc(s.repo)}" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>`).join('');
+
+  SITES.forEach((s, i) => {
+    const card = $('#site-' + i);
+    const dot = card.querySelector('[data-dot]');
+    const commitEl = card.querySelector('[data-commit]');
+    // 접속 가능 여부 (no-cors ping — 성공/실패만 판별)
+    if (!s.pending) {
+      fetch(s.url, { mode: 'no-cors', cache: 'no-store' })
+        .then(() => { dot.className = 'dot up'; dot.title = '접속 정상'; })
+        .catch(() => { dot.className = 'dot down'; dot.title = '접속 실패'; });
+    } else {
+      dot.title = '배포 준비 중';
+    }
+    // 최근 커밋 (GitHub 공개 API)
+    fetch(`https://api.github.com/repos/${s.repo}/commits?per_page=1`)
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(j => {
+        const c = j && j[0] && j[0].commit;
+        if (!c) throw 0;
+        commitEl.textContent = `최근 변경: ${relTime(c.committer.date)} — ${c.message.split('\n')[0].slice(0, 40)}`;
+      })
+      .catch(() => { commitEl.textContent = '최근 변경: 확인 불가'; });
+  });
+}
+
+function guard(r) {
+  // 세션 만료 → 로그인 화면으로
+  if (r.status === 401) { show('login-view'); showMsg($('#login-msg'), '세션이 만료되었습니다. 다시 로그인해 주세요.', 'error'); return false; }
+  return true;
+}
+
+/* 탭 전환 */
+document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  $('#tab-sites').classList.toggle('hidden', b.dataset.tab !== 'sites');
+  $('#tab-members').classList.toggle('hidden', b.dataset.tab !== 'members');
+  $('#tab-feedback').classList.toggle('hidden', b.dataset.tab !== 'feedback');
+}));
+
+/* 필터 칩 */
+$('#member-filters').addEventListener('click', e => {
+  const chip = e.target.closest('.chip'); if (!chip) return;
+  $('#member-filters').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  memberStatus = chip.dataset.status;
+  loadMembers();
+});
+$('#fb-filters').addEventListener('click', e => {
+  const chip = e.target.closest('.chip'); if (!chip) return;
+  $('#fb-filters').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  fbStatus = chip.dataset.status;
+  loadFeedback();
+});
+
+/* ── 회원 승인 탭 ── */
+const M_STATUS_KO = { pending: '대기', approved: '승인됨', rejected: '거절됨' };
+const ROLE_KO = { member: '일반', staff: '직원', admin: '이사장·관리자' };
+/* 역할 변경은 서버에서 admin만 허용 — UI도 admin에게만, 자기 자신은 제외 */
+function roleCell(m) {
+  const role = m.role || 'member';
+  if (currentUser && currentUser.role === 'admin' && m.id !== currentUser.id) {
+    return `<select class="role-sel" data-id="${esc(m.id)}">${['member','staff','admin']
+      .map(r => `<option value="${r}"${r === role ? ' selected' : ''}>${ROLE_KO[r]}</option>`).join('')}</select>`;
+  }
+  return esc(ROLE_KO[role] || role);
+}
+const fmtDate = s => { if (!s) return '—'; const d = new Date(s); return isNaN(d) ? esc(s) : `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`; };
+
+async function loadMembers() {
+  const box = $('#members-body');
+  box.className = 'loading'; box.textContent = '불러오는 중…';
+  const q = memberStatus ? `?status=${memberStatus}` : '';
+  const r = await api('/api/admin/members' + q);
+  if (!guard(r)) return;
+  if (!r.ok) { box.className = 'empty'; box.textContent = errText(r); return; }
+  const items = r.items || [];
+  // 대기 건수 배지
+  if (memberStatus === 'pending') {
+    const cnt = $('#cnt-members');
+    cnt.textContent = items.length;
+    cnt.classList.toggle('hidden', items.length === 0);
+  }
+  if (!items.length) { box.className = 'empty'; box.textContent = '해당하는 회원이 없습니다.'; return; }
+  box.className = '';
+  box.innerHTML = `<table class="members">
+    <thead><tr><th>이름</th><th>연락처</th><th>소속</th><th>신청일</th><th>상태</th><th>역할</th><th>처리</th></tr></thead>
+    <tbody>${items.map(m => `
+      <tr>
+        <td><strong>${esc(m.name) || '—'}</strong>${m.username ? `<div style="font-size:.78rem;color:#888">${esc(m.username)}</div>` : ''}</td>
+        <td>${esc(m.contact) || '—'}</td>
+        <td>${esc(m.org) || '—'}</td>
+        <td>${fmtDate(m.applied_at)}</td>
+        <td><span class="status-pill st-${esc(m.status)}">${M_STATUS_KO[m.status] || esc(m.status)}</span></td>
+        <td>${roleCell(m)}</td>
+        <td><div class="row-actions">
+          ${m.status !== 'approved' ? `<button class="btn btn-sm act-approve" data-id="${esc(m.id)}" data-set="approved">승인</button>` : ''}
+          ${m.status !== 'rejected' ? `<button class="btn btn-sm act-reject" data-id="${esc(m.id)}" data-set="rejected">거절</button>` : ''}
+          ${m.status !== 'pending' ? `<button class="btn btn-sm act-pending" data-id="${esc(m.id)}" data-set="pending">대기로</button>` : ''}
+        </div></td>
+      </tr>`).join('')}</tbody></table>`;
+}
+
+$('#members-body').addEventListener('change', async e => {
+  const sel = e.target.closest('.role-sel'); if (!sel) return;
+  sel.disabled = true;
+  const r = await api(`/api/admin/members/${sel.dataset.id}`, { method: 'PATCH', body: { role: sel.value } });
+  if (!guard(r)) return;
+  if (!r.ok) alert(errText(r));
+  loadMembers();
+});
+
+$('#members-body').addEventListener('click', async e => {
+  const btn = e.target.closest('button[data-set]'); if (!btn) return;
+  const status = btn.dataset.set;
+  const body = { status };
+  if (status === 'rejected') {
+    const memo = prompt('거절 사유 (선택, 비워도 됩니다):');
+    if (memo === null) return; // 취소
+    if (memo.trim()) body.memo = memo.trim();
+  }
+  btn.disabled = true;
+  const r = await api(`/api/admin/members/${btn.dataset.id}`, { method: 'PATCH', body });
+  if (!guard(r)) return;
+  if (!r.ok) { alert(errText(r)); btn.disabled = false; return; }
+  loadMembers();
+});
+
+/* ── 개선의견 탭 ── */
+const FB_STATUSES = ['미확인', '검토중', '반영', '보류'];
+
+async function loadFeedback() {
+  const box = $('#feedback-body');
+  box.className = 'loading'; box.textContent = '불러오는 중…';
+  const q = fbStatus ? `?status=${encodeURIComponent(fbStatus)}` : '';
+  const r = await api('/api/admin/feedback' + q);
+  if (!guard(r)) return;
+  if (!r.ok) { box.className = 'empty'; box.textContent = errText(r); return; }
+  const items = r.items || [];
+  if (fbStatus === '미확인') {
+    const cnt = $('#cnt-feedback');
+    cnt.textContent = items.length;
+    cnt.classList.toggle('hidden', items.length === 0);
+  }
+  if (!items.length) { box.className = 'empty'; box.textContent = '해당하는 의견이 없습니다.'; return; }
+  box.className = 'fb-list';
+  box.innerHTML = items.map(f => {
+    const showOrig = f.msg && f.msg_ko && f.msg !== f.msg_ko;
+    const meta = [
+      f.page ? `페이지: ${esc(f.page)}` : '',
+      f.contact ? `연락처: ${esc(f.contact)}` : '',
+      f.user_lang && f.user_lang !== 'ko' ? `언어: ${esc(f.user_lang)}` : '',
+      f.created_at ? fmtDate(f.created_at) : '',
+    ].filter(Boolean).join(' · ');
+    return `<div class="fb-item" data-id="${esc(f.id)}">
+      <div class="fb-top">
+        <span class="status-pill st-${esc(f.status)}">${esc(f.status)}</span>
+        <span class="fb-meta">${meta}</span>
+      </div>
+      <div class="fb-msg">${esc(f.msg_ko || f.msg)}</div>
+      ${showOrig ? `<div class="fb-orig">원문: ${esc(f.msg)}</div>` : ''}
+      ${f.reply ? `<div class="fb-reply-saved">답변: ${esc(f.reply)}</div>` : ''}
+      <div class="fb-controls">
+        <select class="fb-status">${FB_STATUSES.map(s => `<option${s === f.status ? ' selected' : ''}>${s}</option>`).join('')}</select>
+        <textarea class="fb-reply" placeholder="답변 메모 (선택)">${esc(f.reply)}</textarea>
+        <button class="btn btn-primary btn-sm fb-save">저장</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+$('#feedback-body').addEventListener('click', async e => {
+  const btn = e.target.closest('.fb-save'); if (!btn) return;
+  const item = btn.closest('.fb-item');
+  const body = { status: item.querySelector('.fb-status').value };
+  const reply = item.querySelector('.fb-reply').value.trim();
+  if (reply) body.reply = reply;
+  btn.disabled = true;
+  const r = await api(`/api/admin/feedback/${item.dataset.id}`, { method: 'PATCH', body });
+  if (!guard(r)) return;
+  if (!r.ok) { alert(errText(r)); btn.disabled = false; return; }
+  loadFeedback();
+});
+
+/* ── 비밀번호 변경 ── */
+$('#btn-pw').addEventListener('click', () => { $('#pw-modal').classList.remove('hidden'); clearMsg($('#pw-msg')); $('#pw-form').reset(); });
+$('#pw-cancel').addEventListener('click', () => $('#pw-modal').classList.add('hidden'));
+$('#pw-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  if ($('#pw-new').value !== $('#pw-new2').value) return showMsg($('#pw-msg'), '새 비밀번호가 서로 다릅니다.', 'error');
+  const btn = e.target.querySelector('[type=submit]'); btn.disabled = true;
+  const r = await api('/api/auth/change-password', { method: 'POST', body: { old: $('#pw-old').value, new: $('#pw-new').value } });
+  btn.disabled = false;
+  if (!guard(r)) return;
+  if (r.ok) {
+    showMsg($('#pw-msg'), '비밀번호가 변경되었습니다.', 'okay');
+    setTimeout(() => $('#pw-modal').classList.add('hidden'), 1200);
+    return;
+  }
+  showMsg($('#pw-msg'), errText(r, '현재 비밀번호를 확인해 주세요.'), 'error');
+});
+
+/* ── 로그아웃 ── */
+$('#btn-logout').addEventListener('click', async () => {
+  await api('/api/auth/logout', { method: 'POST' });
+  currentUser = null;
+  $('#login-form').reset();
+  show('login-view');
+  clearMsg($('#login-msg'));
+});
+
+boot();
+</script>
+</body>
+</html>
