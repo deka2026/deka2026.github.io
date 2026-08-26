@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>햇소자 — 햇빛소득마을 통합 운영 플랫폼</title>
 <meta name="description" content="햇빛소득마을 마을협동조합의 설립·운영 업무를 자동화하여 지원하는 통합 플랫폼">
+<meta property="og:type" content="website">
+<meta property="og:title" content="햇소자 — 햇빛소득마을 통합 운영 플랫폼">
+<meta property="og:description" content="후보지 진단·수익 계산부터 조합 설립, 정산·배당, 마을비즈니스까지 — 마을협동조합 업무를 한 곳에서. 상업발전 전 전면 무료.">
+<meta property="og:url" content="https://sakyowon.co.kr/hatsoja/">
+<meta property="og:image" content="https://sakyowon.co.kr/icon-512.png">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="https://sakyowon.co.kr/icon-192.png">
+<link rel="apple-touch-icon" href="https://sakyowon.co.kr/apple-touch-icon.png">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
 <style>
@@ -202,11 +210,22 @@ input,select,textarea{font-family:inherit;font-size:14px;}
 .grid-2{grid-template-columns:repeat(2,1fr);}
 .grid-3{grid-template-columns:repeat(3,1fr);}
 .grid-4{grid-template-columns:repeat(4,1fr);}
+.nav-toggle{display:none;background:none;border:1px solid var(--line-soft);border-radius:8px;
+  font-size:20px;line-height:1;padding:7px 11px;cursor:pointer;color:var(--ink);}
 @media (max-width:900px){
   .grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}
   .app{grid-template-columns:1fr;}
   .sidebar{position:relative;top:0;}
   .pub-nav{display:none;}
+  .nav-toggle{display:inline-block;}
+  .topnav-in{position:relative;flex-wrap:wrap;}
+  .topnav-in.nav-open .pub-nav{
+    display:flex;flex-direction:column;align-items:stretch;gap:2px;
+    position:absolute;top:100%;left:0;right:0;z-index:60;
+    background:var(--card);border-bottom:1px solid var(--line-soft);
+    box-shadow:0 10px 24px rgba(0,0,0,.08);padding:10px 14px;
+  }
+  .topnav-in.nav-open .pub-nav a{padding:12px 10px;border-radius:8px;font-size:16px;}
   .hero h1{font-size:32px;}
 }
 
@@ -463,6 +482,8 @@ footer{
     <div class="top-actions" id="topActions">
       <!-- populated by JS depending on auth state -->
     </div>
+
+    <button class="nav-toggle" id="navToggle" aria-label="메뉴 열기" onclick="toggleNav()">☰</button>
   </div>
 </nav>
 
@@ -850,6 +871,36 @@ footer{
 </section>
 
 <!-- CONTACT (상담신청) -->
+<!-- ==================== 개인정보처리방침 ==================== -->
+<section class="view" id="v-pub-privacy">
+  <div class="wrap pub-page" style="max-width:760px;">
+    <div class="sec-head">
+      <h1>개인정보처리방침</h1>
+      <p class="sec-desc">햇소자(햇빛소득마을 통합 운영 플랫폼)는 개인정보보호법에 따라 이용자의 개인정보를 다음과 같이 처리합니다. (시행 2026-08-26)</p>
+    </div>
+    <div class="card">
+      <h3 class="serif">1. 수집하는 개인정보와 목적</h3>
+      <table class="tbl">
+        <thead><tr><th>수집 시점</th><th>항목</th><th>목적</th></tr></thead>
+        <tbody>
+          <tr><td>상담 신청</td><td>성함, 연락처, 소속(선택), 문의 내용</td><td>상담 응대·답변</td></tr>
+          <tr><td>참여 신청서 접수</td><td>담당자 성함, 연락처, 마을 이름, 진단·계산 입력값</td><td>햇빛소득마을 참여 상담·심사 안내</td></tr>
+          <tr><td>통합 계정 가입 신청</td><td>아이디, 비밀번호(암호화 저장), 이름, 연락처, 소속</td><td>계정 발급·본인 확인</td></tr>
+        </tbody>
+      </table>
+      <h3 class="serif">2. 보유 및 이용 기간</h3>
+      <p>수집 목적 달성 시(상담 종결, 신청 처리 완료) 지체 없이 파기하며, 최대 1년을 넘기지 않습니다. 통합 계정 정보는 탈퇴(삭제 요청) 시 즉시 파기합니다. 법령에 따로 보존 의무가 있는 경우 그 기간을 따릅니다.</p>
+      <h3 class="serif">3. 제3자 제공 및 처리 위탁</h3>
+      <p>수집한 개인정보를 제3자에게 제공하거나 외부에 처리 위탁하지 않습니다. 저장은 사교원이 직접 운영하는 서버(sakyowon.co.kr)에서 이뤄집니다.</p>
+      <h3 class="serif">4. 이용자의 권리</h3>
+      <p>이용자는 언제든 본인 개인정보의 열람·정정·삭제·처리정지를 요구할 수 있습니다. 아래 연락처로 요청하시면 지체 없이 처리합니다.</p>
+      <h3 class="serif">5. 개인정보 보호책임자</h3>
+      <p>사회혁신교육원 사회적협동조합 · 이메일 <a href="mailto:hello@sakyowon.poomasi.org">hello@sakyowon.poomasi.org</a></p>
+      <p class="text-mute" style="font-size:12.5px;">이 방침이 변경되면 이 페이지에 게시하고 시행일을 갱신합니다.</p>
+    </div>
+  </div>
+</section>
+
 <section class="view" id="v-pub-contact">
   <div class="wrap pub-page">
     <div class="sec-head">
@@ -885,6 +936,11 @@ footer{
           <label>내용 <span style="color:var(--danger);">*</span></label>
           <textarea class="textarea" id="c-msg" placeholder="상담받고 싶은 내용을 자유롭게 적어주세요."></textarea>
         </div>
+        <label style="display:flex;gap:8px;align-items:flex-start;font-size:13.5px;margin:4px 0 12px;cursor:pointer;">
+          <input type="checkbox" id="c-consent" style="margin-top:3px;">
+          <span>(필수) 상담 응대를 위한 개인정보(성함·연락처·문의 내용) 수집·이용에 동의합니다.
+          <a href="#/pub/privacy" target="_blank">개인정보처리방침 보기</a></span>
+        </label>
         <button class="btn btn-primary" onclick="submitContact()">상담 신청하기</button>
       </div>
 
@@ -902,7 +958,6 @@ footer{
           <h3 class="serif">⏰ 응답 시간</h3>
           <p class="text-mute" style="margin:0;">
             영업일 기준 <strong>1~2일 내</strong> 답변드립니다.
-            급하신 경우 전화 문의 부탁드립니다.
           </p>
         </div>
       </div>
@@ -931,8 +986,9 @@ footer{
     </div>
     <div>
       <a href="https://sakyowon.poomasi.org" target="_blank">사교원 사이트</a> ·
-      <a href="sunvillage.html">햇빛소득 종합업무도우미</a> ·
-      <a href="wando-solar.html">완도 시범사업 계획서</a>
+      <a href="https://sakyowon.poomasi.org/sunvillage.html">햇빛소득 종합업무도우미</a> ·
+      <a href="https://sakyowon.poomasi.org/wando-solar.html">완도 시범사업 계획서</a> ·
+      <a href="#/pub/privacy">개인정보처리방침</a>
       <div style="margin-top:8px"><a href="https://sakyowon.co.kr/admin.html" rel="nofollow" style="display:inline-block;padding:5px 14px;border:1px solid rgba(128,128,128,.45);border-radius:999px;font-size:12px;color:inherit;text-decoration:none">🔐 통합 관리자</a></div>
     </div>
   </div>
@@ -964,11 +1020,27 @@ footer{
       </button>
     </div>
     <p class="text-mute text-small" style="margin-top:14px;margin-bottom:0;">
-      ⓘ <strong>사교원 통합 계정 하나로 로그인</strong>합니다 (sakyowon.co.kr 도메인에서 이용 시).
-      통합 관리자에 이미 로그인돼 있으면 자동으로 이어집니다(SSO).
-      계정이 없으면 <a href="https://sakyowon.co.kr/admin.html" target="_blank" rel="noopener">여기서 가입 신청</a>하세요.
+      ⓘ <strong>사교원 통합 계정 하나로 로그인</strong>합니다.
+      다른 사교원 사이트에 이미 로그인돼 있으면 자동으로 이어집니다(SSO).
+      계정이 없으면 <a href="#" onclick="toggleSignup(true);return false;">가입 신청</a>하세요.
       데모 버튼으로는 계정 없이 화면을 체험할 수 있습니다.
     </p>
+
+    <!-- 통합 계정 가입 신청 (승인제) -->
+    <div id="signupPanel" style="display:none;border-top:1px solid var(--line-soft);margin-top:16px;padding-top:14px;">
+      <h3 class="serif" style="margin:0 0 4px;">통합 계정 가입 신청</h3>
+      <p class="text-mute text-small" style="margin:0 0 10px;">계정 하나로 사교원 모든 사이트를 이용합니다. 관리자 승인 후 로그인할 수 있습니다.</p>
+      <div class="form-row"><label>아이디 (3자 이상)</label><input class="input" id="su-id"></div>
+      <div class="form-row"><label>비밀번호 (8자 이상)</label><input class="input" id="su-pw" type="password"></div>
+      <div class="form-row"><label>이름</label><input class="input" id="su-name"></div>
+      <div class="form-row"><label>연락처</label><input class="input" id="su-contact" placeholder="010-0000-0000"></div>
+      <div class="form-row"><label>소속 마을·조직 (선택)</label><input class="input" id="su-org"></div>
+      <label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;margin-bottom:10px;cursor:pointer;">
+        <input type="checkbox" id="su-consent" style="margin-top:3px;">
+        <span>(필수) 계정 발급을 위한 개인정보 수집·이용에 동의합니다. <a href="#/pub/privacy" target="_blank">처리방침</a></span>
+      </label>
+      <button class="btn btn-primary" style="width:100%;" onclick="doSignup()">가입 신청하기</button>
+    </div>
   </div>
 </div>
 
@@ -1131,6 +1203,33 @@ async function doLogin(){
   toast(`환영합니다, ${name}님 (${role === 'admin' ? '관리자' : '회원'}) — 데모 모드`);
 }
 
+function toggleSignup(show){
+  const p = document.getElementById('signupPanel');
+  p.style.display = show === undefined ? (p.style.display === 'none' ? '' : 'none') : (show ? '' : 'none');
+}
+
+async function doSignup(){
+  const id = document.getElementById('su-id').value.trim();
+  const pw = document.getElementById('su-pw').value;
+  if(id.length < 3){ toast('아이디는 3자 이상이어야 합니다.'); return; }
+  if(pw.length < 8){ toast('비밀번호는 8자 이상이어야 합니다.'); return; }
+  if(!document.getElementById('su-consent').checked){ toast('개인정보 수집·이용에 동의해 주세요.'); return; }
+  if(!REAL_API){ toast('가입 신청은 sakyowon.co.kr/hatsoja 에서 할 수 있습니다.'); return; }
+  try{
+    const res = await fetch('/api/auth/signup', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({username:id, password:pw,
+        name: document.getElementById('su-name').value.trim(),
+        contact: document.getElementById('su-contact').value.trim(),
+        org: document.getElementById('su-org').value.trim()}),
+    });
+    const d = await res.json().catch(() => ({}));
+    if(d.ok){ toggleSignup(false); closeLogin(); toast('가입 신청이 접수되었습니다. 관리자 승인 후 로그인할 수 있습니다.'); return; }
+    const msgs = {username_taken:'이미 사용 중인 아이디입니다.', weak_password:'비밀번호는 8자 이상이어야 합니다.', invalid_username:'아이디는 3자 이상이어야 합니다.'};
+    toast(msgs[d.error] || '가입 신청에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+  }catch(e){ toast('가입 서버에 연결하지 못했습니다.'); }
+}
+
 /* SSO 자동 로그인: 통합 관리자 등에서 이미 로그인돼 있으면 그 세션을 그대로 인식 */
 async function ssoBoot(){
   if(!REAL_API || currentUser()) return;
@@ -1164,23 +1263,26 @@ function renderTopActions(){
   const u = currentUser();
   const el = document.getElementById('topActions');
   const pn = document.getElementById('pubNav');
+  const nt = document.getElementById('navToggle');
   if(u){
     pn.style.display = 'none';
+    if(nt) nt.style.display = 'none';
     el.innerHTML = `
       <div class="user-chip">
         <div class="avatar ${u.role === 'admin' ? 'admin' : ''}">${u.name.slice(0,1).toUpperCase()}</div>
         <div>
-          <div class="user-name">${escapeHtml(u.name)}</div>
-          <div class="user-role">${u.role === 'admin' ? '관리자' : '회원 · ' + (u.village || '')}</div>
+          <div class="user-name">${escapeHtml(u.name)}${u.unified ? '' : ' <span class="badge badge-gold" style="font-size:10px;vertical-align:middle;">데모</span>'}</div>
+          <div class="user-role">${u.role === 'admin' ? '관리자' : '회원 · ' + (u.village || '')}${u.unified ? '' : ' · 체험 모드'}</div>
         </div>
       </div>
       <button class="btn btn-ghost btn-sm" onclick="logout()">로그아웃</button>
     `;
   } else {
     pn.style.display = '';
+    if(nt) nt.style.display = '';
     el.innerHTML = `
       <button class="btn btn-outline btn-sm" onclick="openLogin()">로그인</button>
-      <button class="btn btn-primary btn-sm" onclick="openLogin()">회원가입</button>
+      <button class="btn btn-primary btn-sm" onclick="openLogin();toggleSignup(true)">회원가입</button>
     `;
   }
 }
@@ -1198,6 +1300,10 @@ function navigate(){
   // Access control
   if(scope === 'mem' && !u){ location.hash = '#/pub/home'; openLogin(); toast('로그인이 필요합니다.'); return; }
   if(scope === 'adm' && (!u || u.role !== 'admin')){ location.hash = '#/pub/home'; toast('관리자 권한이 필요합니다.'); return; }
+
+  // 라우트 이동 시 열려 있던 모달·모바일 메뉴를 닫는다
+  closeDyn(); closeLogin();
+  document.querySelector('.topnav-in').classList.remove('nav-open');
 
   // Hide all views
   document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
@@ -1218,6 +1324,11 @@ function navigate(){
   window.scrollTo({top:0, behavior:'instant'});
 }
 window.addEventListener('hashchange', navigate);
+
+/* 모바일 메뉴 토글 */
+function toggleNav(){
+  document.querySelector('.topnav-in').classList.toggle('nav-open');
+}
 
 /* ─── Logged-in app rendering ─── */
 function renderApp(scope, page){
@@ -1603,7 +1714,7 @@ function memMyPage(u){
   const done = myDocs.filter(d => d.status === '완료').length;
   const acctN = (MOCK.accounting || []).length;
   const upN = (MOCK.uploads || []).length;
-  const upcoming = MOCK.events.slice(0,3);
+  const upcoming = upcomingEvents(3);
   const loginAt = u.loginAt ? new Date(u.loginAt) : null;
   const loginTxt = loginAt && !isNaN(loginAt)
     ? `${loginAt.getFullYear()}.${String(loginAt.getMonth()+1).padStart(2,'0')}.${String(loginAt.getDate()).padStart(2,'0')} ${String(loginAt.getHours()).padStart(2,'0')}:${String(loginAt.getMinutes()).padStart(2,'0')}`
@@ -1678,11 +1789,11 @@ function memMyPage(u){
 
 function memDashboard(u){
   const village = MOCK.villages[0]; // 데모: 첫 마을
-  const upcoming = MOCK.events.slice(0,3);
+  const upcoming = upcomingEvents(3);
   return `
     <div class="sec-head">
       <h1>안녕하세요, ${escapeHtml(u.name)}님</h1>
-      <p class="sec-desc">${escapeHtml(village.name)} · ${village.phase} · 마감 D-${dday(village.deadline)}</p>
+      <p class="sec-desc">${escapeHtml(village.name)} · ${village.phase} · 마감 ${ddayLabel(village.deadline)}</p>
     </div>
 
     ${lifecycleStepper(village)}
@@ -1691,7 +1802,7 @@ function memDashboard(u){
       <div class="kpi"><div class="kpi-n">${village.members}</div><div class="kpi-l">조합원 수</div></div>
       <div class="kpi"><div class="kpi-n">${village.capacity}</div><div class="kpi-l">설비 규모</div></div>
       <div class="kpi"><div class="kpi-n">${village.progress}%</div><div class="kpi-l">준비 진행률</div><div class="kpi-sub">${village.phase}</div></div>
-      <div class="kpi"><div class="kpi-n">D-${dday(village.deadline)}</div><div class="kpi-l">1차 마감</div><div class="kpi-sub">${village.deadline}</div></div>
+      <div class="kpi"><div class="kpi-n">${ddayLabel(village.deadline)}</div><div class="kpi-l">1차 마감</div><div class="kpi-sub">${village.deadline}</div></div>
     </div>
 
     <div class="grid grid-2 mt-20">
@@ -1702,7 +1813,7 @@ function memDashboard(u){
           <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line-soft);">
             <div style="width:60px;text-align:center;">
               <div style="font-family:var(--font-serif);font-size:20px;font-weight:700;color:var(--primary-dark);">${e.date.slice(5).replace('-','.')}</div>
-              <div class="text-small text-mute">D-${dday(e.date)}</div>
+              <div class="text-small text-mute">${ddayLabel(e.date)}</div>
             </div>
             <div style="flex:1;">
               <div style="font-weight:600;">${escapeHtml(e.title)}</div>
@@ -2541,7 +2652,7 @@ function memSchedule(){
           </div>
           <div style="flex:1;">
             <div style="font-weight:600;font-size:15px;">${escapeHtml(e.title)}</div>
-            <div class="text-small text-mute">${e.kind} · D-${dday(e.date)}</div>
+            <div class="text-small text-mute">${e.kind} · ${ddayLabel(e.date)}</div>
           </div>
           ${e.urgent ? '<span class="badge badge-danger">긴급</span>' : '<span class="badge badge-mute">일반</span>'}
           <button class="btn btn-ghost btn-sm" onclick="viewEvent('${escapeJs(e.title)}')">상세</button>
@@ -2629,7 +2740,8 @@ function memChat(){
   `;
 }
 
-function sendChat(){
+let _chatHistory = [];
+async function sendChat(){
   const inp = document.getElementById('chatIn');
   const body = document.getElementById('chatBody');
   const q = inp.value.trim();
@@ -2637,10 +2749,34 @@ function sendChat(){
   body.insertAdjacentHTML('beforeend', `<div class="msg user">${escapeHtml(q)}</div>`);
   inp.value = '';
   body.scrollTop = body.scrollHeight;
+
+  if(REAL_API){
+    // 자체서버 AI(/api/ai/chat) 실연동 — 서버에 AI 키가 없으면 서버가 안내 문구를 돌려준다
+    body.insertAdjacentHTML('beforeend', `<div class="msg ai" id="chat-pending">답변 작성 중…</div>`);
+    body.scrollTop = body.scrollHeight;
+    let answer = '';
+    try{
+      const res = await fetch('/api/ai/chat', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({prompt: q, history: _chatHistory.slice(-10),
+          context: '햇소자(햇빛소득마을 통합 운영 플랫폼) 이용자 상담 — 마을협동조합 설립·운영·발전사업'}),
+      });
+      const d = await res.json();
+      answer = d && d.answer ? d.answer : '';
+    }catch(e){ answer = ''; }
+    if(!answer) answer = '(연결 실패) 잠시 후 다시 시도해 주세요. 급한 질문은 상담신청으로 남겨 주세요.';
+    _chatHistory.push({role:'user', content:q}, {role:'assistant', content:answer});
+    const pending = document.getElementById('chat-pending');
+    if(pending){   // 답변 대기 중 다른 화면으로 이동했으면 조용히 종료
+      pending.removeAttribute('id');
+      pending.innerHTML = escapeHtml(answer).replace(/\n/g, '<br>');
+      body.scrollTop = body.scrollHeight;
+    }
+    return;
+  }
   setTimeout(() => {
     body.insertAdjacentHTML('beforeend', `<div class="msg ai">
-      (데모 응답) 질문 감사합니다. 실제 서비스에서는 이 자리에 사교원의 실무 지식과 관련 법령을 학습한 AI가 상세 답변을 제공합니다.<br><br>
-      백엔드 <code>/api/ai</code>가 연동되면 실제 답변이 표시됩니다.
+      (데모 응답) 질문 감사합니다. sakyowon.co.kr/hatsoja 에서 이용하시면 사교원 실무 지식을 갖춘 AI가 실제 답변을 제공합니다.
     </div>`);
     body.scrollTop = body.scrollHeight;
   }, 500);
@@ -2745,6 +2881,11 @@ function svDraft(){
         <input class="input" id="sv-apply-name" placeholder="이장·추진위원장 성함"></div>
       <div class="form-row"><label>연락처 <span style="color:var(--danger);">*</span></label>
         <input class="input" id="sv-apply-phone" placeholder="010-0000-0000"></div>
+      <label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;cursor:pointer;">
+        <input type="checkbox" id="sv-apply-consent" style="margin-top:3px;">
+        <span>(필수) 신청 처리를 위한 개인정보(성함·연락처·마을 정보) 수집·이용에 동의합니다.
+        <a href="#/pub/privacy" target="_blank">처리방침</a></span>
+      </label>
     </div>`,
     foot: `<button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
            <button class="btn btn-primary" onclick="svDraftSubmit('${escapeJs(village)}')">검토 완료 → 접수</button>`,
@@ -2756,6 +2897,7 @@ async function svDraftSubmit(village){
   const name = document.getElementById('sv-apply-name').value.trim();
   const phone = document.getElementById('sv-apply-phone').value.trim();
   if(!name || !phone){ toast('담당자 성함과 연락처를 입력해 주세요.'); return; }
+  if(!document.getElementById('sv-apply-consent').checked){ toast('개인정보 수집·이용에 동의해 주세요.'); return; }
   const d = _svDiag, c = _svCalc;
   const detail = [
     d && d.site ? `관심 후보지: ${d.region} ${d.site.name} (만수면적 ${d.site.ha}ha)` : '후보지: 미진단',
@@ -3676,7 +3818,7 @@ function viewEvent(title){
   const e = MOCK.events.find(x => x.title === title);
   showDyn({
     title: title,
-    sub: e ? `${e.kind} · ${e.date} (D-${dday(e.date)})` : '',
+    sub: e ? `${e.kind} · ${e.date} (${ddayLabel(e.date)})` : '',
     body: `<p class="text-mute">${e ? escapeHtml(e.title) + ' 관련 상세 정보 및 준비 체크리스트가 여기에 표시됩니다.' : ''}</p>
       <ul style="padding-left:20px;color:var(--ink-soft);">
         <li>참석자 명단 확인</li>
@@ -4221,7 +4363,7 @@ function admContest(){
           <tr>
             <td><strong>2026년 햇빛소득마을 시범사업 2차 공모</strong>
               <div class="text-mute" style="font-size:12.5px;">접수 2026-08-01 ~ 2026-08-30 · 발주: 전남광주통합특별시 (예시)</div></td>
-            <td style="white-space:nowrap;"><span class="badge badge-info">접수 중 · D-${dday('2026-08-30')}</span></td>
+            <td style="white-space:nowrap;"><span class="badge badge-info">접수 중 · ${ddayLabel("2026-08-30")}</span></td>
           </tr>
         </tbody>
       </table>
@@ -4363,7 +4505,7 @@ function genVillageReport(vid){
         <tbody>
           <tr><td>지역</td><td>${escapeHtml(v.region)}</td></tr>
           <tr><td>현재 단계</td><td><span class="badge badge-info">${escapeHtml(v.phase)}</span></td></tr>
-          <tr><td>차기 마감</td><td>${escapeHtml(v.deadline)}${v.deadline !== '미정' ? ` (D-${dday(v.deadline)})` : ''}</td></tr>
+          <tr><td>차기 마감</td><td>${escapeHtml(v.deadline)}${v.deadline !== '미정' ? ` (${ddayLabel(v.deadline)})` : ''}</td></tr>
           <tr><td>자료 현황</td><td>${Object.keys(byType).length ? Object.entries(byType).map(([t,n]) => `${t} ${n}건`).join(' · ') : '생성된 자료 없음'}</td></tr>
         </tbody>
       </table>
@@ -4379,7 +4521,7 @@ function downloadVillageReport(vid){
   if(!v){ toast('마을을 찾을 수 없습니다.'); return; }
   const {docs, byType, done} = villageReportData(v);
   const today = new Date().toISOString().slice(0,10);
-  const upcoming = MOCK.events.slice(0,3);
+  const upcoming = upcomingEvents(3);
   const html = `<!DOCTYPE html>
 <html lang="ko"><head><meta charset="utf-8"><title>${escapeHtml(v.name)} 운영 리포트</title>
 <style>
@@ -4598,7 +4740,19 @@ function dday(dateStr){
   if(!dateStr || dateStr === '미정') return '?';
   const t = new Date(dateStr).getTime();
   const now = new Date().getTime();
-  return Math.max(0, Math.ceil((t - now) / 86400000));
+  return Math.ceil((t - now) / 86400000);   // 지난 날짜는 음수
+}
+/* 화면 표시용: 지난 일정은 "지남"으로 */
+function ddayLabel(dateStr){
+  const d = dday(dateStr);
+  if(d === '?') return '미정';
+  return d < 0 ? '지남' : 'D-' + d;
+}
+/* 다가오는 일정만 (지난 일정 제외, 날짜순) */
+function upcomingEvents(n){
+  const today = new Date().toISOString().slice(0,10);
+  const list = MOCK.events.filter(e => e.date >= today).sort((a,b) => a.date < b.date ? -1 : 1);
+  return n ? list.slice(0, n) : list;
 }
 function toast(msg){
   const el = document.getElementById('toast');
@@ -4612,6 +4766,7 @@ async function submitContact(){
   const phone = document.getElementById('c-phone').value.trim();
   const msg = document.getElementById('c-msg').value.trim();
   if(!name || !phone || !msg){ toast('필수 항목을 모두 입력해주세요.'); return; }
+  if(!document.getElementById('c-consent').checked){ toast('개인정보 수집·이용에 동의해 주세요.'); return; }
   const payload = {
     name, contact: phone,
     org: document.getElementById('c-org').value.trim(),
