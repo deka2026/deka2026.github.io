@@ -895,7 +895,7 @@ footer{
       <h3 class="serif">4. 이용자의 권리</h3>
       <p>이용자는 언제든 본인 개인정보의 열람·정정·삭제·처리정지를 요구할 수 있습니다. 아래 연락처로 요청하시면 지체 없이 처리합니다.</p>
       <h3 class="serif">5. 개인정보 보호책임자</h3>
-      <p>사회혁신교육원 사회적협동조합 · 이메일 <a href="mailto:hello@sakyowon.poomasi.org">hello@sakyowon.poomasi.org</a></p>
+      <p>사회혁신교육원 사회적협동조합 · 이메일 <a href="mailto:sakyowon@sakyowon.co.kr">sakyowon@sakyowon.co.kr</a></p>
       <p class="text-mute" style="font-size:12.5px;">이 방침이 변경되면 이 페이지에 게시하고 시행일을 갱신합니다.</p>
     </div>
   </div>
@@ -949,7 +949,8 @@ footer{
           <h3 class="serif">📞 직접 문의</h3>
           <p class="text-mute">전화·이메일 문의는 아래로 부탁드립니다.</p>
           <div style="margin-top:14px;font-size:14px;line-height:2;">
-            📮 이메일 · <a href="mailto:hello@sakyowon.poomasi.org">hello@sakyowon.poomasi.org</a><br>
+            📞 대표전화 · <a href="tel:070-4196-4677">070-4196-4677</a><br>
+            📮 이메일 · <a href="mailto:sakyowon@sakyowon.co.kr">sakyowon@sakyowon.co.kr</a><br>
             🏢 사교원 사회적협동조합<br>
             🌐 <a href="https://sakyowon.poomasi.org" target="_blank">sakyowon.poomasi.org</a>
           </div>
@@ -958,6 +959,7 @@ footer{
           <h3 class="serif">⏰ 응답 시간</h3>
           <p class="text-mute" style="margin:0;">
             영업일 기준 <strong>1~2일 내</strong> 답변드립니다.
+            급하신 경우 대표전화 <a href="tel:070-4196-4677"><strong>070-4196-4677</strong></a>로 문의해 주세요.
           </p>
         </div>
       </div>
@@ -4780,7 +4782,7 @@ async function submitContact(){
     const d = await res.json().catch(() => ({}));
     sent = !!(d.ok || res.ok);
   }catch(e){ sent = false; }
-  if(!sent){ toast('접수 서버에 연결하지 못했습니다. 이메일(hello@sakyowon.poomasi.org)로 문의해 주세요.'); return; }
+  if(!sent){ toast('접수 서버에 연결하지 못했습니다. 이메일(sakyowon@sakyowon.co.kr)로 문의해 주세요.'); return; }
   document.getElementById('c-name').value = '';
   document.getElementById('c-phone').value = '';
   document.getElementById('c-org').value = '';
