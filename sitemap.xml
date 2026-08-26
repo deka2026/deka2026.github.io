@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://sakyowon.co.kr/</loc>
-    <lastmod>2026-07-24</lastmod>
-    <changefreq>monthly</changefreq>
-  </url>
+  <url><loc>https://sakyowon.co.kr/</loc><lastmod>2026-08-25</lastmod><changefreq>weekly</changefreq></url>
+  <url><loc>https://sakyowon.co.kr/hatsoja/</loc><lastmod>2026-08-25</lastmod><changefreq>weekly</changefreq></url>
+  <url><loc>https://sakyowon.co.kr/academy-site/</loc><lastmod>2026-08-25</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://sakyowon.co.kr/hometown-love/</loc><lastmod>2026-08-15</lastmod><changefreq>weekly</changefreq></url>
+  <url><loc>https://sakyowon.co.kr/mangnam-coop/</loc><lastmod>2026-08-25</lastmod><changefreq>weekly</changefreq></url>
+  <url><loc>https://sakyowon.co.kr/teamlearning-site/</loc><lastmod>2026-08-25</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://sakyowon.co.kr/sakyowon-wiki/</loc><lastmod>2026-08-25</lastmod><changefreq>weekly</changefreq></url>
 </urlset>
