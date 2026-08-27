@@ -1166,10 +1166,51 @@ const REAL_API = location.hostname.endsWith('sakyowon.co.kr');
 function applyUnifiedUser(user, {redirect = true, silent = false} = {}){
   const role = (user.role === 'admin' || user.role === 'staff') ? 'admin' : 'member';
   setUser({email: user.username, name: user.name || user.username, role,
-           village: '완도군 청산면 A리', loginAt: new Date().toISOString(), unified: true});
+           village: '', loginAt: new Date().toISOString(), unified: true});
   if(redirect) location.hash = role === 'admin' ? '#/adm/dashboard' : '#/mem/dashboard';
   if(!silent) toast(`${user.name || user.username}님, 사교원 통합 계정으로 로그인했습니다.`);
+  loadRealData();
 }
+
+/* ─── 실데이터 모드: 통합 계정 로그인 시 서버 DB(마을·문서) 사용 ─── */
+let _realMode = false, _myVillage = null;
+const _villageDocsCache = {};
+
+async function loadRealData(){
+  if(!REAL_API) return;
+  const u = currentUser();
+  if(!u || !u.unified) return;
+  try{
+    const opt = {credentials:'same-origin'};
+    const [vRes, mvRes, dRes] = await Promise.all([
+      fetch('/api/villages', opt).then(r => r.json()),
+      fetch('/api/my/village', opt).then(r => r.json()),
+      fetch('/api/my/documents', opt).then(r => r.json()),
+    ]);
+    if(!vRes.ok) return;
+    _realMode = true;
+    if(!window._demoVillages) window._demoVillages = MOCK.villages.filter(v => !v._srv);
+    if(Array.isArray(vRes.items)){
+      MOCK.villages = vRes.items.length
+        ? vRes.items.map(v => ({...v, _srv:true}))
+        : window._demoVillages;   // 서버에 마을 0곳이면 데모 예시로 폴백 (화면에 안내 표시)
+    }
+    _myVillage = (mvRes.ok && mvRes.village) ? {...mvRes.village, _srv:true} : null;
+    if(dRes.ok && Array.isArray(dRes.items)){
+      const srvDocs = dRes.items.map(d => ({
+        id: d.id, title: d.title, type: d.type || '문서', village: '',
+        date: (d.created_at || '').slice(0,10), status: d.status || '완료',
+        _user: true, _srv: true, _content: d.content || '',
+      }));
+      MOCK.documents = srvDocs.concat(MOCK.documents.filter(x => !x._user));
+    }
+    // 세션이 앱 화면을 보고 있으면 실데이터로 다시 그린다
+    if(currentRoute().startsWith('mem/') || currentRoute().startsWith('adm/')) navigate();
+  }catch(e){ /* 서버 미연결 — 데모 데이터 유지 */ }
+}
+
+/* 회원의 "우리 마을": 배정된 실마을 > 데모 첫 마을 */
+function myVillage(){ return _myVillage || MOCK.villages[0]; }
 
 async function doLogin(){
   const email = document.getElementById('lg-email').value.trim();
@@ -1257,6 +1298,7 @@ function logout(){
   }
   setUser(null);
   location.hash = '#/pub/home';
+  if(_realMode){ location.reload(); return; }  // 서버 데이터를 데모로 되돌리기 위해 새로고침
   toast('로그아웃되었습니다.');
 }
 
@@ -1733,7 +1775,7 @@ function memMyPage(u){
         <tbody>
           <tr><td style="width:140px;"><strong>이름</strong></td><td>${escapeHtml(u.name)}</td></tr>
           <tr><td><strong>이메일</strong></td><td>${escapeHtml(u.email)}</td></tr>
-          <tr><td><strong>소속 마을</strong></td><td>${escapeHtml(u.village || '—')}</td></tr>
+          <tr><td><strong>소속 마을</strong></td><td>${escapeHtml((_myVillage && _myVillage.name) || u.village || '미배정')}</td></tr>
           <tr><td><strong>권한</strong></td><td><span class="badge badge-mute">${u.role === 'admin' ? '관리자' : '회원'}</span></td></tr>
           <tr><td><strong>이번 로그인</strong></td><td>${loginTxt}</td></tr>
         </tbody>
@@ -1790,13 +1832,19 @@ function memMyPage(u){
 }
 
 function memDashboard(u){
-  const village = MOCK.villages[0]; // 데모: 첫 마을
+  const village = myVillage(); // 배정된 실마을 > 데모 첫 마을
+  const unassigned = _realMode && !_myVillage;
   const upcoming = upcomingEvents(3);
   return `
     <div class="sec-head">
       <h1>안녕하세요, ${escapeHtml(u.name)}님</h1>
-      <p class="sec-desc">${escapeHtml(village.name)} · ${village.phase} · 마감 ${ddayLabel(village.deadline)}</p>
+      <p class="sec-desc">${unassigned ? '소속 마을 배정 대기 중' : `${escapeHtml(village.name)} · ${village.phase} · 마감 ${ddayLabel(village.deadline)}`}</p>
     </div>
+
+    ${unassigned ? `<div class="card" style="margin-bottom:16px;background:var(--paper-soft);box-shadow:none;">
+      ⓘ 아직 <b>소속 마을이 배정되지 않았습니다.</b> 관리자가 회원 관리에서 마을을 배정하면
+      우리 마을의 실제 현황이 여기에 표시됩니다. 아래 수치는 예시 화면입니다.
+    </div>` : ''}
 
     ${lifecycleStepper(village)}
 
@@ -3284,11 +3332,27 @@ function persistUserDocs(){
   localStorage.setItem(DOC_STORE_KEY, JSON.stringify(userDocs));
 }
 
-function saveDocStub(name){
+async function saveDocStub(name){
   if(!_lastGenDoc){ closeDyn(); toast('저장할 문서가 없습니다.'); return; }
   const {name: docName, values, content} = _lastGenDoc;
   const coop = (values.coop_name || '').trim() || '우리 조합';
   const year = values.year ? ' ' + values.year + '년' : '';
+  if(_realMode){
+    // 통합 계정: 서버 DB에 저장 — 어느 기기에서 로그인해도 내 문서가 보인다
+    try{
+      const title = `${coop}${year} ${docName}`;
+      const res = await fetch('/api/my/documents', {method:'POST', credentials:'same-origin',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({title, type: DOC_TYPE_MAP[docName] || '문서', status:'완료', content})});
+      const d = await res.json();
+      if(!d.ok){ toast('서버 저장에 실패했습니다.'); return; }
+      await loadRealData();
+      _lastGenDoc = null;
+      closeDyn(); toast(`"${title}" 이(가) 서버에 저장되었습니다.`);
+      if(currentRoute() === 'mem/docs') navigate();
+    }catch(e){ toast('서버에 연결하지 못했습니다.'); }
+    return;
+  }
   const newDoc = {
     id: 'u' + Date.now().toString(36),
     title: `${coop}${year} ${docName}`,
@@ -3357,7 +3421,7 @@ function editDoc(id){
     size:'lg'
   });
 }
-function submitEditDoc(id){
+async function submitEditDoc(id){
   const doc = MOCK.documents.find(d => d.id === id);
   if(!doc){ closeDyn(); return; }
   const title = document.getElementById('edoc-title').value.trim();
@@ -3365,6 +3429,17 @@ function submitEditDoc(id){
   doc.title    = title;
   doc.status   = document.getElementById('edoc-status').value;
   doc._content = document.getElementById('edoc-content').innerHTML;
+  if(_realMode && doc._srv){
+    try{
+      const res = await fetch('/api/my/documents', {method:'POST', credentials:'same-origin',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({id: doc.id, title, type: doc.type, status: doc.status, content: doc._content})});
+      const d = await res.json();
+      if(!d.ok){ toast('서버 저장에 실패했습니다.'); return; }
+      closeDyn(); toast(`"${title}" 문서가 서버에 저장되었습니다.`); refresh();
+    }catch(e){ toast('서버에 연결하지 못했습니다.'); }
+    return;
+  }
   if(doc._user) persistUserDocs();  // only persist user-generated docs
   closeDyn();
   toast(`"${title}" 문서가 저장되었습니다.`);
@@ -3957,12 +4032,32 @@ function editVillage(originalName){
            <button class="btn btn-primary" onclick="submitEditVillage('${escapeJs(originalName)}')">저장</button>`
   });
 }
-function submitEditVillage(originalName){
+async function submitEditVillage(originalName){
   const v = MOCK.villages.find(x => x.name === originalName);
   if(!v){ closeDyn(); return; }
   const newName = document.getElementById('ev-name').value.trim() || v.name;
   if(newName !== originalName && MOCK.villages.some(x => x.name === newName)){
     toast('같은 이름의 마을이 이미 있습니다.'); return;
+  }
+  if(_realMode && v._srv){
+    try{
+      const res = await fetch('/api/villages/' + v.id, {method:'PATCH', credentials:'same-origin',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          name: newName,
+          region:   document.getElementById('ev-region').value.trim(),
+          members:  +document.getElementById('ev-members').value || 0,
+          capacity: document.getElementById('ev-capacity').value.trim(),
+          phase:    document.getElementById('ev-phase').value,
+          progress: Math.max(0, Math.min(100, +document.getElementById('ev-progress').value || 0)),
+          deadline: document.getElementById('ev-deadline').value || v.deadline || '미정',
+        })});
+      const d = await res.json();
+      if(!d.ok){ toast('저장에 실패했습니다.'); return; }
+      await loadRealData();
+      closeDyn(); toast(`"${newName}" 정보가 서버에 저장되었습니다.`); refresh();
+    }catch(e){ toast('서버에 연결하지 못했습니다.'); }
+    return;
   }
   v.name     = newName;
   v.region   = document.getElementById('ev-region').value.trim() || v.region;
@@ -3977,9 +4072,20 @@ function submitEditVillage(originalName){
   toast(`"${v.name}" 정보가 저장되었습니다.`);
   refresh();
 }
-function removeVillage(name){
+async function removeVillage(name){
   if(!confirm(`"${name}" 마을을 삭제하시겠습니까?`)) return;
-  MOCK.villages = MOCK.villages.filter(v => v.name !== name);
+  const v = MOCK.villages.find(x => x.name === name);
+  if(_realMode && v && v._srv){
+    try{
+      const res = await fetch('/api/villages/' + v.id, {method:'DELETE', credentials:'same-origin'});
+      const d = await res.json();
+      if(!d.ok){ toast(d.error === 'forbidden' ? '마을 삭제는 이사장 계정만 가능합니다.' : '삭제에 실패했습니다.'); return; }
+      await loadRealData();
+      closeDyn(); toast(`"${name}" 마을이 삭제되었습니다.`); refresh();
+    }catch(e){ toast('서버에 연결하지 못했습니다.'); }
+    return;
+  }
+  MOCK.villages = MOCK.villages.filter(x => x.name !== name);
   persistVillages();
   closeDyn();
   toast(`"${name}" 마을이 삭제되었습니다.`);
@@ -4029,10 +4135,29 @@ function addVillage(){
            <button class="btn btn-primary" onclick="submitAddVillage()">등록</button>`
   });
 }
-function submitAddVillage(){
+async function submitAddVillage(){
   const name = document.getElementById('av-name').value.trim();
   if(!name){ toast('마을 이름을 입력해주세요.'); return; }
   if(MOCK.villages.some(v => v.name === name)){ toast('같은 이름의 마을이 이미 등록되어 있습니다.'); return; }
+  if(_realMode){
+    try{
+      const res = await fetch('/api/villages', {method:'POST', credentials:'same-origin',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          name,
+          region:   document.getElementById('av-region').value.trim(),
+          capacity: document.getElementById('av-capacity').value.trim(),
+          members:  +document.getElementById('av-members').value || 0,
+          phase:    document.getElementById('av-phase').value,
+          deadline: document.getElementById('av-deadline').value || '미정',
+        })});
+      const d = await res.json();
+      if(!d.ok){ toast('등록에 실패했습니다. 권한을 확인해 주세요.'); return; }
+      await loadRealData();
+      closeDyn(); toast(`"${name}" 이(가) 서버에 등록되었습니다.`); refresh();
+    }catch(e){ toast('서버에 연결하지 못했습니다.'); }
+    return;
+  }
   MOCK.villages.push({
     id: 'v' + Date.now().toString(36),
     name,
@@ -4049,6 +4174,60 @@ function submitAddVillage(){
   toast(`"${name}" 이(가) 등록되었습니다.`);
   refresh();
 }
+/* 실데이터 회원 관리 — 통합 계정 API */
+async function admUsersRealLoad(){
+  const box = document.getElementById('realUsersBox');
+  if(!box) return;
+  try{
+    const res = await fetch('/api/admin/members', {credentials:'same-origin'});
+    const d = await res.json();
+    if(!d.ok){ box.textContent = '회원 목록을 불러오지 못했습니다. (권한 확인)'; return; }
+    const STATUS_KO = {pending:'대기', approved:'승인', rejected:'거절'};
+    const srvVillages = MOCK.villages.filter(v => v._srv);
+    box.innerHTML = `
+      <table class="tbl">
+        <thead><tr><th>이름</th><th>아이디</th><th>소속·연락처</th><th>상태</th><th>마을 배정</th><th>처리</th></tr></thead>
+        <tbody>
+          ${d.items.map(m => `
+            <tr>
+              <td><strong>${escapeHtml(m.name || '—')}</strong></td>
+              <td>${escapeHtml(m.username)}</td>
+              <td>${escapeHtml(m.org || '—')}<div class="text-small text-mute">${escapeHtml(m.contact || '')}</div></td>
+              <td><span class="badge ${m.status === 'approved' ? 'badge-success' : m.status === 'pending' ? 'badge-info' : 'badge-danger'}">${STATUS_KO[m.status] || m.status}</span></td>
+              <td>
+                <select class="select" style="width:auto;max-width:180px;" onchange="assignVillageReal(${m.id}, this.value)">
+                  <option value="">미배정</option>
+                  ${srvVillages.map(v => `<option value="${v.id}"${m.village_id === v.id ? ' selected' : ''}>${escapeHtml(v.name)}</option>`).join('')}
+                </select>
+              </td>
+              <td class="tbl-actions" style="white-space:nowrap;">
+                ${m.status !== 'approved' ? `<button class="btn btn-primary btn-sm" onclick="setMemberStatusReal(${m.id},'approved')">승인</button>` : ''}
+                ${m.status !== 'rejected' ? `<button class="btn btn-ghost btn-sm" onclick="setMemberStatusReal(${m.id},'rejected')">거절</button>` : ''}
+              </td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+      ${srvVillages.length ? '' : '<p class="form-hint" style="margin-top:8px;">마을 배정을 하려면 먼저 조합·마을 관리에서 마을을 등록하세요.</p>'}`;
+  }catch(e){ box.textContent = '서버에 연결하지 못했습니다.'; }
+}
+async function setMemberStatusReal(id, status){
+  try{
+    const res = await fetch('/api/admin/members/' + id, {method:'PATCH', credentials:'same-origin',
+      headers:{'Content-Type':'application/json'}, body: JSON.stringify({status})});
+    const d = await res.json();
+    toast(d.ok ? '처리되었습니다.' : (d.error === 'forbidden' ? '자기 계정은 바꿀 수 없습니다.' : '처리에 실패했습니다.'));
+    admUsersRealLoad();
+  }catch(e){ toast('서버에 연결하지 못했습니다.'); }
+}
+async function assignVillageReal(id, villageId){
+  try{
+    const res = await fetch('/api/admin/members/' + id, {method:'PATCH', credentials:'same-origin',
+      headers:{'Content-Type':'application/json'}, body: JSON.stringify({village_id: villageId ? +villageId : null})});
+    const d = await res.json();
+    toast(d.ok ? '마을 배정이 저장되었습니다.' : '배정에 실패했습니다.');
+  }catch(e){ toast('서버에 연결하지 못했습니다.'); }
+}
+
 function approveUser(email){
   const u = MOCK.users.find(x => x.email === email);
   if(!u){ toast('회원을 찾을 수 없습니다.'); return; }
@@ -4403,9 +4582,14 @@ function admVillages(){
       <p class="sec-desc">플랫폼에 등록된 마을협동조합을 관리합니다.</p>
     </div>
 
+    ${_realMode && !MOCK.villages.some(v => v._srv) ? `
+    <div class="card" style="margin-bottom:14px;background:var(--paper-soft);box-shadow:none;">
+      ⓘ 서버에 등록된 마을이 아직 없습니다. 아래 표는 <b>데모 예시</b>이며,
+      "+ 마을 등록"으로 첫 마을을 등록하면 그때부터 실제 데이터로 운영됩니다.
+    </div>` : ''}
     <div class="card">
       <div class="card-title">
-        <h3 class="serif">🏘 등록된 마을</h3>
+        <h3 class="serif">🏘 등록된 마을 ${_realMode && MOCK.villages.some(v => v._srv) ? '<span class="badge badge-success">실데이터</span>' : ''}</h3>
         <button class="btn btn-primary btn-sm" onclick="addVillage()">+ 마을 등록</button>
       </div>
       <table class="tbl">
@@ -4443,10 +4627,30 @@ function villageDocsOf(v){
     (d.village && v.name.includes(d.village)) || (idx === 0 && d._user));
 }
 
-function admVillageDocs(vid){
+/* 실데이터 모드면 서버 자료실, 아니면 데모 매칭 */
+async function villageDocsFor(v){
+  if(!(_realMode && v._srv)) return villageDocsOf(v);
+  try{
+    const res = await fetch('/api/villages/' + v.id + '/documents', {credentials:'same-origin'});
+    const d = await res.json();
+    if(!d.ok) return [];
+    const docs = d.items.map(x => ({
+      id: x.id, title: x.title, type: x.type || '문서', village: v.name,
+      date: (x.created_at || '').slice(0,10), status: x.status || '완료',
+      _user: true, _srv: true, _content: x.content || '',
+    }));
+    _villageDocsCache[v.id] = docs;
+    // 보기·다운로드가 MOCK.documents에서 찾으므로 합류시킨다 (중복 제거)
+    const known = new Set(MOCK.documents.map(m => m.id));
+    MOCK.documents = docs.filter(x => !known.has(x.id)).concat(MOCK.documents);
+    return docs;
+  }catch(e){ return _villageDocsCache[v.id] || []; }
+}
+
+async function admVillageDocs(vid){
   const v = MOCK.villages.find(x => x.id === vid);
   if(!v){ toast('마을을 찾을 수 없습니다.'); return; }
-  const docs = villageDocsOf(v);
+  const docs = await villageDocsFor(v);
   const order = ['정관','회의록','사업계획서','결산서','신청서','계약서','문서'];
   const groups = order
     .map(t => [t, docs.filter(d => (d.type || '문서') === t)])
@@ -4479,18 +4683,17 @@ function admVillageDocs(vid){
 }
 
 /* ─── 마을 리포트 자동 생성 (관리자) ─── */
-function villageReportData(v){
-  const docs = villageDocsOf(v);
+function villageReportData(docs){
   const byType = {};
   docs.forEach(d => { const t = d.type || '문서'; byType[t] = (byType[t] || 0) + 1; });
   const done = docs.filter(d => d.status === '완료').length;
   return {docs, byType, done};
 }
 
-function genVillageReport(vid){
+async function genVillageReport(vid){
   const v = MOCK.villages.find(x => x.id === vid);
   if(!v){ toast('마을을 찾을 수 없습니다.'); return; }
-  const {docs, byType, done} = villageReportData(v);
+  const {docs, byType, done} = villageReportData(await villageDocsFor(v));
   const today = new Date().toISOString().slice(0,10);
   showDyn({
     title: `📊 ${v.name} 운영 리포트`,
@@ -4518,10 +4721,10 @@ function genVillageReport(vid){
   });
 }
 
-function downloadVillageReport(vid){
+async function downloadVillageReport(vid){
   const v = MOCK.villages.find(x => x.id === vid);
   if(!v){ toast('마을을 찾을 수 없습니다.'); return; }
-  const {docs, byType, done} = villageReportData(v);
+  const {docs, byType, done} = villageReportData(await villageDocsFor(v));
   const today = new Date().toISOString().slice(0,10);
   const upcoming = upcomingEvents(3);
   const html = `<!DOCTYPE html>
@@ -4592,6 +4795,16 @@ th { background:#eef1e8; }
 }
 
 function admUsers(){
+  if(_realMode){
+    setTimeout(admUsersRealLoad, 0);
+    return `
+      <div class="sec-head">
+        <h1>회원 관리 <span class="badge badge-success">실데이터</span></h1>
+        <p class="sec-desc">통합 계정 회원의 승인과 마을 배정을 관리합니다. 역할(직원·관리자) 변경은
+        <a href="https://sakyowon.co.kr/admin.html" target="_blank" rel="noopener">통합 관리자</a>에서 합니다.</p>
+      </div>
+      <div class="card"><div id="realUsersBox" class="text-mute">회원 목록을 불러오는 중…</div></div>`;
+  }
   return `
     <div class="sec-head">
       <h1>회원 관리</h1>
