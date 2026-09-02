@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>시민재생에너지 AI — 사회혁신교육원 사회적협동조합</title>
+<meta name="description" content="마을과 농민이 재생에너지 발전의 주인으로 서는 데 필요한 서류·법령·수익 판단을 돕는 도메인 특화 AI. 햇빛나눔 영농형태양광과 햇빛소득마을 두 사업을 지원합니다.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="시민재생에너지 AI">
+<meta property="og:description" content="시민이 에너지 발전의 주인이 되도록, 결정에 필요한 데이터를 만듭니다.">
+<meta property="og:url" content="https://cre.sakyowon.co.kr/">
+<link rel="icon" href="https://sakyowon.co.kr/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=Nanum+Myeongjo:wght@400;700;800&display=swap">
+<style>
+:root{
+  --paper:#FBF9F4;
+  --paper-2:#F4F0E6;
+  --surface:#FFFFFF;
+  --ink:#14181C;
+  --ink-2:#3D474F;
+  --ink-3:#5C666E;
+  --line:#E2DDD1;
+  --line-2:#EFEBE1;
+  --brand:#3B5A34;
+  --brand-bright:#4A6741;
+  --brand-wash:#EAF0E6;
+  --gold:#8A5606;
+  --gold-bright:#C77D0A;
+  --gold-wash:#F7EEDC;
+  --focus:#3B5A34;
+
+  --sp-1:4px;  --sp-2:8px;  --sp-3:12px; --sp-4:16px;
+  --sp-5:24px; --sp-6:32px; --sp-7:48px; --sp-8:64px; --sp-9:96px;
+  --r:4px; --r-2:10px;
+  --maxw:1240px;
+
+  --font-d:'Nanum Myeongjo','Batang',Georgia,serif;
+  --font-b:'IBM Plex Sans KR','Pretendard',-apple-system,BlinkMacSystemFont,'Malgun Gothic','Apple SD Gothic Neo',sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#14161A;
+    --paper-2:#1A1D22;
+    --surface:#1B1E23;
+    --ink:#EDEAE3;
+    --ink-2:#C3C9CF;
+    --ink-3:#A2ABB3;
+    --line:#2C3138;
+    --line-2:#23272D;
+    --brand:#9CC98B;
+    --brand-bright:#B0D8A0;
+    --brand-wash:#1A231A;
+    --gold:#E8A93C;
+    --gold-bright:#F0BC5E;
+    --gold-wash:#2A2317;
+    --focus:#9CC98B;
+  }
+}
+
+*,*::before,*::after{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--font-b); font-size:17px; line-height:1.75;
+  font-weight:400; -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+h1,h2,h3,h4{margin:0; font-family:var(--font-d); font-weight:700; line-height:1.3; letter-spacing:-.01em;}
+p{margin:0;}
+h1,h2,h3,h4,p,li,dd,dt,th,td,caption,figcaption{word-break:keep-all; overflow-wrap:anywhere;}
+a{color:inherit;}
+ul{margin:0; padding:0; list-style:none;}
+img,svg{max-width:100%;}
+
+:focus-visible{outline:3px solid var(--focus); outline-offset:3px; border-radius:2px;}
+
+.skip{
+  position:absolute; left:var(--sp-4); top:-100px; z-index:1000;
+  background:var(--ink); color:var(--paper); padding:12px 20px;
+  border-radius:var(--r); font-weight:600; text-decoration:none;
+  transition:top .15s ease-out;
+}
+.skip:focus{top:var(--sp-4);}
+
+.wrap{width:100%; max-width:var(--maxw); margin:0 auto; padding-inline:var(--sp-5);}
+@media (min-width:768px){.wrap{padding-inline:var(--sp-7);}}
+
+/* ───────── header ───────── */
+.site-head{
+  position:sticky; top:0; z-index:100;
+  background:color-mix(in srgb, var(--paper) 92%, transparent);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.head-in{display:flex; align-items:center; gap:var(--sp-5); min-height:64px;}
+.brand{display:flex; align-items:center; gap:10px; text-decoration:none; flex-shrink:0;}
+.brand-mark{width:30px; height:30px; flex-shrink:0; color:var(--gold-bright);}
+.brand-name{font-family:var(--font-d); font-weight:800; font-size:18px; letter-spacing:-.02em;}
+.brand-org{display:block; font-family:var(--font-b); font-size:12px; font-weight:400; color:var(--ink-3); letter-spacing:0; margin-top:-3px;}
+.nav{margin-left:auto; display:none; gap:var(--sp-1);}
+@media (min-width:900px){.nav{display:flex;}}
+.nav a{
+  display:inline-flex; align-items:center; min-height:44px; padding:0 14px;
+  font-size:15px; font-weight:500; color:var(--ink-2); text-decoration:none;
+  border-radius:var(--r); transition:background .18s ease-out,color .18s ease-out;
+}
+.nav a:hover{background:var(--paper-2); color:var(--ink);}
+
+/* ───────── hero ───────── */
+.hero{
+  position:relative; overflow:hidden;
+  border-bottom:1px solid var(--line);
+  background:
+    radial-gradient(ellipse 70% 90% at 88% -10%, var(--gold-wash) 0%, transparent 62%),
+    linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%);
+}
+.hero-grid{
+  display:grid; gap:var(--sp-7);
+  padding-block:var(--sp-8) var(--sp-8);
+}
+@media (min-width:1024px){
+  .hero-grid{grid-template-columns:1.35fr .95fr; align-items:end; gap:var(--sp-9);}
+}
+.eyebrow{
+  display:inline-flex; align-items:center; gap:8px;
+  font-size:13px; font-weight:600; letter-spacing:.06em;
+  color:var(--brand); text-transform:none; margin-bottom:var(--sp-5);
+}
+.eyebrow::before{content:""; width:26px; height:1px; background:var(--brand-bright);}
+.hero h1{
+  font-size:clamp(34px,6.2vw,64px); line-height:1.18; letter-spacing:-.028em;
+  font-weight:800;
+}
+.hero h1 em{font-style:normal; color:var(--brand); display:block;}
+.hero-lede{
+  margin-top:var(--sp-5); font-size:clamp(17px,2vw,20px); line-height:1.8;
+  color:var(--ink-2); max-width:34em;
+}
+.hero-actions{display:flex; flex-wrap:wrap; gap:var(--sp-3); margin-top:var(--sp-6);}
+.btn{
+  display:inline-flex; align-items:center; gap:9px; min-height:48px;
+  padding:0 22px; border-radius:var(--r-2); font-size:16px; font-weight:600;
+  text-decoration:none; cursor:pointer; border:1px solid transparent;
+  transition:transform .18s ease-out, background .18s ease-out, border-color .18s ease-out;
+}
+.btn svg{width:17px; height:17px; flex-shrink:0;}
+.btn-primary{background:var(--ink); color:var(--paper);}
+.btn-primary:hover{transform:translateY(-2px);}
+.btn-ghost{border-color:var(--line); color:var(--ink); background:var(--surface);}
+.btn-ghost:hover{border-color:var(--brand-bright); transform:translateY(-2px);}
+
+.hero-note{
+  border-left:2px solid var(--brand-bright); padding-left:var(--sp-5);
+}
+.hero-note dt{font-size:12px; font-weight:600; color:var(--ink-3); letter-spacing:.04em;}
+.hero-note dd{margin:2px 0 var(--sp-4); font-size:16px; color:var(--ink); font-weight:500;}
+.hero-note dd:last-child{margin-bottom:0;}
+
+/* ───────── section frame ───────── */
+.sec{padding-block:var(--sp-9); border-bottom:1px solid var(--line);}
+.sec-alt{background:var(--paper-2);}
+.sec-head{max-width:62ch; margin-bottom:var(--sp-7);}
+.sec-num{
+  font-family:var(--font-b); font-size:12px; font-weight:700; letter-spacing:.12em;
+  color:var(--brand); display:block; margin-bottom:var(--sp-3);
+}
+.sec h2{font-size:clamp(26px,3.6vw,40px); letter-spacing:-.02em;}
+.sec-sub{margin-top:var(--sp-4); font-size:17px; line-height:1.8; color:var(--ink-2);}
+
+/* ───────── problem ───────── */
+.prob-grid{display:grid; gap:var(--sp-5);}
+@media (min-width:700px){.prob-grid{grid-template-columns:repeat(2,1fr);}}
+@media (min-width:1100px){.prob-grid{grid-template-columns:repeat(4,1fr);}}
+.prob{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r-2);
+  padding:var(--sp-5); display:flex; flex-direction:column; gap:var(--sp-3);
+}
+.prob-ico{width:26px; height:26px; color:var(--brand-bright);}
+.prob h3{font-family:var(--font-b); font-size:16px; font-weight:600; letter-spacing:-.01em;}
+.prob p{font-size:15px; line-height:1.7; color:var(--ink-3);}
+
+.quote{
+  margin-top:var(--sp-7); padding:var(--sp-6);
+  background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--brand-bright);
+  border-radius:var(--r-2);
+}
+.quote p{font-family:var(--font-d); font-size:clamp(18px,2.4vw,23px); line-height:1.65; color:var(--ink);}
+.quote cite{display:block; margin-top:var(--sp-4); font-family:var(--font-b); font-size:13px; font-style:normal; color:var(--ink-3);}
+
+/* ───────── services ───────── */
+.svc-grid{display:grid; gap:var(--sp-5);}
+@media (min-width:900px){.svc-grid{grid-template-columns:repeat(2,1fr);}}
+.svc{
+  position:relative; display:flex; flex-direction:column;
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r-2);
+  padding:var(--sp-6); text-decoration:none;
+  transition:border-color .2s ease-out, transform .2s ease-out;
+}
+.svc:hover{border-color:var(--brand-bright); transform:translateY(-3px);}
+.svc-tag{
+  display:inline-flex; align-items:center; gap:7px; align-self:flex-start;
+  font-size:12px; font-weight:600; letter-spacing:.03em;
+  padding:5px 11px; border-radius:100px; margin-bottom:var(--sp-4);
+}
+.svc-tag svg{width:13px; height:13px;}
+.tag-sun{background:var(--gold-wash); color:var(--gold);}
+.tag-field{background:var(--brand-wash); color:var(--brand);}
+.svc h3{font-size:clamp(23px,2.8vw,29px); letter-spacing:-.02em;}
+.svc-line{margin-top:var(--sp-2); font-size:14px; color:var(--ink-3);}
+.svc p.svc-body{margin-top:var(--sp-4); font-size:16px; line-height:1.8; color:var(--ink-2);}
+.svc-facts{margin-top:var(--sp-5); padding-top:var(--sp-5); border-top:1px solid var(--line-2); display:grid; gap:var(--sp-3);}
+.svc-facts li{display:flex; gap:10px; font-size:15px; line-height:1.6; color:var(--ink-2);}
+.svc-facts svg{width:16px; height:16px; flex-shrink:0; margin-top:5px; color:var(--brand-bright);}
+.svc-go{
+  margin-top:var(--sp-6); display:inline-flex; align-items:center; gap:8px;
+  font-size:15px; font-weight:600; color:var(--ink);
+}
+.svc-go svg{width:16px; height:16px; transition:transform .2s ease-out;}
+.svc:hover .svc-go svg{transform:translateX(4px);}
+
+/* ───────── HPC ───────── */
+.spec{
+  display:grid; gap:1px; background:var(--line);
+  border:1px solid var(--line); border-radius:var(--r-2); overflow:hidden;
+  margin-bottom:var(--sp-7);
+}
+@media (min-width:600px){.spec{grid-template-columns:repeat(2,1fr);}}
+@media (min-width:1000px){.spec{grid-template-columns:repeat(4,1fr);}}
+.spec div{background:var(--surface); padding:var(--sp-5);}
+.spec dt{font-size:12px; font-weight:600; letter-spacing:.05em; color:var(--ink-3); margin-bottom:6px;}
+.spec dd{margin:0; font-size:17px; font-weight:600; letter-spacing:-.01em;}
+
+.tablewrap{overflow-x:auto; border:1px solid var(--line); border-radius:var(--r-2); background:var(--surface);}
+table{width:100%; border-collapse:collapse; font-size:15px; min-width:620px;}
+caption{
+  text-align:left; padding:var(--sp-5) var(--sp-5) var(--sp-3);
+  font-size:13px; color:var(--ink-3);
+}
+th,td{padding:15px var(--sp-5); text-align:left; border-top:1px solid var(--line-2); vertical-align:top;}
+thead th{
+  font-size:12px; font-weight:600; letter-spacing:.05em; color:var(--ink-3);
+  border-top:none; border-bottom:1px solid var(--line); white-space:nowrap;
+}
+tbody th{font-weight:600; color:var(--ink); font-size:15px;}
+td.num{font-variant-numeric:tabular-nums;}
+.state{display:inline-flex; align-items:center; gap:7px; font-weight:600; font-size:14px;}
+.state svg{width:15px; height:15px; flex-shrink:0;}
+.st-done{color:var(--brand);}
+.st-run{color:var(--gold);}
+.st-wait{color:var(--ink-3);}
+
+.notice{
+  margin-top:var(--sp-6); display:flex; gap:var(--sp-4);
+  padding:var(--sp-5); background:var(--surface);
+  border:1px solid var(--line); border-radius:var(--r-2);
+}
+.notice svg{width:20px; height:20px; flex-shrink:0; margin-top:3px; color:var(--ink-3);}
+.notice p{font-size:15px; line-height:1.75; color:var(--ink-2);}
+
+/* ───────── engine ───────── */
+.eng{display:grid; gap:var(--sp-7);}
+@media (min-width:1024px){.eng{grid-template-columns:.95fr 1.05fr; align-items:start; gap:var(--sp-9);}}
+.stack{display:grid; gap:var(--sp-3);}
+.layer{
+  border:1px solid var(--line); border-radius:var(--r-2); padding:var(--sp-5);
+  background:var(--surface);
+}
+.layer-top{border-style:dashed;}
+.layer-lab{font-size:12px; font-weight:600; letter-spacing:.05em; color:var(--ink-3); margin-bottom:var(--sp-3);}
+.layer-row{display:grid; grid-template-columns:repeat(2,1fr); gap:var(--sp-3);}
+.chip{
+  border:1px solid var(--line); border-radius:var(--r); background:var(--paper-2);
+  padding:11px var(--sp-4); font-size:14px; font-weight:600; text-align:center;
+}
+.layer-core{background:var(--gold-wash); border-color:var(--gold-bright);}
+.layer-core .layer-lab{color:var(--gold);}
+.core-name{font-family:var(--font-d); font-size:26px; font-weight:800; letter-spacing:-.01em;}
+.core-desc{font-size:15px; color:var(--ink-2); margin-top:6px; line-height:1.7;}
+.flow{display:flex; justify-content:center; color:var(--ink-3);}
+.flow svg{width:18px; height:18px;}
+
+.eng-list{display:grid; gap:var(--sp-5);}
+.eng-item{display:flex; gap:var(--sp-4); padding-bottom:var(--sp-5); border-bottom:1px solid var(--line-2);}
+.eng-item:last-child{border-bottom:none; padding-bottom:0;}
+.eng-ico{
+  width:38px; height:38px; flex-shrink:0; border-radius:var(--r);
+  background:var(--paper-2); border:1px solid var(--line);
+  display:flex; align-items:center; justify-content:center; color:var(--brand);
+}
+.eng-ico svg{width:19px; height:19px;}
+.eng-item h3{font-family:var(--font-b); font-size:16px; font-weight:600; margin-bottom:5px;}
+.eng-item p{font-size:15px; line-height:1.7; color:var(--ink-3);}
+
+/* ───────── footer ───────── */
+.site-foot{padding-block:var(--sp-8); background:var(--paper-2);}
+.foot-grid{display:grid; gap:var(--sp-6);}
+@media (min-width:768px){.foot-grid{grid-template-columns:1.4fr 1fr 1fr;}}
+.foot-org{font-family:var(--font-d); font-size:19px; font-weight:700; margin-bottom:var(--sp-3);}
+.foot-p{font-size:14px; line-height:1.85; color:var(--ink-3);}
+.foot-h{font-size:12px; font-weight:600; letter-spacing:.05em; color:var(--ink-3); margin-bottom:var(--sp-3);}
+.foot-links{display:grid; gap:2px;}
+.foot-links a{
+  display:inline-flex; align-items:center; min-height:36px;
+  font-size:15px; color:var(--ink-2); text-decoration:none;
+}
+.foot-links a:hover{color:var(--brand); text-decoration:underline;}
+.foot-base{
+  margin-top:var(--sp-7); padding-top:var(--sp-5); border-top:1px solid var(--line);
+  font-size:13px; color:var(--ink-3); display:flex; flex-wrap:wrap; gap:var(--sp-4);
+  justify-content:space-between;
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important; transition-duration:.01ms!important; scroll-behavior:auto!important;}
+  .btn:hover,.svc:hover{transform:none;}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">본문 바로가기</a>
+
+<header class="site-head">
+  <div class="wrap head-in">
+    <a class="brand" href="/">
+      <svg class="brand-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4.2"/>
+        <path d="M12 2v2.6M12 19.4V22M22 12h-2.6M4.6 12H2M19.07 4.93l-1.84 1.84M6.77 17.23l-1.84 1.84M19.07 19.07l-1.84-1.84M6.77 6.77L4.93 4.93"/>
+      </svg>
+      <span class="brand-name">시민재생에너지 AI<span class="brand-org">사회혁신교육원 사회적협동조합</span></span>
+    </a>
+    <nav class="nav" aria-label="주요 메뉴">
+      <a href="#why">왜 필요한가</a>
+      <a href="#services">두 사업</a>
+      <a href="#hpc">HPC 사업</a>
+      <a href="#engine">기술 기반</a>
+      <a href="#contact">문의</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow">도메인 특화 인공지능</span>
+        <h1>시민이 에너지 발전의<br>주인이 되도록,<em>결정에 필요한 데이터를 만듭니다.</em></h1>
+        <p class="hero-lede">
+          재생에너지 사업은 발전 기술이 없어서 멈추지 않습니다. 마을과 농민이 무엇을 결정해야 하는지 알 수 없어서 멈춥니다.
+          시민재생에너지 AI는 그 결정에 필요한 서류·법령·수익 판단을 다루는 도메인 특화 인공지능입니다.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#services">
+            두 사업 살펴보기
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+          <a class="btn btn-ghost" href="#hpc">
+            HPC 사업 현황
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
+          </a>
+        </div>
+      </div>
+      <dl class="hero-note">
+        <dt>주관</dt>
+        <dd>사회혁신교육원 사회적협동조합</dd>
+        <dt>과제명</dt>
+        <dd>시민재생에너지 사업자동화 AI</dd>
+        <dt>사업 기간</dt>
+        <dd>2026년 5월 — 12월</dd>
+        <dt>지원</dt>
+        <dd>과학기술정보통신부 고성능 컴퓨팅 자원 지원사업</dd>
+      </dl>
+    </div>
+  </section>
+
+  <!-- WHY -->
+  <section class="sec" id="why">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-num">01 — 왜 필요한가</span>
+        <h2>준비 단계에서 포기하는 마을</h2>
+        <p class="sec-sub">
+          주민참여형 재생에너지 공모에 참여하려면 방대한 서류가 동시에 준비되어야 합니다.
+          토지대장·건축물대장·계통검토의견서·탄소인증서·사업계획서·법인 서류가 병렬로 요구됩니다.
+          기술도 자본도 아닌, 준비 과정이 병목입니다.
+        </p>
+      </div>
+
+      <div class="prob-grid">
+        <article class="prob">
+          <svg class="prob-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg>
+          <h3>서류의 양</h3>
+          <p>여러 기관의 서식이 동시에 요구됩니다. 하나가 늦으면 전체가 멈춥니다.</p>
+        </article>
+        <article class="prob">
+          <svg class="prob-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h12"/></svg>
+          <h3>근거 법령의 분산</h3>
+          <p>전기·농지·산지·협동조합 법령이 겹칩니다. 어느 조항이 우리 마을에 걸리는지 확인하기 어렵습니다.</p>
+        </article>
+        <article class="prob">
+          <svg class="prob-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          <h3>컨설팅 비용</h3>
+          <p>외부 전문 컨설팅에 기대면 준비 단계부터 큰 비용이 발생합니다. 소규모 마을에는 문턱이 됩니다.</p>
+        </article>
+        <article class="prob">
+          <svg class="prob-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+          <h3>판단의 근거 부재</h3>
+          <p>수익을 어떻게 나눌지, 무엇을 먼저 정할지 — 숫자 없이 논의하면 합의가 아니라 갈등이 남습니다.</p>
+        </article>
+      </div>
+
+      <blockquote class="quote">
+        <p>이 사업의 AI는 마을을 대신해 결정하지 않습니다. 결정에 필요한 근거를 만들어 내놓을 뿐입니다. 무엇을 택할지는 결사한 시민의 몫입니다.</p>
+        <cite>시민재생에너지 AI 개발 원칙</cite>
+      </blockquote>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="sec sec-alt" id="services">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-num">02 — 두 사업</span>
+        <h2>같은 기술 기반, 두 갈래의 현장</h2>
+        <p class="sec-sub">
+          농지에서 농사와 발전을 함께하는 <strong>영농형 태양광</strong>, 마을 주민이 공동출자하는 <strong>햇빛소득마을</strong>.
+          사업 구조와 주체는 다르지만 서류·법령·수익 판단이라는 과제는 같습니다. 두 서비스는 하나의 지식 기반 위에 섭니다.
+        </p>
+      </div>
+
+      <div class="svc-grid">
+        <a class="svc" href="https://sunshare.kr" rel="noopener">
+          <span class="svc-tag tag-field">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 22s4-10 10-10 10 10 10 10"/><path d="M12 12V2"/></svg>
+            영농형 태양광
+          </span>
+          <h3>햇빛나눔</h3>
+          <p class="svc-line">전국 햇빛나눔 영농형태양광 사회적협동조합연합회</p>
+          <p class="svc-body">
+            농지 위에서 농사를 지으면서 발전도 하는 영농형 태양광입니다.
+            발전소의 주인은 농민이고, 사회적협동조합은 위수탁으로 대행합니다.
+          </p>
+          <ul class="svc-facts">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span>영농형 태양광 발전사업의 활성화 및 지원에 관한 법률 시행 대응</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span>발전사업자·조직활동가·협력시공업체 등록과 위수탁 계약</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span>농민 수익과 배분 구조의 근거 자료 생산</span></li>
+          </ul>
+          <span class="svc-go">
+            sunshare.kr 바로가기
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </span>
+        </a>
+
+        <a class="svc" href="https://sakyowon.co.kr/hatsoja/" rel="noopener">
+          <span class="svc-tag tag-sun">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><path d="M10 21v-6h4v6"/></svg>
+            햇빛소득마을
+          </span>
+          <h3>햇소자</h3>
+          <p class="svc-line">햇빛소득마을 통합 운영 플랫폼</p>
+          <p class="svc-body">
+            마을 주민이 공동출자해 발전소를 세우고 수익을 지역에 환원하는 햇빛소득마을 공모를,
+            후보지 진단부터 조합 설립·정산·배당까지 전주기로 지원합니다.
+          </p>
+          <ul class="svc-facts">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span>후보지 자가진단과 예상수익 계산</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span>신청 서류 초안 생성과 AI 검토</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span>조합 설립·인허가·정산·배당 업무 관리</span></li>
+          </ul>
+          <span class="svc-go">
+            햇소자 바로가기
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- HPC -->
+  <section class="sec" id="hpc">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-num">03 — HPC 사업</span>
+        <h2>고성능 컴퓨팅 자원 지원사업</h2>
+        <p class="sec-sub">
+          과학기술정보통신부가 지원하는 고성능 컴퓨팅 자원을 활용해, 햇빛소득마을 공모 전주기를 지원하는
+          한국어 도메인 특화 언어모델을 연구·개발하고 있습니다.
+        </p>
+      </div>
+
+      <dl class="spec">
+        <div><dt>과제명</dt><dd>시민재생에너지 사업자동화 AI</dd></div>
+        <div><dt>수행 기간</dt><dd>2026.5 — 2026.12 (8개월)</dd></div>
+        <div><dt>활용 자원</dt><dd>GPU 1장 · 32Core · 384GB</dd></div>
+        <div><dt>분야</dt><dd>에너지 · 생성형 AI</dd></div>
+      </dl>
+
+      <div class="tablewrap">
+        <table>
+          <caption>사업계획 정량목표 대비 진행 현황 · 지표 기준일 2026-06-30</caption>
+          <thead>
+            <tr>
+              <th scope="col">지표</th>
+              <th scope="col">착수 시점</th>
+              <th scope="col">목표</th>
+              <th scope="col">현재</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">공고문 질의 정답률</th>
+              <td class="num">약 70%</td>
+              <td class="num">90% 이상</td>
+              <td class="num"><span class="state st-run"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 6v6l4 2"/><circle cx="12" cy="12" r="9"/></svg>83%</span></td>
+            </tr>
+            <tr>
+              <th scope="row">서류 자동 검토 시간</th>
+              <td>컨설턴트 수일</td>
+              <td>분 단위</td>
+              <td><span class="state st-done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>즉시 응답</span></td>
+            </tr>
+            <tr>
+              <th scope="row">사업계획서 자동 작성 범위</th>
+              <td>부분 초안</td>
+              <td class="num">전체 항목의 80%</td>
+              <td><span class="state st-run"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 6v6l4 2"/><circle cx="12" cy="12" r="9"/></svg>부분 초안 보조</span></td>
+            </tr>
+            <tr>
+              <th scope="row">운영 비용</th>
+              <td>상용 API 기준</td>
+              <td class="num">70% 절감</td>
+              <td><span class="state st-wait"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>측정 예정</span></td>
+            </tr>
+            <tr>
+              <th scope="row">실증 마을</th>
+              <td>—</td>
+              <td class="num">3 — 5개</td>
+              <td><span class="state st-wait"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>10월 개시 예정</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="notice">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <p>
+          본 사업으로 확보한 GPU 자원은 <strong>베이스 모델 선정, 도메인 데이터 파인튜닝, RAG 구성의 학습·평가·검증에 한정</strong>하여 활용합니다.
+          학습을 마친 모델의 실서비스 배포는 사업 종료 후 별도 인프라에서 추진합니다.
+          자세한 진행 현황은 <a href="https://nexus.poomasi.org/" rel="noopener">사업 현황 대시보드</a>에서 확인할 수 있습니다.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENGINE -->
+  <section class="sec sec-alt" id="engine">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-num">04 — 기술 기반</span>
+        <h2>두 서비스가 함께 쓰는 하나의 엔진</h2>
+        <p class="sec-sub">
+          화면은 사업마다 다르지만, 그 아래에서 법령을 읽고 서류를 만들고 근거를 대는 일은 하나의 엔진이 담당합니다.
+          한쪽 현장에서 쌓인 지식이 다른 쪽으로 그대로 이어집니다.
+        </p>
+      </div>
+
+      <div class="eng">
+        <div class="stack" aria-label="시스템 구조도">
+          <div class="layer layer-top">
+            <span class="layer-lab">현장 서비스</span>
+            <div class="layer-row">
+              <span class="chip">햇빛나눔</span>
+              <span class="chip">햇소자</span>
+            </div>
+          </div>
+          <div class="flow" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
+          </div>
+          <div class="layer layer-core">
+            <span class="layer-lab">공통 엔진</span>
+            <p class="core-name">품에</p>
+            <p class="core-desc">법령·서류·수익 판단을 담당하는 도메인 특화 추론 계층. 두 서비스의 요청이 이곳을 지납니다.</p>
+          </div>
+          <div class="flow" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
+          </div>
+          <div class="layer">
+            <span class="layer-lab">지식 기반</span>
+            <div class="layer-row">
+              <span class="chip">법령 코퍼스</span>
+              <span class="chip">온톨로지</span>
+              <span class="chip">RAG 검색</span>
+              <span class="chip">자체 학습 모델</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="eng-list">
+          <div class="eng-item">
+            <span class="eng-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6.5A2.5 2.5 0 0 1 5.5 4H20v16H5.5A2.5 2.5 0 0 1 3 17.5z"/><path d="M8 8h8M8 12h6"/></svg></span>
+            <div>
+              <h3>법령 코퍼스</h3>
+              <p>전기·신재생·분산에너지·농지·산지·협동조합 등 사업에 실제로 걸리는 법령을 검증된 출처에서만 수집해 쌓습니다.</p>
+            </div>
+          </div>
+          <div class="eng-item">
+            <span class="eng-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="2.4"/><circle cx="5" cy="18" r="2.4"/><circle cx="19" cy="18" r="2.4"/><path d="M10.6 7L6.4 15.8M13.4 7l4.2 8.8M7.4 18h9.2"/></svg></span>
+            <div>
+              <h3>온톨로지</h3>
+              <p>발전소·농지·조합원·계약·수익 배분이 서로 어떻게 걸리는지 관계로 정의합니다. 답이 어떤 근거에서 나왔는지 되짚을 수 있습니다.</p>
+            </div>
+          </div>
+          <div class="eng-item">
+            <span class="eng-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg></span>
+            <div>
+              <h3>RAG 검색</h3>
+              <p>질문이 들어오면 관련 조항과 문서를 먼저 찾아 근거로 붙입니다. 근거가 없으면 지어내지 않고 없다고 답합니다.</p>
+            </div>
+          </div>
+          <div class="eng-item">
+            <span class="eng-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2.5"/><rect x="9" y="9" width="6" height="6" rx="1"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/></svg></span>
+            <div>
+              <h3>자체 학습 모델</h3>
+              <p>공모 문서와 도메인 자료로 직접 학습한 한국어 모델입니다. 민감한 마을 정보를 외부로 보내지 않는 구조를 목표로 합니다.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-foot" id="contact">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <p class="foot-org">사회혁신교육원 사회적협동조합</p>
+        <p class="foot-p">
+          대전광역시 서구 관저중로80번길 8, 3층<br>
+          대표전화 <a href="tel:07041964677">070-4196-4677</a><br>
+          <a href="mailto:sakyowon@sakyowon.co.kr">sakyowon@sakyowon.co.kr</a>
+        </p>
+      </div>
+      <div>
+        <p class="foot-h">서비스</p>
+        <div class="foot-links">
+          <a href="https://sunshare.kr" rel="noopener">햇빛나눔 — 영농형 태양광</a>
+          <a href="https://sakyowon.co.kr/hatsoja/" rel="noopener">햇소자 — 햇빛소득마을</a>
+          <a href="https://nexus.poomasi.org/" rel="noopener">사업 현황 대시보드</a>
+        </div>
+      </div>
+      <div>
+        <p class="foot-h">기관</p>
+        <div class="foot-links">
+          <a href="https://sakyowon.co.kr" rel="noopener">사교원 본진</a>
+          <a href="https://sakyowon.co.kr/hatsoja/#privacy" rel="noopener">개인정보처리방침</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot-base">
+      <span>&copy; 2026 사회혁신교육원 사회적협동조합</span>
+      <span>과학기술정보통신부 고성능 컴퓨팅 자원 지원사업 수행 과제</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
