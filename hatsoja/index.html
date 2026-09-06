@@ -1236,6 +1236,7 @@ const MOCK = {
   ],
   accounting: [],   // 사용자 생성 회계·세무 자료
   uploads: [],      // 업로드된 거래내역·세금계산서·영수증
+  closings: [],     // 월 마감 실행으로 생성된 월간 운영보고서
   contents: {
     notices: [
       {id:'n01', title:'2026년 7월 시범사업 참여마을 모집 공고', date:'2026-07-15', tag:'공고', body:'전남광주통합특별시 완도군·진도군·해남군 대상, 접수 마감 2026-08-30.'},
@@ -2834,18 +2835,41 @@ function memAccounting(){
 
 function uploadFiles(kind, files){
   if(!files || !files.length) return;
-  const today = new Date().toISOString().slice(0,10);
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  let csvCount = 0;
   for(const f of files){
-    MOCK.uploads.unshift({
+    const item = {
       id: 'u' + Date.now().toString(36) + Math.random().toString(36).slice(2,6),
       kind, name: f.name,
       size: f.size < 1024 ? f.size + ' B' : f.size < 1048576 ? (f.size/1024).toFixed(0) + ' KB' : (f.size/1048576).toFixed(2) + ' MB',
       date: today,
-    });
+    };
+    MOCK.uploads.unshift(item);
+    // 통장 CSV는 내용까지 저장 — 월마감·보고서 메뉴에서 바로 분류·집계에 사용
+    if(/\.csv$/i.test(f.name) && f.size < 512*1024){
+      csvCount++;
+      _readTextFile(f, text => { item._text = text; persistUploads(); });
+    }
   }
   persistUploads();
-  toast(`${files.length}개 파일이 업로드되었습니다. (실제 파일 저장은 백엔드 연동 후)`);
+  toast(`${files.length}개 파일이 업로드되었습니다.` + (csvCount ? ' 통장 CSV는 월마감·보고서에서 바로 사용할 수 있습니다.' : ' (파일 원본 저장은 백엔드 연동 후)'));
   refresh();
+}
+/* CSV 텍스트 읽기 — UTF-8 우선, 한글 깨짐(�) 감지 시 EUC-KR 재시도 (은행 다운로드 양식 대응) */
+function _readTextFile(file, cb){
+  const rd = new FileReader();
+  rd.onload = () => {
+    const t = String(rd.result || '');
+    if(t.includes('�')){
+      const rd2 = new FileReader();
+      rd2.onload = () => cb(String(rd2.result || ''));
+      rd2.onerror = () => cb(t);
+      rd2.readAsText(file, 'euc-kr');
+    } else cb(t);
+  };
+  rd.onerror = () => cb('');
+  rd.readAsText(file, 'utf-8');
 }
 function removeUpload(id){
   MOCK.uploads = MOCK.uploads.filter(f => f.id !== id);
@@ -2991,10 +3015,10 @@ function downloadAccounting(id){
   if(!a) return;
   _downloadAccountingHtml(a.typeLabel, a.period, a._content, a.title);
 }
-function _downloadAccountingHtml(title, period, content, filename){
+function _downloadAccountingHtml(title, period, content, filename, villageOverride){
   const today = new Date().toISOString().slice(0,10);
   const u = currentUser();
-  const village = (u && u.village) ? u.village : '조합';
+  const village = villageOverride || ((u && u.village) ? u.village : '조합');
   const html = `<!DOCTYPE html>
 <html lang="ko"><head><meta charset="utf-8"><title>${escapeHtml(title)} - ${escapeHtml(period)}</title>
 <style>
@@ -3331,17 +3355,48 @@ function memClosing(){
     {icon:'🏛', name:'총회 자료집', cycle:'연 1회', desc:'결산·감사보고·잉여금 처분안·차년 계획'},
     {icon:'💌', name:'배당 통지문', cycle:'분기', desc:'조합원별 지역화폐 배당 안내 — 알림톡 연계'},
   ];
+  const bankFiles = MOCK.uploads.filter(f => f.kind === 'bank' && f._text);
   return `
     <div class="sec-head">
       <h1>📁 월마감·보고서</h1>
-      <p class="sec-desc">수집·계산·대조·초안 작성은 자동으로, 이체 실행·인증서 제출·현장 점검·의결은 사람이 — 1MW 조합의 정기업무 표준 체계입니다. <span class="badge badge-mute">데모</span></p>
+      <p class="sec-desc">수집·계산·대조·초안 작성은 자동으로, 이체 실행·인증서 제출·현장 점검·의결은 사람이 — 1MW 조합의 정기업무 표준 체계입니다.</p>
     </div>
 
     <div class="grid grid-4">
       <div class="kpi"><div class="kpi-n">8</div><div class="kpi-l">월 정기업무</div><div class="kpi-sub">아래 체크리스트</div></div>
-      <div class="kpi"><div class="kpi-n">5종</div><div class="kpi-l">운영 대장</div><div class="kpi-sub">발전·회계·급여·배당·설비</div></div>
-      <div class="kpi"><div class="kpi-n">6종</div><div class="kpi-l">자동 생성 보고서</div><div class="kpi-sub">한글(hwpx) 파일</div></div>
+      <div class="kpi"><div class="kpi-n">${bankFiles.length}</div><div class="kpi-l">마감 사용 가능한 통장 CSV</div><div class="kpi-sub">회계·세무 메뉴에서 업로드</div></div>
+      <div class="kpi"><div class="kpi-n">${MOCK.closings.length}</div><div class="kpi-l">생성된 월마감 보고서</div><div class="kpi-sub">아래 목록</div></div>
       <div class="kpi"><div class="kpi-n">21건</div><div class="kpi-l">연간 반복 업무</div><div class="kpi-sub">분기 5 · 반기 4 · 연 8 포함</div></div>
+    </div>
+
+    <div class="card mt-20" style="border-color:var(--primary);">
+      <div class="card-title"><h3 class="serif">▶ 월 마감 실행</h3><span class="badge badge-primary">자동 산출</span></div>
+      <p class="text-mute" style="margin-top:0;font-size:13px;">
+        통장 거래내역 CSV를 자동 분류·기장하고, 한전 정산 수입의 50/10/20/20 배분 계산과 실제 이체 대조,
+        계정과목별 집계까지 담은 <strong>월간 운영보고서</strong>를 생성합니다.
+        ${bankFiles.length ? '' : '먼저 <a href="#/mem/accounting" style="color:var(--primary);">회계·세무 자동화</a>에서 통장 CSV를 업로드하거나, 실행 창에서 직접 파일을 선택하세요.'}
+      </p>
+      <button class="btn btn-primary" onclick="closingStart()">📁 월 마감 실행</button>
+    </div>
+
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">📚 생성한 월마감 보고서 (${MOCK.closings.length})</h3></div>
+      ${MOCK.closings.length ? `<table class="tbl">
+        <thead><tr><th>보고서</th><th>대상 월</th><th>생성일</th><th></th></tr></thead>
+        <tbody>
+          ${MOCK.closings.map(c => `
+            <tr>
+              <td><strong>${escapeHtml(c.title)}</strong></td>
+              <td>${escapeHtml(c.period)}</td>
+              <td>${escapeHtml(c.date)}</td>
+              <td class="tbl-actions">
+                <button class="btn btn-ghost btn-sm" onclick="viewClosing('${escapeJs(c.id)}')">보기</button>
+                <button class="btn btn-ghost btn-sm" onclick="downloadClosing('${escapeJs(c.id)}')">다운로드</button>
+                <button class="btn btn-ghost btn-sm" onclick="removeClosing('${escapeJs(c.id)}')">삭제</button>
+              </td>
+            </tr>`).join('')}
+        </tbody>
+      </table>` : '<p class="text-mute text-center" style="padding:16px 0;">아직 생성된 보고서가 없습니다. 위 [월 마감 실행]을 눌러 생성하세요.</p>'}
     </div>
 
     <div class="card mt-20">
@@ -3374,6 +3429,272 @@ function memClosing(){
       <p class="text-mute" style="font-size:12.5px;">※ 대장에 기록만 하면 보고서는 자동입니다 — 상근 인력의 시간은 서류가 아니라 마을공동사업에 씁니다.</p>
     </div>
   `;
+}
+
+/* ─── 월 마감 실행 엔진: 통장 CSV → 자동 분류·배분 계산 → 월간 운영보고서 ─── */
+const CLOSING_RULES = [
+  // [적요 패턴, 계정과목, 사업구분] — 위에서부터 먼저 맞는 규칙 적용
+  [/배분이체.*공동/,        '내부이체', '공동사업(50%)'],
+  [/배분이체.*배당/,        '내부이체', '배당적립(10%)'],
+  [/배분이체.*적립/,        '내부이체', '내부적립(20%)'],
+  [/배분이체.*(상환|융자)/, '내부이체', '융자상환(20%)'],
+  [/한전.*(판매|정산)|전력판매/, '전력판매수입', '매출'],
+  [/출자금/,               '출자금 수입', '자본'],
+  [/보조금/,               '보조금 수입', '수입'],
+  [/회비/,                 '회비 수입', '수입'],
+  [/이자/,                 '이자수익', '수입'],
+  [/이월/,                 '전월이월', '—'],
+  [/급여/,                 '인건비(급여)', '공동사업'],
+  [/원천세/,               '제세공과금', '공동사업'],
+  [/보험/,                 '4대보험료', '공동사업'],
+  [/임차/,                 '임차료', '공동사업'],
+  [/전기요금|가설전기/,     '수도광열비', '공동사업'],
+  [/통신|회선/,             '통신비', '공동사업'],
+  [/인쇄|현수막|홍보|전단/, '홍보비', '공동사업'],
+  [/기성금|공사/,           '건설비(자산)', '건설'],
+  [/감리/,                 '감리비(자산)', '건설'],
+  [/측량|지반/,             '용역비(자산)', '건설'],
+  [/점검|정비/,             '수선유지비', '공동사업'],
+  [/법무|등기/,             '지급수수료', '공동사업'],
+  [/수수료/,               '지급수수료', '공동사업'],
+  [/사무용품|문구/,         '사무용품비', '공동사업'],
+  [/다과|도시락|회의|대관/, '회의비', '공동사업'],
+  [/안전/,                 '소모품비', '건설'],
+  [/주유|차량/,             '차량유지비', '공동사업'],
+  [/숙박|여비/,             '여비교통비', '공동사업'],
+];
+const CLOSING_SPLIT = [
+  ['마을공동사업', 0.5, '공동사업(50%)'],
+  ['지역화폐 배당', 0.1, '배당적립(10%)'],
+  ['내부 적립',    0.2, '내부적립(20%)'],
+  ['융자 상환',    0.2, '융자상환(20%)'],
+];
+let _lastClosing = null;
+const _fmtN = n => Math.round(n).toLocaleString('ko-KR');
+
+function closingStart(){
+  const now = new Date();
+  const prev = new Date(now.getFullYear(), now.getMonth()-1, 1);   // 기본값: 지난달 (로컬 기준)
+  const defYm = `${prev.getFullYear()}-${String(prev.getMonth()+1).padStart(2,'0')}`;
+  const bankFiles = MOCK.uploads.filter(f => f.kind === 'bank' && f._text);
+  showDyn({
+    title: '월 마감 실행',
+    sub: '통장 거래내역을 자동 분류하고 월간 운영보고서를 생성합니다.',
+    body: `
+      <div class="form-row"><label>대상 조합 <span style="color:var(--danger);">*</span></label>
+        <select class="select" id="cl-village">
+          ${MOCK.villages.map(v => `<option value="${escapeHtml(v.name)}">${escapeHtml(v.name)}</option>`).join('')}
+        </select></div>
+      <div class="form-row"><label>대상 월 <span style="color:var(--danger);">*</span></label>
+        <input class="input" id="cl-period" type="month" value="${defYm}"></div>
+      <div class="form-row"><label>통장 거래내역 (업로드된 CSV)</label>
+        <select class="select" id="cl-file">
+          ${bankFiles.length
+            ? bankFiles.map(f => `<option value="${escapeJs(f.id)}">${escapeHtml(f.name)} (${escapeHtml(f.date)})</option>`).join('')
+            : '<option value="">— 업로드된 통장 CSV 없음 —</option>'}
+        </select></div>
+      <div class="form-row"><label>또는 CSV 파일 직접 선택 (선택 시 이 파일 우선)</label>
+        <input class="input" id="cl-direct" type="file" accept=".csv"></div>`,
+    foot: `<button class="btn btn-outline" onclick="closeDyn()">취소</button>
+           <button class="btn btn-primary" onclick="closingRun()">✅ 마감 실행</button>`,
+    size: 'lg'
+  });
+}
+
+function closingRun(){
+  const village = document.getElementById('cl-village').value;
+  const ym = document.getElementById('cl-period').value;
+  if(!village || !ym){ toast('대상 조합과 월을 선택해주세요.'); return; }
+  const direct = document.getElementById('cl-direct').files[0];
+  if(direct){
+    _readTextFile(direct, text => _closingProcess(village, ym, text, direct.name));
+    return;
+  }
+  const fid = document.getElementById('cl-file').value;
+  const f = MOCK.uploads.find(x => x.id === fid && x._text);
+  if(!f){ toast('통장 CSV를 선택하거나 파일을 직접 첨부해주세요.'); return; }
+  _closingProcess(village, ym, f._text, f.name);
+}
+
+/* CSV 파서 — 따옴표 필드 지원 */
+function _closingCsvParse(text){
+  const rows = []; let row = [], cell = '', inQ = false;
+  text = text.replace(/^﻿/, '').replace(/\r\n?/g, '\n');
+  for(let i = 0; i < text.length; i++){
+    const ch = text[i];
+    if(inQ){
+      if(ch === '"'){ if(text[i+1] === '"'){ cell += '"'; i++; } else inQ = false; }
+      else cell += ch;
+    } else if(ch === '"') inQ = true;
+    else if(ch === ','){ row.push(cell); cell = ''; }
+    else if(ch === '\n'){ row.push(cell); rows.push(row); row = []; cell = ''; }
+    else cell += ch;
+  }
+  if(cell !== '' || row.length) { row.push(cell); rows.push(row); }
+  return rows.filter(r => r.some(c => String(c).trim() !== ''));
+}
+const _closingNum = v => Number(String(v ?? '').replace(/[^\d.-]/g, '')) || 0;
+
+function _closingProcess(village, ym, csvText, fileName){
+  const rows = _closingCsvParse(csvText);
+  if(rows.length < 2){ toast('CSV에서 거래를 읽지 못했습니다. 파일 내용을 확인해주세요.'); return; }
+  // 열 위치 탐색 (헤더명 기준, 못 찾으면 표준 순서 가정)
+  const head = rows[0].map(h => String(h).trim());
+  const col = (names, def) => { const i = head.findIndex(h => names.some(n => h.includes(n))); return i >= 0 ? i : def; };
+  const iDate = col(['일자','날짜','거래일'], 0), iDesc = col(['적요','내용'], 1),
+        iOut = col(['출금'], 2), iIn = col(['입금'], 3), iBal = col(['잔액'], 4), iBr = col(['거래점','취급'], 5);
+  const txAll = rows.slice(1).map(r => ({
+    date: String(r[iDate] || '').trim().replace(/[./]/g, '-'),
+    desc: String(r[iDesc] || '').trim(),
+    out: _closingNum(r[iOut]), inn: _closingNum(r[iIn]),
+    bal: _closingNum(r[iBal]), br: String(r[iBr] || '').trim(),
+  }));
+  const tx = txAll.filter(t => t.date.slice(0,7) === ym);
+  if(!tx.length){ toast(`${ym}에 해당하는 거래가 없습니다. (파일 전체 ${txAll.length}건)`); return; }
+  // 키워드 분류
+  for(const t of tx){
+    const hit = CLOSING_RULES.find(([re]) => re.test(t.desc));
+    t.acct = hit ? hit[1] : '(분류필요)';
+    t.biz  = hit ? hit[2] : '(분류필요)';
+  }
+  const content = _closingReport(village, ym, tx, fileName);
+  _lastClosing = {village, period: ym, content};
+  showDyn({
+    title: `월간 운영보고서 — ${ym}`,
+    sub: `${village} · 원본: ${fileName}`,
+    body: `<div class="doc-preview" style="font-family:var(--font-sans);font-size:12.5px;">${content}</div>`,
+    foot: `<button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
+           <button class="btn btn-outline" onclick="closingStart()">↻ 다시 실행</button>
+           <button class="btn btn-outline" onclick="downloadClosingCurrent()">📥 다운로드</button>
+           <button class="btn btn-primary" onclick="saveClosing()">💾 저장</button>`,
+    size: 'xl'
+  });
+}
+
+function _closingReport(village, ym, tx, fileName){
+  const isTransfer = t => t.acct === '내부이체' || t.acct === '전월이월';
+  const sumIn  = tx.reduce((s,t) => s + (isTransfer(t) ? 0 : t.inn), 0);
+  const sumOut = tx.reduce((s,t) => s + (isTransfer(t) ? 0 : t.out), 0);
+  const settle = tx.filter(t => t.acct === '전력판매수입').reduce((s,t) => s + t.inn, 0);
+  const unclassified = tx.filter(t => t.acct === '(분류필요)');
+  const lastBal = tx[tx.length-1].bal;
+  // 계정과목별 집계 (이월 제외)
+  const byAcct = {};
+  for(const t of tx){
+    if(t.acct === '전월이월') continue;
+    const k = t.acct + '|' + t.biz;
+    byAcct[k] = byAcct[k] || {acct: t.acct, biz: t.biz, inn: 0, out: 0, n: 0};
+    byAcct[k].inn += t.inn; byAcct[k].out += t.out; byAcct[k].n++;
+  }
+  const aggr = Object.values(byAcct).sort((a,b) => (b.inn + b.out) - (a.inn + a.out));
+  // 50/10/20/20 배분 계산 vs 실제 이체 대조
+  const splitRows = CLOSING_SPLIT.map(([name, r, tag]) => {
+    const plan = Math.round(settle * r);
+    const actual = tx.filter(t => t.acct === '내부이체' && t.biz === tag).reduce((s,t) => s + t.out, 0);
+    return {name, r, plan, actual, diff: actual - plan};
+  });
+  const hasTransfers = splitRows.some(s => s.actual > 0);
+  return `
+    <h3 style="margin-top:0;">1. 월간 요약</h3>
+    <table class="tbl"><tbody>
+      <tr><th>대상</th><td>${escapeHtml(village)} · ${escapeHtml(ym)}</td>
+          <th>거래 건수</th><td class="num">${tx.length}건 (원본: ${escapeHtml(fileName)})</td></tr>
+      <tr><th>총수입 (이월·내부이체 제외)</th><td class="num"><strong>${_fmtN(sumIn)}원</strong></td>
+          <th>총지출 (내부이체 제외)</th><td class="num"><strong>${_fmtN(sumOut)}원</strong></td></tr>
+      <tr><th>월말 통장 잔액</th><td class="num">${_fmtN(lastBal)}원</td>
+          <th>미분류 거래</th><td class="num">${unclassified.length ? `<span style="color:var(--danger);">${unclassified.length}건 — 확인 필요</span>` : '0건 ✓'}</td></tr>
+    </tbody></table>
+
+    ${settle > 0 ? `
+    <h3>2. 수익 배분 계산 (50 / 10 / 20 / 20)</h3>
+    <p style="font-size:12px;color:#666;margin:4px 0 8px;">한전 전력판매 수입 <strong>${_fmtN(settle)}원</strong> 기준 배분 기준액${hasTransfers ? ' — 실제 이체와 자동 대조' : ''}</p>
+    <table class="tbl">
+      <thead><tr><th>배분 항목</th><th>비율</th><th>배분 기준액</th>${hasTransfers ? '<th>실제 이체액</th><th>차이</th>' : ''}</tr></thead>
+      <tbody>${splitRows.map(s => `
+        <tr><td>${s.name}</td><td>${Math.round(s.r*100)}%</td><td class="num">${_fmtN(s.plan)}원</td>
+        ${hasTransfers ? `<td class="num">${s.actual ? _fmtN(s.actual)+'원' : '<span style="color:#b58900;">이체 없음</span>'}</td>
+        <td class="num">${s.actual ? (s.diff === 0 ? '<span style="color:var(--primary);">일치 ✓</span>' : `<span style="color:var(--danger);">${s.diff>0?'+':''}${_fmtN(s.diff)}원</span>`) : '—'}</td>` : ''}</tr>`).join('')}
+        <tr class="total"><td>합계</td><td>100%</td><td class="num">${_fmtN(settle)}원</td>
+        ${hasTransfers ? `<td class="num">${_fmtN(splitRows.reduce((s,x)=>s+x.actual,0))}원</td><td></td>` : ''}</tr>
+      </tbody>
+    </table>
+    ${!hasTransfers ? `<div class="section"><strong>📨 자금 배분 지시서</strong> — 정산금 입금이 확인되었습니다. 위 기준액대로 4개 계좌 이체를 집행하세요 (이체 실행·승인은 사람이 합니다).</div>` : ''}
+    ` : `
+    <h3>2. 수익 배분</h3>
+    <p style="font-size:12.5px;color:#666;">이달 한전 전력판매 수입이 없어 배분 계산을 생략합니다. (상업발전 전 단계이거나 정산 미도래)</p>
+    `}
+
+    <h3>3. 계정과목별 집계</h3>
+    <table class="tbl">
+      <thead><tr><th>계정과목</th><th>사업구분</th><th>건수</th><th>수입</th><th>지출</th></tr></thead>
+      <tbody>${aggr.map(a => `
+        <tr><td>${escapeHtml(a.acct)}</td><td>${escapeHtml(a.biz)}</td><td class="num">${a.n}</td>
+        <td class="num">${a.inn ? _fmtN(a.inn)+'원' : ''}</td><td class="num">${a.out ? _fmtN(a.out)+'원' : ''}</td></tr>`).join('')}
+      </tbody>
+    </table>
+
+    <h3>4. 자동 분류 기장 내역 (전 거래)</h3>
+    <table class="tbl">
+      <thead><tr><th>일자</th><th>적요</th><th>계정과목</th><th>사업구분</th><th>입금</th><th>출금</th><th>잔액</th></tr></thead>
+      <tbody>${tx.map(t => `
+        <tr${t.acct === '(분류필요)' ? ' style="background:#fdf3e3;"' : ''}>
+          <td>${escapeHtml(t.date)}</td><td>${escapeHtml(t.desc)}</td>
+          <td>${escapeHtml(t.acct)}</td><td>${escapeHtml(t.biz)}</td>
+          <td class="num">${t.inn ? _fmtN(t.inn) : ''}</td><td class="num">${t.out ? _fmtN(t.out) : ''}</td>
+          <td class="num">${t.bal ? _fmtN(t.bal) : ''}</td></tr>`).join('')}
+      </tbody>
+    </table>
+    ${unclassified.length ? `<div class="section" style="border-left-color:var(--danger);"><strong>⚠ 미분류 ${unclassified.length}건</strong> — ${unclassified.map(t => escapeHtml(t.desc)).join(', ')} : 계정과목을 확인해 분류 규칙에 추가하세요.</div>` : ''}
+  `;
+}
+
+function saveClosing(){
+  if(!_lastClosing){ closeDyn(); return; }
+  const now = new Date();
+  const c = {
+    id: 'c' + Date.now().toString(36),
+    title: `${_lastClosing.village} ${_lastClosing.period} 월간 운영보고서`,
+    village: _lastClosing.village,
+    period: _lastClosing.period,
+    date: `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`,
+    _content: _lastClosing.content,
+  };
+  MOCK.closings.unshift(c);
+  persistClosings();
+  _lastClosing = null;
+  closeDyn();
+  toast(`"${c.title}"이(가) 저장되었습니다.`);
+  refresh();
+}
+function viewClosing(id){
+  const c = MOCK.closings.find(x => x.id === id);
+  if(!c){ toast('보고서를 찾을 수 없습니다.'); return; }
+  showDyn({
+    title: c.title,
+    sub: `대상 ${c.period} · 생성일 ${c.date}`,
+    body: `<div class="doc-preview" style="font-family:var(--font-sans);font-size:12.5px;">${c._content}</div>`,
+    foot: `<button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
+           <button class="btn btn-outline" onclick="downloadClosing('${escapeJs(id)}')">📥 다운로드</button>`,
+    size: 'xl'
+  });
+}
+function downloadClosingCurrent(){
+  if(!_lastClosing) return;
+  _downloadAccountingHtml('월간 운영보고서', _lastClosing.period, _lastClosing.content, `${_lastClosing.village}_월간운영보고서`, _lastClosing.village);
+}
+function downloadClosing(id){
+  const c = MOCK.closings.find(x => x.id === id);
+  if(!c) return;
+  _downloadAccountingHtml('월간 운영보고서', c.period, c._content, c.title, c.village);
+}
+function removeClosing(id){
+  const c = MOCK.closings.find(x => x.id === id);
+  if(!c) return;
+  if(!confirm(`"${c.title}"을(를) 삭제하시겠습니까?`)) return;
+  MOCK.closings = MOCK.closings.filter(x => x.id !== id);
+  persistClosings();
+  toast('보고서가 삭제되었습니다.');
+  refresh();
 }
 
 function memLibrary(){
@@ -5406,6 +5727,7 @@ const STORE = {
   contents:   'sunvillage_auto_contents',
   accounting: 'sunvillage_auto_accounting',
   uploads:    'sunvillage_auto_uploads',
+  closings:   'sunvillage_auto_closings',
 };
 function _loadArr(key){
   try {
@@ -5451,6 +5773,8 @@ function loadAccounting(){ const s=_loadArr(STORE.accounting); if(s) MOCK.accoun
 function persistAccounting(){ _save(STORE.accounting, MOCK.accounting); }
 function loadUploads(){ const s=_loadArr(STORE.uploads); if(s) MOCK.uploads = s; }
 function persistUploads(){ _save(STORE.uploads, MOCK.uploads); }
+function loadClosings(){ const s=_loadArr(STORE.closings); if(s) MOCK.closings = s; }
+function persistClosings(){ _save(STORE.closings, MOCK.closings); }
 
 function refreshMembersView(){ navigate(); }  // just re-render whatever is showing
 function refresh(){ navigate(); }
@@ -6903,6 +7227,7 @@ loadInquiries();
 loadContents();
 loadAccounting();
 loadUploads();
+loadClosings();
 renderTopActions();
 ssoBoot();   // 통합 계정 세션이 있으면 자동 로그인 (sakyowon.co.kr 서빙 시)
 navigate();
