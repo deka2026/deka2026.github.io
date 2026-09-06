@@ -1,0 +1,16 @@
+{
+  "name": "햇소자 — 햇빛소득마을 통합 운영 플랫폼",
+  "short_name": "햇소자",
+  "description": "햇빛소득마을 마을협동조합의 설립·운영 업무를 지원하는 통합 플랫폼",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FAF8F2",
+  "theme_color": "#4A6741",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -11,6 +11,7 @@
 <meta property="og:url" content="https://sakyowon.co.kr/hatsoja/">
 <meta property="og:image" content="https://sakyowon.co.kr/icon-512.png">
 <meta name="twitter:card" content="summary">
+<link rel="manifest" href="manifest.json">
 <link rel="icon" href="https://sakyowon.co.kr/icon-192.png">
 <link rel="apple-touch-icon" href="https://sakyowon.co.kr/apple-touch-icon.png">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
@@ -456,6 +457,79 @@ footer{
 .text-small{font-size:12.5px;}
 .tag-row{display:flex;flex-wrap:wrap;gap:6px;}
 .divider{height:1px;background:var(--line-soft);margin:20px 0;}
+
+/* ─── 사용자 편의 개선 (2026-09-06 개선안) ─── */
+/* 글자 크게 보기 (body zoom — px 기반 CSS라 root font-size로는 안 먹음) */
+.fontsize-btns{display:flex;align-items:center;gap:2px;margin-right:6px;}
+.fontsize-btns button{
+  border:1px solid var(--line-soft);background:var(--card);color:var(--ink-soft);
+  border-radius:6px;cursor:pointer;line-height:1;padding:5px 7px;font-family:inherit;
+}
+.fontsize-btns button:nth-child(1){font-size:12px;}
+.fontsize-btns button:nth-child(2){font-size:14px;}
+.fontsize-btns button:nth-child(3){font-size:17px;font-weight:700;}
+.fontsize-btns button.on{background:var(--primary);border-color:var(--primary);color:#fff;}
+@media(max-width:560px){.fontsize-btns{display:none;}}
+
+/* 전화 상담 버튼 (모바일 하단 고정) */
+.call-fab{
+  display:none;position:fixed;left:14px;bottom:14px;z-index:180;
+  background:var(--primary-dark);color:#fff!important;text-decoration:none;
+  padding:11px 16px;border-radius:999px;font-size:14px;font-weight:700;
+  box-shadow:var(--shadow-md);
+}
+@media(max-width:760px){.call-fab{display:block;}}
+
+/* AI 상담 플로팅 버튼 (회원 화면) */
+.chat-fab{
+  display:none;position:fixed;right:16px;bottom:16px;z-index:180;
+  width:52px;height:52px;border-radius:50%;border:none;cursor:pointer;
+  background:var(--primary);color:#fff;font-size:22px;box-shadow:var(--shadow-md);
+}
+.chat-fab.on{display:block;}
+
+/* 데모 체험 → 가입 유도 띠 / 관리자 미리보기 띠 */
+.mode-bar{
+  display:none;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;
+  padding:8px 14px;font-size:13.5px;text-align:center;
+}
+.mode-bar.on{display:flex;}
+.mode-bar.demo{background:#FFF7E0;border-bottom:1px solid #EAD9A0;color:#6B5619;}
+.mode-bar.preview{background:var(--primary-50);border-bottom:1px solid var(--primary-light);color:var(--primary-dark);}
+.mode-bar .btn{padding:5px 12px;font-size:13px;}
+
+/* 홈 화면 설치(PWA) 안내 띠 */
+.pwa-bar{
+  display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:76px;z-index:185;
+  background:var(--card);border:1px solid var(--line-soft);border-radius:12px;
+  box-shadow:var(--shadow-md);padding:10px 14px;font-size:13.5px;
+  align-items:center;gap:10px;max-width:92vw;
+}
+.pwa-bar.on{display:flex;}
+
+/* 로그인·가입 인라인 오류 상자 (행동 중심 오류 안내) */
+.inline-err{
+  background:#FBEFEC;border:1px solid #E5B8AC;color:#8A3B26;
+  border-radius:8px;padding:10px 12px;font-size:13.5px;margin:10px 0;
+}
+.inline-err .btn{margin-top:8px;}
+.field-err{border-color:#C0563A!important;background:#FFF9F7;}
+.avail-ok{color:var(--primary-dark);font-weight:600;}
+.avail-no{color:#8A3B26;font-weight:600;}
+
+/* 오늘 할 일 카드 */
+.todo-strip{margin-bottom:18px;}
+.todo-card{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  background:var(--card);border-left:4px solid var(--primary);
+  border-radius:10px;box-shadow:var(--shadow-sm);padding:12px 16px;margin-bottom:8px;
+}
+.todo-card.urgent{border-left-color:#C0563A;}
+.todo-card .todo-txt{flex:1;min-width:200px;font-weight:600;}
+.todo-card .todo-sub{display:block;font-weight:400;font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
+
+/* 용어 쉬운 말 병기 */
+.term{border-bottom:1px dashed var(--primary);cursor:help;}
 </style>
 </head>
 <body>
@@ -480,6 +554,12 @@ footer{
       <a href="manual.html">이용안내</a>
     </div>
 
+    <div class="fontsize-btns" id="fontSizeBtns" title="글자 크기">
+      <button onclick="setFontScale(1)" aria-label="글자 보통">가</button>
+      <button onclick="setFontScale(1.15)" aria-label="글자 크게">가</button>
+      <button onclick="setFontScale(1.3)" aria-label="글자 아주 크게">가</button>
+    </div>
+
     <div class="top-actions" id="topActions">
       <!-- populated by JS depending on auth state -->
     </div>
@@ -487,6 +567,25 @@ footer{
     <button class="nav-toggle" id="navToggle" aria-label="메뉴 열기" onclick="toggleNav()">☰</button>
   </div>
 </nav>
+
+<!-- 관리자 미리보기 / 데모 체험 안내 띠 -->
+<div class="mode-bar preview" id="previewBar">
+  👀 <strong>회원 화면 미리보기 모드</strong>입니다. 실제 회원에게 보이는 화면 그대로예요.
+  <button class="btn btn-primary btn-sm" onclick="endPreview()">관리자로 돌아가기</button>
+</div>
+<div class="mode-bar demo" id="demoBar">
+  🌱 지금은 <strong>체험 모드</strong>입니다. 입력한 내용은 저장되지 않아요.
+  <button class="btn btn-primary btn-sm" onclick="gotoSignupFromDemo()">우리 마을로 시작하기 — 가입 신청</button>
+</div>
+
+<!-- 전화 상담(모바일 고정) · AI 상담 플로팅 · 홈 화면 설치 안내 -->
+<a class="call-fab" href="tel:070-4196-4677">📞 전화 상담</a>
+<button class="chat-fab" id="chatFab" onclick="location.hash='#/mem/chat'" aria-label="AI 상담 열기">💬</button>
+<div class="pwa-bar" id="pwaBar">
+  📱 홈 화면에 추가하면 다음부터 주소 입력 없이 바로 열 수 있어요.
+  <button class="btn btn-primary btn-sm" onclick="installPwa()">홈 화면에 추가</button>
+  <button class="btn btn-ghost btn-sm" onclick="dismissPwa()">닫기</button>
+</div>
 
 <!-- ═════════════════ PUBLIC VIEWS ═════════════════ -->
 
@@ -1013,7 +1112,24 @@ footer{
       <label>비밀번호</label>
       <input class="input" id="lg-pw" type="password" placeholder="비밀번호">
     </div>
-    <button class="btn btn-primary" style="width:100%;" onclick="doLogin()">로그인</button>
+    <div id="lg-err" style="display:none;"></div>
+    <button class="btn btn-primary" id="lgBtn" style="width:100%;" onclick="doLogin()">로그인</button>
+    <p class="text-small" style="margin:8px 0 0;text-align:right;">
+      <a href="#" onclick="togglePwReset(true);return false;">비밀번호를 잊으셨나요?</a>
+    </p>
+
+    <!-- 비밀번호 초기화 요청 (기존 문의 접수 채널 재사용 — 관리자 문의처리함에 도착) -->
+    <div id="pwResetPanel" style="display:none;border-top:1px solid var(--line-soft);margin-top:12px;padding-top:12px;">
+      <h3 class="serif" style="margin:0 0 4px;">비밀번호 초기화 요청</h3>
+      <p class="text-mute text-small" style="margin:0 0 10px;">
+        아래 내용을 보내주시면 관리자가 확인 후 <strong>가입 시 등록하신 연락처로</strong> 새 비밀번호를 안내드립니다 (영업일 1일 내).
+      </p>
+      <div class="form-row"><label>아이디</label><input class="input" id="pr-id"></div>
+      <div class="form-row"><label>이름</label><input class="input" id="pr-name"></div>
+      <div class="form-row"><label>연락처</label><input class="input" id="pr-contact" placeholder="010-0000-0000"></div>
+      <button class="btn btn-primary" style="width:100%;" onclick="submitPwReset()">초기화 요청 보내기</button>
+      <p class="text-mute text-small" style="margin:8px 0 0;">급하시면 대표전화 <a href="tel:070-4196-4677">070-4196-4677</a>로 연락해 주세요.</p>
+    </div>
 
     <div class="demo-buttons">
       <button class="btn btn-outline btn-sm" style="flex:1;" onclick="demoLogin('member')">
@@ -1034,7 +1150,8 @@ footer{
     <div id="signupPanel" style="display:none;border-top:1px solid var(--line-soft);margin-top:16px;padding-top:14px;">
       <h3 class="serif" style="margin:0 0 4px;">통합 계정 가입 신청</h3>
       <p class="text-mute text-small" style="margin:0 0 10px;">계정 하나로 사교원 모든 사이트를 이용합니다. 관리자 승인 후 로그인할 수 있습니다.</p>
-      <div class="form-row"><label>아이디 (3자 이상)</label><input class="input" id="su-id"></div>
+      <div class="form-row"><label>아이디 (3자 이상)</label><input class="input" id="su-id" onblur="checkUsernameAvail()" oninput="clearUsernameCheck()">
+        <div class="form-hint" id="su-id-check"></div></div>
       <div class="form-row"><label>비밀번호 (8자 이상)</label><input class="input" id="su-pw" type="password"></div>
       <div class="form-row"><label>이름</label><input class="input" id="su-name"></div>
       <div class="form-row"><label>연락처</label><input class="input" id="su-contact" placeholder="010-0000-0000"></div>
@@ -1165,6 +1282,136 @@ function closeLogin(){ document.getElementById('loginModal').classList.remove('o
    (통합 세션 쿠키 sk_session은 .sakyowon.co.kr 전용이라 다른 출처에서는 동작하지 않는다) */
 const REAL_API = location.hostname.endsWith('sakyowon.co.kr');
 
+/* ─── 사용자 편의 기능 (2026-09-06 개선안) ─── */
+
+/* 글자 크게 보기 (개선안 3-1) — px 기반 스타일이라 body zoom으로 확대. 선택값은 기기에 기억 */
+function setFontScale(n){
+  try{ localStorage.setItem('sv_fontscale', String(n)); }catch(e){}
+  applyFontScale(n);
+}
+function applyFontScale(n){
+  document.body.style.zoom = n === 1 ? '' : n;
+  document.querySelectorAll('#fontSizeBtns button').forEach((b, i) => {
+    b.classList.toggle('on', [1, 1.15, 1.3][i] === n);
+  });
+}
+(function initFontScale(){
+  let n = 1;
+  try{ n = parseFloat(localStorage.getItem('sv_fontscale')) || 1; }catch(e){}
+  if(n !== 1) document.addEventListener('DOMContentLoaded', () => applyFontScale(n));
+})();
+
+/* 홈 화면에 앱처럼 설치 (개선안 3-4) — 허브 공용 PWA 키트 재사용 */
+let _pwaPrompt = null;
+if('serviceWorker' in navigator && (REAL_API || location.hostname.endsWith('github.io'))){
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _pwaPrompt = e;
+  let seen = '';
+  try{ seen = localStorage.getItem('sv_pwa_dismissed') || ''; }catch(err){}
+  if(!seen){ const bar = document.getElementById('pwaBar'); if(bar) bar.classList.add('on'); }
+});
+function installPwa(){
+  const bar = document.getElementById('pwaBar');
+  if(bar) bar.classList.remove('on');
+  if(_pwaPrompt){ _pwaPrompt.prompt(); _pwaPrompt = null; }
+}
+function dismissPwa(){
+  const bar = document.getElementById('pwaBar');
+  if(bar) bar.classList.remove('on');
+  try{ localStorage.setItem('sv_pwa_dismissed', '1'); }catch(e){}
+}
+
+/* 관리자 → 회원 화면 미리보기 (개선안 5-1) — 재로그인 없이 원클릭 복귀 */
+function startPreview(){
+  const u = currentUser();
+  if(!u || u.role !== 'admin'){ toast('관리자만 사용할 수 있습니다.'); return; }
+  try{ sessionStorage.setItem('sv_preview_admin', JSON.stringify(u)); }catch(e){}
+  setUser({email:'preview@sakyowon.org', name:u.name, role:'member', village:'완도군 A리',
+    loginAt:new Date().toISOString(), preview:true});
+  location.hash = '#/mem/dashboard';
+  toast('회원 화면 미리보기를 시작합니다.');
+}
+function endPreview(){
+  let admin = null;
+  try{ admin = JSON.parse(sessionStorage.getItem('sv_preview_admin') || 'null'); }catch(e){}
+  try{ sessionStorage.removeItem('sv_preview_admin'); }catch(e){}
+  if(!admin){ logout(); return; }
+  setUser(admin);
+  location.hash = '#/adm/dashboard';
+  navigate();   // 같은 해시여도 즉시 복귀되도록
+  toast('관리자 화면으로 돌아왔습니다.');
+}
+
+/* 데모 체험 → 가입 전환 (개선안 2-6) */
+function gotoSignupFromDemo(){
+  const u = currentUser();
+  openLogin();
+  toggleSignup(true);
+  const org = document.getElementById('su-org');
+  if(org && !org.value && u && u.village && u.village !== '전체') org.value = u.village;
+}
+
+/* 화면 상태에 따라 편의 요소(띠·플로팅 버튼) 표시 갱신 — navigate()에서 호출 */
+let _screenName = '';
+function updateConvenienceUI(scope, page){
+  const u = currentUser();
+  const preview = !!(u && u.preview);
+  const demo = !!(u && !u.unified && !preview);
+  const pv = document.getElementById('previewBar');
+  const db = document.getElementById('demoBar');
+  const fab = document.getElementById('chatFab');
+  if(pv) pv.classList.toggle('on', preview);
+  if(db) db.classList.toggle('on', demo && scope === 'mem');
+  if(fab) fab.classList.toggle('on', !!u && scope === 'mem' && page !== 'chat');
+  _screenName = (scope === 'mem' || scope === 'adm') ? (MENU_DESC[page] ? MENU_DESC[page][0] : page) : '';
+}
+
+/* 사이드바 메뉴 한 줄 설명 (개선안 4-3) — [메뉴명, 설명]. AI 상담 맥락 전달에도 재사용 */
+const MENU_DESC = {
+  dashboard:['대시보드','우리 마을 현황과 이번 주 할 일을 한눈에 봅니다'],
+  mypage:['마이페이지','내 정보와 출자·배당 내역을 확인합니다'],
+  setup:['설립 내비게이터·청약','조합 설립 단계를 안내받고 조합원 청약을 진행합니다'],
+  docs:['문서 자동 생성','정관·회의록·사업계획서 초안을 AI가 만들어 줍니다'],
+  review:['서류 AI 검토','작성한 서류의 누락·오류를 AI가 점검합니다'],
+  law:['법령·인허가','발전사업 관련 법령을 확인하고 질문합니다'],
+  power:['발전·정산·배당','발전량과 판매 수익, 조합원 배당을 관리합니다'],
+  revenue:['수익 시뮬레이션','설비 규모별 예상 수익을 계산해 봅니다'],
+  accounting:['회계·세무 자동화','장부 기록과 세무 신고를 자동화합니다'],
+  closing:['월마감·보고서','매월 결산과 보고서를 만듭니다'],
+  members:['조합원 관리','조합원 명부와 출자 현황을 관리합니다'],
+  schedule:['일정·마감','총회·신고 등 마감 일정을 관리합니다'],
+  biz:['마을비즈니스','발전소 수익을 활용한 마을 사업을 계획합니다'],
+  union:['연합체·커뮤니티','다른 햇빛소득마을과 소식을 나눕니다'],
+  library:['공지·자료실','공지사항과 서식 자료를 봅니다'],
+  chat:['AI 상담','무엇이든 물어보면 AI가 답합니다'],
+};
+
+/* 용어 쉬운 말 병기 (개선안 3-3) */
+const GLOSSARY = {
+  'SMP':'전기를 판 값 — 한국전력에 전기를 팔 때 받는 1kWh당 금액(계통한계가격)',
+  'REC':'신재생 보조금 — 재생에너지로 발전했다는 인증서를 판매해 얻는 추가 수익',
+  '이용률':'하루 24시간 중 실제로 발전한 비율 — 수상태양광은 보통 14~16%',
+  '계통연계':'발전소 전기를 한국전력 전선망에 연결하는 것 — 여유 용량이 있어야 가능',
+  'RPS':'대형 발전사가 재생에너지를 일정 비율 의무 구매하는 제도 — REC 수요의 근원',
+  'kWh':'전기량 단위 — 1kWh는 가정용 전열기 1시간 사용량 정도',
+};
+function term(word){
+  const desc = GLOSSARY[word];
+  if(!desc) return escapeHtml(word);
+  return `<span class="term" title="${escapeHtml(desc)}" onclick="toast('${escapeJs(word + ' = ' + desc)}')">${escapeHtml(word)}</span>`;
+}
+function showGlossary(){
+  showDyn({
+    title:'📖 용어 쉬운 말 풀이',
+    body: Object.entries(GLOSSARY).map(([k,v]) =>
+      `<div style="padding:8px 0;border-bottom:1px solid var(--line-soft);"><strong>${escapeHtml(k)}</strong><br><span class="text-mute">${escapeHtml(v)}</span></div>`).join(''),
+    foot:`<button class="btn btn-primary" onclick="closeDyn()">닫기</button>`,
+  });
+}
+
 function applyUnifiedUser(user, {redirect = true, silent = false} = {}){
   const role = (user.role === 'admin' || user.role === 'staff') ? 'admin' : 'member';
   setUser({email: user.username, name: user.name || user.username, role,
@@ -1214,10 +1461,45 @@ async function loadRealData(){
 /* 회원의 "우리 마을": 배정된 실마을 > 데모 첫 마을 */
 function myVillage(){ return _myVillage || MOCK.villages[0]; }
 
+/* 로그인 인라인 오류 — 원인과 "다음 행동"을 같은 화면에 표시 (개선안 3-5) */
+function loginErr(html){
+  const box = document.getElementById('lg-err');
+  if(!box){ toast(html.replace(/<[^>]+>/g,'')); return; }
+  box.className = 'inline-err';
+  box.style.display = '';
+  box.innerHTML = html;
+}
+function clearLoginErr(){
+  const box = document.getElementById('lg-err');
+  if(box){ box.style.display = 'none'; box.innerHTML = ''; }
+}
+
+/* 로그인 잠금 카운트다운 (개선안 1-4) — 서버가 retry_after(초)를 주면 그 값, 없으면 60초 */
+let _lockTimer = null;
+function startLoginLock(sec){
+  const btn = document.getElementById('lgBtn');
+  if(_lockTimer) clearInterval(_lockTimer);
+  let left = Math.max(1, Math.round(sec));
+  if(btn) btn.disabled = true;
+  const tick = () => {
+    if(left <= 0){
+      clearInterval(_lockTimer); _lockTimer = null;
+      if(btn) btn.disabled = false;
+      clearLoginErr();
+      toast('이제 다시 로그인할 수 있습니다.');
+      return;
+    }
+    loginErr(`⏳ 로그인 시도가 잠시 제한되었습니다. <strong>${left}초</strong> 후 다시 시도할 수 있습니다.`);
+    left--;
+  };
+  tick();
+  _lockTimer = setInterval(tick, 1000);
+}
+
 async function doLogin(){
   const email = document.getElementById('lg-email').value.trim();
   const pw = document.getElementById('lg-pw').value;
-  if(!email || !pw){ toast('아이디·비밀번호를 입력해주세요.'); return; }
+  if(!email || !pw){ loginErr('아이디와 비밀번호를 모두 입력해 주세요.'); return; }
   if(REAL_API){
     // 사교원 통합 계정으로 실제 로그인
     try{
@@ -1227,15 +1509,24 @@ async function doLogin(){
         body: JSON.stringify({username: email, password: pw}),
       });
       const d = await res.json().catch(() => ({}));
-      if(d.ok && d.user){ closeLogin(); applyUnifiedUser(d.user); return; }
-      const msgs = {
-        invalid_credentials:'아이디 또는 비밀번호가 올바르지 않습니다.',
-        not_approved:'가입 승인 대기 중입니다. 관리자 승인 후 이용할 수 있습니다.',
-        rate_limited:'시도가 잠시 제한되었습니다. 1분 후 다시 시도해 주세요.',
-      };
-      toast(msgs[d.error] || '로그인하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+      if(d.ok && d.user){ clearLoginErr(); closeLogin(); applyUnifiedUser(d.user); return; }
+      if(d.error === 'rate_limited'){ startLoginLock(d.retry_after || 60); return; }
+      if(d.error === 'not_approved'){
+        loginErr(`가입 신청은 접수되었고 <strong>아직 승인 대기 중</strong>입니다 (보통 영업일 1~2일).
+          승인되면 이 아이디로 바로 로그인할 수 있습니다.<br>
+          급하시면 <a href="tel:070-4196-4677">070-4196-4677</a>로 확인해 주세요.`);
+        return;
+      }
+      if(d.error === 'invalid_credentials'){
+        loginErr(`아이디 또는 비밀번호가 올바르지 않습니다.<br>
+          <a href="#" onclick="togglePwReset(true);return false;">비밀번호를 잊으셨다면 여기서 초기화를 요청</a>할 수 있습니다.`);
+        return;
+      }
+      loginErr('로그인하지 못했습니다. 잠시 후 다시 시도해 주세요.<br><button class="btn btn-outline btn-sm" onclick="doLogin()">다시 시도</button>');
     }catch(e){
-      toast('통합 계정 서버에 연결하지 못했습니다. 데모 로그인으로 화면을 체험할 수 있습니다.');
+      loginErr(`통합 계정 서버에 연결하지 못했습니다. 인터넷 연결을 확인해 주세요.<br>
+        <button class="btn btn-outline btn-sm" onclick="doLogin()">다시 시도</button>
+        <button class="btn btn-ghost btn-sm" onclick="clearLoginErr();demoLogin('member')">데모로 둘러보기</button>`);
     }
     return;
   }
@@ -1251,6 +1542,65 @@ async function doLogin(){
 function toggleSignup(show){
   const p = document.getElementById('signupPanel');
   p.style.display = show === undefined ? (p.style.display === 'none' ? '' : 'none') : (show ? '' : 'none');
+  if(p.style.display !== 'none') togglePwReset(false);
+}
+function togglePwReset(show){
+  const p = document.getElementById('pwResetPanel');
+  if(!p) return;
+  p.style.display = show === undefined ? (p.style.display === 'none' ? '' : 'none') : (show ? '' : 'none');
+  if(p.style.display !== 'none'){
+    toggleSignup(false);
+    const id = document.getElementById('lg-email').value.trim();
+    if(id && !document.getElementById('pr-id').value) document.getElementById('pr-id').value = id;
+  }
+}
+
+/* 비밀번호 초기화 요청 (개선안 2-3, 1안) — 별도 백엔드 없이 기존 문의 접수 채널을 재사용.
+   관리자 "문의 처리" 목록에 도착하면 관리자가 초기화 후 등록 연락처로 안내한다. */
+async function submitPwReset(){
+  const id = document.getElementById('pr-id').value.trim();
+  const name = document.getElementById('pr-name').value.trim();
+  const contact = document.getElementById('pr-contact').value.trim();
+  if(!id || !name || !contact){ toast('아이디·이름·연락처를 모두 입력해 주세요.'); return; }
+  if(!REAL_API){ toast('비밀번호 초기화 요청은 sakyowon.co.kr/hatsoja 에서 할 수 있습니다.'); return; }
+  try{
+    const res = await fetch('/api/inquiries', {method:'POST', headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({name, contact, org:'', category:'비밀번호 초기화 요청',
+        message:`[비밀번호 초기화 요청] 아이디: ${id} / 이름: ${name} / 연락처: ${contact} — 본인 확인 후 초기화하고 등록 연락처로 안내해 주세요.`,
+        source:'햇소자 로그인 화면'})});
+    const d = await res.json().catch(() => ({}));
+    if(!(d.ok || res.ok)){ toast('요청 서버에 연결하지 못했습니다. 070-4196-4677로 연락해 주세요.'); return; }
+    togglePwReset(false);
+    loginErr(`✅ <strong>초기화 요청이 접수되었습니다.</strong> 관리자 확인 후
+      가입 시 등록하신 연락처로 안내드립니다 (영업일 1일 내).
+      급하시면 <a href="tel:070-4196-4677">070-4196-4677</a>.`);
+  }catch(e){ toast('요청 서버에 연결하지 못했습니다. 070-4196-4677로 연락해 주세요.'); }
+}
+
+/* 아이디 실시간 중복 확인 (개선안 1-3) — 전용 API(/api/auth/check-username)가 생기면
+   자동으로 동작하고, 아직 없으면(404 등) 조용히 건너뛴다. 제출 후 실패해도 입력값은 유지된다. */
+let _availSeq = 0;
+async function checkUsernameAvail(){
+  const el = document.getElementById('su-id');
+  const out = document.getElementById('su-id-check');
+  if(!el || !out || !REAL_API) return;
+  const id = el.value.trim();
+  if(id.length < 3) return;
+  const seq = ++_availSeq;
+  try{
+    const res = await fetch('/api/auth/check-username?username=' + encodeURIComponent(id));
+    if(!res.ok) return;                       // 엔드포인트 미구현 — 표시 생략
+    const d = await res.json().catch(() => null);
+    if(!d || d.ok === undefined || seq !== _availSeq) return;
+    if(d.available === true){ out.innerHTML = '<span class="avail-ok">✓ 사용할 수 있는 아이디입니다.</span>'; el.classList.remove('field-err'); }
+    else if(d.available === false){ out.innerHTML = '<span class="avail-no">✗ 이미 사용 중인 아이디입니다. 아이디만 바꾸면 됩니다.</span>'; el.classList.add('field-err'); }
+  }catch(e){ /* 네트워크 오류 — 표시 생략 */ }
+}
+function clearUsernameCheck(){
+  const el = document.getElementById('su-id');
+  const out = document.getElementById('su-id-check');
+  if(el) el.classList.remove('field-err');
+  if(out) out.innerHTML = '';
 }
 
 async function doSignup(){
@@ -1269,10 +1619,29 @@ async function doSignup(){
         org: document.getElementById('su-org').value.trim()}),
     });
     const d = await res.json().catch(() => ({}));
-    if(d.ok){ toggleSignup(false); closeLogin(); toast('가입 신청이 접수되었습니다. 관리자 승인 후 로그인할 수 있습니다.'); return; }
-    const msgs = {username_taken:'이미 사용 중인 아이디입니다.', weak_password:'비밀번호는 8자 이상이어야 합니다.', invalid_username:'아이디는 3자 이상이어야 합니다.'};
+    if(d.ok){
+      toggleSignup(false); closeLogin();
+      showDyn({
+        title:'가입 신청이 접수되었습니다 ✅',
+        body:`<p>관리자 확인 후 승인해 드립니다 — <strong>보통 영업일 1~2일</strong> 걸립니다.</p>
+          <p>승인되면 방금 만든 아이디로 바로 로그인할 수 있습니다.
+          로그인 시 "승인 대기 중"이 뜨면 아직 처리 전이라는 뜻이에요.</p>
+          <p class="text-mute text-small">급하시면 대표전화 <a href="tel:070-4196-4677">070-4196-4677</a>로 문의해 주세요.</p>`,
+        foot:`<button class="btn btn-primary" onclick="closeDyn()">확인</button>`,
+      });
+      return;
+    }
+    if(d.error === 'username_taken'){
+      // 다른 입력값은 그대로 두고 아이디만 고치면 되게 (개선안 1-3)
+      const el = document.getElementById('su-id');
+      const out = document.getElementById('su-id-check');
+      if(el){ el.classList.add('field-err'); el.focus(); }
+      if(out) out.innerHTML = '<span class="avail-no">✗ 이미 사용 중인 아이디입니다. 아이디만 바꿔서 다시 눌러 주세요. (다른 입력은 그대로 유지됩니다)</span>';
+      return;
+    }
+    const msgs = {weak_password:'비밀번호는 8자 이상이어야 합니다.', invalid_username:'아이디는 3자 이상이어야 합니다.'};
     toast(msgs[d.error] || '가입 신청에 실패했습니다. 잠시 후 다시 시도해 주세요.');
-  }catch(e){ toast('가입 서버에 연결하지 못했습니다.'); }
+  }catch(e){ toast('가입 서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요. 급하시면 070-4196-4677.'); }
 }
 
 /* SSO 자동 로그인: 통합 관리자 등에서 이미 로그인돼 있으면 그 세션을 그대로 인식 */
@@ -1367,6 +1736,7 @@ function navigate(){
     document.getElementById('v-app').classList.add('on');
     renderApp(scope, page || 'dashboard');
   }
+  updateConvenienceUI(scope, page || 'dashboard');
   window.scrollTo({top:0, behavior:'instant'});
 }
 window.addEventListener('hashchange', navigate);
@@ -1422,7 +1792,8 @@ function renderMemberSidebar(active){
     <div class="side-group">
       <div class="side-label">${label}</div>
       ${items.map(([id,e,n]) => `
-        <button class="side-item ${active===id?'on':''}" onclick="location.hash='#/mem/${id}'">
+        <button class="side-item ${active===id?'on':''}" onclick="location.hash='#/mem/${id}'"
+          title="${MENU_DESC[id] ? escapeHtml(MENU_DESC[id][1]) : ''}">
           <span class="side-emoji">${e}</span>${n}
         </button>
       `).join('')}
@@ -1451,7 +1822,7 @@ function renderAdminSidebar(active){
     </div>
     <div class="side-group">
       <div class="side-label">바로가기</div>
-      <button class="side-item" onclick="demoLogin('member')">
+      <button class="side-item" onclick="startPreview()" title="회원에게 보이는 화면을 확인합니다. 상단 띠의 버튼으로 재로그인 없이 돌아올 수 있습니다.">
         <span class="side-emoji">👀</span>회원 화면 미리보기
       </button>
     </div>
@@ -1843,6 +2214,50 @@ function memMyPage(u){
   `;
 }
 
+/* "이번 주 할 일" 카드 (개선안 4-1) — 생애주기 단계·일정 데이터에서 규칙으로 1~3개 도출 */
+function buildTodos(village){
+  const todos = [];
+  const stage = stageOf(village);
+  // ① 7일 내 마감 일정 — 가장 급한 것 하나
+  const today = new Date().toISOString().slice(0,10);
+  const near = MOCK.events
+    .filter(e => e.date >= today)
+    .sort((a,b) => a.date < b.date ? -1 : 1)
+    .find(e => (new Date(e.date) - new Date(today)) / 86400000 <= 7);
+  if(near) todos.push({
+    urgent: true,
+    txt: `"${near.title}" 마감이 ${ddayLabel(near.date)} 남았습니다`,
+    sub: `${near.date} · ${near.kind || '일정'}`,
+    cta: '일정 보기', go: '#/mem/schedule',
+  });
+  // ② 생애주기 단계별 다음 행동
+  const hasDoc = kw => MOCK.documents.some(d => (d.title || '').includes(kw));
+  if(stage <= 2){
+    todos.push({txt:'주민 동의 수합을 시작할 차례입니다', sub:'설립 내비게이터에서 단계별로 안내합니다', cta:'지금 시작', go:'#/mem/setup'});
+  } else if(stage <= 4){
+    if(!hasDoc('정관')) todos.push({txt:'조합 정관 초안을 아직 만들지 않았습니다', sub:'AI가 표준안 기반 초안을 만들어 드립니다', cta:'지금 만들기', go:'#/mem/docs'});
+    if(!hasDoc('창립총회')) todos.push({txt:'창립총회 회의록을 아직 만들지 않았습니다', sub:'문서 자동 생성에서 3분이면 초안이 나옵니다', cta:'지금 만들기', go:'#/mem/docs'});
+    if(hasDoc('정관') && hasDoc('창립총회')) todos.push({txt:'만든 설립 서류를 AI 검토로 점검해 보세요', sub:'누락 조항·법령 부합 여부를 확인합니다', cta:'검토 받기', go:'#/mem/review'});
+  } else if(stage === 5){
+    todos.push({txt:'발전허가 신청 서류를 준비할 단계입니다', sub:'신청서 자동 생성과 첨부서류 점검을 지원합니다', cta:'서류 준비', go:'#/mem/docs'});
+  } else {
+    todos.push({txt:'이번 달 월 마감을 진행하세요', sub:'발전량·정산 데이터로 보고서가 자동 작성됩니다', cta:'마감 시작', go:'#/mem/closing'});
+  }
+  return todos.slice(0, 3);
+}
+function todoStrip(village){
+  const todos = buildTodos(village);
+  if(!todos.length) return '';
+  return `<div class="todo-strip">
+    <div class="side-label" style="margin-bottom:8px;">☀ 이번 주 할 일</div>
+    ${todos.map(t => `
+      <div class="todo-card${t.urgent ? ' urgent' : ''}">
+        <div class="todo-txt">${escapeHtml(t.txt)}<span class="todo-sub">${escapeHtml(t.sub)}</span></div>
+        <button class="btn btn-primary btn-sm" onclick="location.hash='${t.go}'">${escapeHtml(t.cta)} →</button>
+      </div>`).join('')}
+  </div>`;
+}
+
 function memDashboard(u){
   const village = myVillage(); // 배정된 실마을 > 데모 첫 마을
   const unassigned = _realMode && !_myVillage;
@@ -1857,6 +2272,8 @@ function memDashboard(u){
       ⓘ 아직 <b>소속 마을이 배정되지 않았습니다.</b> 관리자가 회원 관리에서 마을을 배정하면
       우리 마을의 실제 현황이 여기에 표시됩니다. 아래 수치는 예시 화면입니다.
     </div>` : ''}
+
+    ${todoStrip(village)}
 
     ${lifecycleStepper(village)}
 
@@ -1971,6 +2388,7 @@ function memDocs(){
 }
 
 function memReview(){
+  const pre = _rvPrefill; _rvPrefill = null;   // 문서 생성 화면에서 넘어온 본문 (1회용)
   return `
     <div class="sec-head">
       <h1>서류 AI 검토</h1>
@@ -1983,12 +2401,13 @@ function memReview(){
         <div class="form-row">
           <label>서류 종류</label>
           <select class="select" id="rvKind">
-            ${Object.keys(REVIEW_GUIDE).map(k => `<option>${escapeHtml(k)}</option>`).join('')}
+            ${Object.keys(REVIEW_GUIDE).map(k => `<option${pre && pre.kind === k ? ' selected' : ''}>${escapeHtml(k)}</option>`).join('')}
           </select>
         </div>
         <div class="form-row">
           <label>서류 본문 붙여넣기</label>
-          <textarea class="textarea" id="rvText" rows="6" placeholder="검토할 서류의 본문(텍스트)을 붙여넣으세요. 스캔본·사진은 아래에 이미지로 첨부할 수 있습니다."></textarea>
+          <textarea class="textarea" id="rvText" rows="6" placeholder="검토할 서류의 본문(텍스트)을 붙여넣으세요. 스캔본·사진은 아래에 이미지로 첨부할 수 있습니다.">${pre ? escapeHtml(pre.text) : ''}</textarea>
+          ${pre ? '<div class="form-hint">✓ 방금 생성한 문서 본문을 자동으로 채웠습니다. [검토 시작]을 누르면 됩니다.</div>' : ''}
         </div>
         <div class="form-row">
           <label>스캔본·사진 첨부 (선택)</label>
@@ -2106,7 +2525,8 @@ function memLaw(){
   return `
     <div class="sec-head">
       <h1>법령·인허가 안내</h1>
-      <p class="sec-desc">햇빛소득마을 사업 관련 법령·인허가 절차를 AI로 질문하고 확인합니다.</p>
+      <p class="sec-desc">햇빛소득마을 사업 관련 법령·인허가 절차를 AI로 질문하고 확인합니다.
+        <button class="btn btn-outline btn-sm" onclick="showGlossary()" style="margin-left:6px;">📖 용어 쉬운 말 풀이</button></p>
     </div>
 
     <div class="card">
@@ -2174,23 +2594,24 @@ function memRevenue(){
   return `
     <div class="sec-head">
       <h1>수익 시뮬레이션</h1>
-      <p class="sec-desc">설비 규모·발전 조건을 입력하면 예상 매출·배당·상환 계획을 자동 계산합니다.</p>
+      <p class="sec-desc">설비 규모·발전 조건을 입력하면 예상 매출·배당·상환 계획을 자동 계산합니다.
+        <button class="btn btn-outline btn-sm" onclick="showGlossary()" style="margin-left:6px;">📖 용어 쉬운 말 풀이</button></p>
     </div>
 
     <div class="grid grid-2">
       <div class="card">
         <h3 class="serif">⚙️ 입력값</h3>
         <div class="form-row">
-          <label>설비 용량 (kW)</label>
+          <label>설비 용량 (${term('kW') || 'kW'})</label>
           <input class="input" id="rv-cap" type="number" value="500">
         </div>
         <div class="form-row">
-          <label>연간 이용률 (%)</label>
+          <label>연간 ${term('이용률')} (%)</label>
           <input class="input" id="rv-cf" type="number" value="15" step="0.1">
-          <div class="form-hint">수상태양광 평균 이용률 14~16%</div>
+          <div class="form-hint">하루 중 실제 발전한 비율 — 수상태양광 평균 14~16%</div>
         </div>
         <div class="form-row">
-          <label>SMP+REC 단가 (원/kWh)</label>
+          <label>${term('SMP')}+${term('REC')} 단가 (원/kWh)</label>
           <input class="input" id="rv-price" type="number" value="180">
         </div>
         <div class="form-row">
@@ -3052,7 +3473,8 @@ async function sendChat(){
       const res = await fetch('/api/ai/chat', {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({prompt: q, history: _chatHistory.slice(-10),
-          context: '햇소자(햇빛소득마을 통합 운영 플랫폼) 이용자 상담 — 마을협동조합 설립·운영·발전사업'}),
+          context: '햇소자(햇빛소득마을 통합 운영 플랫폼) 이용자 상담 — 마을협동조합 설립·운영·발전사업'
+            + (_screenName ? ` (사용자가 직전에 보던 화면: ${_screenName})` : '')}),
       });
       const d = await res.json();
       answer = d && d.answer ? d.answer : '';
@@ -4478,17 +4900,38 @@ async function generateDocAI(name, values){
     showDocPreview(name, values, 'AI 연결이 아직 준비되지 않아(' + r.error + ') 표준 서식 기반 초안을 대신 제공합니다.');
     return;
   }
-  _lastGenDoc = {name, values, content: escapeHtml(r.text).replace(/\n/g,'<br>')};
-  body.querySelector('p').innerHTML = '✓ AI가 초안을 작성했습니다. 아래 내용을 확인하고 필요 시 편집·다운로드하세요.';
+  _lastGenDoc = {name, values, content: escapeHtml(r.text).replace(/\n/g,'<br>'), raw: r.text};
+  body.querySelector('p').innerHTML = '✓ AI가 초안을 작성했습니다. 아래 내용을 확인하고 필요 시 편집·다운로드하세요. <strong>초안은 검토 후 사용</strong>을 권장합니다 — 아래 [AI 검토받기]로 바로 이어집니다.';
   document.getElementById('dynFoot').innerHTML = `
     <button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
     <button class="btn btn-outline" onclick="startDoc('${escapeJs(name)}')">↻ 다시 생성</button>
     <button class="btn btn-outline" onclick="downloadStub('${escapeJs(name)}')">📥 다운로드</button>
+    <button class="btn btn-outline" onclick="reviewFromDoc()">🔍 이 문서 AI 검토받기</button>
     <button class="btn btn-primary" onclick="saveDocStub('${escapeJs(name)}')">💾 저장</button>
   `;
 }
 
 let _lastGenDoc = null;
+
+/* 문서 생성 → AI 검토 원클릭 (개선안 2-5): 생성된 본문을 서류 검토 화면에 자동 전달 */
+let _rvPrefill = null;
+function reviewFromDoc(){
+  if(!_lastGenDoc){ toast('먼저 문서를 생성해 주세요.'); return; }
+  const raw = _lastGenDoc.raw
+    || _lastGenDoc.content.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '').trim();
+  const name = _lastGenDoc.name || '';
+  let kind = '기타';
+  for(const k of Object.keys(REVIEW_GUIDE)){
+    const kw = k === '발전사업 허가 신청서' ? '발전' : k === '결산 보고서' ? '결산' : k === '사업계획서' ? '사업계획' : k;
+    if(name.includes(kw)){ kind = k; break; }
+  }
+  _rvPrefill = {kind, text: raw};
+  closeDyn();
+  if(currentRoute() === 'mem/review') navigate();
+  else location.hash = '#/mem/review';
+  toast('생성한 문서를 검토 화면으로 옮겼습니다. [검토 시작]을 눌러 주세요.');
+}
+
 function showDocPreview(name, values, fallbackNote){
   _lastGenDoc = {name, values, content: renderSampleDoc(name, values)};
   const content = _lastGenDoc.content;
@@ -4503,6 +4946,7 @@ function showDocPreview(name, values, fallbackNote){
     <button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
     <button class="btn btn-outline" onclick="startDoc('${escapeJs(name)}')">↻ 다시 생성</button>
     <button class="btn btn-outline" onclick="downloadStub('${escapeJs(name)}')">📥 다운로드</button>
+    <button class="btn btn-outline" onclick="reviewFromDoc()">🔍 이 문서 AI 검토받기</button>
     <button class="btn btn-primary" onclick="saveDocStub('${escapeJs(name)}')">💾 저장</button>
   `;
 }
@@ -5606,14 +6050,41 @@ async function admUsersRealLoad(){
       ${srvVillages.length ? '' : '<p class="form-hint" style="margin-top:8px;">마을 배정을 하려면 먼저 조합·마을 관리에서 마을을 등록하세요.</p>'}`;
   }catch(e){ box.textContent = '서버에 연결하지 못했습니다.'; }
 }
-async function setMemberStatusReal(id, status){
+async function setMemberStatusReal(id, status, reason){
+  // 거절은 사유를 남긴다 (개선안 5-2) — 재신청 안내의 근거가 된다
+  if(status === 'rejected' && reason === undefined){
+    showDyn({
+      title:'가입 신청 거절',
+      body:`<p>거절 사유를 선택해 주세요. 사유는 기록에 남고, 신청자 안내에 사용됩니다.</p>
+        <div class="form-row"><label>사유</label>
+          <select class="select" id="rj-reason">
+            <option>마을 관계자 확인 불가</option>
+            <option>중복 신청</option>
+            <option>기재 정보 불충분</option>
+            <option>기타</option>
+          </select></div>
+        <div class="form-row"><label>추가 메모 (선택)</label><input class="input" id="rj-note"></div>`,
+      foot:`<button class="btn btn-ghost" onclick="closeDyn()">취소</button>
+        <button class="btn btn-primary" onclick="confirmReject(${+id})">거절 처리</button>`,
+    });
+    return;
+  }
   try{
+    const body = {status};
+    if(reason) body.reason = reason;   // 서버가 아직 안 받으면 무시된다 — 알림톡 연동 시 활용
     const res = await fetch('/api/admin/members/' + id, {method:'PATCH', credentials:'same-origin',
-      headers:{'Content-Type':'application/json'}, body: JSON.stringify({status})});
+      headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
     const d = await res.json();
     toast(d.ok ? '처리되었습니다.' : (d.error === 'forbidden' ? '자기 계정은 바꿀 수 없습니다.' : '처리에 실패했습니다.'));
     admUsersRealLoad();
   }catch(e){ toast('서버에 연결하지 못했습니다.'); }
+}
+function confirmReject(id){
+  const sel = document.getElementById('rj-reason');
+  const note = document.getElementById('rj-note');
+  const reason = (sel ? sel.value : '기타') + (note && note.value.trim() ? ' — ' + note.value.trim() : '');
+  closeDyn();
+  setMemberStatusReal(id, 'rejected', reason);
 }
 async function assignVillageReal(id, villageId){
   try{
@@ -5704,7 +6175,12 @@ function answerInquiry(id){
         <div style="margin-top:6px;">${escapeHtml(q.answer)}</div>
       </div>` : ''}
       <div class="form-row"><label>답변 내용</label>
-        <textarea class="textarea" id="ai-msg" placeholder="답변을 입력하세요...">${escapeHtml(q.answer || '')}</textarea></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
+          <button class="btn btn-outline btn-sm" onclick="fillInquiryTpl('join')">📋 가입 안내</button>
+          <button class="btn btn-outline btn-sm" onclick="fillInquiryTpl('biz')">📋 사업 요건</button>
+          <button class="btn btn-outline btn-sm" onclick="fillInquiryTpl('visit')">📋 방문 상담 일정</button>
+        </div>
+        <textarea class="textarea" id="ai-msg" placeholder="답변을 입력하세요... (위 템플릿 버튼으로 자주 쓰는 답변을 채울 수 있습니다)">${escapeHtml(q.answer || '')}</textarea></div>
       <div class="form-row">
         <label><input type="checkbox" id="ai-mail" checked> 이메일로 발송</label>
       </div>`,
@@ -5713,6 +6189,17 @@ function answerInquiry(id){
     size:'lg'
   });
 }
+/* 자주 쓰는 회신 템플릿 (개선안 5-3) */
+const INQUIRY_TPL = {
+  join: `안녕하세요, 사교원입니다. 햇소자 가입은 sakyowon.co.kr/hatsoja 첫 화면의 [로그인·회원가입] → [가입 신청]에서 하실 수 있습니다. 아이디·비밀번호·이름·연락처만 입력하시면 되고, 관리자 승인(영업일 1~2일) 후 로그인이 가능합니다. 진행이 어려우시면 070-4196-4677로 전화 주세요 — 함께 진행해 드립니다.`,
+  biz: `안녕하세요, 사교원입니다. 햇빛소득마을 사업은 마을 주민이 참여하는 마을협동조합을 설립해 수상태양광 발전소를 운영하고 수익을 배당하는 사업입니다. 참여를 위해서는 ①마을 내 후보지(저수지 등) ②주민 동의 ③조합 설립이 필요합니다. 자세한 요건과 절차는 sakyowon.co.kr/hatsoja 의 [사업소개]·[가입절차]에서 확인하실 수 있습니다.`,
+  visit: `안녕하세요, 사교원입니다. 방문 상담을 도와드리겠습니다. 가능하신 날짜·시간대 두어 개와 방문 지역(마을회관 등)을 알려주시면 담당자 일정을 잡아 다시 연락드리겠습니다. 대표전화 070-4196-4677로 전화 주셔도 됩니다.`,
+};
+function fillInquiryTpl(key){
+  const el = document.getElementById('ai-msg');
+  if(el && INQUIRY_TPL[key]) el.value = INQUIRY_TPL[key];
+}
+
 function submitAnswerInquiry(id){
   const q = MOCK.inquiries.find(x => x.id === id);
   if(!q){ closeDyn(); toast('문의를 찾을 수 없습니다.'); return; }
@@ -6396,7 +6883,14 @@ async function submitContact(){
   document.getElementById('c-phone').value = '';
   document.getElementById('c-org').value = '';
   document.getElementById('c-msg').value = '';
-  toast('상담 신청이 접수되었습니다. 영업일 기준 1~2일 내 연락드리겠습니다.');
+  // 접수 확인을 화면에 명시 (개선안 2-4): 언제·어디로 회신이 오는지 함께 안내
+  showDyn({
+    title:'상담 신청이 접수되었습니다 ✅',
+    body:`<p><strong>영업일 기준 1~2일 내</strong>에 남겨주신 연락처(<strong>${escapeHtml(phone)}</strong>)로 담당자가 연락드립니다.</p>
+      <p class="text-mute text-small">그 전에 궁금한 점은 <a href="manual.html">이용안내</a>를 보시거나,
+      급하시면 대표전화 <a href="tel:070-4196-4677">070-4196-4677</a>로 문의해 주세요.</p>`,
+    foot:`<button class="btn btn-primary" onclick="closeDyn()">확인</button>`,
+  });
 }
 
 /* ─── Init ─── */
