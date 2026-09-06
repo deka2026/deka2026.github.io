@@ -6339,6 +6339,7 @@ async function submitAddVillage(){
   refresh();
 }
 /* 실데이터 회원 관리 — 통합 계정 API */
+let _admMembers = [];   // 마이페이지 보기에서 재사용
 async function admUsersRealLoad(){
   const box = document.getElementById('realUsersBox');
   if(!box) return;
@@ -6346,6 +6347,7 @@ async function admUsersRealLoad(){
     const res = await fetch('/api/admin/members', {credentials:'same-origin'});
     const d = await res.json();
     if(!d.ok){ box.textContent = '회원 목록을 불러오지 못했습니다. (권한 확인)'; return; }
+    _admMembers = d.items || [];
     const STATUS_KO = {pending:'대기', approved:'승인', rejected:'거절'};
     const srvVillages = MOCK.villages.filter(v => v._srv);
     box.innerHTML = `
@@ -6365,6 +6367,7 @@ async function admUsersRealLoad(){
                 </select>
               </td>
               <td class="tbl-actions" style="white-space:nowrap;">
+                <button class="btn btn-outline btn-sm" onclick="admMemberPage(${m.id})">👤 마이페이지</button>
                 ${m.status !== 'approved' ? `<button class="btn btn-primary btn-sm" onclick="setMemberStatusReal(${m.id},'approved')">승인</button>` : ''}
                 ${m.status !== 'rejected' ? `<button class="btn btn-ghost btn-sm" onclick="setMemberStatusReal(${m.id},'rejected')">거절</button>` : ''}
               </td>
@@ -6409,6 +6412,89 @@ function confirmReject(id){
   const reason = (sel ? sel.value : '기타') + (note && note.value.trim() ? ' — ' + note.value.trim() : '');
   closeDyn();
   setMemberStatusReal(id, 'rejected', reason);
+}
+
+/* ─── 회원 마이페이지 열람 (관리자) ───
+   회원 관리의 [👤 마이페이지] — 회원 본인이 보는 마이페이지 정보를 관리자 시점에서 확인.
+   실데이터 모드는 회원 목록(id), 데모 모드는 MOCK.users(email)를 받는다. */
+async function admMemberPage(key){
+  const STATUS_KO = {pending:'승인 대기', approved:'승인', rejected:'거절'};
+  let acct, docsPromise;
+  if(_realMode && typeof key === 'number'){
+    const m = _admMembers.find(x => x.id === key);
+    if(!m){ toast('회원을 찾을 수 없습니다.'); return; }
+    const village = m.village_id ? MOCK.villages.find(v => v._srv && v.id === m.village_id) : null;
+    acct = [
+      ['이름', m.name || '—'], ['아이디', m.username], ['연락처', m.contact || '—'],
+      ['소속·조직', m.org || '—'], ['상태', STATUS_KO[m.status] || m.status],
+      ['배정 마을', village ? village.name : '미배정'],
+    ];
+    docsPromise = admMemberDocs(m, village);
+  } else {
+    const u = MOCK.users.find(x => x.email === key);
+    if(!u){ toast('회원을 찾을 수 없습니다.'); return; }
+    acct = [
+      ['이름', u.name], ['이메일', u.email], ['소속 마을', u.village || '미배정'],
+      ['가입일', u.joined || '—'], ['상태', u.status], ['권한', u.role === 'admin' ? '관리자' : '회원'],
+    ];
+    const docs = MOCK.documents.filter(d => d.village && (u.village || '').includes(d.village));
+    docsPromise = Promise.resolve({docs, label:'소속 마을 관련 문서 (데모)'});
+  }
+  showDyn({
+    title: `👤 회원 마이페이지 — ${acct[0][1]}`,
+    sub: '회원 본인이 보는 마이페이지 정보를 관리자 시점에서 확인합니다.',
+    body: `
+      <table class="tbl"><tbody>
+        ${acct.map(([k,v]) => `<tr><td style="width:130px;"><strong>${escapeHtml(k)}</strong></td><td>${escapeHtml(String(v))}</td></tr>`).join('')}
+      </tbody></table>
+      <div class="card-title" style="margin-top:16px;"><h3 class="serif">📝 문서</h3></div>
+      <div id="admMpDocs" class="text-mute">문서를 불러오는 중…</div>`,
+    foot: `<button class="btn btn-primary" onclick="closeDyn()">닫기</button>`,
+    size: 'lg',
+  });
+  const {docs, label, note} = await docsPromise;
+  const box = document.getElementById('admMpDocs');
+  if(!box) return;   // 기다리는 사이 모달을 닫음
+  box.className = '';
+  box.innerHTML = `
+    ${label ? `<p class="text-small text-mute" style="margin:0 0 8px;">${escapeHtml(label)}</p>` : ''}
+    ${docs.length ? `<table class="tbl">
+      <thead><tr><th>제목</th><th>유형</th><th>날짜</th><th>상태</th><th></th></tr></thead>
+      <tbody>${docs.map(d => `<tr>
+        <td><strong>${escapeHtml(d.title)}</strong></td><td>${escapeHtml(d.type || '문서')}</td>
+        <td style="white-space:nowrap;">${escapeHtml(d.date || '')}</td>
+        <td><span class="badge ${d.status === '완료' ? 'badge-success' : 'badge-info'}">${escapeHtml(d.status || '')}</span></td>
+        <td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="viewDoc('${escapeJs(d.id)}')">보기</button></td>
+      </tr>`).join('')}</tbody></table>` : '<p class="text-mute">표시할 문서가 없습니다.</p>'}
+    ${note ? `<p class="form-hint" style="margin-top:8px;">${escapeHtml(note)}</p>` : ''}`;
+}
+
+/* 회원 개인 문서: 전용 관리자 API(/api/admin/members/:id/documents)가 생기면 자동으로 그걸 쓰고,
+   아직 없으면(404 등) 배정 마을 자료실 문서로 폴백 */
+async function admMemberDocs(m, village){
+  try{
+    const res = await fetch('/api/admin/members/' + m.id + '/documents', {credentials:'same-origin'});
+    if(res.ok){
+      const d = await res.json();
+      if(d.ok && Array.isArray(d.items)){
+        const docs = d.items.map(x => ({
+          id: x.id, title: x.title, type: x.type || '문서',
+          date: (x.created_at || '').slice(0,10), status: x.status || '완료',
+          _user: true, _srv: true, _content: x.content || '',
+        }));
+        // [보기]가 MOCK.documents에서 찾으므로 합류시킨다 (중복 제거)
+        const known = new Set(MOCK.documents.map(k => k.id));
+        MOCK.documents = docs.filter(x => !known.has(x.id)).concat(MOCK.documents);
+        return {docs, label: '회원이 만든 문서'};
+      }
+    }
+  }catch(e){ /* 아래 폴백 */ }
+  if(village){
+    const docs = await villageDocsFor(village);
+    return {docs, label: `배정 마을(${village.name}) 자료실 문서`,
+      note: '회원 개인 문서 열람 API는 준비 중이라, 지금은 배정 마을의 자료실 문서를 대신 표시합니다.'};
+  }
+  return {docs: [], note: '배정된 마을이 없어 표시할 문서가 없습니다. (회원 개인 문서 열람 API는 준비 중)'};
 }
 async function assignVillageReal(id, villageId){
   try{
@@ -7038,6 +7124,7 @@ function admUsers(){
               <td><span class="badge ${u.status==='승인'?'badge-success':'badge-danger'}">${u.status}</span></td>
               <td><span class="badge badge-mute">${u.role === 'admin' ? '관리자' : '회원'}</span></td>
               <td class="tbl-actions">
+                <button class="btn btn-outline btn-sm" onclick="admMemberPage('${escapeJs(u.email)}')">👤 마이페이지</button>
                 ${u.status === '승인대기' ? `<button class="btn btn-primary btn-sm" onclick="approveUser('${escapeJs(u.email)}')">승인</button>` : ''}
                 <button class="btn btn-ghost btn-sm" onclick="editUser('${escapeJs(u.email)}')">수정</button>
               </td>
