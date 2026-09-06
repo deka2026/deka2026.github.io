@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>햇소자 사용 설명서 — 햇빛소득마을 통합 운영 플랫폼</title>
+<meta name="description" content="햇소자(햇빛소득마을 통합 운영 플랫폼)의 일반 이용자·관리자용 사용 설명서. 회원가입·로그인부터 각 메뉴 이용 방법까지.">
+<link rel="icon" href="https://sakyowon.co.kr/icon-192.png">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
+<style>
+:root{
+  --paper:#FAF8F2; --paper-soft:#F3EFE4; --card:#FFFFFF;
+  --ink:#1C2621; --ink-soft:#516156; --ink-faint:#8C9A90;
+  --primary:#4A6741; --primary-dark:#375030; --primary-50:#EEF3EC; --primary-100:#D8E5D3;
+  --gold:#D3A03A; --gold-soft:#F6EAC9; --gold-dark:#95630F;
+  --line:#E2DFD2; --line-soft:#ECE9DD;
+  --font-serif:'Nanum Myeongjo', Georgia, 'Times New Roman', serif;
+  --font-sans:'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,'Malgun Gothic',sans-serif;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--font-sans); font-size:15.5px; line-height:1.75;
+  -webkit-font-smoothing:antialiased;
+}
+/* ── 상단 바 ── */
+.topbar{background:var(--card); border-bottom:1px solid var(--line); position:sticky; top:0; z-index:10}
+.topbar-in{max-width:1080px; margin:0 auto; padding:12px 20px; display:flex; align-items:center; justify-content:space-between; gap:12px}
+.brand{display:flex; align-items:center; gap:8px; text-decoration:none; color:var(--primary-dark); font-family:var(--font-serif); font-weight:700; font-size:18px}
+.brand .ic{color:var(--gold)}
+.topbar .back{font-size:13.5px; color:var(--ink-soft); text-decoration:none; padding:6px 14px; border:1px solid var(--line); border-radius:999px; white-space:nowrap}
+.topbar .back:hover{border-color:var(--primary); color:var(--primary-dark)}
+.layout{display:flex; max-width:1080px; margin:0 auto}
+/* ── 목차 ── */
+.toc{
+  width:236px; flex:none; position:sticky; top:57px; align-self:flex-start;
+  max-height:calc(100vh - 57px); overflow-y:auto; padding:32px 18px 40px 20px;
+  border-right:1px solid var(--line-soft); font-size:13.5px;
+}
+.toc-label{font-size:11px; letter-spacing:.14em; color:var(--ink-faint); text-transform:uppercase; margin:18px 0 6px; font-weight:700}
+.toc-label:first-child{margin-top:0}
+.toc a{display:block; color:var(--ink-soft); text-decoration:none; padding:3px 8px; border-radius:6px}
+.toc a:hover{color:var(--primary-dark); background:var(--primary-50)}
+.toc a.adm:hover{color:var(--gold-dark); background:var(--gold-soft)}
+main{flex:1; min-width:0; padding:44px 36px 90px}
+@media(max-width:900px){
+  .layout{display:block}
+  .toc{position:static; width:auto; max-height:none; border-right:0; border-bottom:1px solid var(--line); padding:22px 20px}
+  main{padding:30px 20px 70px}
+}
+/* ── 타이포 ── */
+h1,h2,h3,h4{font-family:var(--font-serif); line-height:1.35; margin:0}
+.cover{margin-bottom:52px}
+.cover .kicker{display:inline-flex; align-items:center; gap:8px; font-size:12.5px; font-weight:700; letter-spacing:.08em; color:var(--primary-dark); background:var(--primary-50); padding:5px 14px; border-radius:999px; margin-bottom:18px}
+.cover h1{font-size:clamp(28px,5vw,40px); font-weight:700}
+.cover .sub{color:var(--ink-soft); margin-top:14px; max-width:34em}
+.cover .meta{margin-top:22px; display:flex; flex-wrap:wrap; gap:10px 26px; font-size:13px; color:var(--ink-soft); border-top:1px solid var(--line); padding-top:16px}
+.cover .meta strong{color:var(--ink); font-weight:500}
+section{margin-top:60px; scroll-margin-top:76px}
+.eyebrow{font-size:12px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--primary-dark); margin-bottom:8px; font-family:var(--font-sans)}
+.eyebrow.adm{color:var(--gold-dark)}
+h2{font-size:26px; padding-bottom:12px; border-bottom:2px solid var(--primary); margin-bottom:8px}
+section.admin h2{border-bottom-color:var(--gold)}
+.sec-intro{color:var(--ink-soft); margin:10px 0 0; max-width:38em}
+h3{font-size:19px; margin:38px 0 10px}
+h3 .mico{font-family:var(--font-sans); margin-right:6px}
+p{margin:10px 0; max-width:40em}
+ul{margin:8px 0; padding-left:22px; max-width:40em}
+li{margin:4px 0}
+a{color:var(--primary-dark)}
+code{font-family:ui-monospace,Consolas,monospace; font-size:.88em; background:var(--paper-soft); padding:2px 6px; border-radius:5px}
+/* ── 단계 리스트 ── */
+ol.steps{list-style:none; counter-reset:st; margin:14px 0; padding:0; max-width:42em}
+ol.steps>li{counter-increment:st; position:relative; padding:0 0 14px 44px; margin:0}
+ol.steps>li::before{
+  content:counter(st); position:absolute; left:0; top:1px;
+  width:27px; height:27px; border-radius:50%;
+  background:var(--primary); color:#fff;
+  font-weight:700; font-size:13.5px; display:grid; place-items:center;
+  font-family:var(--font-sans);
+}
+ol.steps>li:not(:last-child)::after{content:""; position:absolute; left:13px; top:32px; bottom:2px; width:1px; background:var(--line)}
+section.admin ol.steps>li::before{background:var(--gold-dark)}
+ol.steps .why{display:block; color:var(--ink-soft); font-size:13.8px; margin-top:2px}
+/* ── 콜아웃 ── */
+.tip,.warn{border-radius:10px; padding:13px 16px; margin:16px 0; font-size:14px; max-width:42em}
+.tip{background:var(--primary-50); border:1px solid var(--primary-100)}
+.warn{background:var(--gold-soft); border:1px solid #E4CE9E}
+/* ── 표 ── */
+.tblwrap{overflow-x:auto; margin:14px 0; border:1px solid var(--line); border-radius:10px; background:var(--card)}
+table{border-collapse:collapse; width:100%; font-size:14px; min-width:520px}
+th{background:var(--primary-50); color:var(--primary-dark); text-align:left; font-weight:700; padding:9px 14px; white-space:nowrap}
+section.admin th{background:var(--gold-soft); color:var(--gold-dark)}
+td{padding:9px 14px; border-top:1px solid var(--line-soft); vertical-align:top}
+td:first-child{white-space:nowrap; font-weight:500}
+tbody tr:hover{background:var(--primary-50)}
+section.admin tbody tr:hover{background:var(--gold-soft)}
+/* ── 배지·경로 ── */
+.badge{display:inline-block; font-size:11.5px; font-weight:700; padding:2px 9px; border-radius:999px; background:var(--primary-50); color:var(--primary-dark); vertical-align:2px}
+.badge.gold{background:var(--gold-soft); color:var(--gold-dark)}
+.path{font-size:13px; color:var(--ink-soft); margin:-4px 0 10px}
+.path b{color:var(--primary-dark); font-weight:500}
+section.admin .path b{color:var(--gold-dark)}
+/* ── 생애주기 ── */
+.cycle{display:flex; gap:5px; flex-wrap:wrap; margin:14px 0; max-width:44em}
+.cycle span{flex:1; min-width:72px; text-align:center; background:var(--card); border:1px solid var(--line); border-radius:8px; padding:8px 4px; font-size:13px}
+.cycle span i{display:block; font-style:normal; font-size:11px; color:var(--ink-faint)}
+.cycle span.free{border-color:var(--primary); background:var(--primary-50)}
+footer.page-foot{margin-top:70px; padding-top:18px; border-top:1px solid var(--line); font-size:13px; color:var(--ink-soft)}
+html{scroll-behavior:smooth}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="./"><span class="ic">☀</span>햇소자 <span style="font-family:var(--font-sans);font-weight:500;font-size:14px;color:var(--ink-soft);">사용 설명서</span></a>
+    <a class="back" href="./">← 햇소자로 돌아가기</a>
+  </div>
+</div>
+
+<div class="layout">
+<nav class="toc" aria-label="목차">
+  <div class="toc-label">시작하기</div>
+  <a href="#intro">햇소자란?</a>
+  <a href="#accounts">계정의 종류</a>
+  <a href="#signup">회원가입</a>
+  <a href="#login">로그인·로그아웃</a>
+  <div class="toc-label">로그인 전 (누구나)</div>
+  <a href="#pub">공개 메뉴 7가지</a>
+  <a href="#diagnose">신청·진단 이용법</a>
+  <a href="#contact">상담 신청하기</a>
+  <div class="toc-label">일반 이용자 (회원)</div>
+  <a href="#mem-overview">회원 화면 한눈에</a>
+  <a href="#mem-cycle">생애주기 7단계</a>
+  <a href="#mem-my">내 조합</a>
+  <a href="#mem-setup">설립·건설</a>
+  <a href="#mem-ops">운영관리</a>
+  <a href="#mem-ext">확장</a>
+  <div class="toc-label">관리자</div>
+  <a class="adm" href="#adm-overview">관리자 화면 한눈에</a>
+  <a class="adm" href="#adm-approve">회원 승인 (가장 중요)</a>
+  <a class="adm" href="#adm-menus">관리자 메뉴 7가지</a>
+  <div class="toc-label">부록</div>
+  <a href="#modes">데모 모드 · 실데이터 모드</a>
+  <a href="#trouble">문제 해결</a>
+</nav>
+
+<main>
+
+<!-- ═══════════ 표지 ═══════════ -->
+<div class="cover">
+  <span class="kicker">☀ 사교원 사회적협동조합</span>
+  <h1>햇소자 사용 설명서</h1>
+  <p class="sub">햇빛소득마을 통합 운영 플랫폼 <strong>햇소자</strong>의 사용 방법을 처음 접속하는 분도 따라 할 수 있도록 안내합니다. 앞부분은 <b>일반 이용자(마을·조합원)</b>용, 뒷부분은 <b>관리자(사교원)</b>용입니다.</p>
+  <div class="meta">
+    <span>접속 주소 <strong>sakyowon.co.kr/hatsoja</strong></span>
+    <span>이용료 <strong>무료 (상업발전 개시 전 전면 무료)</strong></span>
+    <span>운영 <strong>사교원 사회적협동조합 · 협력 품앗이 본부</strong></span>
+  </div>
+</div>
+
+<!-- ═══════════ 1. 시작하기 ═══════════ -->
+<section id="intro">
+  <div class="eyebrow">시작하기</div>
+  <h2>햇소자란 무엇인가요?</h2>
+  <p class="sec-intro">햇소자는 햇빛소득마을 사업에 참여하는 마을협동조합의 <b>전 과정을 한 곳에서 처리하는 통합 운영 플랫폼</b>입니다. 후보지 진단과 신청서 작성부터 조합 설립, 발전소 정산·배당, 마을식당·점빵 같은 파생사업까지 이어집니다.</p>
+  <p>로그인하면 이런 일을 할 수 있습니다.</p>
+  <ul>
+    <li><b>문서 자동 생성</b> — 정관·총회 회의록·사업계획서·결산서를 조합 정보만 입력하면 AI가 초안을 작성</li>
+    <li><b>서류 AI 검토</b> — 작성한 서류를 올리면 누락·오류·개선점을 점검</li>
+    <li><b>법령·인허가 안내</b> — 발전사업 허가, 협동조합법 등을 말로 물어보면 답변</li>
+    <li><b>수익 시뮬레이션</b> — 설비 규모를 넣으면 25년 매출·배당·상환 계획을 자동 계산</li>
+    <li><b>발전·정산·배당 관리</b> — 발전량과 한전 정산금을 대조하고 수익을 자동 배분</li>
+    <li><b>회계·세무 자동화, 조합원 관리, 일정·마감 알림</b></li>
+  </ul>
+</section>
+
+<section id="accounts">
+  <div class="eyebrow">시작하기</div>
+  <h2>계정의 종류 — 하나만 기억하세요</h2>
+  <p class="sec-intro">햇소자는 <b>사교원 통합 계정</b> 하나로 로그인합니다. 별도의 햇소자 전용 계정은 없습니다.</p>
+  <div class="tblwrap"><table>
+    <thead><tr><th>구분</th><th>누가 쓰나요</th><th>특징</th></tr></thead>
+    <tbody>
+      <tr><td>사교원 통합 계정 (회원)</td><td>마을 조합원·예비 조합원·실무자</td><td>가입 신청 후 <b>관리자 승인</b>을 받아야 로그인할 수 있습니다. 계정 하나로 사교원의 모든 사이트를 이용합니다.</td></tr>
+      <tr><td>사교원 통합 계정 (관리자)</td><td>사교원 운영진</td><td>회원 승인, 마을 관리, 콘텐츠 관리 등 관리자 메뉴가 열립니다.</td></tr>
+      <tr><td>데모 계정</td><td>누구나</td><td>가입 없이 <b>버튼 한 번으로 화면을 체험</b>합니다. 입력한 내용은 저장되지 않는 연습용입니다.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="tip"><b>💡 SSO(자동 로그인)</b> 사교원의 다른 사이트(통합 관리자 등)에 이미 로그인되어 있다면, 햇소자에 들어오는 순간 자동으로 로그인이 이어집니다. 다시 로그인할 필요가 없습니다.</div>
+</section>
+
+<section id="signup">
+  <div class="eyebrow">시작하기</div>
+  <h2>회원가입 (승인제)</h2>
+  <p class="sec-intro">계정이 없다면 먼저 가입을 신청합니다. 신청 즉시 로그인되는 것이 아니라, <b>관리자가 승인한 뒤부터</b> 로그인할 수 있습니다.</p>
+  <ol class="steps">
+    <li><strong>sakyowon.co.kr/hatsoja</strong> 에 접속한 뒤, 화면 오른쪽 위의 <b>[회원가입]</b> 버튼을 누릅니다.<span class="why">첫 화면 가운데의 [로그인·회원가입] 버튼을 눌러도 같은 창이 열립니다.</span></li>
+    <li>로그인 창 아래쪽 <b>"통합 계정 가입 신청"</b> 칸에 정보를 입력합니다.<span class="why">아이디(3자 이상) · 비밀번호(8자 이상) · 이름 · 연락처는 필수이고, 소속 마을·조직은 선택입니다.</span></li>
+    <li><b>개인정보 수집·이용 동의</b>에 체크합니다. 처리방침 링크에서 내용을 확인할 수 있습니다.</li>
+    <li><b>[가입 신청하기]</b>를 누릅니다. "가입 신청이 접수되었습니다"라는 안내가 뜨면 끝입니다.</li>
+    <li>관리자 승인을 기다립니다. <span class="why">승인 전에 로그인하면 "가입 승인 대기 중입니다"라는 안내가 나옵니다. 급한 경우 사교원(070-4196-4677)으로 연락해 주세요.</span></li>
+  </ol>
+  <div class="warn"><b>⚠️ 이미 사용 중인 아이디</b>라는 안내가 나오면 다른 아이디로 다시 신청하세요. 가입 신청은 반드시 <code>sakyowon.co.kr/hatsoja</code> 주소에서 해야 합니다.</div>
+</section>
+
+<section id="login">
+  <div class="eyebrow">시작하기</div>
+  <h2>로그인과 로그아웃</h2>
+  <h3>통합 계정으로 로그인</h3>
+  <ol class="steps">
+    <li>오른쪽 위 <b>[로그인]</b> 버튼을 누릅니다.</li>
+    <li>사교원 통합 계정의 <b>아이디와 비밀번호</b>를 입력하고 <b>[로그인]</b>을 누릅니다.</li>
+    <li>로그인이 되면 자동으로 <b>내 대시보드</b>로 이동합니다.<span class="why">회원은 회원 대시보드, 관리자는 관리자 대시보드로 각각 이동합니다. 오른쪽 위에 내 이름과 역할(회원/관리자)이 표시됩니다.</span></li>
+  </ol>
+  <h3>데모로 체험해 보기</h3>
+  <p>계정 없이 화면을 둘러보고 싶다면, 로그인 창의 아래쪽 버튼을 누르세요.</p>
+  <ul>
+    <li><b>👤 회원 데모 로그인</b> — 일반 이용자 화면을 예시 데이터로 체험</li>
+    <li><b>🔐 관리자 데모 로그인</b> — 관리자 화면을 예시 데이터로 체험</li>
+  </ul>
+  <div class="tip"><b>💡 데모 표시</b> 데모로 들어가면 이름 옆에 <span class="badge gold">데모</span> 배지와 "체험 모드"라는 문구가 붙습니다. 데모에서 만든 내용은 실제로 저장되지 않습니다.</div>
+  <h3>로그아웃</h3>
+  <p>오른쪽 위 이름 옆의 <b>[로그아웃]</b> 버튼을 누르면 첫 화면으로 돌아갑니다.</p>
+</section>
+
+<!-- ═══════════ 2. 공개 메뉴 ═══════════ -->
+<section id="pub">
+  <div class="eyebrow">로그인 전 · 누구나</div>
+  <h2>공개 메뉴 7가지</h2>
+  <p class="sec-intro">로그인하지 않아도 상단 메뉴에서 아래 7가지를 이용할 수 있습니다. 휴대전화에서는 오른쪽 위 <b>☰</b> 버튼을 누르면 메뉴가 펼쳐집니다.</p>
+  <div class="tblwrap"><table>
+    <thead><tr><th>메뉴</th><th>무엇을 하는 곳인가요</th></tr></thead>
+    <tbody>
+      <tr><td>홈</td><td>햇소자가 자동화하는 업무 소개와 로그인·진단 바로가기</td></tr>
+      <tr><td>사업소개</td><td>햇빛소득마을 사업의 구조와 취지 설명</td></tr>
+      <tr><td>신청·진단</td><td><b>무료 자가진단, 수익 계산, 신청서 초안 만들기</b> — 아래에서 자세히</td></tr>
+      <tr><td>가입절차</td><td>신청부터 이용까지의 절차 안내 (신청 → 영업일 1~2일 내 승인 → 이용)</td></tr>
+      <tr><td>사례</td><td>참여 마을들의 진행 사례 모음</td></tr>
+      <tr><td>FAQ</td><td>자주 묻는 질문과 답변</td></tr>
+      <tr><td>상담신청</td><td>사업 참여·조합 설립 등 상담을 신청하는 폼 — 아래에서 자세히</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="diagnose">
+  <div class="eyebrow">로그인 전 · 누구나</div>
+  <h2>신청·진단 이용법</h2>
+  <p class="sec-intro">우리 마을이 사업에 맞는지 궁금할 때 가장 먼저 써 보는 메뉴입니다. 로그인 없이, 전부 무료입니다. 세 가지 도구가 있습니다.</p>
+  <h3>① 자가진단</h3>
+  <ol class="steps">
+    <li>상단 메뉴에서 <b>신청·진단</b>을 누릅니다.</li>
+    <li>마을 상황에 대한 문항에 답한 뒤 <b>[진단하기]</b>를 누릅니다.</li>
+    <li>우리 마을의 사업 적합도와 다음에 할 일을 확인합니다.</li>
+  </ol>
+  <h3>② 간이 수익 계산</h3>
+  <ol class="steps">
+    <li>같은 화면에서 <b>설비용량</b>과 <b>참여 가구 수</b>를 고릅니다.</li>
+    <li><b>[계산하기]</b>를 누르면 예상 수익이 바로 표시됩니다.<span class="why">더 자세한 25년치 계산은 로그인 후 "수익 시뮬레이션" 메뉴에서 할 수 있습니다.</span></li>
+  </ol>
+  <h3>③ 신청서 초안 만들기</h3>
+  <ol class="steps">
+    <li><b>마을 이름</b>을 입력합니다. (예: ○○군 ○○면 ○○리)</li>
+    <li><b>[신청서 초안 만들기]</b>를 누르면 사업 신청서 초안이 만들어집니다.</li>
+  </ol>
+</section>
+
+<section id="contact">
+  <div class="eyebrow">로그인 전 · 누구나</div>
+  <h2>상담 신청하기</h2>
+  <ol class="steps">
+    <li>상단 메뉴에서 <b>상담신청</b>을 누릅니다.</li>
+    <li><b>성함, 연락처</b>(필수)와 소속 마을·조직, 상담 유형을 입력합니다.</li>
+    <li><b>내용</b> 칸에 상담받고 싶은 내용을 자유롭게 적습니다.</li>
+    <li>개인정보 동의에 체크하고 <b>[상담 신청하기]</b>를 누릅니다.<span class="why">접수된 상담은 관리자가 확인한 뒤 입력하신 연락처로 회신합니다.</span></li>
+  </ol>
+</section>
+
+<!-- ═══════════ 3. 회원 매뉴얼 ═══════════ -->
+<section id="mem-overview">
+  <div class="eyebrow">일반 이용자</div>
+  <h2>회원 화면 한눈에 보기</h2>
+  <p class="sec-intro">로그인하면 화면 왼쪽에 <b>사이드바(세로 메뉴)</b>가 나타납니다. 메뉴는 업무 흐름에 따라 4개 묶음, 16개로 정리되어 있습니다.</p>
+  <div class="tblwrap"><table>
+    <thead><tr><th>묶음</th><th>메뉴</th><th>언제 쓰나요</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="2">내 조합</td><td>🏠 대시보드</td><td>로그인 직후 — 일정·문서·우리 마을 현황 요약</td></tr>
+      <tr><td>👤 마이페이지</td><td>내 계정 정보와 내가 만든 문서 확인</td></tr>
+      <tr><td rowspan="4">설립·건설</td><td>🏗 설립 내비게이터·청약</td><td>조합을 만드는 중일 때 — 설립 4단계·청약·인허가 관리</td></tr>
+      <tr><td>📝 문서 자동 생성</td><td>정관·회의록 등 서류가 필요할 때</td></tr>
+      <tr><td>📄 서류 AI 검토</td><td>작성한 서류를 점검받고 싶을 때</td></tr>
+      <tr><td>⚖️ 법령·인허가</td><td>법·허가 절차가 궁금할 때</td></tr>
+      <tr><td rowspan="6">운영관리</td><td>⚡ 발전·정산·배당</td><td>발전소 운영 중 — 발전량·정산·배당 확인</td></tr>
+      <tr><td>💰 수익 시뮬레이션</td><td>수익 구조를 미리 계산해 보고 싶을 때</td></tr>
+      <tr><td>🧾 회계·세무 자동화</td><td>거래내역·영수증 정리와 신고 자료 작성</td></tr>
+      <tr><td>📁 월마감·보고서</td><td>매월 마감 체크와 보고서 자동 생성</td></tr>
+      <tr><td>👥 조합원 관리</td><td>조합원 명부·출자금·의결권 관리</td></tr>
+      <tr><td>📅 일정·마감</td><td>총회·이사회·신고 마감 일정 관리</td></tr>
+      <tr><td rowspan="4">확장</td><td>🛍 마을비즈니스</td><td>마을식당·점빵 등 파생사업 구상</td></tr>
+      <tr><td>🤝 연합체·커뮤니티</td><td>다른 마을 현황·공동사업·교육 신청</td></tr>
+      <tr><td>📚 공지·자료실</td><td>공지사항과 서식·가이드 내려받기</td></tr>
+      <tr><td>💬 AI 상담</td><td>무엇이든 채팅으로 물어보기</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="mem-cycle">
+  <div class="eyebrow">일반 이용자</div>
+  <h2>생애주기 7단계 — 화면이 우리 마을에 맞춰집니다</h2>
+  <p class="sec-intro">햇소자는 마을의 진행 단계를 7단계로 나누어 관리합니다. 대시보드 위쪽의 스테퍼에서 <b>우리 마을이 지금 몇 단계인지</b> 확인할 수 있고, 단계가 오르면 같은 화면에서 다음 메뉴가 차례로 열립니다.</p>
+  <div class="cycle">
+    <span class="free">① 관심<i>무료</i></span><span class="free">② 신청<i>무료</i></span><span class="free">③ 선정<i>무료</i></span><span class="free">④ 설립<i>무료</i></span><span class="free">⑤ 건설<i>무료</i></span><span>⑥ 운영</span><span>⑦ 확장</span>
+  </div>
+  <p>운영(⑥) 단계 전까지는 이용료가 전혀 없습니다.</p>
+</section>
+
+<section id="mem-my">
+  <div class="eyebrow">일반 이용자 — 내 조합</div>
+  <h2>내 조합: 대시보드 · 마이페이지</h2>
+
+  <h3><span class="mico">🏠</span>대시보드</h3>
+  <p class="path">사이드바 <b>내 조합 → 대시보드</b> (로그인하면 처음 열리는 화면)</p>
+  <p>매일 아침 여기부터 보시면 됩니다. 한 화면에 네 가지가 요약됩니다.</p>
+  <ul>
+    <li><b>우리 마을 생애주기</b> — 지금 몇 단계인지 스테퍼로 표시</li>
+    <li><b>📅 다가오는 일정</b> — 총회·이사회·신고 마감 (마감 임박은 강조 표시)</li>
+    <li><b>📝 최근 문서</b> — 최근 만들거나 검토한 문서</li>
+    <li><b>🚀 빠른 시작</b> — 자주 쓰는 기능으로 바로가기</li>
+  </ul>
+
+  <h3><span class="mico">👤</span>마이페이지</h3>
+  <p class="path">사이드바 <b>내 조합 → 마이페이지</b></p>
+  <ul>
+    <li><b>내 계정</b> — 아이디·이름·소속 마을 확인</li>
+    <li><b>내가 만든 문서</b> — 문서 자동 생성으로 만든 문서 목록 (다시 열기·다운로드)</li>
+    <li><b>다른 업무 바로가기</b> — 주요 메뉴로 이동하는 버튼 모음</li>
+  </ul>
+</section>
+
+<section id="mem-setup">
+  <div class="eyebrow">일반 이용자 — 설립·건설</div>
+  <h2>설립·건설: 조합을 만들고 발전소를 짓기까지</h2>
+
+  <h3><span class="mico">🏗</span>설립 내비게이터·청약</h3>
+  <p class="path">사이드바 <b>설립·건설 → 설립 내비게이터·청약</b></p>
+  <p>조합 설립부터 착공까지를 한 화면에서 관리합니다. 세 개의 판이 있습니다.</p>
+  <ul>
+    <li><b>조합 설립 내비게이터</b> — ① 발기인 모집(5인 이상) → ② 창립총회(정관 확정·임원 선출) → ③ 설립등기(의사록 공증 필요) → ④ 사업자등록. 각 단계 옆의 <b>[📝 ○○ 만들기]</b> 버튼을 누르면 그 단계에 필요한 서식이 문서 자동 생성으로 바로 연결됩니다.</li>
+    <li><b>구좌 청약 현황</b> — 구좌별 배정·접수·모집 상태를 표로 확인하고, 자부담 15% 조달 구성을 봅니다.</li>
+    <li><b>인허가 체크리스트·건설 공정</b> — 개발행위 허가 / 전기사업 허가 / 환경 협의 / 계통 연계 신청의 진행 상태와, 착공 후에는 공정률을 확인합니다.</li>
+  </ul>
+  <div class="tip"><b>💡 알아두세요</b> 설립등기용 의사록은 공증이 필요할 수 있고, 전자 의결은 정관에 근거 조항이 있어야 합니다. 화면 아래 안내 문구를 꼭 확인하세요.</div>
+
+  <h3><span class="mico">📝</span>문서 자동 생성</h3>
+  <p class="path">사이드바 <b>설립·건설 → 문서 자동 생성</b></p>
+  <ol class="steps">
+    <li><b>문서 템플릿</b>에서 만들 문서를 고릅니다.<span class="why">조합 정관 · 창립총회 회의록 · 사업계획서 · 정기총회 회의록 · 결산 보고서 · 이사회 회의록 · 발전사업 허가 신청서 · 분양 계약서 — 8종이 기본 제공됩니다.</span></li>
+    <li>조합 이름·일자 등 기본 정보를 입력하면 <b>AI가 초안을 작성</b>합니다.</li>
+    <li>만들어진 문서는 아래 <b>"생성한 문서"</b> 목록과 마이페이지에 저장됩니다. 열어서 내용을 확인·수정하고 내려받으세요.</li>
+  </ol>
+  <div class="warn"><b>⚠️ 초안입니다</b> AI가 만든 문서는 반드시 내용을 검토한 뒤 사용하세요. 걱정되면 다음 메뉴인 "서류 AI 검토"에 한 번 더 돌려 보는 것을 권합니다.</div>
+
+  <h3><span class="mico">📄</span>서류 AI 검토</h3>
+  <p class="path">사이드바 <b>설립·건설 → 서류 AI 검토</b></p>
+  <ol class="steps">
+    <li><b>서류 제출</b> 칸에 검토받을 서류의 본문을 붙여넣습니다.<span class="why">스캔본·사진은 이미지 파일로 첨부할 수 있습니다.</span></li>
+    <li>요청 메모 칸에 <b>특별히 봐 줄 부분</b>을 적습니다. (예: "조합원 배당 조항이 협동조합법에 맞는지 확인해주세요.")</li>
+    <li><b>[검토 시작]</b>을 누르고 잠시 기다립니다.</li>
+    <li><b>AI 검토 결과</b>에서 누락·오류·개선점을 확인합니다. 결과는 아래 검토 이력에 남습니다.</li>
+  </ol>
+
+  <h3><span class="mico">⚖️</span>법령·인허가</h3>
+  <p class="path">사이드바 <b>설립·건설 → 법령·인허가</b></p>
+  <ol class="steps">
+    <li><b>법령 질의</b> 칸에 궁금한 것을 평소 말하듯 적습니다.<span class="why">예: "마을협동조합이 발전사업 허가를 받으려면 어떤 서류가 필요한가요?"</span></li>
+    <li><b>[AI에 질문]</b>을 누르면 관련 법령을 바탕으로 답변이 표시됩니다.</li>
+    <li>화면 아래 <b>주요 법령·지침</b> 카드에서 협동조합기본법·전기사업법 등 자주 찾는 법령을 바로 볼 수 있습니다.</li>
+  </ol>
+</section>
+
+<section id="mem-ops">
+  <div class="eyebrow">일반 이용자 — 운영관리</div>
+  <h2>운영관리: 발전소가 돌아가기 시작하면</h2>
+
+  <h3><span class="mico">⚡</span>발전·정산·배당</h3>
+  <p class="path">사이드바 <b>운영관리 → 발전·정산·배당</b></p>
+  <p>발전 계량 데이터와 한전 정산내역을 자동으로 대조하고, 수익 배분까지 계산합니다. 조합원 누구나 같은 숫자를 봅니다.</p>
+  <ul>
+    <li><b>이달 요약</b> — 발전량(kWh), 한전 정산금액, 배당 적립액, 이상 알림 건수가 큰 숫자로 표시됩니다. 무발전일·발전 급락·이용률 미달은 자동 감지되어 점검 지시와 함께 알림이 갑니다.</li>
+    <li><b>월별 발전량 그래프</b> — 월별 추이를 막대로 확인합니다.</li>
+    <li><b>수익 배분 자동 계산 (50·10·20·20)</b> — 정산금이 마을공동사업 50% / 지역화폐 배당 10% / 내부 적립 20% / 융자 상환 20%로 자동 배분 계산됩니다. 입금이 확인되면 4개 계좌 이체 지시서가 자동 생성되고, <b>이체 실행은 사람이 승인</b>합니다. 배분 비율은 조합 총회 의결로 정합니다.</li>
+    <li><b>배당 적립 현황</b> — 지역화폐 배당 적립액을 확인하고, <b>[📨 배당 통지문 생성]</b>을 누르면 조합원별 한글 파일·알림톡용 통지문이 만들어집니다.</li>
+  </ul>
+
+  <h3><span class="mico">💰</span>수익 시뮬레이션</h3>
+  <p class="path">사이드바 <b>운영관리 → 수익 시뮬레이션</b></p>
+  <ol class="steps">
+    <li>입력값 5가지를 채웁니다 — <b>설비 용량(kW), 연간 이용률(%), SMP+REC 단가(원/kWh), 초기 투자비(억원), 조합원 수</b>.<span class="why">잘 모르면 기본값(500kW · 15% · 180원 · 7억 · 65명)으로 먼저 계산해 보세요.</span></li>
+    <li><b>[계산하기]</b>를 누릅니다.</li>
+    <li><b>예상 수익(25년)</b> 결과에서 연 매출, 조합원 배당, 융자 상환 계획을 확인합니다. 값을 바꿔 가며 여러 번 계산해도 됩니다.</li>
+  </ol>
+
+  <h3><span class="mico">🧾</span>회계·세무 자동화</h3>
+  <p class="path">사이드바 <b>운영관리 → 회계·세무 자동화</b></p>
+  <p>매월 표준 흐름은 세 단계입니다: <b>① 통장 거래내역 업로드 → 자동 분류·기장</b> (키워드 규칙으로 계정과목까지 자동 분류, 미분류 건만 사람이 확정) <b>→ ② 대장 확인 → ③ 월 마감 실행</b>.</p>
+  <ol class="steps">
+    <li><b>자료 업로드</b>에서 파일 종류 카드(통장 거래내역 · 세금계산서 · 지출 영수증)를 눌러 파일을 올립니다.<span class="why">영수증은 사진·PDF도 됩니다. 여러 파일을 한 번에 선택할 수 있습니다.</span></li>
+    <li>업로드된 자료가 화면 위 개수 집계에 반영되는지 확인합니다.</li>
+    <li><b>신고 자료 자동 생성</b>에서 필요한 자료를 선택하면, 업로드된 데이터를 바탕으로 AI가 초안을 작성합니다. 만든 자료는 "생성한 자료" 목록에 쌓입니다.</li>
+  </ol>
+  <div class="tip"><b>💡 신고 마감 알림</b> 원천세(익월 10일)·부가세(분기 25일) 등 신고 마감은 자동으로 알려줍니다. 전체 마감 목록은 "월마감·보고서" 메뉴에 있습니다.</div>
+
+  <h3><span class="mico">📁</span>월마감·보고서</h3>
+  <p class="path">사이드바 <b>운영관리 → 월마감·보고서</b></p>
+  <ul>
+    <li><b>월 마감 체크리스트</b> — 매월 이 순서대로: 근태 집계·급여 계산 → 자금 배분 이체(50/10/20/20) → 융자 원리금 자동이체 확인 → 마감. 항목마다 기한(말일·익월 10일·정산 후 3일 내 등)이 붙어 있습니다.</li>
+    <li><b>자동 생성 보고서 6종</b> — 월간 운영보고서, 급여명세서(매월), 분기 재무보고서, 반기 경영보고서, 총회 자료집 등을 버튼 한 번으로 생성합니다.</li>
+  </ul>
+
+  <h3><span class="mico">👥</span>조합원 관리</h3>
+  <p class="path">사이드바 <b>운영관리 → 조합원 관리</b></p>
+  <ul>
+    <li><b>조합원 명부</b> — 이름·직책(이사장/이사/감사/조합원)·가입일·출자금·의결권을 표로 관리합니다.</li>
+    <li><b>[+ 조합원 추가]</b> 버튼으로 새 조합원을 등록합니다.</li>
+    <li>명부는 인쇄용으로 내보낼 수 있어 총회 자료 준비에 쓸 수 있습니다.</li>
+  </ul>
+
+  <h3><span class="mico">📅</span>일정·마감</h3>
+  <p class="path">사이드바 <b>운영관리 → 일정·마감</b></p>
+  <ul>
+    <li><b>정기 마감 캘린더(자동 계산)</b> — 세무·운영의 고정 일정(원천세, 부가세 등)이 자동으로 채워집니다.</li>
+    <li><b>예정된 일정</b> — 총회·이사회·계약 등 우리 조합의 일정 목록. 마감이 임박한 항목은 빨간 강조로 표시됩니다.</li>
+    <li><b>[+ 일정 추가]</b>로 새 일정을 등록합니다.</li>
+  </ul>
+</section>
+
+<section id="mem-ext">
+  <div class="eyebrow">일반 이용자 — 확장</div>
+  <h2>확장: 발전 수익 그다음</h2>
+
+  <h3><span class="mico">🛍</span>마을비즈니스</h3>
+  <p class="path">사이드바 <b>확장 → 마을비즈니스</b></p>
+  <ul>
+    <li>마을식당·점빵 같은 <b>파생사업 후보</b>를 1차/2차 단계별 카드로 살펴봅니다.</li>
+    <li><b>창업 타당성 간이 진단</b> — 구상 중인 사업 정보를 넣고 <b>[진단하기]</b>를 누르면 간단한 타당성 평가를 받아볼 수 있습니다.</li>
+  </ul>
+
+  <h3><span class="mico">🤝</span>연합체·커뮤니티</h3>
+  <p class="path">사이드바 <b>확장 → 연합체·커뮤니티</b></p>
+  <ul>
+    <li><b>전체 마을 현황판</b> — 다른 참여 마을들의 진행 단계를 한눈에 봅니다.</li>
+    <li><b>공동사업</b> — 마을들이 함께 하는 사업 현황.</li>
+    <li><b>교육·연수</b> — 🎓 임원 아카데미, 🧾 회계 실무 교육, 🚌 선진지 연수를 버튼으로 신청하고, 사례 공유 게시판으로 이동할 수 있습니다.</li>
+  </ul>
+
+  <h3><span class="mico">📚</span>공지·자료실</h3>
+  <p class="path">사이드바 <b>확장 → 공지·자료실</b></p>
+  <ul>
+    <li><b>공지사항</b> — 모집 공고, 법령 개정, 플랫폼 새 기능 소식. 제목을 누르면 본문이 열립니다.</li>
+    <li><b>자료실</b> — 정관 표준안, 허가 신청서 양식, 가이드라인, 계약서 양식 등을 내려받습니다.</li>
+  </ul>
+
+  <h3><span class="mico">💬</span>AI 상담</h3>
+  <p class="path">사이드바 <b>확장 → AI 상담</b></p>
+  <ol class="steps">
+    <li>입력칸에 질문을 적습니다. 조합 운영·사업 절차·플랫폼 사용법 무엇이든 좋습니다.</li>
+    <li><b>[보내기]</b>를 누르거나 Enter 키를 칩니다.</li>
+    <li>채팅으로 답변이 옵니다. 이어서 계속 질문할 수 있습니다.</li>
+  </ol>
+</section>
+
+<!-- ═══════════ 4. 관리자 매뉴얼 ═══════════ -->
+<section id="adm-overview" class="admin">
+  <div class="eyebrow adm">관리자</div>
+  <h2>관리자 화면 한눈에 보기</h2>
+  <p class="sec-intro">관리자 계정으로 로그인하면 회원과 다른 <b>관리자 전용 사이드바</b>가 나타납니다. 아바타가 금색으로 표시되어 관리자임을 알 수 있습니다.</p>
+  <div class="tblwrap"><table>
+    <thead><tr><th>메뉴</th><th>무엇을 하는 곳인가요</th></tr></thead>
+    <tbody>
+      <tr><td>📊 통계 대시보드</td><td>처리 대기 회원·미처리 문의·마을별 진행률 요약</td></tr>
+      <tr><td>🏆 공모·심사 관리</td><td>공모 접수 현황과 심사위원 평가 집계</td></tr>
+      <tr><td>🏘 조합·마을 관리</td><td>마을 등록, 마을별 자료 열람, 운영 리포트 생성</td></tr>
+      <tr><td>👤 회원 관리</td><td>전체 회원 조회, <b>가입 신청 승인·거절</b></td></tr>
+      <tr><td>📮 문의 처리</td><td>상담 신청 접수분 처리 (미처리/처리중/완료)</td></tr>
+      <tr><td>📢 콘텐츠 관리</td><td>공지·FAQ·자료실·문서 템플릿 등록·관리</td></tr>
+      <tr><td>📋 시스템 로그</td><td>누가 언제 무엇을 했는지 활동 기록 열람</td></tr>
+    </tbody>
+  </table></div>
+  <div class="tip"><b>💡 회원 화면 미리보기</b> 사이드바 아래 "바로가기"의 <b>[👀 회원 화면 미리보기]</b>를 누르면 회원 데모 계정으로 전환되어, 회원에게 화면이 어떻게 보이는지 직접 확인할 수 있습니다. 다시 관리자로 돌아오려면 로그아웃 후 재로그인하세요.</div>
+</section>
+
+<section id="adm-approve" class="admin">
+  <div class="eyebrow adm">관리자</div>
+  <h2>회원 승인 — 관리자의 가장 중요한 일과</h2>
+  <p class="sec-intro">햇소자는 승인제입니다. 새로 가입 신청한 분은 <b>관리자가 승인하기 전까지 로그인할 수 없으므로</b>, 승인 대기자를 매일 확인해 주세요. 가입절차 안내상 승인 목표는 <b>영업일 기준 1~2일</b>입니다.</p>
+  <ol class="steps">
+    <li>관리자로 로그인하면 <b>통계 대시보드</b>가 열립니다.</li>
+    <li><b>"⏳ 처리 대기 회원"</b> 카드에서 신청자의 이름·소속을 확인합니다.<span class="why">전체 목록이 필요하면 사이드바의 "회원 관리"에서 승인대기 상태 회원을 봅니다.</span></li>
+    <li>실제 마을 관계자가 맞는지 확인한 뒤 <b>[승인]</b>을 누릅니다. 알 수 없는 신청이면 <b>[거절]</b>을 누릅니다.</li>
+    <li>승인 즉시 신청자가 로그인할 수 있게 됩니다. 승인 처리 내역은 시스템 로그에 기록됩니다.</li>
+  </ol>
+</section>
+
+<section id="adm-menus" class="admin">
+  <div class="eyebrow adm">관리자</div>
+  <h2>관리자 메뉴 7가지 사용법</h2>
+
+  <h3><span class="mico">📊</span>통계 대시보드</h3>
+  <p class="path">관리자 사이드바 <b>통계 대시보드</b> (로그인하면 처음 열리는 화면)</p>
+  <ul>
+    <li><b>처리 대기 회원</b> — 여기서 바로 승인·거절 (위 절차 참고)</li>
+    <li><b>미처리 문의</b> — 새로 들어온 상담 신청 미리보기</li>
+    <li><b>마을별 진행률</b> — 참여 마을들의 진행 단계와 마감일 요약</li>
+  </ul>
+
+  <h3><span class="mico">🏆</span>공모·심사 관리</h3>
+  <p class="path">관리자 사이드바 <b>공모·심사 관리</b></p>
+  <ul>
+    <li><b>진행 중인 공모</b> — 참여마을 모집 공모의 접수 기간·상태를 봅니다. 새 공모 개설은 발주기관과의 협약 후 지원됩니다.</li>
+    <li><b>접수 현황</b> — 마을별 신청 접수 목록.</li>
+    <li><b>심사 집계</b> — 심사위원 평가가 자동 합산되어 표시됩니다.</li>
+  </ul>
+
+  <h3><span class="mico">🏘</span>조합·마을 관리</h3>
+  <p class="path">관리자 사이드바 <b>조합·마을 관리</b></p>
+  <ol class="steps">
+    <li><b>등록된 마을</b> 표에서 각 마을의 조합원 수·설비용량·진행률·현재 단계·마감일을 확인합니다.</li>
+    <li>새 마을이 참여하면 <b>[+ 마을 등록]</b>으로 추가합니다.</li>
+    <li>마을 행의 <b>[📂 자료]</b>를 누르면 그 마을의 문서·자료를 열람·다운로드할 수 있습니다.</li>
+    <li><b>[📊 리포트 생성]</b>을 누르면 사업 개요·자료 현황·다가오는 일정이 담긴 <b>운영 리포트</b>가 자동으로 만들어지고, <b>[📥 리포트 다운로드(A4)]</b>로 인쇄용 파일을 받습니다.<span class="why">보고·회의 자료로 바로 쓸 수 있는 형식입니다.</span></li>
+  </ol>
+
+  <h3><span class="mico">👤</span>회원 관리</h3>
+  <p class="path">관리자 사이드바 <b>회원 관리</b></p>
+  <ul>
+    <li><b>전체 회원</b> 표에서 아이디·이름·소속 마을·가입일·상태(승인/승인대기)를 봅니다.</li>
+    <li>승인대기 회원 옆에는 <b>[승인]</b> 버튼이 나타납니다.</li>
+    <li>실서버 연결 상태에서는 <span class="badge">실데이터</span> 배지가 표시되어, 지금 보는 목록이 실제 가입자임을 알 수 있습니다.</li>
+  </ul>
+
+  <h3><span class="mico">📮</span>문의 처리</h3>
+  <p class="path">관리자 사이드바 <b>문의 처리</b></p>
+  <ol class="steps">
+    <li><b>문의 목록</b>에서 상담 신청 내역(이름·소속·유형·날짜·상태)을 확인합니다.</li>
+    <li>문의를 열어 내용을 읽고, 신청자가 남긴 연락처로 회신합니다.</li>
+    <li>처리 상태를 <b>미처리 → 처리중 → 완료</b>로 바꿔 기록을 남깁니다.</li>
+  </ol>
+
+  <h3><span class="mico">📢</span>콘텐츠 관리</h3>
+  <p class="path">관리자 사이드바 <b>콘텐츠 관리</b></p>
+  <p>회원들이 보는 콘텐츠 네 종류를 여기서 등록·관리합니다.</p>
+  <ul>
+    <li><b>공지사항</b> — [+ 새 공지]로 모집 공고·법령 안내 등을 올립니다. 회원의 "공지·자료실"에 바로 반영됩니다.</li>
+    <li><b>FAQ</b> — [+ FAQ 추가]로 자주 묻는 질문·답을 올립니다. 공개 페이지 FAQ에도 노출됩니다.</li>
+    <li><b>자료실</b> — [+ 파일 업로드]로 서식·가이드 파일을 올립니다.</li>
+    <li><b>문서 템플릿</b> — [+ 템플릿 추가]로 회원의 "문서 자동 생성"에서 쓸 템플릿을 늘립니다.</li>
+  </ul>
+
+  <h3><span class="mico">📋</span>시스템 로그</h3>
+  <p class="path">관리자 사이드바 <b>시스템 로그</b></p>
+  <p><b>최근 활동</b> 표에서 시각·사용자·행동(회원 승인, 문서 생성, 검토 요청, 공지 등록, AI 상담 등)·대상을 확인합니다. 문제가 생겼을 때 "누가 언제 무엇을 했는지" 추적하는 용도입니다.</p>
+
+  <div class="tip"><b>💡 통합 관리자</b> 계정 발급·사이트 전반 관리는 페이지 맨 아래의 <b>🔐 통합 관리자</b>(sakyowon.co.kr/admin.html)에서 합니다. 통합 관리자에 로그인해 두면 햇소자에는 자동으로 로그인됩니다(SSO).</div>
+</section>
+
+<!-- ═══════════ 5. 부록 ═══════════ -->
+<section id="modes">
+  <div class="eyebrow">부록</div>
+  <h2>데모 모드와 실데이터 모드</h2>
+  <div class="tblwrap"><table>
+    <thead><tr><th>구분</th><th>데모 모드</th><th>실데이터 모드</th></tr></thead>
+    <tbody>
+      <tr><td>들어가는 방법</td><td>로그인 창의 데모 버튼</td><td>sakyowon.co.kr/hatsoja 에서 통합 계정 로그인</td></tr>
+      <tr><td>보이는 데이터</td><td>예시 마을·예시 문서 (연습용)</td><td>서버에 저장된 우리 마을·내 문서</td></tr>
+      <tr><td>저장 여부</td><td>저장되지 않음</td><td>내 계정에 저장됨 <span class="badge">실데이터</span> 배지 표시</td></tr>
+      <tr><td>이런 분께</td><td>가입 전 화면을 둘러보고 싶을 때</td><td>실제 업무를 처리할 때</td></tr>
+    </tbody>
+  </table></div>
+  <p>통합 계정으로 로그인하면 마을 목록·내 문서가 서버 실데이터로 자동 전환됩니다. 아직 등록된 실데이터가 없으면 화면에 안내와 함께 예시 데이터가 표시됩니다.</p>
+</section>
+
+<section id="trouble">
+  <div class="eyebrow">부록</div>
+  <h2>문제 해결 — 이런 안내가 나올 때</h2>
+  <div class="tblwrap"><table>
+    <thead><tr><th>화면의 안내</th><th>원인과 해결 방법</th></tr></thead>
+    <tbody>
+      <tr><td>"아이디 또는 비밀번호가 올바르지 않습니다."</td><td>입력을 다시 확인하세요. 한/영 전환과 대소문자를 확인해 보세요.</td></tr>
+      <tr><td>"가입 승인 대기 중입니다."</td><td>아직 관리자가 승인하지 않은 상태입니다. 영업일 1~2일 안에 승인됩니다. 급하면 사교원으로 연락하세요.</td></tr>
+      <tr><td>"시도가 잠시 제한되었습니다."</td><td>로그인을 여러 번 실패해 잠시 잠긴 상태입니다. <b>1분 후</b> 다시 시도하세요.</td></tr>
+      <tr><td>"통합 계정 서버에 연결하지 못했습니다."</td><td>서버 연결이 원활하지 않은 상태입니다. 잠시 후 다시 시도하고, 그동안은 데모 로그인으로 화면을 볼 수 있습니다.</td></tr>
+      <tr><td>"로그인이 필요합니다."</td><td>회원 전용 메뉴에 로그인 없이 접근한 경우입니다. 로그인 창이 자동으로 열립니다.</td></tr>
+      <tr><td>"관리자 권한이 필요합니다."</td><td>회원 계정으로 관리자 메뉴에 접근한 경우입니다. 관리자 계정으로 로그인하세요.</td></tr>
+      <tr><td>"가입 신청은 sakyowon.co.kr/hatsoja 에서 할 수 있습니다."</td><td>다른 주소(옛 주소 등)로 접속한 상태입니다. 반드시 <code>sakyowon.co.kr/hatsoja</code>에서 가입·로그인하세요.</td></tr>
+    </tbody>
+  </table></div>
+  <h3>그래도 안 될 때</h3>
+  <ul>
+    <li>공개 메뉴의 <b>상담신청</b>으로 문의를 남기시면 관리자가 회신합니다.</li>
+    <li>전화 070-4196-4677, 070-4196-4678 / 이메일 sakyowon@sakyowon.co.kr</li>
+  </ul>
+</section>
+
+<footer class="page-foot">
+  햇소자 — 햇빛소득마을 통합 운영 플랫폼 사용 설명서 · 2026년 9월 기준 화면으로 작성 · 운영: 사교원 사회적협동조합 · <a href="./">햇소자로 돌아가기</a>
+</footer>
+
+</main>
+</div>
+</body>
+</html>
