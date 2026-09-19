@@ -753,6 +753,7 @@ footer{
       <div class="card-title"><h3 class="serif">① 후보지 자가진단</h3></div>
       <p class="text-mute" style="margin-top:0;">설치형태(지상형·건물형·수상형)와 부지 규모를 넣으면 가능 설비용량과 공모 요건 충족 여부를 판정합니다.
       <b>부지는 저수지·국유지·시군유지·도로 법면 등 공공부지를 우선 검토</b>하세요 —
+      국·공유재산은 재생에너지 설비 설치 시 <b>사용료를 약 80% 감면</b>받는 반면,
       개인 소유 토지를 임대하면 임대료만큼 마을에 남는 몫이 줄어듭니다.</p>
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
         <select class="select" id="diag-type" style="width:auto;min-width:130px;" onchange="svDiagUnit()">
@@ -776,22 +777,40 @@ footer{
       <div class="card-title"><h3 class="serif">② 20년 순수익 계산기</h3>
         <span class="badge badge-info">매출 ≠ 마을 소득</span></div>
       <p class="text-mute" style="margin-top:0;"><b>발전소 매출이 곧 주민 소득이 아닙니다.</b>
-      대출 원리금·유지관리비·보험료·토지 임대료·설비 교체비를 모두 뺀 뒤
-      "20년 동안 마을에 실제로 남는 돈"을 계산합니다.</p>
+      대출 원금과 이자, 유지관리비, 보험료, 토지 임대료, 시설 교체비(인버터 등),
+      초기 인허가·설계비, 계통연계 추가비용, 향후 시스템 비용(ESS·송전망 확충)까지
+      모두 뺀 뒤 "20년 동안 마을에 실제로 남는 돈"을 계산합니다.</p>
       <div style="display:flex;gap:10px 14px;flex-wrap:wrap;align-items:center;">
         <label style="display:flex;align-items:center;gap:6px;">설비용량
-          <input class="input" id="calc-kw" type="number" value="990" min="10" max="1000" style="width:100px;"> kW</label>
+          <input class="input" id="calc-kw" type="number" value="990" min="10" max="1000" style="width:95px;"> kW</label>
         <label style="display:flex;align-items:center;gap:6px;">참여 가구
-          <input class="input" id="calc-homes" type="number" value="65" min="1" style="width:80px;"> 가구</label>
+          <input class="input" id="calc-homes" type="number" value="65" min="1" style="width:75px;"> 가구</label>
         <label style="display:flex;align-items:center;gap:6px;">설치비
-          <input class="input" id="calc-capex" type="number" value="16" min="1" step="0.5" style="width:80px;"> 억 원/MW</label>
+          <input class="input" id="calc-capex" type="number" value="16" min="1" step="0.5" style="width:70px;"> 억/MW</label>
         <label style="display:flex;align-items:center;gap:6px;">융자 비율
-          <input class="input" id="calc-loan" type="number" value="85" min="0" max="85" style="width:75px;"> %</label>
+          <input class="input" id="calc-loan" type="number" value="85" min="0" max="85" style="width:70px;"> %</label>
         <label style="display:flex;align-items:center;gap:6px;">융자 금리
-          <input class="input" id="calc-rate" type="number" value="2.0" min="0" max="10" step="0.1" style="width:75px;"> %</label>
+          <input class="input" id="calc-rate" type="number" value="2.0" min="0" max="10" step="0.1" style="width:70px;"> %</label>
         <label style="display:flex;align-items:center;gap:6px;">토지 임대료
-          <input class="input" id="calc-rent" type="number" value="0" min="0" step="100" style="width:90px;"> 만 원/년</label>
+          <input class="input" id="calc-rent" type="number" value="0" min="0" step="100" style="width:85px;"> 만/년</label>
+        <label style="display:flex;align-items:center;gap:6px;">초기 부대비용
+          <input class="input" id="calc-init" type="number" value="8000" min="0" step="500" style="width:90px;"> 만 원
+          <span class="text-mute" style="font-size:12px;">인허가·설계·계통연계</span></label>
+        <label style="display:flex;align-items:center;gap:6px;">시스템비용 적립
+          <input class="input" id="calc-sys" type="number" value="2" min="0" max="20" step="0.5" style="width:65px;"> %
+          <span class="text-mute" style="font-size:12px;">ESS·송전망 대응</span></label>
         <button class="btn btn-primary" onclick="svCalc()">계산하기</button>
+      </div>
+      <div style="display:flex;gap:10px 14px;flex-wrap:wrap;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--line-soft);">
+        <span style="font-weight:700;font-size:13.5px;">전기 판매 방식</span>
+        <label style="display:flex;align-items:center;gap:6px;">한전 매입 단가
+          <input class="input" id="calc-kepco" type="number" value="165" min="50" step="5" style="width:75px;"> 원/kWh
+          <span class="text-mute" style="font-size:12px;">SMP+REC 고정가격계약</span></label>
+        <label style="display:flex;align-items:center;gap:6px;">PPA 계약단가
+          <input class="input" id="calc-ppa" type="number" value="185" min="50" step="5" style="width:75px;"> 원/kWh</label>
+        <label style="display:flex;align-items:center;gap:6px;">PPA 부대비용
+          <input class="input" id="calc-ppafee" type="number" value="25" min="0" step="5" style="width:70px;"> 원/kWh
+          <span class="text-mute" style="font-size:12px;">망 이용료·부가정산금</span></label>
       </div>
       <div id="calc-result" style="margin-top:14px;"></div>
     </div>
@@ -1835,6 +1854,7 @@ function navigate(){
   } else {
     document.getElementById('v-app').classList.add('on');
     renderApp(scope, page || 'dashboard');
+    if(scope === 'mem' && page === 'finance') finRenderDocs();
   }
   updateConvenienceUI(scope, page || 'dashboard');
   window.scrollTo({top:0, behavior:'instant'});
@@ -1869,6 +1889,7 @@ function renderMemberSidebar(active){
     ]],
     ['설립·건설', [
       ['setup','🏗','설립 내비게이터·청약'],
+      ['finance','🏦','자부담·융자 신청'],
       ['docs','📝','문서 자동 생성'],
       ['review','📄','서류 AI 검토'],
       ['law','⚖️','법령·인허가'],
@@ -1936,6 +1957,7 @@ function renderMemberPage(page){
     case 'dashboard': return memDashboard(u);
     case 'mypage':    return memMyPage(u);
     case 'setup':     return memSetup();
+    case 'finance':   return memFinance();
     case 'power':     return memPower();
     case 'biz':       return memBiz();
     case 'union':     return memUnion();
@@ -2061,6 +2083,276 @@ function memSetup(){
       <p class="text-mute" style="font-size:12.5px;">착공 후 시공사가 월간 공정률·현장사진을 보고하면 조합원 모두에게 공개됩니다.</p>
     </div>
   `;
+}
+
+/* ─── 자부담·융자 신청 (선정 후 ~ 착공 전) ─── */
+const FIN_STEPS = [
+  ['사전 상담', '관할 신협 방문 — 기업(법인)여신 담당자와 상담',
+   '햇빛소득마을 선정 통보서와 사업계획서를 들고 갑니다. 취급 가능 여부·한도·금리·상환기간·담보 요구 수준을 먼저 확인하세요. 조합 소재지 관할 신협 여러 곳을 비교하는 것이 좋습니다.', '1~2주'],
+  ['조합원 가입', '신협 조합원 가입 · 출자금 납입',
+   '신협은 조합원을 대상으로 여신하는 상호금융기관입니다. 우리 협동조합이 해당 신협의 조합원으로 가입(법인 출자)해야 대출 신청이 가능합니다.', '상담 시 동시 진행'],
+  ['차입 의결', '총회(또는 이사회) 차입 의결 · 의사록 작성',
+   '정관에 차입 한도와 의결기관이 정해져 있습니다. 한도를 넘는 차입은 총회 의결이 필요하니 정관을 먼저 확인하세요. 의사록은 대출 신청 서류로 제출합니다.', '총회 소집기간 포함 2~3주'],
+  ['여신 신청', '대출 신청서 접수 · 서류 제출',
+   '아래 서류 체크리스트를 모두 갖춰 제출합니다. 서류가 빠지면 심사가 시작되지 않습니다.', '1일'],
+  ['심사', '사업성·신용 심사 · 담보 감정평가',
+   '발전 수익으로 원리금을 갚을 수 있는지(상환능력)를 자금수지계획서로 봅니다. 부지·설비 담보 감정평가와 이사장 연대보증 요구 여부가 이 단계에서 정해집니다.', '2~4주'],
+  ['의결', '여신위원회·이사회 심의 의결',
+   '금액 규모에 따라 지점 전결 또는 이사회 의결로 갈립니다. 조건부 승인(담보 추가·보증 요구 등)이 나올 수 있습니다.', '1~2주'],
+  ['약정·실행', '대출 약정 체결 · 근저당 설정 · 자금 인출',
+   '금전소비대차 약정과 담보 설정을 마치면 인출이 가능합니다. 공사 기성고에 따라 분할 인출하는 경우가 많으므로 시공 계약의 대금 지급 일정과 맞추세요.', '1~2주'],
+];
+const FIN_DOCS = [
+  ['법인 서류', ['협동조합 등기사항전부증명서', '사업자등록증 사본', '정관 (차입 관련 조항 포함)', '법인 인감증명서 · 사용인감계', '대표자(이사장) 신분증']],
+  ['의결 서류', ['차입 의결 총회 의사록 (또는 이사회 의사록)', '임원 명부 · 이사장 선임 증빙']],
+  ['사업 서류', ['햇빛소득마을 선정 통보서', '발전사업 허가증 (또는 신청 접수 증빙)', '사업계획서', '자금수지계획서 (상환계획 포함)', '공사 도급계약서 또는 견적서', '한전 계통연계 검토의견']],
+  ['재무 서류', ['추정 재무제표 (설립 초년도는 추정치)', '조합원 출자금 납입 증빙', '마을기금 통장 사본', '자부담 조달계획서']],
+  ['담보 서류', ['부지 등기부등본 · 토지대장', '(임차 부지) 토지사용 승낙서 · 임대차계약서', '감정평가서 (신협이 지정한 평가기관)', '(요구 시) 발전설비 양도담보 · 보험 질권설정 서류']],
+];
+
+function memFinance(){
+  return `
+    <div class="sec-head">
+      <h1>🏦 자부담·융자 신청</h1>
+      <p class="sec-desc">선정 후 확보해야 하는 <b>자부담 15%</b>를 지역 신협 융자로 조달하는 절차와 제출 서식을 지원합니다.
+      <span class="badge badge-mute">절차 안내 도구 — 실제 승인·조건은 해당 신협이 결정합니다</span></p>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;border-left:4px solid var(--primary);">
+      <div class="card-title"><h3 class="serif">신협 융자가 공모에서 인정되는 재원인가?</h3>
+        <span class="badge badge-success">인정 재원</span></div>
+      <p style="margin-top:0;">공모 지침은 <b>지역 농·수협, 새마을금고, 신협 등 상호금융기관과의 협력을 통한 지역 기반 자금조달(대출·출자)</b>을
+      명시적으로 인정합니다. 다만 두 가지 제약이 있습니다.</p>
+      <table class="tbl">
+        <tbody>
+          <tr><td style="width:170px;"><b>과도한 배당 지양</b></td>
+            <td>자금조달 대가로 상호금융기관에 과도한 배당을 약정하는 것은 지양해야 합니다 — 수익이 마을 밖으로 빠져나가는 구조가 되기 때문입니다.</td></tr>
+          <tr><td><b>그 밖의 외부 재원 금지</b></td>
+            <td>마을 공동체·정부·지방정부·<b>지역 상호금융기관</b> 외의 외부 재원을 받으면 신청이 불가하고,
+            선정 후 확인되어도 <b>선정이 취소될 수 있습니다</b>. 시공업체(ReSCO)의 자부담·이자 대납 제안이 여기에 해당할 수 있습니다.</td></tr>
+          <tr><td><b>자부담 산정 기준</b></td>
+            <td>태양광 <b>설치비의 15% 이상</b>이며, <b>부지 매입비와 ESS 설치비는 이 15% 산정에서 별도</b>입니다.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title"><h3 class="serif">① 융자 규모·상환 계산</h3></div>
+      <p class="text-mute" style="margin-top:0;">자부담 15% 가운데 마을이 직접 낼 몫과 신협에서 빌릴 몫을 나눠, 정책융자와 합친 <b>총 원리금 부담</b>을 계산합니다.</p>
+      <div style="display:flex;gap:10px 14px;flex-wrap:wrap;align-items:center;">
+        <label style="display:flex;align-items:center;gap:6px;">설비용량
+          <input class="input" id="fin-kw" type="number" value="990" min="10" max="1000" style="width:95px;"> kW</label>
+        <label style="display:flex;align-items:center;gap:6px;">설치비
+          <input class="input" id="fin-capex" type="number" value="16" min="1" step="0.5" style="width:75px;"> 억/MW</label>
+        <label style="display:flex;align-items:center;gap:6px;">정책융자
+          <input class="input" id="fin-policy" type="number" value="85" min="0" max="85" style="width:70px;"> %</label>
+        <label style="display:flex;align-items:center;gap:6px;">정책융자 금리
+          <input class="input" id="fin-prate" type="number" value="2.0" min="0" step="0.1" style="width:70px;"> %</label>
+        <label style="display:flex;align-items:center;gap:6px;">마을 자체 조달
+          <input class="input" id="fin-own" type="number" value="30" min="0" max="100" style="width:70px;"> % <span class="text-mute" style="font-size:12px;">(자부담 중)</span></label>
+        <label style="display:flex;align-items:center;gap:6px;">조합원 수
+          <input class="input" id="fin-members" type="number" value="65" min="1" style="width:70px;"> 명</label>
+        <label style="display:flex;align-items:center;gap:6px;">신협 금리
+          <input class="input" id="fin-rate" type="number" value="4.5" min="0" step="0.1" style="width:70px;"> %</label>
+        <label style="display:flex;align-items:center;gap:6px;">신협 상환기간
+          <input class="input" id="fin-term" type="number" value="10" min="1" max="30" style="width:65px;"> 년</label>
+        <button class="btn btn-primary" onclick="finCalc()">계산하기</button>
+      </div>
+      <div id="fin-result" style="margin-top:14px;"></div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;border-left:4px solid #c9a227;">
+      <div class="card-title"><h3 class="serif">융자 약정 전, 마을이 먼저 결정해야 할 5가지</h3>
+        <span class="badge badge-info">총회 안건</span></div>
+      <p class="text-mute" style="margin-top:0;">85% 정책융자는 <b>기회이자 위험</b>입니다. 더 많은 마을이 초기 자기자본 부담 없이 시작할 수 있게 하지만,
+      발전량이 예상보다 적거나 판매 조건이 달라지면 상환 부담이 그대로 마을에 남습니다.
+      아래 다섯 가지는 <b>차입을 의결하는 총회 전에</b> 주민 합의로 정해 두어야 합니다.</p>
+      <table class="tbl">
+        <tbody>
+          <tr><td style="width:44px;"><b>1</b></td>
+            <td><b>주민 1인당 부담액</b>
+            <div class="text-mute" style="font-size:12.5px;">출자금을 1인당 얼마로 할지, 형편이 어려운 주민은 어떻게 할지(분납·차등 출자·미참여 허용 여부)를 정합니다.
+            위 계산기의 <b>1인당 조달액</b>이 기준선입니다. 개인 출자는 전체 주민 출자금의 10% 이내로 제한됩니다.</div></td></tr>
+          <tr><td><b>2</b></td>
+            <td><b>수익 배분 구조 — 개인 배당 / 공동자산 활용 / 둘 다</b>
+            <div class="text-mute" style="font-size:12.5px;">정답은 없습니다. 고령화된 마을에서 현금소득이 급하면 연금·배당형(완주 서봉마을은 70세 이상 월 5만 원, 75세 이상 월 10만 원),
+            공동체 유지가 목표면 급식·교통·장학금 같은 공동사업형(여주 구양리는 무료 마을식당·병원 교통 지원)이 맞습니다.
+            중요한 것은 <b>주민이 직접 정하고 그 합의를 20년간 유지할 수 있는지</b>입니다.
+            수익을 나눌 주민의 범위·거주 요건·신규 전입자의 권리까지 규약에 담으세요.</div></td></tr>
+          <tr><td><b>3</b></td>
+            <td><b>사업 초기 자금 흐름 — 수익 발생 전 선투자</b>
+            <div class="text-mute" style="font-size:12.5px;">인허가·설계·감정평가·계통연계 부담금은 <b>전기를 팔기 전에</b> 나갑니다.
+            착공부터 첫 정산 입금까지 보통 수개월~1년이 걸리므로, 그 기간의 지출 목록과 자금 출처를 미리 표로 만들어 두어야 합니다.
+            융자금 인출 시점과 공사 대금 지급 일정을 맞추는 것도 이 단계에서 정합니다.</div></td></tr>
+          <tr><td><b>4</b></td>
+            <td><b>예상치 못한 비용이 생겼을 때의 대응책</b>
+            <div class="text-mute" style="font-size:12.5px;">계통 접속 지연으로 수익이 늦어지거나, 출력제어로 발전량이 줄거나, 태풍·화재로 설비가 손상되거나,
+            인버터가 예상보다 빨리 고장날 수 있습니다. <b>예비비 적립 비율</b>과 <b>보험 가입 범위</b>(재산종합·배상책임·기업휴지),
+            그리고 그래도 모자랄 때 누가 어떻게 결정할지를 미리 정해 두세요.</div></td></tr>
+          <tr><td><b>5</b></td>
+            <td><b>"조달할 수 있는가"와 "유지할 수 있는가"는 다른 문제</b>
+            <div class="text-mute" style="font-size:12.5px;">대출 승인은 사업의 시작일 뿐입니다. 20년 동안 발전량 확인·설비 점검·교체·회계·세무·총회 운영이 계속되고,
+            그 사이 주민·이장·조합 임원·운영업체가 모두 바뀝니다. <b>사람이 바뀌어도 규칙이 남도록</b>
+            마을회–협동조합 간 협약과 운영 규정을 문서로 만들고, 운영을 전문업체에 맡기더라도 최종 의사결정은 주민에게 남겨 두세요.</div></td></tr>
+        </tbody>
+      </table>
+      <p class="text-mute" style="font-size:12.5px;">※ 위 5가지를 정리하면 <b>차입 의결 총회 의사록</b>과 <b>자금수지계획서</b> 작성이 훨씬 쉬워집니다 — 아래 ④에서 서식을 만들 수 있습니다.</p>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title"><h3 class="serif">② 신청 절차 7단계</h3>
+        <span class="badge badge-info">상담부터 인출까지 통상 2~3개월</span></div>
+      <div class="timeline" style="margin-top:6px;">
+        ${FIN_STEPS.map(([name, head, desc, dur], i) => `
+          <div class="tl-step">
+            <div class="tl-dot">${i+1}</div>
+            <div class="tl-head">${name} — ${head} <span class="badge badge-mute">${dur}</span></div>
+            <div class="tl-body">${desc}</div>
+          </div>`).join('')}
+      </div>
+      <p class="text-mute" style="font-size:12.5px;">※ 소요 기간은 일반적인 경우의 개략치입니다. 총회 소집·감정평가 일정에 따라 더 걸릴 수 있으니
+      <b>착공 예정일에서 최소 3개월을 거꾸로 세어</b> 상담을 시작하세요.</p>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title"><h3 class="serif">③ 제출 서류 체크리스트</h3></div>
+      <p class="text-mute" style="margin-top:0;">준비된 항목을 체크하면 남은 서류를 알려줍니다. 신협마다 요구 서류가 조금씩 다르니 상담 때 확정하세요.</p>
+      <div id="fin-doc-list"></div>
+      <div id="fin-doc-result" style="margin-top:12px;"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><h3 class="serif">④ 제출 서식 자동 작성</h3></div>
+      <p class="text-mute" style="margin-top:0;">우리 조합 정보와 위 계산 결과를 넣어 초안을 만듭니다. <b>제출 전 이사장·담당자 검토가 필요합니다.</b></p>
+      <div class="grid grid-2 mt-20">
+        ${[
+          ['🏦','신협 여신 신청서','대출 신청서 본문 — 신청 금액·자금 용도·상환 재원'],
+          ['📋','차입 의결 총회 의사록','정관에 따른 차입 의결 기록 — 한도·조건·위임 사항'],
+          ['📊','자금수지계획서','20년 발전수익 대비 원리금 상환계획 — 심사 핵심 서류'],
+          ['💰','자부담 조달계획서','설치비 15% 조달 구성 — 공모 인정 재원 기준'],
+        ].map(([icon, title, desc]) => `
+          <div class="feature" style="cursor:pointer;" onclick="startDoc('${escapeHtml(title)}')">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div class="feature-icon">${icon}</div>
+              <span class="badge badge-mute">금융</span>
+            </div>
+            <h3>${title}</h3>
+            <p>${desc}</p>
+          </div>`).join('')}
+      </div>
+      <p class="text-mute" style="font-size:12.5px;">※ 햇소자는 <b>서식 작성과 절차 안내를 돕는 도구</b>입니다. 대출 신청·약정은 조합이 직접 신협과 진행하며,
+      금리·한도·담보 조건은 신협의 심사로 결정됩니다. 햇소자는 자금을 모집하거나 중개하지 않습니다.</p>
+    </div>
+  `;
+}
+
+function finCalc(){
+  const kw     = Math.max(10, Number(document.getElementById('fin-kw').value) || 0);
+  const capex  = Math.max(1,  Number(document.getElementById('fin-capex').value) || 16);
+  const pR     = Math.min(85, Math.max(0, Number(document.getElementById('fin-policy').value) || 0)) / 100;
+  const pRate  = Math.max(0,  Number(document.getElementById('fin-prate').value) || 0) / 100;
+  const ownR   = Math.min(100, Math.max(0, Number(document.getElementById('fin-own').value) || 0)) / 100;
+  const rate   = Math.max(0,  Number(document.getElementById('fin-rate').value) || 0) / 100;
+  const term   = Math.max(1,  Number(document.getElementById('fin-term').value) || 10);
+  const mem    = Math.max(1,  Number(document.getElementById('fin-members').value) || 1);
+
+  const pmt = (P, r, n) => r > 0 ? P * r / (1 - Math.pow(1 + r, -n)) : P / n;
+  const total = capex * 1e8 * (kw / 1000);      // 총 설치비
+  const policy = total * pR;                    // 정책융자
+  const self = total - policy;                  // 자부담 총액
+  const selfCash = self * ownR;                 // 마을 자체 조달 (출자·마을기금)
+  const loan = self - selfCash;                 // 신협 융자 신청액
+  const pPmt = pmt(policy, pRate, 20);          // 정책융자 원리금 (20년)
+  const sPmt = pmt(loan, rate, term);           // 신협 원리금
+  const gen = kw * 8760 * 0.154, rev = gen * 165;   // 한전 매입(고정가격계약) 기준 — 보수적 산정
+  const opex = rev * (0.06 + 0.02 + 0.04 + 0.02);   // 유지관리6+보험2+교체적립4+시스템비용2
+  const net1 = rev - opex - pPmt - sPmt;        // 신협 상환 기간 중
+  const net2 = rev - opex - pPmt;               // 신협 상환 완료 후
+  const dscr = (pPmt + sPmt) > 0 ? (rev - opex) / (pPmt + sPmt) : 0;
+  const selfOK = self / total >= 0.15;
+  _finCalc = {kw, total, policy, self, selfCash, loan, sPmt, pPmt, term, rate, net1, dscr};
+
+  document.getElementById('fin-result').innerHTML = `
+    <div class="grid grid-4">
+      <div class="kpi"><div class="kpi-n">${fmtWon(self)}</div><div class="kpi-l">자부담 총액</div>
+        <div class="kpi-sub">설치비 ${fmtWon(total)}의 ${Math.round(self/total*100)}% ${selfOK ? '— 15% 요건 충족' : '— 15% 이상 필요'}</div></div>
+      <div class="kpi"><div class="kpi-n">${fmtWon(selfCash)}</div><div class="kpi-l">마을 자체 조달</div>
+        <div class="kpi-sub">조합원 ${mem}명 · <b>1인당 ${fmtWon(selfCash/mem)}</b></div></div>
+      <div class="kpi"><div class="kpi-n" style="color:var(--primary);">${fmtWon(loan)}</div><div class="kpi-l">신협 융자 신청액</div>
+        <div class="kpi-sub">연 ${(rate*100).toFixed(1)}% · ${term}년 균등상환</div></div>
+      <div class="kpi"><div class="kpi-n" style="color:${dscr >= 1.2 ? 'var(--primary)' : dscr >= 1 ? '#9c6a00' : 'var(--danger)'};">${dscr.toFixed(2)}</div>
+        <div class="kpi-l">상환능력 배수 (DSCR)</div>
+        <div class="kpi-sub">1.2 이상이면 심사에 유리</div></div>
+    </div>
+    <table class="tbl" style="margin-top:10px;">
+      <thead><tr><th>구분</th><th style="text-align:right;">금액</th><th>비고</th></tr></thead>
+      <tbody>
+        <tr><td><b>총 설치비</b></td><td style="text-align:right;">${fmtWon(total)}</td>
+          <td class="text-mute" style="font-size:12.5px;">${kw.toLocaleString()}kW × ${capex}억/MW · 부지 매입비·ESS 별도</td></tr>
+        <tr><td>정책융자 (${Math.round(pR*100)}%)</td><td style="text-align:right;">${fmtWon(policy)}</td>
+          <td class="text-mute" style="font-size:12.5px;">연 ${(pRate*100).toFixed(1)}% · 20년 → 원리금 연 ${fmtWon(pPmt)}</td></tr>
+        <tr><td>자부담 (${Math.round(self/total*100)}%) 중 마을 자체</td><td style="text-align:right;">${fmtWon(selfCash)}</td>
+          <td class="text-mute" style="font-size:12.5px;">상환 부담 없음 — 개인 출자는 전체 주민 출자금의 10% 이내</td></tr>
+        <tr><td><b>자부담 중 신협 융자</b></td><td style="text-align:right;"><b>${fmtWon(loan)}</b></td>
+          <td class="text-mute" style="font-size:12.5px;">연 ${(rate*100).toFixed(1)}% · ${term}년 → 원리금 연 ${fmtWon(sPmt)}</td></tr>
+        <tr style="background:var(--paper-soft);"><td><b>연간 총 원리금</b></td>
+          <td style="text-align:right;"><b>${fmtWon(pPmt + sPmt)}</b></td>
+          <td class="text-mute" style="font-size:12.5px;">매출 ${fmtWon(rev)}의 ${Math.round((pPmt+sPmt)/rev*100)}%</td></tr>
+      </tbody>
+    </table>
+    <table class="tbl" style="margin-top:10px;">
+      <thead><tr><th>기간</th><th style="text-align:right;">마을에 남는 돈 (연)</th><th>설명</th></tr></thead>
+      <tbody>
+        <tr><td><b>1~${term}년차</b></td>
+          <td style="text-align:right;"><b style="color:${net1 > 0 ? 'var(--primary)' : 'var(--danger)'};">${fmtWon(net1)}</b></td>
+          <td class="text-mute" style="font-size:12.5px;">정책융자 + 신협 융자를 함께 갚는 기간 — 가장 빡빡합니다</td></tr>
+        <tr><td><b>${term+1}~20년차</b></td>
+          <td style="text-align:right;"><b style="color:var(--primary);">${fmtWon(net2)}</b></td>
+          <td class="text-mute" style="font-size:12.5px;">신협 융자 상환 완료 후 — 그만큼 공동소득이 늘어납니다</td></tr>
+      </tbody>
+    </table>
+    ${net1 <= 0 ? `<div style="background:var(--paper-soft);border-radius:8px;padding:12px 14px;margin-top:10px;">
+      <b style="color:var(--danger);">상환 기간 중 남는 돈이 없습니다</b>
+      <p class="text-mute" style="font-size:13px;margin:4px 0 0;">마을 자체 조달 비율을 높여 융자액을 줄이거나, 상환기간을 늘려 연 부담을 낮춰야 합니다.
+      이 상태로 약정하면 배당도 공동사업도 할 수 없고, 설비 고장 같은 돌발 지출에 대응할 수 없습니다.</p></div>`
+    : dscr < 1.2 ? `<div style="background:var(--paper-soft);border-radius:8px;padding:12px 14px;margin-top:10px;">
+      <b style="color:#9c6a00;">상환능력 배수(DSCR)가 1.2에 못 미칩니다</b>
+      <p class="text-mute" style="font-size:13px;margin:4px 0 0;">금융기관은 통상 발전수익이 원리금의 1.2배 이상일 때 안정적으로 봅니다.
+      마을 자체 조달을 늘리거나 상환기간을 늘리는 방향으로 조정해 상담하세요.</p></div>` : ''}
+    <p class="text-mute" style="font-size:12.5px;">※ 이용률 15.4%, 한전 매입 165원/kWh, 운영비 매출의 14%
+    (유지관리 6 + 보험 2 + 시설교체 적립 4 + 시스템비용 적립 2) 가정의 <b>추산</b>입니다.
+    신협 금리·기간은 <b>예시 기본값</b>이며 실제 조건은 신협 심사로 결정됩니다. 토지 임대료가 있으면 남는 돈은 그만큼 줄어듭니다.
+    <b>자부담까지 융자로 채우면 설치비 전액이 차입이 되어 20년 부담이 커진다는 점</b>을 총회에서 충분히 설명하세요.</p>`;
+}
+
+function finRenderDocs(){
+  const box = document.getElementById('fin-doc-list');
+  if(!box) return;
+  box.innerHTML = FIN_DOCS.map(([group, items]) => `
+    <div style="margin-bottom:10px;">
+      <div style="font-weight:700;font-size:13.5px;margin-bottom:4px;">${group}</div>
+      ${items.map(it => `<label style="display:flex;gap:8px;align-items:flex-start;font-size:13.5px;padding:3px 0;cursor:pointer;">
+        <input type="checkbox" class="fin-chk" onchange="finDocScore()" style="margin-top:3px;"><span>${it}</span></label>`).join('')}
+    </div>`).join('');
+  finDocScore();
+}
+function finDocScore(){
+  const all = [...document.querySelectorAll('.fin-chk')];
+  const done = all.filter(b => b.checked).length;
+  const out = document.getElementById('fin-doc-result');
+  if(!out) return;
+  const flat = FIN_DOCS.flatMap(([, items]) => items);
+  const miss = flat.filter((_, i) => all[i] && !all[i].checked);
+  out.innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <span style="display:inline-block;flex:1;min-width:160px;height:12px;background:var(--paper-soft);border-radius:6px;overflow:hidden;">
+        <span style="display:block;height:100%;width:${done/all.length*100}%;background:${done === all.length ? 'var(--primary)' : '#c9a227'};"></span></span>
+      <b>${done} / ${all.length} 준비 완료</b>
+    </div>
+    <p class="text-mute" style="font-size:13px;margin:8px 0 0;">${done === all.length
+      ? '서류가 모두 준비되었습니다. 신협 여신 담당자와 접수 일정을 잡으세요.'
+      : `남은 서류 ${miss.length}건: <b>${miss.slice(0,4).join(' · ')}</b>${miss.length > 4 ? ` 외 ${miss.length-4}건` : ''}.
+         등기·인감·감정평가는 발급에 시간이 걸리니 먼저 신청하세요.`}</p>`;
 }
 
 /* ─── 발전·정산·배당 (운영 단계 핵심) ─── */
@@ -2453,6 +2745,10 @@ function memDocs(){
     {icon:'📊', title:'결산 보고서', desc:'회계연도 결산·감사 보고', tag:'회계'},
     {icon:'📝', title:'이사회 회의록', desc:'이사회 소집·의결 기록', tag:'운영'},
     {icon:'📃', title:'발전사업 허가 신청서', desc:'전기사업법상 발전사업 허가', tag:'인허가'},
+    {icon:'🏦', title:'신협 여신 신청서', desc:'자부담 15% 융자 신청서', tag:'금융'},
+    {icon:'📋', title:'차입 의결 총회 의사록', desc:'정관에 따른 차입 의결 기록', tag:'금융'},
+    {icon:'📊', title:'자금수지계획서', desc:'발전수익 대비 원리금 상환계획', tag:'금융'},
+    {icon:'💰', title:'자부담 조달계획서', desc:'설치비 15% 조달 구성', tag:'금융'},
     {icon:'📑', title:'분양 계약서', desc:'조합원 분양·출자 계약', tag:'계약'},
   ];
   return `
@@ -3959,7 +4255,11 @@ function svDiagnose(){
   const over = raw > SV_LIMIT.max, under = raw < SV_LIMIT.min;
   _svDiag = {type, area, land, raw, plan};
   const landMsg = {
-    '공공': ['badge-success', '공공부지 — 권장', '저수지·국유지·시군유지·도로 법면 등 공공부지는 임대료 부담이 낮아 마을에 남는 몫이 큽니다. 관리청 사용허가·임대의향서를 미리 확인하세요.'],
+    '공공': ['badge-success', '공공부지 — 권장', '저수지·국유지·시군유지·도로 법면 등 공공부지가 가장 유리합니다. '
+      + '<b>재생에너지 설비 설치를 위해 국·공유재산을 임대하면 사용료(대부료)를 약 80% 감면받습니다</b> '
+      + '— 통상 재산가액의 5% 수준인 요율이 1% 수준으로 낮아집니다(신재생에너지법상 국유·공유재산 임대 특례). '
+      + '즉 같은 땅이라도 개인 토지를 빌리는 것보다 임대료 부담이 훨씬 작아 마을에 남는 몫이 커집니다. '
+      + '감면 여부·요율은 재산 종류와 관리청(지자체 조례 포함)에 따라 달라지므로, 관리청에 <b>사용허가·대부 신청과 감면 적용</b>을 함께 확인하고 임대의향서를 받아 두세요.'],
     '마을': ['badge-success', '마을 공동 소유 — 양호', '임대료 부담이 없어 유리합니다. 마을 공동재산 처분·사용에 관한 총회 의결 절차를 확인하세요.'],
     '개인': ['badge-warn', '개인 소유 — 임대료 주의', '임대료가 높으면 발전수익 가운데 마을에 남는 몫이 그만큼 줄어듭니다. 20년 임대 조건과 연 임대료를 ②번 계산기에 넣어 순수익을 꼭 확인하세요.'],
   }[land];
@@ -4010,33 +4310,51 @@ function svCalc(){
   const loanR = Math.min(85, Math.max(0, Number(document.getElementById('calc-loan').value) || 0)) / 100;
   const rate  = Math.max(0,  Number(document.getElementById('calc-rate').value) || 0) / 100;
   const rent  = Math.max(0,  Number(document.getElementById('calc-rent').value) || 0) * 1e4; // 원/년
+  const init  = Math.max(0,  Number(document.getElementById('calc-init').value) || 0) * 1e4; // 초기 부대비용 (원)
+  const sysR  = Math.max(0,  Number(document.getElementById('calc-sys').value) || 0) / 100;
+
+  const pKepco = Math.max(0, Number(document.getElementById('calc-kepco').value) || 0);
+  const pPpa   = Math.max(0, Number(document.getElementById('calc-ppa').value) || 0);
+  const pFee   = Math.max(0, Number(document.getElementById('calc-ppafee').value) || 0);
 
   const YEARS = 20;
   const gen = kw * 8760 * 0.154;                       // 연간 발전량 kWh (이용률 15.4%)
-  const scenarios = [140, 165, 185].map(p => ({p, rev: gen * p}));
-  const base = scenarios[1];                           // 기준 165원/kWh
   const total = capex * 1e8 * (kw / 1000);             // 총 설치비
   const loan = total * loanR, own = total - loan;      // 융자 / 자부담
   const pmt = rate > 0                                 // 20년 원리금 균등상환
     ? loan * rate / (1 - Math.pow(1 + rate, -YEARS))
     : loan / YEARS;
-  const om = base.rev * 0.08;                          // 유지관리비·보험료 (매출의 8% 가정)
-  const repl = base.rev * 0.04;                        // 인버터 등 설비 교체 적립 (4% 가정)
-  const cost = pmt + om + repl + rent;
-  const net = base.rev - cost;                         // 마을에 남는 돈
+  const initY = init / YEARS;                          // 초기 부대비용 20년 상각
   const ownOK = loanR <= 0.85 && (own / total) >= 0.15;
-  _svCalc = {kw, homes, gen, rev: base.rev, net, total, own, loan, pmt};
+
+  /* 판매 방식별 매출·비용·순수익 — 매출 비례 비용은 방식별로 재계산 */
+  const model = (label, unit, memo) => {
+    const rev = gen * unit;
+    const om = rev * 0.06, ins = rev * 0.02, repl = rev * 0.04, sys = rev * sysR;
+    const cost = pmt + om + ins + repl + sys + rent + initY;
+    return {label, unit, memo, rev, om, ins, repl, sys, cost, net: rev - cost};
+  };
+  const kepco = model('한전 매입', pKepco, `SMP+REC 고정가격계약 ${pKepco}원/kWh`);
+  const ppa   = model('PPA (전력구매계약)', Math.max(0, pPpa - pFee), `계약 ${pPpa}원 − 부대비용 ${pFee}원 = 실수령 ${Math.max(0, pPpa - pFee)}원/kWh`);
+  const base = kepco;                                  // 기준 방식 = 한전 매입
+  const net = base.net;
+  _svCalc = {kw, homes, gen, rev: base.rev, net, total, own, loan, pmt, cost: base.cost,
+             kepcoNet: kepco.net, ppaNet: ppa.net};
 
   const rows = [
-    ['연간 발전수익 (매출)', base.rev, '165원/kWh 기준 · 발전량 ' + Math.round(gen/1000).toLocaleString() + 'MWh'],
-    ['− 대출 원리금', -pmt, loanR ? `융자 ${fmtWon(loan)} · 연 ${(rate*100).toFixed(1)}% · ${YEARS}년 균등상환` : '융자 없음'],
-    ['− 유지관리비·보험료', -om, '매출의 8% 가정 — 실제는 계약 조건에 따라 다름'],
-    ['− 설비 교체 적립', -repl, '인버터는 통상 10~15년차 교체 — 미리 적립하지 않으면 그때 목돈 필요'],
-    ['− 토지 임대료', -rent, rent ? '입력값' : '공공·마을 부지면 0'],
+    ['연간 발전수익 (매출)', base.rev, `${base.memo} · 발전량 ${Math.round(gen/1000).toLocaleString()}MWh`],
+    ['− 대출 원금과 이자', -pmt, loanR ? `융자 ${fmtWon(loan)} · 연 ${(rate*100).toFixed(1)}% · ${YEARS}년 균등상환` : '융자 없음'],
+    ['− 유지관리비', -base.om, '매출의 6% 가정 — 모듈 세척·제초·점검·고장 수리'],
+    ['− 보험료', -base.ins, '매출의 2% 가정 — 재산종합·배상책임·기업휴지'],
+    ['− 시설 교체비 적립', -base.repl, '인버터는 통상 10~15년차 교체 — 미리 적립하지 않으면 그때 목돈 필요'],
+    ['− 초기 인허가·설계·계통연계비 상각', -initY, `초기 ${fmtWon(init)}을 ${YEARS}년으로 나눈 금액 — 인허가 수수료·설계비·한전 접속설비 부담금`],
+    ['− 향후 시스템 비용 적립', -base.sys, `매출의 ${(sysR*100).toFixed(1)}% — ESS 설치·송전망 확충 분담 등 제도 변화 대응`],
+    ['− 토지 임대료', -rent, rent ? '입력값' : '마을 소유면 0 · 국공유지는 사용료 약 80% 감면 적용'],
   ];
+  const better = ppa.net > kepco.net ? ppa : kepco;
   document.getElementById('calc-result').innerHTML = `
     <div class="grid grid-4">
-      <div class="kpi"><div class="kpi-n">${fmtWon(base.rev)}</div><div class="kpi-l">연간 매출</div>
+      <div class="kpi"><div class="kpi-n">${fmtWon(base.rev)}</div><div class="kpi-l">연간 매출 (한전 매입)</div>
         <div class="kpi-sub">발전소가 버는 돈</div></div>
       <div class="kpi"><div class="kpi-n" style="color:${net > 0 ? 'var(--primary)' : 'var(--danger)'};">${fmtWon(net)}</div>
         <div class="kpi-l">연간 마을에 남는 돈</div><div class="kpi-sub">모든 비용을 뺀 실제 공동소득</div></div>
@@ -4045,7 +4363,40 @@ function svCalc(){
       <div class="kpi"><div class="kpi-n">${fmtWon(own)}</div><div class="kpi-l">필요 자부담</div>
         <div class="kpi-sub">${ownOK ? '설치비의 15% 이상 — 요건 충족' : '설치비의 15% 이상 확보 필요'}</div></div>
     </div>
-    <table class="tbl" style="margin-top:10px;">
+
+    <h4 style="margin:14px 0 6px;font-size:14.5px;">전기 판매 방식 비교</h4>
+    <table class="tbl">
+      <thead><tr><th>구분</th><th style="text-align:right;">한전 매입</th><th style="text-align:right;">PPA (전력구매계약)</th></tr></thead>
+      <tbody>
+        <tr><td>적용 단가</td>
+          <td style="text-align:right;">${pKepco}원/kWh</td>
+          <td style="text-align:right;">${Math.max(0, pPpa - pFee)}원/kWh <span class="text-mute" style="font-size:12px;">(${pPpa} − ${pFee})</span></td></tr>
+        <tr><td>연간 매출</td>
+          <td style="text-align:right;">${fmtWon(kepco.rev)}</td>
+          <td style="text-align:right;">${fmtWon(ppa.rev)}</td></tr>
+        <tr><td>연간 총비용</td>
+          <td style="text-align:right;color:var(--danger);">−${fmtWon(kepco.cost)}</td>
+          <td style="text-align:right;color:var(--danger);">−${fmtWon(ppa.cost)}</td></tr>
+        <tr style="background:var(--paper-soft);"><td><b>마을에 남는 돈 (연)</b></td>
+          <td style="text-align:right;"><b style="color:${kepco.net > 0 ? 'var(--primary)' : 'var(--danger)'};">${fmtWon(kepco.net)}</b></td>
+          <td style="text-align:right;"><b style="color:${ppa.net > 0 ? 'var(--primary)' : 'var(--danger)'};">${fmtWon(ppa.net)}</b></td></tr>
+        <tr><td>20년 누계</td>
+          <td style="text-align:right;">${fmtWon(kepco.net * YEARS)}</td>
+          <td style="text-align:right;">${fmtWon(ppa.net * YEARS)}</td></tr>
+      </tbody>
+    </table>
+    <div style="background:var(--paper-soft);border-radius:8px;padding:12px 14px;margin-top:10px;">
+      <b>이 조건에서는 «${better.label}»이 연 ${fmtWon(Math.abs(kepco.net - ppa.net))} 유리합니다</b>
+      <p class="text-mute" style="font-size:13px;margin:4px 0 0;">
+      <b>한전 매입</b>은 SMP+REC 장기 고정가격계약으로 <b>20년 단가가 확정</b>되어 상환계획을 세우기 쉽고, 판매처를 따로 구할 필요가 없습니다.
+      대신 단가 상승 여지가 없습니다.<br>
+      <b>PPA</b>는 RE100이 필요한 기업에 직접 팔아 <b>단가를 더 받을 수 있지만</b>, 망 이용료·부가정산금을 발전사업자가 부담하고
+      <b>계약 상대를 직접 구해야</b> 합니다. 계약기간이 짧으면 만료 후 판매처를 다시 찾아야 하는 위험도 있습니다.<br>
+      1MW 이하 마을 발전소는 통상 <b>한전 매입(고정가격계약)</b>으로 시작하고, 인근에 RE100 수요 기업이 있을 때 PPA를 검토합니다.</p>
+    </div>
+
+    <h4 style="margin:14px 0 6px;font-size:14.5px;">한전 매입 기준 상세 — 매출에서 무엇을 빼는가</h4>
+    <table class="tbl">
       <thead><tr><th>구분</th><th style="text-align:right;">금액 (연)</th><th>비고</th></tr></thead>
       <tbody>${rows.map(([n, v, memo]) => `
         <tr><td><b>${n}</b></td>
@@ -4061,19 +4412,9 @@ function svCalc(){
       <p class="text-mute" style="font-size:13px;margin:4px 0 0;">설치비·금리·임대료를 낮추거나 자부담을 늘려 융자 규모를 줄여야 합니다.
       <b>"사업비 조달이 가능한가"와 "20년간 사업을 유지할 수 있는가"는 별개의 문제입니다.</b>
       업체가 제시한 설치비와 예상 수익을 이 표에 넣어 직접 확인하고, 여러 업체 견적을 비교하세요.</p></div>` : ''}
-    <table class="tbl" style="margin-top:10px;">
-      <thead><tr><th>판매단가 시나리오</th>${scenarios.map(s => `<th>${s.p}원/kWh</th>`).join('')}</tr></thead>
-      <tbody>
-        <tr><td>연간 매출</td>${scenarios.map(s => `<td>${fmtWon(s.rev)}</td>`).join('')}</tr>
-        <tr><td><b>마을에 남는 돈</b></td>${scenarios.map(s => {
-          const n2 = s.rev - (pmt + s.rev*0.08 + s.rev*0.04 + rent);
-          return `<td><b style="color:${n2 > 0 ? 'var(--primary)' : 'var(--danger)'};">${fmtWon(n2)}</b></td>`;
-        }).join('')}</tr>
-      </tbody>
-    </table>
     <p class="text-mute" style="font-size:12.5px;">※ 이용률 15.4%, 1MW 설치비 약 16억 원, 정책융자 최대 85%(자부담 15%) 기준의 <b>추산</b>입니다.
-    부지 확보 방식·금리·상환조건이 마을마다 달라 실제 순수익은 변동됩니다. 초기 인허가·설계비와 계통연계 추가 비용,
-    ESS 설치비는 위 계산에 포함되지 않았습니다(부지 매입비·ESS 비용은 자부담 15% 산정에서도 별도).
+    단가·금리·상환조건·임대료가 마을마다 달라 실제 순수익은 변동되므로, 업체와 신협이 제시한 실제 숫자를 넣어 다시 계산하세요.
+    부지 매입비와 ESS 설치비는 설치비·자부담 15% 산정에서 별도이며 위 계산에도 포함되지 않았습니다.
     <b>남은 돈을 개인 배당에 쓸지 공동사업에 쓸지는 조합 총회가 정합니다.</b></p>`;
 }
 
@@ -5367,6 +5708,44 @@ const REVIEW_GUIDE = {
 };
 
 const DOC_FIELDS = {
+  '신협 여신 신청서': [
+    {k:'coop_name', label:'조합 이름', req:true},
+    {k:'bank',      label:'신청 신협', ph:'예: ○○신용협동조합 ○○지점', req:true},
+    {k:'amount',    label:'융자 신청액 (백만원)', type:'number', ph:'예: 166', req:true},
+    {k:'term',      label:'희망 상환기간 (년)', type:'number', ph:'예: 10'},
+    {k:'capacity',  label:'발전설비 용량 (kW)', type:'number', ph:'예: 990'},
+    {k:'total',     label:'총 설치비 (백만원)', type:'number', ph:'예: 1584'},
+    {k:'collateral',label:'담보·보증 제공 내용', type:'textarea', ph:'예: 발전부지 근저당 설정 예정, 발전설비 양도담보, 이사장 연대보증 협의 중'},
+  ],
+  '차입 의결 총회 의사록': [
+    {k:'coop_name', label:'조합 이름', req:true},
+    {k:'date',      label:'회의 일시', type:'datetime-local', req:true},
+    {k:'place',     label:'회의 장소', ph:'예: ○○리 마을회관'},
+    {k:'members',   label:'총 조합원 수', type:'number', ph:'예: 65'},
+    {k:'attendees', label:'참석 조합원 수 (위임 포함)', type:'number', ph:'예: 48'},
+    {k:'bank',      label:'차입 금융기관', ph:'예: ○○신용협동조합'},
+    {k:'amount',    label:'차입 한도 (백만원)', type:'number', ph:'예: 166'},
+    {k:'term',      label:'상환기간 (년)', type:'number', ph:'예: 10'},
+    {k:'rate',      label:'예상 금리 (%)', type:'number', step:'0.1', ph:'예: 4.5'},
+  ],
+  '자금수지계획서': [
+    {k:'coop_name', label:'조합 이름', req:true},
+    {k:'capacity',  label:'발전설비 용량 (kW)', type:'number', ph:'예: 990', req:true},
+    {k:'revenue',   label:'연간 예상 매출 (백만원)', type:'number', ph:'예: 220'},
+    {k:'policy_pmt',label:'정책융자 연 원리금 (백만원)', type:'number', ph:'예: 82'},
+    {k:'loan_pmt',  label:'신협 융자 연 원리금 (백만원)', type:'number', ph:'예: 21'},
+    {k:'opex',      label:'연간 운영비 (유지관리·보험·교체적립, 백만원)', type:'number', ph:'예: 26'},
+    {k:'rent',      label:'연간 토지 임대료 (백만원)', type:'number', ph:'예: 0'},
+  ],
+  '자부담 조달계획서': [
+    {k:'coop_name', label:'조합 이름', req:true},
+    {k:'total',     label:'총 설치비 (백만원)', type:'number', ph:'예: 1584', req:true},
+    {k:'self',      label:'자부담 총액 (백만원)', type:'number', ph:'예: 238'},
+    {k:'fund_share',label:'조합원 출자 (백만원)', type:'number', ph:'예: 45'},
+    {k:'fund_village', label:'마을기금 (백만원)', type:'number', ph:'예: 26'},
+    {k:'fund_loan', label:'지역 상호금융 융자 (백만원)', type:'number', ph:'예: 166'},
+    {k:'fund_policy', label:'지방정부 보조·정책자금 (백만원)', type:'number', ph:'예: 0'},
+  ],
   '조합 정관': [
     {k:'coop_name', label:'조합 이름', ph:'예: 완도청산햇빛소득협동조합', req:true},
     {k:'address',   label:'주 사무소 주소', ph:'예: 전남광주통합특별시 완도군 청산면 ○○리 123', req:true},
@@ -5550,8 +5929,175 @@ function showDocPreview(name, values, fallbackNote){
 
 function renderSampleDoc(name, v){
   const coop = escapeHtml(v.coop_name || '(조합 이름 미입력)');
-  const today = new Date().toISOString().slice(0,10);
+  const _d = new Date();
+  const today = `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`;
+  const mm = n => Number(n || 0);                       // 백만원 단위 입력값
+  const won = n => fmtWon(mm(n) * 1e6);                 // 백만원 → 사람이 읽는 금액
   switch(name){
+    case '신협 여신 신청서': return `
+      <h3>여신(대출) 신청서</h3>
+      <h4>1. 신청인</h4>
+・ 법인명: ${coop}
+・ 대표자: (이사장 성명)
+・ 사업자등록번호 / 설립인가번호: (기재)
+・ 주 사무소: (조합 정관 기재 주소)
+・ 연락처: (담당자 성명 / 전화)
+
+      <h4>2. 신청 내용</h4>
+・ 신청 금융기관: ${escapeHtml(v.bank || '(신협명 미입력)')}
+・ 신청 금액: ${mm(v.amount).toLocaleString()}백만원 (${won(v.amount)})
+・ 희망 상환기간: ${escapeHtml(String(v.term || '10'))}년 (원리금 균등상환 희망)
+・ 자금 용도: 햇빛소득마을 태양광 발전사업 <strong>자부담분(설치비의 15% 이상)</strong> 조달
+・ 상환 재원: 발전소 전력 판매수익 (한전 고정가격계약 기준)
+
+      <h4>3. 사업 개요</h4>
+・ 사업명: 햇빛소득마을 태양광 발전사업
+・ 발전설비 용량: ${escapeHtml(String(v.capacity || 'OOO'))}kW (공모 기준 300~1,000kW)
+・ 총 설치비: ${mm(v.total).toLocaleString()}백만원 (${won(v.total)})
+・ 자금 조달 구조: 정책융자 85% + 자부담 15%(본 신청 포함)
+・ 사업 근거: 햇빛소득마을 공모 선정 (선정 통보서 첨부)
+・ 전력 판매: 한전 매입(SMP+REC 고정가격계약) — 20년 단가 확정 구조
+
+      <h4>4. 담보·보증</h4>
+${escapeHtml(v.collateral || '(담보 및 보증 제공 내용 기재 — 발전부지 근저당, 발전설비 양도담보, 보험금 질권설정, 이사장 연대보증 등 신협 협의 결과)')}
+
+      <h4>5. 첨부 서류</h4>
+① 협동조합 등기사항전부증명서, 사업자등록증 사본, 정관
+② 차입 의결 총회 의사록, 법인 인감증명서·사용인감계
+③ 햇빛소득마을 선정 통보서, 발전사업 허가증(또는 접수 증빙)
+④ 사업계획서, 자금수지계획서, 자부담 조달계획서
+⑤ 공사 도급계약서(또는 견적서), 한전 계통연계 검토의견
+⑥ 조합원 출자금 납입 증빙, 마을기금 통장 사본
+⑦ 부지 등기부등본·토지대장 (임차 시 토지사용 승낙서·임대차계약서)
+
+위와 같이 여신을 신청합니다.
+
+${today}
+신청인: ${coop} 이사장 (인)`;
+
+    case '차입 의결 총회 의사록': return `
+      <h3>${coop} 임시총회 의사록</h3>
+      <h4>1. 개회</h4>
+・ 일시: ${escapeHtml(String(v.date || '(일시 미입력)')).replace('T', ' ')}
+・ 장소: ${escapeHtml(v.place || '(장소 미입력)')}
+・ 총 조합원 수: ${escapeHtml(String(v.members || 'OO'))}명
+・ 참석 조합원 수: ${escapeHtml(String(v.attendees || 'OO'))}명 (위임 포함)
+・ 정관에 정한 의사정족수를 충족하여 총회가 적법하게 성립되었음을 의장이 선포함
+
+      <h4>2. 안건 — 사업 자부담금 조달을 위한 차입 승인의 건</h4>
+의장은 햇빛소득마을 태양광 발전사업의 <strong>자부담분(설치비의 15% 이상)</strong> 조달을 위하여
+아래 조건으로 금융기관 차입이 필요함을 설명하고 심의를 요청함.
+
+・ 차입 금융기관: ${escapeHtml(v.bank || '(금융기관명)')}
+・ 차입 한도: ${mm(v.amount).toLocaleString()}백만원 (${won(v.amount)}) 이내
+・ 상환기간: ${escapeHtml(String(v.term || '10'))}년 (원리금 균등상환)
+・ 예상 금리: 연 ${escapeHtml(String(v.rate || 'O.O'))}% (실제 금리는 금융기관 심사로 확정)
+・ 상환 재원: 발전소 전력 판매수익
+・ 담보 제공: 발전부지 및 발전설비 등 (금융기관 요구에 따름)
+
+      <h4>3. 심의 내용</h4>
+의장은 다음 사항을 조합원에게 설명하고 질의응답을 진행함.
+① 조합원 1인당 출자 부담액과 납입 방법
+② 발전수익의 배분 구조 (개인 배당 / 공동자산 활용 / 병행) 및 그 결정 절차
+③ 사업 초기 자금 흐름 — 전력 판매 개시 전 선투자 항목과 자금 출처
+④ 예상치 못한 비용(계통 지연·출력제어·설비 고장) 발생 시 대응 방안과 예비비
+⑤ 차입 원리금 상환이 20년간 지속된다는 점과 사업 유지 체계
+
+      <h4>4. 의결</h4>
+위 안건에 대하여 표결한 결과 참석 조합원 ○○명 중 찬성 ○○명, 반대 ○명, 기권 ○명으로
+정관이 정한 의결정족수를 충족하여 <strong>원안대로 가결</strong>되었음을 의장이 선포함.
+
+아울러 차입 약정 체결, 담보 제공, 부속 서류 작성 등 세부 사항은
+<strong>이사장에게 위임</strong>하되, 차입 한도와 상환기간의 변경은 다시 총회 의결을 받도록 함.
+
+      <h4>5. 폐회</h4>
+이상으로 모든 안건의 심의를 마치고 의장이 폐회를 선언함.
+
+위 의사록의 내용이 사실과 다름없음을 확인하며 아래와 같이 기명·날인함.
+
+${today}
+의장(이사장): (인)   이사: (인)   이사: (인)   감사: (인)`;
+
+    case '자금수지계획서': {
+      const rev = mm(v.revenue), pP = mm(v.policy_pmt), lP = mm(v.loan_pmt), op = mm(v.opex), rt = mm(v.rent);
+      const cost = pP + lP + op + rt, net = rev - cost;
+      const dscr = (pP + lP) > 0 ? (rev - op - rt) / (pP + lP) : 0;
+      return `
+      <h3>${coop} 자금수지계획서</h3>
+      <h4>1. 사업 개요</h4>
+・ 발전설비 용량: ${escapeHtml(String(v.capacity || 'OOO'))}kW
+・ 전력 판매 방식: 한전 매입(SMP+REC 고정가격계약) 기준 산정
+・ 계획 기간: 20년 (발전 개시 후)
+
+      <h4>2. 연간 수지 계획 (단위: 백만원)</h4>
+・ 수입 — 전력 판매수익: ${rev.toLocaleString()} (${won(v.revenue)})
+・ 지출 — 정책융자 원리금: ${pP.toLocaleString()}
+・ 지출 — 금융기관 융자 원리금: ${lP.toLocaleString()}
+・ 지출 — 운영비 (유지관리·보험료·시설교체 적립·시스템비용 적립): ${op.toLocaleString()}
+・ 지출 — 토지 임대료: ${rt.toLocaleString()}${rt === 0 ? ' (마을 소유 또는 국공유지 사용료 감면 적용)' : ''}
+・ 지출 합계: ${cost.toLocaleString()}
+・ <strong>연간 수지(잉여): ${net.toLocaleString()} (${won(net)})</strong>
+
+      <h4>3. 상환능력 검토</h4>
+・ 원리금 상환 전 영업현금흐름: ${(rev - op - rt).toLocaleString()}백만원
+・ 연간 원리금 합계: ${(pP + lP).toLocaleString()}백만원
+・ <strong>상환능력 배수(DSCR): ${dscr.toFixed(2)}</strong> ${dscr >= 1.2 ? '— 안정 범위(1.2 이상)' : '— 1.2 미만, 조달 구조 조정 검토 필요'}
+
+      <h4>4. 수지 변동 요인과 대응</h4>
+① 발전량 변동 — 일사량·설비 이용률에 따라 매출이 달라짐. 보수적 이용률로 산정함
+② 계통 접속 지연·출력제어 — 판매 개시 지연 시 상환 개시 시점 조정을 금융기관과 협의
+③ 설비 고장·교체 — 인버터 등 교체비를 운영비에 매년 적립
+④ 제도 변화 — ESS 설치·송전망 확충 분담 등 향후 시스템 비용을 운영비에 반영
+⑤ 예비비 — 위 항목 외 돌발 지출에 대응하기 위해 잉여금의 일부를 적립
+
+      <h4>5. 잉여금 활용</h4>
+연간 수지 잉여금은 조합 총회 의결에 따라 조합원 배당 및 마을 공동사업에 사용하며,
+상환 완료 이후에는 원리금 상환액만큼 공동소득이 증가함.
+
+${today}
+작성: ${coop} (인)`;
+    }
+
+    case '자부담 조달계획서': {
+      const tot = mm(v.total), self = mm(v.self);
+      const parts = [
+        ['조합원 출자금', mm(v.fund_share), '마을 공동체 재원 — 개인 출자는 전체 주민 출자금의 10% 이내'],
+        ['마을기금 (기존 기금·마을펀딩)', mm(v.fund_village), '마을 공동체 재원'],
+        ['지역 상호금융 융자', mm(v.fund_loan), '농·수협·새마을금고·신협 — 공모 인정 재원 (과도한 배당 지양)'],
+        ['지방정부 보조·정책자금', mm(v.fund_policy), '정부·지방정부 지원 — 공모 인정 재원'],
+      ];
+      const sum = parts.reduce((a, p) => a + p[1], 0);
+      const ratio = tot > 0 ? self / tot * 100 : 0;
+      return `
+      <h3>${coop} 자부담 조달계획서</h3>
+      <h4>1. 자부담 요건</h4>
+・ 총 태양광 설치비: ${tot.toLocaleString()}백만원 (${won(v.total)})
+・ 자부담 총액: ${self.toLocaleString()}백만원 (${won(v.self)}) — 설치비의 <strong>${ratio.toFixed(1)}%</strong>
+・ 공모 요건: 설치비의 <strong>15% 이상</strong> ${ratio >= 15 ? '→ 충족' : '→ 미달, 추가 확보 필요'}
+・ 유의: <strong>부지 매입비와 ESS 설치비는 위 15% 산정에서 별도</strong>
+
+      <h4>2. 조달 구성 (단위: 백만원)</h4>
+${parts.map(([n, amt, memo]) => `・ ${n}: ${amt.toLocaleString()} — ${memo}`).join('\n')}
+・ <strong>조달 합계: ${sum.toLocaleString()}</strong> ${Math.abs(sum - self) < 1 ? '(자부담 총액과 일치)' : `(자부담 총액과 ${(sum - self).toLocaleString()} 차이 — 확인 필요)`}
+
+      <h4>3. 공모 인정 재원 확인</h4>
+본 조합은 자부담 재원을 <strong>마을 공동체(출자금·마을기금), 정부·지방정부 정책자금,
+지역 상호금융기관(농·수협·새마을금고·신협)</strong>으로만 조달하며,
+그 밖의 외부 재원은 조달하지 않습니다.
+
+※ 위 외의 외부 재원을 지원받는 경우 햇빛소득마을 신청이 불가하며,
+선정 후 확인될 경우 선정이 취소될 수 있음을 확인하였습니다.
+※ 시공업체(ReSCO) 등이 자부담금 또는 이자를 대납하는 방식은 취하지 않습니다.
+
+      <h4>4. 납입·집행 일정</h4>
+① 조합원 출자금 납입 — 총회 의결 후 (기한: 기재)
+② 상호금융 융자 신청·약정 — 상담부터 인출까지 약 2~3개월 소요
+③ 공사 기성고에 따른 분할 집행 — 시공 계약의 대금 지급 일정과 연동
+
+${today}
+작성: ${coop} 이사장 (인)`;
+    }
+
     case '조합 정관': return `
       <h3>${coop} 정관</h3>
       <h4>제1장 총칙</h4>
