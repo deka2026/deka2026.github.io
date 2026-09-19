@@ -1890,6 +1890,7 @@ function renderMemberSidebar(active){
       ['mypage','👤','마이페이지'],
     ]],
     ['설립·건설', [
+      ['structure','👪','마을회·조합 설계'],
       ['setup','🏗','설립 내비게이터·청약'],
       ['finance','🏦','자부담·융자 신청'],
       ['vendor','🔍','사업자(ReSCO) 선정'],
@@ -1960,6 +1961,7 @@ function renderMemberPage(page){
   switch(page){
     case 'dashboard': return memDashboard(u);
     case 'mypage':    return memMyPage(u);
+    case 'structure': return memStructure();
     case 'setup':     return memSetup();
     case 'finance':   return memFinance();
     case 'vendor':    return memVendor();
@@ -2359,6 +2361,265 @@ function finDocScore(){
       ? '서류가 모두 준비되었습니다. 신협 여신 담당자와 접수 일정을 잡으세요.'
       : `남은 서류 ${miss.length}건: <b>${miss.slice(0,4).join(' · ')}</b>${miss.length > 4 ? ` 외 ${miss.length-4}건` : ''}.
          등기·인감·감정평가는 발급에 시간이 걸리니 먼저 신청하세요.`}</p>`;
+}
+
+/* ─── 마을회·조합 구성 모델과 배분 방식 ─── */
+const ST_VILLAGE = [
+  {code:'V1', name:'주민등록 전원형', sub:'미성년 포함 전 주민',
+   who:'2026.3.31 기준 마을에 주민등록된 모든 주민',
+   pros:['수익 혜택 범위가 가장 넓어 "마을 사업"이라는 명분이 분명합니다', '급식·통학·장학금 등 아동·청소년 대상 공동사업의 근거가 자연스럽습니다', '주민동의율 70% 산정 기준(주민등록 주민)과 분모가 일치합니다'],
+   cons:['미성년은 의결권이 없으므로 구성원과 의결권자를 규약에서 나눠 정의해야 합니다', '전입·전출이 잦으면 명부 관리 부담이 큽니다'],
+   fit:'공동사업(급식·교통·장학) 중심으로 수익을 쓰려는 마을'},
+  {code:'V2', name:'성인 주민형', sub:'18세 이상 주민',
+   who:'주민등록된 18세 이상 주민',
+   pros:['구성원과 의결권자가 일치해 총회 운영이 단순합니다', '조합원 자격(18세 이상·1년 이상 거주)과 정합해 이중 명부 관리가 쉽습니다', '1인 1표 원칙을 그대로 적용할 수 있습니다'],
+   cons:['미성년 자녀가 있는 가구의 체감이 낮아, 장학금·통학 지원 같은 항목으로 보완이 필요합니다'],
+   fit:'가장 무난한 표준형 — 의결과 배분을 같은 명부로 운영하려는 마을'},
+  {code:'V3', name:'세대 대표형', sub:'세대당 1인',
+   who:'세대별로 지정한 대표 1인 (세대주 또는 세대 합의로 지정)',
+   pros:['가구 수가 많은 집이 유리해지는 문제를 막아 가구 간 형평이 맞습니다', '총회 정족수·의결 관리가 가장 단순합니다', '발기인 요건(한 가구에서 1명 초과 불인정)과 결이 같습니다'],
+   cons:['1인 가구와 대가족의 형평 논쟁이 생깁니다(가구당 같은 몫이 공정한가)', '세대 내에서 누가 대표가 될지 정하는 과정에 갈등이 생길 수 있습니다'],
+   fit:'마을 관행이 가구 단위로 돌아가고, 가구당 배당을 계획하는 마을'},
+  {code:'V4', name:'이중 구성형', sub:'구성원 전원 · 의결권 세대당 1인',
+   who:'혜택 대상은 전 주민, 의결권은 세대 대표 1인',
+   pros:['혜택은 넓게, 의결은 단순하게 — 두 장점을 함께 가집니다', '공동사업 명분과 총회 운영 편의를 모두 확보합니다'],
+   cons:['규약이 복잡해지고, 의결권 없는 구성원의 불만이 생길 수 있습니다', '"누가 무엇을 결정하는지" 설명에 시간이 더 걸립니다'],
+   fit:'주민 수가 많고 세대 구성이 다양한 마을'},
+];
+const ST_COOP = [
+  {code:'C1', name:'전원 참여형', sub:'마을회 = 협동조합',
+   who:'조합원 자격자(1년 이상 거주·18세 이상) 전원이 출자·가입',
+   pros:['"협동조합 사업인데 왜 마을 전체에 수익을 주나"라는 갈등이 <b>구조적으로 발생하지 않습니다</b>', '마을회와 조합의 의사결정이 사실상 하나여서 이중 회계·이중 총회 부담이 적습니다', '개인 출자 10% 이내 제한을 자연스럽게 지킵니다'],
+   cons:['출자 여력이 없는 주민을 어떻게 할지 정해야 합니다(분납·최소 출자·면제)', '전원을 설득하는 데 시간이 오래 걸립니다'],
+   fit:'주민 수가 적고(50명 내외) 결속이 강한 마을'},
+  {code:'C2', name:'희망자 출자형', sub:'원하는 주민만 출자',
+   who:'출자를 희망하는 주민만 조합원, 나머지 주민은 마을회 구성원으로 공동사업 혜택',
+   pros:['출자 부담을 강제하지 않아 설립이 빠릅니다', '출자 의사가 분명한 사람들이 모여 초기 추진력이 좋습니다'],
+   cons:['<b>조합원 배당과 전체 주민 혜택 사이의 갈등이 가장 잘 생기는 형태</b>입니다', '마을회–조합 협약으로 수익 환원 비율을 반드시 문서화해야 합니다', '조합원이 소수면 "일부가 마을 자산으로 이익을 본다"는 시비가 생깁니다'],
+   fit:'가장 흔한 형태 — 단, 협약과 배분 원칙 문서화가 필수'},
+  {code:'C3', name:'차등 출자형', sub:'전원 가입 · 출자액 등급화',
+   who:'전원이 가입하되 출자액을 기본·추가 등급으로 구분',
+   pros:['여력 차이를 반영하면서도 전원 참여를 유지합니다', '출자 여력이 있는 주민의 자금을 활용해 자부담을 채우기 쉽습니다'],
+   cons:['출자 비례 배당으로 가면 형평 논쟁이 생깁니다(1인 1표와 출자 비례 배당의 충돌)', '개인 출자가 전체 주민 출자금의 10%를 넘지 않는지 계속 확인해야 합니다'],
+   fit:'주민 간 경제력 차이가 크지만 전원을 참여시키려는 마을'},
+  {code:'C4', name:'세대 대표 출자형', sub:'세대당 1명 조합원',
+   who:'세대별로 1명이 조합원으로 가입·출자',
+   pros:['발기인 요건(한 가구 1명 초과 불인정)과 정합해 설립 절차가 깔끔합니다', '가구 단위 배당과 명부 관리가 단순합니다'],
+   cons:['세대 내 명의자를 정해야 하고, 상속·이혼·분가 시 승계 규정이 필요합니다', '1인 가구가 상대적으로 불리하다는 인식이 생길 수 있습니다'],
+   fit:'세대 대표형 마을회(V3)와 짝을 맞추려는 마을'},
+];
+const ST_DIST = [
+  {code:'D1', name:'기관 간 총액 배분형', sub:'마을회 : 조합 = 6 : 4 등',
+   how:'배분 가능 잉여를 먼저 <b>마을회 몫과 조합 몫으로 나누고</b>, 각 기관이 내부 규약에 따라 집행합니다. 마을회는 공동사업·마을연금에, 조합은 조합원 배당·재투자에 씁니다.',
+   pros:['구조가 단순해 주민에게 설명하기 쉽습니다', '기관별 자율성이 보장되고 회계 구분이 명확합니다'],
+   cons:['각 기관 내부 배분이 불투명하면 "저쪽은 어떻게 쓰나"는 불신이 생깁니다', '기관별로 회계·결산을 따로 해야 합니다'],
+   fit:'희망자 출자형(C2)처럼 마을회와 조합의 구성원이 크게 다른 마을'},
+  {code:'D2', name:'용도별 항목 배분형', sub:'배당·연금·공동사업·상환·재투자 비율',
+   how:'잉여를 <b>용도별 비율로 나눕니다</b> — 조합원 배당 / 주민 마을연금 / 공동사업 기금 / 차입금 조기상환 / 재투자 기금. 항목마다 집행 주체(마을회 또는 조합)를 함께 지정합니다.',
+   pros:['돈이 어디에 쓰이는지 가장 투명하고 주민 체감 설명이 쉽습니다', '항목별 적립 관리가 되어 계획적인 운영이 가능합니다'],
+   cons:['기관 역할 구분이 흐려질 수 있어, 항목마다 집행 주체를 명시해야 합니다'],
+   fit:'전원 참여형(C1)처럼 마을회와 조합이 사실상 하나인 마을'},
+  {code:'D3', name:'2단계 혼합형', sub:'의무·적립 먼저 → 나머지 배분',
+   how:'<b>1단계</b>로 원리금 상환·시설교체 적립·예비비를 먼저 떼고, <b>2단계</b>로 남은 금액만 기관 간 또는 용도별로 배분합니다.',
+   pros:['사업의 지속성을 먼저 확보하므로 20년 운영에 가장 안전합니다', '수익이 줄어든 해에도 상환·적립이 흔들리지 않습니다'],
+   cons:['초기에 배분액이 적어 보여 주민 설득이 어렵습니다 — 상환 완료 후 늘어난다는 설명이 필요합니다'],
+   fit:'융자 비중이 높은 대부분의 마을에 권장'},
+  {code:'D4', name:'우선순위 계층형', sub:'정액 보장 → 잔여 배당',
+   how:'우선순위대로 채웁니다 — ① 원리금 ② 적립 목표액 ③ <b>마을연금 정액</b>(예: 70세 이상 월 5만 원) ④ 공동사업 기본예산 ⑤ 남은 전액을 조합원 배당.',
+   pros:['발전량이 줄어도 마을연금 같은 <b>정액 항목이 지켜집니다</b>', '고령 주민에게 약속한 금액을 안정적으로 지급할 수 있습니다'],
+   cons:['잔여 배당이 해마다 크게 변동해 조합원 불만이 생길 수 있습니다', '순위가 낮은 항목은 흉작인 해에 0이 될 수 있습니다'],
+   fit:'마을연금을 약속했고 그 약속을 반드시 지켜야 하는 마을'},
+];
+
+function memStructure(){
+  const card = (m, kind) => `
+    <div class="card" style="box-shadow:none;background:var(--paper-soft);margin-bottom:10px;">
+      <div class="card-title" style="margin-bottom:6px;">
+        <h3 class="serif" style="font-size:16px;">${m.code}. ${m.name}</h3>
+        <span class="badge badge-mute">${m.sub}</span></div>
+      <p style="margin:0 0 6px;font-size:13.5px;"><b>${kind === 'dist' ? '배분 방법' : '대상'}</b> — ${m.how || m.who}</p>
+      <div style="font-size:12.5px;line-height:1.75;">
+        <div style="color:var(--primary);"><b>장점</b></div>
+        <ul style="margin:2px 0 6px;padding-left:18px;">${m.pros.map(p => `<li>${p}</li>`).join('')}</ul>
+        <div style="color:#9c6a00;"><b>주의</b></div>
+        <ul style="margin:2px 0 6px;padding-left:18px;">${m.cons.map(c => `<li>${c}</li>`).join('')}</ul>
+        <div class="text-mute"><b>이런 마을에</b> — ${m.fit}</div>
+      </div>
+    </div>`;
+  return `
+    <div class="sec-head">
+      <h1>👪 마을회·조합 설계</h1>
+      <p class="sec-desc">누가 마을회 구성원이고 누가 조합원인지, 그리고 수익을 어떤 방식으로 나눌지를 정하는 것이
+      <b>가장 먼저이자 가장 오래 남는 결정</b>입니다. 유형별 장단점을 비교하고 우리 마을에 맞는 조합을 찾으세요.</p>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;border-left:4px solid var(--primary);">
+      <div class="card-title"><h3 class="serif">먼저 알아 둘 공모 제약</h3><span class="badge badge-info">지침 요건</span></div>
+      <table class="tbl">
+        <tbody>
+          <tr><td style="width:150px;"><b>주민의 범위</b></td><td>2026.3.31 기준 마을에 <b>주민등록된 자</b> — 주민동의율 70%의 분모가 됩니다</td></tr>
+          <tr><td><b>조합원 자격</b></td><td>공고일 전일 기준 마을 내 <b>1년 이상 거주 중인 18세 이상</b> 주민 (마을 자치규약상 주민 자격 보유)<br>
+            <span class="text-mute" style="font-size:12.5px;">→ 마을회를 전 주민으로 하더라도 <b>조합원은 성인·1년 거주자만</b> 가능합니다</span></td></tr>
+          <tr><td><b>조합 설립 인원</b></td><td>조합원 자격자 <b>10인 이상</b></td></tr>
+          <tr><td><b>발기인</b></td><td>최소 5인 이상, <b>한 가구에서 1명 초과 인원은 불인정</b><br>
+            <span class="text-mute" style="font-size:12.5px;">→ 발기인 단계에서는 사실상 세대당 1인 원칙이 적용됩니다</span></td></tr>
+          <tr><td><b>개인 출자 한도</b></td><td>개인 출자는 <b>전체 주민 출자금의 10% 이내</b> — 소수가 조합을 지배하는 구조를 막는 장치입니다</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title"><h3 class="serif">① 마을회 구성 — 네 가지 유형</h3></div>
+      <p class="text-mute" style="margin-top:0;">마을회 구성원은 <b>공동사업·마을연금의 혜택을 받는 범위</b>이자 총회 의결의 기초가 됩니다.</p>
+      ${ST_VILLAGE.map(m => card(m)).join('')}
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title"><h3 class="serif">② 협동조합 구성 — 네 가지 유형</h3></div>
+      <p class="text-mute" style="margin-top:0;">조합원은 <b>출자하고 배당을 받는 범위</b>입니다. 마을회와 얼마나 겹치는지가 갈등의 크기를 결정합니다.</p>
+      ${ST_COOP.map(m => card(m)).join('')}
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title"><h3 class="serif">③ 수익금 배분 — 네 가지 방법</h3></div>
+      <p class="text-mute" style="margin-top:0;">운영비와 원리금을 뺀 잉여를 어떤 <b>방식</b>으로 나눌지에 관한 선택입니다.
+      구체적인 비율 모델은 <button class="btn btn-ghost btn-sm" onclick="location.hash='#/mem/power'">발전·정산·배당 →</button> 에서 네 가지 전략으로 비교할 수 있습니다.</p>
+      ${ST_DIST.map(m => card(m, 'dist')).join('')}
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title"><h3 class="serif">④ 우리 마을 유형 찾기</h3></div>
+      <p class="text-mute" style="margin-top:0;">마을 현황을 넣으면 유형별 구성원 수·1인당 출자액·배분 결과를 계산해 조합을 추천합니다.</p>
+      <div style="display:flex;gap:10px 14px;flex-wrap:wrap;align-items:center;">
+        <label style="display:flex;align-items:center;gap:6px;">총 주민
+          <input class="input" id="st-pop" type="number" value="150" min="1" style="width:80px;"> 명</label>
+        <label style="display:flex;align-items:center;gap:6px;">성인(18세↑)
+          <input class="input" id="st-adult" type="number" value="128" min="1" style="width:80px;"> 명</label>
+        <label style="display:flex;align-items:center;gap:6px;">세대
+          <input class="input" id="st-house" type="number" value="64" min="1" style="width:75px;"> 세대</label>
+        <label style="display:flex;align-items:center;gap:6px;">70세 이상
+          <input class="input" id="st-eld" type="number" value="35" min="0" style="width:75px;"> 명</label>
+        <label style="display:flex;align-items:center;gap:6px;">출자 희망
+          <input class="input" id="st-join" type="number" value="45" min="1" style="width:75px;"> 명</label>
+        <label style="display:flex;align-items:center;gap:6px;">자부담 중 주민 출자
+          <input class="input" id="st-equity" type="number" value="7128" min="0" step="100" style="width:95px;"> 만 원</label>
+        <label style="display:flex;align-items:center;gap:6px;">연 배분 잉여
+          <input class="input" id="st-surplus" type="number" value="10717" min="0" step="100" style="width:95px;"> 만 원</label>
+        <button class="btn btn-primary" onclick="stMatch()">유형 비교</button>
+      </div>
+      <div id="st-result" style="margin-top:14px;"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><h3 class="serif">⑤ 어떤 유형을 고르든 문서로 남길 것</h3></div>
+      <table class="tbl">
+        <tbody>
+          <tr><td style="width:44px;text-align:center;">1</td><td><b>마을회–협동조합 협약서</b>
+            <div class="text-mute" style="font-size:12.5px;">수익 환원 비율(또는 용도별 배분), 운영권 귀속, 자산 소유 관계, 분쟁 조정 절차. 조합이 발전사업을 하고 마을회가 수익을 받는 구조라면 <b>그 근거가 협약뿐</b>입니다.</div></td></tr>
+          <tr><td style="text-align:center;">2</td><td><b>구성원·조합원 자격 규정</b>
+            <div class="text-mute" style="font-size:12.5px;">거주 요건(몇 년 이상), 신규 전입자의 권리 발생 시점, 전출·사망 시 처리, 세대 대표 지정·승계 방법.</div></td></tr>
+          <tr><td style="text-align:center;">3</td><td><b>출자 규정</b>
+            <div class="text-mute" style="font-size:12.5px;">1좌 금액, 1인 최소·최대 출자좌수(개인 10% 한도 준수), 분납 허용 여부, 미출자 주민의 공동사업 혜택 범위.</div></td></tr>
+          <tr><td style="text-align:center;">4</td><td><b>배분 규정</b>
+            <div class="text-mute" style="font-size:12.5px;">배분 방식(D1~D4 중 무엇인지), 항목별 비율과 집행 주체, 배당 기준(균등/출자 비례), 변경 시 의결 요건.</div></td></tr>
+          <tr><td style="text-align:center;">5</td><td><b>의결권 규정</b>
+            <div class="text-mute" style="font-size:12.5px;">협동조합은 출자액과 무관하게 <b>1인 1표</b>가 원칙입니다. 마을회 의결권을 세대당 1표로 한다면 그 차이를 규약에 명확히 적어야 합니다.</div></td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-outline btn-sm" onclick="startDoc('마을회·협동조합 협약서')">📄 협약서 초안 만들기</button>
+        <button class="btn btn-ghost btn-sm" onclick="location.hash='#/mem/docs'">조합 정관 만들기 →</button>
+      </div>
+    </div>
+  `;
+}
+
+function stMatch(){
+  const pop  = Math.max(1, Number(document.getElementById('st-pop').value) || 1);
+  const adult= Math.max(1, Number(document.getElementById('st-adult').value) || 1);
+  const house= Math.max(1, Number(document.getElementById('st-house').value) || 1);
+  const eld  = Math.max(0, Number(document.getElementById('st-eld').value) || 0);
+  const join = Math.max(1, Number(document.getElementById('st-join').value) || 1);
+  const eq   = Math.max(0, Number(document.getElementById('st-equity').value) || 0) * 1e4;
+  const sur  = Math.max(0, Number(document.getElementById('st-surplus').value) || 0) * 1e4;
+  const rate = join / adult;          // 성인 중 출자 참여율
+
+  /* 조합 구성 유형별 조합원 수와 1인당 출자액 */
+  const coops = [
+    {code:'C1', name:'전원 참여형', n:adult, memo:'성인 주민 전원'},
+    {code:'C2', name:'희망자 출자형', n:join, memo:'출자 희망자만'},
+    {code:'C3', name:'차등 출자형', n:adult, memo:'전원 가입 · 출자액 등급화'},
+    {code:'C4', name:'세대 대표 출자형', n:house, memo:'세대당 1명'},
+  ].map(c => ({...c, per: eq / c.n, cover: c.n / adult * 100,
+               limit: eq > 0 ? (eq / c.n) / eq * 100 : 0}));
+
+  /* 배분 방식별 결과 (조합원 수는 C2 기준, 마을회는 성인 기준 예시) */
+  const distRows = [
+    ['D1 기관 간 총액 (마을회 6 : 조합 4)',
+     `마을회 ${fmtWon(sur*0.6)} → 공동사업·연금`, `조합 ${fmtWon(sur*0.4)} → 배당·재투자`,
+     `조합원 1인당 ${fmtWon(sur*0.4*0.6/join)} (조합 몫의 60%를 배당 가정)`],
+    ['D2 용도별 항목 (배당20·연금20·공동30·상환5·재투자25)',
+     `조합원 배당 ${fmtWon(sur*0.2)} · 마을연금 ${fmtWon(sur*0.2)}`,
+     `공동사업 ${fmtWon(sur*0.3)} · 재투자 ${fmtWon(sur*0.25)}`,
+     `조합원 1인당 ${fmtWon(sur*0.2/join)} · 연금 월 ${eld ? fmtWon(sur*0.2/eld/12) : '—'}`],
+    ['D3 2단계 혼합 (적립·예비비 30% 선공제 후 D2 비율)',
+     `선공제 ${fmtWon(sur*0.3)} (교체적립·예비비)`, `배분 대상 ${fmtWon(sur*0.7)}`,
+     `조합원 1인당 ${fmtWon(sur*0.7*0.2/join)} · 연금 월 ${eld ? fmtWon(sur*0.7*0.2/eld/12) : '—'}`],
+    ['D4 우선순위 계층 (연금 정액 우선)',
+     `① 적립 ${fmtWon(sur*0.2)} ② 연금 정액`, `③ 공동사업 ${fmtWon(sur*0.2)} ④ 잔여 배당`,
+     `연금 월 5만 원 × ${eld}명 = 연 ${fmtWon(eld*50000*12)} → 잔여 ${fmtWon(Math.max(0, sur - sur*0.4 - eld*50000*12))}`],
+  ];
+
+  /* 추천 로직 */
+  let recV, recC, recD, why;
+  if(rate >= 0.8){ recC = 'C1 전원 참여형'; }
+  else if(house / adult > 0.45){ recC = 'C4 세대 대표 출자형'; }
+  else if(rate >= 0.4){ recC = 'C2 희망자 출자형'; }
+  else { recC = 'C2 희망자 출자형'; }
+  recV = (pop - adult) / pop > 0.15 ? 'V1 주민등록 전원형' : 'V2 성인 주민형';
+  recD = rate >= 0.8 ? 'D2 용도별 항목 배분형' : 'D1 기관 간 총액 배분형';
+  if(eld / pop >= 0.3) recD += ' + D4 우선순위(연금 정액 보장) 병용';
+  why = [
+    rate >= 0.8 ? `성인 ${adult}명 중 ${join}명(${Math.round(rate*100)}%)이 출자를 희망해 전원 참여에 가깝습니다 — 마을회와 조합을 하나로 가면 갈등 구조가 사라집니다.`
+      : `성인 ${adult}명 중 출자 희망이 ${join}명(${Math.round(rate*100)}%)이라, 조합원과 비조합원이 나뉩니다 — 마을회–조합 협약으로 수익 환원 비율을 먼저 정해야 합니다.`,
+    (pop - adult) / pop > 0.15 ? `미성년이 ${pop - adult}명(${Math.round((pop-adult)/pop*100)}%)이라 급식·장학 같은 공동사업 명분이 큽니다 — 마을회를 전 주민으로 두는 편이 설명하기 쉽습니다.`
+      : `미성년 비중이 낮아 성인 주민형으로 두면 의결과 배분 명부를 하나로 운영할 수 있습니다.`,
+    eld / pop >= 0.3 ? `70세 이상이 ${eld}명(${Math.round(eld/pop*100)}%)으로 높습니다 — 마을연금 정액을 우선순위 상단에 두어 약속을 지키는 구조가 맞습니다.`
+      : `고령 비중이 높지 않아 공동사업과 배당의 균형을 잡기 쉽습니다.`,
+  ];
+  document.getElementById('st-result').innerHTML = `
+    <h4 style="margin:0 0 6px;font-size:14.5px;">조합 구성 유형별 비교</h4>
+    <div style="overflow-x:auto;"><table class="tbl" style="min-width:620px;">
+      <thead><tr><th>유형</th><th style="text-align:right;">조합원 수</th><th style="text-align:right;">성인 대비</th>
+        <th style="text-align:right;">1인당 출자액</th><th>개인 출자 10% 한도</th></tr></thead>
+      <tbody>${coops.map(c => `
+        <tr><td><b>${c.code}</b> ${c.name}<div class="text-mute" style="font-size:12px;">${c.memo}</div></td>
+          <td style="text-align:right;">${c.n}명</td>
+          <td style="text-align:right;">${c.cover.toFixed(0)}%</td>
+          <td style="text-align:right;"><b>${fmtWon(c.per)}</b></td>
+          <td>${c.limit <= 10
+            ? `<span class="badge badge-success">여유 (1인 ${c.limit.toFixed(1)}%)</span>`
+            : `<span class="badge badge-danger">초과 위험 (1인 ${c.limit.toFixed(1)}%)</span>`}</td></tr>`).join('')}
+      </tbody></table></div>
+    <p class="text-mute" style="font-size:12.5px;">※ 1인당 출자액은 주민 출자로 조달할 금액을 조합원 수로 나눈 균등 기준입니다.
+    개인 출자가 전체 주민 출자금의 10%를 넘으면 공모 요건에 걸리므로, 조합원이 10명 미만이면 균등 출자로도 한도를 넘게 됩니다.</p>
+
+    <h4 style="margin:14px 0 6px;font-size:14.5px;">배분 방식별 결과 (연 잉여 ${fmtWon(sur)} 기준)</h4>
+    <div style="overflow-x:auto;"><table class="tbl" style="min-width:680px;">
+      <thead><tr><th>방식</th><th>배분 ①</th><th>배분 ②</th><th>1인 체감</th></tr></thead>
+      <tbody>${distRows.map(r => `<tr><td><b>${r[0]}</b></td>
+        <td style="font-size:12.5px;">${r[1]}</td><td style="font-size:12.5px;">${r[2]}</td>
+        <td style="font-size:12.5px;">${r[3]}</td></tr>`).join('')}
+      </tbody></table></div>
+
+    <div style="background:var(--paper-soft);border-radius:8px;padding:12px 14px;margin-top:12px;">
+      <b>우리 마을에 맞을 조합 — ${recV} × ${recC} × ${recD}</b>
+      <ul class="text-mute" style="font-size:13px;margin:6px 0 0;padding-left:18px;">
+        ${why.map(w => `<li>${w}</li>`).join('')}
+      </ul>
+      <p class="text-mute" style="font-size:12.5px;margin:8px 0 0;">※ 추천은 입력한 인구 구조로 계산한 <b>참고안</b>입니다.
+      실제 선택은 주민 논의와 총회 의결로 정하고, 정한 내용을 규약·협약에 문서로 남기세요.</p>
+    </div>`;
 }
 
 /* ─── 20년 운영 성공의 다섯 조건 ─── */
@@ -6321,6 +6582,16 @@ const REVIEW_GUIDE = {
 };
 
 const DOC_FIELDS = {
+  '마을회·협동조합 협약서': [
+    {k:'coop_name',  label:'협동조합 이름', req:true},
+    {k:'village',    label:'마을회 이름', ph:'예: ○○군 ○○면 ○○리 마을회', req:true},
+    {k:'v_model',    label:'마을회 구성 유형', ph:'예: V2 성인 주민형 (18세 이상 주민등록 주민)'},
+    {k:'c_model',    label:'조합 구성 유형', ph:'예: C2 희망자 출자형 (출자 희망 주민 45명)'},
+    {k:'d_model',    label:'배분 방식', ph:'예: D1 기관 간 총액 배분 (마을회 60 : 조합 40)'},
+    {k:'d_detail',   label:'배분 비율 상세', type:'textarea', ph:'예: 운영비·원리금 차감 후 잉여를 마을회 60%(공동사업·마을연금), 조합 40%(조합원 배당·재투자)로 배분'},
+    {k:'resident',   label:'수익 대상 주민 요건', ph:'예: 1년 이상 계속 거주 중인 주민, 전입 후 1년 경과 시 권리 발생'},
+    {k:'date',       label:'협약 체결일', type:'date'},
+  ],
   '마을 점검표 결과서': [
     {k:'coop_name', label:'조합 이름', req:true},
     {k:'date',      label:'점검일', type:'date'},
@@ -6573,6 +6844,60 @@ function renderSampleDoc(name, v){
   const mm = n => Number(n || 0);                       // 백만원 단위 입력값
   const won = n => fmtWon(mm(n) * 1e6);                 // 백만원 → 사람이 읽는 금액
   switch(name){
+    case '마을회·협동조합 협약서': {
+      const vil = escapeHtml(v.village || '(마을회명 미입력)');
+      return `
+      <h3>발전수익 환원 및 사업 운영에 관한 협약서</h3>
+${vil}(이하 "마을회")와 ${coop}(이하 "조합")은 햇빛소득마을 태양광 발전사업의
+수익 환원과 사업 운영에 관하여 다음과 같이 협약을 체결한다.
+
+      <h4>제1조 (목적)</h4>
+이 협약은 조합이 수행하는 발전사업의 수익을 마을 공동체에 환원하는 방법과
+양 기관의 역할·권한을 정하여, <strong>구성원이 바뀌어도 동일한 원칙으로 운영되도록</strong> 함을 목적으로 한다.
+
+      <h4>제2조 (구성원의 범위)</h4>
+① 마을회 구성원: ${escapeHtml(v.v_model || '(마을회 구성 유형 기재)')}
+② 조합원: ${escapeHtml(v.c_model || '(조합 구성 유형 기재)')}
+③ 수익 배분 대상 주민의 요건: ${escapeHtml(v.resident || '(거주 요건·전입자 권리 발생 시점 기재)')}
+④ 전출·사망 시의 권리 처리와 세대 대표의 승계 방법은 마을 자치규약에 따른다.
+
+      <h4>제3조 (역할 분담)</h4>
+① 조합은 발전설비의 소유·운영, 전력 판매, 회계·세무, 차입금 상환을 담당한다.
+② 마을회는 공동사업의 기획·집행과 주민 의견 수렴을 담당한다.
+③ 발전설비의 운영권은 조합에 귀속하며, 조합은 운영을 전문업체에 위탁할 수 있으나
+   <strong>위탁 여부와 조건에 관한 최종 결정권은 조합 총회에 유보한다.</strong>
+
+      <h4>제4조 (수익의 환원 방식)</h4>
+① 배분 방식: ${escapeHtml(v.d_model || '(배분 방식 기재)')}
+② 배분 대상 금액은 전력 판매수익에서 <strong>운영비(유지관리비·보험료·시설교체 적립·시스템비용 적립)와
+   차입금 원리금</strong>을 차감한 잉여로 한다.
+③ 배분 상세:
+${escapeHtml(v.d_detail || '(항목별 비율과 집행 주체를 기재)')}
+④ 배분 비율의 변경은 마을회 총회와 조합 총회의 <strong>각각의 의결</strong>을 거쳐야 한다.
+
+      <h4>제5조 (집행과 회계)</h4>
+① 각 기관은 배분받은 금액을 이 협약과 각자의 규약에 정한 용도로만 집행한다.
+② 양 기관은 매 회계연도 종료 후 집행 내역을 상호 통보하고, 주민이 열람할 수 있도록 공개한다.
+③ 조합은 발전량·정산·배분 내역을 월 단위로 기록하고 마을회에 정기 보고한다.
+
+      <h4>제6조 (분쟁의 해결)</h4>
+① 이 협약의 해석이나 이행에 관하여 이견이 있는 경우 양 기관의 대표가 협의하여 해결한다.
+② 협의가 이루어지지 않을 때에는 기초 지방정부 또는 관련 전문기관의 조정을 받는다.
+③ 주민은 배분·집행에 관하여 서면으로 이의를 제기할 수 있고, 각 기관은
+   접수 후 30일 이내에 서면으로 답변한다.
+
+      <h4>제7조 (협약의 효력과 승계)</h4>
+① 이 협약은 체결일부터 효력을 가지며, 발전설비의 운영 기간 동안 유지된다.
+② <strong>양 기관의 대표자와 임원이 교체되어도 이 협약은 그대로 승계된다.</strong>
+③ 협약의 변경·해지는 양 기관 총회의 의결을 거쳐 서면으로 한다.
+
+이 협약을 증명하기 위하여 2부를 작성하고 각 1부씩 보관한다.
+
+${escapeHtml(String(v.date || today))}
+
+${vil} 대표 (인)          ${coop} 이사장 (인)`;
+    }
+
     case '마을 점검표 결과서': {
       const snap = sucSnapshot();
       const tot = snap.reduce((a, s) => a + s.total, 0);
