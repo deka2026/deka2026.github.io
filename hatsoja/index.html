@@ -729,13 +729,15 @@ footer{
         <tbody>
           <tr><td style="width:150px;"><b>마을의 범위</b></td><td>지방정부 조례에 따른 <b>행정리</b> 단위</td></tr>
           <tr><td><b>조합원 자격</b></td><td>공고일 전일 기준 마을 내 <b>1년 이상 거주 중인 18세 이상</b> 주민 (마을 자치규약상 주민 자격 보유)</td></tr>
-          <tr><td><b>조합 구성</b></td><td>위 자격자 <b>10인 이상</b>이 설립한 협동조합 또는 사회적협동조합 (등기 완료)<br>
-            <span class="text-mute" style="font-size:12.5px;">발기인은 최소 5인 이상 — 한 가구에서 1명 초과 인원은 인정되지 않습니다</span></td></tr>
+          <tr><td><b>조합 구성</b></td><td>위 자격자 <b>10인 이상</b>이 설립한 협동조합 또는 사회적협동조합<br>
+            <span class="text-mute" style="font-size:12.5px;">발기인은 최소 5인 이상 — 한 가구에서 1명 초과 인원은 인정되지 않습니다<br>
+            <b>3차 공고부터 설립 중이어도 신청할 수 있습니다</b> — 설립인가서 대신 «조합 설립 신청서»를 제출합니다(등기 완료가 전제였던 이전과 다릅니다)</span></td></tr>
           <tr><td><b>주민 수용성</b></td><td>마을 자치규약에 따른 총회 의결 + <b>주민 70% 이상 동의</b></td></tr>
           <tr><td><b>발전 규모</b></td><td><b>300kW 이상 1,000kW 이하</b>가 원칙<br>
             <span class="text-mute" style="font-size:12.5px;">1,000kW를 넘으면 별도 평가위원회의 예외 심의를 거쳐야 하므로, 계획 단계에서 1MW 이하로 맞추는 것이 안전합니다</span></td></tr>
           <tr><td><b>재원 확보</b></td><td>태양광 설치비의 <b>15% 이상</b> 자부담 재원 확보 (부지 매입비·ESS 설치비는 별도)<br>
-            <span class="text-mute" style="font-size:12.5px;">마을기금·마을펀딩, 정부·지방정부 정책자금, 지역 농·수협·새마을금고·신협 등 상호금융 협력으로 조달. 개인 출자는 전체 주민 출자금의 10% 이내</span></td></tr>
+            <span class="text-mute" style="font-size:12.5px;">마을기금·마을펀딩, 정부·지방정부 정책자금, 지역 농·수협·새마을금고·신협 등 상호금융 협력으로 조달<br>
+            출자 한도 — <b>개인은 전체 주민 출자금의 10% 이내</b>, <b>지역 상호금융은 30% 이내</b>(3차 공고부터 기초 지방정부 소재 농·수협·새마을금고·신협이 조합원으로 출자 참여 가능)</span></td></tr>
           <tr><td><b>부지·계통</b></td><td>전기사업법상 발전사업이 가능하도록 <b>부지와 계통 접속 여력</b>을 확보할 수 있어야 함</td></tr>
           <tr><td><b>신규 추진 원칙</b></td><td>주민이 <b>직접 신규로</b> 준비·추진하는 경우가 원칙<br>
             <span class="text-mute" style="font-size:12.5px;">기존 발전소 활용, 발전사업허가 등 인허가를 이미 받은 경우, 발전소 양수·양도를 통한 참여는 제한됩니다</span></td></tr>
@@ -790,7 +792,14 @@ footer{
         <label style="display:flex;align-items:center;gap:6px;">융자 비율
           <input class="input" id="calc-loan" type="number" value="85" min="0" max="85" style="width:70px;"> %</label>
         <label style="display:flex;align-items:center;gap:6px;">융자 금리
-          <input class="input" id="calc-rate" type="number" value="2.0" min="0" max="10" step="0.1" style="width:70px;"> %</label>
+          <input class="input" id="calc-rate" type="number" value="2.0" min="0" max="10" step="0.1" style="width:70px;"> %
+          <span class="text-mute" style="font-size:12px;">1차 마을 1.75% → 현재 2.5%대</span></label>
+        <label style="display:flex;align-items:center;gap:6px;">상환 방식
+          <select class="select" id="calc-term" style="width:auto;min-width:150px;">
+            <option value="5">5년 거치 10년 상환</option>
+            <option value="1">1년 거치 19년 상환</option>
+            <option value="0">거치 없이 20년 균등</option>
+          </select></label>
         <label style="display:flex;align-items:center;gap:6px;">토지 임대료
           <input class="input" id="calc-rent" type="number" value="0" min="0" step="100" style="width:85px;"> 만/년</label>
         <label style="display:flex;align-items:center;gap:6px;">초기 부대비용
@@ -860,6 +869,24 @@ footer{
         </tbody>
       </table>
       <p class="text-mute" style="font-size:12.5px;">※ 참여 요건을 못 갖추거나 서류를 누락하면 평가 대상에서 제외됩니다. 조합 설립·정관·명부 준비에는 수 주가 걸리므로 공고 전에 착수하세요.</p>
+
+      <h4 style="margin:14px 0 6px;font-size:14.5px;">제출 경로와 형식 (3차 공고 기준)</h4>
+      <table class="tbl">
+        <tbody>
+          <tr><td style="width:150px;"><b>마을의 실제 마감</b></td>
+            <td><b>공고 마감 7일 전</b>까지 기초 지방정부(시·군·구)에 제출합니다. 시·군·구의 검토와 광역 보고에 시간이 필요하기 때문입니다.<br>
+            <span class="text-mute" style="font-size:12.5px;">서류 보완이 생길 수 있으므로 <b>10일 전</b>을 목표로 잡으면 안전합니다</span></td></tr>
+          <tr><td><b>제출 경로</b></td>
+            <td>마을·조합 → <b>기초 지방정부</b> → <b>추진단과 광역 지방정부에 동시 제출</b> → 결과는 광역 → 기초 → 마을 순으로 통보됩니다</td></tr>
+          <tr><td><b>파일 형식</b></td>
+            <td><b>서류마다 PDF 한 개씩</b> 따로 만듭니다(3차부터 변경 — 이전에는 한 파일로 묶었습니다).<br>
+            <span class="text-mute" style="font-size:12.5px;">파일 이름을 잘못 적어도 보완 요구나 반려 사유가 됩니다. 공고문의 파일명 규칙을 그대로 따르세요</span></td></tr>
+          <tr><td><b>선정 규모·기준</b></td>
+            <td>3차는 <b>200개 이상 선정</b>(1·2차는 500개 이상), <b>종합 60점 이상</b>만 선정 대상입니다. 특정 지역 편중을 막는 기준도 함께 적용됩니다</td></tr>
+          <tr><td><b>미선정 시</b></td>
+            <td>추진단·현장지원단의 <b>보완 컨설팅</b>을 받아 다음 공고에 다시 신청할 수 있습니다</td></tr>
+        </tbody>
+      </table>
     </div>
 
     <div class="card">
@@ -1857,6 +1884,7 @@ function navigate(){
     if(scope === 'mem' && page === 'finance') finRenderDocs();
     if(scope === 'mem' && page === 'vendor'){ venRender(); venRenderSite(); }
     if(scope === 'mem' && page === 'success') sucRender();
+    if(scope === 'mem' && page === 'schedule') dlCalc();
   }
   updateConvenienceUI(scope, page || 'dashboard');
   window.scrollTo({top:0, behavior:'instant'});
@@ -2081,7 +2109,10 @@ function memSetup(){
         <b style="color:#9c6a00;">계통연계가 가장 흔한 지연 지점입니다</b>
         <p class="text-mute" style="font-size:13px;margin:4px 0 0;">발전소를 다 지어도 한전 배전선로·변전소에 여유 용량이 없으면 전기를 팔 수 없습니다.
         접속이 늦어지면 첫 발전수익도 그만큼 늦어지고, 접속 후에도 <b>출력제어</b>가 걸리면 예상 수익이 줄어듭니다.
-        계통 부족지역은 <b>ESS 연계</b> 조건으로 접속하는 방법이 있고 선정 시 설치비 지원 대상이 되므로,
+        계통 부족지역은 <b>ESS 연계</b> 조건으로 접속하는 방법이 있고 선정 시 설치비 지원 대상이 됩니다.
+        배전망 연계형 ESS의 비용 분담은 <b>정부 40% · 지방정부 30% · VPP 사업자 30%</b>이며, 같은 배전선로(대체로 한 개 면)에
+        <b>3MW 이상</b>이 모이면 설치 가능성이 높아집니다(공용 ESS 1기가 약 5.7MW를 수용).
+        따라서
         한전 지사 검토의견과 지방정부 담당자 협의를 <b>착공 전에</b> 확정해 두세요.</p>
       </div>
       <h3 style="margin-top:14px;">공정률 (착공 후 표시)</h3>
@@ -4552,6 +4583,47 @@ function memMembers(){
   `;
 }
 
+/* 넘기면 되돌릴 수 없는 기한 세 개 — D-6개월 / 선정+6개월 / 허가+12개월 */
+function dlCalc(){
+  const box = document.getElementById('dl-result');
+  if(!box) return;
+  const get = id => { const v = document.getElementById(id).value; return v ? new Date(v + 'T00:00:00') : null; };
+  const today = new Date(); today.setHours(0,0,0,0);
+  const add = (d, m) => { const x = new Date(d); x.setMonth(x.getMonth() + m); return x; };
+  const sub = (d, m) => { const x = new Date(d); x.setMonth(x.getMonth() - m); return x; };
+  const ymd = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const days = d => Math.ceil((d - today) / 86400000);
+  const apply = get('dl-apply'), sel = get('dl-select'), per = get('dl-permit');
+  const rows = [
+    {n:'D-6개월 — 착수 기한', base: apply, at: apply ? sub(apply, 6) : null,
+     why:'조합 등기·주민동의·부지와 계통 확인은 한 달에 끝낼 수 없습니다. 공고 마감 6개월 전에는 시작해야 합니다.',
+     miss:'이 시점을 넘겼다면 이번 공고보다 다음 공고를 목표로 준비하는 편이 안전합니다.'},
+    {n:'선정 +6개월 — 발전사업허가', base: sel, at: sel ? add(sel, 6) : null,
+     why:'선정일부터 6개월 안에 발전사업허가를 받아야 합니다. 허가 신청·심사에 2~3개월이 걸리므로 첫 90일에 계약·신청을 끝내야 합니다.',
+     miss:'기한을 넘기면 선정이 취소될 수 있습니다. 환경영향평가 등 행정 지연은 별도 심사로 연장을 검토합니다.'},
+    {n:'허가 +12개월 — 판매계약·사용전검사', base: per, at: per ? add(per, 12) : null,
+     why:'발전사업허가일부터 12개월 안에 전력 판매계약과 사용전검사를 마쳐야 합니다.',
+     miss:'허가 당일에 전력거래 계약을 신청해 연결 용량을 먼저 확보하세요.'},
+  ];
+  box.innerHTML = `<table class="tbl">
+    <thead><tr><th>기한</th><th style="width:110px;">날짜</th><th style="width:90px;">남은 기간</th><th>내용</th></tr></thead>
+    <tbody>${rows.map(r => {
+      if(!r.at) return `<tr><td><b>${r.n}</b></td><td colspan="2" class="text-mute">기준일 입력 필요</td>
+        <td class="text-mute" style="font-size:12.5px;">${r.why}</td></tr>`;
+      const d = days(r.at), over = d < 0;
+      return `<tr><td><b>${r.n}</b></td><td>${ymd(r.at)}</td>
+        <td><span class="badge ${over ? 'badge-danger' : d <= 30 ? 'badge-danger' : d <= 90 ? 'badge-mute' : 'badge-success'}">${over ? '지남' : 'D-' + d}</span></td>
+        <td class="text-mute" style="font-size:12.5px;">${r.why}${over ? `<br><b style="color:var(--danger);">${r.miss}</b>` : ''}</td></tr>`;
+    }).join('')}</tbody></table>
+    <div style="background:var(--paper-soft);border-radius:8px;padding:12px 14px;margin-top:10px;">
+      <b>선정 뒤 첫 90일이 6개월 기한을 결정합니다</b>
+      <p class="text-mute" style="font-size:13px;margin:4px 0 0;">
+      · <b>1~30일</b> — 시·군·구 인허가 협의 착수, 부지 정식 사용허가 신청, 사업자 3곳 이상 비교 후 도급·O&amp;M 계약<br>
+      · <b>31~60일</b> — 발전사업허가 신청(시·도), 실시설계·개발행위 병행, 주민 진행 보고 1회<br>
+      · <b>61~90일</b> — 허가 즉시 <b>전력거래 계약 신청</b>(연결 용량 선점)과 <b>정책자금 본신청</b>. 변경이 생기면 30일 안에 공문</p>
+    </div>`;
+}
+
 /* 협동조합 정기 마감 자동 계산 (원천세·부가세·법인세·월 마감) */
 function coopDeadlines(){
   const today = new Date(); today.setHours(0,0,0,0);
@@ -4580,6 +4652,22 @@ function memSchedule(){
     <div class="sec-head">
       <h1>일정·마감 관리</h1>
       <p class="sec-desc">총회·이사회·공모 마감 등 주요 일정을 확인합니다.</p>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;border-left:4px solid var(--danger);">
+      <div class="card-title"><h3 class="serif">넘기면 되돌릴 수 없는 기한 세 개</h3>
+        <span class="badge badge-danger">선정 취소 사유</span></div>
+      <p class="text-mute" style="margin-top:0;">나머지 일정은 마을 형편에 맞춰 조정할 수 있지만, 아래 셋은 넘기면
+      <b>신청이 불가하거나 선정이 취소</b>됩니다. 선정일과 허가일을 입력하면 남은 기간을 계산합니다.</p>
+      <div style="display:flex;gap:10px 14px;flex-wrap:wrap;align-items:center;margin-bottom:10px;">
+        <label style="display:flex;align-items:center;gap:6px;">공고 마감일
+          <input class="input" id="dl-apply" type="date" style="width:auto;" onchange="dlCalc()"></label>
+        <label style="display:flex;align-items:center;gap:6px;">선정일
+          <input class="input" id="dl-select" type="date" style="width:auto;" onchange="dlCalc()"></label>
+        <label style="display:flex;align-items:center;gap:6px;">발전사업허가일
+          <input class="input" id="dl-permit" type="date" style="width:auto;" onchange="dlCalc()"></label>
+      </div>
+      <div id="dl-result"></div>
     </div>
 
     <div class="card" style="margin-bottom:16px;">
@@ -5130,6 +5218,7 @@ function svDiagnose(){
   _svDiag = {type, area, land, raw, plan};
   const landMsg = {
     '공공': ['badge-success', '공공부지 — 권장', '저수지·국유지·시군유지·도로 법면 등 공공부지가 가장 유리합니다. '
+      + '<b>다만 농어촌공사 저수지를 쓰면 매출의 5%를 사용료로 냅니다</b>(월 수익 1,000만 원이면 매월 50만 원) — 순수익 계산에 꼭 반영하세요. '
       + '<b>재생에너지 설비 설치를 위해 국·공유재산을 임대하면 사용료(대부료)를 약 80% 감면받습니다</b> '
       + '— 통상 재산가액의 5% 수준인 요율이 1% 수준으로 낮아집니다(신재생에너지법상 국유·공유재산 임대 특례). '
       + '즉 같은 땅이라도 개인 토지를 빌리는 것보다 임대료 부담이 훨씬 작아 마을에 남는 몫이 커집니다. '
@@ -5195,9 +5284,14 @@ function svCalc(){
   const gen = kw * 8760 * 0.154;                       // 연간 발전량 kWh (이용률 15.4%)
   const total = capex * 1e8 * (kw / 1000);             // 총 설치비
   const loan = total * loanR, own = total - loan;      // 융자 / 자부담
-  const pmt = rate > 0                                 // 20년 원리금 균등상환
-    ? loan * rate / (1 - Math.pow(1 + rate, -YEARS))
-    : loan / YEARS;
+  /* 상환 구조: 거치기간에는 이자만, 이후 원리금 균등 */
+  const grace = Number(document.getElementById('calc-term').value);   // 거치 연수
+  const repay = grace === 5 ? 10 : grace === 1 ? 19 : YEARS;          // 상환 연수
+  const pmtAfter = rate > 0
+    ? loan * rate / (1 - Math.pow(1 + rate, -repay))
+    : loan / repay;
+  const pmtGrace = loan * rate;                       // 거치기간 연 이자
+  const pmt = grace > 0 ? pmtAfter : pmtAfter;        // 표시 기준 = 상환기 부담(가장 빡빡한 구간)
   const initY = init / YEARS;                          // 초기 부대비용 20년 상각
   const ownOK = loanR <= 0.85 && (own / total) >= 0.15;
 
@@ -5217,7 +5311,11 @@ function svCalc(){
 
   const rows = [
     ['연간 발전수익 (매출)', base.rev, `${base.memo} · 발전량 ${Math.round(gen/1000).toLocaleString()}MWh`],
-    ['− 대출 원금과 이자', -pmt, loanR ? `융자 ${fmtWon(loan)} · 연 ${(rate*100).toFixed(1)}% · ${YEARS}년 균등상환` : '융자 없음'],
+    ['− 대출 원금과 이자', -pmt, loanR
+      ? (grace > 0
+         ? `융자 ${fmtWon(loan)} · 연 ${(rate*100).toFixed(1)}% · ${grace}년 거치 ${repay}년 상환 — 거치기간에는 이자만 연 ${fmtWon(pmtGrace)}`
+         : `융자 ${fmtWon(loan)} · 연 ${(rate*100).toFixed(1)}% · ${YEARS}년 균등상환`)
+      : '융자 없음'],
     ['− 유지관리비', -base.om, '매출의 6% 가정 — 모듈 세척·제초·점검·고장 수리'],
     ['− 보험료', -base.ins, '매출의 2% 가정 — 재산종합·배상책임·기업휴지'],
     ['− 시설 교체비 적립', -base.repl, '인버터는 통상 10~15년차 교체 — 미리 적립하지 않으면 그때 목돈 필요'],
@@ -5281,6 +5379,33 @@ function svCalc(){
           <td class="text-mute" style="font-size:12.5px;">20년 누계 약 ${fmtWon(net * YEARS)} ${net > 0 ? '(상환 완료 뒤에는 원리금만큼 늘어납니다)' : ''}</td></tr>
       </tbody>
     </table>
+    ${grace > 0 ? `
+    <h4 style="margin:14px 0 6px;font-size:14.5px;">구간별 수지 — 거치기간의 여유에 속지 마세요</h4>
+    <table class="tbl">
+      <thead><tr><th>구간</th><th style="text-align:right;">연 원리금</th><th style="text-align:right;">마을에 남는 돈(연)</th><th>주의</th></tr></thead>
+      <tbody>
+        <tr><td><b>1~${grace}년차 (거치)</b></td>
+          <td style="text-align:right;">${fmtWon(pmtGrace)}</td>
+          <td style="text-align:right;"><b style="color:var(--primary);">${fmtWon(base.rev - (base.cost - pmt + pmtGrace))}</b></td>
+          <td class="text-mute" style="font-size:12.5px;">이자만 내므로 여유가 있습니다. <b>이때 다 쓰면 안 됩니다</b></td></tr>
+        <tr><td><b>${grace+1}~${grace+repay}년차 (상환)</b></td>
+          <td style="text-align:right;">${fmtWon(pmt)}</td>
+          <td style="text-align:right;"><b style="color:${net > 0 ? 'var(--primary)' : 'var(--danger)'};">${fmtWon(net)}</b></td>
+          <td class="text-mute" style="font-size:12.5px;">원금이 시작되는 구간 — <b>배분 여력이 가장 적습니다</b></td></tr>
+        ${grace + repay < YEARS ? `<tr><td><b>${grace+repay+1}~${YEARS}년차</b></td>
+          <td style="text-align:right;">0</td>
+          <td style="text-align:right;"><b style="color:var(--primary);">${fmtWon(base.rev - (base.cost - pmt))}</b></td>
+          <td class="text-mute" style="font-size:12.5px;">상환 완료 — 원리금만큼 공동소득이 늘어납니다</td></tr>` : ''}
+      </tbody>
+    </table>
+    <div style="background:var(--paper-soft);border-radius:8px;padding:12px 14px;margin-top:10px;">
+      <b style="color:#9c6a00;">거치기간에 배분을 다 하면 ${grace+1}년차에 마이너스가 납니다</b>
+      <p class="text-mute" style="font-size:13px;margin:4px 0 0;">
+      연 매출 2억 원 규모의 선정 마을을 기준으로 한 계산에서, 거치가 끝나고 원금 상환이 시작되는 해에
+      <b>연 수지가 마이너스 400만 원</b>이 되는 사례가 제시되었습니다.
+      거치기간 배분 가능액의 <b>30~50%를 상환·수선 기금으로 적립</b>하고, 그 원칙을 <b>정관에 먼저 명시</b>하세요.
+      이 조건에서 권장 적립액은 연 <b>${fmtWon((base.rev - (base.cost - pmt + pmtGrace)) * 0.3)} ~ ${fmtWon((base.rev - (base.cost - pmt + pmtGrace)) * 0.5)}</b>입니다.</p>
+    </div>` : ''}
     ${net <= 0 ? `<div style="background:var(--paper-soft);border-radius:8px;padding:12px 14px;margin-top:10px;">
       <b style="color:var(--danger);">이 조건으로는 마을에 남는 돈이 없습니다</b>
       <p class="text-mute" style="font-size:13px;margin:4px 0 0;">설치비·금리·임대료를 낮추거나 자부담을 늘려 융자 규모를 줄여야 합니다.
@@ -5289,6 +5414,7 @@ function svCalc(){
     <p class="text-mute" style="font-size:12.5px;">※ 이용률 15.4%, 1MW 설치비 약 16억 원, 정책융자 최대 85%(자부담 15%) 기준의 <b>추산</b>입니다.
     단가·금리·상환조건·임대료가 마을마다 달라 실제 순수익은 변동되므로, 업체와 신협이 제시한 실제 숫자를 넣어 다시 계산하세요.
     부지 매입비와 ESS 설치비는 설치비·자부담 15% 산정에서 별도이며 위 계산에도 포함되지 않았습니다.
+    업체가 말하는 <b>&quot;1MW 15억&quot;에는 토목비와 계통비가 빠져 있는 경우가 많습니다</b> — 계약 전에 포함 여부를 확인하세요.
     <b>남은 돈을 개인 배당에 쓸지 공동사업에 쓸지는 조합 총회가 정합니다.</b></p>`;
 }
 
@@ -5299,15 +5425,25 @@ function svConsentDemo(){
   const tot = rows.reduce((a,r) => a + r[1], 0), agr = rows.reduce((a,r) => a + r[2], 0);
   const pct = agr / tot * 100, pass = pct >= 70;
   const need = Math.max(0, Math.ceil(tot * 0.7) - agr);
+  /* 주민수용성 배점: 총회 의결서 10점(필수) + 동의서 (동의율-70%)/30%×5점 */
+  const score = pass ? 10 + Math.min(5, (pct - 70) / 30 * 5) : 0;
   box.innerHTML = `
     <div class="grid grid-4" style="margin-bottom:10px;">
       <div class="kpi"><div class="kpi-n">${tot}</div><div class="kpi-l">마을 총 주민수 (명)</div></div>
       <div class="kpi"><div class="kpi-n">${agr}</div><div class="kpi-l">동의 완료 (명)</div></div>
       <div class="kpi"><div class="kpi-n" style="color:${pass ? 'var(--primary)' : 'var(--danger)'};">${pct.toFixed(1)}%</div>
         <div class="kpi-l">주민동의율</div><div class="kpi-sub">공모 요건 70% 이상</div></div>
-      <div class="kpi"><div class="kpi-n">${pass ? '충족' : need + '명'}</div>
-        <div class="kpi-l">${pass ? '요건 충족' : '70%까지 부족'}</div>
-        <div class="kpi-sub">${pass ? '총회 의결서도 함께 필요' : '추가 동의 필요'}</div></div>
+      <div class="kpi"><div class="kpi-n" style="color:${score >= 14 ? 'var(--primary)' : 'inherit'};">${score.toFixed(1)}<span style="font-size:14px;">점</span></div>
+        <div class="kpi-l">주민수용성 예상 점수</div>
+        <div class="kpi-sub">15점 만점 · 100% 동의가 만점</div></div>
+    </div>
+    <div style="background:var(--paper-soft);border-radius:8px;padding:12px 14px;margin-bottom:10px;">
+      <b>70%는 최저선이고, 100%가 만점입니다</b>
+      <p class="text-mute" style="font-size:13px;margin:4px 0 0;">
+      · 마을 총회 의결서 <b>10점</b> (필수 — 없으면 신청 자체가 불가)<br>
+      · 주민동의서 <b>5점</b> = (주민동의율 − 70%) ÷ 30% × 5점<br>
+      · 현재 ${pct.toFixed(1)}% → <b>${score.toFixed(1)}점</b>${pass ? `. 100%까지 올리면 <b>15점</b>이 되어 ${(15-score).toFixed(1)}점을 더 얻습니다` : `. 70%를 채워야 10점을 받습니다(${need}명 부족)`}<br>
+      <b>주민동의서는 주민이 직접 점수를 만들 수 있는 사실상 유일한 항목</b>이므로 70%에서 멈추지 마세요.</p>
     </div>
     <table class="tbl"><thead><tr><th>반</th><th>주민수</th><th>동의</th><th>동의율 (70% 기준선)</th></tr></thead>
     <tbody>${rows.map(r => {
