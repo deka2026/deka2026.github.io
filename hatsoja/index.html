@@ -1885,6 +1885,7 @@ function navigate(){
     if(scope === 'mem' && page === 'vendor'){ venRender(); venRenderSite(); }
     if(scope === 'mem' && page === 'success') sucRender();
     if(scope === 'mem' && page === 'schedule') dlCalc();
+    if(scope === 'mem' && page === 'cost') costCalc();
   }
   updateConvenienceUI(scope, page || 'dashboard');
   window.scrollTo({top:0, behavior:'instant'});
@@ -1920,6 +1921,7 @@ function renderMemberSidebar(active){
     ['설립·건설', [
       ['structure','👪','마을회·조합 설계'],
       ['setup','🏗','설립 내비게이터·청약'],
+      ['cost','🧱','사업비·부품 구성'],
       ['finance','🏦','자부담·융자 신청'],
       ['vendor','🔍','사업자(ReSCO) 선정'],
       ['docs','📝','문서 자동 생성'],
@@ -1991,6 +1993,7 @@ function renderMemberPage(page){
     case 'mypage':    return memMyPage(u);
     case 'structure': return memStructure();
     case 'setup':     return memSetup();
+    case 'cost':      return memCost();
     case 'finance':   return memFinance();
     case 'vendor':    return memVendor();
     case 'success':   return memSuccess();
@@ -2392,6 +2395,273 @@ function finDocScore(){
       ? '서류가 모두 준비되었습니다. 신협 여신 담당자와 접수 일정을 잡으세요.'
       : `남은 서류 ${miss.length}건: <b>${miss.slice(0,4).join(' · ')}</b>${miss.length > 4 ? ` 외 ${miss.length-4}건` : ''}.
          등기·인감·감정평가는 발급에 시간이 걸리니 먼저 신청하세요.`}</p>`;
+}
+
+/* ─── 사업비 세부 구성과 주요 부품 선택 ─── */
+const COST_BASE = {   // 설치형태별 kW당 기준 단가(만원)와 항목 비율(%)
+  '지상형': {unit:160, rows:[
+    ['모듈',            33, 'module',  '태양전지 모듈 — 사업비에서 가장 큰 항목'],
+    ['인버터',          10, 'inverter','직류를 교류로 바꾸는 장치 — 교체 주기가 가장 짧음'],
+    ['구조물·가대',     16, 'rack',    '모듈을 고정하는 架臺 — 20년 부식 저항이 관건'],
+    ['기초·토목',        9, 'found',   '기초공사·부지 정지·배수·진입로'],
+    ['전기공사',        12, null,      '배선·접속반·수배전반·접지'],
+    ['계통연계',         7, null,      '한전 인입선로·부담금 — 거리와 여건에 따라 크게 변동'],
+    ['설계·인허가·감리', 5, null,      '설계비·인허가 수수료·감리비'],
+    ['모니터링·통신',    2, 'monitor', '발전량 감시 시스템'],
+    ['시운전·준공검사',  2, null,      '시운전·사용전검사·준공'],
+    ['보험·예비비',      4, null,      '공사보험·예비비'],
+  ]},
+  '수상형': {unit:195, rows:[
+    ['모듈',            28, 'module',  '수상 환경은 냉각 효과로 발전량이 다소 유리'],
+    ['인버터',           8, 'inverter','육상 설치가 일반적 — 방수·방염 등급 확인'],
+    ['부유체·구조물',   26, 'rack',    'HDPE 부유체와 프레임 — 수상형 사업비를 가르는 핵심'],
+    ['계류·앵커',        3, 'found',   '수위 변동에 대응하는 계류 시스템'],
+    ['전기공사',        12, null,      '수중케이블 포함 — 육상보다 단가가 높음'],
+    ['계통연계',         7, null,      '한전 인입선로·부담금'],
+    ['설계·인허가·감리', 6, null,      '수면 점용허가·환경성 검토 포함'],
+    ['모니터링·통신',    2, 'monitor', '발전량 감시 시스템'],
+    ['시운전·준공검사',  2, null,      '시운전·사용전검사·준공'],
+    ['보험·예비비',      6, null,      '수상 특수 위험 반영'],
+  ]},
+  '건물형': {unit:155, rows:[
+    ['모듈',            35, 'module',  '지붕 면적 제약으로 고효율 모듈이 유리'],
+    ['인버터',          11, 'inverter','소용량 분산 배치가 일반적'],
+    ['구조물·가대',     18, 'rack',    '지붕 방수·구조 보강 포함'],
+    ['기초·앵커',        2, 'found',   '지붕 고정 방식(관통형·비관통형)'],
+    ['전기공사',        14, null,      '건물 수전설비 연계 포함'],
+    ['계통연계',         8, null,      '한전 인입·계량 설비'],
+    ['설계·구조안전진단',6, null,      '구조 안전진단이 필수'],
+    ['모니터링·통신',    2, 'monitor', '발전량 감시 시스템'],
+    ['시운전·준공검사',  2, null,      '시운전·사용전검사·준공'],
+    ['보험·예비비',      2, null,      '공사보험·예비비'],
+  ]},
+};
+const COST_PARTS = {
+  module: {label:'모듈', opts:[
+    {v:'perc',   n:'PERC 단결정 550W', k:1.00, gen:0,    life:'출력 25년 / 제품 12년', memo:'현재 가장 널리 쓰이는 표준 제품 — 단가가 가장 낮습니다'},
+    {v:'topcon', n:'TOPCon 580W',     k:1.08, gen:0.03, life:'출력 30년 / 제품 15년', memo:'같은 면적에서 발전량이 약 3% 높고 열화율이 낮습니다'},
+    {v:'hjt',    n:'HJT 600W',        k:1.18, gen:0.05, life:'출력 30년 / 제품 25년', memo:'온도계수가 좋아 여름 손실이 적지만 단가가 가장 높습니다'},
+  ]},
+  origin: {label:'모듈 원산지', opts:[
+    {v:'kr', n:'국산 (탄소인증 1등급)', k:1.10, gen:0, cert:'1등급', memo:'탄소배출량 검증인정서 1등급 — 공모의 재생에너지 산업생태계 기여 항목에 유리'},
+    {v:'im', n:'수입 (탄소인증 3등급)', k:1.00, gen:0, cert:'3등급', memo:'단가는 낮지만 산업생태계 기여 평가에서 불리할 수 있습니다'},
+  ]},
+  inverter: {label:'인버터', opts:[
+    {v:'string',  n:'스트링형 100kW급', k:1.00, gen:0,    memo:'고장 시 해당 구간만 정지 — 마을 발전소에 가장 무난'},
+    {v:'central', n:'중앙집중식 500kW급', k:0.90, gen:0,  memo:'초기 단가는 싸지만 한 대가 고장 나면 발전 전체가 멈춥니다'},
+    {v:'opti',    n:'스트링형 + 옵티마이저', k:1.12, gen:0.02, memo:'그늘·오염이 있는 부지에서 손실을 줄여 줍니다'},
+  ]},
+  rack: {label:'구조물 재질', opts:[
+    {v:'galv',  n:'용융아연도금강', k:1.00, memo:'표준 — 내륙 지역에 적합, 20년 수명 기준'},
+    {v:'alum',  n:'알루미늄',       k:1.15, memo:'가볍고 부식에 강해 시공이 빠릅니다'},
+    {v:'stain', n:'스테인리스',     k:1.30, memo:'염해 지역(해안·간척지)에 권장 — 단가가 높습니다'},
+  ]},
+  found: {label:'기초 방식', opts:[
+    {v:'con',  n:'콘크리트 기초', k:1.00, memo:'표준 — 지반이 약해도 안정적이나 철거비가 듭니다'},
+    {v:'screw',n:'스크류파일',   k:0.92, memo:'공기가 짧고 철거·원상복구가 쉽습니다(임차 부지에 유리)'},
+    {v:'ram',  n:'래머 파일',    k:0.88, memo:'단가가 가장 낮지만 연약지반에는 부적합합니다'},
+  ]},
+  monitor: {label:'모니터링', opts:[
+    {v:'basic',n:'기본 (인버터 단위)', k:1.00, memo:'인버터가 주는 데이터만 봅니다'},
+    {v:'adv',  n:'스트링 단위 + 기상센서', k:1.60, memo:'어느 구간이 고장인지 바로 찾고, 일사량 대비 성능비(PR)를 계산할 수 있습니다'},
+  ]},
+};
+const COST_ESS = [
+  {v:'0',   n:'설치 안 함',    cost:0,      memo:'계통 여유가 있는 경우'},
+  {v:'500', n:'500kWh',  cost:25000*1e4,   memo:'계통 부족지역 접속 조건으로 요구될 수 있음'},
+  {v:'1000',n:'1,000kWh',cost:45000*1e4,   memo:'출력제어가 잦은 지역에서 검토'},
+];
+
+function memCost(){
+  const sel = (key, id) => {
+    const p = COST_PARTS[key];
+    return `<label style="display:flex;align-items:center;gap:6px;">${p.label}
+      <select class="select" id="${id}" style="width:auto;min-width:150px;" onchange="costCalc()">
+        ${p.opts.map(o => `<option value="${o.v}">${o.n}</option>`).join('')}
+      </select></label>`;
+  };
+  return `
+    <div class="sec-head">
+      <h1>🧱 사업비·부품 구성</h1>
+      <p class="sec-desc">업체가 준 총액 견적을 <b>항목별로 뜯어 보고</b>, 주요 부품을 바꿔 가며 사업비와 발전량이
+      어떻게 달라지는지 확인합니다. 견적 비교와 총회 설명에 그대로 쓸 수 있습니다.</p>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;border-left:4px solid var(--primary);">
+      <div class="card-title"><h3 class="serif">총액만 적힌 견적을 받지 마세요</h3></div>
+      <p style="margin-top:0;">사업비가 커지면 융자도 커지고 <b>20년 원리금 부담이 그대로 마을에 남습니다.</b>
+      업체에 아래 항목별 단가 내역서를 요구하고, <b>kW당 설치비</b>로 환산해 비교하세요.
+      부품 사양이 다르면 단가가 다른 것이 당연하므로, <b>같은 사양으로 견적을 받는 것</b>이 비교의 출발입니다.</p>
+      <p class="text-mute" style="margin-bottom:0;">공모 제출서류에 <b>모듈 탄소배출량 검증인정서</b>와 <b>모듈·인버터 KS인증서</b>가 포함되므로,
+      부품을 고를 때 인증 여부를 반드시 확인해야 합니다.</p>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title"><h3 class="serif">① 설비 조건과 부품 선택</h3></div>
+      <div style="display:flex;gap:10px 14px;flex-wrap:wrap;align-items:center;margin-bottom:10px;">
+        <label style="display:flex;align-items:center;gap:6px;">설치형태
+          <select class="select" id="cost-type" style="width:auto;min-width:110px;" onchange="costCalc()">
+            ${Object.keys(COST_BASE).map(t => `<option>${t}</option>`).join('')}
+          </select></label>
+        <label style="display:flex;align-items:center;gap:6px;">용량
+          <input class="input" id="cost-kw" type="number" value="990" min="10" max="1000" style="width:90px;" onchange="costCalc()"> kW</label>
+        <label style="display:flex;align-items:center;gap:6px;">기준 단가
+          <input class="input" id="cost-unit" type="number" value="160" min="50" step="5" style="width:75px;" onchange="costCalc()"> 만원/kW
+          <span class="text-mute" style="font-size:12px;">설치형태를 바꾸면 자동 반영</span></label>
+      </div>
+      <div style="display:flex;gap:10px 14px;flex-wrap:wrap;align-items:center;padding-top:10px;border-top:1px solid var(--line-soft);">
+        ${sel('module','cost-module')}
+        ${sel('origin','cost-origin')}
+        ${sel('inverter','cost-inverter')}
+        ${sel('rack','cost-rack')}
+        ${sel('found','cost-found')}
+        ${sel('monitor','cost-monitor')}
+        <label style="display:flex;align-items:center;gap:6px;">ESS
+          <select class="select" id="cost-ess" style="width:auto;min-width:120px;" onchange="costCalc()">
+            ${COST_ESS.map(e => `<option value="${e.v}">${e.n}</option>`).join('')}
+          </select></label>
+      </div>
+      <div id="cost-part-memo" style="margin-top:10px;"></div>
+    </div>
+
+    <div id="cost-result"></div>
+
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">부품을 고를 때 확인할 것</h3></div>
+      <table class="tbl">
+        <tbody>
+          <tr><td style="width:150px;"><b>인증 서류</b></td>
+            <td>모듈 <b>탄소배출량 검증인정서</b>(등급 확인), 모듈·인버터 <b>KS인증서</b> — 공모 제출서류입니다.
+            견적 단계에서 사본을 미리 받아 두세요.</td></tr>
+          <tr><td><b>보증 조건</b></td>
+            <td>모듈은 <b>출력 보증</b>(25~30년, 연간 열화율)과 <b>제품 보증</b>(12~25년)이 다릅니다.
+            인버터 보증은 보통 5~10년이므로 연장 보증 비용을 미리 확인하세요.</td></tr>
+          <tr><td><b>제조사 존속성</b></td>
+            <td>20년 뒤에도 보증을 이행할 회사인지가 중요합니다. 국내 A/S 조직과 부품 수급 경로를 확인하세요.</td></tr>
+          <tr><td><b>부지 환경</b></td>
+            <td>해안·간척지는 <b>염해</b>로 구조물 부식이 빠릅니다. 스테인리스나 고내식 도금을 검토하고,
+            모듈도 염수분무 시험 인증 제품을 고르세요.</td></tr>
+          <tr><td><b>교체 계획</b></td>
+            <td>인버터는 통상 <b>10~15년차 교체</b>가 필요합니다. 선택한 인버터의 단가가 곧 교체 적립액의 기준이 됩니다.</td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-outline btn-sm" onclick="startDoc('사업비 내역서')">📄 사업비 내역서 만들기</button>
+        <button class="btn btn-ghost btn-sm" onclick="location.hash='#/mem/vendor'">견적 비교하러 가기 →</button>
+      </div>
+    </div>
+  `;
+}
+
+let _costCalc = null;
+function costCalc(){
+  const type = document.getElementById('cost-type').value;
+  const base = COST_BASE[type];
+  const unitEl = document.getElementById('cost-unit');
+  if(unitEl.dataset.type !== type){ unitEl.value = base.unit; unitEl.dataset.type = type; }
+  const kw   = Math.max(10, Number(document.getElementById('cost-kw').value) || 0);
+  const unit = Math.max(1, Number(unitEl.value) || base.unit);
+  const pick = k => {
+    const v = document.getElementById('cost-' + k).value;
+    return COST_PARTS[k].opts.find(o => o.v === v);
+  };
+  const P = {module:pick('module'), origin:pick('origin'), inverter:pick('inverter'),
+             rack:pick('rack'), found:pick('found'), monitor:pick('monitor')};
+  const ess = COST_ESS.find(e => e.v === document.getElementById('cost-ess').value);
+  const mult = {module: P.module.k * P.origin.k, inverter: P.inverter.k,
+                rack: P.rack.k, found: P.found.k, monitor: P.monitor.k};
+
+  const baseTotal = unit * 1e4 * kw;
+  const rows = base.rows.map(([n, pct, key, memo]) => {
+    const std = baseTotal * pct / 100;
+    const k = key ? (mult[key] || 1) : 1;
+    return {n, pct, key, memo, std, amt: std * k, k};
+  });
+  const total = rows.reduce((a, r) => a + r.amt, 0);
+  const invAmt = (rows.find(r => r.key === 'inverter') || {amt:0}).amt;
+  const perKw = total / kw / 1e4;
+  const genBoost = (P.module.gen || 0) + (P.inverter.gen || 0);
+  const util = 15.4 * (1 + genBoost);
+  const gen = kw * 8760 * util / 100;
+  const rev = gen * 165;
+  const own = total * 0.15;
+  const life20 = total + invAmt * 0.8 + (rev * 0.08 * 20);
+
+  _costCalc = {type, kw, unit, total, perKw, rows, ess, P, util, gen, own, invAmt, baseTotal};
+
+  document.getElementById('cost-part-memo').innerHTML = `
+    <div style="background:var(--paper-soft);border-radius:8px;padding:10px 14px;font-size:12.5px;line-height:1.8;">
+      <b>${P.module.n}</b> — ${P.module.memo} <span class="text-mute">(${P.module.life})</span><br>
+      <b>${P.origin.n}</b> — ${P.origin.memo}<br>
+      <b>${P.inverter.n}</b> — ${P.inverter.memo}<br>
+      <b>${P.rack.n}</b> · <b>${P.found.n}</b> — ${P.rack.memo} / ${P.found.memo}<br>
+      <b>${P.monitor.n}</b> — ${P.monitor.memo}${ess.cost ? `<br><b>ESS ${ess.n}</b> — ${ess.memo}` : ''}
+    </div>`;
+
+  document.getElementById('cost-result').innerHTML = `
+    <div class="card">
+      <div class="card-title"><h3 class="serif">② 사업비 세부 내역</h3>
+        <span class="badge ${perKw <= 170 ? 'badge-success' : perKw <= 200 ? 'badge-mute' : 'badge-danger'}">kW당 ${perKw.toFixed(0)}만원</span></div>
+      <div class="grid grid-4" style="margin-bottom:12px;">
+        <div class="kpi"><div class="kpi-n">${fmtWon(total)}</div><div class="kpi-l">총 설치비</div>
+          <div class="kpi-sub">${type} ${kw.toLocaleString()}kW · ESS 별도</div></div>
+        <div class="kpi"><div class="kpi-n">${perKw.toFixed(0)}<span style="font-size:14px;">만원</span></div>
+          <div class="kpi-l">kW당 단가</div><div class="kpi-sub">견적 비교의 기준값</div></div>
+        <div class="kpi"><div class="kpi-n">${fmtWon(own)}</div><div class="kpi-l">필요 자부담 (15%)</div>
+          <div class="kpi-sub">부지 매입비·ESS는 별도</div></div>
+        <div class="kpi"><div class="kpi-n">${util.toFixed(1)}<span style="font-size:14px;">%</span></div>
+          <div class="kpi-l">예상 이용률</div>
+          <div class="kpi-sub">${genBoost ? '부품 선택으로 +' + (genBoost*100).toFixed(0) + '%' : '표준 15.4%'}</div></div>
+      </div>
+      <div style="overflow-x:auto;"><table class="tbl" style="min-width:640px;">
+        <thead><tr><th>항목</th><th style="text-align:right;">표준 비율</th><th style="text-align:right;">표준 금액</th>
+          <th style="text-align:right;">선택 반영</th><th style="text-align:right;">비중</th></tr></thead>
+        <tbody>${rows.map(r => `
+          <tr><td><b>${r.n}</b><div class="text-mute" style="font-size:12px;">${r.memo}</div></td>
+            <td style="text-align:right;">${r.pct}%</td>
+            <td style="text-align:right;color:var(--ink-soft);">${fmtWon(r.std)}</td>
+            <td style="text-align:right;"><b>${fmtWon(r.amt)}</b>${r.k !== 1
+              ? `<div style="font-size:11.5px;color:${r.k > 1 ? '#9c6a00' : 'var(--primary)'};">${r.k > 1 ? '+' : ''}${((r.k-1)*100).toFixed(0)}%</div>` : ''}</td>
+            <td style="text-align:right;">${(r.amt/total*100).toFixed(1)}%</td></tr>`).join('')}
+          <tr style="background:var(--paper-soft);"><td><b>합계 (설치비)</b></td><td style="text-align:right;">100%</td>
+            <td style="text-align:right;color:var(--ink-soft);">${fmtWon(baseTotal)}</td>
+            <td style="text-align:right;"><b>${fmtWon(total)}</b></td><td style="text-align:right;">100%</td></tr>
+          ${ess.cost ? `<tr><td><b>ESS ${ess.n}</b><div class="text-mute" style="font-size:12px;">자부담 15% 산정에서 별도 — 선정 시 설치비 지원 대상</div></td>
+            <td colspan="2"></td><td style="text-align:right;"><b>${fmtWon(ess.cost)}</b></td><td></td></tr>
+          <tr style="background:var(--paper-soft);"><td><b>총 사업비 (ESS 포함)</b></td><td colspan="2"></td>
+            <td style="text-align:right;"><b>${fmtWon(total + ess.cost)}</b></td><td></td></tr>` : ''}
+        </tbody></table></div>
+      <p class="text-mute" style="font-size:12.5px;">※ 표준 비율은 ${type} 1MW 기준의 <b>일반적인 구성</b>이며, 부지 여건·계통 거리·자재 시세에 따라 달라집니다.
+      업체 견적을 이 표에 대입해 <b>어느 항목이 특별히 비싼지</b> 확인하세요.</p>
+    </div>
+
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">③ 선택 결과 — 20년 관점</h3></div>
+      <table class="tbl">
+        <tbody>
+          <tr><td style="width:190px;"><b>연간 예상 발전량</b></td><td style="text-align:right;width:130px;">${Math.round(gen/1000).toLocaleString()} MWh</td>
+            <td class="text-mute" style="font-size:12.5px;">이용률 ${util.toFixed(1)}% 적용</td></tr>
+          <tr><td><b>연간 매출 (한전 매입)</b></td><td style="text-align:right;">${fmtWon(rev)}</td>
+            <td class="text-mute" style="font-size:12.5px;">165원/kWh 기준</td></tr>
+          <tr><td><b>인버터 교체비 (12년차)</b></td><td style="text-align:right;">${fmtWon(invAmt * 0.8)}</td>
+            <td class="text-mute" style="font-size:12.5px;">선택한 인버터 단가의 80% 가정 — 매년 적립할 금액의 근거</td></tr>
+          <tr style="background:var(--paper-soft);"><td><b>20년 총비용 (참고)</b></td>
+            <td style="text-align:right;"><b>${fmtWon(life20)}</b></td>
+            <td class="text-mute" style="font-size:12.5px;">설치비 + 인버터 교체 + 20년 유지관리·보험(매출의 8%)</td></tr>
+        </tbody>
+      </table>
+      <div style="background:var(--paper-soft);border-radius:8px;padding:12px 14px;margin-top:10px;">
+        <b>공모 관련 확인</b>
+        <p class="text-mute" style="font-size:13px;margin:4px 0 0;">
+        · 모듈 탄소배출량 검증: <b>${P.origin.cert}</b> — ${P.origin.cert === '1등급'
+          ? '재생에너지 산업생태계 기여 항목에 유리합니다'
+          : '등급이 낮으면 평가에서 불리할 수 있으니 국산 제품과 단가 차이를 비교해 보세요'}<br>
+        · 자부담 요건: 설치비 ${fmtWon(total)}의 15% = <b>${fmtWon(own)}</b> 이상 확보 필요 (부지 매입비·ESS 별도)<br>
+        · 규모 요건: ${kw <= 1000 ? `<b>${kw.toLocaleString()}kW</b> — 1,000kW 이하로 요건 내` : `<b>${kw.toLocaleString()}kW</b> — 1,000kW 초과, 예외 심의 대상`}</p>
+      </div>
+      <p class="text-mute" style="font-size:12.5px;">※ 부품 선택에 따른 발전량 증감은 제조사 사양 기준의 <b>개략 추정</b>입니다.
+      실제 발전량은 일사량·음영·온도·오염도에 좌우되므로, 업체에 <b>발전량 추정 근거(일사량 자료·손실률)</b>를 함께 요구하세요.</p>
+    </div>`;
 }
 
 /* ─── 마을회·조합 구성 모델과 배분 방식 ─── */
@@ -6718,6 +6988,11 @@ const REVIEW_GUIDE = {
 };
 
 const DOC_FIELDS = {
+  '사업비 내역서': [
+    {k:'coop_name', label:'조합 이름', req:true},
+    {k:'firm',      label:'견적 업체', ph:'예: ○○에너지(주)'},
+    {k:'note',      label:'특이사항·협의 내용', type:'textarea', ph:'예: 계통 인입거리 1.2km로 계통연계비가 표준보다 높음. 모듈은 국산 1등급으로 협의'},
+  ],
   '마을회·협동조합 협약서': [
     {k:'coop_name',  label:'협동조합 이름', req:true},
     {k:'village',    label:'마을회 이름', ph:'예: ○○군 ○○면 ○○리 마을회', req:true},
@@ -6980,6 +7255,54 @@ function renderSampleDoc(name, v){
   const mm = n => Number(n || 0);                       // 백만원 단위 입력값
   const won = n => fmtWon(mm(n) * 1e6);                 // 백만원 → 사람이 읽는 금액
   switch(name){
+    case '사업비 내역서': {
+      const c = _costCalc;
+      if(!c) return '<p>사업비·부품 구성 화면에서 조건을 먼저 계산한 뒤 이 서식을 만들어 주세요.</p>';
+      const W = n => Math.round(n/1e4).toLocaleString();
+      return `
+      <h3>${coop} 태양광 발전사업 사업비 내역서</h3>
+      <h4>1. 설비 개요</h4>
+・ 설치형태: ${escapeHtml(c.type)}
+・ 설비 용량: ${c.kw.toLocaleString()}kW
+・ 견적 업체: ${escapeHtml(v.firm || '(업체명 기재)')}
+・ kW당 설치비: <strong>${c.perKw.toFixed(0)}만원</strong>
+
+      <h4>2. 주요 부품 사양</h4>
+・ 모듈: ${escapeHtml(c.P.module.n)} · ${escapeHtml(c.P.origin.n)} — 보증 ${escapeHtml(c.P.module.life)}
+・ 인버터: ${escapeHtml(c.P.inverter.n)}
+・ 구조물: ${escapeHtml(c.P.rack.n)} · 기초: ${escapeHtml(c.P.found.n)}
+・ 모니터링: ${escapeHtml(c.P.monitor.n)}
+・ ESS: ${escapeHtml(c.ess.n)}${c.ess.cost ? ' (' + W(c.ess.cost) + '만원 · 자부담 산정 별도)' : ''}
+
+      <h4>3. 사업비 세부 내역 (단위: 만원)</h4>
+${c.rows.map(r => '・ ' + r.n + ': ' + W(r.amt) + ' (' + (r.amt/c.total*100).toFixed(1) + '%)').join('\n')}
+・ <strong>설치비 합계: ${W(c.total)} (${(c.total/1e8).toFixed(2)}억원)</strong>
+${c.ess.cost ? '・ ESS 별도: ' + W(c.ess.cost) + '\n・ 총 사업비: ' + W(c.total + c.ess.cost) : ''}
+
+      <h4>4. 자부담 확인</h4>
+・ 자부담 요건: 설치비의 15% 이상 = <strong>${W(c.own)}만원</strong>
+・ 부지 매입비와 ESS 설치비는 위 15% 산정에서 별도임
+・ 업체 견적에 <strong>토목비와 계통비가 포함되어 있는지</strong> 반드시 확인 (별도 청구되는 경우가 많음)
+
+      <h4>5. 예상 발전량</h4>
+・ 적용 이용률: ${c.util.toFixed(1)}%
+・ 연간 예상 발전량: ${Math.round(c.gen/1000).toLocaleString()}MWh
+・ 인버터 교체 적립 기준액(12년차, 단가의 80%): ${W(c.invAmt*0.8)}만원
+
+      <h4>6. 특이사항</h4>
+${escapeHtml(v.note || '(계통 인입거리, 지반 조건, 부품 협의 내용 등 기재)')}
+
+      <h4>7. 확인 사항</h4>
+① 업체에 <strong>항목별 단가 내역서</strong>를 요구하여 위 표와 대조하였다.
+② 모듈 <strong>탄소배출량 검증인정서</strong>와 모듈·인버터 <strong>KS인증서</strong> 사본을 수령하였다.
+③ 발전량 추정 근거(일사량 자료·손실률)를 서면으로 제출받았다.
+④ 보증 조건(모듈 출력·제품, 인버터 기간)과 하자보수 범위를 확인하였다.
+⑤ 토목비·계통비 포함 여부와 예상 금액을 확인하였다.
+
+${today}
+작성: ${coop} (인)`;
+    }
+
     case '마을회·협동조합 협약서': {
       const vil = escapeHtml(v.village || '(마을회명 미입력)');
       return `
