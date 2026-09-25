@@ -418,6 +418,12 @@ input,select,textarea{font-family:inherit;font-size:14px;}
 .msg{max-width:80%;padding:10px 14px;border-radius:16px;margin-bottom:10px;font-size:14px;line-height:1.55;}
 .msg.user{background:var(--primary);color:#fff;margin-left:auto;border-bottom-right-radius:4px;}
 .msg.ai{background:#fff;color:var(--ink);border:1px solid var(--line-soft);border-bottom-left-radius:4px;}
+.msg.ai.insufficient{border-color:#b8b8b8;}
+.msg-src{list-style:none;margin:8px 0 0;padding:8px 0 0;border-top:1px dashed var(--line-soft);font-size:0.8em;color:#666;overflow-wrap:anywhere;word-break:break-all;}
+.msg-src li{margin:2px 0;}
+.msg-src .msg-src-more{color:#999;}
+.msg-act{margin-top:8px;}
+.msg-badge{margin-top:6px;font-size:0.75em;color:#888;}
 .chat-input{display:flex;gap:8px;}
 .chat-input .input{flex:1;}
 
@@ -5429,7 +5435,7 @@ async function sendChat(){
     // 자체서버 AI(/api/ai/chat) 실연동 — 서버에 AI 키가 없으면 서버가 안내 문구를 돌려준다
     body.insertAdjacentHTML('beforeend', `<div class="msg ai" id="chat-pending">답변 작성 중…</div>`);
     body.scrollTop = body.scrollHeight;
-    let answer = '';
+    let answer = '', meta = null;
     try{
       const res = await fetch('/api/ai/chat', {
         method:'POST', headers:{'Content-Type':'application/json'},
@@ -5439,13 +5445,16 @@ async function sendChat(){
       });
       const d = await res.json();
       answer = d && d.answer ? d.answer : '';
-    }catch(e){ answer = ''; }
+      meta = answer && d && typeof d === 'object' ? d : null;   // 근거·엔진·request_id (표시용, 이력에는 안 넣음)
+    }catch(e){ answer = ''; meta = null; }
     if(!answer) answer = '(연결 실패) 잠시 후 다시 시도해 주세요. 급한 질문은 상담신청으로 남겨 주세요.';
     _chatHistory.push({role:'user', content:q}, {role:'assistant', content:answer});
     const pending = document.getElementById('chat-pending');
     if(pending){   // 답변 대기 중 다른 화면으로 이동했으면 조용히 종료
       pending.removeAttribute('id');
-      pending.innerHTML = escapeHtml(answer).replace(/\n/g, '<br>');
+      pending.innerHTML = escapeHtml(answer).replace(/\n/g, '<br>') + chatMetaHtml(meta);
+      if(meta && meta.insufficient === true) pending.classList.add('insufficient');
+      if(meta && meta.request_id) pending.setAttribute('data-req', String(meta.request_id));
       body.scrollTop = body.scrollHeight;
     }
     return;
@@ -5456,6 +5465,35 @@ async function sendChat(){
     </div>`);
     body.scrollTop = body.scrollHeight;
   }, 500);
+}
+/* /api/ai/chat 응답의 부가 정보(근거 sources · 엔진 backend · 근거 없음 insufficient)를 말풍선 안 HTML로.
+   새 필드가 하나도 없으면 ''(옛 서버·데모와 동일 표시). 링크는 만들지 않는다(본부 위키 내부 이름). */
+function chatMetaHtml(d){
+  if(!d || typeof d !== 'object') return '';
+  const srcs = Array.isArray(d.sources) ? d.sources : [];
+  const names = [];                                  // wiki: node의 '#' 앞부분 · law: ref · ontology 제외 · 중복 제거
+  srcs.forEach(s => {
+    if(!s || typeof s !== 'object') return;
+    let n = '';
+    if(s.type === 'wiki' && s.node) n = String(s.node).split('#')[0];
+    else if(s.type === 'law' && s.ref) n = String(s.ref);
+    n = n.trim();
+    if(n && !names.includes(n)) names.push(n);
+  });
+  const MAX = 5, shown = names.slice(0, MAX), rest = names.length - shown.length;
+  const list = shown.length
+    ? `<ul class="msg-src">${shown.map(n => `<li>${escapeHtml(n)}</li>`).join('')}${rest > 0 ? `<li class="msg-src-more">외 ${rest}건</li>` : ''}</ul>`
+    : '';
+  const act = d.insufficient === true
+    ? `<div class="msg-act"><button class="btn btn-outline btn-sm" onclick="location.hash='#/pub/contact'">상담신청으로 남기기</button></div>`
+    : '';
+  const be = typeof d.backend === 'string' ? d.backend : '';
+  let badge = '';
+  if(be === 'anthropic') badge = '일반 AI';
+  else if(be.startsWith('poome')) badge = d.engine_status != null ? `엔진 일시 불가 (${d.engine_status})` : '';
+  else if(be) badge = `GPU 엔진 · 근거 ${srcs.length}건`;
+  const badgeHtml = badge ? `<div class="msg-badge">${escapeHtml(badge)}</div>` : '';
+  return list + act + badgeHtml;
 }
 
 /* ─── 신청·진단 (공개, 생애주기 1~2단계) ─── */
