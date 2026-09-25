@@ -1491,6 +1491,7 @@ const ROLE_MENUS = {
       ['adm','contest','🏆','공모·심사 관리'],
       ['adm','villages','🏘','조합·마을 관리'],
       ['adm','users','👤','회원 관리'],
+      ['adm','taxkpi','📈','세무 파일럿 KPI'],
     ]],
     ['소통·콘텐츠', [
       ['adm','inquiries','📮','문의 처리'],
@@ -1508,6 +1509,7 @@ const ROLE_MENUS = {
       ['mem','union','🤝','연합회 현황판'],
       ['adm','villages','🏘','조합·마을 현황'],
       ['adm','contest','🏆','공모·심사'],
+      ['adm','taxkpi','📈','세무 파일럿 KPI'],
     ]],
     ['공동업무', [
       ['mem','docs','📝','문서 자동 생성'],
@@ -1540,7 +1542,9 @@ const ROLE_MENUS = {
     ['운영관리', [
       ['mem','power','⚡','발전·정산·배당'],
       ['mem','revenue','💰','수익 시뮬레이션'],
-      ['mem','accounting','🧾','회계·세무 자동화'],
+      ['mem','accounting','🧾','회계·세무 자료이관'],
+      ['mem','taxpay','💸','지급·원천징수'],
+      ['mem','ledgers','📒','표준장부·거래처'],
       ['mem','closing','📁','월마감·보고서'],
       ['mem','members','👥','조합원 관리'],
       ['mem','schedule','📅','일정·마감'],
@@ -1548,6 +1552,7 @@ const ROLE_MENUS = {
     ]],
     ['확장', [
       ['mem','biz','🛍','마을비즈니스'],
+      ['mem','taxjoin','🧮','세무 공동구매 신청'],
       ['mem','union','🤝','연합체·커뮤니티'],
       ['mem','library','📚','공지·자료실'],
       ['mem','chat','💬','AI 상담'],
@@ -1736,7 +1741,11 @@ const MENU_DESC = {
   law:['법령·인허가','발전사업 관련 법령을 확인하고 질문합니다'],
   power:['발전·정산·배당','발전량과 판매 수익, 조합원 배당을 관리합니다'],
   revenue:['수익 시뮬레이션','설비 규모별 예상 수익을 계산해 봅니다'],
-  accounting:['회계·세무 자동화','장부 기록과 세무 신고를 자동화합니다'],
+  accounting:['회계·세무 자료이관','급여대장·통장 원본·증빙을 세무사에게 정해진 날짜에 보내고 되묻기를 받습니다'],
+  taxpay:['지급·원천징수','급여대장 5일 마감, 지급 유형 판별, 배당·햇빛소득 원천징수를 계산합니다'],
+  ledgers:['표준장부·거래처','연합회 표준 관리대장 12종과 거래처별 표준 계정을 관리합니다'],
+  taxjoin:['세무 공동구매 신청','세무회계 비용절감 프로젝트(공동구매)에 신청합니다'],
+  taxkpi:['세무 파일럿 KPI','조합별 패키지 제출·되묻기·담당자 현황을 봅니다'],
   closing:['월마감·보고서','매월 결산과 보고서를 만듭니다'],
   members:['조합원 관리','조합원 명부와 출자 현황을 관리합니다'],
   schedule:['일정·마감','총회·신고 등 마감 일정을 관리합니다'],
@@ -2233,6 +2242,9 @@ function renderMemberPage(page){
     case 'law':       return memLaw();
     case 'revenue':   return memRevenue();
     case 'accounting':return memAccounting();
+    case 'taxpay':    return memTaxPay();
+    case 'ledgers':   return memLedgers();
+    case 'taxjoin':   return memTaxJoin();
     case 'closing':   return memClosing();
     case 'members':   return memMembers();
     case 'schedule':  return memSchedule();
@@ -3688,7 +3700,7 @@ function memPower(){
     <div class="card">
       <div class="card-title">
         <h3 class="serif">지역화폐 배당 적립 현황</h3>
-        <button class="btn btn-outline btn-sm" onclick="toast('배당 통지문은 조합원별 한글 파일·알림톡으로 자동 생성됩니다. (데모)')">📨 배당 통지문 생성</button>
+        <button class="btn btn-outline btn-sm" onclick="location.hash='#/mem/taxpay'">📨 배당·햇빛소득 지급 (원천징수·통지문)</button>
       </div>
       <div class="grid grid-4">
         <div class="kpi"><div class="kpi-n">${fmtWon(fund)}</div><div class="kpi-l">이달 적립 재원</div></div>
@@ -4537,113 +4549,7 @@ const UPLOAD_KINDS = {
   receipt: {label:'지출 영수증',   icon:'📇', accept:'.pdf,image/*'},
 };
 
-function memAccounting(){
-  const u = currentUser();
-  const bankCount    = MOCK.uploads.filter(f=>f.kind==='bank').length;
-  const invCount     = MOCK.uploads.filter(f=>f.kind==='invoice').length;
-  const receiptCount = MOCK.uploads.filter(f=>f.kind==='receipt').length;
-  return `
-    <div class="sec-head">
-      <h1>회계·세무 자동화</h1>
-      <p class="sec-desc">통장 거래내역·세금계산서·영수증을 업로드하면 세무 신고 자료를 AI가 자동으로 정리합니다.</p>
-    </div>
-
-    <div class="card" style="margin-bottom:16px;">
-      <div class="card-title"><h3 class="serif">📁 월 마감 자동화 흐름</h3><span class="badge badge-mute">표준 파이프라인</span></div>
-      <table class="tbl">
-        <tbody>
-          <tr><td style="width:60px;"><strong>①</strong></td><td><strong>통장 거래내역 업로드 → 자동 분류·기장</strong><div class="text-mute" style="font-size:12.5px;">키워드 규칙으로 계정과목·사업구분(공동사업/배당/적립/상환)까지 자동 분류 — 미분류 건만 사람이 확정</div></td></tr>
-          <tr><td><strong>②</strong></td><td><strong>대장 확인</strong><div class="text-mute" style="font-size:12.5px;">발전·회계·급여근태·배당적립 대장의 당월 기록 점검 (모든 자동화의 원본 데이터)</div></td></tr>
-          <tr><td><strong>③</strong></td><td><strong>월 마감 실행 → 산출물 자동 생성</strong><div class="text-mute" style="font-size:12.5px;">월간 운영보고서 · 직원별 급여명세서 · 자금 배분 지시서가 한글 파일로 한 번에 생성</div></td></tr>
-        </tbody>
-      </table>
-      <p class="text-mute" style="font-size:12.5px;">※ 원천세(익월 10일)·부가세(분기 25일) 등 신고 마감은 자동 알림 — 전체 목록은 <a href="#/mem/closing" style="color:var(--primary);">월마감·보고서</a> 메뉴에서.</p>
-    </div>
-
-    <div class="grid grid-3">
-      <div class="kpi"><div class="kpi-n">${bankCount}</div><div class="kpi-l">통장 거래내역</div><div class="kpi-sub">업로드된 파일</div></div>
-      <div class="kpi"><div class="kpi-n">${invCount}</div><div class="kpi-l">세금계산서</div><div class="kpi-sub">매입·매출</div></div>
-      <div class="kpi"><div class="kpi-n">${receiptCount}</div><div class="kpi-l">지출 영수증</div><div class="kpi-sub">이미지·PDF</div></div>
-    </div>
-
-    <div class="card mt-20">
-      <div class="card-title">
-        <h3 class="serif">📤 자료 업로드</h3>
-        ${MOCK.uploads.length ? `<button class="btn btn-outline btn-sm" onclick="clearUploads()">🗑 전체 삭제</button>` : ''}
-      </div>
-      <div class="grid grid-3">
-        ${Object.entries(UPLOAD_KINDS).map(([k,v]) => `
-          <label class="feature" style="cursor:pointer;text-align:center;">
-            <div class="feature-icon" style="margin:0 auto 12px;">${v.icon}</div>
-            <h3>${v.label}</h3>
-            <p>${v.accept.split(',').join(' · ')}</p>
-            <div style="margin-top:12px;">
-              <span class="btn btn-outline btn-sm">📁 파일 선택</span>
-            </div>
-            <input type="file" style="display:none;" accept="${v.accept}" multiple onchange="uploadFiles('${k}', this.files)">
-          </label>
-        `).join('')}
-      </div>
-      ${MOCK.uploads.length ? `
-        <div style="margin-top:20px;border-top:1px solid var(--line-soft);padding-top:16px;">
-          <h4 class="text-small" style="margin-bottom:8px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;">업로드된 자료 (${MOCK.uploads.length})</h4>
-          ${MOCK.uploads.map(f => `
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line-soft);">
-              <div style="min-width:0;flex:1;">
-                <span class="badge badge-mute">${UPLOAD_KINDS[f.kind]?.label || f.kind}</span>
-                <span style="margin-left:8px;font-weight:500;">${escapeHtml(f.name)}</span>
-                <span class="text-small text-mute" style="margin-left:8px;">${escapeHtml(f.size)} · ${escapeHtml(f.date)}</span>
-              </div>
-              <button class="btn btn-ghost btn-sm" onclick="removeUpload('${escapeJs(f.id)}')">삭제</button>
-            </div>
-          `).join('')}
-        </div>
-      ` : `<p class="text-mute text-center" style="padding:16px 0 0;font-size:13px;">아직 업로드된 자료가 없습니다. 위 카드를 클릭해 파일을 선택하세요.</p>`}
-    </div>
-
-    <div class="card mt-20">
-      <h3 class="serif">📊 신고 자료 자동 생성</h3>
-      <p class="text-mute text-small" style="margin-bottom:16px;">필요한 자료를 선택하면 업로드된 데이터를 기반으로 AI가 초안을 작성합니다.</p>
-      <div class="grid grid-3">
-        ${ACCOUNTING_TEMPLATES.map(t => `
-          <div class="feature" style="cursor:pointer;" onclick="startAccounting('${escapeJs(t.kind)}')">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-              <div class="feature-icon">${t.icon}</div>
-              <span class="badge badge-mute">${t.period==='month'?'월간':t.period==='quarter'?'분기':t.period==='year'?'연간':'—'}</span>
-            </div>
-            <h3>${escapeHtml(t.title)}</h3>
-            <p>${escapeHtml(t.desc)}</p>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-
-    <div class="card mt-20">
-      <div class="card-title">
-        <h3 class="serif">📚 생성한 자료 (${MOCK.accounting.length})</h3>
-      </div>
-      ${MOCK.accounting.length ? `<table class="tbl">
-        <thead><tr><th>자료명</th><th>유형</th><th>대상 기간</th><th>생성일</th><th></th></tr></thead>
-        <tbody>
-          ${MOCK.accounting.map(a => `
-            <tr>
-              <td><strong>${escapeHtml(a.title)}</strong></td>
-              <td>${escapeHtml(a.typeLabel)}</td>
-              <td>${escapeHtml(a.period)}</td>
-              <td>${escapeHtml(a.date)}</td>
-              <td class="tbl-actions">
-                <button class="btn btn-ghost btn-sm" onclick="viewAccounting('${escapeJs(a.id)}')">보기</button>
-                <button class="btn btn-ghost btn-sm" onclick="downloadAccounting('${escapeJs(a.id)}')">다운로드</button>
-                <button class="btn btn-ghost btn-sm" onclick="removeAccounting('${escapeJs(a.id)}')">삭제</button>
-              </td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>` : '<p class="text-mute text-center" style="padding:20px 0;">아직 생성된 자료가 없습니다. 위에서 원하는 자료를 선택해 생성하세요.</p>'}
-    </div>
-  `;
-}
-
+/* memAccounting → 세무 모듈(아래)에서 재정의: 자료 이관 허브 */
 function uploadFiles(kind, files){
   if(!files || !files.length) return;
   const now = new Date();
@@ -5169,15 +5075,17 @@ function memSchedule(){
     </div>
 
     <div class="card" style="margin-bottom:16px;">
-      <div class="card-title"><h3 class="serif">⏰ 정기 마감 캘린더 (자동 계산)</h3><span class="badge badge-mute">세무·운영 고정 일정</span></div>
-      ${coopDeadlines().map(e => `
+      <div class="card-title"><h3 class="serif">⏰ 세무 달력 (조합 유형별 자동 계산)</h3><span class="badge badge-mute">세무사 인터뷰 2026-09 기준</span></div>
+      ${taxProfileBar()}
+      ${taxDeadlines().map(e => `
         <div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--line-soft);">
           <span class="badge ${dday(e.date) <= 7 ? 'badge-danger' : 'badge-mute'}" style="width:52px;text-align:center;">${ddayLabel(e.date)}</span>
           <div style="flex:1;font-weight:500;">${e.title}</div>
+          <span class="badge badge-mute">${e.kind}</span>
           <span class="text-small text-mute">${e.date}</span>
         </div>
       `).join('')}
-      <p class="text-mute" style="font-size:12.5px;margin-bottom:0;">※ 원천세(매월 10일)·부가세(1·4·7·10월 25일)·법인세(3월)·월 마감(말일)은 입력 없이 자동으로 뜹니다.</p>
+      <p class="text-mute" style="font-size:12.5px;margin-bottom:0;">※ 급여대장 5일 · 원천세 10일 · 부가세 1·4·7·10월 25일 · 연말정산 2월 · 법인세 3월 · 국세청 결산공시 4월(사협·공익법인) · 근로소득 간이지급명세서 반기(한시). 세무사가 신고를 마치면 완료 처리됩니다. 설비 취득 달에는 부가세 조기환급 신고를 바로 할 수 있습니다.</p>
     </div>
 
     <div class="card">
@@ -5214,6 +5122,7 @@ function memClosing(){
     ['6','융자 원리금 자동이체 확인','약정일','상환 대장 갱신'],
     ['7','기장·시산표 마감, 배당 적립 계산','말일','회계대장, 배당적립대장'],
     ['8','월간 운영보고서 작성·운영위 보고','익월 첫 주','월간 운영보고서(한글)'],
+    ['9','세무 패키지 전송 — 급여대장(5일)·통장 원본+보조 시트·증빙 목록','말일 (급여대장 5일)','회계·세무 자료이관 메뉴 · 세무사 열람 기록'],
   ];
   const reports = [
     {icon:'📊', name:'월간 운영보고서', cycle:'매월', desc:'발전·재무·설비·배당 통합 — 월 마감 시 자동 생성'},
@@ -5221,7 +5130,7 @@ function memClosing(){
     {icon:'📈', name:'분기 재무보고서', cycle:'분기', desc:'예산 대비 실적·부가세·사업별 집행률'},
     {icon:'📣', name:'반기 경영보고서', cycle:'반기', desc:'조합원 보고회용 — 쉬운 말 요약 포함'},
     {icon:'🏛', name:'총회 자료집', cycle:'연 1회', desc:'결산·감사보고·잉여금 처분안·차년 계획'},
-    {icon:'💌', name:'배당 통지문', cycle:'분기', desc:'조합원별 지역화폐 배당 안내 — 알림톡 연계'},
+    {icon:'💌', name:'배당·햇빛소득 통지문', cycle:'분기', desc:'원천징수 계산·건강보험료 영향 안내 포함 — 지급·원천징수 메뉴에서 생성'},
   ];
   const bankFiles = MOCK.uploads.filter(f => f.kind === 'bank' && f._text);
   return `
@@ -5231,7 +5140,7 @@ function memClosing(){
     </div>
 
     <div class="grid grid-4">
-      <div class="kpi"><div class="kpi-n">8</div><div class="kpi-l">월 정기업무</div><div class="kpi-sub">아래 체크리스트</div></div>
+      <div class="kpi"><div class="kpi-n">9</div><div class="kpi-l">월 정기업무</div><div class="kpi-sub">아래 체크리스트</div></div>
       <div class="kpi"><div class="kpi-n">${bankFiles.length}</div><div class="kpi-l">마감 사용 가능한 통장 CSV</div><div class="kpi-sub">회계·세무 메뉴에서 업로드</div></div>
       <div class="kpi"><div class="kpi-n">${MOCK.closings.length}</div><div class="kpi-l">생성된 월마감 보고서</div><div class="kpi-sub">아래 목록</div></div>
       <div class="kpi"><div class="kpi-n">21건</div><div class="kpi-l">연간 반복 업무</div><div class="kpi-sub">분기 5 · 반기 4 · 연 8 포함</div></div>
@@ -5285,7 +5194,7 @@ function memClosing(){
       <div class="card-title"><h3 class="serif">📄 자동 생성 보고서 6종</h3></div>
       <div class="feature-grid">
         ${reports.map(r => `
-          <div class="feature" style="cursor:pointer;" onclick="toast('${r.name}는 대장 데이터로 자동 생성됩니다. (데모)')">
+          <div class="feature" style="cursor:pointer;" onclick="${r.name.includes('통지문') ? "location.hash='#/mem/taxpay'" : r.name==='급여명세서' ? "location.hash='#/mem/taxpay'" : `toast('${r.name}는 대장 데이터로 자동 생성됩니다. (데모)')`}">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;">
               <div class="feature-icon">${r.icon}</div>
               <span class="badge badge-primary">${r.cycle}</span>
@@ -9366,6 +9275,7 @@ function renderAdminPage(page){
     case 'inquiries':  return admInquiries();
     case 'content':    return admContent();
     case 'logs':       return admLogs();
+    case 'taxkpi':     return admTaxKpi();
     default:           return admDashboard();
   }
 }
@@ -9934,6 +9844,910 @@ async function submitContact(){
   });
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   세무자료 자동 이관·노무 자동화 모듈 (2026-09-25)
+   근거: 세무사 인터뷰(한길세무회계사무소 2026-09-16) · 회계세무 업무 표준안(안)
+   원칙: ① 통장 적요 원본 불변(보조 컬럼만) ② 세금계산서·카드·현금영수증은 홈택스 수임동의로 세무사가 직접 조회
+         ③ 신고서는 시스템이 만들지 않는다(제출 전 점검만) ④ 담당자·비상연락망·인수인계가 먼저
+   ═══════════════════════════════════════════════════════════════════ */
+const TAX_STORE = 'sunvillage_auto_tax';
+const TAX_VENDOR_SEED = [
+  {id:'ven01', name:'한국전력공사',        acct:'전력판매수익',   type:'매출처',   bizNo:'',  kw:'한전|한국전력|전력판매|전력대금'},
+  {id:'ven02', name:'한국전력거래소(REC)', acct:'REC판매수익',    type:'매출처',   bizNo:'',  kw:'전력거래소|REC|공급인증서'},
+  {id:'ven03', name:'지자체(보조금)',      acct:'보조금수입',     type:'교부기관', bizNo:'',  kw:'보조금|군청|시청|도청|교부'},
+  {id:'ven04', name:'조합원 출자',         acct:'출자금',         type:'조합원',   bizNo:'',  kw:'출자금|출자'},
+  {id:'ven05', name:'마을회(부지 임차)',   acct:'토지임차료',     type:'임대인',   bizNo:'',  kw:'임차|임대료|마을회'},
+  {id:'ven06', name:'유지보수 업체',       acct:'발전설비유지관리비', type:'매입처', bizNo:'', kw:'점검|정비|유지보수|O&M|인버터'},
+  {id:'ven07', name:'보험사',              acct:'보험료',         type:'매입처',   bizNo:'',  kw:'보험료|화재보험|손해보험'},
+  {id:'ven08', name:'금융기관(융자)',      acct:'차입금상환·이자', type:'금융',    bizNo:'',  kw:'융자|상환|원리금|대출이자|이자'},
+  {id:'ven09', name:'국민건강보험공단',    acct:'4대보험료',      type:'공공',     bizNo:'',  kw:'건강보험|국민연금|고용보험|산재|4대보험'},
+  {id:'ven10', name:'세무서·지자체(세금)', acct:'세금과공과',     type:'공공',     bizNo:'',  kw:'원천세|부가세|법인세|지방소득세|주민세|재산세'},
+  {id:'ven11', name:'세무회계사무소',      acct:'회계·세무비용',  type:'매입처',   bizNo:'',  kw:'세무|기장료|회계사무소'},
+  {id:'ven12', name:'직원 급여',           acct:'인건비(급여)',   type:'직원',     bizNo:'',  kw:'급여|급료|월급|상여'},
+  {id:'ven13', name:'주민환원(햇빛소득)',  acct:'주민환원사업비', type:'주민',     bizNo:'',  kw:'햇빛소득|배당|환원'},
+  {id:'ven14', name:'통신·전기(관리비)',   acct:'관리비',         type:'매입처',   bizNo:'',  kw:'통신|전기요금|수도|가스|KT|SK|LG'},
+];
+const TAX_EVIDENCE_KINDS = ['세금계산서','계산서','신용카드 매출전표','현금영수증','계좌이체 내역','계약서','보조금 교부결정서','기타'];
+const TAX_RETURN_CODES = ['증빙 누락','금액 불일치','거래처 불명','현금인출 사유 없음','계약서 필수항목 누락','기타'];
+const TAX_LEDGERS = [
+  ['조합원 명부',        '이름·직책·가입일·출자금·의결권',                                   'members'],
+  ['출자금 관리대장',    '조합원별 출자좌수·1좌 금액·총출자금·출자일·변동. 사업수익과 혼합 금지', 'shares'],
+  ['발전수익 관리대장',  '전력판매·REC·임대·기타 수익원별 구분',                              'revenue'],
+  ['시설보조금 관리대장','교부기관·결정일·금액·관련시설·내용연수·연간 인식액·잔여 이연수익·반환조건', 'grants'],
+  ['시설자산 관리대장',  '취득가·내용연수·감가상각·자본적지출 구분',                           'assets'],
+  ['임차료 관리대장',    '임대인·대상·면적·기간·임차료·지급일·세금·증빙. 토지/시설 구분',        'lease'],
+  ['사업비용 관리대장',  '표준안 §13 비용 9항목 — 통장 보조 컬럼에서 집계',                    'expense'],
+  ['차입금 관리대장',    '차입금별 원금·이자 구분',                                          'loan'],
+  ['세금계산서 관리대장','발행·수취 목록 — 내부 누락 점검용(세무사는 홈택스 직접 조회)',         'invoice'],
+  ['원천징수 관리대장',  '급여·지급·햇빛소득의 원천징수 내역 — 자동 생성',                     'wht'],
+  ['잉여금 관리대장',    '일반/사회적협동조합 구분, 법령·정관에 따른 처리',                     'surplus'],
+  ['주민환원사업 관리대장','환원사업명·대상·집행금액·집행일·지급방법·의사결정·증빙',            'return'],
+];
+const TAX_PAY_RULES = {
+  // 대상 → {소득구분, 원천징수, 지급명세서, 필요 서류·주의}
+  staff:    {label:'직원(상시근로자)',        income:'근로소득(상여 포함)', rate:0,     rateLabel:'간이세액표 · 4대보험', stmt:'근로소득 간이지급명세서(반기, 한시) · 연말정산 2월',
+             docs:['급여대장에 상여로 합산','근로계약서'], warn:'직원에게 강사료·회의수당을 따로 책정할 수 없습니다. 급여(상여)로 합쳐집니다.'},
+  freelance:{label:'사업자 없는 개인(단발 용역)', income:'사업소득', rate:0.033, rateLabel:'3.3% (소득세 3% + 지방세 0.3%)', stmt:'사업소득 간이지급명세서(매월)',
+             docs:['용역 계약서 또는 청구서','주민등록번호(신고 필수)'], warn:'매년 반복되면 근로소득 여부를 세무사와 재검토합니다.'},
+  member:   {label:'조합원',                  income:'배당소득', rate:0.154, rateLabel:'15.4% (국세 14% + 지방세 1.4%)', stmt:'배당소득 지급명세서',
+             docs:['정관상 적립금 차감 근거','총회 의결서(결산총회)'], warn:'배당은 정관 적립금을 뺀 이익금을 출자 비율로. 이용실적배당은 총회 의결로.'},
+  resident: {label:'비조합원 주민(햇빛소득)',  income:'기타소득(원칙)', rate:0.22, rateLabel:'22% (기타소득 20% + 지방세 2%) · 필요경비 적용 여부 세무사 확인', stmt:'기타소득 간이지급명세서(매월)',
+             docs:['주민환원 의결서','수령자 성명·주민등록번호·계좌'], warn:'매년 반복 지급되면 소득 구분 해석을 다시 받아야 합니다. 건강보험료·기초연금·기초생활수급 영향 안내 필수.'},
+  landlord: {label:'개인 임대인(부지·지붕)',   income:'임대사업소득(임대인)', rate:0, rateLabel:'원천징수 없음 — 임대인이 세금계산서 발행', stmt:'해당 없음',
+             docs:['임대인 사업자등록증','임대인 발행 세금계산서','임대차 계약서(거래일·금액·거래처·사업자번호)'], warn:'임대인이 사업자등록을 하지 않았으면 지급을 보류하고 등록을 요청합니다.'},
+  village:  {label:'마을회(고유번호증)',       income:'마을회 수익사업', rate:0, rateLabel:'원천징수 없음 — 마을회가 수익사업 개시 후 영수증 발행', stmt:'해당 없음',
+             docs:['마을회 수익사업개시 신고·사업자등록','마을회 발행 영수증(세금계산서)'], warn:'마을회에 부가세·법인세 신고 의무가 생깁니다. 마을발전기금 기부 방식은 법률 검토 대상입니다.'},
+  biz:      {label:'사업자(법인·개인사업자)',  income:'매입 거래', rate:0, rateLabel:'원천징수 없음 — 세금계산서·카드·현금영수증 수취', stmt:'해당 없음',
+             docs:['적격증빙(세금계산서·계산서·카드전표·현금영수증)'], warn:'적격증빙 없이 지급하면 비용 인정에 문제가 생깁니다.'},
+};
+
+function TAX_DEFAULT(){
+  return {
+    profile: {coopType:'일반', publicCorp:false, hasStaff:true, hometax:false, office:'한길세무회계사무소', officeTel:'', officeEmail:'',
+              bizStatus:'등록완료', bizType:'전기/서비스', bizItem:'태양광발전', coopCode:''},
+    contacts: {main:{name:'',phone:'',email:''}, sub:{name:'',phone:'',email:''}, rep:{name:'',phone:'',email:''}},
+    handover: [],
+    vendors: TAX_VENDOR_SEED.map(v => Object.assign({}, v)),
+    bankFiles: [], bank: [],
+    evidence: [],
+    staff: [{id:'st01', name:'사무국장', base:2200000}, {id:'st02', name:'운영 담당', base:1900000}],
+    payroll: [],
+    payments: [],
+    packages: [],
+    returns: [],
+    grants: [],
+    sunIncome: [],
+    apply: null,
+    notes: [],
+  };
+}
+MOCK.tax = TAX_DEFAULT();
+function loadTax(){ const s = _loadObj(TAX_STORE); if(s) MOCK.tax = Object.assign(TAX_DEFAULT(), s); }
+function persistTax(){ _save(TAX_STORE, MOCK.tax); }
+const _tid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
+const _ymd = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const _ymNow = () => _ymd().slice(0,7);
+const _ymPrev = () => { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth()-1); return _ymd(d).slice(0,7); };
+const _won = n => Math.round(Number(n)||0).toLocaleString('ko-KR') + '원';
+const _addYears = (ymd, y) => { const d = new Date(ymd + 'T00:00:00'); d.setFullYear(d.getFullYear() + y); return _ymd(d); };
+const _nextMonth10 = ym => { const [y, m] = ym.split('-').map(Number); const d = new Date(y, m, 10); return _ymd(d); };
+function taxVendor(id){ return MOCK.tax.vendors.find(v => v.id === id); }
+function taxCoopCode(){ return MOCK.tax.profile.coopCode || (myVillage().id || 'coop').toUpperCase(); }
+function taxContactsOk(){ const c = MOCK.tax.contacts; return !!(c.main.name && c.main.phone && c.rep.name && c.rep.phone); }
+function taxLog(action, target){ MOCK.logs.unshift({ts: new Date().toISOString().slice(0,16).replace('T',' '), user: (currentUser()||{}).email || (currentUser()||{}).id || 'coop', action, target}); }
+
+/* 패키지 마감 차단 조건 (A-2·A-3) */
+function taxBlockers(ym){
+  const rows = MOCK.tax.bank.filter(t => t.date.slice(0,7) === ym);
+  const b = [];
+  const noVendor = rows.filter(t => !t.vendorId || !t.confirmed).length;
+  const cashNoReason = rows.filter(t => t.cash && !t.cashReason).length;
+  const badContracts = MOCK.tax.evidence.filter(e => e.kind === '계약서' && !(e.date && e.amount && e.vendor && e.bizNo)).length;
+  const pr = MOCK.tax.payroll.find(p => p.ym === ym);
+  if(noVendor)      b.push({code:'거래처 미확정', n:noVendor, fix:'통장 보조 시트에서 거래처를 확정하세요.'});
+  if(cashNoReason)  b.push({code:'현금인출 사유 없음', n:cashNoReason, fix:'현금 인출 거래마다 사유를 적으세요. 세무사가 가장 주의 깊게 보는 항목입니다.'});
+  if(badContracts)  b.push({code:'계약서 필수항목 누락', n:badContracts, fix:'거래일·금액·거래처·사업자번호 네 가지를 채우세요.'});
+  if(MOCK.tax.profile.hasStaff && !pr) b.push({code:'급여대장 미마감', n:1, fix:'지급·원천징수 메뉴에서 이달 급여대장을 마감하세요(매월 5일).'});
+  if(!taxContactsOk()) b.push({code:'담당자·대표 연락처 미등록', n:1, fix:'세무 담당자와 대표 연락처를 등록하세요.'});
+  return b;
+}
+
+/* ─── 페이지 1. 회계·세무 자료이관 (허브) ─── */
+function memAccounting(){
+  const T = MOCK.tax, ym = _ymPrev();
+  const rowsYm = T.bank.filter(t => t.date.slice(0,7) === ym);
+  const blockers = taxBlockers(ym);
+  const openReturns = T.returns.filter(r => r.status === '열림');
+  const pkg = T.packages.find(p => p.ym === ym);
+  const c = T.contacts;
+  const contactRow = (k, label) => `<tr><td><strong>${label}</strong></td><td>${escapeHtml(c[k].name || '—')}</td><td>${escapeHtml(c[k].phone || '—')}</td><td>${escapeHtml(c[k].email || '—')}</td></tr>`;
+  return `
+    <div class="sec-head">
+      <h1>🧾 회계·세무 자료이관</h1>
+      <p class="sec-desc">조합은 기장을 하지 않습니다. 세무사가 원하는 원자료(급여대장·통장 엑셀 원본·증빙)를 정해진 날짜에 빠짐없이 보내고, 되묻기를 한 곳에서 받습니다. <span class="badge badge-mute">세무사 인터뷰 2026-09-16 기준</span></p>
+    </div>
+
+    ${!taxContactsOk() ? `<div class="card" style="border-left:4px solid var(--danger);margin-bottom:16px;">
+      <strong>먼저 세무 담당자와 대표 연락처를 등록하세요.</strong>
+      <p class="text-mute" style="margin:4px 0 8px;font-size:13px;">세무사가 첫째로 꼽은 조건은 "연락되는 담당자"입니다. 담당자·부담당자·대표 3인이 등록돼야 패키지를 보낼 수 있습니다.</p>
+      <button class="btn btn-primary btn-sm" onclick="taxEditContacts()">👤 담당자 등록</button></div>` : ''}
+    ${!T.profile.hometax ? `<div class="card" style="border-left:4px solid var(--gold-dark, #B8860B);margin-bottom:16px;">
+      <strong>홈택스 세무사 수임동의가 아직 안 됐습니다.</strong>
+      <p class="text-mute" style="margin:4px 0 8px;font-size:13px;">수임동의가 되면 세금계산서·법인카드·현금영수증은 세무사가 직접 조회합니다. 조합이 따로 보낼 필요가 없어집니다.</p>
+      <button class="btn btn-outline btn-sm" onclick="taxSetHometax(true)">✅ 수임동의 완료로 표시</button></div>` : ''}
+
+    <div class="grid grid-4">
+      <div class="kpi"><div class="kpi-n">${pkg ? (pkg.status === '전송' ? '전송됨' : pkg.status) : '준비 중'}</div><div class="kpi-l">${ym} 세무 패키지</div><div class="kpi-sub">${pkg && pkg.sentAt ? '전송 ' + pkg.sentAt.slice(0,10) : '매월 말 전송'}</div></div>
+      <div class="kpi"><div class="kpi-n" style="${blockers.length ? 'color:var(--danger);' : ''}">${blockers.reduce((s,b)=>s+b.n,0)}</div><div class="kpi-l">마감 차단 항목</div><div class="kpi-sub">${blockers.length ? blockers.map(b=>b.code).join(' · ') : '없음'}</div></div>
+      <div class="kpi"><div class="kpi-n">${rowsYm.length}</div><div class="kpi-l">${ym} 통장 거래</div><div class="kpi-sub">확정 ${rowsYm.filter(t=>t.confirmed).length}건</div></div>
+      <div class="kpi"><div class="kpi-n" style="${openReturns.length ? 'color:var(--danger);' : ''}">${openReturns.length}</div><div class="kpi-l">열린 보정 요청</div><div class="kpi-sub">세무사 되묻기</div></div>
+    </div>
+
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">👤 세무 담당자·비상연락망</h3>
+        <div style="display:flex;gap:6px;"><button class="btn btn-outline btn-sm" onclick="taxHandoverStart()">🔁 담당자 변경(인수인계)</button><button class="btn btn-primary btn-sm" onclick="taxEditContacts()">✏ 등록·수정</button></div></div>
+      <table class="tbl"><thead><tr><th>구분</th><th>성명</th><th>전화</th><th>이메일</th></tr></thead>
+        <tbody>${contactRow('main','세무 담당(주)')}${contactRow('sub','부담당')}${contactRow('rep','대표')}</tbody></table>
+      <p class="text-mute" style="font-size:12.5px;margin:8px 0 0;">※ 세무사 사무소(${escapeHtml(T.profile.office || '미지정')})에 자동 공유됩니다. 담당자가 바뀔 때는 인수인계 기간(기본 30일)을 두고 체크리스트를 완료해야 변경이 끝납니다.</p>
+      ${T.handover.length ? `<div style="margin-top:10px;">${T.handover.map(h => `
+        <div style="display:flex;gap:10px;align-items:center;padding:6px 0;border-top:1px solid var(--line-soft);font-size:13px;">
+          <span class="badge ${h.status==='완료'?'badge-success':'badge-danger'}">${h.status}</span>
+          <span>${escapeHtml(h.from)} → ${escapeHtml(h.to)} · ${h.start} ~ ${h.end}</span>
+          <span class="text-mute" style="margin-left:auto;">체크 ${h.done.filter(Boolean).length}/${h.done.length}</span>
+          ${h.status !== '완료' ? `<button class="btn btn-ghost btn-sm" onclick="taxHandoverView('${h.id}')">체크리스트</button>` : ''}
+        </div>`).join('')}</div>` : ''}
+    </div>
+
+    <div class="card mt-20" style="border-color:var(--primary);">
+      <div class="card-title"><h3 class="serif">📦 ${ym} 세무 패키지</h3><span class="badge badge-primary">매월 말 전송 · 급여대장은 5일</span></div>
+      <table class="tbl">
+        <thead><tr><th>구성</th><th>출처</th><th>형식</th><th>상태</th></tr></thead>
+        <tbody>
+          ${(() => { const pr = T.payroll.find(p => p.ym === ym); return `<tr><td><strong>① 급여대장</strong></td><td>지급·원천징수 메뉴</td><td>xlsx(표)</td><td>${pr ? `<span class="badge badge-success">마감 ${pr.closedAt.slice(0,10)}</span>` : (T.profile.hasStaff ? '<span class="badge badge-danger">미마감</span>' : '<span class="badge badge-mute">직원 없음</span>')}</td></tr>`; })()}
+          <tr><td><strong>② 통장 거래내역</strong></td><td>은행 엑셀·CSV 원본 + 보조 시트</td><td>원본 그대로 · 적요 불변</td><td>${rowsYm.length ? `<span class="badge ${rowsYm.every(t=>t.confirmed)?'badge-success':'badge-danger'}">${rowsYm.filter(t=>t.confirmed).length}/${rowsYm.length} 확정</span>` : '<span class="badge badge-danger">없음</span>'}</td></tr>
+          <tr><td><strong>③ 증빙 목록</strong></td><td>증빙 보관함(계약서·보조금 서류 링크)</td><td>목록 + 파일 링크</td><td><span class="badge badge-mute">${T.evidence.filter(e => e.date.slice(0,7) === ym).length}건</span></td></tr>
+          <tr><td><strong>④ 담당자 확인</strong></td><td>담당자·연락망</td><td>제출자·일시</td><td>${taxContactsOk() ? '<span class="badge badge-success">등록</span>' : '<span class="badge badge-danger">미등록</span>'}</td></tr>
+          <tr><td class="text-mute">제외: 세금계산서 합계표·법인카드·현금영수증</td><td class="text-mute" colspan="2">홈택스 수임동의로 세무사가 직접 조회 — 보내지 않습니다</td><td>${T.profile.hometax ? '<span class="badge badge-success">수임동의</span>' : '<span class="badge badge-danger">수임동의 전</span>'}</td></tr>
+        </tbody>
+      </table>
+      ${blockers.length ? `<div style="background:#F8D7D7;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:13px;">
+        <strong style="color:var(--danger);">마감 차단 ${blockers.length}종</strong>
+        <ul style="margin:4px 0 0;padding-left:18px;">${blockers.map(b => `<li><b>${b.code}</b> ${b.n}건 — ${b.fix}</li>`).join('')}</ul></div>` : ''}
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+        <button class="btn btn-outline" onclick="taxCheckReport('${ym}')">🔍 제출 전 점검</button>
+        <button class="btn btn-primary" onclick="taxBuildPackage('${ym}')" ${blockers.length ? 'disabled title="마감 차단 항목을 먼저 해결하세요"' : ''}>📤 패키지 만들기·전송</button>
+        <select class="select" style="width:auto;" onchange="taxBuildPackage(this.value)"><option value="">다른 달 선택…</option>${[0,1,2,3].map(k => { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth()-k); const v = _ymd(d).slice(0,7); return `<option value="${v}">${v}</option>`; }).join('')}</select>
+      </div>
+      ${T.packages.length ? `<h4 class="text-small" style="margin:16px 0 6px;color:var(--ink-soft);">전송 이력</h4>
+      <table class="tbl"><thead><tr><th>대상 월</th><th>버전</th><th>전송</th><th>세무사 열람</th><th>보정 요청</th><th></th></tr></thead><tbody>
+        ${T.packages.slice().reverse().map(p => `<tr><td><strong>${p.ym}</strong></td><td>v${p.ver}</td><td>${p.sentAt ? p.sentAt.slice(0,16).replace('T',' ') : '—'}</td>
+          <td>${p.openedAt ? p.openedAt.slice(0,16).replace('T',' ') : '<span class="text-mute">미열람</span>'}</td>
+          <td>${T.returns.filter(r => r.pkgId === p.id).length}건</td>
+          <td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="taxViewPackage('${p.id}')">보기</button>${!p.openedAt ? `<button class="btn btn-ghost btn-sm" onclick="taxMarkOpened('${p.id}')">열람 확인(세무사)</button>` : ''}<button class="btn btn-ghost btn-sm" onclick="taxNewReturn('${p.id}')">보정 요청(세무사)</button></td></tr>`).join('')}
+      </tbody></table>` : ''}
+    </div>
+
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">🏦 통장 거래내역 — 원본 + 보조 시트</h3>
+        <div style="display:flex;gap:6px;">
+          <label class="btn btn-primary btn-sm" style="cursor:pointer;">📁 은행 CSV 올리기<input type="file" accept=".csv,.txt" style="display:none;" onchange="taxImportBank(this.files)"></label>
+          <button class="btn btn-outline btn-sm" onclick="taxSampleBank()">예시 거래 넣기</button>
+        </div></div>
+      <p class="text-mute" style="font-size:12.5px;margin-top:0;">적요는 절대 고치지 않습니다(원본은 해시와 함께 보관). 거래처는 자동 추천 뒤 사람이 확정하고, 현금 인출에는 사유를 꼭 적습니다. 계정과목 태그는 세무사에게 보내지 않습니다.</p>
+      ${T.bankFiles.length ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">${T.bankFiles.map(f => `<span class="badge badge-mute" title="해시 ${f.hash}">🔒 ${escapeHtml(f.name)} · ${f.rows}건 · ${f.date}</span>`).join('')}</div>` : ''}
+      ${T.bank.length ? `
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
+        <select class="select" id="tax-bank-ym" style="width:auto;" onchange="refresh()">${[...new Set(T.bank.map(t=>t.date.slice(0,7)))].sort().reverse().map(v => `<option value="${v}"${v===(window._taxBankYm||ym)?' selected':''}>${v}</option>`).join('')}</select>
+        <button class="btn btn-outline btn-sm" onclick="taxConfirmAllSuggested()">추천 거래처 전체 확정</button>
+        <button class="btn btn-outline btn-sm" onclick="taxExportGrant()">📥 보조금 정산용 추출(e나라도움)</button>
+        <button class="btn btn-ghost btn-sm" onclick="taxClearBank()">전체 삭제</button>
+      </div>
+      <div style="overflow-x:auto;"><table class="tbl" style="font-size:13px;min-width:900px;">
+        <thead><tr><th>일자</th><th>적요(원본·잠금)</th><th>입금</th><th>출금</th><th>거래처</th><th>현금인출</th><th>사유·메모</th><th>보조금코드</th><th>증빙</th><th></th></tr></thead>
+        <tbody>${T.bank.filter(t => t.date.slice(0,7) === (document.getElementById('tax-bank-ym') ? document.getElementById('tax-bank-ym').value : (window._taxBankYm||ym))).map(t => {
+          const v = taxVendor(t.vendorId);
+          return `<tr style="${t.cash && !t.cashReason ? 'background:#FDECEC;' : ''}">
+            <td>${t.date}</td><td title="원본 적요는 수정할 수 없습니다">🔒 ${escapeHtml(t.desc)}</td>
+            <td>${t.inn ? t.inn.toLocaleString() : ''}</td><td>${t.out ? t.out.toLocaleString() : ''}</td>
+            <td><select class="select" style="width:150px;padding:3px 6px;font-size:12.5px;" onchange="taxSetVendor('${t.id}', this.value)">
+              <option value="">— 선택 —</option>${T.vendors.map(x => `<option value="${x.id}"${x.id===t.vendorId?' selected':''}>${escapeHtml(x.name)}</option>`).join('')}</select>
+              ${t.vendorId ? (t.confirmed ? '<span class="badge badge-success">확정</span>' : `<span class="badge badge-gold">추천</span>`) : ''}</td>
+            <td><input type="checkbox" ${t.cash?'checked':''} onchange="taxSetCash('${t.id}', this.checked)"></td>
+            <td><input class="input" style="width:170px;padding:3px 6px;font-size:12.5px;" value="${escapeHtml(t.cash ? t.cashReason : t.memo)}" placeholder="${t.cash ? '인출 사유(필수)' : '메모'}" onchange="taxSetMemo('${t.id}', this.value)"></td>
+            <td><input class="input" style="width:90px;padding:3px 6px;font-size:12.5px;" value="${escapeHtml(t.grant||'')}" placeholder="사업코드" onchange="taxSetGrant('${t.id}', this.value)"></td>
+            <td>${t.evId ? '📎' : `<button class="btn btn-ghost btn-sm" onclick="taxMatchEvidence('${t.id}')">연결</button>`}</td>
+            <td>${t.vendorId && !t.confirmed ? `<button class="btn btn-ghost btn-sm" onclick="taxConfirmVendor('${t.id}')">확정</button>` : ''}</td></tr>`; }).join('')}
+        </tbody></table></div>` : '<p class="text-mute text-center" style="padding:14px 0;">아직 거래내역이 없습니다. 은행에서 내려받은 CSV를 그대로 올리세요.</p>'}
+    </div>
+
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">📎 증빙 보관함 (5년 보존)</h3><button class="btn btn-primary btn-sm" onclick="taxAddEvidence()">+ 증빙 등록</button></div>
+      <p class="text-mute" style="font-size:12.5px;margin-top:0;">영수증은 세무사에게 보내지 않지만 품목 정리를 위해 조합이 5년 보관합니다. 계약서는 거래일·금액·거래처·사업자번호 4가지가 없으면 저장되지 않습니다. 파일명은 <code>조합코드_날짜_거래처_금액_종류</code> 규칙으로 자동 정리됩니다.</p>
+      ${T.evidence.length ? `<table class="tbl" style="font-size:13px;"><thead><tr><th>종류</th><th>거래일</th><th>거래처</th><th>금액</th><th>사업자번호</th><th>부가세</th><th>보조금</th><th>정리 파일명</th><th>보존기한</th><th></th></tr></thead><tbody>
+        ${T.evidence.slice().reverse().map(e => `<tr><td><span class="badge ${e.kind==='보조금 교부결정서'?'badge-gold':'badge-mute'}">${e.kind}</span></td><td>${e.date}</td><td>${escapeHtml(e.vendor)}</td><td>${Number(e.amount).toLocaleString()}</td><td>${escapeHtml(e.bizNo||'—')}</td><td>${e.vatIncl?'포함':'미포함'}</td><td>${e.grant ? escapeHtml(e.grantCode||'보조금') : '—'}</td><td class="text-mute" style="font-size:12px;">${escapeHtml(e.fileName)}</td><td>${e.keepUntil}</td><td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="taxRemoveEvidence('${e.id}')">삭제</button></td></tr>`).join('')}
+      </tbody></table>` : '<p class="text-mute text-center" style="padding:14px 0;">등록된 증빙이 없습니다.</p>'}
+    </div>
+
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">↩ 보정 요청(되묻기) ${openReturns.length ? `<span class="badge badge-danger">${openReturns.length}건 열림</span>` : ''}</h3></div>
+      <p class="text-mute" style="font-size:12.5px;margin-top:0;">세무사가 패키지 항목에 사유 코드와 기한을 붙여 보내면 담당자에게 알림이 가고, 기한 초과 시 부담당→대표→연합회로 올라갑니다.</p>
+      ${T.returns.length ? `<table class="tbl" style="font-size:13px;"><thead><tr><th>대상 월</th><th>항목</th><th>사유 코드</th><th>내용</th><th>기한</th><th>상태</th><th></th></tr></thead><tbody>
+        ${T.returns.slice().reverse().map(r => `<tr><td>${r.ym}</td><td>${escapeHtml(r.item)}</td><td><span class="badge badge-danger">${r.code}</span></td><td>${escapeHtml(r.note||'')}</td><td>${r.due} ${r.status==='열림' ? `<span class="badge ${dday(r.due) < 0 ? 'badge-danger' : 'badge-mute'}">${ddayLabel(r.due)}</span>` : ''}</td><td>${r.status}${r.resolvedAt ? ' · ' + r.resolvedAt.slice(0,10) : ''}</td>
+          <td class="tbl-actions">${r.status==='열림' ? `<button class="btn btn-primary btn-sm" onclick="taxResolveReturn('${r.id}')">보정 완료</button>` : ''}</td></tr>`).join('')}
+      </tbody></table>` : '<p class="text-mute text-center" style="padding:14px 0;">보정 요청이 없습니다.</p>'}
+    </div>
+
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">🚫 이 화면이 하지 않는 것</h3></div>
+      <ul style="padding-left:20px;color:var(--ink-soft);font-size:13.5px;margin:0;">
+        <li>통장 적요를 고치거나 정리하지 않습니다 — 원본 그대로, 메모만 붙입니다.</li>
+        <li>세무 신고서를 만들지 않습니다 — 신고는 기장을 맡은 세무사가 합니다. 시스템은 제출 전 누락·불일치만 점검합니다.</li>
+        <li>세금계산서·카드·현금영수증을 세무사에게 보내지 않습니다 — 홈택스 수임동의로 직접 조회합니다.</li>
+        <li>조합이 복식부기 장부를 따로 만들지 않습니다 — 가공된 자료는 확인 시간을 늘립니다.</li>
+      </ul>
+    </div>
+  `;
+}
+
+/* 담당자·연락망 */
+function taxEditContacts(){
+  const c = MOCK.tax.contacts, p = MOCK.tax.profile;
+  const row = (k, label) => `<div class="form-row"><label>${label}</label>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:6px;">
+      <input class="input" id="tc-${k}-name" placeholder="성명" value="${escapeHtml(c[k].name)}">
+      <input class="input" id="tc-${k}-phone" placeholder="전화" value="${escapeHtml(c[k].phone)}">
+      <input class="input" id="tc-${k}-email" placeholder="이메일" value="${escapeHtml(c[k].email)}"></div></div>`;
+  showDyn({title:'세무 담당자·비상연락망', sub:'담당(주)·부담당·대표 3인. 세무사 사무소에 자동 공유됩니다.',
+    body: row('main','세무 담당(주) *') + row('sub','부담당') + row('rep','대표 *') + `
+      <div class="form-row"><label>담당 세무사 사무소</label><div style="display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:6px;">
+        <input class="input" id="tc-office" value="${escapeHtml(p.office)}"><input class="input" id="tc-office-tel" placeholder="전화" value="${escapeHtml(p.officeTel)}"><input class="input" id="tc-office-email" placeholder="이메일" value="${escapeHtml(p.officeEmail)}"></div></div>
+      <div class="form-row"><label>조합 유형·직원</label><div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+        <select class="select" id="tc-cooptype" style="width:auto;"><option${p.coopType==='일반'?' selected':''}>일반</option><option${p.coopType==='사협'?' selected':''}>사협</option></select>
+        <label><input type="checkbox" id="tc-public" ${p.publicCorp?'checked':''}> 공익법인 지정</label>
+        <label><input type="checkbox" id="tc-staff" ${p.hasStaff?'checked':''}> 급여 직원 있음</label>
+        <label><input type="checkbox" id="tc-hometax" ${p.hometax?'checked':''}> 홈택스 수임동의 완료</label></div></div>
+      <div class="form-row"><label>조합 코드(파일명용)</label><input class="input" id="tc-code" placeholder="예: WANDO-A" value="${escapeHtml(p.coopCode)}"></div>`,
+    foot:`<button class="btn btn-outline" onclick="closeDyn()">취소</button><button class="btn btn-primary" onclick="taxSaveContacts()">저장</button>`});
+}
+function taxSaveContacts(){
+  const g = id => (document.getElementById(id).value || '').trim();
+  const c = MOCK.tax.contacts, p = MOCK.tax.profile;
+  for(const k of ['main','sub','rep']) c[k] = {name:g(`tc-${k}-name`), phone:g(`tc-${k}-phone`), email:g(`tc-${k}-email`)};
+  if(!c.main.name || !c.main.phone || !c.rep.name || !c.rep.phone){ toast('담당(주)와 대표의 성명·전화는 필수입니다.'); return; }
+  p.office = g('tc-office'); p.officeTel = g('tc-office-tel'); p.officeEmail = g('tc-office-email');
+  p.coopType = document.getElementById('tc-cooptype').value; p.publicCorp = document.getElementById('tc-public').checked;
+  p.hasStaff = document.getElementById('tc-staff').checked; p.hometax = document.getElementById('tc-hometax').checked; p.coopCode = g('tc-code');
+  persistTax(); taxLog('세무 담당자 등록', c.main.name); closeDyn(); toast('담당자·연락망을 저장했습니다. 세무사 사무소에 공유됩니다.'); refresh();
+}
+function taxSetHometax(v){ MOCK.tax.profile.hometax = v; persistTax(); toast(v ? '홈택스 수임동의 완료로 표시했습니다.' : '수임동의를 해제했습니다.'); refresh(); }
+const TAX_HANDOVER_CHECK = ['미제출 패키지 인계','진행 중 보정 요청 인계','증빙 보관함 접근 권한 이전','홈택스 수임동의·계정 확인','급여·이체 계정 확인','세무사 사무소·연합회 통지'];
+function taxHandoverStart(){
+  const c = MOCK.tax.contacts;
+  showDyn({title:'담당자 변경 — 인수인계', sub:'인수인계 기간(기본 30일) 동안 체크리스트를 완료해야 변경이 끝납니다.',
+    body:`<div class="form-row"><label>현 담당자</label><input class="input" id="th-from" value="${escapeHtml(c.main.name)}"></div>
+      <div class="form-row"><label>새 담당자 *</label><div style="display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:6px;"><input class="input" id="th-to" placeholder="성명"><input class="input" id="th-phone" placeholder="전화"><input class="input" id="th-email" placeholder="이메일"></div></div>
+      <div class="form-row"><label>인수인계 기간</label><div style="display:flex;gap:6px;align-items:center;"><input class="input" type="date" id="th-start" value="${_ymd()}" style="width:auto;"> ~ <input class="input" type="date" id="th-end" value="${(()=>{const d=new Date();d.setDate(d.getDate()+30);return _ymd(d);})()}" style="width:auto;"></div></div>
+      <p class="text-mute" style="font-size:12.5px;">체크리스트: ${TAX_HANDOVER_CHECK.join(' · ')}</p>`,
+    foot:`<button class="btn btn-outline" onclick="closeDyn()">취소</button><button class="btn btn-primary" onclick="taxHandoverSave()">인수인계 시작</button>`});
+}
+function taxHandoverSave(){
+  const g = id => (document.getElementById(id).value || '').trim();
+  if(!g('th-to') || !g('th-phone')){ toast('새 담당자 성명·전화를 입력하세요.'); return; }
+  const h = {id:_tid('ho'), from:g('th-from'), to:g('th-to'), phone:g('th-phone'), email:g('th-email'), start:g('th-start'), end:g('th-end'), status:'진행', done:TAX_HANDOVER_CHECK.map(()=>false)};
+  MOCK.tax.handover.push(h); persistTax(); taxLog('담당자 인수인계 시작', `${h.from}→${h.to}`); closeDyn();
+  toast('인수인계를 시작했습니다. 세무사 사무소와 연합회에 통지됩니다.'); refresh();
+}
+function taxHandoverView(id){
+  const h = MOCK.tax.handover.find(x => x.id === id); if(!h) return;
+  showDyn({title:`인수인계 체크리스트 — ${h.from} → ${h.to}`, sub:`${h.start} ~ ${h.end}`,
+    body: TAX_HANDOVER_CHECK.map((t,i) => `<label style="display:block;padding:6px 0;border-bottom:1px solid var(--line-soft);"><input type="checkbox" ${h.done[i]?'checked':''} onchange="taxHandoverTick('${h.id}',${i},this.checked)"> ${t}</label>`).join(''),
+    foot:`<button class="btn btn-outline" onclick="closeDyn()">닫기</button><button class="btn btn-primary" onclick="taxHandoverFinish('${h.id}')">인수인계 완료 → 담당자 교체</button>`});
+}
+function taxHandoverTick(id, i, v){ const h = MOCK.tax.handover.find(x => x.id === id); if(h){ h.done[i] = v; persistTax(); } }
+function taxHandoverFinish(id){
+  const h = MOCK.tax.handover.find(x => x.id === id); if(!h) return;
+  if(!h.done.every(Boolean)){ toast('체크리스트를 모두 완료해야 담당자를 교체할 수 있습니다.'); return; }
+  h.status = '완료'; MOCK.tax.contacts.main = {name:h.to, phone:h.phone, email:h.email}; persistTax(); taxLog('세무 담당자 교체', h.to); closeDyn(); toast(`담당자가 ${h.to}(으)로 바뀌었습니다.`); refresh();
+}
+
+/* 통장 보조 시트 */
+function _taxHash(s){ let h = 0; for(let i = 0; i < s.length; i++){ h = (h * 31 + s.charCodeAt(i)) | 0; } return (h >>> 0).toString(16).padStart(8,'0'); }
+function taxSuggestVendor(desc){
+  for(const v of MOCK.tax.vendors){ if(v.kw && new RegExp(v.kw, 'i').test(desc)) return v.id; }
+  return '';
+}
+function taxImportBank(files){
+  if(!files || !files.length) return;
+  const f = files[0];
+  _readTextFile(f, text => {
+    const rows = _closingCsvParse(text);
+    if(rows.length < 2){ toast('CSV에서 거래를 읽지 못했습니다.'); return; }
+    const head = rows[0].map(h => String(h).trim());
+    const col = (names, def) => { const i = head.findIndex(h => names.some(n => h.includes(n))); return i >= 0 ? i : def; };
+    const iDate = col(['일자','날짜','거래일'],0), iDesc = col(['적요','내용','거래내용'],1), iOut = col(['출금'],2), iIn = col(['입금'],3), iBal = col(['잔액'],4);
+    let n = 0;
+    for(const r of rows.slice(1)){
+      const date = String(r[iDate]||'').trim().replace(/[./]/g,'-').slice(0,10); if(!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
+      const desc = String(r[iDesc]||'').trim();
+      const vid = taxSuggestVendor(desc);
+      MOCK.tax.bank.push({id:_tid('tx'), date, desc, inn:_closingNum(r[iIn]), out:_closingNum(r[iOut]), bal:_closingNum(r[iBal]),
+        vendorId:vid, confirmed:false, cash:/현금|ATM|CD출금|자기앞/.test(desc), cashReason:'', memo:'', grant:'', evId:'', file:f.name});
+      n++;
+    }
+    MOCK.tax.bankFiles.push({id:_tid('bf'), name:f.name, date:_ymd(), rows:n, hash:_taxHash(text)});
+    MOCK.tax.bank.sort((a,b) => a.date < b.date ? -1 : 1);
+    persistTax(); taxLog('통장 원본 업로드', f.name);
+    toast(`${n}건을 읽었습니다. 원본은 해시와 함께 잠겼고, 거래처는 추천 상태입니다.`); refresh();
+  });
+}
+function taxSampleBank(){
+  const ym = _ymPrev();
+  const sample = [
+    ['05','한전 전력판매대금 8월분', 19185000, 0], ['05','전력거래소 REC정산', 4200000, 0], ['07','완도군청 운영비보조금', 3000000, 0],
+    ['10','급여 사무국장', 0, 2200000], ['10','급여 운영담당', 0, 1900000], ['10','원천세 납부', 0, 96000], ['12','건강보험공단 4대보험', 0, 412000],
+    ['15','마을회 부지임차료', 0, 800000], ['18','○○에너지 인버터 점검', 0, 550000], ['20','ATM 현금출금', 0, 300000], ['22','KT 통신요금', 0, 38000],
+    ['25','신협 융자원리금', 0, 4600000], ['28','한길세무 기장료', 0, 165000],
+  ];
+  for(const [d, desc, inn, out] of sample){
+    const date = `${ym}-${d}`;
+    MOCK.tax.bank.push({id:_tid('tx'), date, desc, inn, out, bal:0, vendorId:taxSuggestVendor(desc), confirmed:false, cash:/현금|ATM/.test(desc), cashReason:'', memo:'', grant:/보조금/.test(desc)?'WD-2026-OP':'', evId:'', file:'예시'});
+  }
+  MOCK.tax.bankFiles.push({id:_tid('bf'), name:'예시_통장내역.csv', date:_ymd(), rows:sample.length, hash:'demo0000'});
+  MOCK.tax.bank.sort((a,b) => a.date < b.date ? -1 : 1);
+  persistTax(); toast('예시 거래 13건을 넣었습니다. 거래처를 확정하고 현금 인출 사유를 적어 보세요.'); refresh();
+}
+function _taxTx(id){ return MOCK.tax.bank.find(t => t.id === id); }
+function taxSetVendor(id, vid){ const t = _taxTx(id); if(!t) return; t.vendorId = vid; t.confirmed = !!vid; persistTax(); refresh(); }
+function taxConfirmVendor(id){ const t = _taxTx(id); if(!t || !t.vendorId) return; t.confirmed = true; persistTax(); refresh(); }
+function taxConfirmAllSuggested(){ let n = 0; for(const t of MOCK.tax.bank){ if(t.vendorId && !t.confirmed){ t.confirmed = true; n++; } } persistTax(); toast(`추천 거래처 ${n}건을 확정했습니다.`); refresh(); }
+function taxSetCash(id, v){ const t = _taxTx(id); if(!t) return; t.cash = v; persistTax(); refresh(); }
+function taxSetMemo(id, v){ const t = _taxTx(id); if(!t) return; if(t.cash) t.cashReason = v.trim(); else t.memo = v.trim(); persistTax(); }
+function taxSetGrant(id, v){ const t = _taxTx(id); if(!t) return; t.grant = v.trim(); persistTax(); }
+function taxClearBank(){ if(!confirm('통장 거래내역을 모두 삭제할까요? (원본 파일 기록도 함께 삭제)')) return; MOCK.tax.bank = []; MOCK.tax.bankFiles = []; persistTax(); refresh(); }
+function taxMatchEvidence(id){
+  const t = _taxTx(id); if(!t) return;
+  const amt = t.out || t.inn;
+  const cands = MOCK.tax.evidence.filter(e => Math.abs(Number(e.amount) - amt) <= 0 || Math.abs(Number(e.amount) * 1.1 - amt) < 2 || Math.abs(Number(e.amount) / 1.1 - amt) < 2);
+  showDyn({title:'증빙 연결', sub:`${t.date} · ${t.desc} · ${amt.toLocaleString()}원`,
+    body: cands.length ? cands.map(e => `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line-soft);"><span>${e.kind} · ${e.date} · ${escapeHtml(e.vendor)} · ${Number(e.amount).toLocaleString()}원 ${Number(e.amount)!==amt?'<span class="badge badge-gold">부가세 차이</span>':''}</span><button class="btn btn-primary btn-sm" onclick="taxLinkEvidence('${t.id}','${e.id}')">연결</button></div>`).join('')
+      : '<p class="text-mute">금액이 일치하는 증빙이 없습니다. 증빙 보관함에 먼저 등록하세요. (부가세 포함·미포함 10% 차이도 함께 찾습니다)</p>',
+    foot:`<button class="btn btn-outline" onclick="closeDyn()">닫기</button><button class="btn btn-primary" onclick="closeDyn();taxAddEvidence('${t.id}')">+ 새 증빙 등록</button>`});
+}
+function taxLinkEvidence(txId, evId){ const t = _taxTx(txId); if(t){ t.evId = evId; persistTax(); } closeDyn(); toast('증빙을 연결했습니다.'); refresh(); }
+function taxExportGrant(){
+  const rows = MOCK.tax.bank.filter(t => t.grant);
+  if(!rows.length){ toast('보조금 사업코드가 붙은 거래가 없습니다. 보조금 집행 거래에 코드를 입력하세요.'); return; }
+  const csv = ['사업코드,일자,적요,입금,출금,거래처,증빙'].concat(rows.map(t => [t.grant, t.date, `"${t.desc.replace(/"/g,'""')}"`, t.inn, t.out, (taxVendor(t.vendorId)||{}).name || '', t.evId ? '연결' : ''].join(','))).join('\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + csv], {type:'text/csv'})); a.download = `보조금정산추출_${taxCoopCode()}_${_ymd()}.csv`; a.click();
+  toast(`보조금 거래 ${rows.length}건을 정산보고용 CSV로 내보냈습니다.`);
+}
+
+/* 증빙 보관함 */
+function taxAddEvidence(txId){
+  const tx = txId ? _taxTx(txId) : null;
+  showDyn({title:'증빙 등록', sub:'스캔본 원칙, 사진 가능. 계약서는 거래일·금액·거래처·사업자번호 4가지 필수.',
+    body:`<div class="form-row"><label>종류 *</label><select class="select" id="ev-kind" onchange="document.getElementById('ev-lease').style.display=this.value==='계약서'?'':'none'">${TAX_EVIDENCE_KINDS.map(k=>`<option>${k}</option>`).join('')}</select></div>
+      <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><div><label>거래일 *</label><input class="input" type="date" id="ev-date" value="${tx ? tx.date : _ymd()}"></div><div><label>금액 *</label><input class="input" type="number" id="ev-amount" value="${tx ? (tx.out||tx.inn) : ''}"></div></div>
+      <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><div><label>거래처 *</label><input class="input" id="ev-vendor" value="${tx && taxVendor(tx.vendorId) ? escapeHtml(taxVendor(tx.vendorId).name) : ''}"></div><div><label>사업자번호 (계약서 필수)</label><input class="input" id="ev-bizno" placeholder="000-00-00000"></div></div>
+      <div class="form-row" style="display:flex;gap:16px;flex-wrap:wrap;"><label><input type="checkbox" id="ev-vat" checked> 부가세 포함 금액</label><label><input type="checkbox" id="ev-grant" onchange="document.getElementById('ev-grantcode').style.display=this.checked?'':'none'"> 보조금 집행분</label><input class="input" id="ev-grantcode" placeholder="보조금 사업코드" style="display:none;width:160px;"></div>
+      <div class="form-row" id="ev-lease" style="display:none;"><label>임대차 계약이면</label><select class="select" id="ev-leasetype"><option value="">해당 없음</option><option>토지 임차</option><option>시설(지붕) 임차</option></select></div>
+      <div class="form-row"><label>파일 (스캔·사진·PDF)</label><input type="file" id="ev-file" accept="image/*,.pdf"></div>`,
+    foot:`<button class="btn btn-outline" onclick="closeDyn()">취소</button><button class="btn btn-primary" onclick="taxSaveEvidence('${txId||''}')">저장</button>`});
+}
+function taxSaveEvidence(txId){
+  const g = id => (document.getElementById(id).value || '').trim();
+  const kind = g('ev-kind'), date = g('ev-date'), amount = Number(g('ev-amount')), vendor = g('ev-vendor'), bizNo = g('ev-bizno');
+  if(!date || !amount || !vendor){ toast('거래일·금액·거래처는 필수입니다.'); return; }
+  if(kind === '계약서' && !bizNo){ toast('계약서는 사업자번호까지 4가지가 모두 있어야 저장됩니다.'); return; }
+  const fileEl = document.getElementById('ev-file'); const orig = fileEl && fileEl.files[0] ? fileEl.files[0].name : '';
+  const ext = orig ? orig.slice(orig.lastIndexOf('.')) : '';
+  const e = {id:_tid('ev'), kind, date, amount, vendor, bizNo, vatIncl:document.getElementById('ev-vat').checked, grant:document.getElementById('ev-grant').checked, grantCode:g('ev-grantcode'),
+    leaseType:g('ev-leasetype'), orig, fileName:`${taxCoopCode()}_${date.replace(/-/g,'')}_${vendor.replace(/\s/g,'')}_${amount}_${kind.replace(/\s/g,'')}${ext}`, keepUntil:_addYears(date, 5), uploaded:_ymd()};
+  MOCK.tax.evidence.push(e);
+  if(txId){ const t = _taxTx(txId); if(t) t.evId = e.id; }
+  persistTax(); taxLog('증빙 등록', e.fileName); closeDyn(); toast(`증빙을 저장했습니다: ${e.fileName}`); refresh();
+}
+function taxRemoveEvidence(id){
+  if(!confirm('증빙은 5년 보존 대상입니다. 정말 삭제할까요? (삭제 기록이 남습니다)')) return;
+  MOCK.tax.evidence = MOCK.tax.evidence.filter(e => e.id !== id); for(const t of MOCK.tax.bank){ if(t.evId === id) t.evId = ''; }
+  persistTax(); taxLog('증빙 삭제', id); refresh();
+}
+
+/* 제출 전 점검 · 패키지 */
+function taxCheckReport(ym){
+  const rows = MOCK.tax.bank.filter(t => t.date.slice(0,7) === ym);
+  const b = taxBlockers(ym);
+  const noEv = rows.filter(t => t.out >= 100000 && !t.evId && !(taxVendor(t.vendorId)||{}).type?.match(/공공|금융|직원|주민/));
+  const dup = rows.filter((t,i) => rows.findIndex(x => x.date===t.date && x.desc===t.desc && x.out===t.out && x.inn===t.inn) !== i);
+  const items = [
+    ['마감 차단', b.length ? b.map(x=>`${x.code} ${x.n}건`).join(', ') : '없음', b.length ? 'danger' : 'success'],
+    ['10만원 이상 출금 중 증빙 미연결', noEv.length ? `${noEv.length}건 — ${noEv.slice(0,3).map(t=>t.desc).join(', ')}${noEv.length>3?' 외':''}` : '없음', noEv.length ? 'gold' : 'success'],
+    ['중복 의심 거래', dup.length ? `${dup.length}건` : '없음', dup.length ? 'gold' : 'success'],
+    ['보조금 집행 거래의 부가세 포함 여부', rows.filter(t=>t.grant).length ? `${rows.filter(t=>t.grant).length}건 — 교부기관에 부가세 포함 여부 확인` : '해당 없음', 'mute'],
+    ['홈택스 수임동의', MOCK.tax.profile.hometax ? '완료' : '미완료 — 세금계산서·카드는 세무사가 조회 못 함', MOCK.tax.profile.hometax ? 'success' : 'danger'],
+  ];
+  showDyn({title:`제출 전 점검 — ${ym}`, sub:'신고서를 만드는 것이 아니라, 세무사가 되물을 항목을 미리 찾습니다.',
+    body:`<table class="tbl"><thead><tr><th>점검</th><th>결과</th></tr></thead><tbody>${items.map(([k,v,c]) => `<tr><td><strong>${k}</strong></td><td><span class="badge badge-${c}">${escapeHtml(v)}</span></td></tr>`).join('')}</tbody></table>
+      <p class="text-mute" style="font-size:12.5px;margin-top:10px;">계정과목 판단은 세무사가 영수증으로 합니다. 이 점검은 되묻기 건수를 줄이기 위한 것입니다.</p>`,
+    foot:`<button class="btn btn-primary" onclick="closeDyn()">확인</button>`});
+}
+function taxBuildPackage(ym){
+  if(!ym) return;
+  const b = taxBlockers(ym);
+  if(b.length){ toast(`마감 차단: ${b.map(x=>x.code).join(', ')}. 먼저 해결하세요.`); return; }
+  const rows = MOCK.tax.bank.filter(t => t.date.slice(0,7) === ym);
+  const pr = MOCK.tax.payroll.find(p => p.ym === ym);
+  const ev = MOCK.tax.evidence.filter(e => e.date.slice(0,7) === ym);
+  const ver = MOCK.tax.packages.filter(p => p.ym === ym).length + 1;
+  const pkg = {id:_tid('pk'), ym, ver, status:'전송', sentAt:new Date().toISOString(), openedAt:'', by:MOCK.tax.contacts.main.name,
+    items:{payroll: pr ? pr.rows.length : 0, bank: rows.length, evidence: ev.length, cash: rows.filter(t=>t.cash).length, hometax: MOCK.tax.profile.hometax}};
+  MOCK.tax.packages.push(pkg); persistTax(); taxLog('세무 패키지 전송', `${ym} v${ver}`);
+  taxViewPackage(pkg.id, true);
+}
+function taxViewPackage(id, justSent){
+  const p = MOCK.tax.packages.find(x => x.id === id); if(!p) return;
+  const rows = MOCK.tax.bank.filter(t => t.date.slice(0,7) === p.ym);
+  const pr = MOCK.tax.payroll.find(x => x.ym === p.ym);
+  const body = `
+    <div class="grid grid-4" style="gap:8px;">
+      <div class="kpi"><div class="kpi-n" style="font-size:22px;">${p.items.payroll}</div><div class="kpi-l">급여대장 인원</div></div>
+      <div class="kpi"><div class="kpi-n" style="font-size:22px;">${p.items.bank}</div><div class="kpi-l">통장 거래</div></div>
+      <div class="kpi"><div class="kpi-n" style="font-size:22px;">${p.items.cash}</div><div class="kpi-l">현금 인출(사유 첨부)</div></div>
+      <div class="kpi"><div class="kpi-n" style="font-size:22px;">${p.items.evidence}</div><div class="kpi-l">증빙 목록</div></div>
+    </div>
+    <h4 style="margin:14px 0 6px;">① 급여대장</h4>
+    ${pr ? `<table class="tbl" style="font-size:12.5px;"><thead><tr><th>성명</th><th>기본급</th><th>상여</th><th>4대보험</th><th>소득세+지방세</th><th>실지급</th></tr></thead><tbody>${pr.rows.map(r=>`<tr><td>${escapeHtml(r.name)}</td><td>${r.base.toLocaleString()}</td><td>${r.bonus.toLocaleString()}</td><td>${r.ins.toLocaleString()}</td><td>${r.tax.toLocaleString()}</td><td><b>${r.net.toLocaleString()}</b></td></tr>`).join('')}</tbody></table>` : '<p class="text-mute">직원 없음</p>'}
+    <h4 style="margin:14px 0 6px;">② 통장 거래내역 원본 + 보조 시트 (적요 원문 그대로)</h4>
+    <div style="max-height:220px;overflow:auto;"><table class="tbl" style="font-size:12.5px;"><thead><tr><th>일자</th><th>적요</th><th>입금</th><th>출금</th><th>거래처</th><th>현금인출·사유</th><th>메모</th><th>보조금</th></tr></thead><tbody>
+      ${rows.map(t=>`<tr><td>${t.date}</td><td>${escapeHtml(t.desc)}</td><td>${t.inn?t.inn.toLocaleString():''}</td><td>${t.out?t.out.toLocaleString():''}</td><td>${escapeHtml((taxVendor(t.vendorId)||{}).name||'')}</td><td>${t.cash?'예 · '+escapeHtml(t.cashReason):''}</td><td>${escapeHtml(t.memo)}</td><td>${escapeHtml(t.grant)}</td></tr>`).join('')}</tbody></table></div>
+    <h4 style="margin:14px 0 6px;">③ 증빙 목록</h4>
+    <p class="text-mute" style="font-size:12.5px;">${MOCK.tax.evidence.filter(e=>e.date.slice(0,7)===p.ym).map(e=>escapeHtml(e.fileName)).join('<br>') || '없음'}</p>
+    <h4 style="margin:14px 0 6px;">④ 담당자 확인</h4>
+    <p style="font-size:13px;">제출자 ${escapeHtml(p.by||'')} · ${p.sentAt.slice(0,16).replace('T',' ')} · 홈택스 수임동의 ${p.items.hometax?'완료':'미완료'}<br>
+    <span class="text-mute">제외 항목: 세금계산서 합계표·법인카드·현금영수증(홈택스 조회). 세무사 열람 링크는 14일 후 만료됩니다.</span></p>`;
+  showDyn({title:`세무 패키지 ${p.ym} v${p.ver}`, sub: justSent ? '전송되었습니다. 세무사가 열면 열람 시각이 기록됩니다.' : `전송 ${p.sentAt.slice(0,10)} · ${p.openedAt ? '열람 ' + p.openedAt.slice(0,10) : '미열람'}`,
+    body, size:'xl',
+    foot:`<button class="btn btn-ghost" onclick="closeDyn()">닫기</button><button class="btn btn-outline" onclick="taxDownloadPackage('${p.id}')">📥 패키지 표지 다운로드</button>`});
+}
+function taxDownloadPackage(id){
+  const p = MOCK.tax.packages.find(x => x.id === id); if(!p) return;
+  const body = document.getElementById('dynBody').innerHTML;
+  _downloadAccountingHtml(`세무 패키지 ${p.ym} v${p.ver}`, p.ym, body, `세무패키지_${taxCoopCode()}_${p.ym}_v${p.ver}.html`);
+}
+function taxMarkOpened(id){ const p = MOCK.tax.packages.find(x => x.id === id); if(p){ p.openedAt = new Date().toISOString(); persistTax(); toast('세무사 열람 시각을 기록했습니다.'); refresh(); } }
+function taxNewReturn(pkgId){
+  const p = MOCK.tax.packages.find(x => x.id === pkgId); if(!p) return;
+  const due = (()=>{ const d = new Date(); d.setDate(d.getDate()+3); return _ymd(d); })();
+  showDyn({title:'보정 요청 (세무사 화면)', sub:`패키지 ${p.ym} v${p.ver} — 사유 코드와 기한을 붙여 담당자에게 알립니다.`,
+    body:`<div class="form-row"><label>항목</label><select class="select" id="rt-item"><option>급여대장</option><option>통장 거래내역</option><option>증빙 목록</option><option>계약서</option><option>기타</option></select></div>
+      <div class="form-row"><label>사유 코드</label><select class="select" id="rt-code">${TAX_RETURN_CODES.map(c=>`<option>${c}</option>`).join('')}</select></div>
+      <div class="form-row"><label>내용</label><textarea class="textarea" id="rt-note" placeholder="예: 9/20 ATM 현금출금 300,000원 사용처"></textarea></div>
+      <div class="form-row"><label>보정 기한</label><input class="input" type="date" id="rt-due" value="${due}" style="width:auto;"></div>`,
+    foot:`<button class="btn btn-outline" onclick="closeDyn()">취소</button><button class="btn btn-primary" onclick="taxSaveReturn('${p.id}')">요청 보내기</button>`});
+}
+function taxSaveReturn(pkgId){
+  const p = MOCK.tax.packages.find(x => x.id === pkgId); if(!p) return;
+  const g = id => (document.getElementById(id).value || '').trim();
+  const r = {id:_tid('rt'), pkgId, ym:p.ym, item:g('rt-item'), code:g('rt-code'), note:g('rt-note'), due:g('rt-due'), status:'열림', createdAt:new Date().toISOString(), resolvedAt:''};
+  MOCK.tax.returns.push(r); p.status = '보정 요청'; persistTax(); taxLog('보정 요청 접수', `${r.ym} ${r.code}`); closeDyn();
+  toast(`담당자 ${MOCK.tax.contacts.main.name || ''}에게 알림을 보냈습니다. 기한 ${r.due} (초과 시 부담당→대표→연합회 순 알림)`); refresh();
+}
+function taxResolveReturn(id){
+  const r = MOCK.tax.returns.find(x => x.id === id); if(!r) return;
+  r.status = '완료'; r.resolvedAt = new Date().toISOString();
+  const p = MOCK.tax.packages.find(x => x.id === r.pkgId); if(p && !MOCK.tax.returns.some(x => x.pkgId === p.id && x.status === '열림')) p.status = '전송';
+  persistTax(); taxLog('보정 완료', r.code); toast('보정 완료로 표시했습니다. 세무사에게 통지됩니다.'); refresh();
+}
+
+/* ─── 페이지 2. 지급·원천징수 (급여대장 · 지급 유형 판별 · 햇빛소득) ─── */
+function taxPayrollCalc(base, bonus){
+  const gross = base + bonus;
+  const pension = Math.round(Math.min(gross, 6170000) * 0.045), health = Math.round(gross * 0.03545), ltc = Math.round(health * 0.1295), emp = Math.round(gross * 0.009);
+  const ins = pension + health + ltc + emp;
+  // 간이세액표 근사(부양 1인): 106만원 이하 0, 이후 구간별 근사
+  let it = 0;
+  if(gross > 1060000){ const t = gross - 1060000; it = t <= 1000000 ? t * 0.02 : t <= 2500000 ? 20000 + (t-1000000)*0.045 : 87500 + (t-2500000)*0.09; }
+  it = Math.round(it / 10) * 10; const lt = Math.round(it * 0.1 / 10) * 10;
+  return {gross, pension, health, ltc, emp, ins, it, lt, tax: it + lt, net: gross - ins - it - lt};
+}
+function memTaxPay(){
+  const T = MOCK.tax, ym = _ymPrev();
+  const pr = T.payroll.find(p => p.ym === ym);
+  const rules = TAX_PAY_RULES;
+  return `
+    <div class="sec-head">
+      <h1>💸 지급·원천징수</h1>
+      <p class="sec-desc">세무사가 자동화를 원한 유일한 영역입니다. 급여대장을 매월 5일까지 마감하고, 돈을 내보내기 전에 지급 유형을 확인하며, 배당·햇빛소득의 원천징수를 계산합니다.</p>
+    </div>
+
+    <div class="grid grid-3">
+      <div class="kpi"><div class="kpi-n">${pr ? '마감' : (T.profile.hasStaff ? '미마감' : '없음')}</div><div class="kpi-l">${ym} 급여대장</div><div class="kpi-sub">기한 ${_ymNow()}-05</div></div>
+      <div class="kpi"><div class="kpi-n">${_nextMonth10(ym).slice(5)}</div><div class="kpi-l">원천세 신고·납부</div><div class="kpi-sub">지급월 다음 달 10일</div></div>
+      <div class="kpi"><div class="kpi-n">${T.sunIncome.length}</div><div class="kpi-l">햇빛소득 지급 회차</div><div class="kpi-sub">배당·주민환원</div></div>
+    </div>
+
+    <div class="card mt-20" style="border-color:var(--primary);">
+      <div class="card-title"><h3 class="serif">① 급여대장 — ${ym}분</h3><div style="display:flex;gap:6px;"><button class="btn btn-outline btn-sm" onclick="taxEditStaff()">직원 관리</button>${pr ? `<button class="btn btn-outline btn-sm" onclick="taxReopenPayroll('${ym}')">마감 해제</button>` : `<button class="btn btn-primary btn-sm" onclick="taxClosePayroll('${ym}')">📌 급여대장 마감 (5일까지)</button>`}</div></div>
+      <p class="text-mute" style="font-size:12.5px;margin-top:0;">직원으로 등록된 사람의 강사료·회의수당은 따로 책정할 수 없고 상여로 합산됩니다. 4대보험·소득세는 근사치이며 최종값은 세무사 사무소가 확정합니다. 4대보험 신고는 세무사 사무소가 서비스로 처리하고, 그 이상의 노무는 연합회 노무사 협약 대상입니다.</p>
+      <table class="tbl" style="font-size:13px;"><thead><tr><th>성명</th><th>기본급</th><th>상여(강사료·수당 합산)</th><th>4대보험(본인)</th><th>소득세+지방세</th><th>실지급액</th></tr></thead><tbody>
+        ${T.staff.map(s => { const bonus = pr ? (pr.rows.find(r=>r.id===s.id)||{}).bonus||0 : (s.bonus||0); const c = taxPayrollCalc(s.base, bonus);
+          return `<tr><td><strong>${escapeHtml(s.name)}</strong></td><td>${s.base.toLocaleString()}</td>
+            <td>${pr ? bonus.toLocaleString() : `<input class="input" type="number" style="width:120px;padding:3px 6px;" value="${bonus}" onchange="taxSetBonus('${s.id}', this.value)">`}</td>
+            <td>${c.ins.toLocaleString()} <span class="text-mute" style="font-size:11px;">(연금 ${c.pension.toLocaleString()} · 건강 ${(c.health+c.ltc).toLocaleString()} · 고용 ${c.emp.toLocaleString()})</span></td>
+            <td>${c.tax.toLocaleString()}</td><td><strong>${c.net.toLocaleString()}</strong></td></tr>`; }).join('')}
+        ${!T.staff.length ? '<tr><td colspan="6" class="text-mute text-center">직원이 없습니다. [직원 관리]에서 등록하세요.</td></tr>' : ''}
+      </tbody></table>
+      ${pr ? `<p class="text-small" style="margin:8px 0 0;"><span class="badge badge-success">마감 ${pr.closedAt.slice(0,16).replace('T',' ')}</span> 세무 패키지 ①에 포함됩니다. 원천세 신고 기한 <b>${_nextMonth10(ym)}</b>, 근로소득 간이지급명세서는 반기(한시), 일용·사업·기타소득은 매월.</p>` : ''}
+      ${T.payroll.length ? `<details style="margin-top:10px;"><summary class="text-small text-mute" style="cursor:pointer;">마감 이력 ${T.payroll.length}건</summary>${T.payroll.slice().reverse().map(p=>`<div class="text-small" style="padding:4px 0;">${p.ym} · ${p.rows.length}명 · 실지급 합계 ${p.rows.reduce((s,r)=>s+r.net,0).toLocaleString()}원 · ${p.closedAt.slice(0,10)}</div>`).join('')}</details>` : ''}
+    </div>
+
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">② 지급 유형 판별기 — 돈을 내보내기 전에</h3></div>
+      <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:8px;align-items:end;">
+        <div><label class="text-small">받는 사람</label><select class="select" id="pc-target">${Object.entries(rules).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('')}</select></div>
+        <div><label class="text-small">지급 성격</label><input class="input" id="pc-nature" placeholder="예: 강사료, 임차료, 배당"></div>
+        <div><label class="text-small">세전 금액(원)</label><input class="input" id="pc-amount" type="number" value="500000"></div>
+        <button class="btn btn-primary" onclick="taxClassify()">판별</button>
+      </div>
+      <div id="pc-result" style="margin-top:12px;"></div>
+      <details style="margin-top:10px;"><summary class="text-small text-mute" style="cursor:pointer;">지급 유형별 규칙표 보기</summary>
+        <table class="tbl" style="font-size:12.5px;margin-top:8px;"><thead><tr><th>받는 사람</th><th>소득 구분</th><th>원천징수</th><th>지급명세서</th></tr></thead><tbody>
+          ${Object.values(rules).map(v=>`<tr><td>${v.label}</td><td>${v.income}</td><td>${v.rateLabel}</td><td>${v.stmt}</td></tr>`).join('')}</tbody></table></details>
+      ${T.payments.length ? `<h4 class="text-small" style="margin:14px 0 6px;color:var(--ink-soft);">기록된 지급 ${T.payments.length}건 (원천징수 관리대장)</h4>
+        <table class="tbl" style="font-size:12.5px;"><thead><tr><th>일자</th><th>대상</th><th>성격</th><th>소득구분</th><th>세전</th><th>원천징수</th><th>실지급</th><th>신고기한</th></tr></thead><tbody>
+        ${T.payments.slice().reverse().slice(0,20).map(p=>`<tr><td>${p.date}</td><td>${escapeHtml(p.target)}</td><td>${escapeHtml(p.nature)}</td><td>${p.income}</td><td>${p.gross.toLocaleString()}</td><td>${p.wh.toLocaleString()}</td><td><b>${p.net.toLocaleString()}</b></td><td>${p.due}</td></tr>`).join('')}</tbody></table>` : ''}
+    </div>
+
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">③ 햇빛소득 지급 — 배당·주민환원</h3><button class="btn btn-primary btn-sm" onclick="taxSunIncomeStart()">+ 지급 회차 만들기</button></div>
+      <p class="text-mute" style="font-size:12.5px;margin-top:0;">결산 → 정관상 적립금 차감 → 출자배당·이용실적배당 산정 → <b>총회 의결(필수)</b> → 원천징수 → 세후 지급 → 다음 달 10일 원천세 신고. 조합원은 배당소득 15.4%, 비조합원 주민은 기타소득이 원칙입니다. 수령자 안내문에 건강보험료·기초연금·기초생활수급 영향 안내가 자동으로 들어갑니다.</p>
+      ${T.sunIncome.length ? `<table class="tbl" style="font-size:13px;"><thead><tr><th>회차</th><th>총회 의결</th><th>조합원 배당</th><th>주민 햇빛소득</th><th>원천징수 합계</th><th>세후 지급 합계</th><th>원천세 신고</th><th></th></tr></thead><tbody>
+        ${T.sunIncome.slice().reverse().map(s=>`<tr><td><strong>${s.ym}</strong></td><td>${s.decidedAt}</td><td>${s.memberN}명 · ${s.memberTotal.toLocaleString()}</td><td>${s.residentN}명 · ${s.residentTotal.toLocaleString()}</td><td>${s.whTotal.toLocaleString()}</td><td><b>${s.netTotal.toLocaleString()}</b></td><td>${s.due}</td>
+          <td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="taxSunIncomeView('${s.id}')">통지문·명세</button></td></tr>`).join('')}</tbody></table>` : '<p class="text-mute text-center" style="padding:14px 0;">아직 지급 회차가 없습니다.</p>'}
+    </div>
+  `;
+}
+function taxEditStaff(){
+  const T = MOCK.tax;
+  showDyn({title:'직원 관리', sub:'상시근로자만 등록합니다. 단발 용역·강사는 지급 유형 판별기로 처리합니다.',
+    body:`<div id="st-list">${T.staff.map(s=>`<div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line-soft);"><span style="flex:1;">${escapeHtml(s.name)} · 기본급 ${s.base.toLocaleString()}원</span><button class="btn btn-ghost btn-sm" onclick="taxRemoveStaff('${s.id}')">삭제</button></div>`).join('') || '<p class="text-mute">직원 없음</p>'}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:6px;margin-top:12px;"><input class="input" id="st-name" placeholder="성명"><input class="input" id="st-base" type="number" placeholder="월 기본급"><button class="btn btn-primary" onclick="taxAddStaff()">추가</button></div>`,
+    foot:`<button class="btn btn-primary" onclick="closeDyn();refresh()">닫기</button>`});
+}
+function taxAddStaff(){ const n = document.getElementById('st-name').value.trim(), b = Number(document.getElementById('st-base').value); if(!n || !b){ toast('성명과 기본급을 입력하세요.'); return; } MOCK.tax.staff.push({id:_tid('st'), name:n, base:b, bonus:0}); MOCK.tax.profile.hasStaff = true; persistTax(); taxEditStaff(); }
+function taxRemoveStaff(id){ MOCK.tax.staff = MOCK.tax.staff.filter(s => s.id !== id); persistTax(); taxEditStaff(); }
+function taxSetBonus(id, v){ const s = MOCK.tax.staff.find(x => x.id === id); if(s){ s.bonus = Number(v)||0; persistTax(); refresh(); } }
+function taxClosePayroll(ym){
+  if(!MOCK.tax.staff.length){ toast('직원이 없습니다. 직원이 없으면 [담당자 등록]에서 "급여 직원 있음"을 해제하세요.'); return; }
+  const rows = MOCK.tax.staff.map(s => { const c = taxPayrollCalc(s.base, s.bonus||0); return {id:s.id, name:s.name, base:s.base, bonus:s.bonus||0, ins:c.ins, tax:c.tax, net:c.net}; });
+  MOCK.tax.payroll.push({ym, closedAt:new Date().toISOString(), rows});
+  for(const r of rows) MOCK.tax.payments.push({id:_tid('pm'), date:`${ym}-25`, target:r.name, nature:'급여'+(r.bonus?'·상여':''), income:'근로소득', gross:r.base+r.bonus, wh:r.tax, net:r.net, due:_nextMonth10(ym)});
+  for(const s of MOCK.tax.staff) s.bonus = 0;
+  persistTax(); taxLog('급여대장 마감', ym); toast(`${ym} 급여대장을 마감했습니다. 세무사에게 전달됩니다. 원천세 신고 ${_nextMonth10(ym)}`); refresh();
+}
+function taxReopenPayroll(ym){ if(!confirm('마감을 해제할까요? 이미 세무사에게 전달됐다면 재전송이 필요합니다.')) return; MOCK.tax.payroll = MOCK.tax.payroll.filter(p => p.ym !== ym); persistTax(); refresh(); }
+function taxClassify(){
+  const k = document.getElementById('pc-target').value, nature = document.getElementById('pc-nature').value.trim(), amt = Number(document.getElementById('pc-amount').value)||0;
+  const r = TAX_PAY_RULES[k]; const wh = Math.round(amt * r.rate); const net = amt - wh;
+  const extra = [];
+  if(k === 'staff' && /강사|수당|회의/.test(nature)) extra.push('직원에게 주는 강사료·회의수당은 급여대장의 상여로 넣습니다 — 판별기가 아니라 [급여대장]에서 처리하세요.');
+  if(k === 'resident') extra.push('수령자에게 건강보험료·기초연금·기초생활수급 영향 가능성과 확인처(건강보험공단·국민연금·지자체)를 안내하세요.');
+  if(k === 'landlord' || k === 'village') extra.push('계약서에 거래일·금액·거래처·사업자번호가 있어야 하고, 증빙 보관함에 등록하세요.');
+  document.getElementById('pc-result').innerHTML = `
+    <div style="background:var(--paper-soft);border-radius:8px;padding:12px 14px;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:6px;"><span class="badge badge-primary">${r.income}</span><span class="badge badge-mute">${r.rateLabel}</span><span class="badge badge-mute">${r.stmt}</span></div>
+      <div class="grid grid-3" style="gap:8px;"><div><div class="kpi-l">세전</div><div class="kpi-n" style="font-size:20px;">${amt.toLocaleString()}</div></div><div><div class="kpi-l">원천징수</div><div class="kpi-n" style="font-size:20px;">${wh.toLocaleString()}</div></div><div><div class="kpi-l">실지급</div><div class="kpi-n" style="font-size:20px;">${net.toLocaleString()}</div></div></div>
+      <p style="font-size:13px;margin:8px 0 4px;"><b>필요 서류:</b> ${r.docs.join(' · ')}</p>
+      <p style="font-size:13px;margin:0;color:var(--danger);"><b>주의:</b> ${r.warn}${extra.map(e=>'<br>'+e).join('')}</p>
+      <div style="margin-top:10px;display:flex;gap:6px;"><button class="btn btn-primary btn-sm" onclick="taxRecordPayment('${k}','${escapeJs(nature)}',${amt},${wh},${net})">📒 원천징수 대장에 기록</button></div>
+    </div>`;
+}
+function taxRecordPayment(k, nature, gross, wh, net){
+  const r = TAX_PAY_RULES[k]; const ym = _ymNow();
+  MOCK.tax.payments.push({id:_tid('pm'), date:_ymd(), target:r.label, nature: nature || r.income, income:r.income, gross, wh, net, due: r.rate ? _nextMonth10(ym) : '—'});
+  persistTax(); taxLog('지급 기록', `${r.label} ${gross}`); toast('원천징수 관리대장에 기록했습니다.' + (r.rate ? ` 신고 기한 ${_nextMonth10(ym)}` : '')); refresh();
+}
+function taxSunIncomeStart(){
+  const mem = MOCK.members.length;
+  showDyn({title:'햇빛소득 지급 회차', sub:'총회 의결이 없으면 만들 수 없습니다. 조합원=배당소득, 비조합원 주민=기타소득(원칙).',
+    body:`<div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><div><label>지급 회차(년-월) *</label><input class="input" type="month" id="si-ym" value="${_ymNow()}"></div><div><label>총회 의결일 *</label><input class="input" type="date" id="si-decided"></div></div>
+      <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><div><label>배당 재원(정관 적립금 차감 후, 원) *</label><input class="input" type="number" id="si-fund" value="12000000"></div><div><label>정관상 적립금 비율(참고)</label><input class="input" type="number" id="si-reserve" value="10"></div></div>
+      <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;"><div><label>조합원 수</label><input class="input" type="number" id="si-mn" value="${mem}"></div><div><label>비조합원 주민 수</label><input class="input" type="number" id="si-rn" value="0"></div><div><label>주민 몫 비율(%)</label><input class="input" type="number" id="si-rpct" value="0"></div></div>
+      <div class="form-row"><label>배분 기준</label><select class="select" id="si-basis"><option>균등</option><option>출자 비례</option></select></div>
+      <p class="text-mute" style="font-size:12.5px;">원천징수: 조합원 15.4%, 주민 22%(필요경비 적용 여부는 세무사 확인). 지급월 다음 달 10일까지 원천세 신고·납부.</p>`,
+    foot:`<button class="btn btn-outline" onclick="closeDyn()">취소</button><button class="btn btn-primary" onclick="taxSunIncomeSave()">계산·저장</button>`});
+}
+function taxSunIncomeSave(){
+  const g = id => (document.getElementById(id).value || '').trim();
+  const ym = g('si-ym'), decidedAt = g('si-decided'), fund = Number(g('si-fund')), mn = Number(g('si-mn'))||0, rn = Number(g('si-rn'))||0, rpct = Number(g('si-rpct'))||0;
+  if(!ym || !decidedAt){ toast('지급 회차와 총회 의결일은 필수입니다.'); return; }
+  if(!fund || !mn){ toast('배당 재원과 조합원 수를 입력하세요.'); return; }
+  const residentTotal = Math.round(fund * rpct / 100), memberTotal = fund - residentTotal;
+  const basis = g('si-basis');
+  const shares = MOCK.members.map(m => parseInt(m.share)||0); const shareSum = shares.reduce((a,b)=>a+b,0) || 1;
+  const rows = [];
+  for(let i = 0; i < mn; i++){
+    const m = MOCK.members[i]; const w = basis === '출자 비례' && m ? (shares[i]/shareSum) : (1/mn);
+    const gross = Math.round(memberTotal * w); const wh = Math.round(gross * 0.154);
+    rows.push({name: m ? m.name : `조합원${i+1}`, kind:'조합원(배당소득)', gross, wh, net: gross - wh});
+  }
+  for(let i = 0; i < rn; i++){ const gross = Math.round(residentTotal / rn); const wh = Math.round(gross * 0.22); rows.push({name:`주민${i+1}`, kind:'비조합원(기타소득)', gross, wh, net:gross-wh}); }
+  const s = {id:_tid('si'), ym, decidedAt, fund, basis, memberN:mn, residentN:rn, memberTotal, residentTotal, whTotal:rows.reduce((a,r)=>a+r.wh,0), netTotal:rows.reduce((a,r)=>a+r.net,0), due:_nextMonth10(ym), rows, createdAt:_ymd()};
+  MOCK.tax.sunIncome.push(s);
+  MOCK.tax.payments.push({id:_tid('pm'), date:_ymd(), target:`조합원 ${mn}명`, nature:'배당(햇빛소득)', income:'배당소득', gross:memberTotal, wh:rows.filter(r=>r.kind.startsWith('조합원')).reduce((a,r)=>a+r.wh,0), net:0, due:s.due});
+  if(rn) MOCK.tax.payments.push({id:_tid('pm'), date:_ymd(), target:`비조합원 주민 ${rn}명`, nature:'햇빛소득', income:'기타소득', gross:residentTotal, wh:rows.filter(r=>!r.kind.startsWith('조합원')).reduce((a,r)=>a+r.wh,0), net:0, due:s.due});
+  MOCK.tax.payments.forEach(p => { if(!p.net) p.net = p.gross - p.wh; });
+  persistTax(); taxLog('햇빛소득 지급 회차 생성', ym); closeDyn(); toast(`${ym} 회차를 만들었습니다. 원천세 신고 ${s.due}`); taxSunIncomeView(s.id);
+}
+function taxSunIncomeView(id){
+  const s = MOCK.tax.sunIncome.find(x => x.id === id); if(!s) return;
+  const v = myVillage();
+  const notice = (r) => `<div style="border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:10px;font-size:13px;">
+    <b>${escapeHtml(v.name)} 마을협동조합 — ${s.ym} 햇빛소득 지급 안내</b><br>
+    ${escapeHtml(r.name)} 님께 ${r.kind === '조합원(배당소득)' ? '조합원 배당' : '햇빛소득(주민환원)'}으로 세전 ${r.gross.toLocaleString()}원에서 원천징수 ${r.wh.toLocaleString()}원을 뺀 <b>${r.net.toLocaleString()}원</b>을 지급합니다. (총회 의결 ${s.decidedAt}, 배분 기준 ${s.basis})<br>
+    <span class="text-mute">이 소득은 ${r.kind === '조합원(배당소득)' ? '배당소득' : '기타소득'}으로 신고되며, 건강보험료·기초연금·기초생활수급 산정에 영향을 줄 수 있습니다. 해당되는 분은 건강보험공단(1577-1000)·국민연금공단(1355)·읍면 주민센터에 미리 확인하세요. 한도액 안내표는 연합회가 제공합니다.</span></div>`;
+  showDyn({title:`햇빛소득 ${s.ym} — 지급 명세·통지문`, sub:`총회 의결 ${s.decidedAt} · 원천세 신고 ${s.due} · 세후 합계 ${s.netTotal.toLocaleString()}원`, size:'xl',
+    body:`<table class="tbl" style="font-size:12.5px;"><thead><tr><th>수령자</th><th>구분</th><th>세전</th><th>원천징수</th><th>세후 지급</th></tr></thead><tbody>${s.rows.map(r=>`<tr><td>${escapeHtml(r.name)}</td><td>${r.kind}</td><td>${r.gross.toLocaleString()}</td><td>${r.wh.toLocaleString()}</td><td><b>${r.net.toLocaleString()}</b></td></tr>`).join('')}</tbody></table>
+      <h4 style="margin:14px 0 8px;">통지문 미리보기 (앞 2명)</h4>${s.rows.slice(0,2).map(notice).join('')}
+      <p class="text-mute" style="font-size:12.5px;">주민환원사업 관리대장에 환원사업명·대상·집행금액·집행일·지급방법·의사결정·증빙이 기록됩니다. 수령자 주민등록번호는 암호화 저장되며 지급명세서 생성 시에만 사용합니다.</p>`,
+    foot:`<button class="btn btn-ghost" onclick="closeDyn()">닫기</button><button class="btn btn-outline" onclick="_downloadAccountingHtml('햇빛소득 지급 명세·통지문 ${s.ym}','${s.ym}',document.getElementById('dynBody').innerHTML,'햇빛소득_${s.ym}.html')">📥 명세·통지문 다운로드</button></div>`});
+}
+
+/* ─── 페이지 3. 표준장부·거래처 ─── */
+function memLedgers(){
+  const T = MOCK.tax;
+  const cnt = {
+    members: MOCK.members.length, shares: MOCK.members.length, revenue: T.bank.filter(t => ['ven01','ven02'].includes(t.vendorId)).length,
+    grants: T.grants.length, assets: T.grants.length, lease: T.evidence.filter(e => e.leaseType).length + T.bank.filter(t => t.vendorId==='ven05').length,
+    expense: T.bank.filter(t => t.out && t.confirmed).length, loan: T.bank.filter(t => t.vendorId==='ven08').length, invoice: T.evidence.filter(e => e.kind==='세금계산서').length,
+    wht: T.payments.length, surplus: T.sunIncome.length, return: T.sunIncome.length,
+  };
+  return `
+    <div class="sec-head">
+      <h1>📒 표준장부·거래처</h1>
+      <p class="sec-desc">연합회 표준안의 관리대장 12종을 같은 양식으로 씁니다. 거래처별로 표준 계정을 통일하면 세무사 쪽 작업이 줄고 조합 간 비교가 됩니다.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><h3 class="serif">🏷 거래처 마스터 — 거래처별 표준 계정</h3><button class="btn btn-primary btn-sm" onclick="taxEditVendor('')">+ 거래처 추가</button></div>
+      <p class="text-mute" style="font-size:12.5px;margin-top:0;">"품목별 계정 세분화는 어렵지만, 거래처별로 계정을 통일하면 재무제표가 일치한다"는 세무사 답변에 따라 거래처마다 표준 계정 하나를 둡니다. 연합회 공통 거래처는 미리 들어 있습니다.</p>
+      <table class="tbl" style="font-size:13px;"><thead><tr><th>거래처</th><th>유형</th><th>표준 계정</th><th>사업자번호</th><th>적요 추천 키워드</th><th></th></tr></thead><tbody>
+        ${T.vendors.map(v=>`<tr><td><strong>${escapeHtml(v.name)}</strong></td><td>${escapeHtml(v.type)}</td><td><span class="badge badge-primary">${escapeHtml(v.acct)}</span></td><td>${escapeHtml(v.bizNo||'—')}</td><td class="text-mute" style="font-size:12px;">${escapeHtml(v.kw||'')}</td><td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="taxEditVendor('${v.id}')">수정</button></td></tr>`).join('')}
+      </tbody></table>
+    </div>
+
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">📚 표준 관리대장 12종</h3></div>
+      <div class="grid grid-3">
+        ${TAX_LEDGERS.map(([name, desc, key]) => `<div class="feature" style="cursor:pointer;" onclick="taxLedgerView('${key}')">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;"><h3 style="font-size:15px;">${name}</h3><span class="badge ${cnt[key] ? 'badge-success' : 'badge-mute'}">${cnt[key] || 0}건</span></div>
+          <p style="font-size:12.5px;">${desc}</p></div>`).join('')}
+      </div>
+    </div>
+
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">🏗 시설보조금 이연수익 계산기</h3></div>
+      <p class="text-mute" style="font-size:12.5px;margin-top:0;">시설보조금은 받은 해에 전부 수익으로 잡지 않고 이연수익으로 두었다가 감가상각 기간에 걸쳐 감가상각비와 대응시킵니다(표준안 §7). 법인세 처리(일시상각충당금·부채 계상)는 세무사 판단 영역입니다.</p>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr) auto;gap:8px;align-items:end;">
+        <div><label class="text-small">취득가액(원)</label><input class="input" id="gr-cost" type="number" value="1000000000"></div>
+        <div><label class="text-small">시설보조금(원)</label><input class="input" id="gr-grant" type="number" value="300000000"></div>
+        <div><label class="text-small">내용연수(년)</label><input class="input" id="gr-years" type="number" value="20"></div>
+        <div><label class="text-small">교부기관</label><input class="input" id="gr-agency" placeholder="예: 완도군"></div>
+        <div><label class="text-small">보조금에 부가세</label><select class="select" id="gr-vat"><option value="0">미포함(자부담)</option><option value="1">포함</option></select></div>
+        <button class="btn btn-primary" onclick="taxGrantCalc()">계산</button>
+      </div>
+      <div id="gr-result" style="margin-top:12px;"></div>
+      ${T.grants.length ? `<h4 class="text-small" style="margin:14px 0 6px;color:var(--ink-soft);">시설보조금 관리대장</h4><table class="tbl" style="font-size:12.5px;"><thead><tr><th>교부기관</th><th>결정일</th><th>보조금</th><th>취득가</th><th>자부담</th><th>내용연수</th><th>연 감가상각</th><th>연 보조금수익</th><th>잔여 이연수익(현재)</th><th>부가세</th></tr></thead><tbody>
+        ${T.grants.map(g=>{ const yrs = Math.max(0, Math.min(g.years, new Date().getFullYear() - Number(g.decidedAt.slice(0,4)))); return `<tr><td>${escapeHtml(g.agency)}</td><td>${g.decidedAt}</td><td>${g.grant.toLocaleString()}</td><td>${g.cost.toLocaleString()}</td><td>${(g.cost-g.grant).toLocaleString()}</td><td>${g.years}</td><td>${Math.round(g.cost/g.years).toLocaleString()}</td><td>${Math.round(g.grant/g.years).toLocaleString()}</td><td>${Math.round(g.grant - g.grant/g.years*yrs).toLocaleString()}</td><td>${g.vatIncl ? '<span class="badge badge-danger">포함 — 환급분 반납</span>' : '미포함'}</td></tr>`; }).join('')}</tbody></table>` : ''}
+    </div>
+
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">💡 세제특례 점검 (설비 투자 조합)</h3></div>
+      <table class="tbl" style="font-size:13px;"><thead><tr><th>특례</th><th>내용</th><th>조건</th></tr></thead><tbody>
+        <tr><td><strong>통합투자세액공제</strong></td><td>설비 공급가액의 10% 법인세 공제, 한도초과액 10년 이월</td><td>보조금 제외 자부담 투자분만 · 중고·리스 제외</td></tr>
+        <tr><td><strong>조합법인 과세특례(조특법 §72)</strong></td><td>당기순이익 과세법인으로 법인세 계산</td><td>협동조합기본법 조합</td></tr>
+        <tr><td><strong>중소기업특별세액감면</strong></td><td>세액의 10~30% 감면</td><td>통합투자세액공제와 중복 불가 — 큰 쪽 선택</td></tr>
+        <tr><td><strong>사회적기업 인증</strong></td><td>5년간 법인세 100% 감면</td><td>배당 금지·잉여금 적립 조건. 사협 전환 자체는 혜택 없음</td></tr>
+      </tbody></table>
+      ${T.grants.length ? `<p style="font-size:13px;margin:8px 0 0;">등록된 설비 기준 통합투자세액공제 추정: <b>${Math.round(T.grants.reduce((s,g)=>s+(g.cost-g.grant),0)*0.1).toLocaleString()}원</b> (자부담 투자분 10% · 세무사 확인 필요)</p>` : ''}
+    </div>
+  `;
+}
+function taxEditVendor(id){
+  const v = MOCK.tax.vendors.find(x => x.id === id) || {name:'', type:'매입처', acct:'', bizNo:'', kw:''};
+  showDyn({title: id ? '거래처 수정' : '거래처 추가', sub:'거래처마다 표준 계정 하나를 지정합니다.',
+    body:`<div class="form-row"><label>거래처명 *</label><input class="input" id="vd-name" value="${escapeHtml(v.name)}"></div>
+      <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><div><label>유형</label><select class="select" id="vd-type">${['매출처','매입처','교부기관','조합원','임대인','금융','공공','직원','주민'].map(t=>`<option${t===v.type?' selected':''}>${t}</option>`).join('')}</select></div><div><label>표준 계정 *</label><input class="input" id="vd-acct" value="${escapeHtml(v.acct)}" placeholder="예: 발전설비유지관리비"></div></div>
+      <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><div><label>사업자번호</label><input class="input" id="vd-bizno" value="${escapeHtml(v.bizNo)}"></div><div><label>적요 추천 키워드(|로 구분)</label><input class="input" id="vd-kw" value="${escapeHtml(v.kw)}"></div></div>`,
+    foot:`${id && !TAX_VENDOR_SEED.some(s=>s.id===id) ? `<button class="btn btn-danger btn-sm" style="margin-right:auto;" onclick="taxRemoveVendor('${id}')">삭제</button>` : ''}<button class="btn btn-outline" onclick="closeDyn()">취소</button><button class="btn btn-primary" onclick="taxSaveVendor('${id}')">저장</button>`});
+}
+function taxSaveVendor(id){
+  const g = k => (document.getElementById(k).value || '').trim();
+  if(!g('vd-name') || !g('vd-acct')){ toast('거래처명과 표준 계정은 필수입니다.'); return; }
+  let v = MOCK.tax.vendors.find(x => x.id === id);
+  if(!v){ v = {id:_tid('ven')}; MOCK.tax.vendors.push(v); }
+  Object.assign(v, {name:g('vd-name'), type:document.getElementById('vd-type').value, acct:g('vd-acct'), bizNo:g('vd-bizno'), kw:g('vd-kw')});
+  persistTax(); closeDyn(); toast('거래처를 저장했습니다.'); refresh();
+}
+function taxRemoveVendor(id){ MOCK.tax.vendors = MOCK.tax.vendors.filter(v => v.id !== id); persistTax(); closeDyn(); refresh(); }
+function taxLedgerView(key){
+  const T = MOCK.tax; const L = TAX_LEDGERS.find(l => l[2] === key); let body = '';
+  const tbl = (head, rows) => rows.length ? `<table class="tbl" style="font-size:12.5px;"><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>` : '<p class="text-mute">아직 기록이 없습니다.</p>';
+  const bankBy = pred => T.bank.filter(pred).map(t => [t.date, escapeHtml(t.desc), t.inn?t.inn.toLocaleString():'', t.out?t.out.toLocaleString():'', escapeHtml((taxVendor(t.vendorId)||{}).acct||'')]);
+  switch(key){
+    case 'members': case 'shares': body = tbl(['성명','직위','가입일','출자금','의결권'], MOCK.members.map(m=>[escapeHtml(m.name), m.role, m.joinDate, m.share, m.voting?'✓':'—'])) + '<p class="text-mute" style="font-size:12.5px;">출자좌수·1좌 금액·변동내역은 조합원 관리에서 편집합니다. 조합원별 출자금과 사업수익은 섞지 않습니다.</p>'; break;
+    case 'revenue': body = tbl(['일자','적요','입금','출금','수익원'], bankBy(t => ['ven01','ven02'].includes(t.vendorId) || t.vendorId==='ven05' && t.inn)); break;
+    case 'grants': case 'assets': body = tbl(['교부기관','결정일','보조금','취득가','내용연수','연 감가상각','연 보조금수익'], T.grants.map(g=>[escapeHtml(g.agency), g.decidedAt, g.grant.toLocaleString(), g.cost.toLocaleString(), g.years, Math.round(g.cost/g.years).toLocaleString(), Math.round(g.grant/g.years).toLocaleString()])); break;
+    case 'lease': body = tbl(['거래일','임대인','금액','구분','사업자번호'], T.evidence.filter(e=>e.leaseType).map(e=>[e.date, escapeHtml(e.vendor), Number(e.amount).toLocaleString(), e.leaseType, escapeHtml(e.bizNo)])) + tbl(['일자','적요','입금','출금','계정'], bankBy(t=>t.vendorId==='ven05')); break;
+    case 'expense': { const agg = {}; for(const t of T.bank){ if(t.out && t.confirmed){ const a = (taxVendor(t.vendorId)||{}).acct || '미분류'; agg[a] = (agg[a]||0) + t.out; } } body = tbl(['계정(거래처 기준)','합계'], Object.entries(agg).map(([k,v])=>[k, v.toLocaleString()])); break; }
+    case 'loan': body = tbl(['일자','적요','입금','출금','계정'], bankBy(t=>t.vendorId==='ven08')) + '<p class="text-mute" style="font-size:12.5px;">원금과 이자는 금융기관 상환 명세로 구분해 기록합니다.</p>'; break;
+    case 'invoice': body = tbl(['거래일','거래처','금액','사업자번호','부가세'], T.evidence.filter(e=>e.kind==='세금계산서').map(e=>[e.date, escapeHtml(e.vendor), Number(e.amount).toLocaleString(), escapeHtml(e.bizNo), e.vatIncl?'포함':'미포함'])) + '<p class="text-mute" style="font-size:12.5px;">세무사는 홈택스에서 직접 조회합니다. 이 대장은 조합 내부 누락 점검용입니다.</p>'; break;
+    case 'wht': body = tbl(['일자','대상','성격','소득구분','세전','원천징수','신고기한'], T.payments.map(p=>[p.date, escapeHtml(p.target), escapeHtml(p.nature), p.income, p.gross.toLocaleString(), p.wh.toLocaleString(), p.due])); break;
+    case 'surplus': body = tbl(['회차','총회 의결','배당 재원','조합원 배당','주민 환원'], T.sunIncome.map(s=>[s.ym, s.decidedAt, s.fund.toLocaleString(), s.memberTotal.toLocaleString(), s.residentTotal.toLocaleString()])) + `<p class="text-mute" style="font-size:12.5px;">조합 유형: ${T.profile.coopType==='사협' ? '사회적협동조합 — 배당 금지, 잉여금은 법령에 따라 적립' : '일반협동조합 — 정관 적립금 차감 후 출자 비율 배당'}</p>`; break;
+    case 'return': body = tbl(['환원사업명','대상','집행금액','집행일','지급방법','의사결정','증빙'], T.sunIncome.map(s=>[`햇빛소득 ${s.ym}`, `조합원 ${s.memberN}·주민 ${s.residentN}`, s.netTotal.toLocaleString(), s.createdAt, '계좌이체', `총회 ${s.decidedAt}`, '지급명세'])); break;
+  }
+  showDyn({title:L ? L[0] : key, sub:L ? L[1] : '', body, size:'lg', foot:`<button class="btn btn-primary" onclick="closeDyn()">닫기</button>`});
+}
+function taxGrantCalc(){
+  const cost = Number(document.getElementById('gr-cost').value)||0, grant = Number(document.getElementById('gr-grant').value)||0, years = Number(document.getElementById('gr-years').value)||20, vat = document.getElementById('gr-vat').value === '1', agency = document.getElementById('gr-agency').value.trim();
+  if(!cost || !years){ toast('취득가액과 내용연수를 입력하세요.'); return; }
+  const dep = cost / years, inc = grant / years; const y0 = new Date().getFullYear();
+  const rows = []; for(let i = 1; i <= years; i++) rows.push(`<tr><td>${i}년차 (${y0+i-1})</td><td>${Math.round(dep).toLocaleString()}</td><td>${Math.round(inc).toLocaleString()}</td><td>${Math.round(grant - inc*i).toLocaleString()}</td><td>${Math.round(dep-inc).toLocaleString()}</td></tr>`);
+  document.getElementById('gr-result').innerHTML = `
+    <div style="background:var(--paper-soft);border-radius:8px;padding:12px 14px;">
+      <div class="grid grid-4" style="gap:8px;"><div><div class="kpi-l">취득 시 분개</div><div style="font-size:13px;">발전설비 ${cost.toLocaleString()} / 현금 △${(cost-grant).toLocaleString()} · 이연수익 ${grant.toLocaleString()}</div></div>
+        <div><div class="kpi-l">연간 감가상각비</div><div class="kpi-n" style="font-size:20px;">${Math.round(dep).toLocaleString()}</div></div><div><div class="kpi-l">연간 보조금 수익 인식</div><div class="kpi-n" style="font-size:20px;">${Math.round(inc).toLocaleString()}</div></div><div><div class="kpi-l">연간 순부담(대응 후)</div><div class="kpi-n" style="font-size:20px;">${Math.round(dep-inc).toLocaleString()}</div></div></div>
+      ${vat ? `<p style="color:var(--danger);font-size:13px;margin:8px 0 0;"><b>부가세 포함 보조금:</b> 매입세액 환급분(약 ${Math.round(grant/11).toLocaleString()}원)은 교부기관에 반납해야 할 수 있습니다. 세무사의 말대로 "부가세는 잠깐 거쳐 가는 돈"입니다. 반납 일정을 교부기관과 확인하세요.</p>` : '<p class="text-mute" style="font-size:12.5px;margin:8px 0 0;">부가세 미포함(자부담) — 매입세액공제를 받아도 문제 없습니다.</p>'}
+      <details style="margin-top:8px;"><summary class="text-small" style="cursor:pointer;">${years}년 인식표 보기</summary><div style="max-height:220px;overflow:auto;"><table class="tbl" style="font-size:12px;"><thead><tr><th>연차</th><th>감가상각비</th><th>보조금 수익</th><th>잔여 이연수익</th><th>순부담</th></tr></thead><tbody>${rows.join('')}</tbody></table></div></details>
+      <div style="margin-top:10px;"><button class="btn btn-primary btn-sm" onclick="taxGrantSave(${cost},${grant},${years},${vat},'${escapeJs(agency)}')">📒 시설보조금 관리대장에 등록</button></div>
+    </div>`;
+}
+function taxGrantSave(cost, grant, years, vat, agency){
+  MOCK.tax.grants.push({id:_tid('gr'), agency: agency || '교부기관', decidedAt:_ymd(), grant, cost, years, vatIncl:vat, purpose:'발전설비 취득'});
+  persistTax(); taxLog('시설보조금 등록', agency); toast('시설보조금 관리대장에 등록했습니다.' + (vat ? ' 부가세 환급분 반납 일정을 일정·마감에서 확인하세요.' : '')); refresh();
+}
+
+/* ─── 페이지 4. 세무회계 비용절감 프로젝트(공동구매) 신청 ─── */
+function memTaxJoin(){
+  const T = MOCK.tax, a = T.apply, v = myVillage(), u = currentUser() || {};
+  return `
+    <div class="sec-head">
+      <h1>🤝 세무회계 비용절감 프로젝트 신청</h1>
+      <p class="sec-desc">연합회가 자료 양식·코드·마감일을 통일하고 세무사 사무소와 상의해 표준 단가를 정해 회원 조합에 알립니다. 계약은 조합별로 맺습니다.</p>
+    </div>
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-title"><h3 class="serif">${a ? '📨 접수 완료' : '📝 신청서'}</h3>${a ? `<span class="badge badge-success">${a.date}</span>` : ''}</div>
+        ${a ? `<table class="tbl" style="font-size:13px;"><tbody>
+          <tr><td>기관명</td><td><strong>${escapeHtml(a.org)}</strong></td></tr><tr><td>대표자</td><td>${escapeHtml(a.rep)} · ${escapeHtml(a.repTel)}</td></tr><tr><td>주소</td><td>${escapeHtml(a.addr)}</td></tr>
+          <tr><td>조직유형</td><td>${escapeHtml(a.orgType)}</td></tr><tr><td>사업자등록번호</td><td>${escapeHtml(a.bizNo)}</td></tr><tr><td>담당자</td><td>${escapeHtml(a.mgr)} · ${escapeHtml(a.mgrTel)} · ${escapeHtml(a.mgrEmail)}</td></tr>
+          <tr><td>상태</td><td><span class="badge badge-primary">${a.status}</span></td></tr></tbody></table>
+          <h4 style="margin:14px 0 6px;">다음 단계</h4>
+          <ol style="padding-left:20px;font-size:13.5px;"><li>${taxContactsOk() ? '✅' : '⬜'} 세무 담당자·부담당·대표 연락처 등록 ${taxContactsOk() ? '' : '<a href="#/mem/accounting" style="color:var(--primary);">(등록하기)</a>'}</li>
+            <li>${T.profile.hometax ? '✅' : '⬜'} 홈택스 세무사 수임동의</li><li>⬜ 연합회 표준 단가 통지 수령</li><li>⬜ 조합–세무사 사무소 개별 계약</li><li>⬜ 첫 달: 급여대장·통장 패키지·담당자 등록 3가지만</li></ol>
+          <button class="btn btn-ghost btn-sm" onclick="taxApplyReset()">신청 취소</button>`
+        : `<div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><div><label>기관명 *</label><input class="input" id="ap-org" value="${escapeHtml(v.name + ' 마을협동조합')}"></div><div><label>조직유형</label><select class="select" id="ap-type"><option>일반협동조합</option><option>사회적협동조합</option><option>마을기업</option><option>기타</option></select></div></div>
+          <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><div><label>대표자명 *</label><input class="input" id="ap-rep" value="${escapeHtml(T.contacts.rep.name)}"></div><div><label>대표자 연락처 *</label><input class="input" id="ap-reptel" value="${escapeHtml(T.contacts.rep.phone)}"></div></div>
+          <div class="form-row"><label>주소</label><input class="input" id="ap-addr" value="${escapeHtml(v.region || '')}"></div>
+          <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;"><div><label>사업자등록번호 *</label><input class="input" id="ap-bizno" placeholder="000-00-00000"></div><div><label>전화번호</label><input class="input" id="ap-tel"></div><div><label>팩스번호</label><input class="input" id="ap-fax"></div></div>
+          <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;"><div><label>담당자명 *</label><input class="input" id="ap-mgr" value="${escapeHtml(T.contacts.main.name || u.name || '')}"></div><div><label>연락처 *</label><input class="input" id="ap-mgrtel" value="${escapeHtml(T.contacts.main.phone)}"></div><div><label>이메일</label><input class="input" id="ap-mgremail" value="${escapeHtml(T.contacts.main.email || u.email || '')}"></div></div>
+          <div style="background:var(--paper-soft);border-radius:8px;padding:10px 12px;font-size:12.5px;margin-bottom:10px;">
+            <b>개인정보 제공 및 이용 동의</b><br>1. 수집·이용 목적: 세무회계 비용절감 프로젝트 업체 정보 확인<br>2. 수집 항목: 성명, 주소, 연락처, 사업자등록번호<br>3. 보유·이용 기간: 신청 접수를 위해 이용·보관<br>4. 수집된 개인정보는 위 목적 외 다른 목적으로 사용하지 않습니다.<br>
+            <label style="display:block;margin-top:6px;"><input type="checkbox" id="ap-agree"> 동의합니다</label></div>
+          <button class="btn btn-primary" onclick="taxApplySubmit()">신청서 제출</button>`}
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-title"><h3 class="serif">서비스 범위와 조건</h3></div>
+          <table class="tbl" style="font-size:13px;"><tbody>
+            <tr><td><strong>기본 서비스</strong></td><td>월 기장, 부가세·법인세·원천세 신고, 법인세 조정, 4대보험 신고(사무소 서비스)</td></tr>
+            <tr><td><strong>추가 협약</strong></td><td>노무(급여 설계·근로계약 등)는 연합회가 노무사와 별도 협약</td></tr>
+            <tr><td><strong>처리 방식</strong></td><td>원격. 세무조사·환급조사가 아니면 방문 불필요</td></tr>
+            <tr><td><strong>책임</strong></td><td>자료가 정상 제출됐는데 신고 오류가 나면 가산세는 세무사 책임(세무사보험). 자료 불량은 조합 책임</td></tr>
+            <tr><td><strong>보관</strong></td><td>세무사는 신고일로부터 5년. 조합원 성명·주민번호는 소득 신고에 필수</td></tr>
+            <tr><td><strong>단가</strong></td><td>매출 규모·직원 수·사업장 수·업종 수로 산정. 표준화·단순화·전문화가 되면 하락. 약 50곳마다 사무소 고정비 증가, 100곳 이상이면 전문화로 감소</td></tr>
+          </tbody></table>
+        </div>
+        <div class="card mt-20" style="border-left:4px solid var(--gold-dark,#B8860B);">
+          <strong>계약 구조 안내</strong>
+          <p class="text-mute" style="font-size:12.5px;margin:4px 0 0;">연합회의 표준약관·표준단가 강제, 연합회 대표 계약, 연합회가 회계담당을 고용해 기장하는 방식은 세무사법·회계사법 위반 소지가 있습니다. 실제 관행은 "연합회와 세무사가 상의해 산정한 표준 단가를 회원 조합에 통지하고, 계약은 조합별로 체결"입니다. 세 구조 모두 법률 검토 중입니다.</p>
+        </div>
+        <div class="card mt-20">
+          <strong>세무사가 꼽은 "먼저 갖출 3가지"</strong>
+          <ul style="padding-left:20px;font-size:13.5px;margin:6px 0 0;"><li>조합 안에 실무 담당자</li><li>비상연락망</li><li>담당자 변경 시 인수인계 기간</li></ul>
+        </div>
+      </div>
+    </div>`;
+}
+function taxApplySubmit(){
+  const g = id => (document.getElementById(id).value || '').trim();
+  if(!document.getElementById('ap-agree').checked){ toast('개인정보 제공·이용에 동의해야 접수됩니다.'); return; }
+  if(!g('ap-org') || !g('ap-rep') || !g('ap-reptel') || !g('ap-bizno') || !g('ap-mgr') || !g('ap-mgrtel')){ toast('* 표시 항목을 모두 입력하세요.'); return; }
+  MOCK.tax.apply = {date:_ymd(), org:g('ap-org'), orgType:document.getElementById('ap-type').value, rep:g('ap-rep'), repTel:g('ap-reptel'), addr:g('ap-addr'), bizNo:g('ap-bizno'), tel:g('ap-tel'), fax:g('ap-fax'), mgr:g('ap-mgr'), mgrTel:g('ap-mgrtel'), mgrEmail:g('ap-mgremail'), status:'접수'};
+  if(!MOCK.tax.contacts.main.name){ MOCK.tax.contacts.main = {name:g('ap-mgr'), phone:g('ap-mgrtel'), email:g('ap-mgremail')}; }
+  if(!MOCK.tax.contacts.rep.name){ MOCK.tax.contacts.rep = {name:g('ap-rep'), phone:g('ap-reptel'), email:''}; }
+  MOCK.tax.profile.coopType = /사회적/.test(MOCK.tax.apply.orgType) ? '사협' : '일반';
+  persistTax(); taxLog('비용절감 프로젝트 신청', MOCK.tax.apply.org); toast('신청서가 접수되었습니다. 연합회가 표준 단가를 통지합니다.'); refresh();
+}
+function taxApplyReset(){ if(!confirm('신청을 취소할까요?')) return; MOCK.tax.apply = null; persistTax(); refresh(); }
+
+/* ─── 페이지 5. 세무 파일럿 KPI (관리자·연합회) ─── */
+function admTaxKpi(){
+  const T = MOCK.tax;
+  const pk = T.packages, rt = T.returns;
+  const onTime = pk.filter(p => { const [y,m] = p.ym.split('-').map(Number); const due = new Date(y, m, 5); return new Date(p.sentAt) <= due; }).length;
+  const resolved = rt.filter(r => r.resolvedAt);
+  const avgH = resolved.length ? Math.round(resolved.reduce((s,r)=>s+(new Date(r.resolvedAt)-new Date(r.createdAt))/36e5,0)/resolved.length) : 0;
+  const mine = {name: myVillage().name, contact: taxContactsOk() ? '등록' : '미등록', hometax: T.profile.hometax ? '완료' : '미완료', pkgs: pk.length, onTime: pk.length ? Math.round(onTime/pk.length*100) : 0, returns: rt.length, open: rt.filter(r=>r.status==='열림').length, handover: T.handover.length, real:true};
+  const demo = [
+    {name:'진도군 조도면 B리', contact:'등록', hometax:'완료', pkgs:4, onTime:100, returns:2, open:0, handover:0},
+    {name:'해남군 화원면 C리', contact:'등록', hometax:'미완료', pkgs:3, onTime:67, returns:7, open:2, handover:1},
+    {name:'신안군 자은면 D리', contact:'미등록', hometax:'미완료', pkgs:0, onTime:0, returns:0, open:0, handover:0},
+  ];
+  const rows = [mine, ...demo];
+  return `
+    <div class="sec-head">
+      <h1>📈 세무 파일럿 KPI</h1>
+      <p class="sec-desc">조합 2~3곳 6개월 파일럿(한길세무회계사무소 의향)에서 측정할 지표: 패키지 기한 준수율, 되묻기 건수, 평균 보정 시간, 담당자 변경. 결과는 표준안 개정과 공동구매 단가에 반영됩니다. <span class="badge badge-mute">열람 전용</span></p>
+    </div>
+    <div class="grid grid-4">
+      <div class="kpi"><div class="kpi-n">${pk.length}</div><div class="kpi-l">전송된 패키지</div><div class="kpi-sub">기한 준수 ${mine.onTime}%</div></div>
+      <div class="kpi"><div class="kpi-n">${rt.length}</div><div class="kpi-l">되묻기(보정 요청)</div><div class="kpi-sub">열림 ${mine.open}건</div></div>
+      <div class="kpi"><div class="kpi-n">${avgH}h</div><div class="kpi-l">평균 보정 소요</div><div class="kpi-sub">요청→완료</div></div>
+      <div class="kpi"><div class="kpi-n">${rows.filter(r=>r.contact==='미등록').length}</div><div class="kpi-l">담당자 공백 조합</div><div class="kpi-sub">연합회 관리 대상</div></div>
+    </div>
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">조합별 제출 현황</h3><span class="badge badge-mute">첫 행은 이 기기의 실제 기록 · 나머지는 예시</span></div>
+      <table class="tbl" style="font-size:13px;"><thead><tr><th>조합</th><th>담당자</th><th>홈택스 수임</th><th>패키지</th><th>기한 준수</th><th>되묻기</th><th>열림</th><th>담당자 변경</th><th>상태</th></tr></thead><tbody>
+        ${rows.map(r=>`<tr><td><strong>${escapeHtml(r.name)}</strong>${r.real?' <span class="badge badge-success">실기록</span>':''}</td><td>${r.contact==='등록'?'✓':'<span class="badge badge-danger">미등록</span>'}</td><td>${r.hometax==='완료'?'✓':'<span class="badge badge-danger">미완료</span>'}</td><td>${r.pkgs}</td><td>${r.onTime}%</td><td>${r.returns}</td><td>${r.open}</td><td>${r.handover}</td>
+          <td>${r.contact==='미등록' ? '<span class="badge badge-danger">담당자 공백</span>' : r.open >= 2 ? '<span class="badge badge-gold">보정 지연</span>' : '<span class="badge badge-success">정상</span>'}</td></tr>`).join('')}
+      </tbody></table>
+      <p class="text-mute" style="font-size:12.5px;">※ 세무사 사무소별 담당 조합 상한: 약 50곳마다 고정비 증가, 100곳 이상이면 전문화. 사무소 규모(세무사 2명·직원 5명 이상)와 협동조합 기장 경험을 등록 시 확인합니다.</p>
+    </div>
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">개선점 기록 — "통일된 업무를 위한 개선점" 게시판</h3></div>
+      <div style="display:flex;gap:6px;margin-bottom:10px;"><input class="input" id="kpi-note" placeholder="예: C리 현금인출 사유 누락 반복 → 교육 필요"><button class="btn btn-primary btn-sm" onclick="taxAddNote()">기록</button></div>
+      ${T.notes.length ? T.notes.slice().reverse().map(n=>`<div style="padding:6px 0;border-top:1px solid var(--line-soft);font-size:13px;"><span class="text-mute">${n.date} · ${escapeHtml(n.by)}</span> ${escapeHtml(n.text)}</div>`).join('') : '<p class="text-mute text-small">아직 기록이 없습니다.</p>'}
+    </div>
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">회계 실무 교육 커리큘럼 (세무사 협의)</h3></div>
+      <ol style="padding-left:20px;font-size:13.5px;margin:0;"><li>매출·매입과 영수증 일치 확인</li><li>적격증빙 판별(세금계산서·계산서·카드전표·현금영수증)</li><li>현금 인출의 위험과 사유 기록</li></ol>
+      <p class="text-mute" style="font-size:12.5px;margin:6px 0 0;">교육 이수 여부는 담당자 프로필에 표시합니다. 신청은 연합체·커뮤니티 → 교육·연수.</p>
+    </div>`;
+}
+function taxAddNote(){ const t = document.getElementById('kpi-note').value.trim(); if(!t) return; MOCK.tax.notes.push({date:_ymd(), by:(currentUser()||{}).name||'관리자', text:t}); persistTax(); refresh(); }
+
+/* ─── 세무 달력 (조합 유형별) — 일정·마감 메뉴가 사용 ─── */
+function taxDeadlines(){
+  const P = MOCK.tax.profile; const today = new Date(); today.setHours(0,0,0,0);
+  const list = []; const push = (d, t, k) => { if(d >= today) list.push([d, t, k]); };
+  const y = today.getFullYear();
+  for(let k = 0; k < 4; k++){
+    const m = today.getMonth() + k; const mon = new Date(y, m, 1).getMonth() + 1; const prevMon = mon === 1 ? 12 : mon - 1;
+    if(P.hasStaff) push(new Date(y, m, 5), `급여대장 마감·세무사 전달 (${prevMon}월분)`, '급여');
+    push(new Date(y, m, 10), `원천세 신고·납부 (${prevMon}월 지급분) · 일용·사업·기타소득 간이지급명세서`, '원천세');
+    if([1,4,7,10].includes(mon)) push(new Date(y, m, 25), `부가가치세 ${[1,7].includes(mon)?'확정':'예정'}신고·납부`, '부가세');
+    if(mon === 2 && P.hasStaff) push(new Date(y, m, 28), '근로소득 연말정산', '급여');
+    if(mon === 3) push(new Date(y, m, 31), '법인세 신고·납부 (설립 초기 무매출 조합 포함)', '법인세');
+    if(mon === 4 && (P.coopType === '사협' || P.publicCorp)) push(new Date(y, m, 30), '국세청 결산공시 (사회적협동조합·공익법인) — 경영공시와 재무제표 일치 확인', '공시');
+    if((mon === 1 || mon === 7) && P.hasStaff) push(new Date(y, m, 31), '근로소득 간이지급명세서 (반기, 한시 유예)', '급여');
+    push(new Date(y, m + 1, 0), `${mon}월 세무 패키지 전송 (통장 원본·증빙 목록)`, '패키지');
+  }
+  for(const r of MOCK.tax.returns.filter(r => r.status === '열림')) push(new Date(r.due + 'T00:00:00'), `보정 요청 기한 — ${r.code}`, '보정');
+  for(const g of MOCK.tax.grants.filter(g => g.vatIncl)){ const d = new Date(g.decidedAt + 'T00:00:00'); d.setMonth(d.getMonth() + 3); push(d, `보조금 부가세 환급분 반납 확인 — ${g.agency}`, '보조금'); }
+  list.sort((a,b) => a[0] - b[0]);
+  return list.slice(0, 12).map(([d, title, kind]) => ({date:_ymd(d), title, kind}));
+}
+function taxProfileBar(){
+  const P = MOCK.tax.profile;
+  return `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:13px;margin-bottom:8px;">
+    <span class="text-mute">조합 유형</span>
+    <select class="select" style="width:auto;padding:3px 8px;" onchange="MOCK.tax.profile.coopType=this.value;persistTax();refresh()"><option${P.coopType==='일반'?' selected':''}>일반</option><option${P.coopType==='사협'?' selected':''}>사협</option></select>
+    <label><input type="checkbox" ${P.publicCorp?'checked':''} onchange="MOCK.tax.profile.publicCorp=this.checked;persistTax();refresh()"> 공익법인</label>
+    <label><input type="checkbox" ${P.hasStaff?'checked':''} onchange="MOCK.tax.profile.hasStaff=this.checked;persistTax();refresh()"> 급여 직원 있음</label>
+    <span class="text-mute">→ 달력이 조합 유형에 맞춰 바뀝니다</span></div>`;
+}
+
 /* ─── Init ─── */
 loadUserDocs();
 loadUserMembers();
@@ -9945,6 +10759,7 @@ loadContents();
 loadAccounting();
 loadUploads();
 loadClosings();
+loadTax();
 renderTopActions();
 ssoBoot();   // 통합 계정 세션이 있으면 자동 로그인 (sakyowon.co.kr 서빙 시)
 navigate();
