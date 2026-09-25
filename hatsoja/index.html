@@ -474,6 +474,11 @@ input,select,textarea{font-family:inherit;font-size:14px;}
 .msg-badge{margin-top:6px;font-size:0.75em;color:#888;}
 .msg-note{margin-top:2px;font-size:0.75em;color:#888;}
 .chat-input{display:flex;gap:8px;}
+.ask-groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:16px;}
+.ask-group h3{font-size:14px;margin:0 0 8px;}
+.ask-group .ask-q{display:block;width:100%;text-align:left;margin:0 0 6px;padding:8px 10px;border:1px solid var(--line-soft);border-radius:10px;background:#fff;color:var(--ink);font-size:13px;line-height:1.45;cursor:pointer;}
+.ask-group .ask-q:hover{border-color:var(--primary);background:var(--primary-50);}
+.ask-tip{font-size:12.5px;color:var(--ink-soft);margin:0 0 12px;}
 .chat-input .input{flex:1;}
 
 /* Toast */
@@ -1596,6 +1601,7 @@ function canAccess(u, scope, page){
   if(role === 'admin') return true;
   if(role === 'guest') return false;
   if(role === 'coop') return scope === 'mem';
+  if(scope === 'mem' && page === 'ask') page = 'chat';   // 질문 모음(상세)은 AI 상담과 같은 권한
   return (ROLE_MENUS[role] || []).some(([, items]) => items.some(([s, p]) => s === scope && p === page));
 }
 
@@ -1714,7 +1720,7 @@ function updateConvenienceUI(scope, page){
     if(sw && demo) sw.innerHTML = Object.entries(ROLES).map(([k, r]) =>
       `<button class="${k === role ? 'on' : ''}" onclick="demoLogin('${k}')" title="${escapeHtml(r.desc)}">${r.emoji} ${r.label}</button>`).join('');
   }
-  if(fab) fab.classList.toggle('on', !!u && role !== 'guest' && scope !== 'pub' && page !== 'chat');
+  if(fab) fab.classList.toggle('on', !!u && role !== 'guest' && scope !== 'pub' && page !== 'chat' && page !== 'ask');
   const descKey = (scope === 'adm' && page === 'dashboard') ? 'admDashboard' : page;
   _screenName = (scope === 'mem' || scope === 'adm') ? (MENU_DESC[descKey] ? MENU_DESC[descKey][0] : page) : '';
 }
@@ -1753,6 +1759,7 @@ const MENU_DESC = {
   union:['연합체·커뮤니티','다른 햇빛소득마을과 소식을 나눕니다'],
   library:['공지·자료실','공지사항과 서식 자료를 봅니다'],
   chat:['AI 상담','무엇이든 물어보면 AI가 답합니다'],
+  ask:['GPU 엔진 질문 모음','주제별 예시 질문을 눌러 GPU 엔진에 바로 묻습니다'],
 };
 
 /* 용어 쉬운 말 병기 (개선안 3-3) */
@@ -2250,6 +2257,7 @@ function renderMemberPage(page){
     case 'schedule':  return memSchedule();
     case 'library':   return memLibrary();
     case 'chat':      return memChat();
+    case 'ask':       return memAsk();
     default:          return memDashboard(u);
   }
 }
@@ -5529,7 +5537,8 @@ function memChat(){
   return `
     <div class="sec-head">
       <h1>AI 상담</h1>
-      <p class="sec-desc">햇빛소득마을 사업·조합 운영에 관한 모든 질문을 자유롭게 물어보세요.</p>
+      <p class="sec-desc">햇빛소득마을 사업·조합 운영에 관한 모든 질문을 자유롭게 물어보세요.
+        <a href="#/mem/ask" style="margin-left:6px;">주제별 질문 모음 보기 →</a></p>
     </div>
 
     <div class="card">
@@ -5550,6 +5559,64 @@ function memChat(){
       </div>
     </div>
   `;
+}
+
+/* AI 상담 상세 — 주제별 예시 질문 모음 + 같은 입력란(chatIn/chatBody → sendChat 공용, /api/ai/chat = GPU 엔진).
+   예시는 9/25 대조 시험에서 엔진이 강했던 공고문·서류·절차 영역 위주. 법령 조문은 법령·인허가 탭으로 안내. */
+const ASK_GROUPS = [
+  ['👥 참여 요건', [
+    '햇빛소득마을 협동조합 조합원이 되려면 나이·거주기간 요건이 어떻게 되나요?',
+    '협동조합 조합원은 최소 몇 명, 발기인은 몇 명이 필요한가요? 한 가구에서 여러 명이 발기인이 될 수 있나요?',
+    '주민 동의는 몇 % 이상 받아야 하나요?',
+  ]],
+  ['🏗 설립·절차', [
+    '마을협동조합 설립에 필요한 서류가 뭔가요?',
+    '발전사업 허가 절차를 순서대로 알려주세요.',
+    '공모 신청부터 준공까지 큰 단계를 정리해 주세요.',
+  ]],
+  ['⚡ 설비·수익', [
+    '태양광 모듈의 탄소배출량 기준은 얼마이고 무엇으로 증명하나요?',
+    '선정된 뒤 수입 확보를 위해 언제까지 무엇을 해야 하나요?',
+    'REC 주민참여 추가 가중치는 최대 얼마이고 어떤 조건에서 받나요?',
+  ]],
+  ['📄 서류 점검', [
+    '한전 계통연계 검토의견서에서 사업계획서 쓸 때 꼭 확인할 항목은?',
+    '공고문이 요구하는 협동조합 정관 필수요건은 무엇인가요?',
+    '정관에 꼭 넣어야 할 조항이 있나요?',
+  ]],
+];
+function memAsk(){
+  return `
+    <div class="sec-head">
+      <h1>GPU 엔진 질문 모음</h1>
+      <p class="sec-desc">주제별 예시 질문을 누르면 햇소자 GPU 엔진(EXAONE)에 바로 묻습니다. 직접 입력해도 됩니다.
+        <a href="#/mem/chat" style="margin-left:6px;">← AI 상담</a></p>
+    </div>
+    <div class="ask-groups">
+      ${ASK_GROUPS.map(([title, qs]) => `
+        <div class="card ask-group">
+          <h3>${escapeHtml(title)}</h3>
+          ${qs.map(q => `<button class="ask-q" onclick="askPreset('${escapeJs(q)}')">${escapeHtml(q)}</button>`).join('')}
+        </div>`).join('')}
+    </div>
+    <div class="card">
+      <p class="ask-tip">⚖️ 법령 조문을 묻는 질문은 <a href="#/mem/law">법령·인허가</a> 화면이 더 정확합니다. 연도별 마감일처럼 날짜가 걸린 답은 공고문 원문으로 꼭 확인하세요.</p>
+      <div class="chat-body" id="chatBody">
+        <div class="msg ai">위 질문 가운데 하나를 누르거나 아래에 직접 입력해 주세요.</div>
+      </div>
+      <div class="chat-input">
+        <input class="input" id="chatIn" placeholder="질문을 입력하세요..." onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="btn btn-primary" onclick="sendChat()">보내기</button>
+      </div>
+    </div>
+  `;
+}
+function askPreset(q){
+  const inp = document.getElementById('chatIn');
+  if(!inp) return;
+  inp.value = q;
+  document.getElementById('chatBody').scrollIntoView({behavior:'smooth', block:'center'});
+  sendChat();
 }
 
 let _chatHistory = [];
