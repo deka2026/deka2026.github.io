@@ -108,6 +108,45 @@ input,select,textarea{font-family:inherit;font-size:14px;}
 .pub-nav a.on{background:var(--primary);color:#fff;}
 .pub-nav a.on:hover{background:var(--primary-dark);}
 .top-actions{display:flex;gap:8px;margin-left:12px;}
+
+/* 등급별 상단 메뉴 (로그인 후 — 관리자·연합회·회원협동조합) */
+.role-nav{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap;align-items:center;}
+.role-group{position:relative;}
+.role-btn{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:7px 12px;border-radius:999px;border:1px solid transparent;
+  background:none;color:var(--ink-soft);font-size:13.5px;font-weight:500;
+  cursor:pointer;white-space:nowrap;font-family:inherit;
+}
+.role-btn:hover{background:var(--primary-50);color:var(--primary-dark);}
+.role-btn.on{background:var(--primary);color:#fff;}
+.role-btn .caret{font-size:10px;opacity:.75;}
+.role-dd{
+  display:none;position:absolute;top:calc(100% + 6px);left:0;min-width:230px;z-index:70;
+  background:var(--card);border:1px solid var(--line-soft);border-radius:12px;
+  box-shadow:0 12px 28px rgba(0,0,0,.10);padding:6px;
+}
+.role-group.open .role-dd{display:block;}
+.role-dd button{
+  display:flex;align-items:center;gap:8px;width:100%;text-align:left;
+  padding:9px 12px;border:none;background:none;border-radius:8px;
+  font-size:14px;color:var(--ink);cursor:pointer;font-family:inherit;
+}
+.role-dd button:hover{background:var(--primary-50);}
+.role-dd button.on{background:var(--primary-100);color:var(--primary-dark);font-weight:600;}
+.role-tag{
+  display:inline-block;font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:999px;
+  background:var(--primary-100);color:var(--primary-dark);vertical-align:middle;margin-right:4px;
+}
+.role-tag.admin{background:var(--gold-soft);color:var(--gold-dark);}
+.role-tag.federation{background:#D8E7EF;color:var(--info);}
+.role-tag.guest{background:var(--paper-soft);color:var(--ink-soft);}
+.demo-switch{display:inline-flex;gap:4px;flex-wrap:wrap;margin:0 6px;}
+.demo-switch button{
+  padding:4px 10px;border-radius:999px;border:1px solid #EAD9A0;background:#fff;
+  font-size:12.5px;cursor:pointer;color:#6B5619;font-family:inherit;
+}
+.demo-switch button.on{background:#6B5619;color:#fff;border-color:#6B5619;}
 .btn{
   display:inline-flex;align-items:center;gap:6px;
   padding:8px 16px;border-radius:999px;border:1px solid transparent;
@@ -147,6 +186,8 @@ input,select,textarea{font-family:inherit;font-size:14px;}
   font-size:12px;font-weight:700;
 }
 .avatar.admin{background:var(--gold-dark);}
+.avatar.federation{background:var(--info);}
+.avatar.guest{background:var(--ink-soft);}
 .user-name{font-size:13px;font-weight:600;}
 .user-role{font-size:11px;color:var(--ink-soft);}
 
@@ -217,16 +258,23 @@ input,select,textarea{font-family:inherit;font-size:14px;}
   .grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}
   .app{grid-template-columns:1fr;}
   .sidebar{position:relative;top:0;}
-  .pub-nav{display:none;}
+  .pub-nav,.role-nav{display:none !important;}
   .nav-toggle{display:inline-block;}
   .topnav-in{position:relative;flex-wrap:wrap;}
-  .topnav-in.nav-open .pub-nav{
-    display:flex;flex-direction:column;align-items:stretch;gap:2px;
+  .topnav-in.nav-open .pub-nav,.topnav-in.nav-open .role-nav{
+    display:flex !important;flex-direction:column;align-items:stretch;gap:2px;
     position:absolute;top:100%;left:0;right:0;z-index:60;
     background:var(--card);border-bottom:1px solid var(--line-soft);
     box-shadow:0 10px 24px rgba(0,0,0,.08);padding:10px 14px;
   }
   .topnav-in.nav-open .pub-nav a{padding:12px 10px;border-radius:8px;font-size:16px;}
+  /* 모바일: 등급 메뉴는 묶음별로 펼쳐서 세로 나열 */
+  .topnav-in.nav-open .role-group{width:100%;}
+  .topnav-in.nav-open .role-btn{width:100%;justify-content:space-between;font-size:15px;padding:10px 10px;color:var(--ink);font-weight:700;}
+  .topnav-in.nav-open .role-btn.on{background:none;color:var(--primary-dark);}
+  .topnav-in.nav-open .role-btn .caret{display:none;}
+  .topnav-in.nav-open .role-dd{display:block;position:static;box-shadow:none;border:none;padding:0 0 8px 12px;}
+  .topnav-in.nav-open .role-dd button{font-size:15px;padding:10px;}
   .hero h1{font-size:32px;}
 }
 
@@ -561,6 +609,9 @@ footer{
       <a href="manual.html">이용안내</a>
     </div>
 
+    <!-- 등급별 메뉴 (로그인 후 — renderRoleNav()가 채움) -->
+    <div class="role-nav" id="roleNav" style="display:none;"></div>
+
     <div class="fontsize-btns" id="fontSizeBtns" title="글자 크기">
       <button onclick="setFontScale(1)" aria-label="글자 보통">가</button>
       <button onclick="setFontScale(1.15)" aria-label="글자 크게">가</button>
@@ -577,11 +628,12 @@ footer{
 
 <!-- 관리자 미리보기 / 데모 체험 안내 띠 -->
 <div class="mode-bar preview" id="previewBar">
-  👀 <strong>회원 화면 미리보기 모드</strong>입니다. 실제 회원에게 보이는 화면 그대로예요.
+  👀 <strong id="previewBarRole">회원 화면 미리보기 모드</strong>입니다. 실제 해당 등급 회원에게 보이는 화면 그대로예요.
   <button class="btn btn-primary btn-sm" onclick="endPreview()">관리자로 돌아가기</button>
 </div>
 <div class="mode-bar demo" id="demoBar">
-  🌱 지금은 <strong>체험 모드</strong>입니다. 입력한 내용은 저장되지 않아요.
+  🌱 <strong>체험 모드</strong>(입력 내용 저장 안 됨) · 등급 바꿔 보기:
+  <span class="demo-switch" id="demoSwitch"></span>
   <button class="btn btn-primary btn-sm" onclick="gotoSignupFromDemo()">우리 마을로 시작하기 — 가입 신청</button>
 </div>
 
@@ -1282,19 +1334,19 @@ footer{
       <p class="text-mute text-small" style="margin:8px 0 0;">급하시면 대표전화 <a href="tel:070-4196-4677">070-4196-4677</a>로 연락해 주세요.</p>
     </div>
 
-    <div class="demo-buttons">
-      <button class="btn btn-outline btn-sm" style="flex:1;" onclick="demoLogin('member')">
-        👤 회원 데모 로그인
-      </button>
-      <button class="btn btn-outline btn-sm" style="flex:1;" onclick="demoLogin('admin')">
-        🔐 관리자 데모 로그인
-      </button>
+    <!-- 등급별 데모 계정 — 버튼 하나로 해당 등급의 화면·기능을 바로 점검 -->
+    <p class="text-small" style="margin:14px 0 6px;font-weight:600;">등급별 데모 로그인 (계정 없이 기능 점검)</p>
+    <div class="demo-buttons" style="flex-wrap:wrap;">
+      <button class="btn btn-outline btn-sm" style="flex:1 1 46%;" onclick="demoLogin('admin')">🔐 관리자</button>
+      <button class="btn btn-outline btn-sm" style="flex:1 1 46%;" onclick="demoLogin('federation')">🤝 연합회</button>
+      <button class="btn btn-outline btn-sm" style="flex:1 1 46%;" onclick="demoLogin('coop')">🏘 회원협동조합</button>
+      <button class="btn btn-outline btn-sm" style="flex:1 1 46%;" onclick="demoLogin('guest')">👋 손님</button>
     </div>
     <p class="text-mute text-small" style="margin-top:14px;margin-bottom:0;">
       ⓘ <strong>사교원 통합 계정 하나로 로그인</strong>합니다.
       다른 사교원 사이트에 이미 로그인돼 있으면 자동으로 이어집니다(SSO).
       계정이 없으면 <a href="#" onclick="toggleSignup(true);return false;">가입 신청</a>하세요.
-      데모 버튼으로는 계정 없이 화면을 체험할 수 있습니다.
+      위 등급 버튼을 누르면 계정 없이 그 등급의 화면과 기능을 바로 점검할 수 있습니다.
     </p>
 
     <!-- 통합 계정 가입 신청 (승인제) -->
@@ -1377,6 +1429,8 @@ const MOCK = {
     {email:'park@example.com', name:'박민수', role:'member', village:'진도군 B리', joined:'2024-04-10', status:'승인'},
     {email:'jung@example.com', name:'정미영', role:'member', village:'해남군 C리', joined:'2026-07-15', status:'승인대기'},
     {email:'choi@example.com', name:'최성훈', role:'member', village:'신안군 D리', joined:'2026-07-18', status:'승인대기'},
+    {email:'union@sakyowon.org', name:'연합회 사무국', role:'federation', village:'햇빛소득마을 연합회', joined:'2024-03-01', status:'승인'},
+    {email:'guest@example.com', name:'손님', role:'guest', village:'', joined:'2026-09-20', status:'승인대기'},
   ],
   logs: [
     {ts:'2026-07-20 14:32', user:'admin@sakyowon', action:'회원 승인', target:'kim@example.com'},
@@ -1420,8 +1474,129 @@ const MOCK = {
 
 /* ─── Auth (localStorage mock) ─── */
 const AUTH_KEY = 'sunvillage_auto_user';
+
+/* ─── 회원 등급 4단계 ───
+   admin(관리자) · federation(연합회) · coop(회원협동조합) · guest(손님: 미로그인 또는 승인 전)
+   메뉴·접근권한은 ROLE_MENUS 한 곳에서만 정의한다 — 상단 메뉴바·사이드바·라우터 접근검사가 모두 이 표를 본다. */
+const ROLES = {
+  admin:      {label:'관리자',       emoji:'🔐', home:'#/adm/dashboard', desc:'플랫폼 전체 운영 · 회원 승인 · 콘텐츠 관리'},
+  federation: {label:'연합회',       emoji:'🤝', home:'#/mem/union',     desc:'참여 마을 전체 현황 · 공모·심사 · 공동사업'},
+  coop:       {label:'회원협동조합', emoji:'🏘', home:'#/mem/dashboard', desc:'우리 마을 조합의 설립·건설·운영 업무'},
+  guest:      {label:'손님',         emoji:'👋', home:'#/pub/home',      desc:'사업 소개 · 자가진단 · 상담 신청 (승인 전)'},
+};
+const ROLE_MENUS = {
+  admin: [
+    ['플랫폼 관리', [
+      ['adm','dashboard','📊','통계 대시보드'],
+      ['adm','contest','🏆','공모·심사 관리'],
+      ['adm','villages','🏘','조합·마을 관리'],
+      ['adm','users','👤','회원 관리'],
+    ]],
+    ['소통·콘텐츠', [
+      ['adm','inquiries','📮','문의 처리'],
+      ['adm','content','📢','콘텐츠 관리'],
+      ['adm','logs','📋','시스템 로그'],
+    ]],
+    ['연합회 업무', [
+      ['mem','union','🤝','연합회 현황판'],
+      ['mem','library','📚','공지·자료실'],
+      ['mem','chat','💬','AI 상담'],
+    ]],
+  ],
+  federation: [
+    ['연합회', [
+      ['mem','union','🤝','연합회 현황판'],
+      ['adm','villages','🏘','조합·마을 현황'],
+      ['adm','contest','🏆','공모·심사'],
+    ]],
+    ['공동업무', [
+      ['mem','docs','📝','문서 자동 생성'],
+      ['mem','review','📄','서류 AI 검토'],
+      ['mem','law','⚖️','법령·인허가'],
+      ['mem','revenue','💰','수익 시뮬레이션'],
+      ['mem','schedule','📅','일정·마감'],
+    ]],
+    ['소통', [
+      ['mem','library','📚','공지·자료실'],
+      ['mem','chat','💬','AI 상담'],
+      ['mem','mypage','👤','마이페이지'],
+    ]],
+  ],
+  coop: [
+    ['내 조합', [
+      ['mem','dashboard','🏠','대시보드'],
+      ['mem','mypage','👤','마이페이지'],
+    ]],
+    ['설립·건설', [
+      ['mem','structure','👪','마을회·조합 설계'],
+      ['mem','setup','🏗','설립 내비게이터·청약'],
+      ['mem','cost','🧱','사업비·부품 구성'],
+      ['mem','finance','🏦','자부담·융자 신청'],
+      ['mem','vendor','🔍','사업자(ReSCO) 선정'],
+      ['mem','docs','📝','문서 자동 생성'],
+      ['mem','review','📄','서류 AI 검토'],
+      ['mem','law','⚖️','법령·인허가'],
+    ]],
+    ['운영관리', [
+      ['mem','power','⚡','발전·정산·배당'],
+      ['mem','revenue','💰','수익 시뮬레이션'],
+      ['mem','accounting','🧾','회계·세무 자동화'],
+      ['mem','closing','📁','월마감·보고서'],
+      ['mem','members','👥','조합원 관리'],
+      ['mem','schedule','📅','일정·마감'],
+      ['mem','success','🧭','20년 성공 조건'],
+    ]],
+    ['확장', [
+      ['mem','biz','🛍','마을비즈니스'],
+      ['mem','union','🤝','연합체·커뮤니티'],
+      ['mem','library','📚','공지·자료실'],
+      ['mem','chat','💬','AI 상담'],
+    ]],
+  ],
+  guest: [
+    ['둘러보기', [
+      ['pub','home','🏠','홈'],
+      ['pub','about','☀','사업소개'],
+      ['pub','cases','🌾','사례'],
+      ['pub','faq','❓','FAQ'],
+    ]],
+    ['시작하기', [
+      ['pub','diagnose','🧭','신청·진단'],
+      ['pub','join','📝','가입절차'],
+      ['pub','contact','📞','상담신청'],
+    ]],
+  ],
+};
+/* 서버·구버전 저장값의 role 문자열을 4등급으로 정규화. status가 승인 전이면 손님. */
+function normalizeRole(r, status){
+  if(status === 'pending' || status === 'rejected' || status === '승인대기' || status === '정지') return 'guest';
+  switch(String(r || '').toLowerCase()){
+    case 'admin': case 'staff': case 'manager':                       return 'admin';
+    case 'federation': case 'union': case 'fed': case '연합회':        return 'federation';
+    case 'coop': case 'member': case 'village': case '회원협동조합': case '회원': return 'coop';
+    case 'guest': case 'visitor': case 'pending': case '손님':         return 'guest';
+    default: return 'coop';   // 역할 미지정 통합계정은 종전대로 회원 취급
+  }
+}
+function roleLabel(r){ return (ROLES[normalizeRole(r)] || ROLES.guest).label; }
+function roleHome(r){ return (ROLES[normalizeRole(r)] || ROLES.guest).home; }
+/* 라우트 접근 검사 — pub은 누구나, admin은 전부, coop은 mem/* 전부, federation은 ROLE_MENUS에 적힌 것만 */
+function canAccess(u, scope, page){
+  if(scope === 'pub') return true;
+  if(!u) return false;
+  const role = normalizeRole(u.role);
+  if(role === 'admin') return true;
+  if(role === 'guest') return false;
+  if(role === 'coop') return scope === 'mem';
+  return (ROLE_MENUS[role] || []).some(([, items]) => items.some(([s, p]) => s === scope && p === page));
+}
+
 function currentUser(){
-  try{ return JSON.parse(localStorage.getItem(AUTH_KEY) || 'null'); }catch{ return null; }
+  try{
+    const u = JSON.parse(localStorage.getItem(AUTH_KEY) || 'null');
+    if(u && u.role !== normalizeRole(u.role)) u.role = normalizeRole(u.role);   // 구 저장값('member') 호환
+    return u;
+  }catch{ return null; }
 }
 function setUser(u){
   if(u) localStorage.setItem(AUTH_KEY, JSON.stringify(u));
@@ -1477,14 +1652,18 @@ function dismissPwa(){
 }
 
 /* 관리자 → 회원 화면 미리보기 (개선안 5-1) — 재로그인 없이 원클릭 복귀 */
-function startPreview(){
+function startPreview(role){
   const u = currentUser();
   if(!u || u.role !== 'admin'){ toast('관리자만 사용할 수 있습니다.'); return; }
+  role = normalizeRole(role || 'coop');
+  if(role === 'admin') role = 'coop';
   try{ sessionStorage.setItem('sv_preview_admin', JSON.stringify(u)); }catch(e){}
-  setUser({email:'preview@sakyowon.org', name:u.name, role:'member', village:'완도군 A리',
+  setUser({email:'preview@sakyowon.org', name:u.name, role,
+    village: role === 'federation' ? '햇빛소득마을 연합회' : (role === 'guest' ? '' : '완도군 A리'),
     loginAt:new Date().toISOString(), preview:true});
-  location.hash = '#/mem/dashboard';
-  toast('회원 화면 미리보기를 시작합니다.');
+  const home = roleHome(role);
+  if(location.hash === home) navigate(); else location.hash = home;
+  toast(`${roleLabel(role)} 화면 미리보기를 시작합니다.`);
 }
 function endPreview(){
   let admin = null;
@@ -1512,18 +1691,41 @@ function updateConvenienceUI(scope, page){
   const u = currentUser();
   const preview = !!(u && u.preview);
   const demo = !!(u && !u.unified && !preview);
+  const role = u ? normalizeRole(u.role) : 'guest';
   const pv = document.getElementById('previewBar');
   const db = document.getElementById('demoBar');
   const fab = document.getElementById('chatFab');
-  if(pv) pv.classList.toggle('on', preview);
-  if(db) db.classList.toggle('on', demo && scope === 'mem');
-  if(fab) fab.classList.toggle('on', !!u && scope === 'mem' && page !== 'chat');
-  _screenName = (scope === 'mem' || scope === 'adm') ? (MENU_DESC[page] ? MENU_DESC[page][0] : page) : '';
+  if(pv){
+    pv.classList.toggle('on', preview);
+    const t = document.getElementById('previewBarRole');
+    if(t) t.textContent = `${roleLabel(role)} 화면 미리보기 모드`;
+  }
+  if(db){
+    db.classList.toggle('on', demo);
+    const sw = document.getElementById('demoSwitch');
+    if(sw && demo) sw.innerHTML = Object.entries(ROLES).map(([k, r]) =>
+      `<button class="${k === role ? 'on' : ''}" onclick="demoLogin('${k}')" title="${escapeHtml(r.desc)}">${r.emoji} ${r.label}</button>`).join('');
+  }
+  if(fab) fab.classList.toggle('on', !!u && role !== 'guest' && scope !== 'pub' && page !== 'chat');
+  const descKey = (scope === 'adm' && page === 'dashboard') ? 'admDashboard' : page;
+  _screenName = (scope === 'mem' || scope === 'adm') ? (MENU_DESC[descKey] ? MENU_DESC[descKey][0] : page) : '';
 }
 
 /* 사이드바 메뉴 한 줄 설명 (개선안 4-3) — [메뉴명, 설명]. AI 상담 맥락 전달에도 재사용 */
 const MENU_DESC = {
   dashboard:['대시보드','우리 마을 현황과 이번 주 할 일을 한눈에 봅니다'],
+  admDashboard:['통계 대시보드','플랫폼 전체 현황과 처리 대기 항목을 확인합니다'],
+  contest:['공모·심사','공모 접수 현황과 심사 진행을 관리합니다'],
+  villages:['조합·마을 관리','참여 마을(조합)의 단계·담당자·서류를 관리합니다'],
+  users:['회원 관리','회원 승인·등급·상태를 관리합니다'],
+  inquiries:['문의 처리','상담 신청과 문의를 접수·처리합니다'],
+  content:['콘텐츠 관리','공지·FAQ·자료실 게시물을 관리합니다'],
+  logs:['시스템 로그','회원·관리자의 활동 기록을 봅니다'],
+  structure:['마을회·조합 설계','마을회와 조합의 구조·역할을 설계합니다'],
+  cost:['사업비·부품 구성','설비 규모별 사업비와 부품 구성을 계산합니다'],
+  finance:['자부담·융자 신청','자부담 비율과 융자 신청 서류를 준비합니다'],
+  vendor:['사업자(ReSCO) 선정','시공·운영 사업자를 비교하고 선정합니다'],
+  success:['20년 성공 조건','장기 운영을 위한 점검 항목을 확인합니다'],
   mypage:['마이페이지','내 정보와 출자·배당 내역을 확인합니다'],
   setup:['설립 내비게이터·청약','조합 설립 단계를 안내받고 조합원 청약을 진행합니다'],
   docs:['문서 자동 생성','정관·회의록·사업계획서 초안을 AI가 만들어 줍니다'],
@@ -1565,11 +1767,11 @@ function showGlossary(){
 }
 
 function applyUnifiedUser(user, {redirect = true, silent = false} = {}){
-  const role = (user.role === 'admin' || user.role === 'staff') ? 'admin' : 'member';
+  const role = normalizeRole(user.role, user.status);   // admin·staff→관리자 / federation→연합회 / 그 외→회원협동조합 / 승인 전→손님
   setUser({email: user.username, name: user.name || user.username, role,
            village: '', loginAt: new Date().toISOString(), unified: true});
-  if(redirect) location.hash = role === 'admin' ? '#/adm/dashboard' : '#/mem/dashboard';
-  if(!silent) toast(`${user.name || user.username}님, 사교원 통합 계정으로 로그인했습니다.`);
+  if(redirect) location.hash = roleHome(role);
+  if(!silent) toast(`${user.name || user.username}님, 사교원 통합 계정(${roleLabel(role)})으로 로그인했습니다.`);
   loadRealData();
 }
 
@@ -1678,17 +1880,21 @@ async function doLogin(){
     }catch(e){
       loginErr(`통합 계정 서버에 연결하지 못했습니다. 인터넷 연결을 확인해 주세요.<br>
         <button class="btn btn-outline btn-sm" onclick="doLogin()">다시 시도</button>
-        <button class="btn btn-ghost btn-sm" onclick="clearLoginErr();demoLogin('member')">데모로 둘러보기</button>`);
+        <button class="btn btn-ghost btn-sm" onclick="clearLoginErr();demoLogin('coop')">데모로 둘러보기</button>`);
     }
     return;
   }
-  // 데모(목업) 로그인 — sakyowon.co.kr 외 출처에서 열람 시
-  const role = (email.includes('admin') || email.endsWith('@sakyowon.org')) ? 'admin' : 'member';
+  // 데모(목업) 로그인 — sakyowon.co.kr 외 출처에서 열람 시. 아이디 문자열로 등급을 정한다
+  const role = email.includes('admin') ? 'admin'
+             : (email.includes('union') || email.includes('fed') || email.includes('연합')) ? 'federation'
+             : email.includes('guest') ? 'guest'
+             : email.endsWith('@sakyowon.org') ? 'admin' : 'coop';
   const name = email.split('@')[0];
-  setUser({email, name, role, village:'완도군 A리', loginAt:new Date().toISOString()});
+  setUser({email, name, role, village: role === 'federation' ? '햇빛소득마을 연합회' : (role === 'guest' ? '' : '완도군 A리'),
+           loginAt:new Date().toISOString()});
   closeLogin();
-  location.hash = role === 'admin' ? '#/adm/dashboard' : '#/mem/dashboard';
-  toast(`환영합니다, ${name}님 (${role === 'admin' ? '관리자' : '회원'}) — 데모 모드`);
+  location.hash = roleHome(role);
+  toast(`환영합니다, ${name}님 (${roleLabel(role)}) — 데모 모드`);
 }
 
 function toggleSignup(show){
@@ -1805,14 +2011,23 @@ async function ssoBoot(){
     if(d.ok && d.user) applyUnifiedUser(d.user, {redirect:false, silent:false});
   }catch(e){ /* 통합 계정 서버 미연결 — 조용히 무시 */ }
 }
+/* 등급별 데모 계정 — 로그인 창의 등급 버튼·체험 띠의 등급 전환 버튼이 모두 여기로 온다 */
+const DEMO_ACCOUNTS = {
+  admin:      {email:'admin@sakyowon.org', name:'관리자',       role:'admin',      village:'전체'},
+  federation: {email:'union@sakyowon.org', name:'연합회 사무국', role:'federation', village:'햇빛소득마을 연합회'},
+  coop:       {email:'member@example.com', name:'김철수',       role:'coop',       village:'완도군 A리'},
+  guest:      {email:'guest@example.com',  name:'손님',         role:'guest',      village:''},
+};
 function demoLogin(role){
-  const demoUser = role === 'admin'
-    ? {email:'admin@sakyowon.org', name:'관리자', role:'admin', village:'전체', loginAt:new Date().toISOString()}
-    : {email:'member@example.com', name:'김철수', role:'member', village:'완도군 A리', loginAt:new Date().toISOString()};
-  setUser(demoUser);
+  const acc = DEMO_ACCOUNTS[normalizeRole(role)] || DEMO_ACCOUNTS.coop;
+  try{ sessionStorage.removeItem('sv_preview_admin'); }catch(e){}
+  setUser({...acc, loginAt:new Date().toISOString()});
   closeLogin();
-  location.hash = role === 'admin' ? '#/adm/dashboard' : '#/mem/dashboard';
-  toast(`데모 ${role === 'admin' ? '관리자' : '회원'} 계정으로 로그인했습니다.`);
+  const home = roleHome(acc.role);
+  if(location.hash === home) navigate(); else location.hash = home;   // 같은 화면이면 즉시 다시 그림
+  toast(acc.role === 'guest'
+    ? '데모 손님 계정입니다 — 승인 전 회원이 보는 공개 화면만 열립니다.'
+    : `데모 ${roleLabel(acc.role)} 계정으로 로그인했습니다.`);
 }
 function logout(){
   const u = currentUser();
@@ -1831,28 +2046,67 @@ function renderTopActions(){
   const el = document.getElementById('topActions');
   const pn = document.getElementById('pubNav');
   const nt = document.getElementById('navToggle');
+  const role = u ? normalizeRole(u.role) : 'guest';
+  // 손님(미로그인·승인 전)은 공개 메뉴, 나머지 등급은 등급별 메뉴바
+  pn.style.display = role === 'guest' ? '' : 'none';
+  if(nt) nt.style.display = '';
   if(u){
-    pn.style.display = 'none';
-    if(nt) nt.style.display = 'none';
+    const sub = role === 'guest' ? '승인 대기 · 공개 메뉴만 이용'
+              : role === 'admin' ? (u.village || '전체')
+              : (u.village || '소속 미배정');
     el.innerHTML = `
       <div class="user-chip">
-        <div class="avatar ${u.role === 'admin' ? 'admin' : ''}">${u.name.slice(0,1).toUpperCase()}</div>
+        <div class="avatar ${role}">${(u.name || '?').slice(0,1).toUpperCase()}</div>
         <div>
-          <div class="user-name">${escapeHtml(u.name)}${u.unified ? '' : ' <span class="badge badge-gold" style="font-size:10px;vertical-align:middle;">데모</span>'}</div>
-          <div class="user-role">${u.role === 'admin' ? '관리자' : '회원 · ' + (u.village || '')}${u.unified ? '' : ' · 체험 모드'}</div>
+          <div class="user-name"><span class="role-tag ${role}">${ROLES[role].emoji} ${ROLES[role].label}</span>${escapeHtml(u.name)}${u.unified ? '' : ' <span class="badge badge-gold" style="font-size:10px;vertical-align:middle;">데모</span>'}</div>
+          <div class="user-role">${escapeHtml(sub)}${u.unified ? '' : ' · 체험 모드'}</div>
         </div>
       </div>
       <button class="btn btn-ghost btn-sm" onclick="logout()">로그아웃</button>
     `;
   } else {
-    pn.style.display = '';
-    if(nt) nt.style.display = '';
     el.innerHTML = `
       <button class="btn btn-outline btn-sm" onclick="openLogin()">로그인</button>
       <button class="btn btn-primary btn-sm" onclick="openLogin();toggleSignup(true)">회원가입</button>
     `;
   }
+  renderRoleNav();
 }
+
+/* 등급별 상단 메뉴바 — ROLE_MENUS의 묶음을 버튼(단일)·드롭다운(복수)으로 그린다 */
+function renderRoleNav(){
+  const el = document.getElementById('roleNav');
+  if(!el) return;
+  const u = currentUser();
+  const role = u ? normalizeRole(u.role) : 'guest';
+  if(!u || role === 'guest'){ el.innerHTML = ''; el.style.display = 'none'; return; }
+  const [scope, page] = currentRoute().split('/');
+  const cur = scope + '/' + (page || 'dashboard');
+  el.style.display = '';
+  el.innerHTML = (ROLE_MENUS[role] || []).map(([label, items], gi) => {
+    const isOn = items.some(([s, p]) => s + '/' + p === cur);
+    if(items.length === 1){
+      const [s, p, e, n] = items[0];
+      return `<div class="role-group"><button class="role-btn ${isOn ? 'on' : ''}" onclick="location.hash='#/${s}/${p}'">${e} ${n}</button></div>`;
+    }
+    return `
+      <div class="role-group">
+        <button class="role-btn ${isOn ? 'on' : ''}" onclick="toggleRoleGroup(${gi})" aria-haspopup="true">${label} <span class="caret">▾</span></button>
+        <div class="role-dd">
+          ${items.map(([s, p, e, n]) => `<button class="${s + '/' + p === cur ? 'on' : ''}" onclick="location.hash='#/${s}/${p}'"
+              title="${MENU_DESC[(s === 'adm' && p === 'dashboard') ? 'admDashboard' : p] ? escapeHtml(MENU_DESC[(s === 'adm' && p === 'dashboard') ? 'admDashboard' : p][1]) : ''}">${e} ${n}</button>`).join('')}
+        </div>
+      </div>`;
+  }).join('');
+}
+function toggleRoleGroup(i){
+  document.querySelectorAll('#roleNav .role-group').forEach((g, j) => {
+    g.classList.toggle('open', j === i && !g.classList.contains('open'));
+  });
+}
+document.addEventListener('click', e => {
+  if(!e.target.closest('.role-group')) document.querySelectorAll('.role-group.open').forEach(g => g.classList.remove('open'));
+});
 
 /* ─── Router ─── */
 function currentRoute(){
@@ -1864,13 +2118,21 @@ function navigate(){
   const u = currentUser();
   const [scope, page] = route.split('/');
 
-  // Access control
-  if(scope === 'mem' && !u){ location.hash = '#/pub/home'; openLogin(); toast('로그인이 필요합니다.'); return; }
-  if(scope === 'adm' && (!u || u.role !== 'admin')){ location.hash = '#/pub/home'; toast('관리자 권한이 필요합니다.'); return; }
+  // Access control — 등급별 허용 메뉴(ROLE_MENUS) 기준
+  if(scope !== 'pub' && !u){ location.hash = '#/pub/home'; openLogin(); toast('로그인이 필요합니다.'); return; }
+  if(!canAccess(u, scope, page || 'dashboard')){
+    const role = normalizeRole(u.role);
+    location.hash = roleHome(role);
+    toast(role === 'guest'
+      ? '가입 승인 후 이용할 수 있는 메뉴입니다. 승인 전에는 공개 메뉴만 열립니다.'
+      : `${roleLabel(role)} 등급에서는 이용할 수 없는 메뉴입니다.`);
+    return;
+  }
 
-  // 라우트 이동 시 열려 있던 모달·모바일 메뉴를 닫는다
+  // 라우트 이동 시 열려 있던 모달·모바일 메뉴·드롭다운을 닫는다
   closeDyn(); closeLogin();
   document.querySelector('.topnav-in').classList.remove('nav-open');
+  document.querySelectorAll('.role-group.open').forEach(g => g.classList.remove('open'));
 
   // Hide all views
   document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
@@ -1895,6 +2157,7 @@ function navigate(){
     if(scope === 'mem' && page === 'cost') costCalc();
   }
   updateConvenienceUI(scope, page || 'dashboard');
+  renderRoleNav();   // 상단 등급 메뉴의 현재 위치 표시 갱신
   window.scrollTo({top:0, behavior:'instant'});
 }
 window.addEventListener('hashchange', navigate);
@@ -1910,83 +2173,38 @@ function renderApp(scope, page){
   const sidebar = document.getElementById('sidebar');
   const main = document.getElementById('appMain');
 
-  if(scope === 'mem'){
-    sidebar.innerHTML = renderMemberSidebar(page);
-    main.innerHTML = renderMemberPage(page);
-  } else if(scope === 'adm'){
-    sidebar.innerHTML = renderAdminSidebar(page);
-    main.innerHTML = renderAdminPage(page);
-  }
+  const role = u ? normalizeRole(u.role) : 'guest';
+  sidebar.innerHTML = renderRoleSidebar(role, scope, page);
+  main.innerHTML = scope === 'adm' ? renderAdminPage(page) : renderMemberPage(page);
 }
 
-function renderMemberSidebar(active){
-  const groups = [
-    ['내 조합', [
-      ['dashboard','🏠','대시보드'],
-      ['mypage','👤','마이페이지'],
-    ]],
-    ['설립·건설', [
-      ['structure','👪','마을회·조합 설계'],
-      ['setup','🏗','설립 내비게이터·청약'],
-      ['cost','🧱','사업비·부품 구성'],
-      ['finance','🏦','자부담·융자 신청'],
-      ['vendor','🔍','사업자(ReSCO) 선정'],
-      ['docs','📝','문서 자동 생성'],
-      ['review','📄','서류 AI 검토'],
-      ['law','⚖️','법령·인허가'],
-    ]],
-    ['운영관리', [
-      ['power','⚡','발전·정산·배당'],
-      ['revenue','💰','수익 시뮬레이션'],
-      ['accounting','🧾','회계·세무 자동화'],
-      ['closing','📁','월마감·보고서'],
-      ['members','👥','조합원 관리'],
-      ['schedule','📅','일정·마감'],
-      ['success','🧭','20년 성공 조건'],
-    ]],
-    ['확장', [
-      ['biz','🛍','마을비즈니스'],
-      ['union','🤝','연합체·커뮤니티'],
-      ['library','📚','공지·자료실'],
-      ['chat','💬','AI 상담'],
-    ]],
-  ];
-  return groups.map(([label, items]) => `
+/* 사이드바 — 상단 메뉴바와 같은 ROLE_MENUS를 그린다. 관리자는 등급별 미리보기 바로가기가 더 붙는다 */
+function renderRoleSidebar(role, scope, active){
+  const cur = scope + '/' + active;
+  const html = (ROLE_MENUS[role] || []).map(([label, items]) => `
     <div class="side-group">
       <div class="side-label">${label}</div>
-      ${items.map(([id,e,n]) => `
-        <button class="side-item ${active===id?'on':''}" onclick="location.hash='#/mem/${id}'"
-          title="${MENU_DESC[id] ? escapeHtml(MENU_DESC[id][1]) : ''}">
+      ${items.map(([s,p,e,n]) => {
+        const dk = (s === 'adm' && p === 'dashboard') ? 'admDashboard' : p;
+        return `
+        <button class="side-item ${s+'/'+p===cur?'on':''}" onclick="location.hash='#/${s}/${p}'"
+          title="${MENU_DESC[dk] ? escapeHtml(MENU_DESC[dk][1]) : ''}">
           <span class="side-emoji">${e}</span>${n}
-        </button>
-      `).join('')}
+        </button>`; }).join('')}
     </div>
   `).join('');
-}
-
-function renderAdminSidebar(active){
-  const items = [
-    ['dashboard','📊','통계 대시보드'],
-    ['contest','🏆','공모·심사 관리'],
-    ['villages','🏘','조합·마을 관리'],
-    ['users','👤','회원 관리'],
-    ['inquiries','📮','문의 처리'],
-    ['content','📢','콘텐츠 관리'],
-    ['logs','📋','시스템 로그'],
-  ];
-  return `
+  if(role !== 'admin') return html;
+  return html + `
     <div class="side-group">
-      <div class="side-label">관리자 메뉴</div>
-      ${items.map(([id,e,n]) => `
-        <button class="side-item ${active===id?'on':''}" onclick="location.hash='#/adm/${id}'">
-          <span class="side-emoji">${e}</span>${n}
-        </button>
-      `).join('')}
-    </div>
-    <div class="side-group">
-      <div class="side-label">바로가기</div>
-      <button class="side-item" onclick="startPreview()" title="회원에게 보이는 화면을 확인합니다. 상단 띠의 버튼으로 재로그인 없이 돌아올 수 있습니다.">
-        <span class="side-emoji">👀</span>회원 화면 미리보기
+      <div class="side-label">등급별 화면 미리보기</div>
+      <button class="side-item" onclick="startPreview('coop')" title="회원협동조합 등급에게 보이는 화면을 확인합니다. 상단 띠의 버튼으로 재로그인 없이 돌아올 수 있습니다.">
+        <span class="side-emoji">🏘</span>회원협동조합 화면
+      </button>
+      <button class="side-item" onclick="startPreview('federation')" title="연합회 등급에게 보이는 화면을 확인합니다.">
+        <span class="side-emoji">🤝</span>연합회 화면
+      </button>
+      <button class="side-item" onclick="startPreview('guest')" title="승인 전 손님에게 보이는 공개 화면을 확인합니다.">
+        <span class="side-emoji">👋</span>손님 화면
       </button>
     </div>
   `;
@@ -3746,7 +3964,7 @@ function memMyPage(u){
           <tr><td style="width:140px;"><strong>이름</strong></td><td>${escapeHtml(u.name)}</td></tr>
           <tr><td><strong>이메일</strong></td><td>${escapeHtml(u.email)}</td></tr>
           <tr><td><strong>소속 마을</strong></td><td>${escapeHtml((_myVillage && _myVillage.name) || u.village || '미배정')}</td></tr>
-          <tr><td><strong>권한</strong></td><td><span class="badge badge-mute">${u.role === 'admin' ? '관리자' : '회원'}</span></td></tr>
+          <tr><td><strong>등급</strong></td><td><span class="badge badge-mute">${roleLabel(u.role)}</span></td></tr>
           <tr><td><strong>이번 로그인</strong></td><td>${loginTxt}</td></tr>
         </tbody>
       </table>
@@ -8837,7 +9055,7 @@ async function admMemberPage(key){
     if(!u){ toast('회원을 찾을 수 없습니다.'); return; }
     acct = [
       ['이름', u.name], ['이메일', u.email], ['소속 마을', u.village || '미배정'],
-      ['가입일', u.joined || '—'], ['상태', u.status], ['권한', u.role === 'admin' ? '관리자' : '회원'],
+      ['가입일', u.joined || '—'], ['상태', u.status], ['등급', roleLabel(u.role)],
     ];
     const docs = MOCK.documents.filter(d => d.village && (u.village || '').includes(d.village));
     docsPromise = Promise.resolve({docs, label:'소속 마을 관련 문서 (데모)'});
@@ -8933,10 +9151,9 @@ function editUser(email){
     body: `
       <div class="form-row"><label>이름</label><input class="input" id="eu-name" value="${escapeHtml(u.name)}"></div>
       <div class="form-row"><label>소속 마을</label><input class="input" id="eu-village" value="${escapeHtml(u.village)}"></div>
-      <div class="form-row"><label>권한</label>
+      <div class="form-row"><label>등급</label>
         <select class="select" id="eu-role">
-          <option value="member"${u.role==='member'?' selected':''}>회원</option>
-          <option value="admin"${u.role==='admin'?' selected':''}>관리자</option>
+          ${Object.entries(ROLES).map(([k, r]) => `<option value="${k}"${normalizeRole(u.role)===k?' selected':''}>${r.emoji} ${r.label} — ${r.desc}</option>`).join('')}
         </select></div>
       <div class="form-row"><label>상태</label>
         <select class="select" id="eu-status">
@@ -9524,7 +9741,7 @@ function admUsers(){
               <td>${escapeHtml(u.village)}</td>
               <td>${u.joined}</td>
               <td><span class="badge ${u.status==='승인'?'badge-success':'badge-danger'}">${u.status}</span></td>
-              <td><span class="badge badge-mute">${u.role === 'admin' ? '관리자' : '회원'}</span></td>
+              <td><span class="badge ${normalizeRole(u.role)==='admin'?'badge-gold':normalizeRole(u.role)==='federation'?'badge-info':'badge-mute'}">${roleLabel(u.role)}</span></td>
               <td class="tbl-actions">
                 <button class="btn btn-outline btn-sm" onclick="admMemberPage('${escapeJs(u.email)}')">👤 마이페이지</button>
                 ${u.status === '승인대기' ? `<button class="btn btn-primary btn-sm" onclick="approveUser('${escapeJs(u.email)}')">승인</button>` : ''}
