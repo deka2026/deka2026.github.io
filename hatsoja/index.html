@@ -1580,6 +1580,9 @@ function normalizeRole(r, status){
 }
 function roleLabel(r){ return (ROLES[normalizeRole(r)] || ROLES.guest).label; }
 function roleHome(r){ return (ROLES[normalizeRole(r)] || ROLES.guest).home; }
+/* 관리자만 편집 — 연합회는 관리 화면(조합·마을 등)을 열람만 한다 */
+function isAdminUser(){ const u = currentUser(); return !!u && normalizeRole(u.role) === 'admin'; }
+function requireAdmin(){ if(isAdminUser()) return true; toast('관리자만 할 수 있는 작업입니다. 연합회 등급은 열람만 가능합니다.'); return false; }
 /* 라우트 접근 검사 — pub은 누구나, admin은 전부, coop은 mem/* 전부, federation은 ROLE_MENUS에 적힌 것만 */
 function canAccess(u, scope, page){
   if(scope === 'pub') return true;
@@ -8788,13 +8791,17 @@ function viewVillage(name){
       <div style="margin-top:16px;">
         <div class="prog"><div class="prog-fill" style="width:${v?v.progress:0}%;"></div></div>
       </div>`,
-    foot: `<button class="btn btn-danger btn-sm" onclick="removeVillage('${escapeJs(name)}')" style="margin-right:auto;">🗑 삭제</button>
-           <button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
-           <button class="btn btn-outline" onclick="editVillage('${escapeJs(name)}')">✏ 편집</button>
-           <button class="btn btn-primary" onclick="assignManager('${escapeJs(name)}')">👤 담당자 배정</button>`
+    foot: isAdminUser()
+      ? `<button class="btn btn-danger btn-sm" onclick="removeVillage('${escapeJs(name)}')" style="margin-right:auto;">🗑 삭제</button>
+         <button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
+         <button class="btn btn-outline" onclick="editVillage('${escapeJs(name)}')">✏ 편집</button>
+         <button class="btn btn-primary" onclick="assignManager('${escapeJs(name)}')">👤 담당자 배정</button>`
+      : `<span class="text-mute text-small" style="margin-right:auto;">담당자: ${escapeHtml((v && v.manager) || '미배정')} · 열람 전용</span>
+         <button class="btn btn-primary" onclick="closeDyn()">닫기</button>`
   });
 }
 function editVillage(originalName){
+  if(!requireAdmin()) return;
   const v = MOCK.villages.find(x => x.name === originalName);
   if(!v){ toast('마을을 찾을 수 없습니다.'); return; }
   showDyn({
@@ -8857,6 +8864,7 @@ async function submitEditVillage(originalName){
   refresh();
 }
 async function removeVillage(name){
+  if(!requireAdmin()) return;
   if(!confirm(`"${name}" 마을을 삭제하시겠습니까?`)) return;
   const v = MOCK.villages.find(x => x.name === name);
   if(_realMode && v && v._srv){
@@ -8876,6 +8884,7 @@ async function removeVillage(name){
   refresh();
 }
 function assignManager(villageName){
+  if(!requireAdmin()) return;
   const v = MOCK.villages.find(x => x.name === villageName);
   if(!v) return;
   const admins = MOCK.users.filter(u => u.role === 'admin' || u.status === '승인');
@@ -8904,6 +8913,7 @@ function submitAssignManager(villageName){
   refresh();
 }
 function addVillage(){
+  if(!requireAdmin()) return;
   showDyn({
     title: '마을·조합 등록',
     body: `
@@ -9488,21 +9498,22 @@ function admContest(){
 }
 
 function admVillages(){
+  const canEdit = isAdminUser();   // 연합회는 열람 전용
   return `
     <div class="sec-head">
-      <h1>조합·마을 관리</h1>
-      <p class="sec-desc">플랫폼에 등록된 마을협동조합을 관리합니다.</p>
+      <h1>${canEdit ? '조합·마을 관리' : '조합·마을 현황'}</h1>
+      <p class="sec-desc">${canEdit ? '플랫폼에 등록된 마을협동조합을 관리합니다.' : '플랫폼에 등록된 마을협동조합의 현황·자료·리포트를 열람합니다. (등록·편집은 관리자 권한)'}</p>
     </div>
 
     ${_realMode && !MOCK.villages.some(v => v._srv) ? `
     <div class="card" style="margin-bottom:14px;background:var(--paper-soft);box-shadow:none;">
       ⓘ 서버에 등록된 마을이 아직 없습니다. 아래 표는 <b>데모 예시</b>이며,
-      "+ 마을 등록"으로 첫 마을을 등록하면 그때부터 실제 데이터로 운영됩니다.
+      ${canEdit ? '"+ 마을 등록"으로 첫 마을을 등록하면 그때부터 실제 데이터로 운영됩니다.' : '관리자가 첫 마을을 등록하면 그때부터 실제 데이터가 표시됩니다.'}
     </div>` : ''}
     <div class="card">
       <div class="card-title">
-        <h3 class="serif">🏘 등록된 마을 ${_realMode && MOCK.villages.some(v => v._srv) ? '<span class="badge badge-success">실데이터</span>' : ''}</h3>
-        <button class="btn btn-primary btn-sm" onclick="addVillage()">+ 마을 등록</button>
+        <h3 class="serif">🏘 등록된 마을 ${_realMode && MOCK.villages.some(v => v._srv) ? '<span class="badge badge-success">실데이터</span>' : ''}${canEdit ? '' : ' <span class="badge badge-mute">열람 전용</span>'}</h3>
+        ${canEdit ? '<button class="btn btn-primary btn-sm" onclick="addVillage()">+ 마을 등록</button>' : ''}
       </div>
       <table class="tbl">
         <thead><tr><th>마을명</th><th>지역</th><th>조합원</th><th>설비</th><th>진행률</th><th>단계</th><th></th></tr></thead>
