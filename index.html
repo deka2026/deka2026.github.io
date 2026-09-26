@@ -95,6 +95,10 @@
   .site-btn .name .arrow { color: var(--accent-green); font-weight: 400; }
   .site-btn .desc { font-size: 13.5px; color: var(--text-secondary); }
   .site-btn .url { margin-top: auto; padding-top: 10px; font-size: 12px; color: var(--text-muted); word-break: break-all; }
+  /* 비활성 버튼: 사이트는 그대로 두고 허브에서 연결만 막는다. 다시 켤 때는 data-href를 href로, is-disabled·aria-disabled를 지우면 된다 */
+  .site-btn.is-disabled { opacity: .45; filter: grayscale(1); cursor: not-allowed; box-shadow: none; }
+  .site-btn.is-disabled:hover, .site-btn.is-disabled:focus-visible { transform: none; box-shadow: none; border-color: var(--border-subtle); }
+  .site-btn .off { font-size: 11px; font-weight: 600; color: var(--text-muted); border: 1px solid var(--border-subtle); border-radius: 999px; padding: 1px 8px; vertical-align: middle; }
 
   .section-label {
     font-size: 13px; font-weight: 700; color: var(--accent-green);
@@ -189,9 +193,9 @@
       <span class="desc">햇빛소득마을 통합 운영 플랫폼 — 신청·진단부터 조합 설립, 정산·배당, 마을비즈니스까지 (통합 계정 로그인)</span>
       <span class="url">sakyowon.co.kr/hatsoja</span>
     </a>
-    <a class="site-btn" href="https://sakyowon.co.kr/hometown-love/" target="_blank" rel="noopener">
+    <a class="site-btn is-disabled" data-href="https://sakyowon.co.kr/hometown-love/" aria-disabled="true" tabindex="-1">
       <span class="icon">🏡</span>
-      <span class="name">고향사랑기부제 정보센터 <span class="arrow">↗</span></span>
+      <span class="name">고향사랑기부제 정보센터 <span class="off">비활성</span></span>
       <span class="desc">전남광주통합특별시 27개 시군구 운영현황·기부금 사용·답례품 안내</span>
       <span class="url">sakyowon.co.kr/hometown-love</span>
     </a>
@@ -207,9 +211,9 @@
       <span class="desc">완도 망남생활권 어촌신활력증진사업 — 사업 안내·소식·성과·문의</span>
       <span class="url">vitality.sakyowon.co.kr</span>
     </a>
-    <a class="site-btn" href="https://bid.poomasi.org" target="_blank" rel="noopener">
+    <a class="site-btn is-disabled" data-href="https://bid.poomasi.org" aria-disabled="true" tabindex="-1">
       <span class="icon">📑</span>
-      <span class="name">입찰메이트 <span class="arrow">↗</span></span>
+      <span class="name">입찰메이트 <span class="off">비활성</span></span>
       <span class="desc">나라장터 용역 제안서 자동화 — 공고 모니터링·문서 분석·제안서 작성 (기업 계정 가입)</span>
       <span class="url">bid.poomasi.org</span>
     </a>
@@ -219,9 +223,9 @@
       <span class="desc">팀러닝 자문·컨설팅 — 질문·계획안 보완·자료조사</span>
       <span class="url">sakyowon.co.kr/teamlearning-site</span>
     </a>
-    <a class="site-btn" href="https://seonamhae-grand.pages.dev/" target="_blank" rel="noopener">
+    <a class="site-btn is-disabled" data-href="https://seonamhae-grand.pages.dev/" aria-disabled="true" tabindex="-1">
       <span class="icon">🌊</span>
-      <span class="name">서남해 그랜드 <span class="arrow">↗</span></span>
+      <span class="name">서남해 그랜드 <span class="off">비활성</span></span>
       <span class="desc">전남광주 서남권 광역 관광 허브 — 지도·테마 루트·현지 정보</span>
       <span class="url">seonamhae-grand.pages.dev</span>
     </a>
