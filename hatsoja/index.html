@@ -235,6 +235,20 @@ input,select,textarea{font-family:inherit;font-size:14px;}
 .side-emoji{width:22px;text-align:center;}
 .main{min-width:0;}
 
+/* Public shell — 로그인 전 공개 페이지 사이드 메뉴 (2026-09-26) */
+.pub-shell{display:none;grid-template-columns:240px 1fr;gap:28px;max-width:1360px;margin:0 auto;padding:24px;}
+.pub-shell.on{display:grid;}
+.pub-main{min-width:0;}
+.pub-main .hero{border-radius:var(--radius);border:1px solid var(--line-soft);}
+.pub-sidebar .side-item a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;width:100%;}
+.pub-sidebar .side-cta{display:flex;flex-direction:column;gap:6px;padding:10px 12px 4px;border-top:1px solid var(--line-soft);margin-top:4px;}
+.pub-sidebar .side-cta .btn{width:100%;justify-content:center;}
+.pub-sidebar .side-note{font-size:12px;color:var(--ink-faint);padding:8px 12px 0;line-height:1.5;}
+@media (max-width:900px){
+  .pub-shell{grid-template-columns:1fr;padding:12px;}
+  .pub-sidebar{display:none;}
+}
+
 /* Cards, grids */
 .card{
   background:var(--card);border:1px solid var(--line-soft);
@@ -652,6 +666,11 @@ footer{
 </div>
 
 <!-- ═════════════════ PUBLIC VIEWS ═════════════════ -->
+
+<!-- 공개 페이지 셸: 왼쪽 사이드 메뉴 + 본문 (renderPubSidebar가 채움) -->
+<div class="pub-shell" id="pubShell">
+  <aside class="sidebar pub-sidebar" id="pubSidebar" aria-label="공개 메뉴"></aside>
+  <div class="main pub-main">
 
 <!-- HOME -->
 <section class="view" id="v-pub-home">
@@ -1274,6 +1293,9 @@ footer{
     </div>
   </div>
 </section>
+
+  </div><!-- /.pub-main -->
+</div><!-- /.pub-shell -->
 
 <!-- ═════════════════ LOGGED-IN APP (member + admin) ═════════════════ -->
 <section class="view" id="v-app">
@@ -2165,8 +2187,11 @@ function navigate(){
     const view = document.getElementById(`v-pub-${page}`);
     if(view) view.classList.add('on');
     else document.getElementById('v-pub-home').classList.add('on');
+    document.getElementById('pubShell').classList.add('on');
+    renderPubSidebar(view ? page : 'home');
     if(page === 'diagnose'){ svDiagUnit(); svRenderChecks(); }
   } else {
+    document.getElementById('pubShell').classList.remove('on');
     document.getElementById('v-app').classList.add('on');
     renderApp(scope, page || 'dashboard');
     if(scope === 'mem' && page === 'finance') finRenderDocs();
@@ -2195,6 +2220,33 @@ function renderApp(scope, page){
   const role = u ? normalizeRole(u.role) : 'guest';
   sidebar.innerHTML = renderRoleSidebar(role, scope, page);
   main.innerHTML = scope === 'adm' ? renderAdminPage(page) : renderMemberPage(page);
+}
+
+/* 공개 페이지 사이드 메뉴 — 손님 메뉴(ROLE_MENUS.guest)와 같은 항목 + 안내·로그인 CTA */
+const PUB_DESC = {
+  home:'플랫폼 소개와 로그인·진단 바로가기', about:'햇빛소득마을 사업의 구조와 취지', cases:'참여 마을들의 진행 사례', faq:'자주 묻는 질문과 답변',
+  diagnose:'무료 자가진단 · 간이 수익 계산 · 신청서 초안', join:'신청 → 승인 → 이용 절차 안내', contact:'사업 참여·조합 설립 상담 신청', privacy:'개인정보 처리방침',
+};
+function renderPubSidebar(active){
+  const box = document.getElementById('pubSidebar');
+  if(!box) return;
+  const u = currentUser();
+  const item = (p, e, n) => `<button class="side-item ${p===active?'on':''}" onclick="location.hash='#/pub/${p}'" title="${PUB_DESC[p]||''}"><span class="side-emoji">${e}</span>${n}</button>`;
+  const groups = (ROLE_MENUS.guest || []).map(([label, items]) => `
+    <div class="side-group"><div class="side-label">${label}</div>${items.map(([,p,e,n]) => item(p, e, n)).join('')}</div>`).join('');
+  const guide = `<div class="side-group"><div class="side-label">안내</div>
+    <button class="side-item" onclick="location.href='manual.html'" title="사용 설명서 (웹)"><span class="side-emoji">📖</span>이용안내</button>
+    ${item('privacy','🔒','개인정보 처리방침')}
+    <button class="side-item" onclick="location.href='tel:070-4196-4677'" title="대표전화로 바로 전화"><span class="side-emoji">📞</span>전화 상담 070-4196-4677</button>
+  </div>`;
+  const cta = u
+    ? `<div class="side-cta"><button class="btn btn-primary btn-sm" onclick="location.hash='${roleHome(u.role)}'">${ROLES[normalizeRole(u.role)].emoji} 내 화면으로 가기</button></div>
+       <div class="side-note">${escapeHtml(u.name || '')} · ${roleLabel(normalizeRole(u.role))} 등급으로 로그인 중</div>`
+    : `<div class="side-cta"><button class="btn btn-primary btn-sm" onclick="openLogin()">로그인</button>
+         <button class="btn btn-outline btn-sm" onclick="openLogin();toggleSignup(true)">회원가입 (승인제)</button>
+         <button class="btn btn-ghost btn-sm" onclick="demoLogin('coop')">👀 가입 없이 체험하기</button></div>
+       <div class="side-note">운영 단계 전까지 전면 무료 · 승인은 영업일 1~2일</div>`;
+  box.innerHTML = groups + guide + cta;
 }
 
 /* 사이드바 — 상단 메뉴바와 같은 ROLE_MENUS를 그린다. 관리자는 등급별 미리보기 바로가기가 더 붙는다 */
