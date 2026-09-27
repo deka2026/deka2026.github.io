@@ -1553,6 +1553,8 @@ const ROLE_MENUS = {
     ]],
     ['공동업무', [
       ['mem','inbox','📥','자료함'],
+      ['mem','state','📒','조합 현황'],
+      ['mem','todo','✅','할 일'],
       ['mem','docs','📝','문서 자동 생성'],
       ['mem','review','📄','서류 AI 검토'],
       ['mem','law','⚖️','법령·인허가'],
@@ -1566,12 +1568,18 @@ const ROLE_MENUS = {
     ]],
   ],
   coop: [
+    ['여기서 시작', [
+      ['mem','inbox','📥','① 자료함'],
+      ['mem','state','📒','② 우리 조합 현황'],
+      ['mem','todo','✅','③ 할 일'],
+      ['mem','docs','📤','④ 산출물 만들기'],
+      ['mem','chat','💬','⑤ 물어보기'],
+    ]],
     ['내 조합', [
-      ['mem','inbox','📥','자료함'],
       ['mem','dashboard','🏠','대시보드'],
       ['mem','mypage','👤','마이페이지'],
     ]],
-    ['설립·건설', [
+    ['깊이 보기 · 설립·건설', [
       ['mem','structure','👪','마을회·조합 설계'],
       ['mem','setup','🏗','설립 내비게이터·청약'],
       ['mem','cost','🧱','사업비·부품 구성'],
@@ -1581,7 +1589,7 @@ const ROLE_MENUS = {
       ['mem','review','📄','서류 AI 검토'],
       ['mem','law','⚖️','법령·인허가'],
     ]],
-    ['운영관리', [
+    ['깊이 보기 · 운영관리', [
       ['mem','power','⚡','발전·정산·배당'],
       ['mem','revenue','💰','수익 시뮬레이션'],
       ['mem','accounting','🧾','회계·세무 자료이관'],
@@ -1592,7 +1600,7 @@ const ROLE_MENUS = {
       ['mem','schedule','📅','일정·마감'],
       ['mem','success','🧭','20년 성공 조건'],
     ]],
-    ['확장', [
+    ['깊이 보기 · 확장', [
       ['mem','biz','🛍','마을비즈니스'],
       ['mem','taxjoin','🧮','세무 공동구매 신청'],
       ['mem','union','🤝','연합체·커뮤니티'],
@@ -1781,6 +1789,8 @@ const MENU_DESC = {
   setup:['설립 내비게이터·청약','조합 설립 단계를 안내받고 조합원 청약을 진행합니다'],
   docs:['문서 자동 생성','정관·회의록·사업계획서 초안을 AI가 만들어 줍니다'],
   review:['서류 AI 검토','작성한 서류의 누락·오류를 AI가 점검합니다'],
+  state:['우리 조합 현황','모든 화면이 읽는 값 하나. 여기서 고치면 진단·법령·할 일·서식이 함께 바뀝니다'],
+  todo:['할 일','현황과 법령·기한 규칙이 자동으로 만들어낸 목록입니다'],
   inbox:['자료함','가진 자료를 한 곳에 올리면 종류를 알아보고 이어지는 작업을 시작합니다'],
   law:['법령·인허가','우리 마을 조건으로 걸리는 법령을 자동 판정하고, 조문 근거와 함께 확인합니다'],
   power:['발전·정산·배당','발전량과 판매 수익, 조합원 배당을 관리합니다'],
@@ -2211,6 +2221,8 @@ function navigate(){
     document.getElementById('v-app').classList.add('on');
     renderApp(scope, page || 'dashboard');
     if(scope === 'mem' && page === 'inbox') inboxRender();
+    if(scope === 'mem' && page === 'state') stRender();
+    if(scope === 'mem' && page === 'todo')  todoRender();
     if(scope === 'mem' && page === 'law'){ lawFillSelects(); lawEvalNow(); }
     if(scope === 'mem' && page === 'finance') finRenderDocs();
     if(scope === 'mem' && page === 'vendor'){ venRender(); venRenderSite(); }
@@ -2304,6 +2316,8 @@ function renderMemberPage(page){
   const u = currentUser();
   switch(page){
     case 'inbox':     return memInbox();
+    case 'state':     return memState();
+    case 'todo':      return memTodo();
     case 'dashboard': return memDashboard(u);
     case 'mypage':    return memMyPage(u);
     case 'structure': return memStructure();
@@ -4526,6 +4540,187 @@ function memLaw(){
       </div>
     </div>
   `;
+}
+
+/* ==================== 원장 · 할 일 · 산출물 (2026-09-28, 3단계) ====================
+   자료함이 쌓은 확정값(원장)을 하나의 원본으로 삼아, 법령·기한 규칙이 '할 일'을 만들고
+   서식·보고서가 값을 스스로 당겨 쓴다. 화면마다 다시 입력하는 일을 없앤다. */
+
+/* 원장에 담는 항목 정의 — 자료함 추출값의 이름과 맞춘다 */
+const LEDGER_FIELDS = [
+  {k:'조합명',      label:'조합 이름',    자료:'articles'},
+  {k:'사업주체',    label:'사업주체',     자료:'registry',  opts:['협동조합','마을회','기타']},
+  {k:'소재지시군',  label:'소재지 시·군', 자료:'land',      opts:null},
+  {k:'지목',        label:'부지 지목',    자료:'land',      opts:null},
+  {k:'설치형태',    label:'설치형태',     자료:null,        opts:['수상형','지상형','건물형','영농형']},
+  {k:'설비용량kW',  label:'설비용량(kW)', 자료:'permit'},
+  {k:'선정일',      label:'선정일',       자료:'selection'},
+  {k:'허가일',      label:'허가일',       자료:'permit'},
+  {k:'동의율',      label:'주민 동의율(%)', 자료:'consent'},
+  {k:'조합원수',    label:'조합원 수',    자료:'roster'},
+];
+
+function ledgerGet(k){
+  const c = loadLedger().확정 || {};
+  return (c[k] && c[k].값 !== undefined) ? c[k].값 : '';
+}
+function ledgerSet(k, v){
+  const L = loadLedger();
+  L.확정 = L.확정 || {};
+  if(v === '' || v === null || v === undefined) delete L.확정[k];
+  else L.확정[k] = {값: v, 출처: '직접 입력', 확정일: new Date().toISOString()};
+  L.갱신일 = new Date().toISOString();
+  saveLedger(L);
+}
+
+/* ─── 기한 규칙 — 공고가 정한 3개 기한 ─── */
+function _lgD(s){ const t = Date.parse(String(s || '').replace(/\./g, '-')); return isNaN(t) ? null : new Date(t); }
+function _lgAddM(d, m){ const x = new Date(d.getTime()); x.setMonth(x.getMonth() + m); return x; }
+function _lgYmd(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+function _lgDday(d){ return Math.ceil((d - new Date()) / 86400000); }
+
+function deadlineRules(){
+  const out = [];
+  const sel = _lgD(ledgerGet('선정일'));
+  const per = _lgD(ledgerGet('허가일'));
+  if(sel && !per){                       // 허가를 이미 받았으면 이 기한은 끝난 것이다
+    const at = _lgAddM(sel, 6);
+    out.push({제목:'발전사업 허가 취득', 기한:_lgYmd(at), 남은:_lgDday(at),
+      근거:'선정일 +6개월 — 넘기면 선정이 취소될 수 있습니다',
+      할일:'허가 신청·심사에 2~3개월이 걸립니다. 첫 90일 안에 계약과 신청을 끝내세요.'});
+  }
+  if(per){
+    const at = _lgAddM(per, 12);
+    out.push({제목:'전력 판매계약 · 사용전검사', 기한:_lgYmd(at), 남은:_lgDday(at),
+      근거:'허가일 +12개월',
+      할일:'허가 당일에 전력거래 계약을 신청해 연결 용량을 먼저 확보하세요.'});
+  }
+  return out;
+}
+
+/* ─── 할 일 만들기 — 법령 판정 + 기한 + 빠진 자료 + 확인 대기 ─── */
+function buildTodos(){
+  const todos = [];
+  const v = ledgerToLawInput();
+
+  deadlineRules().forEach(function(d){
+    todos.push({급: d.남은 < 30 ? 'high' : (d.남은 < 90 ? 'mid' : 'low'),
+      묶음:'기한', 제목: d.제목,
+      한줄: d.기한 + ' 까지 · ' + (d.남은 >= 0 ? 'D-' + d.남은 : '기한 지남 ' + (-d.남은) + '일'),
+      설명: d.근거 + ' — ' + d.할일, 가기:'#/mem/schedule'});
+  });
+
+  evalLaws(v).forEach(function(r){
+    if(r.결과.수준 !== 'warn') return;
+    todos.push({급:'mid', 묶음:'법령', 제목: r.제목, 한줄: r.결과.한줄,
+      설명: r.근거 + (r.결과.주의 ? ' — ' + r.결과.주의 : ''), 가기:'#/mem/law'});
+  });
+
+  const 빠짐 = LEDGER_FIELDS.filter(function(f){ return !ledgerGet(f.k); });
+  if(빠짐.length){
+    todos.push({급: 빠짐.length > 5 ? 'high' : 'mid', 묶음:'자료', 제목:'현황에 빠진 항목 ' + 빠짐.length + '개',
+      한줄: 빠짐.slice(0,5).map(function(f){ return f.label; }).join(', ') + (빠짐.length > 5 ? ' 외' : ''),
+      설명:'자료함에 해당 서류를 올리면 자동으로 채워집니다. 직접 입력해도 됩니다.', 가기:'#/mem/inbox'});
+  }
+
+  const ps = (loadLedger().제안 || []).length;
+  if(ps){
+    todos.push({급:'high', 묶음:'확인', 제목:'확인 기다리는 값 ' + ps + '건',
+      한줄:'자료에서 읽어낸 값이 확정을 기다립니다',
+      설명:'원본과 맞는지 보고 확정해야 원장·서식·보고서에 반영됩니다.', 가기:'#/mem/inbox'});
+  }
+
+  const 순 = {high:0, mid:1, low:2};
+  todos.sort(function(a, b){ return 순[a.급] - 순[b.급]; });
+  return todos;
+}
+
+function todoCardHtml(t){
+  const cls = {high:'badge-danger', mid:'badge-warn', low:'badge-info'}[t.급];
+  const lab = {high:'지금', mid:'곧', low:'여유'}[t.급];
+  return '<div class="card" style="margin-bottom:10px;">'
+    + '<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline;">'
+    + '<h3 class="serif" style="margin:0;font-size:16px;">' + escapeHtml(t.제목) + '</h3>'
+    + '<span class="badge ' + cls + '">' + lab + ' · ' + escapeHtml(t.묶음) + '</span></div>'
+    + '<p style="margin:6px 0 4px;font-size:13.5px;"><b>' + escapeHtml(t.한줄) + '</b></p>'
+    + '<p class="text-mute" style="font-size:12.5px;margin:0 0 10px;">' + escapeHtml(t.설명) + '</p>'
+    + '<a class="btn btn-outline btn-sm" href="' + t.가기 + '">바로 가기</a></div>';
+}
+
+/* ─── 화면: 우리 조합 현황(원장) ─── */
+function memState(){
+  return '<div class="sec-head"><h1>우리 조합 현황</h1>'
+    + '<p class="sec-desc">모든 화면이 여기 있는 값 하나만 읽습니다. 여기서 고치면 진단·법령 판정·할 일·서식이 함께 바뀝니다.</p></div>'
+    + '<div class="card"><div class="card-title"><h3 class="serif">📒 원장</h3>'
+    + '<a class="btn btn-outline btn-sm" href="#/mem/inbox">📥 자료함에서 채우기</a></div>'
+    + '<div id="stForm"></div></div>'
+    + '<div class="card mt-20"><h3 class="serif">⚖️ 이 현황에 걸리는 법령</h3><div id="stLaw"></div></div>';
+}
+function stRender(){
+  const box = document.getElementById('stForm');
+  if(box){
+    const L = loadLedger();
+    box.innerHTML = '<table class="tbl"><thead><tr><th style="width:170px;">항목</th><th>값</th><th style="width:150px;">출처</th></tr></thead><tbody>'
+      + LEDGER_FIELDS.map(function(f){
+          const cur = (L.확정 || {})[f.k];
+          const val = cur ? String(cur.값) : '';
+          const input = f.opts
+            ? '<select class="select" onchange="stSave(\'' + f.k + '\', this.value)"><option value="">(없음)</option>'
+              + f.opts.map(function(o){ return '<option value="' + o + '"' + (o === val ? ' selected' : '') + '>' + o + '</option>'; }).join('')
+              + '</select>'
+            : '<input class="input" value="' + escapeHtml(val) + '" onchange="stSave(\'' + f.k + '\', this.value)">';
+          return '<tr><td><b>' + escapeHtml(f.label) + '</b></td><td>' + input + '</td>'
+            + '<td class="text-mute" style="font-size:12px;">' + (cur ? escapeHtml(cur.출처) : '—') + '</td></tr>';
+        }).join('')
+      + '</tbody></table>'
+      + '<p class="text-mute" style="font-size:12.5px;margin-top:10px;">갱신 '
+      + (L.갱신일 ? escapeHtml(String(L.갱신일).slice(0,10)) : '없음') + '</p>';
+  }
+  const lb = document.getElementById('stLaw');
+  if(lb){
+    const rs = evalLaws(ledgerToLawInput());
+    lb.innerHTML = rs.length ? rs.map(lawCardHtml).join('')
+      : '<p class="text-mute">용량·소재지·지목을 채우면 걸리는 법령이 표시됩니다.</p>';
+  }
+}
+function stSave(k, v){ ledgerSet(k, String(v).trim()); stRender(); toast('현황을 고쳤습니다.'); }
+
+/* ─── 화면: 할 일 ─── */
+function memTodo(){
+  return '<div class="sec-head"><h1>할 일</h1>'
+    + '<p class="sec-desc">현황과 법령·기한 규칙이 만들어낸 목록입니다. 사람이 적어 넣은 것이 아닙니다.</p></div>'
+    + '<div id="todoBox"></div>';
+}
+function todoRender(){
+  const box = document.getElementById('todoBox');
+  if(!box) return;
+  const ts = buildTodos();
+  if(!ts.length){ box.innerHTML = '<div class="card"><p class="text-mute" style="margin:0;">지금 할 일이 없습니다. 현황이 비어 있으면 <a href="#/mem/inbox">자료함</a>부터 채우세요.</p></div>'; return; }
+  const n = function(g){ return ts.filter(function(t){ return t.급 === g; }).length; };
+  box.innerHTML = '<div class="grid grid-3" style="margin-bottom:14px;">'
+    + '<div class="kpi"><div class="kpi-n">' + n('high') + '</div><div class="kpi-l">지금</div></div>'
+    + '<div class="kpi"><div class="kpi-n">' + n('mid') + '</div><div class="kpi-l">곧</div></div>'
+    + '<div class="kpi"><div class="kpi-n">' + n('low') + '</div><div class="kpi-l">여유</div></div></div>'
+    + ts.map(todoCardHtml).join('');
+}
+
+/* ─── 산출물: 서식이 원장에서 값을 당겨 쓴다 ─── */
+const DOC_PREFILL = {
+  coop_name: '조합명', capacity: '설비용량kW', location: '소재지시군',
+  kind: '설치형태', members: '조합원수', permit_date: '허가일', select_date: '선정일',
+};
+function ledgerPrefillForm(){
+  const form = document.getElementById('dfForm');
+  if(!form) return 0;
+  let n = 0;
+  form.querySelectorAll('[data-k]').forEach(function(el){
+    if(el.value) return;
+    const f = DOC_PREFILL[el.getAttribute('data-k')];
+    if(!f) return;
+    const v = ledgerGet(f);
+    if(v){ el.value = v; n++; }
+  });
+  return n;
 }
 
 /* ==================== 자료함 화면 (2026-09-28, 2단계) ==================== */
@@ -8087,6 +8282,10 @@ function startDoc(name){
         `).join('')}
       </div>
     </div>`;
+  setTimeout(function(){
+    const n = ledgerPrefillForm();
+    if(n) toast('우리 조합 현황에서 ' + n + '개 항목을 자동으로 채웠습니다.');
+  }, 60);
   const foot = `
     <button class="btn btn-outline" onclick="closeDyn()">취소</button>
     <button class="btn btn-primary" onclick="generateDoc('${escapeJs(name)}')">✨ AI로 초안 생성</button>
