@@ -1552,6 +1552,7 @@ const ROLE_MENUS = {
       ['adm','taxkpi','📈','세무 파일럿 KPI'],
     ]],
     ['공동업무', [
+      ['mem','inbox','📥','자료함'],
       ['mem','docs','📝','문서 자동 생성'],
       ['mem','review','📄','서류 AI 검토'],
       ['mem','law','⚖️','법령·인허가'],
@@ -1566,6 +1567,7 @@ const ROLE_MENUS = {
   ],
   coop: [
     ['내 조합', [
+      ['mem','inbox','📥','자료함'],
       ['mem','dashboard','🏠','대시보드'],
       ['mem','mypage','👤','마이페이지'],
     ]],
@@ -1779,6 +1781,7 @@ const MENU_DESC = {
   setup:['설립 내비게이터·청약','조합 설립 단계를 안내받고 조합원 청약을 진행합니다'],
   docs:['문서 자동 생성','정관·회의록·사업계획서 초안을 AI가 만들어 줍니다'],
   review:['서류 AI 검토','작성한 서류의 누락·오류를 AI가 점검합니다'],
+  inbox:['자료함','가진 자료를 한 곳에 올리면 종류를 알아보고 이어지는 작업을 시작합니다'],
   law:['법령·인허가','우리 마을 조건으로 걸리는 법령을 자동 판정하고, 조문 근거와 함께 확인합니다'],
   power:['발전·정산·배당','발전량과 판매 수익, 조합원 배당을 관리합니다'],
   revenue:['수익 시뮬레이션','설비 규모별 예상 수익을 계산해 봅니다'],
@@ -2207,6 +2210,7 @@ function navigate(){
     document.getElementById('pubShell').classList.remove('on');
     document.getElementById('v-app').classList.add('on');
     renderApp(scope, page || 'dashboard');
+    if(scope === 'mem' && page === 'inbox') inboxRender();
     if(scope === 'mem' && page === 'law'){ lawFillSelects(); lawEvalNow(); }
     if(scope === 'mem' && page === 'finance') finRenderDocs();
     if(scope === 'mem' && page === 'vendor'){ venRender(); venRenderSite(); }
@@ -2299,6 +2303,7 @@ function renderRoleSidebar(role, scope, active){
 function renderMemberPage(page){
   const u = currentUser();
   switch(page){
+    case 'inbox':     return memInbox();
     case 'dashboard': return memDashboard(u);
     case 'mypage':    return memMyPage(u);
     case 'structure': return memStructure();
@@ -4522,6 +4527,307 @@ function memLaw(){
     </div>
   `;
 }
+
+/* ==================== 자료함 화면 (2026-09-28, 2단계) ==================== */
+function memInbox(){
+  return '<div class="sec-head">'
+    + '<h1>자료함</h1>'
+    + '<p class="sec-desc">가진 자료를 <b>여기 한 곳에만</b> 올리면 됩니다. 어떤 자료인지 알아보고, 이어지는 작업을 대신 시작합니다.'
+    + ' 메뉴를 돌아다니지 않아도 됩니다.</p></div>'
+
+    + '<div class="card">'
+    + '<div class="card-title"><h3 class="serif">📥 자료 올리기</h3>'
+    + '<span class="badge badge-info">' + DOC_KINDS.length + '가지 자료를 알아봅니다</span></div>'
+    + '<div id="inboxDrop" style="border:2px dashed var(--line);border-radius:12px;padding:26px;text-align:center;cursor:pointer;"'
+    + ' onclick="document.getElementById(\'inboxFile\').click()"'
+    + ' ondragover="event.preventDefault();this.style.borderColor=\'var(--brand)\';"'
+    + ' ondragleave="this.style.borderColor=\'var(--line)\';"'
+    + ' ondrop="event.preventDefault();this.style.borderColor=\'var(--line)\';inboxAddFiles(event.dataTransfer.files);">'
+    + '<div style="font-size:30px;line-height:1;">📂</div>'
+    + '<p style="margin:10px 0 4px;font-weight:600;">여기로 끌어다 놓거나 눌러서 고르세요</p>'
+    + '<p class="text-mute" style="font-size:13px;margin:0;">통장 거래내역 · 한전 정산명세 · REMS 발전량 · 허가증 · 선정 공문 · 주민동의서 ·'
+    + ' 회의록 · 토지대장 · 견적서 · 정관 · 등기부 · 세금계산서 · 조합원 명부</p>'
+    + '<input type="file" id="inboxFile" multiple style="display:none;" onchange="inboxAddFiles(this.files)">'
+    + '</div>'
+    + '<div style="background:var(--paper-soft);border-radius:8px;padding:10px 12px;margin-top:12px;font-size:13px;">'
+    + '<b>🔒 확정하기 전에는 장부에 들어가지 않습니다.</b> 자동으로 읽어낸 값은 모두 <span class="badge badge-warn">제안</span> 으로만 쌓이고,'
+    + ' 눈으로 확인하고 <b>확정</b>을 눌러야 원장에 반영됩니다. 금액과 날짜는 반드시 원본과 맞춰 보세요.</div>'
+    + '</div>'
+
+    + '<div class="card mt-20"><div class="card-title"><h3 class="serif">📋 올린 자료</h3>'
+    + '<button class="btn btn-outline btn-sm" onclick="inboxClear()">전체 비우기</button></div>'
+    + '<div id="inboxList"></div></div>'
+
+    + '<div class="card mt-20"><div class="card-title"><h3 class="serif">🕵️ 확인 기다리는 값</h3>'
+    + '<span class="badge badge-warn">확정 전</span></div>'
+    + '<p class="text-mute" style="font-size:13px;margin-top:0;">자료에서 읽어낸 값입니다. 원본과 맞는지 보고 확정하세요.</p>'
+    + '<div id="inboxProps"></div></div>'
+
+    + '<div class="card mt-20"><h3 class="serif">📖 어떤 자료를 올리면 무엇이 되나</h3>'
+    + '<table class="tbl"><thead><tr><th style="width:150px;">자료</th><th style="width:170px;">읽어내는 것</th><th>이어지는 작업</th></tr></thead><tbody>'
+    + DOC_KINDS.map(function(k){
+        return '<tr><td><b>' + escapeHtml(k.이름) + '</b>'
+          + (k.민감 ? ' <span class="badge badge-danger" style="font-size:10px;">개인정보</span>' : '')
+          + '<div class="text-mute" style="font-size:11.5px;">' + k.ext.join(' · ') + '</div></td>'
+          + '<td class="text-mute" style="font-size:12.5px;">' + escapeHtml(k.필드.join(', ')) + '</td>'
+          + '<td style="font-size:12.5px;">' + k.작업.map(function(w){ return '→ ' + escapeHtml(w); }).join('<br>') + '</td></tr>';
+      }).join('')
+    + '</tbody></table></div>';
+}
+
+function inboxAddFiles(files){
+  if(!files || !files.length) return;
+  const list = loadInbox();
+  let 불확실 = 0;
+  Array.prototype.forEach.call(files, function(f){
+    const c = classifyFile(f.name);
+    if(c.불확실) 불확실++;
+    list.unshift({
+      id: 'f' + Date.now() + Math.floor(Math.random() * 1000),
+      name: f.name, size: f.size, kind: c.kind ? c.kind.id : '',
+      불확실: !!c.불확실, 상태: '대기', 때: new Date().toISOString()
+    });
+  });
+  saveInbox(list);
+  inboxRender();
+  toast(files.length + '건을 받았습니다.' + (불확실 ? ' ' + 불확실 + '건은 종류를 확인해 주세요.' : ''));
+}
+
+function inboxSetKind(fid, kid){
+  const list = loadInbox();
+  const it = list.filter(function(x){ return x.id === fid; })[0];
+  if(!it) return;
+  it.kind = kid; it.불확실 = false;
+  saveInbox(list); inboxRender();
+}
+function inboxRemove(fid){ saveInbox(loadInbox().filter(function(x){ return x.id !== fid; })); inboxRender(); }
+function inboxClear(){
+  if(!confirm('올린 자료 목록을 모두 비웁니다. 계속할까요?')) return;
+  saveInbox([]); inboxRender();
+}
+
+/* 처리 — 서버 파싱 엔드포인트가 생기면 자동으로 쓰고, 없으면 우아하게 폴백한다. */
+async function inboxProcess(fid){
+  const list = loadInbox();
+  const it = list.filter(function(x){ return x.id === fid; })[0];
+  if(!it) return;
+  const k = docKindById(it.kind);
+  if(!k){ toast('자료 종류를 먼저 골라 주세요.'); return; }
+  it.상태 = '처리중'; saveInbox(list); inboxRender();
+
+  let ok = false;
+  try{
+    const res = await fetch('/api/docs/ingest', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({kind: it.kind, name: it.name})
+    });
+    if(res.ok){
+      const d = await res.json().catch(function(){ return null; });
+      if(d && d.fields){
+        Object.keys(d.fields).forEach(function(f){ addProposal(f, d.fields[f], it.name, '서버 추출'); });
+        ok = true;
+      }
+    }
+  }catch(e){ /* 서버 미배치 — 폴백 */ }
+
+  const l2 = loadInbox();
+  const i2 = l2.filter(function(x){ return x.id === fid; })[0];
+  if(i2){ i2.상태 = ok ? '완료' : '대기(수기)'; saveInbox(l2); }
+  inboxRender();
+  if(!ok){
+    _inboxManual = {kindId: k.id, fileName: it.name};
+    showDyn({
+      title: k.이름 + ' — 값 직접 넣기',
+      sub: '서버 자동판독이 아직 없어 수기로 받습니다',
+      body: '<p class="text-mute" style="margin-top:0;">문서를 자동으로 읽는 서버 기능이 아직 붙지 않았습니다.'
+        + ' 아래 값만 넣어 주시면 이어지는 작업은 그대로 돌아갑니다.</p>'
+        + k.필드.map(function(f, i){
+            return '<div class="form-row"><label>' + escapeHtml(f) + '</label>'
+              + '<input class="input" id="mx-' + i + '" placeholder="' + escapeHtml(f) + '"></div>';
+          }).join('')
+        + '<p class="text-mute" style="font-size:12.5px;">넣은 값은 <b>제안</b>으로 쌓이고, 확정을 눌러야 원장에 들어갑니다.</p>',
+      foot: '<button class="btn btn-outline" onclick="closeDyn()">취소</button>'
+          + '<button class="btn btn-primary" onclick="inboxManualSave()">제안으로 넣기</button>'
+    });
+  }
+}
+
+let _inboxManual = null;
+function inboxManualSave(){
+  if(!_inboxManual) return closeDyn();
+  const k = docKindById(_inboxManual.kindId);
+  if(!k) return closeDyn();
+  let n = 0;
+  k.필드.forEach(function(f, i){
+    const el = document.getElementById('mx-' + i);
+    if(el && el.value.trim()){ addProposal(f, el.value.trim(), _inboxManual.fileName, '수기 입력'); n++; }
+  });
+  closeDyn(); _inboxManual = null; inboxRender();
+  toast(n ? n + '건을 제안에 넣었습니다.' : '넣은 값이 없습니다.');
+}
+
+function inboxRender(){
+  const box = document.getElementById('inboxList');
+  if(box){
+    const list = loadInbox();
+    box.innerHTML = list.length ? '<table class="tbl"><thead><tr><th>파일</th><th style="width:170px;">종류</th>'
+      + '<th style="width:100px;">상태</th><th style="width:150px;"></th></tr></thead><tbody>'
+      + list.map(function(it){
+          const k = docKindById(it.kind);
+          return '<tr><td><b>' + escapeHtml(it.name) + '</b>'
+            + '<div class="text-mute" style="font-size:11.5px;">' + Math.max(1, Math.round((it.size||0)/1024)) + ' KB</div></td>'
+            + '<td><select class="select" style="font-size:12.5px;" onchange="inboxSetKind(\'' + it.id + '\', this.value)">'
+            + '<option value="">(고르세요)</option>'
+            + DOC_KINDS.map(function(d){
+                return '<option value="' + d.id + '"' + (d.id === it.kind ? ' selected' : '') + '>' + escapeHtml(d.이름) + '</option>';
+              }).join('')
+            + '</select>'
+            + (it.불확실 ? '<div class="text-mute" style="font-size:11.5px;color:var(--danger);">종류를 확인해 주세요</div>' : '')
+            + '</td>'
+            + '<td><span class="badge ' + (it.상태 === '완료' ? 'badge-success' : 'badge-info') + '">' + escapeHtml(it.상태) + '</span></td>'
+            + '<td><button class="btn btn-primary btn-sm" onclick="inboxProcess(\'' + it.id + '\')">처리</button> '
+            + '<button class="btn btn-outline btn-sm" onclick="inboxRemove(\'' + it.id + '\')">삭제</button></td></tr>'
+            + (k ? '<tr><td colspan="4" class="text-mute" style="font-size:12px;padding-top:0;">→ ' + k.작업.map(escapeHtml).join(' · ') + '</td></tr>' : '');
+        }).join('')
+      + '</tbody></table>'
+      : '<p class="text-mute">아직 올린 자료가 없습니다.</p>';
+  }
+  const pbox = document.getElementById('inboxProps');
+  if(pbox){
+    const L = loadLedger();
+    const ps = L.제안 || [];
+    pbox.innerHTML = ps.length ? '<table class="tbl"><thead><tr><th style="width:160px;">항목</th><th>값</th>'
+      + '<th style="width:150px;">출처</th><th style="width:150px;"></th></tr></thead><tbody>'
+      + ps.map(function(p){
+          return '<tr><td><b>' + escapeHtml(p.field) + '</b></td>'
+            + '<td>' + escapeHtml(String(p.value)) + ' <span class="badge badge-warn">제안</span></td>'
+            + '<td class="text-mute" style="font-size:12px;">' + escapeHtml(p.src) + '<br>' + escapeHtml(p.note) + '</td>'
+            + '<td><button class="btn btn-primary btn-sm" onclick="inboxConfirm(\'' + p.id + '\')">확정</button> '
+            + '<button class="btn btn-outline btn-sm" onclick="inboxReject(\'' + p.id + '\')">버림</button></td></tr>';
+        }).join('')
+      + '</tbody></table>'
+      : '<p class="text-mute">확인을 기다리는 값이 없습니다.</p>';
+  }
+}
+function inboxConfirm(pid){ if(confirmProposal(pid)){ inboxRender(); toast('원장에 확정했습니다.'); } }
+function inboxReject(pid){ rejectProposal(pid); inboxRender(); toast('버렸습니다.'); }
+
+/* ==================== 자료함 · 원장 (2026-09-28 신설, 2단계) ====================
+   이용자가 메뉴를 돌지 않고 가진 자료를 한 곳에 넣으면,
+   분류 → 추출 → 검증 → 사람 확인 을 거쳐 '원장'에 쌓이고 여러 작업이 이어진다.
+   ★ 원칙: AI·자동추출 결과는 전부 '제안' 상태로만 들어간다. 사람이 확정해야 원장에 반영된다. */
+
+const STORE_INBOX  = 'sunvillage_auto_inbox';    // 올린 자료 목록
+const STORE_LEDGER = 'sunvillage_auto_ledger';   // 조합 현황(원장)
+
+/* 자료 유형 사전 — 파일명·확장자로 1차 분류한다(무료·즉시).
+   ext: 허용 확장자, kw: 파일명 키워드, 필드: 이 자료에서 뽑을 것, 작업: 뒤따르는 일 */
+const DOC_KINDS = [
+  { id:'bank',      이름:'통장 거래내역',   ext:['csv','txt','xls','xlsx'], kw:['통장','거래내역','입출금','계좌','거래명세'],
+    필드:['거래일','적요','입금','출금','잔액'],
+    작업:['회계 기장 자동 분류','월마감','배분 기준액 대조','월간 운영보고서'], 파싱:'client' },
+  { id:'kepco',     이름:'한전 전력거래 명세', ext:['csv','xls','xlsx','pdf'], kw:['한전','전력거래','전력대금','정산금','판매대금','smp','rec'],
+    필드:['정산월','발전량kWh','SMP','REC','정산금액'],
+    작업:['발전대장 기입','수익 실적','배분 기준액','대시보드'], 파싱:'client' },
+  { id:'rems',      이름:'REMS 발전량',      ext:['csv','xls','xlsx'], kw:['rems','발전량','시간별','일별발전'],
+    필드:['일자','발전량kWh','이용률'],
+    작업:['발전일별 누적','이상감지(무발전·급락·이용률)','알림'], 파싱:'client' },
+  { id:'permit',    이름:'발전사업 허가증',   ext:['pdf','jpg','jpeg','png','hwp','hwpx'], kw:['허가증','발전사업허가','허가서'],
+    필드:['허가일','허가번호','설비용량','허가권자'],
+    작업:['허가일 확정','허가+12개월 기한 3종 자동계산','일정 반영'], 파싱:'server' },
+  { id:'selection', 이름:'선정 통보 공문',    ext:['pdf','hwp','hwpx','jpg','png'], kw:['선정','통보','공문','결과알림','선정결과'],
+    필드:['선정일','사업명','통보기관'],
+    작업:['선정일 확정','선정+6개월 허가 기한','첫 90일 로드맵'], 파싱:'server' },
+  { id:'consent',   이름:'주민동의서',       ext:['pdf','xlsx','xls','jpg','png'], kw:['동의서','주민동의','서명부'],
+    필드:['총 주민수','동의 인원','동의율'],
+    작업:['동의율 산정','배점 계산(10 + (동의율−70)/30×5)','신청 적격 판정'], 파싱:'server' },
+  { id:'minutes',   이름:'총회 회의록',      ext:['pdf','hwp','hwpx','docx'], kw:['총회','회의록','의사록','창립총회'],
+    필드:['개최일','의결사항','참석/의결 정족수'],
+    작업:['총회의결서 배점 10점','정관변경·업종추가 판정','서식 자동채움'], 파싱:'server' },
+  { id:'land',      이름:'토지대장·지적도',  ext:['pdf','jpg','png'], kw:['토지대장','지적','임야도','등기사항','토지이용계획'],
+    필드:['소재지','지목','면적','소유구분'],
+    작업:['농지/산지/수면 갈래','인허가 경로','영농형 가능성','법령 판정 갱신'], 파싱:'server' },
+  { id:'quote',     이름:'사업자 견적서',    ext:['pdf','xlsx','hwp','hwpx'], kw:['견적','입찰','제안서','resco','시공'],
+    필드:['업체명','총액','단가','보증조건'],
+    작업:['단가 비교','100점 평가표','사업비 내역서'], 파싱:'server' },
+  { id:'articles',  이름:'조합 정관',        ext:['pdf','hwp','hwpx','docx'], kw:['정관'],
+    필드:['설립일','사업 범위','출자 1좌 금액','배당 규정'],
+    작업:['사업 범위 확인','업종 추가 필요 판정','서식 자동채움'], 파싱:'server' },
+  { id:'registry',  이름:'법인 등기부등본',  ext:['pdf'], kw:['등기부','등기사항전부','법인등기'],
+    필드:['법인명','등기일','목적사업','임원'],
+    작업:['법인격 확정','법령 판정 갱신','변경등기 기한 점검'], 파싱:'server' },
+  { id:'invoice',   이름:'세금계산서·영수증', ext:['pdf','jpg','png','xlsx','csv'], kw:['계산서','세금계산서','영수증','증빙'],
+    필드:['작성일','공급가액','세액','거래처'],
+    작업:['매입세액 집계','비용 분류','부가세·법인세 자료'], 파싱:'server' },
+  { id:'roster',    이름:'조합원 명부',      ext:['xlsx','xls','csv'], kw:['명부','조합원','출자자'],
+    필드:['성명','출자좌수','출자금','가입일'],
+    작업:['출자금 집계','배당명세','원천징수'], 파싱:'client', 민감:true },
+];
+
+function docKindById(id){ return DOC_KINDS.filter(k => k.id === id)[0] || null; }
+
+/* 1단 분류 — 파일명·확장자만 본다. 확신이 없으면 null 을 돌려주고 사람에게 묻는다. */
+function classifyFile(name){
+  const n = String(name || '').toLowerCase();
+  const ext = n.indexOf('.') >= 0 ? n.split('.').pop() : '';
+  let best = null, bestScore = 0;
+  DOC_KINDS.forEach(k => {
+    let sc = 0;
+    if(k.ext.indexOf(ext) !== -1) sc += 1;
+    k.kw.forEach(w => { if(n.indexOf(w) !== -1) sc += 3; });
+    if(sc > bestScore){ bestScore = sc; best = k; }
+  });
+  return bestScore >= 3 ? {kind: best, score: bestScore} : {kind: best, score: bestScore, 불확실: true};
+}
+
+/* 원장 읽기/쓰기. 확정값과 제안값을 분리해 담는다. */
+function loadLedger(){
+  const o = _loadObj(STORE_LEDGER);
+  return o || {확정:{}, 제안:[], 갱신일:null};
+}
+function saveLedger(L){ _save(STORE_LEDGER, L); }
+
+/* 추출 제안 한 건 추가 — 사람이 확정하기 전까지는 원장 본문에 안 들어간다. */
+function addProposal(field, value, src, note){
+  const L = loadLedger();
+  L.제안 = L.제안 || [];
+  L.제안.push({id:'p'+Date.now()+Math.floor(Math.random()*1000), field, value, src, note: note||'', 때: new Date().toISOString()});
+  saveLedger(L);
+}
+function confirmProposal(pid){
+  const L = loadLedger();
+  const p = (L.제안 || []).filter(x => x.id === pid)[0];
+  if(!p) return false;
+  L.확정 = L.확정 || {};
+  L.확정[p.field] = {값: p.value, 출처: p.src, 확정일: new Date().toISOString()};
+  L.제안 = L.제안.filter(x => x.id !== pid);
+  L.갱신일 = new Date().toISOString();
+  saveLedger(L);
+  return true;
+}
+function rejectProposal(pid){
+  const L = loadLedger();
+  L.제안 = (L.제안 || []).filter(x => x.id !== pid);
+  saveLedger(L);
+}
+
+/* 원장 확정값을 법령 규칙이 먹는 형태로 변환 */
+function ledgerToLawInput(){
+  const c = loadLedger().확정 || {};
+  const g = k => (c[k] && c[k].값 !== undefined) ? c[k].값 : undefined;
+  return {
+    capacityKw: Number(g('설비용량kW')) || 0,
+    sigun: g('소재지시군') || '',
+    landKind: g('지목') || '',
+    orgType: g('사업주체') || '협동조합',
+    plantType: g('설치형태') || '',
+    허가일: g('허가일'), 선정일: g('선정일'), 동의율: g('동의율'),
+  };
+}
+
+/* 자료함 목록 */
+function loadInbox(){ return _loadArr(STORE_INBOX) || []; }
+function saveInbox(a){ _save(STORE_INBOX, a); }
 
 /* ==================== 법령 규칙 엔진 (2026-09-28 신설) ====================
    법령을 '읽을거리'가 아니라 '실행되는 규칙'으로 둔다.
