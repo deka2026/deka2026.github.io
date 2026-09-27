@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>사교원 데이터 저장소 — 사회혁신교육원 사회적협동조합</title>
+<meta name="theme-color" content="#4a6741">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%234a6741'/><text x='16' y='22' text-anchor='middle' font-size='16' fill='%23FAF6EC'>▦</text></svg>">
+<style>
+:root{
+  --paper:#FAF6EC; --paper-soft:#F1EBD9; --card:#FFFFFF;
+  --ink:#1C2621; --ink-soft:#4F5A50; --ink-faint:#8B9188;
+  --green-900:#0D3B2C; --green-700:#2C5842; --green-600:#4A6741; --green-500:#6B8560; --green-100:#DBE4D0; --green-50:#EDF2E5;
+  --gold-600:#B47D14; --gold-100:#F6EAC9; --danger:#B03A3A; --success:#2E8B57;
+  --line:#D9D2C0; --line-soft:#EBE5D5;
+  --shadow-sm:0 1px 2px rgba(28,38,33,.05), 0 3px 10px rgba(28,38,33,.05);
+  --shadow-md:0 3px 8px rgba(28,38,33,.07), 0 14px 32px rgba(28,38,33,.10);
+  --radius:14px; --radius-sm:10px;
+  --font-serif:'Nanum Myeongjo', Georgia, 'Times New Roman', serif;
+  --font-sans:'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,'Malgun Gothic',sans-serif;
+  --mono:ui-monospace,'Cascadia Mono','D2Coding',Consolas,monospace;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-sans);font-size:14.5px;line-height:1.6;}
+a{color:var(--green-700);text-decoration:none;}
+button{font-family:inherit;cursor:pointer;}
+input,select,textarea{font-family:inherit;font-size:14px;}
+.hidden{display:none !important;}
+.mono{font-family:var(--mono);font-size:12.5px;}
+
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--ink-soft);margin-bottom:5px;}
+.field input,.field select,.field textarea{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:var(--radius-sm);background:#fff;color:var(--ink);}
+.field input:focus,.field select:focus,.field textarea:focus{outline:2px solid var(--green-100);border-color:var(--green-500);}
+.field .hint{font-size:12px;color:var(--ink-faint);margin-top:4px;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:600;white-space:nowrap;}
+.btn-primary{background:var(--green-700);color:#fff;}
+.btn-primary:hover{background:var(--green-900);}
+.btn-primary:disabled{opacity:.55;cursor:default;}
+.btn-ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--line);}
+.btn-ghost:hover{background:var(--green-50);color:var(--green-700);}
+.btn-danger{background:transparent;color:var(--danger);border:1px solid #E5C9C9;}
+.btn-danger:hover{background:#F9ECEC;}
+.btn-sm{padding:6px 11px;font-size:13px;}
+.btn-xs{padding:3px 8px;font-size:12px;border-radius:7px;}
+.msg{margin-top:12px;padding:10px 12px;border-radius:var(--radius-sm);font-size:13.5px;display:none;}
+.msg.error{display:block;background:#F9ECEC;color:var(--danger);}
+.msg.okay{display:block;background:var(--green-50);color:var(--green-700);}
+.loading{min-height:100vh;display:flex;align-items:center;justify-content:center;color:var(--ink-faint);}
+
+/* 로그인 */
+#login-view{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.login-card{width:100%;max-width:400px;background:var(--card);border:1px solid var(--line-soft);border-radius:var(--radius);box-shadow:var(--shadow-md);padding:36px 32px;}
+.login-card .logo{text-align:center;margin-bottom:24px;}
+.login-card .logo .mark{display:inline-flex;width:52px;height:52px;border-radius:50%;background:var(--green-600);color:var(--paper);font-size:22px;align-items:center;justify-content:center;margin-bottom:10px;}
+.login-card h1{font-family:var(--font-serif);font-size:21px;margin:0;color:var(--green-900);}
+.login-card .sub{font-size:13px;color:var(--ink-faint);margin-top:4px;}
+.login-card form button[type=submit]{width:100%;margin-top:6px;justify-content:center;}
+.login-home{text-align:center;margin-top:16px;font-size:13px;color:var(--ink-soft);}
+
+/* 앱 셸 */
+#app{display:flex;flex-direction:column;height:100vh;}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 18px;border-bottom:1px solid var(--line);background:var(--card);flex-wrap:wrap;}
+.topbar .title{display:flex;align-items:center;gap:10px;}
+.topbar .mark{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--green-600);color:var(--paper);font-size:16px;align-items:center;justify-content:center;}
+.topbar h1{font-family:var(--font-serif);font-size:17px;margin:0;color:var(--green-900);}
+.topbar .user{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-soft);flex-wrap:wrap;}
+.role-badge{padding:2px 8px;border-radius:999px;background:var(--green-50);color:var(--green-700);font-size:12px;font-weight:600;}
+.shell{display:flex;flex:1;min-height:0;}
+.sidebar{width:260px;flex:0 0 260px;border-right:1px solid var(--line);background:var(--paper-soft);display:flex;flex-direction:column;min-height:0;}
+.sidebar .side-head{padding:12px 12px 8px;}
+.sidebar .side-head .btn{width:100%;justify-content:center;}
+.sidebar input.search{width:100%;margin-top:8px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;}
+.table-list{flex:1;overflow:auto;padding:4px 8px 12px;}
+.table-item{display:block;width:100%;text-align:left;background:transparent;border:1px solid transparent;border-radius:9px;padding:8px 10px;margin-bottom:2px;color:var(--ink);}
+.table-item:hover{background:#fff;border-color:var(--line-soft);}
+.table-item.active{background:#fff;border-color:var(--green-100);box-shadow:var(--shadow-sm);}
+.table-item .t{font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.table-item .n{font-size:11.5px;color:var(--ink-faint);font-family:var(--mono);}
+.table-item .c{float:right;font-size:11.5px;color:var(--ink-faint);}
+.side-foot{padding:10px 12px;border-top:1px solid var(--line-soft);font-size:12px;color:var(--ink-faint);}
+.main{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0;}
+.tabs{display:flex;gap:2px;padding:8px 14px 0;border-bottom:1px solid var(--line);background:var(--card);}
+.tab{padding:8px 14px;border:none;background:transparent;color:var(--ink-soft);font-weight:600;font-size:13.5px;border-bottom:2px solid transparent;border-radius:6px 6px 0 0;}
+.tab.active{color:var(--green-700);border-bottom-color:var(--green-700);}
+.panel{flex:1;min-height:0;display:flex;flex-direction:column;}
+.empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--ink-faint);gap:10px;padding:30px;text-align:center;}
+.empty .big{font-size:40px;}
+
+/* 표 보기 */
+.toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;background:var(--card);border-bottom:1px solid var(--line-soft);}
+.toolbar .t-title{font-weight:700;font-size:16px;color:var(--green-900);}
+.toolbar .t-name{font-family:var(--mono);font-size:12px;background:var(--paper-soft);padding:2px 7px;border-radius:6px;color:var(--ink-soft);}
+.toolbar .t-meta{font-size:12px;color:var(--ink-faint);}
+.toolbar .grow{flex:1;}
+.toolbar input.q{padding:7px 10px;border:1px solid var(--line);border-radius:8px;min-width:180px;}
+.filterbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:6px 14px;background:var(--card);border-bottom:1px solid var(--line-soft);font-size:13px;}
+.filterbar select,.filterbar input{padding:5px 8px;border:1px solid var(--line);border-radius:7px;background:#fff;font-size:13px;}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;background:var(--green-50);color:var(--green-700);font-size:12.5px;}
+.chip button{border:none;background:transparent;color:inherit;padding:0;font-size:14px;line-height:1;}
+.gridwrap{flex:1;overflow:auto;background:#fff;}
+table.grid{border-collapse:separate;border-spacing:0;min-width:100%;font-size:13px;}
+table.grid th{position:sticky;top:0;background:var(--paper-soft);color:var(--ink-soft);font-weight:600;text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);border-right:1px solid var(--line-soft);white-space:nowrap;cursor:pointer;user-select:none;z-index:1;}
+table.grid th .ty{font-size:10.5px;color:var(--ink-faint);font-weight:400;margin-left:4px;}
+table.grid th.sorted{color:var(--green-700);}
+table.grid td{padding:5px 10px;border-bottom:1px solid var(--line-soft);border-right:1px solid var(--line-soft);white-space:nowrap;max-width:360px;overflow:hidden;text-overflow:ellipsis;vertical-align:top;}
+table.grid td.num{text-align:right;font-variant-numeric:tabular-nums;}
+table.grid td.null{color:#C9C4B6;}
+table.grid td.idc{color:var(--ink-faint);font-family:var(--mono);font-size:12px;background:var(--paper);}
+table.grid tr:hover td{background:#FCFBF6;}
+table.grid td.editing{padding:0;}
+table.grid td.editing input{width:100%;min-width:120px;padding:5px 9px;border:2px solid var(--green-500);border-radius:0;font-size:13px;}
+table.grid td .rowdel{visibility:hidden;border:none;background:transparent;color:var(--danger);font-size:13px;padding:0 3px;}
+table.grid tr:hover td .rowdel{visibility:visible;}
+.pager{display:flex;align-items:center;gap:8px;padding:8px 14px;border-top:1px solid var(--line);background:var(--card);font-size:13px;color:var(--ink-soft);flex-wrap:wrap;}
+.pager select{padding:4px 6px;border:1px solid var(--line);border-radius:6px;}
+
+/* SQL */
+.sqlbox{padding:12px 14px;background:var(--card);border-bottom:1px solid var(--line-soft);}
+.sqlbox textarea{width:100%;min-height:110px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--radius-sm);font-family:var(--mono);font-size:13px;resize:vertical;}
+.sqlbox .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px;}
+.sqlbox .examples{font-size:12.5px;color:var(--ink-faint);}
+.sqlbox .examples a{margin-right:10px;}
+
+/* 안내 */
+.doc{padding:20px 24px;overflow:auto;max-width:900px;line-height:1.7;}
+.doc h2{font-family:var(--font-serif);font-size:18px;color:var(--green-900);margin:18px 0 8px;}
+.doc h2:first-child{margin-top:0;}
+.doc pre{background:#1C2621;color:#E8EADF;padding:12px 14px;border-radius:var(--radius-sm);overflow:auto;font-size:12.5px;line-height:1.55;}
+.doc code{font-family:var(--mono);font-size:12.5px;background:var(--paper-soft);padding:1px 5px;border-radius:5px;}
+.doc pre code{background:transparent;padding:0;}
+.doc table{border-collapse:collapse;font-size:13px;}
+.doc td,.doc th{border:1px solid var(--line);padding:5px 10px;text-align:left;}
+.doc th{background:var(--paper-soft);}
+.tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600;}
+.tag.on{background:var(--green-50);color:var(--green-700);}
+.tag.off{background:var(--gold-100);color:var(--gold-600);}
+
+/* 모달 */
+.modal-bg{position:fixed;inset:0;background:rgba(28,38,33,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:20;}
+.modal{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow-md);width:100%;max-width:760px;max-height:92vh;display:flex;flex-direction:column;}
+.modal.narrow{max-width:460px;}
+.modal .m-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line-soft);}
+.modal .m-head h2{margin:0;font-size:16px;font-family:var(--font-serif);color:var(--green-900);}
+.modal .m-body{padding:16px 18px;overflow:auto;}
+.modal .m-foot{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px;border-top:1px solid var(--line-soft);}
+.drop{border:2px dashed var(--line);border-radius:var(--radius);padding:34px 16px;text-align:center;color:var(--ink-soft);background:var(--paper);}
+.drop.over{border-color:var(--green-500);background:var(--green-50);}
+.drop input{display:none;}
+.sheet-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;}
+.sheet-tab{padding:4px 10px;border-radius:7px;border:1px solid var(--line);background:#fff;font-size:12.5px;}
+.sheet-tab.active{background:var(--green-700);color:#fff;border-color:var(--green-700);}
+.preview{overflow:auto;border:1px solid var(--line-soft);border-radius:var(--radius-sm);max-height:220px;margin-bottom:12px;}
+.preview table{border-collapse:collapse;font-size:12px;min-width:100%;}
+.preview th{background:var(--paper-soft);padding:5px 8px;text-align:left;white-space:nowrap;position:sticky;top:0;}
+.preview th .ty{color:var(--ink-faint);font-weight:400;font-size:10.5px;margin-left:3px;}
+.preview td{padding:4px 8px;border-top:1px solid var(--line-soft);white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis;}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:0 12px;}
+.radio-row{display:flex;gap:14px;flex-wrap:wrap;font-size:13.5px;margin-bottom:10px;}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;font-size:13.5px;box-shadow:var(--shadow-md);z-index:30;opacity:0;transition:opacity .2s;pointer-events:none;}
+.toast.show{opacity:1;}
+.toast.err{background:var(--danger);}
+
+@media (max-width:760px){
+  .shell{flex-direction:column;}
+  .sidebar{width:100%;flex:0 0 auto;max-height:38vh;border-right:none;border-bottom:1px solid var(--line);}
+  .two{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<div id="boot-view" class="loading">확인 중…</div>
+
+<!-- ══ 로그인 ══ -->
+<div id="login-view" class="hidden">
+  <div class="login-card">
+    <div class="logo">
+      <span class="mark">▦</span>
+      <h1>사교원 데이터 저장소</h1>
+      <div class="sub">엑셀·CSV를 표로 올리고 조회하는 곳</div>
+    </div>
+    <form id="login-form">
+      <div class="field"><label for="login-username">아이디</label><input id="login-username" autocomplete="username" required></div>
+      <div class="field"><label for="login-password">비밀번호</label><input id="login-password" type="password" autocomplete="current-password" required></div>
+      <button type="submit" class="btn btn-primary">로그인</button>
+      <div id="login-msg" class="msg"></div>
+    </form>
+    <div class="login-home">사교원 통합 계정(직원·관리자)으로 로그인합니다.<br>계정이 없으면 <a href="admin.html">통합 관리자</a>에서 가입 신청 · <a href="index.html">← 사교원 홈</a></div>
+  </div>
+</div>
+
+<!-- ══ 앱 ══ -->
+<div id="app" class="hidden">
+  <div class="topbar">
+    <div class="title"><span class="mark">▦</span><h1>사교원 데이터 저장소</h1></div>
+    <div class="user">
+      <span id="user-name"></span><span id="user-role" class="role-badge"></span>
+      <a class="btn btn-ghost btn-sm" href="admin.html">통합 관리자</a>
+      <button id="btn-logout" class="btn btn-ghost btn-sm">로그아웃</button>
+    </div>
+  </div>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="side-head">
+        <button id="btn-upload" class="btn btn-primary">＋ 엑셀·CSV 올리기</button>
+        <input id="table-search" class="search" placeholder="표 찾기">
+      </div>
+      <div id="table-list" class="table-list"></div>
+      <div class="side-foot"><span id="table-count">0</span>개 표 · <a href="#" id="link-guide">연동 안내</a></div>
+    </aside>
+    <main class="main">
+      <div class="tabs">
+        <button class="tab active" data-tab="browse">표 보기</button>
+        <button class="tab" data-tab="sql">SQL 조회</button>
+        <button class="tab" data-tab="guide">연동 안내</button>
+      </div>
+
+      <!-- 표 보기 -->
+      <section id="panel-browse" class="panel">
+        <div id="browse-empty" class="empty">
+          <div class="big">▦</div>
+          <div>왼쪽에서 표를 고르거나, <b>엑셀·CSV 올리기</b>로 새 표를 만드세요.</div>
+          <div style="font-size:12.5px">올린 표는 데카(AI)가 API로 바로 읽어갑니다. 더 이상 파일을 채팅에 던지지 않아도 됩니다.</div>
+        </div>
+        <div id="browse-body" class="hidden" style="display:flex;flex-direction:column;flex:1;min-height:0">
+          <div class="toolbar">
+            <span class="t-title" id="t-title"></span>
+            <span class="t-name" id="t-name"></span>
+            <button class="btn btn-ghost btn-xs" id="btn-edit-meta" title="제목·이름·메모 수정">✎</button>
+            <span class="t-meta" id="t-meta"></span>
+            <span class="grow"></span>
+            <input class="q" id="q" placeholder="모든 열에서 검색 (Enter)">
+            <button class="btn btn-ghost btn-sm" id="btn-add-row">＋ 행</button>
+            <button class="btn btn-ghost btn-sm" id="btn-append">이어붙이기</button>
+            <button class="btn btn-ghost btn-sm" id="btn-csv">CSV ↓</button>
+            <button class="btn btn-danger btn-sm" id="btn-drop">표 삭제</button>
+          </div>
+          <div class="filterbar">
+            <span style="color:var(--ink-faint)">필터</span>
+            <select id="f-col"></select>
+            <select id="f-op">
+              <option value="eq">= 같음</option><option value="neq">≠ 다름</option>
+              <option value="like">포함</option><option value="gt">&gt;</option><option value="gte">≥</option>
+              <option value="lt">&lt;</option><option value="lte">≤</option>
+              <option value="in">목록(쉼표)</option><option value="is">비어있음/있음</option>
+            </select>
+            <input id="f-val" placeholder="값" style="min-width:140px">
+            <button class="btn btn-ghost btn-xs" id="f-add">추가</button>
+            <span id="f-chips"></span>
+          </div>
+          <div class="gridwrap"><table class="grid" id="grid"></table></div>
+          <div class="pager">
+            <button class="btn btn-ghost btn-xs" id="pg-prev">‹ 이전</button>
+            <span id="pg-info"></span>
+            <button class="btn btn-ghost btn-xs" id="pg-next">다음 ›</button>
+            <span style="margin-left:auto">한 번에</span>
+            <select id="pg-limit"><option>50</option><option selected>100</option><option>500</option><option>2000</option></select>
+            <span style="color:var(--ink-faint);font-size:12px">셀을 두 번 클릭하면 바로 고칠 수 있습니다 · 열 제목을 누르면 정렬</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- SQL -->
+      <section id="panel-sql" class="panel hidden">
+        <div class="sqlbox">
+          <textarea id="sql" placeholder="SELECT * FROM 표이름 LIMIT 100"></textarea>
+          <div class="row">
+            <button class="btn btn-primary btn-sm" id="sql-run">실행 (Ctrl+Enter)</button>
+            <button class="btn btn-ghost btn-sm" id="sql-csv">결과 CSV ↓</button>
+            <span id="sql-info" style="font-size:13px;color:var(--ink-soft)"></span>
+            <span class="grow"></span>
+            <span class="examples" id="sql-examples"></span>
+          </div>
+          <div id="sql-msg" class="msg"></div>
+        </div>
+        <div class="gridwrap"><table class="grid" id="sql-grid"></table></div>
+      </section>
+
+      <!-- 연동 안내 -->
+      <section id="panel-guide" class="panel hidden"><div class="doc" id="guide-doc"></div></section>
+    </main>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+'use strict';
+/* 인증은 HttpOnly 쿠키(sk_session). 모든 응답은 {ok:true|false,...}. 파일 업로드는 본문을 그대로(raw) 보낸다. */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtNum = n => Number(n).toLocaleString('ko-KR');
+
+async function api(path, opts = {}) {
+  const res = await fetch(path, {
+    credentials: 'same-origin',
+    headers: opts.body ? { 'Content-Type': 'application/json' } : {},
+    ...opts,
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  });
+  let data = {};
+  try { data = await res.json(); } catch (_) {}
+  return { status: res.status, ...data };
+}
+async function apiFile(path, file) {
+  const res = await fetch(path, { method: 'POST', credentials: 'same-origin', body: file });
+  let data = {};
+  try { data = await res.json(); } catch (_) {}
+  return { status: res.status, ...data };
+}
+const ERROR_TEXT = {
+  invalid_credentials: '아이디 또는 비밀번호가 올바르지 않습니다.',
+  not_approved: '가입 승인 대기 중입니다.',
+  unauthorized: '로그인이 필요합니다.', forbidden: '직원·관리자 권한이 필요합니다.',
+  bad_name: '표 이름은 영문 소문자로 시작, 영문·숫자·밑줄만 쓸 수 있습니다(이미 있는 이름 제외).',
+  xls_unsupported: '.xls(구형)는 지원하지 않습니다. 엑셀에서 .xlsx로 저장한 뒤 올려 주세요.',
+  unsupported_format: '지원하지 않는 파일 형식입니다(.xlsx .csv .tsv).',
+  parse_failed: '파일을 읽지 못했습니다. 엑셀에서 다시 저장해 보세요.',
+  empty_file: '빈 파일입니다.', empty_sheet: '시트에 데이터가 없습니다.',
+  file_too_large: '파일이 너무 큽니다(30MB 이하).', sheet_not_found: '시트를 찾지 못했습니다.',
+  select_only: 'SELECT(조회) 문만 실행할 수 있습니다.', timeout: '조회가 너무 오래 걸려 중단했습니다.',
+  not_found: '대상을 찾지 못했습니다.', openpyxl_missing: '서버에 엑셀 읽기 모듈(openpyxl)이 없습니다. 서버 갱신이 필요합니다.',
+};
+function errText(r, fb) {
+  if (r.status === 429) return '요청이 잠시 제한되었습니다. 1분 후 다시 시도해 주세요.';
+  if (r.error && r.error.startsWith('unknown_column:')) return '없는 열입니다: ' + r.error.slice(15);
+  if (r.error === 'sql_error') return 'SQL 오류: ' + (r.detail || '');
+  return ERROR_TEXT[r.error] || fb || '처리하지 못했습니다. 잠시 후 다시 시도해 주세요.';
+}
+function showMsg(el, t, k) { el.textContent = t; el.className = 'msg ' + k; }
+function clearMsg(el) { el.textContent = ''; el.className = 'msg'; }
+let toastTimer;
+function toast(t, err) {
+  const el = $('#toast'); el.textContent = t; el.className = 'toast show' + (err ? ' err' : '');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.className = 'toast', 2600);
+}
+function show(view) { ['boot-view', 'login-view', 'app'].forEach(id => $('#' + id).classList.add('hidden')); $('#' + view).classList.remove('hidden'); }
+
+/* ── 진입 ── */
+async function boot() {
+  const r = await api('/api/auth/me');
+  if (r.ok && r.user && (r.user.role === 'admin' || r.user.role === 'staff')) return enter(r.user);
+  if (r.ok && r.user) { await api('/api/auth/logout', { method: 'POST' }); show('login-view'); showMsg($('#login-msg'), '직원·관리자 계정만 이용할 수 있습니다.', 'error'); return; }
+  show('login-view');
+}
+$('#login-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = e.target.querySelector('[type=submit]'); btn.disabled = true; clearMsg($('#login-msg'));
+  const r = await api('/api/auth/login', { method: 'POST', body: { username: $('#login-username').value.trim(), password: $('#login-password').value } });
+  btn.disabled = false;
+  if (r.ok && r.user) {
+    if (r.user.role === 'admin' || r.user.role === 'staff') return enter(r.user);
+    await api('/api/auth/logout', { method: 'POST' });
+    return showMsg($('#login-msg'), '직원·관리자 계정만 이용할 수 있습니다.', 'error');
+  }
+  showMsg($('#login-msg'), errText(r), 'error');
+});
+$('#btn-logout').addEventListener('click', async () => { await api('/api/auth/logout', { method: 'POST' }); location.reload(); });
+
+/* ── 상태 ── */
+let tables = [], cur = null, readKeySet = false;
+let state = { q: '', filters: [], order: null, limit: 100, offset: 0, total: 0 };
+
+function enter(user) {
+  $('#user-name').textContent = user.name || user.username;
+  $('#user-role').textContent = user.role === 'admin' ? '이사장·관리자' : '직원';
+  show('app');
+  loadTables().then(() => { const want = location.hash.slice(1); if (want) openTable(want); });
+  renderGuide();
+}
+
+async function loadTables() {
+  const r = await api('/api/data/tables');
+  if (!r.ok) { toast(errText(r), true); return; }
+  tables = r.items; readKeySet = !!r.read_key_set;
+  renderTableList();
+  if (cur) { const t = tables.find(x => x.name === cur.name); if (t) cur = t; }
+}
+function renderTableList() {
+  const kw = $('#table-search').value.trim().toLowerCase();
+  const list = tables.filter(t => !kw || t.name.includes(kw) || (t.title || '').toLowerCase().includes(kw));
+  $('#table-count').textContent = tables.length;
+  $('#table-list').innerHTML = list.map(t => `
+    <button class="table-item${cur && cur.name === t.name ? ' active' : ''}" data-name="${esc(t.name)}">
+      <span class="c">${fmtNum(t.row_count)}행</span>
+      <div class="t">${esc(t.title || t.name)}</div>
+      <div class="n">${esc(t.name)}</div>
+    </button>`).join('') || '<div style="padding:14px;color:var(--ink-faint);font-size:13px">표가 없습니다.</div>';
+  document.querySelectorAll('.table-item').forEach(b => b.addEventListener('click', () => openTable(b.dataset.name)));
+}
+$('#table-search').addEventListener('input', renderTableList);
+
+/* ── 탭 ── */
+document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => switchTab(b.dataset.tab)));
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  ['browse', 'sql', 'guide'].forEach(p => $('#panel-' + p).classList.toggle('hidden', p !== name));
+}
+$('#link-guide').addEventListener('click', e => { e.preventDefault(); switchTab('guide'); });
+
+/* ── 표 보기 ── */
+function openTable(name) {
+  const t = tables.find(x => x.name === name);
+  if (!t) return;
+  cur = t; state = { q: '', filters: [], order: null, limit: +$('#pg-limit').value, offset: 0, total: 0 };
+  location.hash = name;
+  $('#q').value = '';
+  renderTableList(); switchTab('browse');
+  $('#browse-empty').classList.add('hidden'); $('#browse-body').classList.remove('hidden');
+  $('#t-title').textContent = t.title || t.name; $('#t-name').textContent = t.name;
+  $('#t-meta').textContent = `${fmtNum(t.row_count)}행 · ${t.columns.length}열` + (t.source ? ` · 원본 ${t.source}${t.sheet ? ' / ' + t.sheet : ''}` : '') + ` · ${(t.updated_at || '').slice(0, 16).replace('T', ' ')}` + (t.note ? ` · ${t.note}` : '');
+  $('#f-col').innerHTML = t.columns.map(c => `<option value="${esc(c.name)}">${esc(c.name)}</option>`).join('');
+  renderChips(); loadRows();
+}
+function buildQuery(extra = {}) {
+  const p = new URLSearchParams();
+  p.set('limit', state.limit); p.set('offset', state.offset);
+  if (state.q) p.set('q', state.q);
+  if (state.order) p.set('order', state.order.col + '.' + state.order.dir);
+  state.filters.forEach(f => p.append(f.col, f.op + '.' + f.val));
+  Object.entries(extra).forEach(([k, v]) => p.set(k, v));
+  return p.toString();
+}
+async function loadRows() {
+  if (!cur) return;
+  const r = await api(`/api/data/tables/${encodeURIComponent(cur.name)}/rows?` + buildQuery());
+  if (!r.ok) { toast(errText(r), true); return; }
+  state.total = r.total;
+  renderGrid(r.columns, r.items);
+  const from = r.total ? r.offset + 1 : 0, to = Math.min(r.offset + r.items.length, r.total);
+  $('#pg-info').textContent = `${fmtNum(from)}–${fmtNum(to)} / 전체 ${fmtNum(r.total)}행`;
+  $('#pg-prev').disabled = r.offset <= 0; $('#pg-next').disabled = to >= r.total;
+}
+function cellClass(v) { return v === null || v === undefined ? 'null' : (typeof v === 'number' ? 'num' : ''); }
+function renderGrid(cols, items) {
+  const types = Object.fromEntries(cur.columns.map(c => [c.name, c.type]));
+  const th = cols.map(c => {
+    const sorted = state.order && state.order.col === c;
+    return `<th data-col="${esc(c)}" class="${sorted ? 'sorted' : ''}">${esc(c)}${c === '_id' ? '' : `<span class="ty">${esc(types[c] || '')}</span>`}${sorted ? (state.order.dir === 'asc' ? ' ▲' : ' ▼') : ''}</th>`;
+  }).join('');
+  const rows = items.map(it => `<tr data-id="${it._id}">` + cols.map(c => c === '_id'
+    ? `<td class="idc"><button class="rowdel" title="행 삭제">✕</button>${it._id}</td>`
+    : `<td class="${cellClass(it[c])}" data-col="${esc(c)}">${it[c] === null || it[c] === undefined ? '∅' : esc(it[c])}</td>`).join('') + '</tr>').join('');
+  $('#grid').innerHTML = `<thead><tr>${th}</tr></thead><tbody>${rows || `<tr><td colspan="${cols.length}" style="color:var(--ink-faint);padding:20px">조건에 맞는 행이 없습니다.</td></tr>`}</tbody>`;
+  $('#grid').querySelectorAll('th').forEach(h => h.addEventListener('click', () => {
+    const col = h.dataset.col;
+    state.order = state.order && state.order.col === col ? (state.order.dir === 'asc' ? { col, dir: 'desc' } : null) : { col, dir: 'asc' };
+    state.offset = 0; loadRows();
+  }));
+  $('#grid').querySelectorAll('td[data-col]').forEach(td => td.addEventListener('dblclick', () => editCell(td)));
+  $('#grid').querySelectorAll('.rowdel').forEach(b => b.addEventListener('click', async e => {
+    const tr = e.target.closest('tr'); const id = tr.dataset.id;
+    if (!confirm(`행 #${id}을(를) 삭제할까요?`)) return;
+    const r = await api(`/api/data/tables/${encodeURIComponent(cur.name)}/rows/${id}`, { method: 'DELETE' });
+    if (!r.ok) return toast(errText(r), true);
+    toast('행을 삭제했습니다.'); await loadTables(); openTableKeep();
+  }));
+}
+function openTableKeep() { const t = tables.find(x => x.name === cur.name); if (t) { cur = t; $('#t-meta').textContent = `${fmtNum(t.row_count)}행 · ${t.columns.length}열`; } loadRows(); }
+function editCell(td) {
+  if (td.classList.contains('editing')) return;
+  const col = td.dataset.col, old = td.classList.contains('null') ? '' : td.textContent;
+  td.classList.add('editing'); td.innerHTML = `<input value="${esc(old)}">`;
+  const inp = td.querySelector('input'); inp.focus(); inp.select();
+  let done = false;
+  const finish = async (save) => {
+    if (done) return; done = true;
+    const val = inp.value;
+    td.classList.remove('editing');
+    if (!save || val === old) { td.textContent = old === '' ? '∅' : old; td.className = old === '' ? 'null' : cellClass(isNaN(+old) || old === '' ? old : +old); return; }
+    const id = td.closest('tr').dataset.id;
+    const r = await api(`/api/data/tables/${encodeURIComponent(cur.name)}/rows/${id}`, { method: 'PATCH', body: { [col]: val } });
+    if (!r.ok) { toast(errText(r), true); td.textContent = old === '' ? '∅' : old; return; }
+    td.textContent = val === '' ? '∅' : val; td.className = val === '' ? 'null' : (isNaN(+val) || val.trim() === '' ? '' : 'num');
+    toast('저장했습니다.');
+  };
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') finish(true); if (e.key === 'Escape') finish(false); });
+  inp.addEventListener('blur', () => finish(true));
+}
+$('#q').addEventListener('keydown', e => { if (e.key === 'Enter') { state.q = $('#q').value.trim(); state.offset = 0; loadRows(); } });
+$('#f-add').addEventListener('click', () => {
+  const col = $('#f-col').value, op = $('#f-op').value, val = $('#f-val').value.trim();
+  if (!col) return;
+  if (op !== 'is' && !val) return toast('값을 입력하세요.', true);
+  state.filters.push({ col, op, val: op === 'is' ? (val || 'null') : val });
+  $('#f-val').value = ''; state.offset = 0; renderChips(); loadRows();
+});
+$('#f-val').addEventListener('keydown', e => { if (e.key === 'Enter') $('#f-add').click(); });
+const OP_LABEL = { eq: '=', neq: '≠', like: '포함', gt: '>', gte: '≥', lt: '<', lte: '≤', in: '∈', is: 'is' };
+function renderChips() {
+  $('#f-chips').innerHTML = state.filters.map((f, i) => `<span class="chip">${esc(f.col)} ${OP_LABEL[f.op]} ${esc(f.val)}<button data-i="${i}" title="제거">×</button></span>`).join('');
+  $('#f-chips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { state.filters.splice(+b.dataset.i, 1); state.offset = 0; renderChips(); loadRows(); }));
+}
+$('#pg-prev').addEventListener('click', () => { state.offset = Math.max(0, state.offset - state.limit); loadRows(); });
+$('#pg-next').addEventListener('click', () => { state.offset += state.limit; loadRows(); });
+$('#pg-limit').addEventListener('change', () => { state.limit = +$('#pg-limit').value; state.offset = 0; loadRows(); });
+$('#btn-csv').addEventListener('click', () => { if (cur) location.href = `/api/data/tables/${encodeURIComponent(cur.name)}/rows?` + buildQuery({ format: 'csv', limit: 200000, offset: 0 }); });
+$('#btn-drop').addEventListener('click', async () => {
+  if (!cur) return;
+  const typed = prompt(`표 "${cur.title || cur.name}" (${cur.name}) 을(를) 완전히 삭제합니다. 되돌릴 수 없습니다.\n확인하려면 표 이름을 입력하세요:`);
+  if (typed !== cur.name) return;
+  const r = await api(`/api/data/tables/${encodeURIComponent(cur.name)}`, { method: 'DELETE' });
+  if (!r.ok) return toast(errText(r), true);
+  toast('표를 삭제했습니다.'); cur = null; location.hash = '';
+  $('#browse-body').classList.add('hidden'); $('#browse-empty').classList.remove('hidden'); loadTables();
+});
+$('#btn-edit-meta').addEventListener('click', () => {
+  if (!cur) return;
+  openModal(`<h2>표 정보 수정</h2>`, `
+    <div class="field"><label>제목</label><input id="m-title" value="${esc(cur.title || '')}"></div>
+    <div class="field"><label>표 이름(API·SQL에서 쓰는 이름)</label><input id="m-name" class="mono" value="${esc(cur.name)}"><div class="hint">영문 소문자·숫자·밑줄. 바꾸면 기존 API 주소가 달라집니다.</div></div>
+    <div class="field"><label>메모</label><input id="m-note" value="${esc(cur.note || '')}" placeholder="출처·기준일 등"></div>`,
+    async () => {
+      const body = { title: $('#m-title').value.trim(), note: $('#m-note').value.trim() };
+      const nn = $('#m-name').value.trim(); if (nn && nn !== cur.name) body.new_name = nn;
+      const r = await api(`/api/data/tables/${encodeURIComponent(cur.name)}`, { method: 'PATCH', body });
+      if (!r.ok) return toast(errText(r), true);
+      closeModal(); toast('저장했습니다.'); await loadTables(); openTable(r.table.name);
+    }, true);
+});
+$('#btn-add-row').addEventListener('click', () => {
+  if (!cur) return;
+  openModal(`<h2>행 추가 — ${esc(cur.title || cur.name)}</h2>`, `<div class="two">` + cur.columns.map(c =>
+    `<div class="field"><label>${esc(c.name)} <span style="font-weight:400;color:var(--ink-faint)">${esc(c.type)}</span></label><input data-col="${esc(c.name)}"></div>`).join('') + `</div>`,
+    async () => {
+      const body = {};
+      document.querySelectorAll('#modal [data-col]').forEach(i => { if (i.value.trim() !== '') body[i.dataset.col] = i.value.trim(); });
+      const r = await api(`/api/data/tables/${encodeURIComponent(cur.name)}/rows`, { method: 'POST', body });
+      if (!r.ok) return toast(errText(r), true);
+      closeModal(); toast('행을 추가했습니다.'); await loadTables(); openTableKeep();
+    });
+});
+$('#btn-append').addEventListener('click', () => { if (cur) openImport(cur.name); });
+$('#btn-upload').addEventListener('click', () => openImport(''));
+
+/* ── 모달 ── */
+function openModal(head, body, onOk, narrow) {
+  closeModal();
+  const bg = document.createElement('div'); bg.className = 'modal-bg'; bg.id = 'modal-bg';
+  bg.innerHTML = `<div class="modal${narrow ? ' narrow' : ''}" id="modal"><div class="m-head">${head}<button class="btn btn-ghost btn-xs" id="m-close">닫기</button></div><div class="m-body">${body}</div>
+    <div class="m-foot"><button class="btn btn-ghost btn-sm" id="m-cancel">취소</button><button class="btn btn-primary btn-sm" id="m-ok">저장</button></div></div>`;
+  document.body.appendChild(bg);
+  $('#m-close').onclick = $('#m-cancel').onclick = closeModal;
+  $('#m-ok').onclick = async () => { $('#m-ok').disabled = true; try { await onOk(); } finally { const b = $('#m-ok'); if (b) b.disabled = false; } };
+  bg.addEventListener('click', e => { if (e.target === bg) closeModal(); });
+}
+function closeModal() { const m = $('#modal-bg'); if (m) m.remove(); }
+
+/* ── 업로드 마법사 ── */
+let imp = null; // {file, inspect, sheetIdx}
+function openImport(appendTo) {
+  imp = { file: null, inspect: null, sheetIdx: 0, appendTo };
+  openModal(`<h2>${appendTo ? '기존 표에 이어붙이기' : '엑셀·CSV 올리기'}</h2>`, `
+    <div id="imp-step1">
+      <label class="drop" id="drop"><input type="file" id="imp-file" accept=".xlsx,.xlsm,.csv,.tsv,.txt">
+        <div style="font-size:30px">📄</div><div><b>파일을 여기에 끌어다 놓거나 클릭해서 선택</b></div>
+        <div style="font-size:12.5px;margin-top:4px">.xlsx · .csv (구형 .xls는 .xlsx로 저장 후) · 첫 줄이 열 제목이면 그대로 인식합니다</div></label>
+      <div id="imp-msg" class="msg"></div>
+    </div>
+    <div id="imp-step2" class="hidden"></div>`, doImport);
+  $('#m-ok').disabled = true; $('#m-ok').textContent = appendTo ? '이어붙이기' : '표로 저장';
+  const drop = $('#drop'), fi = $('#imp-file');
+  fi.addEventListener('change', () => { if (fi.files[0]) inspectFile(fi.files[0]); });
+  ['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+  drop.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) inspectFile(f); });
+}
+async function inspectFile(file, headerRow) {
+  imp.file = file;
+  const msg = $('#imp-msg'); showMsg(msg, '파일을 읽는 중…', 'okay');
+  const r = await apiFile(`/api/data/inspect?filename=${encodeURIComponent(file.name)}${headerRow ? '&header_row=' + headerRow : ''}`, file);
+  if (!r.ok) return showMsg(msg, errText(r), 'error');
+  imp.inspect = r; imp.sheetIdx = r.sheets.findIndex(s => !s.empty); if (imp.sheetIdx < 0) imp.sheetIdx = 0;
+  clearMsg(msg); renderImportStep2();
+}
+function renderImportStep2() {
+  const r = imp.inspect, sh = r.sheets[imp.sheetIdx];
+  $('#imp-step1').classList.add('hidden'); const s2 = $('#imp-step2'); s2.classList.remove('hidden');
+  const existing = tables.find(t => t.name === (imp.appendTo || r.suggested_name));
+  s2.innerHTML = `
+    <div style="font-size:13px;color:var(--ink-soft);margin-bottom:8px">📄 <b>${esc(r.filename)}</b> · 시트 ${r.sheets.length}개</div>
+    <div class="sheet-tabs">${r.sheets.map((s, i) => `<button class="sheet-tab${i === imp.sheetIdx ? ' active' : ''}" data-i="${i}">${esc(s.sheet)}${s.empty ? ' (빈 시트)' : ` · ${fmtNum(s.row_count)}행`}</button>`).join('')}</div>
+    ${sh.empty ? '<div class="msg error" style="display:block">이 시트에는 데이터가 없습니다.</div>' : `
+    <div class="preview"><table><thead><tr>${sh.columns.map(c => `<th>${esc(c.name)}<span class="ty">${esc(c.type)}</span></th>`).join('')}</tr></thead>
+      <tbody>${sh.preview.map(row => `<tr>${row.map(v => `<td>${v === null ? '' : esc(v)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+    <div style="font-size:12.5px;color:var(--ink-faint);margin:-6px 0 12px">${sh.columns.length}열 · ${fmtNum(sh.row_count)}행 · 열 제목은 ${sh.header_row}번째 줄에서 읽음
+      · <a href="#" id="imp-hdr">다른 줄을 제목으로</a></div>`}
+    <div class="two">
+      <div class="field"><label>표 이름 <span style="font-weight:400;color:var(--ink-faint)">API·SQL에서 쓰는 영문 이름</span></label>
+        <input id="imp-name" class="mono" value="${esc(imp.appendTo || r.suggested_name)}" ${imp.appendTo ? 'readonly' : ''}></div>
+      <div class="field"><label>제목 <span style="font-weight:400;color:var(--ink-faint)">화면에 보이는 이름</span></label>
+        <input id="imp-title" value="${esc(imp.appendTo ? (existing ? existing.title : '') : (r.filename.replace(/\.[^.]+$/, '') + (r.sheets.length > 1 ? ' - ' + sh.sheet : '')))}"></div>
+    </div>
+    ${imp.appendTo ? `<div class="msg okay" style="display:block">기존 표 <b>${esc(imp.appendTo)}</b> 뒤에 ${fmtNum(sh.row_count || 0)}행을 이어붙입니다. 열 이름이 같은 것끼리 맞춰 넣고, 새 열은 추가됩니다.</div>`
+      : `<div class="radio-row"><label><input type="radio" name="imp-mode" value="replace" checked> 새 표로 저장 (같은 이름이 있으면 덮어씀)</label>
+         <label><input type="radio" name="imp-mode" value="append"> 같은 이름의 표에 이어붙이기</label></div>
+         <div id="imp-warn" class="msg"></div>`}`;
+  s2.querySelectorAll('.sheet-tab').forEach(b => b.addEventListener('click', () => { imp.sheetIdx = +b.dataset.i; renderImportStep2(); }));
+  const hdr = $('#imp-hdr'); if (hdr) hdr.addEventListener('click', e => { e.preventDefault(); const n = prompt('열 제목이 있는 줄 번호(1부터):', sh.header_row); if (n && +n > 0) { $('#imp-step1').classList.remove('hidden'); s2.classList.add('hidden'); inspectFile(imp.file, +n); } });
+  const nameInp = $('#imp-name'), warn = $('#imp-warn');
+  const checkName = () => { if (!warn) return; const ex = tables.find(t => t.name === nameInp.value.trim()); if (ex) showMsg(warn, `⚠ 같은 이름의 표(${ex.title || ex.name}, ${fmtNum(ex.row_count)}행)가 이미 있습니다. "새 표로 저장"이면 덮어씁니다.`, 'error'); else clearMsg(warn); };
+  nameInp.addEventListener('input', checkName); checkName();
+  $('#m-ok').disabled = !!sh.empty;
+}
+async function doImport() {
+  if (!imp || !imp.file || !imp.inspect) return;
+  const sh = imp.inspect.sheets[imp.sheetIdx];
+  const name = $('#imp-name').value.trim(), title = $('#imp-title').value.trim();
+  const mode = imp.appendTo ? 'append' : (document.querySelector('input[name=imp-mode]:checked') || {}).value || 'replace';
+  const p = new URLSearchParams({ filename: imp.file.name, name, title, sheet: sh.sheet, mode });
+  if (sh.header_row) p.set('header_row', sh.header_row);
+  $('#m-ok').textContent = '저장 중…';
+  const r = await apiFile('/api/data/import?' + p.toString(), imp.file);
+  if (!r.ok) { $('#m-ok').textContent = '표로 저장'; return toast(errText(r), true); }
+  closeModal(); toast(`${fmtNum(r.imported)}행을 ${mode === 'append' ? '이어붙였' : '저장했'}습니다.`);
+  await loadTables(); openTable(r.table.name);
+}
+
+/* ── SQL ── */
+let sqlResult = null;
+function renderSqlExamples() {
+  const t = cur ? cur.name : (tables[0] ? tables[0].name : '표이름');
+  const ex = [
+    ['전체 보기', `SELECT * FROM ${t} LIMIT 100`],
+    ['열 목록', `SELECT name, type FROM pragma_table_info('${t}')`],
+    ['건수 세기', `SELECT COUNT(*) AS 건수 FROM ${t}`],
+    ['표 목록', `SELECT name, title, row_count FROM _catalog`],
+  ];
+  $('#sql-examples').innerHTML = '예시: ' + ex.map(([l, s]) => `<a href="#" data-sql="${esc(s)}">${l}</a>`).join('');
+  $('#sql-examples').querySelectorAll('a').forEach(a => a.addEventListener('click', e => { e.preventDefault(); $('#sql').value = a.dataset.sql; }));
+}
+async function runSql() {
+  const sql = $('#sql').value.trim(); if (!sql) return;
+  clearMsg($('#sql-msg')); $('#sql-info').textContent = '실행 중…';
+  const t0 = performance.now();
+  const r = await api('/api/data/sql', { method: 'POST', body: { sql } });
+  if (!r.ok) { $('#sql-info').textContent = ''; sqlResult = null; $('#sql-grid').innerHTML = ''; return showMsg($('#sql-msg'), errText(r), 'error'); }
+  sqlResult = r;
+  $('#sql-info').textContent = `${fmtNum(r.count)}행 · ${Math.round(performance.now() - t0)}ms` + (r.truncated ? ' · 5,000행에서 잘림' : '');
+  $('#sql-grid').innerHTML = `<thead><tr>${r.columns.map(c => `<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>` +
+    r.rows.map(row => `<tr>${row.map(v => `<td class="${cellClass(v)}">${v === null ? '∅' : esc(v)}</td>`).join('')}</tr>`).join('') + '</tbody>';
+}
+$('#sql-run').addEventListener('click', runSql);
+$('#sql').addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') runSql(); });
+$('#sql-csv').addEventListener('click', () => {
+  if (!sqlResult) return toast('먼저 실행하세요.', true);
+  const q = v => { const s = v === null ? '' : String(v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  const csv = '﻿' + [sqlResult.columns.map(q).join(','), ...sqlResult.rows.map(r => r.map(q).join(','))].join('\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = 'query.csv'; a.click();
+});
+document.querySelector('[data-tab=sql]').addEventListener('click', renderSqlExamples);
+
+/* ── 연동 안내 ── */
+function renderGuide() {
+  const base = location.origin, t = cur ? cur.name : 'mangnam_2024';
+  $('#guide-doc').innerHTML = `
+    <h2>이 저장소가 하는 일</h2>
+    <p>엑셀·CSV를 올리면 <b>표(테이블)</b>로 저장되고, 화면·API·SQL로 바로 조회할 수 있습니다. 데카(AI)는 파일을 받지 않고 아래 API로 표를 직접 읽어 갑니다.
+    권한은 통합 계정(직원·관리자) 로그인, 관리자 키, 또는 <b>읽기 전용 키</b> 세 가지입니다.</p>
+    <p>읽기 전용 키 상태: ${readKeySet ? '<span class="tag on">설정됨</span> — 데카에게 키를 전달하면 바로 읽어 갑니다.' : '<span class="tag off">미설정</span> — 서버 <code>/etc/sakyowon-api.env</code>에 <code>SAKYOWON_DATA_READ_KEY=…</code>를 추가하고 <code>sakyowon-api</code>를 재시작하면 켜집니다.'}</p>
+    <h2>API 한눈에</h2>
+    <table><tr><th>무엇</th><th>요청</th></tr>
+      <tr><td>표 목록</td><td><code>GET /api/data/tables</code></td></tr>
+      <tr><td>행 조회</td><td><code>GET /api/data/tables/{표}/rows?limit=100&amp;offset=0&amp;order=열.desc&amp;q=검색어&amp;열=연산자.값</code></td></tr>
+      <tr><td>CSV 내려받기</td><td><code>GET /api/data/tables/{표}/rows?format=csv</code></td></tr>
+      <tr><td>읽기 전용 SQL</td><td><code>POST /api/data/sql</code> 본문 <code>{"sql":"SELECT … LIMIT 100"}</code></td></tr>
+      <tr><td>업로드(직원·관리자)</td><td><code>POST /api/data/import?name=표&amp;title=제목&amp;filename=파일.xlsx&amp;mode=replace|append</code> 본문=파일 그대로</td></tr>
+      <tr><td>행 추가/수정/삭제</td><td><code>POST /api/data/tables/{표}/rows</code> · <code>PATCH …/rows/{_id}</code> · <code>DELETE …/rows/{_id}</code></td></tr>
+    </table>
+    <p>필터 연산자: <code>eq</code> 같음 · <code>neq</code> 다름 · <code>gt gte lt lte</code> 크기 비교 · <code>like</code> 부분일치(<code>*</code>=아무 글자) · <code>in.(a,b,c)</code> 목록 · <code>is.null</code> / <code>is.notnull</code>. 예: <code>?거래처명=like.김&amp;집행액=gte.1000000</code></p>
+    <h2>데카가 쓰는 명령 (읽기 전용 키)</h2>
+<pre><code>export SK_KEY='읽기키'
+# 표 목록
+curl -s ${base}/api/data/tables -H "X-Data-Key: $SK_KEY"
+# 행 조회 (필터·정렬)
+curl -s -G "${base}/api/data/tables/${t}/rows" -H "X-Data-Key: $SK_KEY" \\
+  --data-urlencode "거래처명=like.김" --data-urlencode "order=집행액.desc" --data-urlencode "limit=50"
+# SQL
+curl -s -X POST ${base}/api/data/sql -H "X-Data-Key: $SK_KEY" -H "Content-Type: application/json" \\
+  -d '{"sql":"SELECT 보조세목명, SUM(집행액) AS 합계 FROM ${t} GROUP BY 1 ORDER BY 2 DESC"}'</code></pre>
+    <p>데카 쪽에는 같은 일을 하는 명령줄 도구 <code>skdata</code>(sakyowon-server 레포 <code>tools/skdata.py</code>)가 있습니다: <code>skdata tables</code> · <code>skdata rows ${t} --where 거래처명=like.김</code> · <code>skdata sql "SELECT …"</code> · <code>skdata import 파일.xlsx --name 표</code>.</p>
+    <h2>규칙</h2>
+    <ul>
+      <li>표 이름은 영문 소문자로 시작, 영문·숫자·밑줄만(예 <code>mangnam_2024</code>). 제목은 한글 자유.</li>
+      <li>각 행에는 자동 번호 <code>_id</code>가 붙습니다. 열 이름은 엑셀 첫 줄(제목 줄)을 그대로 씁니다(한글 가능).</li>
+      <li>"새 표로 저장"은 같은 이름의 표를 통째로 바꿉니다. 매달 쌓이는 자료는 "이어붙이기"를 쓰세요.</li>
+      <li>주민번호·연락처 같은 개인정보가 든 표는 이 화면(직원·관리자)과 키로만 접근됩니다. 키는 채팅에 남기지 마세요.</li>
+      <li>SQL은 조회(SELECT)만 됩니다. 수정은 화면에서 셀을 두 번 클릭하거나 API로 합니다.</li>
+    </ul>`;
+}
+document.querySelector('[data-tab=guide]').addEventListener('click', renderGuide);
+
+boot();
+</script>
+</body>
+</html>
