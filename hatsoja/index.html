@@ -3751,6 +3751,7 @@ function memPower(){
   ];
   const fund = Math.round(settle * 0.1);
   return `
+    ${powerRealCard()}
     <div class="sec-head">
       <h1>⚡ 발전·정산·배당</h1>
       <p class="sec-desc">발전 계량 데이터와 한전 정산내역을 자동 대조하고, 수익 배분·배당 적립·이상 감지까지 한 번에 — 조합원 누구나 같은 숫자를 봅니다. <span class="badge badge-mute">데모 데이터 (1MW 표준모델)</span></p>
@@ -4817,7 +4818,9 @@ async function inboxProcess(fid){
   if(k.파싱 === 'client'){
     const f = _inboxFiles[fid];
     if(!f){ toast('새로고침 뒤에는 파일을 다시 올려야 읽을 수 있습니다.'); return; }
-    if(it.kind === 'bank'){ inboxParseBank(f, fid); return; }
+    if(it.kind === 'bank'){  inboxParseBank(f, fid);  return; }
+    if(it.kind === 'rems'){  inboxParseRems(f, fid);  return; }
+    if(it.kind === 'kepco'){ inboxParseKepco(f, fid); return; }
     toast(k.이름 + ' 자동 읽기는 아직 준비 중입니다. 값을 직접 넣어 주세요.');
   }
 
@@ -4943,6 +4946,232 @@ function inboxParseBank(file, fid){
     inboxRender();
     toast(n + '건을 읽었습니다. 거래처 추천 ' + 추천 + '건 — 확정하러 가세요.');
   });
+}
+
+/* ─── 발전대장 — REMS 발전량 · 한전 정산명세 (2026-09-28) ───
+   자료함에서 올린 두 자료가 여기 쌓이고, 서로 대조된다.
+   daily  : REMS 일별 발전량
+   settle : 한전 월별 정산
+   files  : 올린 원본 기록(해시로 중복 차단) */
+const STORE_POWER = 'sunvillage_auto_power';
+function loadPower(){
+  const o = _loadObj(STORE_POWER);
+  return o || {daily: [], settle: [], files: []};
+}
+function savePower(P){ _save(STORE_POWER, P); }
+function powerDupFile(hash){ return (loadPower().files || []).filter(function(f){ return f.hash === hash; })[0] || null; }
+function powerRejectDup(dup, fid, what){
+  showDyn({
+    title: '이미 올린 파일입니다 — ' + what,
+    sub: dup.name + ' · ' + dup.date + ' · ' + dup.rows + '건',
+    body: '<p style="margin-top:0;">내용이 완전히 같은 파일입니다. 그대로 넣으면 <b>발전량·정산금이 두 번 잡힙니다.</b></p>'
+        + '<p class="text-mute" style="font-size:13px;">다른 기간 자료를 올리려던 것이라면 파일을 다시 확인해 주세요.</p>',
+    foot: '<button class="btn btn-primary" onclick="closeDyn()">알겠습니다</button>'
+  });
+  const l = loadInbox(); const i = l.filter(function(x){ return x.id === fid; })[0];
+  if(i){ i.상태 = '중복'; i.요약 = '이미 올린 파일과 내용이 같아 넣지 않았습니다'; saveInbox(l); inboxRender(); }
+}
+function _inboxFinish(fid, 상태, 요약, 가기){
+  const l = loadInbox(); const i = l.filter(function(x){ return x.id === fid; })[0];
+  if(i){ i.상태 = 상태; i.요약 = 요약; if(가기) i.가기 = 가기; saveInbox(l); }
+  inboxRender();
+}
+/* 머리글에서 열 번호 찾기 — 은행·기관마다 이름이 달라 키워드로 본다 */
+function _colOf(head, names, def){
+  const i = head.findIndex(function(h){ return names.some(function(n){ return h.indexOf(n) !== -1; }); });
+  return i >= 0 ? i : def;
+}
+
+/* ① REMS 발전량 — 일별로 모은다(시간별 파일이면 날짜로 합산) */
+function inboxParseRems(file, fid){
+  _readTextFile(file, function(text){
+    const rows = _closingCsvParse(text);
+    if(rows.length < 2){ toast('CSV에서 발전량을 읽지 못했습니다.'); return; }
+    const hash = _taxHash(text);
+    const dup = powerDupFile(hash);
+    if(dup){ powerRejectDup(dup, fid, 'REMS 발전량'); return; }
+
+    const head = rows[0].map(function(h){ return String(h).trim(); });
+    const iDate = _colOf(head, ['일자','날짜','발전일','거래일','일시'], 0);
+    const iKwh  = _colOf(head, ['발전량','생산량','kWh','전력량'], 1);
+
+    const byDate = {};
+    let 건너뜀 = 0;
+    rows.slice(1).forEach(function(r){
+      const d = String(r[iDate] || '').trim().replace(/[./]/g, '-').slice(0, 10);
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(d)){ 건너뜀++; return; }
+      byDate[d] = (byDate[d] || 0) + _closingNum(r[iKwh]);
+    });
+    const dates = Object.keys(byDate).sort();
+    if(!dates.length){ toast('날짜를 알아보지 못했습니다. 일자 칸이 YYYY-MM-DD 인지 확인해 주세요.'); return; }
+
+    const P = loadPower();
+    let 새로 = 0, 덮어씀 = 0;
+    dates.forEach(function(d){
+      const ex = P.daily.filter(function(x){ return x.date === d; })[0];
+      if(ex){ ex.kwh = byDate[d]; 덮어씀++; }
+      else { P.daily.push({date: d, kwh: byDate[d]}); 새로++; }
+    });
+    P.daily.sort(function(a, b){ return a.date < b.date ? -1 : 1; });
+    P.files.push({id:_tid('pf'), name: file.name, kind:'rems', date:_ymd(), rows: dates.length, hash: hash});
+    savePower(P);
+
+    const 총 = dates.reduce(function(s, d){ return s + byDate[d]; }, 0);
+    const an = powerAnomalies();
+    _inboxFinish(fid, '완료',
+      dates.length + '일치 (' + dates[0] + ' ~ ' + dates[dates.length-1] + ') · 합계 '
+      + Math.round(총).toLocaleString() + ' kWh'
+      + ' · 새로 ' + 새로 + '일, 갱신 ' + 덮어씀 + '일'
+      + (건너뜀 ? ' · 날짜를 못 읽어 건너뜀 ' + 건너뜀 + '줄' : '')
+      + (an.length ? ' · ⚠ 이상 ' + an.length + '건' : ' · 이상 없음'),
+      '#/mem/power');
+    toast(dates.length + '일치를 넣었습니다.' + (an.length ? ' 이상 ' + an.length + '건을 찾았습니다.' : ''));
+  });
+}
+
+/* ② 한전 정산명세 — 월별로 모으고 REMS 합계와 대조한다 */
+function inboxParseKepco(file, fid){
+  _readTextFile(file, function(text){
+    const rows = _closingCsvParse(text);
+    if(rows.length < 2){ toast('CSV에서 정산내역을 읽지 못했습니다. PDF라면 값을 직접 넣어 주세요.'); return; }
+    const hash = _taxHash(text);
+    const dup = powerDupFile(hash);
+    if(dup){ powerRejectDup(dup, fid, '한전 정산명세'); return; }
+
+    const head = rows[0].map(function(h){ return String(h).trim(); });
+    const iYm  = _colOf(head, ['정산월','거래월','년월','월','일자','기간'], 0);
+    const iKwh = _colOf(head, ['전력량','판매전력','발전량','kWh'], 1);
+    const iSmp = _colOf(head, ['SMP','계통한계','smp'], -1);
+    const iRec = _colOf(head, ['REC','인증서','rec'], -1);
+    const iAmt = _colOf(head, ['정산금','판매대금','금액','합계','대금'], -1);
+
+    const P = loadPower();
+    let n = 0, 갱신 = 0, 총액 = 0, 건너뜀 = 0;
+    const 대조 = [];
+    rows.slice(1).forEach(function(r){
+      const raw = String(r[iYm] || '').trim().replace(/[./]/g, '-');
+      const m = /(\d{4})-?(\d{1,2})/.exec(raw);
+      if(!m){ 건너뜀++; return; }
+      const ym = m[1] + '-' + String(m[2]).padStart(2, '0');
+      const rec = {
+        ym: ym, kwh: _closingNum(r[iKwh]),
+        smp: iSmp >= 0 ? _closingNum(r[iSmp]) : 0,
+        rec: iRec >= 0 ? _closingNum(r[iRec]) : 0,
+        amount: iAmt >= 0 ? _closingNum(r[iAmt]) : 0,
+        file: file.name
+      };
+      총액 += rec.amount;
+      const ex = P.settle.filter(function(x){ return x.ym === ym; })[0];
+      if(ex){ Object.assign(ex, rec); 갱신++; } else { P.settle.push(rec); n++; }
+
+      // 자체 계량(REMS) 합계와 대조
+      const 자체 = P.daily.filter(function(d){ return d.date.slice(0, 7) === ym; })
+                        .reduce(function(s, d){ return s + d.kwh; }, 0);
+      if(자체 > 0 && rec.kwh > 0){
+        const diff = (자체 - rec.kwh) / 자체 * 100;
+        대조.push({ym: ym, 자체: 자체, 한전: rec.kwh, 차이: diff});
+      }
+    });
+    if(!n && !갱신){ toast('정산월을 알아보지 못했습니다. 월 칸을 확인해 주세요.'); return; }
+
+    P.settle.sort(function(a, b){ return a.ym < b.ym ? -1 : 1; });
+    P.files.push({id:_tid('pf'), name: file.name, kind:'kepco', date:_ymd(), rows: n + 갱신, hash: hash});
+    savePower(P);
+
+    const 벗어남 = 대조.filter(function(c){ return Math.abs(c.차이) > 2; });
+    const 만 = function(v){ return Math.round(v / 10000).toLocaleString() + '만'; };
+    _inboxFinish(fid, '완료',
+      (n + 갱신) + '개월치 · 정산금 ' + 만(총액)
+      + (대조.length
+          ? ' · 계량 대조 ' + 대조.map(function(c){ return c.ym + ' ' + c.차이.toFixed(1) + '%'; }).join(', ')
+            + (벗어남.length ? ' → ⚠ ±2% 벗어남 ' + 벗어남.length + '개월' : ' (정상)')
+          : ' · REMS 자료가 없어 계량 대조 못 함')
+      + (건너뜀 ? ' · 월을 못 읽어 건너뜀 ' + 건너뜀 + '줄' : ''),
+      '#/mem/power');
+    toast((n + 갱신) + '개월치를 넣었습니다.'
+      + (벗어남.length ? ' 계량 차이가 ±2%를 벗어난 달이 ' + 벗어남.length + '개 있습니다.' : ''));
+  });
+}
+
+/* ③ 이상 감지 — 무발전일 · 급락 · 이용률 미달 */
+function powerAnomalies(){
+  const P = loadPower();
+  const d = P.daily || [];
+  if(d.length < 2) return [];
+  const capKw = Number(ledgerGet('설비용량kW')) || 0;
+  const out = [];
+  d.forEach(function(row, i){
+    if(row.kwh === 0){ out.push({date: row.date, 유형:'무발전', 값:'0 kWh', 말:'하루 종일 발전이 없습니다. 인버터·계통을 점검하세요.'}); return; }
+    const 앞 = d.slice(Math.max(0, i - 7), i).filter(function(x){ return x.kwh > 0; });
+    if(앞.length >= 3){
+      const avg = 앞.reduce(function(s, x){ return s + x.kwh; }, 0) / 앞.length;
+      if(row.kwh < avg * 0.5){
+        out.push({date: row.date, 유형:'급락', 값: Math.round(row.kwh).toLocaleString() + ' kWh',
+          말:'최근 ' + 앞.length + '일 평균(' + Math.round(avg).toLocaleString() + ')의 절반 아래입니다.'});
+        return;
+      }
+    }
+    if(capKw > 0){
+      const 이용률 = row.kwh / (capKw * 24) * 100;
+      if(이용률 < 5) out.push({date: row.date, 유형:'이용률 미달', 값: 이용률.toFixed(1) + '%',
+        말:'설비용량 ' + capKw.toLocaleString() + 'kW 기준 이용률이 5% 아래입니다.'});
+    }
+  });
+  return out;
+}
+
+/* ④ 발전·정산 화면에 붙는 실측 카드 — 자료가 있을 때만 나온다 */
+function powerRealCard(){
+  const P = loadPower();
+  const d = P.daily || [], s = P.settle || [];
+  if(!d.length && !s.length) return '';
+  const an = powerAnomalies();
+  const 총 = d.reduce(function(a, x){ return a + x.kwh; }, 0);
+  const 총액 = s.reduce(function(a, x){ return a + x.amount; }, 0);
+  const 만 = function(v){ return Math.round(v / 10000).toLocaleString() + '만'; };
+  return '<div class="card" style="border:2px solid var(--brand);margin-bottom:18px;">'
+    + '<div class="card-title"><h3 class="serif">📈 올린 자료로 본 실제 발전·정산</h3>'
+    + '<a class="btn btn-outline btn-sm" href="#/mem/inbox">📥 자료함</a></div>'
+    + '<p class="text-mute" style="font-size:12.5px;margin-top:0;">아래 숫자는 자료함에 올린 REMS·한전 명세에서 나온 것입니다. '
+    + '이 화면의 나머지 숫자는 1MW 표준모델 예시입니다.</p>'
+    + '<div class="grid grid-4">'
+    + '<div class="kpi"><div class="kpi-n">' + d.length + '</div><div class="kpi-l">발전 기록 (일)</div>'
+    + '<div class="kpi-sub">' + (d.length ? d[0].date + ' ~ ' + d[d.length-1].date : '—') + '</div></div>'
+    + '<div class="kpi"><div class="kpi-n">' + Math.round(총).toLocaleString() + '</div><div class="kpi-l">누적 발전량 (kWh)</div></div>'
+    + '<div class="kpi"><div class="kpi-n">' + (s.length ? 만(총액) : '—') + '</div><div class="kpi-l">누적 정산금</div>'
+    + '<div class="kpi-sub">' + s.length + '개월</div></div>'
+    + '<div class="kpi"><div class="kpi-n" style="' + (an.length ? 'color:var(--danger);' : '') + '">' + an.length + '</div>'
+    + '<div class="kpi-l">이상 알림</div></div></div>'
+    + (an.length
+        ? '<table class="tbl" style="margin-top:12px;"><thead><tr><th style="width:110px;">날짜</th><th style="width:110px;">유형</th>'
+          + '<th style="width:110px;">값</th><th>무엇을 해야 하나</th></tr></thead><tbody>'
+          + an.slice(0, 12).map(function(a){
+              return '<tr><td>' + escapeHtml(a.date) + '</td>'
+                + '<td><span class="badge badge-danger">' + escapeHtml(a.유형) + '</span></td>'
+                + '<td>' + escapeHtml(a.값) + '</td>'
+                + '<td class="text-mute" style="font-size:12.5px;">' + escapeHtml(a.말) + '</td></tr>';
+            }).join('')
+          + '</tbody></table>'
+          + (an.length > 12 ? '<p class="text-mute" style="font-size:12px;">외 ' + (an.length - 12) + '건</p>' : '')
+        : '<p class="text-mute" style="font-size:13px;margin:10px 0 0;">이상 징후가 없습니다.</p>')
+    + (s.length
+        ? '<table class="tbl" style="margin-top:12px;"><thead><tr><th>정산월</th><th>한전 전력량</th><th>자체 계량</th>'
+          + '<th>차이</th><th>정산금</th></tr></thead><tbody>'
+          + s.map(function(x){
+              const 자체 = d.filter(function(y){ return y.date.slice(0,7) === x.ym; }).reduce(function(a, y){ return a + y.kwh; }, 0);
+              const diff = (자체 > 0 && x.kwh > 0) ? ((자체 - x.kwh) / 자체 * 100) : null;
+              return '<tr><td><b>' + escapeHtml(x.ym) + '</b></td>'
+                + '<td>' + Math.round(x.kwh).toLocaleString() + ' kWh</td>'
+                + '<td>' + (자체 ? Math.round(자체).toLocaleString() + ' kWh' : '—') + '</td>'
+                + '<td>' + (diff === null ? '—'
+                    : '<span class="badge ' + (Math.abs(diff) > 2 ? 'badge-danger' : 'badge-success') + '">'
+                      + diff.toFixed(2) + '%</span>') + '</td>'
+                + '<td>' + (x.amount ? 만(x.amount) : '—') + '</td></tr>';
+            }).join('')
+          + '</tbody></table>'
+          + '<p class="text-mute" style="font-size:12px;margin-top:6px;">차이가 ±2%를 넘으면 한전에 계량 확인을 요청하세요.</p>'
+        : '')
+    + '</div>';
 }
 
 function inboxRender(){
