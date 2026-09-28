@@ -4821,6 +4821,7 @@ async function inboxProcess(fid){
     if(it.kind === 'bank'){  inboxParseBank(f, fid);  return; }
     if(it.kind === 'rems'){  inboxParseRems(f, fid);  return; }
     if(it.kind === 'kepco'){ inboxParseKepco(f, fid); return; }
+    if(it.kind === 'roster'){ inboxParseRoster(f, fid); return; }
     toast(k.이름 + ' 자동 읽기는 아직 준비 중입니다. 값을 직접 넣어 주세요.');
   }
 
@@ -5172,6 +5173,101 @@ function powerRealCard(){
           + '<p class="text-mute" style="font-size:12px;margin-top:6px;">차이가 ±2%를 넘으면 한전에 계량 확인을 요청하세요.</p>'
         : '')
     + '</div>';
+}
+
+/* ─── 조합원 명부 CSV — 브라우저 안에서만 처리한다 (2026-09-28) ───
+   🔴 개인정보다. 설계 원칙 셋:
+     ① 서버로 절대 안 보낸다 — 파싱도 저장도 브라우저 안에서 끝낸다
+     ② 최소수집 — 명부에 필요한 4개(성명·직위·가입일·출자금)만 가져오고 나머지 열은 버린다
+     ③ 주민등록번호가 섞여 있으면 아예 들이지 않는다 — 열을 지우고 다시 올리게 한다
+   재업로드는 성명(+가입일)으로 맞춰 갱신하므로 여러 번 올려도 중복되지 않는다. */
+const _RRN = /\b\d{6}\s*[-–—]\s*[1-4]\d{6}\b/;           // 주민등록번호 형태
+
+function _rosterWon(v){
+  /* '500만원' · '5,000,000' · '500' 을 모두 만원 단위 정수로 */
+  const s = String(v == null ? '' : v).trim();
+  if(!s) return 0;
+  const n = Number(s.replace(/[^\d.]/g, '')) || 0;
+  if(/억/.test(s)) return Math.round(n * 10000);
+  if(/만/.test(s)) return Math.round(n);
+  return n >= 10000 ? Math.round(n / 10000) : Math.round(n);   // 원 단위로 보이면 만원으로
+}
+
+function inboxParseRoster(file, fid){
+  _readTextFile(file, function(text){
+    // ③ 주민번호가 있으면 들이지 않는다
+    if(_RRN.test(text)){
+      showDyn({
+        title: '주민등록번호가 들어 있습니다 — 들이지 않았습니다',
+        sub: file.name,
+        body: '<p style="margin-top:0;">명부 안에서 <b>주민등록번호 형태의 값</b>을 찾았습니다.'
+            + ' 햇소자는 주민번호를 받지 않습니다 — 저장도, 전송도 하지 않습니다.</p>'
+            + '<p style="font-size:13.5px;"><b>이렇게 해 주세요.</b> 원본에서 주민번호 열을 통째로 지운 뒤 다시 올려 주세요.'
+            + ' 조합원 명부에 필요한 것은 <b>성명·직위·가입일·출자금</b> 네 가지뿐입니다.</p>'
+            + '<p class="text-mute" style="font-size:12.5px;">주민번호가 필요한 서류(원천징수 등)는 그때그때 원본을 보고 직접 적으시고,'
+            + ' 플랫폼에는 남기지 마세요.</p>',
+        foot: '<button class="btn btn-primary" onclick="closeDyn()">알겠습니다</button>'
+      });
+      _inboxFinish(fid, '거부', '주민등록번호가 있어 들이지 않았습니다 — 해당 열을 지우고 다시 올려 주세요');
+      return;
+    }
+
+    const rows = _closingCsvParse(text);
+    if(rows.length < 2){ toast('CSV에서 조합원을 읽지 못했습니다. 첫 줄이 머리글인지 확인해 주세요.'); return; }
+
+    const head = rows[0].map(function(h){ return String(h).trim(); });
+    const iName  = _colOf(head, ['성명','이름','조합원명'], 0);
+    const iRole  = _colOf(head, ['직위','역할','구분'], -1);
+    const iJoin  = _colOf(head, ['가입일','가입','등록일'], -1);
+    // ⚠ '출자' 로 찾으면 '출자좌수' 에 먼저 걸린다 — 좌수와 금액을 반드시 갈라야 한다
+    const iUnit  = head.findIndex(function(h){ return h.indexOf('좌') !== -1; });
+    const iShare = head.findIndex(function(h){
+      return h.indexOf('좌') === -1 && (h.indexOf('출자') !== -1 || h.indexOf('납입') !== -1);
+    });
+
+    // ② 최소수집 — 쓰는 열 말고는 전부 버린다. 무엇을 버렸는지 사람에게 알린다
+    const 쓰는열 = [iName, iRole, iJoin, iShare, iUnit].filter(function(i){ return i >= 0; });
+    const 버린열 = head.filter(function(h, i){ return 쓰는열.indexOf(i) === -1 && h; });
+
+    loadUserMembers();
+    let 새로 = 0, 갱신 = 0, 건너뜀 = 0;
+    rows.slice(1).forEach(function(r){
+      const name = String(r[iName] || '').trim();
+      if(!name){ 건너뜀++; return; }
+      const join  = iJoin >= 0 ? String(r[iJoin] || '').trim().replace(/[./]/g, '-').slice(0, 10) : '';
+      const 만원  = iShare >= 0 ? _rosterWon(r[iShare]) : 0;
+      const rec = {
+        name: name,
+        role: (iRole >= 0 ? String(r[iRole] || '').trim() : '') || '조합원',
+        joinDate: /^\d{4}-\d{2}-\d{2}$/.test(join) ? join : '',
+        share: 만원 ? 만원 + '만원' : '0만원',
+        voting: true
+      };
+      if(iUnit >= 0) rec.shares = Number(String(r[iUnit] || '').replace(/[^\d]/g, '')) || 0;
+
+      const 같음 = MOCK.members.filter(function(m){
+        return m.name === name && (!rec.joinDate || !m.joinDate || m.joinDate === rec.joinDate);
+      })[0];
+      if(같음){ Object.assign(같음, rec); 갱신++; } else { MOCK.members.push(rec); 새로++; }
+    });
+
+    if(!새로 && !갱신){ toast('성명을 알아보지 못했습니다. 머리글에 「성명」 열이 있는지 확인해 주세요.'); return; }
+    persistMembers();
+
+    const 총출자 = MOCK.members.reduce(function(s, m){ return s + (parseInt(m.share) || 0); }, 0);
+    _inboxFinish(fid, '완료',
+      '조합원 ' + (새로 + 갱신) + '명 (새로 ' + 새로 + ', 갱신 ' + 갱신 + ')'
+      + ' · 총 출자금 ' + 총출자.toLocaleString() + '만원'
+      + (버린열.length ? ' · 안 쓰는 열 ' + 버린열.length + '개 버림(' + 버린열.slice(0, 3).join(', ') + (버린열.length > 3 ? ' 외' : '') + ')' : '')
+      + (건너뜀 ? ' · 성명이 비어 건너뜀 ' + 건너뜀 + '줄' : '')
+      + ' · 🔒 이 기기 안에만 저장했습니다',
+      '#/mem/members');
+
+    // 원장에도 조합원 수를 제안으로 올린다(사람이 확정해야 들어간다)
+    addProposal('조합원수', String(MOCK.members.length), file.name, '명부에서 셈');
+    inboxRender();
+    toast((새로 + 갱신) + '명을 명부에 넣었습니다. 서버로 보내지 않았습니다.');
+  });
 }
 
 function inboxRender(){
