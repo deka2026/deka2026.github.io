@@ -4770,6 +4770,8 @@ function memInbox(){
     + '</tbody></table></div>';
 }
 
+const _inboxFiles = {};   // id → File. 새로고침하면 사라진다(브라우저 보안). 그때는 다시 올려야 한다.
+
 function inboxAddFiles(files){
   if(!files || !files.length) return;
   const list = loadInbox();
@@ -4777,8 +4779,10 @@ function inboxAddFiles(files){
   Array.prototype.forEach.call(files, function(f){
     const c = classifyFile(f.name);
     if(c.불확실) 불확실++;
+    const id = 'f' + Date.now() + Math.floor(Math.random() * 1000);
+    _inboxFiles[id] = f;
     list.unshift({
-      id: 'f' + Date.now() + Math.floor(Math.random() * 1000),
+      id: id,
       name: f.name, size: f.size, kind: c.kind ? c.kind.id : '',
       불확실: !!c.불확실, 상태: '대기', 때: new Date().toISOString()
     });
@@ -4808,6 +4812,15 @@ async function inboxProcess(fid){
   if(!it) return;
   const k = docKindById(it.kind);
   if(!k){ toast('자료 종류를 먼저 골라 주세요.'); return; }
+
+  // 브라우저에서 바로 읽는 유형(CSV 계열)은 서버를 거치지 않는다
+  if(k.파싱 === 'client'){
+    const f = _inboxFiles[fid];
+    if(!f){ toast('새로고침 뒤에는 파일을 다시 올려야 읽을 수 있습니다.'); return; }
+    if(it.kind === 'bank'){ inboxParseBank(f, fid); return; }
+    toast(k.이름 + ' 자동 읽기는 아직 준비 중입니다. 값을 직접 넣어 주세요.');
+  }
+
   it.상태 = '처리중'; saveInbox(list); inboxRender();
 
   let ok = false;
@@ -4861,6 +4874,77 @@ function inboxManualSave(){
   toast(n ? n + '건을 제안에 넣었습니다.' : '넣은 값이 없습니다.');
 }
 
+/* ─── 통장 거래내역 CSV — 자료함에서 바로 읽는다 (2026-09-28) ───
+   기존 taxImportBank 와 같은 파이프라인(거래처 추천 규칙·해시 잠금)을 쓰되,
+   ① 같은 파일을 두 번 올려 이중 계상되는 것을 막고
+   ② 무엇이 들어갔는지 요약을 자료함에 남긴다. */
+function inboxParseBank(file, fid){
+  _readTextFile(file, function(text){
+    const rows = _closingCsvParse(text);
+    if(rows.length < 2){ toast('CSV에서 거래를 읽지 못했습니다. 첫 줄이 머리글인지 확인해 주세요.'); return; }
+
+    // ① 중복 방어 — 같은 내용을 이미 올렸는지 해시로 본다
+    const hash = _taxHash(text);
+    const dup = (MOCK.tax.bankFiles || []).filter(function(b){ return b.hash === hash; })[0];
+    if(dup){
+      showDyn({
+        title: '같은 통장 내역을 이미 올렸습니다',
+        sub: dup.name + ' · ' + dup.date + ' · ' + dup.rows + '건',
+        body: '<p style="margin-top:0;">내용이 완전히 같은 파일입니다. 그대로 넣으면 <b>거래가 두 번 잡혀 수입·지출이 부풀려집니다.</b></p>'
+            + '<p class="text-mute" style="font-size:13px;">다른 달 내역을 올리려던 것이라면 파일을 다시 확인해 주세요.</p>',
+        foot: '<button class="btn btn-primary" onclick="closeDyn()">알겠습니다</button>'
+      });
+      const l = loadInbox(); const i = l.filter(function(x){ return x.id === fid; })[0];
+      if(i){ i.상태 = '중복'; i.요약 = '이미 올린 파일과 내용이 같아 넣지 않았습니다'; saveInbox(l); inboxRender(); }
+      return;
+    }
+
+    // ② 적재 — 컬럼 이름은 은행마다 달라서 키워드로 찾는다
+    const head = rows[0].map(function(h){ return String(h).trim(); });
+    const col = function(names, def){
+      const i = head.findIndex(function(h){ return names.some(function(n){ return h.includes(n); }); });
+      return i >= 0 ? i : def;
+    };
+    const iDate = col(['일자','날짜','거래일'], 0), iDesc = col(['적요','내용','거래내용'], 1);
+    const iOut = col(['출금'], 2), iIn = col(['입금'], 3), iBal = col(['잔액'], 4);
+
+    let n = 0, 추천 = 0, 입금 = 0, 출금 = 0, 현금 = 0, first = '', last = '', 건너뜀 = 0;
+    rows.slice(1).forEach(function(r){
+      const date = String(r[iDate] || '').trim().replace(/[./]/g, '-').slice(0, 10);
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){ 건너뜀++; return; }
+      const desc = String(r[iDesc] || '').trim();
+      const vid = taxSuggestVendor(desc);
+      const inn = _closingNum(r[iIn]), out = _closingNum(r[iOut]);
+      const cash = /현금|ATM|CD출금|자기앞/.test(desc);
+      MOCK.tax.bank.push({id:_tid('tx'), date: date, desc: desc, inn: inn, out: out, bal:_closingNum(r[iBal]),
+        vendorId: vid, confirmed: false, cash: cash, cashReason:'', memo:'', grant:'', evId:'', file: file.name});
+      n++; if(vid) 추천++; 입금 += inn; 출금 += out; if(cash) 현금++;
+      if(!first || date < first) first = date;
+      if(!last || date > last) last = date;
+    });
+
+    if(!n){ toast('날짜 형식을 알아보지 못했습니다. 거래일 칸이 YYYY-MM-DD 인지 확인해 주세요.'); return; }
+
+    MOCK.tax.bankFiles.push({id:_tid('bf'), name: file.name, date:_ymd(), rows: n, hash: hash});
+    MOCK.tax.bank.sort(function(a, b){ return a.date < b.date ? -1 : 1; });
+    persistTax(); taxLog('통장 원본 업로드(자료함)', file.name);
+
+    const 만 = function(v){ return Math.round(v / 10000).toLocaleString() + '만'; };
+    const l = loadInbox(); const i = l.filter(function(x){ return x.id === fid; })[0];
+    if(i){
+      i.상태 = '완료';
+      i.요약 = n + '건 (' + first + ' ~ ' + last + ') · 입금 ' + 만(입금) + ' / 출금 ' + 만(출금)
+             + ' · 거래처 자동추천 ' + 추천 + '건, 확인 필요 ' + (n - 추천) + '건'
+             + (현금 ? ' · 현금거래 ' + 현금 + '건(사유 적어야 함)' : '')
+             + (건너뜀 ? ' · 날짜를 못 읽어 건너뜀 ' + 건너뜀 + '줄' : '');
+      i.가기 = '#/mem/taxpay';
+      saveInbox(l);
+    }
+    inboxRender();
+    toast(n + '건을 읽었습니다. 거래처 추천 ' + 추천 + '건 — 확정하러 가세요.');
+  });
+}
+
 function inboxRender(){
   const box = document.getElementById('inboxList');
   if(box){
@@ -4879,10 +4963,15 @@ function inboxRender(){
             + '</select>'
             + (it.불확실 ? '<div class="text-mute" style="font-size:11.5px;color:var(--danger);">종류를 확인해 주세요</div>' : '')
             + '</td>'
-            + '<td><span class="badge ' + (it.상태 === '완료' ? 'badge-success' : 'badge-info') + '">' + escapeHtml(it.상태) + '</span></td>'
+            + '<td><span class="badge ' + (it.상태 === '완료' ? 'badge-success' : it.상태 === '중복' ? 'badge-danger' : 'badge-info') + '">' + escapeHtml(it.상태) + '</span></td>'
             + '<td><button class="btn btn-primary btn-sm" onclick="inboxProcess(\'' + it.id + '\')">처리</button> '
             + '<button class="btn btn-outline btn-sm" onclick="inboxRemove(\'' + it.id + '\')">삭제</button></td></tr>'
-            + (k ? '<tr><td colspan="4" class="text-mute" style="font-size:12px;padding-top:0;">→ ' + k.작업.map(escapeHtml).join(' · ') + '</td></tr>' : '');
+            + (it.요약
+                ? '<tr><td colspan="4" style="font-size:12.5px;padding-top:0;">'
+                  + '<b>' + (it.상태 === '중복' ? '⚠ ' : '✅ ') + '</b>' + escapeHtml(it.요약)
+                  + (it.가기 ? ' <a class="btn btn-outline btn-sm" href="' + it.가기 + '" style="margin-left:6px;">이어서 하기</a>' : '')
+                  + '</td></tr>'
+                : (k ? '<tr><td colspan="4" class="text-mute" style="font-size:12px;padding-top:0;">→ ' + k.작업.map(escapeHtml).join(' · ') + '</td></tr>' : ''));
         }).join('')
       + '</tbody></table>'
       : '<p class="text-mute">아직 올린 자료가 없습니다.</p>';
