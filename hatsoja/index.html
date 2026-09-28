@@ -4831,24 +4831,42 @@ async function inboxProcess(fid){
 
   it.상태 = '처리중'; saveInbox(list); inboxRender();
 
-  let ok = false;
-  try{
-    const res = await fetch('/api/docs/ingest', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({kind: it.kind, name: it.name})
-    });
-    if(res.ok){
+  let ok = false, 읽은수 = 0;
+  const f2 = _inboxFiles[fid];
+  if(f2){
+    try{
+      const fd = new FormData();
+      fd.append('kind', it.kind);
+      fd.append('file', f2, it.name);
+      const res = await fetch('/api/docs/ingest', {method:'POST', body: fd});
       const d = await res.json().catch(function(){ return null; });
-      if(d && d.fields){
-        Object.keys(d.fields).forEach(function(f){ addProposal(f, d.fields[f], it.name, '서버 추출'); });
-        ok = true;
+      if(res.ok && d && d.fields){
+        Object.keys(d.fields).forEach(function(key){
+          const v = d.fields[key];
+          // 서버는 {값, 확신, 위치} 로 준다. 옛 형식(민값)도 받아 준다
+          const 값  = (v && typeof v === 'object') ? v.값 : v;
+          const 확신 = (v && typeof v === 'object') ? v.확신 : null;
+          const 위치 = (v && typeof v === 'object') ? v.위치 : '';
+          if(값 === undefined || 값 === null || 값 === '') return;
+          const 꼬리 = (확신 === null ? '' : ' · 확신 ' + Math.round(확신 * 100) + '%')
+                     + (위치 ? ' · ' + 위치 : '');
+          addProposal(key, 값, it.name, '자동판독' + 꼬리);
+          읽은수++;
+        });
+        ok = 읽은수 > 0;
+      } else if(d && d.error){
+        toast(d.error);
       }
-    }
-  }catch(e){ /* 서버 미배치 — 폴백 */ }
+    }catch(e){ /* 서버 미배치 — 수기 입력으로 떨어진다 */ }
+  }
 
   const l2 = loadInbox();
   const i2 = l2.filter(function(x){ return x.id === fid; })[0];
-  if(i2){ i2.상태 = ok ? '완료' : '대기(수기)'; saveInbox(l2); }
+  if(i2){
+    i2.상태 = ok ? '완료' : '대기(수기)';
+    if(ok) i2.요약 = '자동판독 ' + 읽은수 + '건 — 확인 기다리는 값에서 확정하세요';
+    saveInbox(l2);
+  }
   inboxRender();
   if(!ok){
     _inboxManual = {kindId: k.id, fileName: it.name};
