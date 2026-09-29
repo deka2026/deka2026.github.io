@@ -1524,7 +1524,7 @@ const AUTH_KEY = 'sunvillage_auto_user';
    메뉴·접근권한은 ROLE_MENUS 한 곳에서만 정의한다 — 상단 메뉴바·사이드바·라우터 접근검사가 모두 이 표를 본다. */
 const ROLES = {
   admin:      {label:'관리자',       emoji:'🔐', home:'#/adm/dashboard', desc:'플랫폼 전체 운영 · 회원 승인 · 콘텐츠 관리'},
-  federation: {label:'연합회',       emoji:'🤝', home:'#/mem/union',     desc:'참여 마을 전체 현황 · 공모·심사 · 공동사업'},
+  federation: {label:'연합회',       emoji:'🤝', home:'#/mem/fedsupport', desc:'회원조합 지원업무 · 연합회 자체 사무'},
   coop:       {label:'회원협동조합', emoji:'🏘', home:'#/mem/dashboard', desc:'우리 마을 조합의 설립·건설·운영 업무'},
   guest:      {label:'손님',         emoji:'👋', home:'#/pub/home',      desc:'사업 소개 · 자가진단 · 상담 신청 (승인 전)'},
 };
@@ -1548,25 +1548,29 @@ const ROLE_MENUS = {
       ['mem','chat','💬','AI 상담'],
     ]],
   ],
+  /* 연합회 메뉴는 두 갈래로 나눈다 (2026-09-29).
+     ① 협동조합 회원 지원업무 — 남(회원조합)의 일을 돕는 업무. 자료는 서버에서 읽고 편집은 안 한다.
+     ② 연합회 자체 사무      — 연합회 자신의 살림(회비·총회·공동사업·결산).
+     두 갈래를 섞으면 "회원 돈"과 "연합회 돈"이 한 화면에 붙어 회계가 흐려진다. */
   federation: [
-    ['연합회', [
-      ['mem','union','🤝','연합회 현황판'],
+    ['① 협동조합 회원 지원업무', [
+      ['mem','fedsupport','🤝','회원조합 지원 현황판'],
+      ['mem','fedqueue','📮','지원요청 처리'],
       ['adm','villages','🏘','조합·마을 현황'],
-      ['adm','contest','🏆','공모·심사'],
+      ['adm','contest','🏆','공모·심사 지원'],
+      ['mem','review','📄','서류 검토 대행'],
+      ['mem','law','⚖️','법령·인허가 안내'],
+      ['mem','docs','📝','문서 작성 지원'],
       ['adm','taxkpi','📈','세무 파일럿 KPI'],
+      ['mem','library','📚','공지·자료 배포'],
     ]],
-    ['공동업무', [
-      ['mem','inbox','📥','자료함'],
-      ['mem','state','📒','조합 현황'],
-      ['mem','todo','✅','할 일'],
-      ['mem','docs','📝','문서 자동 생성'],
-      ['mem','review','📄','서류 AI 검토'],
-      ['mem','law','⚖️','법령·인허가'],
-      ['mem','revenue','💰','수익 시뮬레이션'],
-      ['mem','schedule','📅','일정·마감'],
+    ['② 연합회 자체 사무', [
+      ['mem','fedoffice','🏢','사무국 운영(총회·이사회)'],
+      ['mem','feddues','💳','회비 부과·수납'],
+      ['mem','fedbiz','🧺','공동사업'],
+      ['mem','fedbooks','📒','연합회 회계·결산'],
     ]],
     ['소통', [
-      ['mem','library','📚','공지·자료실'],
       ['mem','chat','💬','AI 상담'],
       ['mem','mypage','👤','마이페이지'],
     ]],
@@ -1812,6 +1816,14 @@ const MENU_DESC = {
   library:['공지·자료실','공지사항과 서식 자료를 봅니다'],
   chat:['AI 상담','무엇이든 물어보면 AI가 답합니다'],
   ask:['GPU 엔진 질문 모음','주제별 예시 질문을 눌러 GPU 엔진에 바로 묻습니다'],
+  /* 연합회 — ① 협동조합 회원 지원업무 */
+  fedsupport:['회원조합 지원 현황판','회원조합이 올린 월 실적을 읽고, 먼저 도와야 할 곳을 찾습니다'],
+  fedqueue:['지원요청 처리','회원조합이 올린 지원요청을 맡아 처리하고 회신합니다'],
+  /* 연합회 — ② 자체 사무 */
+  fedoffice:['사무국 운영','연합회 총회·이사회·규정·인사 기록을 관리합니다'],
+  feddues:['회비 부과·수납','회원조합 정산금을 기준으로 회비를 산정해 부과하고 수납을 기록합니다'],
+  fedbiz:['공동사업','공동 REC 판매·공동 O&M 등 연합회 공동사업의 성과를 회비와 대비해 봅니다'],
+  fedbooks:['연합회 회계·결산','연합회 자체 수입(회비·공동사업)과 지출만 담은 회계입니다'],
 };
 
 /* 용어 쉬운 말 병기 (개선안 3-3) */
@@ -2233,6 +2245,8 @@ function navigate(){
     if(scope === 'mem' && page === 'success') sucRender();
     if(scope === 'mem' && page === 'schedule') dlCalc();
     if(scope === 'mem' && page === 'cost') costCalc();
+    if(scope === 'mem' && FED_PAGES.indexOf(page) !== -1) fedLoad(page);
+    if(scope === 'mem' && page === 'power' && _MY_MONTHLY === null) powerLoadMine();
   }
   updateConvenienceUI(scope, page || 'dashboard');
   renderRoleNav();   // 상단 등급 메뉴의 현재 위치 표시 갱신
@@ -2333,6 +2347,12 @@ function renderMemberPage(page){
     case 'power':     return memPower();
     case 'biz':       return memBiz();
     case 'union':     return memUnion();
+    case 'fedsupport':return fedSupportBoard();
+    case 'fedqueue':  return fedQueuePage();
+    case 'fedoffice': return fedOfficePage();
+    case 'feddues':   return fedDuesPage();
+    case 'fedbiz':    return fedBizPage();
+    case 'fedbooks':  return fedBooksPage();
     case 'docs':      return memDocs();
     case 'review':    return memReview();
     case 'law':       return memLaw();
@@ -3756,6 +3776,7 @@ function memPower(){
   const fund = Math.round(settle * 0.1);
   return `
     ${powerRealCard()}
+    ${powerSubmitCard()}
     <div class="sec-head">
       <h1>⚡ 발전·정산·배당</h1>
       <p class="sec-desc">발전 계량 데이터와 한전 정산내역을 자동 대조하고, 수익 배분·배당 적립·이상 감지까지 한 번에 — 조합원 누구나 같은 숫자를 봅니다. <span class="badge badge-mute">데모 데이터 (1MW 표준모델)</span></p>
@@ -4049,6 +4070,495 @@ function memUnion(){
         <button class="btn btn-outline" onclick="toast('선진지 연수 수요조사에 등록되었습니다. (데모)')">🚌 선진지 연수</button>
         <button class="btn btn-outline" onclick="location.hash='#/mem/library'">📚 사례 공유 게시판</button>
       </div>
+    </div>
+  `;
+}
+
+
+/* ==================== 연합회 화면 (2026-09-29 신설) ====================
+   연합회 업무를 두 갈래로 나눠 담는다.
+     ① 협동조합 회원 지원업무 — fedsupport(현황판) · fedqueue(지원요청 처리)
+     ② 연합회 자체 사무      — fedoffice(총회·이사회) · feddues(회비) · fedbiz(공동사업) · fedbooks(회계·결산)
+   ★ 원칙: 회원조합의 돈(정산금·배분)과 연합회의 돈(회비·공동사업 수익)을 같은 표에 합산하지 않는다.
+     합치면 "연합회 매출"이 회원 매출로 부풀려진다. 화면마다 어느 쪽 돈인지 띠로 밝힌다. */
+
+const FED_PAGES = ['fedsupport','fedqueue','fedoffice','feddues','fedbiz','fedbooks'];
+const FED_DUES_RATE = 0.02;            // 회비 요율 — 매년 총회 재의결(연합체 회비 = 운영관리비의 2%p)
+let _FED = {summary:null, dues:null, affairs:null, support:null, 때:null, 로딩:false, 실데이터:false};
+
+function fedMoneyBar(kind){
+  return kind === '회원'
+    ? '<div class="section" style="border-left:3px solid var(--primary);"><b>회원조합의 돈입니다.</b> 이 화면의 금액은 각 조합의 것이며 연합회 회계에 잡히지 않습니다. 연합회는 읽기만 합니다.</div>'
+    : '<div class="section" style="border-left:3px solid #b58900;"><b>연합회 자체 회계입니다.</b> 회원조합 정산금과 합산하지 않습니다.</div>';
+}
+
+/* 서버에서 끌어오고 다시 그린다. 실패하면 데모 값으로 화면을 채운다(체험 모드). */
+async function fedLoad(page, force){
+  if(_FED.로딩) return;
+  if(_FED.때 && !force){ return; }
+  _FED.로딩 = true;
+  try{
+    if(REAL_API){
+      const opt = {credentials:'same-origin'};
+      const [sm, du, af, sp] = await Promise.all([
+        fetch('/api/monthly/summary', opt).then(r => r.json()).catch(() => ({ok:false})),
+        fetch('/api/fed/dues', opt).then(r => r.json()).catch(() => ({ok:false})),
+        fetch('/api/fed/affairs', opt).then(r => r.json()).catch(() => ({ok:false})),
+        fetch('/api/fed/support', opt).then(r => r.json()).catch(() => ({ok:false})),
+      ]);
+      if(sm.ok){
+        _FED.summary = sm; _FED.실데이터 = true;
+        _FED.dues = du.ok ? du : {items:[]};
+        _FED.affairs = af.ok ? af : {items:[]};
+        _FED.support = sp.ok ? sp : {items:[]};
+      }
+    }
+  }catch(e){ /* 서버 미연결 — 아래 데모 폴백 */ }
+  if(!_FED.실데이터) fedDemoFill();
+  _FED.때 = new Date().toISOString();
+  _FED.로딩 = false;
+  const main = document.getElementById('appMain');
+  if(main && currentRoute() === 'mem/' + page) main.innerHTML = renderMemberPage(page);
+}
+
+/* 데모 폴백 — 서버가 없을 때도 화면 구조를 보여준다(숫자는 예시임을 표시). */
+function fedDemoFill(){
+  const by = MOCK.villages.map((v, i) => ({
+    village_id: v.id || i+1, village_name: v.name, region: v.region, capacity: v.capacity,
+    phase: v.phase, months: v.phase === '운영' ? 8 : 0,
+    kwh: v.phase === '운영' ? 420000 : 0, revenue: v.phase === '운영' ? 84000000 : 0,
+    expense: v.phase === '운영' ? 11800000 : 0, debt: v.phase === '운영' ? 39000000 : 0,
+    last_month: v.phase === '운영' ? '2026-08' : null,
+  }));
+  _FED.summary = {ok:true, by_village: by, by_month: []};
+  _FED.dues = {items:[], 부과합계:0, 수납합계:0};
+  _FED.affairs = {items:[
+    {id:'demo1', kind:'총회', title:'2026년 정기총회(예시)', date:'2026-02-20', status:'완료', amount:0, owner:'사무국'},
+    {id:'demo2', kind:'이사회', title:'3월 정기이사회(예시)', date:'2026-03-18', status:'완료', amount:0, owner:'사무국'},
+  ]};
+  _FED.support = {items:[]};
+}
+
+function fedEmptyCard(무엇){
+  return `<div class="card"><p class="text-mute" style="margin:0;">${escapeHtml(무엇)}이(가) 아직 없습니다.
+    회원조합이 월 실적을 올리거나, 아래에서 직접 등록하면 여기에 쌓입니다.</p></div>`;
+}
+function fedStamp(){
+  return `<p class="text-mute" style="font-size:12px;margin:6px 0 0;">
+    ${_FED.실데이터 ? '서버 실데이터' : '예시(데모) — 서버에 연결되면 실제 값으로 바뀝니다'}
+    ${_FED.때 ? ' · 읽은 때 ' + escapeHtml(_FED.때.slice(0,16).replace('T',' ')) : ''}
+    <button class="btn btn-ghost btn-sm" onclick="fedRefresh()">↻ 새로 읽기</button></p>`;
+}
+function fedRefresh(){
+  const page = currentRoute().split('/')[1];
+  _FED.때 = null;
+  fedLoad(page, true);
+  toast('서버에서 다시 읽는 중입니다.');
+}
+
+/* ── ① 지원업무: 회원조합 지원 현황판 ── */
+function fedSupportBoard(){
+  const S = _FED.summary;
+  if(!S) return `<div class="sec-head"><h1>🤝 회원조합 지원 현황판</h1></div><div class="card"><p>불러오는 중…</p></div>`;
+  const rows = S.by_village || [];
+  const 운영중 = rows.filter(r => r.months > 0);
+  const totKwh = rows.reduce((a,r) => a + (r.kwh||0), 0);
+  const totRev = rows.reduce((a,r) => a + (r.revenue||0), 0);
+  const 미처리 = ((_FED.support && _FED.support.items) || []).filter(x => x.status !== '완료').length;
+  const 최신월 = rows.reduce((m,r) => (r.last_month && r.last_month > m) ? r.last_month : m, '');
+
+  /* 지원이 필요한 곳을 규칙으로 뽑는다 — 사람이 표를 훑어 찾지 않게 */
+  const 경보 = [];
+  rows.forEach(r => {
+    if(r.months === 0) 경보.push([r.village_name, '자료 미제출', '월 실적이 한 건도 없습니다 — 자료함 사용법부터 안내']);
+    else if(최신월 && r.last_month < 최신월) 경보.push([r.village_name, '보고 지연', `최근 제출 ${r.last_month} · 기준월 ${최신월}`]);
+    const 수지 = (r.revenue||0) - (r.expense||0) - (r.debt||0);
+    if(r.months > 0 && 수지 < 0) 경보.push([r.village_name, '수지 마이너스', `누적 ${_fmtN(수지)}원 — 적립률·상환방식 재검토 필요`]);
+  });
+
+  return `
+    <div class="sec-head">
+      <h1>🤝 회원조합 지원 현황판</h1>
+      <p class="sec-desc">연합회가 <b>회원조합을 돕기 위해</b> 보는 화면입니다. 편집은 각 조합이 하고, 연합회는 읽고 지원합니다.</p>
+    </div>
+    ${fedMoneyBar('회원')}
+    <div class="grid grid-4">
+      <div class="kpi"><div class="kpi-n">${rows.length}</div><div class="kpi-l">회원조합</div><div class="kpi-sub">운영단계 ${운영중.length}곳</div></div>
+      <div class="kpi"><div class="kpi-n">${_fmtN(totKwh)}</div><div class="kpi-l">누적 발전량(kWh)</div><div class="kpi-sub">제출된 달 기준</div></div>
+      <div class="kpi"><div class="kpi-n">${_fmtN(totRev/10000)}</div><div class="kpi-l">누적 정산금(만원)</div><div class="kpi-sub">회원조합 수입</div></div>
+      <div class="kpi"><div class="kpi-n">${미처리}</div><div class="kpi-l">미처리 지원요청</div><div class="kpi-sub"><a href="#/mem/fedqueue" style="color:var(--primary);">처리하러 가기</a></div></div>
+    </div>
+
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">🚨 먼저 도와야 할 곳 (${경보.length})</h3></div>
+      ${경보.length ? `<table class="tbl">
+        <thead><tr><th>조합</th><th>신호</th><th>무엇을 해야 하나</th></tr></thead>
+        <tbody>${경보.map(([n,k,d]) => `<tr><td><strong>${escapeHtml(n)}</strong></td>
+          <td><span class="badge ${k==='수지 마이너스'?'badge-danger':'badge-info'}">${escapeHtml(k)}</span></td>
+          <td>${escapeHtml(d)}</td></tr>`).join('')}</tbody></table>`
+        : '<p class="text-mute" style="margin:0;">모든 회원조합이 제때 제출했고 수지도 양(+)입니다.</p>'}
+    </div>
+
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">📋 회원조합별 실적 (제출분)</h3></div>
+      <table class="tbl">
+        <thead><tr><th>조합</th><th>지역</th><th>설비</th><th>단계</th><th class="num">제출 월</th>
+          <th class="num">발전량(kWh)</th><th class="num">정산금</th><th class="num">운영비</th><th class="num">원리금</th><th class="num">수지</th><th>최근</th></tr></thead>
+        <tbody>${rows.map(r => {
+          const 수지 = (r.revenue||0) - (r.expense||0) - (r.debt||0);
+          return `<tr>
+            <td><strong>${escapeHtml(r.village_name||'')}</strong></td>
+            <td>${escapeHtml(r.region||'')}</td><td>${escapeHtml(r.capacity||'')}</td>
+            <td><span class="badge badge-info">${escapeHtml(r.phase||'')}</span></td>
+            <td class="num">${r.months||0}</td>
+            <td class="num">${_fmtN(r.kwh||0)}</td>
+            <td class="num">${_fmtN(r.revenue||0)}</td>
+            <td class="num">${_fmtN(r.expense||0)}</td>
+            <td class="num">${_fmtN(r.debt||0)}</td>
+            <td class="num" style="color:${수지<0?'var(--danger)':'var(--primary)'};">${_fmtN(수지)}</td>
+            <td>${escapeHtml(r.last_month||'—')}</td></tr>`;
+        }).join('')}</tbody>
+      </table>
+      ${fedStamp()}
+    </div>
+
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">🧰 지원 도구</h3></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-outline" onclick="location.hash='#/mem/review'">📄 서류 검토 대행</button>
+        <button class="btn btn-outline" onclick="location.hash='#/mem/law'">⚖️ 법령·인허가 안내</button>
+        <button class="btn btn-outline" onclick="location.hash='#/mem/docs'">📝 문서 작성 지원</button>
+        <button class="btn btn-outline" onclick="location.hash='#/adm/villages'">🏘 조합·마을 현황(열람)</button>
+        <button class="btn btn-outline" onclick="location.hash='#/mem/library'">📚 공지·자료 배포</button>
+      </div>
+    </div>
+  `;
+}
+
+/* ── ① 지원업무: 지원요청 처리 ── */
+function fedQueuePage(){
+  const items = (_FED.support && _FED.support.items) || [];
+  const 상태 = ['접수','처리중','완료','보류'];
+  return `
+    <div class="sec-head">
+      <h1>📮 지원요청 처리</h1>
+      <p class="sec-desc">회원조합이 올린 요청을 연합회 사무국이 맡아 처리합니다. 회신을 적으면 요청한 조합 화면에 그대로 보입니다.</p>
+    </div>
+    ${fedMoneyBar('회원')}
+    <div class="grid grid-4">
+      ${상태.map(s => `<div class="kpi"><div class="kpi-n">${items.filter(x => x.status === s).length}</div><div class="kpi-l">${s}</div></div>`).join('')}
+    </div>
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">요청 목록 (${items.length})</h3></div>
+      ${items.length ? `<table class="tbl">
+        <thead><tr><th>접수일</th><th>조합</th><th>주제</th><th>내용</th><th>상태</th><th>담당</th><th>회신</th><th></th></tr></thead>
+        <tbody>${items.map(x => `<tr>
+          <td style="white-space:nowrap;">${escapeHtml((x.created_at||'').slice(0,10))}</td>
+          <td>${escapeHtml(x.village_name||'—')}</td>
+          <td><strong>${escapeHtml(x.topic||'')}</strong></td>
+          <td style="max-width:280px;">${escapeHtml(x.detail||'')}</td>
+          <td><span class="badge ${x.status==='완료'?'badge-success':'badge-info'}">${escapeHtml(x.status||'')}</span></td>
+          <td>${escapeHtml(x.assignee||'—')}</td>
+          <td style="max-width:280px;">${escapeHtml(x.reply||'—')}</td>
+          <td class="tbl-actions"><button class="btn btn-outline btn-sm" onclick="fedSupportOpen('${escapeJs(x.id)}')">처리</button></td>
+        </tr>`).join('')}</tbody></table>` : fedEmptyCard('지원요청')}
+      ${fedStamp()}
+    </div>
+  `;
+}
+function fedSupportOpen(id){
+  const x = ((_FED.support && _FED.support.items) || []).filter(v => v.id === id)[0];
+  if(!x){ toast('요청을 찾지 못했습니다.'); return; }
+  showDyn({
+    title: '지원요청 처리 — ' + (x.topic || ''),
+    sub: (x.village_name || '') + ' · ' + (x.created_at || '').slice(0,10),
+    body: `<p style="margin-top:0;">${escapeHtml(x.detail||'')}</p>
+      <label class="fld"><span>상태</span>
+        <select id="sup-status">${['접수','처리중','완료','보류'].map(s => `<option ${x.status===s?'selected':''}>${s}</option>`).join('')}</select></label>
+      <label class="fld"><span>담당</span><input id="sup-assignee" value="${escapeHtml(x.assignee||'')}" placeholder="사무국 담당자"></label>
+      <label class="fld"><span>회신</span><textarea id="sup-reply" rows="4" placeholder="요청한 조합이 그대로 읽습니다">${escapeHtml(x.reply||'')}</textarea></label>`,
+    foot: `<button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
+           <button class="btn btn-primary" onclick="fedSupportSave('${escapeJs(id)}')">저장</button>`
+  });
+}
+async function fedSupportSave(id){
+  const body = {
+    id,
+    status: document.getElementById('sup-status').value,
+    assignee: document.getElementById('sup-assignee').value,
+    reply: document.getElementById('sup-reply').value,
+  };
+  const r = await fedPost('/api/fed/support', body);
+  closeDyn();
+  if(r) { toast('처리 내용을 저장했습니다.'); fedRefresh(); }
+}
+
+/* 공용 POST — 실서버가 아니면 저장하지 않고 알린다(체험 모드에서 헛저장 방지) */
+async function fedPost(path, body){
+  if(!REAL_API){ toast('체험 모드에서는 저장되지 않습니다. 실계정으로 로그인하면 저장됩니다.'); return null; }
+  try{
+    const res = await fetch(path, {method:'POST', credentials:'same-origin',
+      headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+    const j = await res.json();
+    if(!j.ok){ toast('저장하지 못했습니다: ' + (j.error || res.status)); return null; }
+    return j;
+  }catch(e){ toast('서버에 닿지 못했습니다.'); return null; }
+}
+
+/* ── ② 자체 사무: 사무국 운영 (총회·이사회·규정·인사) ── */
+const FED_AFFAIR_KINDS = ['총회','이사회','규정','인사','예산','결산','기타'];
+function fedOfficePage(){
+  const all = (_FED.affairs && _FED.affairs.items) || [];
+  const items = all.filter(x => FED_AFFAIR_KINDS.indexOf(x.kind) !== -1);
+  const 올해 = items.filter(x => (x.date||'').slice(0,4) === '2026');
+  return `
+    <div class="sec-head">
+      <h1>🏢 사무국 운영 — 연합회 자체 사무</h1>
+      <p class="sec-desc">연합회 자신의 의사결정과 살림입니다. 회원조합 업무와 섞지 않습니다.</p>
+    </div>
+    ${fedMoneyBar('연합회')}
+    <div class="grid grid-4">
+      <div class="kpi"><div class="kpi-n">${items.filter(x => x.kind==='총회').length}</div><div class="kpi-l">총회</div></div>
+      <div class="kpi"><div class="kpi-n">${items.filter(x => x.kind==='이사회').length}</div><div class="kpi-l">이사회</div></div>
+      <div class="kpi"><div class="kpi-n">${items.filter(x => x.kind==='규정').length}</div><div class="kpi-l">규정·내규</div></div>
+      <div class="kpi"><div class="kpi-n">${올해.length}</div><div class="kpi-l">2026년 기록</div></div>
+    </div>
+
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">➕ 사무 기록 등록</h3></div>
+      <div class="grid grid-2">
+        <label class="fld"><span>구분</span><select id="fa-kind">${FED_AFFAIR_KINDS.map(k => `<option>${k}</option>`).join('')}</select></label>
+        <label class="fld"><span>날짜</span><input id="fa-date" type="date" value="2026-09-29"></label>
+        <label class="fld"><span>제목</span><input id="fa-title" placeholder="예: 2026년 제2차 임시총회"></label>
+        <label class="fld"><span>상태</span><select id="fa-status"><option>예정</option><option>진행중</option><option>완료</option></select></label>
+        <label class="fld"><span>담당</span><input id="fa-owner" placeholder="사무국"></label>
+        <label class="fld"><span>금액(원, 예산·결산일 때)</span><input id="fa-amount" type="number" value="0"></label>
+      </div>
+      <label class="fld"><span>내용</span><textarea id="fa-body" rows="3" placeholder="의결사항·비고"></textarea></label>
+      <button class="btn btn-primary" onclick="fedAffairSave()">등록</button>
+    </div>
+
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">📚 사무 기록 (${items.length})</h3></div>
+      ${items.length ? `<table class="tbl">
+        <thead><tr><th>날짜</th><th>구분</th><th>제목</th><th>상태</th><th>담당</th><th class="num">금액</th><th></th></tr></thead>
+        <tbody>${items.map(x => `<tr>
+          <td style="white-space:nowrap;">${escapeHtml(x.date||'—')}</td>
+          <td><span class="badge badge-mute">${escapeHtml(x.kind)}</span></td>
+          <td><strong>${escapeHtml(x.title)}</strong>${x.body ? `<div class="text-mute" style="font-size:12px;">${escapeHtml(x.body)}</div>` : ''}</td>
+          <td><span class="badge ${x.status==='완료'?'badge-success':'badge-info'}">${escapeHtml(x.status)}</span></td>
+          <td>${escapeHtml(x.owner||'—')}</td>
+          <td class="num">${x.amount ? _fmtN(x.amount)+'원' : '—'}</td>
+          <td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="fedAffairDel('${escapeJs(x.id)}')">삭제</button></td>
+        </tr>`).join('')}</tbody></table>` : fedEmptyCard('사무 기록')}
+      ${fedStamp()}
+    </div>
+  `;
+}
+async function fedAffairSave(){
+  const g = id => (document.getElementById(id) || {}).value || '';
+  if(!g('fa-title')){ toast('제목을 적어 주세요.'); return; }
+  const r = await fedPost('/api/fed/affairs', {
+    kind:g('fa-kind'), title:g('fa-title'), date:g('fa-date'), status:g('fa-status'),
+    owner:g('fa-owner'), amount:Number(g('fa-amount'))||0, body:g('fa-body'),
+  });
+  if(r){ toast('등록했습니다.'); fedRefresh(); }
+}
+async function fedAffairDel(id){
+  if(!REAL_API){ toast('체험 모드에서는 삭제되지 않습니다.'); return; }
+  if(!confirm('이 기록을 지울까요?')) return;
+  try{ await fetch('/api/fed/affairs/' + encodeURIComponent(id), {method:'DELETE', credentials:'same-origin'}); }catch(e){}
+  toast('지웠습니다.'); fedRefresh();
+}
+
+/* ── ② 자체 사무: 회비 부과·수납 ── */
+function fedDuesPage(){
+  const S = _FED.summary || {by_village:[], by_month:[]};
+  const dues = (_FED.dues && _FED.dues.items) || [];
+  const months = (S.by_month || []).map(m => m.month);
+  const 부과 = dues.reduce((a,d) => a + (d.amount||0), 0);
+  const 수납 = dues.reduce((a,d) => a + (d.paid||0), 0);
+  const 미납 = 부과 - 수납;
+  return `
+    <div class="sec-head">
+      <h1>💳 회비 부과·수납 — 연합회 자체 사무</h1>
+      <p class="sec-desc">회원조합 정산금을 <b>기준</b>으로 회비를 산정합니다. 기준일 뿐, 그 정산금이 연합회 수입은 아닙니다 — 회비만 연합회 수입입니다.</p>
+    </div>
+    ${fedMoneyBar('연합회')}
+    <div class="grid grid-4">
+      <div class="kpi"><div class="kpi-n">${_fmtN(부과)}</div><div class="kpi-l">부과 누계(원)</div><div class="kpi-sub">요율 ${(FED_DUES_RATE*100).toFixed(1)}%</div></div>
+      <div class="kpi"><div class="kpi-n">${_fmtN(수납)}</div><div class="kpi-l">수납 누계(원)</div></div>
+      <div class="kpi"><div class="kpi-n" style="color:${미납>0?'var(--danger)':'inherit'};">${_fmtN(미납)}</div><div class="kpi-l">미납(원)</div></div>
+      <div class="kpi"><div class="kpi-n">${부과 ? Math.round(수납/부과*100) : 0}%</div><div class="kpi-l">수납률</div></div>
+    </div>
+
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">▶ 월 회비 일괄 산정·부과</h3></div>
+      <div class="grid grid-2">
+        <label class="fld"><span>대상 월</span>
+          <select id="du-month">${months.length ? months.map(m => `<option>${m}</option>`).join('') : '<option value="">제출된 월이 없습니다</option>'}</select></label>
+        <label class="fld"><span>요율</span><input id="du-rate" type="number" step="0.001" value="${FED_DUES_RATE}"></label>
+      </div>
+      <p class="text-mute" style="font-size:12.5px;margin-top:0;">해당 월에 실적을 올린 회원조합 전부에 대해 <code>정산금 × 요율</code>로 부과액을 계산해 기록합니다. 이미 부과된 달은 갱신됩니다.</p>
+      <button class="btn btn-primary" onclick="fedDuesCharge()">💳 이 달 회비 부과</button>
+    </div>
+
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">📒 부과·수납 내역 (${dues.length})</h3></div>
+      ${dues.length ? `<table class="tbl">
+        <thead><tr><th>월</th><th>조합</th><th class="num">기준 정산금</th><th class="num">요율</th><th class="num">부과액</th><th class="num">수납액</th><th>상태</th><th></th></tr></thead>
+        <tbody>${dues.map(d => `<tr>
+          <td>${escapeHtml(d.month)}</td><td><strong>${escapeHtml(d.village_name||'')}</strong></td>
+          <td class="num">${_fmtN(d.base||0)}</td><td class="num">${((d.rate||0)*100).toFixed(1)}%</td>
+          <td class="num">${_fmtN(d.amount||0)}</td><td class="num">${_fmtN(d.paid||0)}</td>
+          <td><span class="badge ${(d.paid||0) >= (d.amount||0) ? 'badge-success' : 'badge-danger'}">${(d.paid||0) >= (d.amount||0) ? '완납' : '미납'}</span></td>
+          <td class="tbl-actions"><button class="btn btn-outline btn-sm" onclick="fedDuesPay(${d.village_id},'${escapeJs(d.month)}',${d.amount||0})">수납 기록</button></td>
+        </tr>`).join('')}</tbody></table>` : fedEmptyCard('회비 부과 내역')}
+      ${fedStamp()}
+    </div>
+  `;
+}
+async function fedDuesCharge(){
+  const month = (document.getElementById('du-month') || {}).value;
+  const rate = Number((document.getElementById('du-rate') || {}).value) || FED_DUES_RATE;
+  if(!month){ toast('부과할 월을 고르세요.'); return; }
+  if(!REAL_API){ toast('체험 모드에서는 저장되지 않습니다.'); return; }
+  let rows = [];
+  try{
+    const j = await fetch('/api/monthly?month=' + encodeURIComponent(month), {credentials:'same-origin'}).then(r => r.json());
+    rows = (j.ok && j.items) || [];
+  }catch(e){ toast('실적을 읽지 못했습니다.'); return; }
+  if(!rows.length){ toast(month + ' 에 올라온 실적이 없습니다.'); return; }
+  let n = 0;
+  for(const r of rows){
+    const ok = await fedPost('/api/fed/dues', {village_id:r.village_id, month, base:r.revenue, rate});
+    if(ok) n++;
+  }
+  toast(`${month} 회비를 ${n}곳에 부과했습니다.`);
+  fedRefresh();
+}
+function fedDuesPay(vid, month, amount){
+  showDyn({
+    title: '회비 수납 기록', sub: month,
+    body: `<label class="fld"><span>수납액(원)</span><input id="du-paid" type="number" value="${amount}"></label>
+           <label class="fld"><span>비고</span><input id="du-memo" placeholder="입금 계좌·일자 등"></label>`,
+    foot: `<button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
+           <button class="btn btn-primary" onclick="fedDuesPaySave(${vid},'${escapeJs(month)}')">저장</button>`
+  });
+}
+async function fedDuesPaySave(vid, month){
+  const paid = Number((document.getElementById('du-paid') || {}).value) || 0;
+  const memo = (document.getElementById('du-memo') || {}).value || '';
+  const r = await fedPost('/api/fed/dues', {village_id:vid, month, paid, memo});
+  closeDyn();
+  if(r){ toast('수납을 기록했습니다.'); fedRefresh(); }
+}
+
+/* ── ② 자체 사무: 공동사업 ── */
+function fedBizPage(){
+  const items = ((_FED.affairs && _FED.affairs.items) || []).filter(x => x.kind === '공동사업');
+  const 성과 = items.reduce((a,x) => a + (x.amount||0), 0);
+  const 회비 = (_FED.dues && _FED.dues.items || []).reduce((a,d) => a + (d.amount||0), 0);
+  return `
+    <div class="sec-head">
+      <h1>🧺 공동사업 — 연합회 자체 사무</h1>
+      <p class="sec-desc">개별 마을이 혼자 할 수 없는 규모의 협상입니다. <b>공동사업 성과가 회비보다 커야</b> 연합회가 존재할 이유가 섭니다.</p>
+    </div>
+    ${fedMoneyBar('연합회')}
+    <div class="grid grid-3">
+      <div class="kpi"><div class="kpi-n">${_fmtN(성과)}</div><div class="kpi-l">공동사업 성과(원)</div><div class="kpi-sub">단가 개선·절감 합계</div></div>
+      <div class="kpi"><div class="kpi-n">${_fmtN(회비)}</div><div class="kpi-l">회비 부과 누계(원)</div></div>
+      <div class="kpi"><div class="kpi-n" style="color:${성과>=회비?'var(--primary)':'var(--danger)'};">${회비 ? (성과/회비).toFixed(2) : '—'}</div>
+        <div class="kpi-l">성과 ÷ 회비</div><div class="kpi-sub">1.0 미만이면 회비 재의결 대상</div></div>
+    </div>
+
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">추진 중인 공동사업 (${items.length})</h3></div>
+      ${items.length ? `<table class="tbl">
+        <thead><tr><th>사업</th><th>내용</th><th>상태</th><th class="num">성과(원)</th><th>담당</th></tr></thead>
+        <tbody>${items.map(x => `<tr><td><strong>${escapeHtml(x.title)}</strong></td>
+          <td>${escapeHtml(x.body||'')}</td>
+          <td><span class="badge ${x.status==='완료'?'badge-success':'badge-info'}">${escapeHtml(x.status)}</span></td>
+          <td class="num">${_fmtN(x.amount||0)}</td><td>${escapeHtml(x.owner||'—')}</td></tr>`).join('')}</tbody></table>`
+        : `<table class="tbl"><thead><tr><th>사업</th><th>내용</th><th>상태</th></tr></thead><tbody>
+          <tr><td><strong>공동 REC 판매</strong></td><td>전체 마을 물량을 묶어 공동 입찰·장기계약</td><td><span class="badge badge-mute">미등록</span></td></tr>
+          <tr><td><strong>공동 O&amp;M 계약</strong></td><td>유지보수·보험·안전진단 공동계약으로 단가 인하</td><td><span class="badge badge-mute">미등록</span></td></tr>
+          <tr><td><strong>정책 대응</strong></td><td>제도 개선 건의 · 공동 창구</td><td><span class="badge badge-mute">미등록</span></td></tr>
+          <tr><td><strong>상호 부조</strong></td><td>신규 마을 멘토링 · 재해 상호지원 기금</td><td><span class="badge badge-mute">미등록</span></td></tr>
+        </tbody></table>
+        <p class="text-mute" style="font-size:12.5px;">아래에서 실제 사업을 등록하면 성과가 회비와 대비되어 표시됩니다.</p>`}
+    </div>
+
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">➕ 공동사업 등록</h3></div>
+      <div class="grid grid-2">
+        <label class="fld"><span>사업명</span><input id="fb-title" placeholder="예: 2026년 공동 REC 입찰"></label>
+        <label class="fld"><span>상태</span><select id="fb-status"><option>예정</option><option>진행중</option><option>완료</option></select></label>
+        <label class="fld"><span>성과 금액(원)</span><input id="fb-amount" type="number" value="0"></label>
+        <label class="fld"><span>담당</span><input id="fb-owner" placeholder="사무국"></label>
+      </div>
+      <label class="fld"><span>내용</span><textarea id="fb-body" rows="2"></textarea></label>
+      <button class="btn btn-primary" onclick="fedBizSave()">등록</button>
+    </div>
+    ${fedStamp()}
+  `;
+}
+async function fedBizSave(){
+  const g = id => (document.getElementById(id) || {}).value || '';
+  if(!g('fb-title')){ toast('사업명을 적어 주세요.'); return; }
+  const r = await fedPost('/api/fed/affairs', {kind:'공동사업', title:g('fb-title'), status:g('fb-status'),
+    amount:Number(g('fb-amount'))||0, owner:g('fb-owner'), body:g('fb-body'), date:_ymdToday()});
+  if(r){ toast('등록했습니다.'); fedRefresh(); }
+}
+function _ymdToday(){ const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+
+/* ── ② 자체 사무: 연합회 회계·결산 ── */
+function fedBooksPage(){
+  const dues = (_FED.dues && _FED.dues.items) || [];
+  const affairs = (_FED.affairs && _FED.affairs.items) || [];
+  const 수입_회비 = dues.reduce((a,d) => a + (d.paid||0), 0);
+  const 수입_공동 = affairs.filter(x => x.kind === '공동사업' && x.status === '완료').reduce((a,x) => a + (x.amount||0), 0);
+  const 지출 = affairs.filter(x => x.kind === '예산' || x.kind === '결산' || x.kind === '인사').reduce((a,x) => a + (x.amount||0), 0);
+  const 수입 = 수입_회비 + 수입_공동;
+  const 잔 = 수입 - 지출;
+  const 월별 = {};
+  dues.forEach(d => { (월별[d.month] = 월별[d.month] || {부과:0, 수납:0}); 월별[d.month].부과 += d.amount||0; 월별[d.month].수납 += d.paid||0; });
+  const ms = Object.keys(월별).sort();
+  return `
+    <div class="sec-head">
+      <h1>📒 연합회 회계·결산 — 자체 사무</h1>
+      <p class="sec-desc">연합회 자신의 수입과 지출만 담습니다. 회원조합 정산금은 여기 들어오지 않습니다.</p>
+    </div>
+    ${fedMoneyBar('연합회')}
+    <div class="grid grid-4">
+      <div class="kpi"><div class="kpi-n">${_fmtN(수입_회비)}</div><div class="kpi-l">회비 수입(원)</div></div>
+      <div class="kpi"><div class="kpi-n">${_fmtN(수입_공동)}</div><div class="kpi-l">공동사업 수입(원)</div></div>
+      <div class="kpi"><div class="kpi-n">${_fmtN(지출)}</div><div class="kpi-l">지출(원)</div></div>
+      <div class="kpi"><div class="kpi-n" style="color:${잔<0?'var(--danger)':'var(--primary)'};">${_fmtN(잔)}</div><div class="kpi-l">수지(원)</div></div>
+    </div>
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">월별 회비 부과·수납</h3></div>
+      ${ms.length ? `<table class="tbl">
+        <thead><tr><th>월</th><th class="num">부과</th><th class="num">수납</th><th class="num">미납</th><th class="num">수납률</th></tr></thead>
+        <tbody>${ms.map(m => { const v = 월별[m]; return `<tr><td>${escapeHtml(m)}</td>
+          <td class="num">${_fmtN(v.부과)}</td><td class="num">${_fmtN(v.수납)}</td>
+          <td class="num" style="color:${v.부과-v.수납>0?'var(--danger)':'inherit'};">${_fmtN(v.부과-v.수납)}</td>
+          <td class="num">${v.부과 ? Math.round(v.수납/v.부과*100) : 0}%</td></tr>`; }).join('')}
+          <tr class="total"><td>합계</td><td class="num">${_fmtN(ms.reduce((a,m)=>a+월별[m].부과,0))}</td>
+          <td class="num">${_fmtN(수입_회비)}</td>
+          <td class="num">${_fmtN(ms.reduce((a,m)=>a+월별[m].부과,0) - 수입_회비)}</td><td></td></tr>
+        </tbody></table>` : fedEmptyCard('회비 기록')}
+      ${fedStamp()}
+    </div>
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">예산·결산·인사 지출</h3></div>
+      ${affairs.filter(x => ['예산','결산','인사'].indexOf(x.kind) !== -1).length ? `<table class="tbl">
+        <thead><tr><th>날짜</th><th>구분</th><th>항목</th><th class="num">금액</th><th>상태</th></tr></thead>
+        <tbody>${affairs.filter(x => ['예산','결산','인사'].indexOf(x.kind) !== -1).map(x => `<tr>
+          <td>${escapeHtml(x.date||'—')}</td><td><span class="badge badge-mute">${escapeHtml(x.kind)}</span></td>
+          <td>${escapeHtml(x.title)}</td><td class="num">${_fmtN(x.amount||0)}</td>
+          <td>${escapeHtml(x.status)}</td></tr>`).join('')}</tbody></table>`
+        : '<p class="text-mute" style="margin:0;">사무국 운영 화면에서 예산·결산·인사 항목을 등록하면 여기 집계됩니다.</p>'}
     </div>
   `;
 }
@@ -4907,7 +5417,7 @@ function inboxManualSave(){
 function inboxParseBank(file, fid){
   _readTextFile(file, function(text){
     const rows = _closingCsvParse(text);
-    if(rows.length < 2){ toast('CSV에서 거래를 읽지 못했습니다. 첫 줄이 머리글인지 확인해 주세요.'); return; }
+    if(rows.length < 2){ _inboxFinish(fid, '실패', '읽을 자료가 없습니다 — 머리글만 있거나 빈 파일입니다'); toast('CSV에서 거래를 읽지 못했습니다. 첫 줄이 머리글인지 확인해 주세요.'); return; }
 
     // ① 중복 방어 — 같은 내용을 이미 올렸는지 해시로 본다
     const hash = _taxHash(text);
@@ -5009,7 +5519,8 @@ function _colOf(head, names, def){
 function inboxParseRems(file, fid){
   _readTextFile(file, function(text){
     const rows = _closingCsvParse(text);
-    if(rows.length < 2){ toast('CSV에서 발전량을 읽지 못했습니다.'); return; }
+    // 머리글만 있고 자료가 없는 파일 — 목록에 이유를 남긴다. 안 남기면 '대기'로 방치된다(2026-09-29 시험)
+    if(rows.length < 2){ _inboxFinish(fid, '실패', '읽을 자료가 없습니다 — 머리글만 있거나 빈 파일입니다'); toast('CSV에서 발전량을 읽지 못했습니다.'); return; }
     const hash = _taxHash(text);
     const dup = powerDupFile(hash);
     if(dup){ powerRejectDup(dup, fid, 'REMS 발전량'); return; }
@@ -5056,7 +5567,7 @@ function inboxParseRems(file, fid){
 function inboxParseKepco(file, fid){
   _readTextFile(file, function(text){
     const rows = _closingCsvParse(text);
-    if(rows.length < 2){ toast('CSV에서 정산내역을 읽지 못했습니다. PDF라면 값을 직접 넣어 주세요.'); return; }
+    if(rows.length < 2){ _inboxFinish(fid, '실패', '읽을 자료가 없습니다 — 머리글만 있거나 빈 파일입니다'); toast('CSV에서 정산내역을 읽지 못했습니다. PDF라면 값을 직접 넣어 주세요.'); return; }
     const hash = _taxHash(text);
     const dup = powerDupFile(hash);
     if(dup){ powerRejectDup(dup, fid, '한전 정산명세'); return; }
@@ -5195,6 +5706,126 @@ function powerRealCard(){
           + '<p class="text-mute" style="font-size:12px;margin-top:6px;">차이가 ±2%를 넘으면 한전에 계량 확인을 요청하세요.</p>'
         : '')
     + '</div>';
+}
+
+
+/* ── 월 실적을 연합회에 제출 (2026-09-29) ─────────────────────────────
+   조합이 자료함에 올린 REMS·한전·통장에서 월별 숫자를 뽑아 서버에 올린다.
+   ★ 올라가는 건 집계값(발전량·정산금·운영비·원리금·잔액)뿐이다.
+     조합원 명부·적요 원문 같은 개인정보는 보내지 않는다. */
+let _MY_MONTHLY = null;      // 서버에 이미 올라간 달 (중복 제출 표시용)
+
+function powerLocalMonths(){
+  const P = loadPower();
+  const byM = {};
+  (P.daily || []).forEach(function(d){
+    const ym = String(d.date).slice(0,7);
+    byM[ym] = byM[ym] || {month:ym, kwh:0, smp:0, rec:0, revenue:0, expense:0, debt:0, balance:0, 일수:0};
+    byM[ym].kwh += d.kwh; byM[ym].일수++;
+  });
+  (P.settle || []).forEach(function(s){
+    byM[s.ym] = byM[s.ym] || {month:s.ym, kwh:0, smp:0, rec:0, revenue:0, expense:0, debt:0, balance:0, 일수:0};
+    byM[s.ym].smp = s.smp || 0; byM[s.ym].rec = s.rec || 0; byM[s.ym].revenue = s.amount || 0;
+  });
+  // 통장 거래는 두 경로로 들어온다 — 자료함(MOCK.tax.bank, 이미 파싱됨)과 회계 메뉴(MOCK.uploads, 원문 CSV)
+  const 분류 = function(desc){
+    const hit = CLOSING_RULES.filter(function(x){ return x[0].test(desc); })[0];
+    return hit ? [hit[1], hit[2]] : ['(분류필요)', ''];
+  };
+  const 담기 = function(ym, acct, biz, out, bal){
+    if(!/^\d{4}-\d{2}$/.test(ym)) return;
+    byM[ym] = byM[ym] || {month:ym, kwh:0, smp:0, rec:0, revenue:0, expense:0, debt:0, balance:0, 일수:0};
+    // 원리금은 두 모습으로 나온다 — 통장에서 바로 빠지거나(융자원리금),
+    // 융자상환 계좌로 배분이체되거나. 둘 다 상환 재원이므로 debt 로 잡는다.
+    if(acct === '융자원리금' || biz === '융자상환(20%)') byM[ym].debt += out;
+    else if(acct !== '내부이체' && acct !== '전월이월') byM[ym].expense += out;
+    if(bal) byM[ym].balance = bal;
+  };
+  ((MOCK.tax && MOCK.tax.bank) || []).forEach(function(t){
+    const c = 분류(t.desc || '');
+    담기(String(t.date).slice(0,7), c[0], c[1], t.out || 0, t.bal || 0);
+  });
+  (MOCK.uploads || []).filter(function(f){ return f.kind === 'bank' && f._text; }).forEach(function(f){
+    const rows = _closingCsvParse(f._text);
+    if(rows.length < 2) return;
+    const head = rows[0].map(function(h){ return String(h).trim(); });
+    const col = function(names, def){ const i = head.findIndex(function(h){ return names.some(function(n){ return h.indexOf(n) !== -1; }); }); return i >= 0 ? i : def; };
+    const iDate = col(['일자','날짜','거래일'], 0), iDesc = col(['적요','내용'], 1),
+          iOut = col(['출금'], 2), iBal = col(['잔액'], 4);
+    rows.slice(1).forEach(function(r){
+      const date = String(r[iDate] || '').trim().replace(/[./]/g, '-');
+      const ym = date.slice(0,7);
+      if(!/^\d{4}-\d{2}$/.test(ym)) return;
+      const c2 = 분류(String(r[iDesc] || '').trim());
+      담기(ym, c2[0], c2[1], _closingNum(r[iOut]), _closingNum(r[iBal]));
+    });
+  });
+  return Object.keys(byM).sort().map(function(k){ return byM[k]; });
+}
+
+function powerSubmitCard(){
+  const ms = powerLocalMonths();
+  if(!ms.length) return '';
+  const 올린달 = (_MY_MONTHLY || []).map(function(x){ return x.month; });
+  return '<div class="card" style="border:2px solid #b58900;margin-bottom:18px;">'
+    + '<div class="card-title"><h3 class="serif">📤 월 실적을 연합회에 제출</h3>'
+    + '<button class="btn btn-primary btn-sm" onclick="powerSubmitAll()">전체 제출</button></div>'
+    + '<p class="text-mute" style="font-size:12.5px;margin-top:0;">올라가는 값은 <b>집계 숫자뿐</b>입니다 — 발전량·정산금·운영비·원리금·월말잔액. '
+    + '조합원 명부와 거래 적요는 브라우저를 떠나지 않습니다. 같은 달을 다시 올리면 덮어씁니다(두 번 잡히지 않습니다).</p>'
+    + '<table class="tbl"><thead><tr><th>월</th><th class="num">발전(kWh)</th><th class="num">정산금</th>'
+    + '<th class="num">운영비</th><th class="num">원리금</th><th class="num">월말잔액</th><th>제출</th><th></th></tr></thead><tbody>'
+    + ms.map(function(m){
+        const 제출됨 = 올린달.indexOf(m.month) !== -1;
+        return '<tr><td><b>' + escapeHtml(m.month) + '</b></td>'
+          + '<td class="num">' + _fmtN(m.kwh) + '</td>'
+          + '<td class="num">' + _fmtN(m.revenue) + '</td>'
+          + '<td class="num">' + _fmtN(m.expense) + '</td>'
+          + '<td class="num">' + _fmtN(m.debt) + '</td>'
+          + '<td class="num">' + _fmtN(m.balance) + '</td>'
+          + '<td>' + (제출됨 ? '<span class="badge badge-success">제출</span>' : '<span class="badge badge-mute">미제출</span>') + '</td>'
+          + '<td class="tbl-actions"><button class="btn btn-outline btn-sm" onclick="powerSubmitMonth(\'' + escapeJs(m.month) + '\')">'
+          + (제출됨 ? '다시 제출' : '제출') + '</button></td></tr>';
+      }).join('')
+    + '</tbody></table></div>';
+}
+
+async function powerLoadMine(){
+  if(!REAL_API) return;
+  try{
+    const j = await fetch('/api/my/monthly', {credentials:'same-origin'}).then(function(r){ return r.json(); });
+    if(j.ok) _MY_MONTHLY = j.items || [];
+  }catch(e){}
+  if(currentRoute() === 'mem/power'){
+    const main = document.getElementById('appMain');
+    if(main) main.innerHTML = renderMemberPage('power');
+  }
+}
+
+async function powerSubmitMonth(ym, 조용히){
+  if(!REAL_API){ toast('체험 모드에서는 제출되지 않습니다. 실계정으로 로그인하면 연합회에 올라갑니다.'); return false; }
+  const m = powerLocalMonths().filter(function(x){ return x.month === ym; })[0];
+  if(!m){ toast('그 달 자료가 없습니다.'); return false; }
+  const 배분 = {};
+  CLOSING_SPLIT.forEach(function(s){ 배분[s[0]] = Math.round(m.revenue * s[1]); });
+  try{
+    const res = await fetch('/api/my/monthly', {method:'POST', credentials:'same-origin',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({month:ym, kwh:m.kwh, smp:m.smp, rec:m.rec, revenue:m.revenue,
+        expense:m.expense, debt:m.debt, balance:m.balance, dist:배분, status:'마감',
+        detail:{발전일수:m.일수}})});
+    const j = await res.json();
+    if(!j.ok){ toast('제출하지 못했습니다: ' + (j.error || res.status)); return false; }
+    if(!조용히){ toast(ym + ' 실적을 제출했습니다.'); await powerLoadMine(); }
+    return true;
+  }catch(e){ toast('서버에 닿지 못했습니다.'); return false; }
+}
+
+async function powerSubmitAll(){
+  const ms = powerLocalMonths();
+  let n = 0;
+  for(const m of ms){ if(await powerSubmitMonth(m.month, true)) n++; }
+  toast(n + '개월치를 제출했습니다.');
+  await powerLoadMine();
 }
 
 /* ─── 조합원 명부 CSV — 브라우저 안에서만 처리한다 (2026-09-28) ───
@@ -6511,6 +7142,8 @@ const CLOSING_RULES = [
   [/배분이체.*배당/,        '내부이체', '배당적립(10%)'],
   [/배분이체.*적립/,        '내부이체', '내부적립(20%)'],
   [/배분이체.*(상환|융자)/, '내부이체', '융자상환(20%)'],
+  // 융자 원리금 자동이체 — 배분이체가 아니라 실제 지출이다. 이 줄이 없으면 '(분류필요)'로 빠진다(2026-09-29 시험에서 확인)
+  [/원리금|융자상환|대출상환|차입금상환/, '융자원리금', '재무'],
   [/한전.*(판매|정산)|전력판매/, '전력판매수입', '매출'],
   [/출자금/,               '출자금 수입', '자본'],
   [/보조금/,               '보조금 수입', '수입'],
@@ -7340,6 +7973,18 @@ function svCheckScore(){
 function svDraft(){
   const village = document.getElementById('draft-village').value.trim() || '○○군 ○○면 ○○리';
   const d = _svDiag, c = _svCalc;
+  /* 진단 용량(①)과 계산기 용량(②)이 다르면 신청서에 서로 안 맞는 숫자가 들어간다
+     — 용량은 진단값, 발전량·설치비는 계산기값이라 그대로 두면 1,000kW 사업에 9,900kW 발전량이 적힌다.
+     2026-09-29 시험에서 실제로 나왔다. 숨기지 말고 화면에 경고로 띄운다. */
+  const 용량어긋남 = (d && c && d.plan > 0 && c.kw > 0 && Math.abs(c.kw - d.plan) / d.plan > 0.01)
+    ? `<div style="background:#fff4e5;border-left:3px solid #d97706;border-radius:6px;padding:10px 12px;margin-bottom:10px;">
+        <b style="color:#9c6a00;">⚠ 용량이 서로 다릅니다 — 그대로 제출하면 안 됩니다.</b>
+        <p style="font-size:13px;margin:4px 0 0;">① 진단 계획용량 <b>${Math.round(d.plan).toLocaleString()}kW</b> ·
+        ② 계산기 용량 <b>${Math.round(c.kw).toLocaleString()}kW</b>.
+        아래 <b>발전량·설치비·자부담은 ②번 계산기 용량 기준</b>이라 총 용량과 맞지 않습니다.
+        ②번 계산기의 설비 규모를 ${Math.round(d.plan).toLocaleString()}kW로 고쳐 다시 계산한 뒤 초안을 만드세요.</p>
+      </div>`
+    : '';
   const today = new Date();
   const ymd = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
   const todo = t => `<span style="color:#9c6a00;">${t}</span>`;
@@ -7347,6 +7992,7 @@ function svDraft(){
     title: '햇빛소득마을 지원 신청서 (초안)',
     sub: '공모 서식2 항목 기준 — 자동 삽입된 값을 확인하고, 담당자 검토 후 제출하세요',
     body: `<div class="doc-preview">
+      ${용량어긋남}
       <h3>${today.getFullYear()}년 햇빛소득마을 지원 신청서</h3>
       <table><tbody>
         <tr><td style="width:160px;"><b>마을 소재지</b></td><td>${escapeHtml(village)}</td></tr>
@@ -7356,7 +8002,9 @@ function svDraft(){
           ? escapeHtml(d.type) + ' · <b>' + Math.round(d.plan).toLocaleString() + 'kW</b>'
             + (d.raw > 1000 ? ' <span style="color:#9c6a00;">(부지 이론용량 ' + Math.round(d.raw).toLocaleString() + 'kW — 1,000kW 이하로 계획 조정)</span>' : '')
           : todo('① 후보지 자가진단을 먼저 실행하면 자동 입력됩니다')}</td></tr>
-        <tr><td><b>예상 발전량</b></td><td>${c ? '연간 약 ' + Math.round(c.gen/1000).toLocaleString() + 'MWh' : todo('② 순수익 계산기를 먼저 실행하면 자동 입력됩니다')}</td></tr>
+        <tr><td><b>예상 발전량</b></td><td>${c ? '연간 약 ' + Math.round(c.gen/1000).toLocaleString() + 'MWh'
+          + (용량어긋남 ? ' <span style="color:#9c6a00;">(' + Math.round(c.kw).toLocaleString() + 'kW 기준 — 총 용량과 불일치)</span>' : '')
+          : todo('② 순수익 계산기를 먼저 실행하면 자동 입력됩니다')}</td></tr>
         <tr><td><b>계통연계 가능여부</b></td><td>${todo('□ 계통연계 가능  □ 계통연계 불가(ESS 설치 등) — 한전 발급 검토의견 서류를 첨부해야 합니다')}</td></tr>
         <tr><td><b>총 예상 설치비 · 자부담</b></td><td>${c
           ? fmtWon(c.total) + ' (100%) · 자부담 ' + fmtWon(c.own) + ' (' + Math.round(c.own/c.total*100) + '%)'
