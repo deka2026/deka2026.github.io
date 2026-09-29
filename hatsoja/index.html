@@ -1536,6 +1536,7 @@ const ROLE_MENUS = {
       ['adm','villages','🏘','조합·마을 관리'],
       ['adm','users','👤','회원 관리'],
       ['adm','taxkpi','📈','세무 파일럿 KPI'],
+      ['adm','consult','🧾','컨설팅 보고서·회원 재무'],
     ]],
     ['소통·콘텐츠', [
       ['adm','inquiries','📮','문의 처리'],
@@ -1569,6 +1570,7 @@ const ROLE_MENUS = {
       ['mem','feddues','💳','회비 부과·수납'],
       ['mem','fedbiz','🧺','공동사업'],
       ['mem','fedbooks','📒','연합회 회계·결산'],
+      ['mem','fedfinstat','📊','재무제표·컨설팅'],
     ]],
     ['소통', [
       ['mem','chat','💬','AI 상담'],
@@ -1603,6 +1605,7 @@ const ROLE_MENUS = {
       ['mem','accounting','🧾','회계·세무 자료이관'],
       ['mem','taxpay','💸','지급·원천징수'],
       ['mem','ledgers','📒','표준장부·거래처'],
+      ['mem','finstat','📊','재무제표·컨설팅'],
       ['mem','closing','📁','월마감·보고서'],
       ['mem','members','👥','조합원 관리'],
       ['mem','schedule','📅','일정·마감'],
@@ -1824,6 +1827,9 @@ const MENU_DESC = {
   feddues:['회비 부과·수납','회원조합 정산금을 기준으로 회비를 산정해 부과하고 수납을 기록합니다'],
   fedbiz:['공동사업','공동 REC 판매·공동 O&M 등 연합회 공동사업의 성과를 회비와 대비해 봅니다'],
   fedbooks:['연합회 회계·결산','연합회 자체 수입(회비·공동사업)과 지출만 담은 회계입니다'],
+  finstat:['재무제표·컨설팅','올린 실적과 기초값으로 손익계산서·재무상태표를 만들고, GPU 엔진 근거로 재무건전성 컨설팅 보고서를 받습니다'],
+  fedfinstat:['재무제표·컨설팅','연합회 법인 자신의 손익과 재무건전성 진단입니다'],
+  consult:['컨설팅 보고서·회원 재무','회원조합·연합회가 신청한 컨설팅 결과와 재무 요약을 전부 봅니다'],
 };
 
 /* 용어 쉬운 말 병기 (개선안 3-3) */
@@ -2246,6 +2252,8 @@ function navigate(){
     if(scope === 'mem' && page === 'schedule') dlCalc();
     if(scope === 'mem' && page === 'cost') costCalc();
     if(scope === 'mem' && FED_PAGES.indexOf(page) !== -1) fedLoad(page);
+    if(scope === 'mem' && FIN_PAGES.indexOf(page) !== -1) finLoad(page);
+    if(scope === 'adm' && page === 'consult') admFinLoad();
     if(scope === 'mem' && page === 'power' && _MY_MONTHLY === null) powerLoadMine();
   }
   updateConvenienceUI(scope, page || 'dashboard');
@@ -2353,6 +2361,8 @@ function renderMemberPage(page){
     case 'feddues':   return fedDuesPage();
     case 'fedbiz':    return fedBizPage();
     case 'fedbooks':  return fedBooksPage();
+    case 'finstat':   return memFinStat();
+    case 'fedfinstat':return fedFinStat();
     case 'docs':      return memDocs();
     case 'review':    return memReview();
     case 'law':       return memLaw();
@@ -3760,13 +3770,33 @@ function venSiteScore(){
 
 /* ─── 발전·정산·배당 (운영 단계 핵심) ─── */
 function memPower(){
-  /* 1MW 표준모델 예시 — 발전 계량 데이터와 한전 정산을 자동 대조하는 운영 대장 구조 */
-  const months = [['3월',108500],['4월',116300],['5월',121400],['6월',114200],['7월',131200],['8월',128500]];
-  const max = Math.max(...months.map(m => m[1]));
-  const gen = months[months.length-1][1];      // 이달 자체계량 발전량 (kWh)
-  const sold = 127900, price = 150;            // 한전 정산 전력량·단가 (예시)
-  const settle = sold * price;
-  const diff = ((gen - sold) / gen * 100).toFixed(2);
+  /* 올린 자료가 있으면 그것으로 그린다. 없을 때만 1MW 표준모델 예시를 쓴다.
+     2026-09-29 전에는 자료를 넣어도 아래 숫자가 예시 그대로여서, 조합원이 자기 마을 것으로
+     오해할 여지가 있었다(시험에서 지적). */
+  const _real = powerLocalMonths().filter(m => m.kwh > 0 || m.revenue > 0);
+  const 실측 = _real.length > 0;
+  const capKw = Number(ledgerGet('설비용량kW')) || 0;
+  let months, gen, sold, settle, diff, 이상수, 이용률;
+  if(실측){
+    const last = _real[_real.length - 1];
+    months = _real.slice(-8).map(m => [Number(m.month.slice(5,7)) + '월', m.kwh]);
+    gen = Math.round(last.kwh);
+    const P = loadPower();
+    const st = (P.settle || []).filter(x => x.ym === last.month)[0];
+    sold = st ? Math.round(st.kwh) : gen;
+    settle = last.revenue || (st ? st.amount : 0);
+    diff = (gen > 0 && sold > 0) ? ((gen - sold) / gen * 100).toFixed(2) : '—';
+    이상수 = powerAnomalies().length;
+    const days = new Date(Number(last.month.slice(0,4)), Number(last.month.slice(5,7)), 0).getDate();
+    이용률 = capKw > 0 ? (gen / (capKw * 24 * days) * 100).toFixed(1) : null;
+  } else {
+    months = [['3월',108500],['4월',116300],['5월',121400],['6월',114200],['7월',131200],['8월',128500]];
+    gen = months[months.length-1][1];
+    sold = 127900; settle = sold * 150;
+    diff = ((gen - sold) / gen * 100).toFixed(2);
+    이상수 = 1; 이용률 = '17.3';
+  }
+  const max = Math.max(...months.map(m => m[1]), 1);
   const SPLIT = [
     ['마을공동사업', 0.5, '인건비·운영비 포함 — 공동사업 계좌'],
     ['지역화폐 배당', 0.1, '조합원 배당 적립 — 배당적립 계좌'],
@@ -3779,18 +3809,24 @@ function memPower(){
     ${powerSubmitCard()}
     <div class="sec-head">
       <h1>⚡ 발전·정산·배당</h1>
-      <p class="sec-desc">발전 계량 데이터와 한전 정산내역을 자동 대조하고, 수익 배분·배당 적립·이상 감지까지 한 번에 — 조합원 누구나 같은 숫자를 봅니다. <span class="badge badge-mute">데모 데이터 (1MW 표준모델)</span></p>
+      <p class="sec-desc">발전 계량 데이터와 한전 정산내역을 자동 대조하고, 수익 배분·배당 적립·이상 감지까지 한 번에 — 조합원 누구나 같은 숫자를 봅니다.
+        ${실측 ? '<span class="badge badge-success">우리 조합 실측 (자료함에 올린 자료 기준)</span>'
+               : '<span class="badge badge-mute">데모 데이터 (1MW 표준모델) — 자료함에 올리면 실측으로 바뀝니다</span>'}</p>
     </div>
 
     <div class="grid grid-4">
-      <div class="kpi"><div class="kpi-n">${gen.toLocaleString()}</div><div class="kpi-l">이달 발전량 (kWh)</div><div class="kpi-sub">이용률 17.3% · 목표 15%</div></div>
-      <div class="kpi"><div class="kpi-n">${fmtWon(settle)}</div><div class="kpi-l">이달 한전 정산금액</div><div class="kpi-sub">계량 대조 차이 ${diff}% (기준 ±2%)</div></div>
-      <div class="kpi"><div class="kpi-n">${fmtWon(fund)}</div><div class="kpi-l">이달 배당 적립 (10%)</div><div class="kpi-sub">지역화폐로 분기 지급</div></div>
-      <div class="kpi"><div class="kpi-n">1건</div><div class="kpi-l">이상 알림</div><div class="kpi-sub">8/15 무발전 감지 → 인버터 점검 지시</div></div>
+      <div class="kpi"><div class="kpi-n">${gen.toLocaleString()}</div><div class="kpi-l">${실측 ? '최근 달' : '이달'} 발전량 (kWh)</div>
+        <div class="kpi-sub">${이용률 ? '이용률 ' + 이용률 + '% · 목표 15%' : '설비용량을 현황에 넣으면 이용률이 나옵니다'}</div></div>
+      <div class="kpi"><div class="kpi-n">${fmtWon(settle)}</div><div class="kpi-l">${실측 ? '최근 달' : '이달'} 한전 정산금액</div>
+        <div class="kpi-sub">계량 대조 차이 ${diff}${diff === '—' ? '' : '%'} (기준 ±2%)</div></div>
+      <div class="kpi"><div class="kpi-n">${fmtWon(fund)}</div><div class="kpi-l">배당 적립 (10%)</div><div class="kpi-sub">지역화폐로 분기 지급</div></div>
+      <div class="kpi"><div class="kpi-n"${이상수 ? ' style="color:var(--danger);"' : ''}>${이상수}건</div><div class="kpi-l">이상 알림</div>
+        <div class="kpi-sub">${실측 ? (이상수 ? '위 실측 카드에 날짜별로 있습니다' : '이상 징후 없음') : '8/15 무발전 감지 → 인버터 점검 지시'}</div></div>
     </div>
 
     <div class="card" style="margin-top:16px;margin-bottom:16px;">
-      <div class="card-title"><h3 class="serif">월별 발전량 (kWh)</h3></div>
+      <div class="card-title"><h3 class="serif">월별 발전량 (kWh)</h3>
+        ${실측 ? '<span class="badge badge-success">실측</span>' : '<span class="badge badge-mute">예시</span>'}</div>
       <div style="display:flex;align-items:flex-end;gap:14px;height:150px;padding:0 8px;">
         ${months.map(([m, v]) => `
           <div style="flex:1;text-align:center;">
@@ -3803,7 +3839,8 @@ function memPower(){
     </div>
 
     <div class="card" style="margin-bottom:16px;">
-      <div class="card-title"><h3 class="serif">이달 수익 배분 자동 계산 (50 · 10 · 20 · 20)</h3></div>
+      <div class="card-title"><h3 class="serif">${실측 ? '최근 달' : '이달'} 수익 배분 자동 계산 (50 · 10 · 20 · 20)</h3>
+        ${실측 ? '<span class="badge badge-success">실측</span>' : '<span class="badge badge-mute">예시</span>'}</div>
       <table class="tbl">
         <thead><tr><th>배분 항목</th><th>비율</th><th>이달 배분액</th><th>용도</th></tr></thead>
         <tbody>
@@ -4024,8 +4061,17 @@ function svBizCheck(){
 }
 
 /* ─── 연합체·커뮤니티 ─── */
+/* 설비 용량 문자열('998kW' · '1MW' · '0.5MW')을 kW 숫자로. 마을 표가 두 단위를 섞어 쓴다. */
+function capacityKw(cap){
+  const t = String(cap || '').trim();
+  const n = parseFloat(t.replace(/[^\d.]/g, ''));
+  if(!isFinite(n)) return 0;
+  return /mw/i.test(t) ? n * 1000 : n;
+}
 function memUnion(){
-  const totMW = 9.9 + 0.08 + 0.3 + 1;
+  // 2026-09-29 까지 `9.9 + 0.08 + 0.3 + 1` 로 박혀 있어 마을이 늘어도 11.3MW 로 고정이었다
+  const totMW = MOCK.villages.reduce((a, v) => a + capacityKw(v.capacity), 0) / 1000;
+  const 운영중 = MOCK.villages.filter(v => v.phase === '운영').length;
   return `
     <div class="sec-head">
       <h1>🤝 연합체·커뮤니티</h1>
@@ -4038,7 +4084,7 @@ function memUnion(){
         <div class="kpi"><div class="kpi-n">${MOCK.villages.length}</div><div class="kpi-l">참여 마을</div></div>
         <div class="kpi"><div class="kpi-n">${totMW.toFixed(1)}MW</div><div class="kpi-l">합계 설비</div></div>
         <div class="kpi"><div class="kpi-n">${MOCK.villages.reduce((a,v) => a+v.members,0)}명</div><div class="kpi-l">전체 조합원</div></div>
-        <div class="kpi"><div class="kpi-n">1곳</div><div class="kpi-l">운영(과금) 단계</div></div>
+        <div class="kpi"><div class="kpi-n">${운영중}곳</div><div class="kpi-l">운영(과금) 단계</div></div>
       </div>
       <table class="tbl" style="margin-top:10px;">
         <thead><tr><th>마을</th><th>설비</th><th>단계</th><th>진행률</th></tr></thead>
@@ -4083,7 +4129,23 @@ function memUnion(){
      합치면 "연합회 매출"이 회원 매출로 부풀려진다. 화면마다 어느 쪽 돈인지 띠로 밝힌다. */
 
 const FED_PAGES = ['fedsupport','fedqueue','fedoffice','feddues','fedbiz','fedbooks'];
-const FED_DUES_RATE = 0.02;            // 회비 요율 — 매년 총회 재의결(연합체 회비 = 운영관리비의 2%p)
+const FED_DUES_RATE = 0.02;            // 기본 요율 — 이력이 없을 때만 쓴다
+/* 회비 요율은 매년 총회가 다시 정한다. 그래서 숫자 하나가 아니라 '이력'으로 둔다.
+   fed_affairs(kind='규정', title='회비요율 …', date=시행일, amount=bp) 한 줄이 개정 한 건이다.
+   amount 는 베이시스포인트(200 = 2.00%) — 소수점 반올림 사고를 피하려고 정수로 담는다. */
+const FED_RATE_TITLE = '회비요율';
+function fedRateHistory(){
+  return ((_FED.affairs && _FED.affairs.items) || [])
+    .filter(x => x.kind === '규정' && String(x.title || '').indexOf(FED_RATE_TITLE) === 0 && x.amount > 0)
+    .map(x => ({시행: x.date || '', bp: x.amount, rate: x.amount / 10000, 근거: x.body || '', id: x.id}))
+    .sort((a, b) => a.시행 < b.시행 ? -1 : 1);
+}
+/* 그 달에 적용되는 요율 — 시행일이 해당 월 말일 이전인 개정 가운데 가장 나중 것 */
+function fedRateFor(month){
+  const 끝 = month + '-31';
+  const hit = fedRateHistory().filter(h => h.시행 && h.시행 <= 끝).pop();
+  return hit ? hit.rate : FED_DUES_RATE;
+}
 let _FED = {summary:null, dues:null, affairs:null, support:null, 때:null, 로딩:false, 실데이터:false};
 
 function fedMoneyBar(kind){
@@ -4309,7 +4371,8 @@ async function fedPost(path, body){
 const FED_AFFAIR_KINDS = ['총회','이사회','규정','인사','예산','결산','기타'];
 function fedOfficePage(){
   const all = (_FED.affairs && _FED.affairs.items) || [];
-  const items = all.filter(x => FED_AFFAIR_KINDS.indexOf(x.kind) !== -1);
+  const items = all.filter(x => FED_AFFAIR_KINDS.indexOf(x.kind) !== -1
+    && !(x.kind === '규정' && String(x.title || '').indexOf(FED_RATE_TITLE) === 0));   // 요율 개정은 회비 화면에서 관리
   const 올해 = items.filter(x => (x.date||'').slice(0,4) === '2026');
   return `
     <div class="sec-head">
@@ -4376,6 +4439,7 @@ function fedDuesPage(){
   const S = _FED.summary || {by_village:[], by_month:[]};
   const dues = (_FED.dues && _FED.dues.items) || [];
   const months = (S.by_month || []).map(m => m.month);
+  const hist = fedRateHistory();
   const 부과 = dues.reduce((a,d) => a + (d.amount||0), 0);
   const 수납 = dues.reduce((a,d) => a + (d.paid||0), 0);
   const 미납 = 부과 - 수납;
@@ -4386,7 +4450,8 @@ function fedDuesPage(){
     </div>
     ${fedMoneyBar('연합회')}
     <div class="grid grid-4">
-      <div class="kpi"><div class="kpi-n">${_fmtN(부과)}</div><div class="kpi-l">부과 누계(원)</div><div class="kpi-sub">요율 ${(FED_DUES_RATE*100).toFixed(1)}%</div></div>
+      <div class="kpi"><div class="kpi-n">${_fmtN(부과)}</div><div class="kpi-l">부과 누계(원)</div>
+        <div class="kpi-sub">현재 요율 ${((hist.length ? hist[hist.length-1].rate : FED_DUES_RATE)*100).toFixed(2)}%${hist.length ? ' · 개정 ' + hist.length + '회' : ' (기본값)'}</div></div>
       <div class="kpi"><div class="kpi-n">${_fmtN(수납)}</div><div class="kpi-l">수납 누계(원)</div></div>
       <div class="kpi"><div class="kpi-n" style="color:${미납>0?'var(--danger)':'inherit'};">${_fmtN(미납)}</div><div class="kpi-l">미납(원)</div></div>
       <div class="kpi"><div class="kpi-n">${부과 ? Math.round(수납/부과*100) : 0}%</div><div class="kpi-l">수납률</div></div>
@@ -4396,11 +4461,31 @@ function fedDuesPage(){
       <div class="card-title"><h3 class="serif">▶ 월 회비 일괄 산정·부과</h3></div>
       <div class="grid grid-2">
         <label class="fld"><span>대상 월</span>
-          <select id="du-month">${months.length ? months.map(m => `<option>${m}</option>`).join('') : '<option value="">제출된 월이 없습니다</option>'}</select></label>
-        <label class="fld"><span>요율</span><input id="du-rate" type="number" step="0.001" value="${FED_DUES_RATE}"></label>
+          <select id="du-month" onchange="fedDuesRateSync()">${months.length ? months.map(m => `<option>${m}</option>`).join('') : '<option value="">제출된 월이 없습니다</option>'}</select></label>
+        <label class="fld"><span>요율 <span class="text-mute" style="font-weight:normal;">(총회 의결값이 자동으로 들어옵니다)</span></span>
+          <input id="du-rate" type="number" step="0.0001" value="${months.length ? fedRateFor(months[0]) : FED_DUES_RATE}"></label>
       </div>
       <p class="text-mute" style="font-size:12.5px;margin-top:0;">해당 월에 실적을 올린 회원조합 전부에 대해 <code>정산금 × 요율</code>로 부과액을 계산해 기록합니다. 이미 부과된 달은 갱신됩니다.</p>
       <button class="btn btn-primary" onclick="fedDuesCharge()">💳 이 달 회비 부과</button>
+    </div>
+
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">📜 회비 요율 개정 이력 (${hist.length})</h3></div>
+      <p class="text-mute" style="font-size:12.5px;margin-top:0;">요율은 매년 총회가 다시 정합니다. 여기에 등록한 시행일에 따라
+        <b>그 달에 적용되는 요율이 자동으로 달라집니다</b> — 지난 달을 다시 부과해도 그때의 요율로 계산됩니다.</p>
+      ${hist.length ? `<table class="tbl">
+        <thead><tr><th>시행일</th><th class="num">요율</th><th>의결 근거</th><th></th></tr></thead>
+        <tbody>${hist.map(h => `<tr><td>${escapeHtml(h.시행)}</td><td class="num">${(h.rate*100).toFixed(2)}%</td>
+          <td>${escapeHtml(h.근거 || '—')}</td>
+          <td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="fedAffairDel('${escapeJs(h.id)}')">삭제</button></td></tr>`).join('')}
+        </tbody></table>`
+        : `<p class="text-mute" style="margin:0;">등록된 개정이 없어 기본 요율 ${(FED_DUES_RATE*100).toFixed(1)}%를 씁니다.</p>`}
+      <div class="grid grid-3" style="margin-top:10px;">
+        <label class="fld"><span>시행일</span><input id="du-eff" type="date" value="2026-01-01"></label>
+        <label class="fld"><span>요율(%)</span><input id="du-newrate" type="number" step="0.01" value="2.00"></label>
+        <label class="fld"><span>의결 근거</span><input id="du-basis" placeholder="예: 2026년 정기총회 제3호 의안"></label>
+      </div>
+      <button class="btn btn-outline" onclick="fedRateSave()">📜 요율 개정 등록</button>
     </div>
 
     <div class="card mt-20">
@@ -4418,9 +4503,25 @@ function fedDuesPage(){
     </div>
   `;
 }
+/* 대상 월을 바꾸면 그 달에 적용되는 요율로 칸을 맞춰 준다 */
+function fedDuesRateSync(){
+  const m = (document.getElementById('du-month') || {}).value;
+  const box = document.getElementById('du-rate');
+  if(m && box) box.value = fedRateFor(m);
+}
+async function fedRateSave(){
+  const eff = (document.getElementById('du-eff') || {}).value;
+  const pct = Number((document.getElementById('du-newrate') || {}).value);
+  const basis = (document.getElementById('du-basis') || {}).value || '';
+  if(!eff || !(pct > 0)){ toast('시행일과 요율을 적어 주세요.'); return; }
+  const r = await fedPost('/api/fed/affairs', {kind:'규정', date:eff, status:'완료', owner:'총회',
+    title: FED_RATE_TITLE + ' ' + pct.toFixed(2) + '% (' + eff + ' 시행)',
+    amount: Math.round(pct * 100), body: basis});
+  if(r){ toast('요율 개정을 등록했습니다.'); fedRefresh(); }
+}
 async function fedDuesCharge(){
   const month = (document.getElementById('du-month') || {}).value;
-  const rate = Number((document.getElementById('du-rate') || {}).value) || FED_DUES_RATE;
+  const rate = Number((document.getElementById('du-rate') || {}).value) || fedRateFor(month);
   if(!month){ toast('부과할 월을 고르세요.'); return; }
   if(!REAL_API){ toast('체험 모드에서는 저장되지 않습니다.'); return; }
   let rows = [];
@@ -4563,6 +4664,419 @@ function fedBooksPage(){
   `;
 }
 
+
+/* ==================== 재무제표 · 재무건전성 컨설팅 (2026-09-29) ====================
+   🔴 금액은 전부 서버가 계산한다. 화면은 받은 숫자를 그리기만 한다.
+      제도·법령 설명만 GPU 엔진(넥서스 H200)이 쓴다 — 보고서 3절에 그렇게 밝혀 둔다. */
+
+const FIN_PAGES = ['finstat', 'fedfinstat'];
+let _FIN = {stat:null, base:null, list:null, all:null, 때:null, 로딩:false, 실데이터:false};
+
+async function finLoad(page, force){
+  if(_FIN.로딩) return;
+  if(_FIN.때 && !force) return;
+  _FIN.로딩 = true;
+  try{
+    if(REAL_API){
+      const opt = {credentials:'same-origin'};
+      const [st, bs, ls] = await Promise.all([
+        fetch('/api/my/finstat', opt).then(r => r.json()).catch(() => ({ok:false})),
+        fetch('/api/my/finbase', opt).then(r => r.json()).catch(() => ({ok:false})),
+        fetch('/api/consult', opt).then(r => r.json()).catch(() => ({ok:false})),
+      ]);
+      if(st.ok){ _FIN.stat = st; _FIN.실데이터 = true; }
+      if(bs.ok) _FIN.base = bs.base;
+      if(ls.ok) _FIN.list = ls.items || [];
+    }
+  }catch(e){ /* 서버 미연결 */ }
+  _FIN.때 = new Date().toISOString();
+  _FIN.로딩 = false;
+  const main = document.getElementById('appMain');
+  if(main && currentRoute() === 'mem/' + page) main.innerHTML = renderMemberPage(page);
+}
+function finRefresh(){
+  _FIN.때 = null;
+  const page = currentRoute().split('/')[1];
+  finLoad(page, true);
+  toast('서버에서 다시 읽는 중입니다.');
+}
+
+function finNotReady(제목){
+  return `<div class="sec-head"><h1>${제목}</h1></div>
+    <div class="card"><p style="margin:0;">${REAL_API ? '불러오는 중…'
+      : '체험 모드에서는 재무제표를 만들지 않습니다. 실계정으로 로그인하면 올린 자료로 자동 작성됩니다.'}</p></div>`;
+}
+
+const _급뱃지 = {high:['badge-danger','지금'], mid:['badge-warn','곧'], low:['badge-success','여유']};
+function finFindingsCard(findings){
+  if(!findings || !findings.length) return '';
+  return `<div class="card mt-20">
+    <div class="card-title"><h3 class="serif">🩺 재무건전성 진단 (${findings.length})</h3>
+      <span class="badge badge-mute">서버 계산 · 규칙 기반</span></div>
+    ${findings.map(f => {
+      const b = _급뱃지[f.급] || _급뱃지.low;
+      return `<div style="border-left:3px solid var(--line);padding:8px 0 8px 12px;margin-bottom:10px;">
+        <div style="display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;">
+          <span class="badge ${b[0]}">${b[1]}</span>
+          <strong>${escapeHtml(f.제목)}</strong></div>
+        <p style="margin:4px 0 2px;font-size:13.5px;"><b>${escapeHtml(f.한줄)}</b></p>
+        <p class="text-mute" style="font-size:12.5px;margin:0;">${escapeHtml(f.설명)}</p></div>`;
+    }).join('')}
+  </div>`;
+}
+
+function finConsultCard(){
+  const list = _FIN.list || [];
+  return `<div class="card mt-20" style="border:2px solid var(--primary);">
+    <div class="card-title"><h3 class="serif">🧠 재무건전성 컨설팅 상담신청</h3>
+      <span class="badge badge-primary">GPU 엔진</span></div>
+    <p class="text-mute" style="font-size:12.5px;margin-top:0;">
+      위 재무제표와 진단을 근거로 <b>재무건전성 강화 컨설팅 보고서</b>를 만듭니다.
+      금액·비율은 서버가 계산하고, <b>제도·법령 근거만 고성능컴퓨팅 엔진(EXAONE)</b>이 씁니다 —
+      숫자를 AI가 지어내지 않습니다. 접수하면 20~40초쯤 걸립니다.</p>
+    <label class="fld"><span>요청 내용</span>
+      <textarea id="cns-ask" rows="2" placeholder="예: 상환 부담을 줄이고 적립을 늘리려면 무엇부터 해야 합니까?">재무제표를 바탕으로 재무건전성을 강화할 방안을 알려 주세요.</textarea></label>
+    <button class="btn btn-primary" id="cns-btn" onclick="consultRequest()">🧠 컨설팅 보고서 신청</button>
+    <div id="cns-state" class="text-mute" style="font-size:12.5px;margin-top:8px;"></div>
+    ${list.length ? `<table class="tbl" style="margin-top:12px;">
+      <thead><tr><th>신청일</th><th>대상</th><th>기간</th><th>상태</th><th>엔진</th><th></th></tr></thead>
+      <tbody>${list.map(x => `<tr>
+        <td style="white-space:nowrap;">${escapeHtml((x.created_at||'').slice(0,16).replace('T',' '))}</td>
+        <td>${escapeHtml(x.village_name || (x.scope === 'fed' ? '연합회' : '—'))}</td>
+        <td>${escapeHtml(x.period||'')}</td>
+        <td><span class="badge ${x.status==='완료'?'badge-success':'badge-info'}">${escapeHtml(x.status)}</span></td>
+        <td class="text-mute" style="font-size:12px;">${escapeHtml(x.engine||'—')}${x.engine_calls ? ' · ' + x.engine_calls + '문 ' + Math.round((x.engine_ms||0)/1000) + '초' : ''}</td>
+        <td class="tbl-actions"><button class="btn btn-outline btn-sm" onclick="consultOpen('${escapeJs(x.id)}')">보기</button></td>
+      </tr>`).join('')}</tbody></table>` : '<p class="text-mute" style="font-size:12.5px;margin:10px 0 0;">아직 신청한 보고서가 없습니다.</p>'}
+  </div>`;
+}
+
+async function consultRequest(){
+  if(!REAL_API){ toast('체험 모드에서는 신청되지 않습니다. 실계정으로 로그인해 주세요.'); return; }
+  const btn = document.getElementById('cns-btn');
+  const box = document.getElementById('cns-state');
+  const ask = (document.getElementById('cns-ask') || {}).value || '';
+  if(btn){ btn.disabled = true; btn.textContent = '작성 중…'; }
+  if(box) box.textContent = '재무제표를 진단하고 GPU 엔진에 제도 근거를 묻는 중입니다. 창을 닫지 마세요.';
+  try{
+    const res = await fetch('/api/consult/request', {method:'POST', credentials:'same-origin',
+      headers:{'Content-Type':'application/json'}, body: JSON.stringify({ask})});
+    const j = await res.json();
+    if(!j.ok){ toast('신청하지 못했습니다: ' + (j.error || res.status)); }
+    else{
+      if(box) box.textContent = `완료 — 엔진 ${j.engine_calls}문 · ${Math.round(j.engine_ms/1000)}초 · 근거 확보 ${j['근거확보']}건`;
+      consultShow(j.report, '재무건전성 컨설팅 보고서');
+      _FIN.때 = null; finLoad(currentRoute().split('/')[1], true);
+    }
+  }catch(e){ toast('서버에 닿지 못했습니다.'); }
+  if(btn){ btn.disabled = false; btn.textContent = '🧠 컨설팅 보고서 신청'; }
+}
+
+async function consultOpen(id){
+  try{
+    const j = await fetch('/api/consult/' + encodeURIComponent(id), {credentials:'same-origin'}).then(r => r.json());
+    if(!j.ok){ toast('보고서를 읽지 못했습니다.'); return; }
+    consultShow(j.item.report || '(본문 없음)', j.item.title || '컨설팅 보고서', j.item);
+  }catch(e){ toast('서버에 닿지 못했습니다.'); }
+}
+
+/* 마크다운 보고서를 화면에 — 표·제목·목록만 다룬다(보고서가 그 셋으로 돼 있다) */
+function mdToHtml(md){
+  const esc = t => escapeHtml(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/_(.+?)_/g, '<i>$1</i>');
+  const out = []; let tbl = null, ul = null;
+  String(md || '').split('\n').forEach(function(ln){
+    const t = ln.trim();
+    if(/^\|/.test(t)){
+      const cells = t.replace(/^\||\|$/g, '').split('|').map(x => x.trim());
+      if(/^[-: ]+$/.test(cells.join(''))) return;                  // 구분선
+      if(!tbl){ tbl = ['<table class="tbl"><thead><tr>' + cells.map(c => '<th>' + esc(c) + '</th>').join('') + '</tr></thead><tbody>']; }
+      else tbl.push('<tr>' + cells.map(c => '<td>' + esc(c) + '</td>').join('') + '</tr>');
+      return;
+    }
+    if(tbl){ out.push(tbl.join('') + '</tbody></table>'); tbl = null; }
+    if(/^\d+\.\s/.test(t) || /^[-*]\s/.test(t)){
+      if(!ul) ul = ['<ul style="margin:6px 0 10px 18px;">'];
+      ul.push('<li>' + esc(t.replace(/^(\d+\.|[-*])\s/, '')) + '</li>');
+      return;
+    }
+    if(ul){ out.push(ul.join('') + '</ul>'); ul = null; }
+    if(/^### /.test(t)) out.push('<h4 style="margin:14px 0 4px;">' + esc(t.slice(4)) + '</h4>');
+    else if(/^## /.test(t)) out.push('<h3 class="serif" style="margin:18px 0 6px;">' + esc(t.slice(3)) + '</h3>');
+    else if(/^# /.test(t)) out.push('<h2 class="serif" style="margin:0 0 8px;">' + esc(t.slice(2)) + '</h2>');
+    else if(/^> /.test(t)) out.push('<p class="text-mute" style="font-size:12.5px;border-left:3px solid var(--line);padding-left:10px;margin:8px 0;">' + esc(t.slice(2)) + '</p>');
+    else if(t) out.push('<p style="margin:4px 0;font-size:13.5px;">' + esc(t) + '</p>');
+  });
+  if(tbl) out.push(tbl.join('') + '</tbody></table>');
+  if(ul) out.push(ul.join('') + '</ul>');
+  return out.join('');
+}
+let _lastConsult = null;
+function consultShow(md, title, meta){
+  _lastConsult = {md, title};
+  showDyn({
+    title: title || '컨설팅 보고서',
+    sub: meta ? ((meta.village_name || '연합회') + ' · ' + (meta.period || '') + ' · 엔진 ' + (meta.engine || '—')) : '',
+    body: '<div class="doc-preview">' + mdToHtml(md) + '</div>',
+    foot: '<button class="btn btn-ghost" onclick="closeDyn()">닫기</button>'
+        + '<button class="btn btn-outline" onclick="consultDownload()">📥 마크다운 내려받기</button>',
+    size: 'xl'
+  });
+}
+function consultDownload(){
+  if(!_lastConsult) return;
+  const blob = new Blob([_lastConsult.md], {type:'text/markdown;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (_lastConsult.title || '컨설팅보고서').replace(/\s+/g,'_') + '.md';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+/* ── 회원조합 재무제표 ── */
+function memFinStat(){
+  const S = _FIN.stat;
+  if(!S || !S.statements) return finNotReady('📊 재무제표·컨설팅');
+  const st = S.statements, c = st.cumulative, b = st.base, ms = st.months;
+  const 억 = v => (v / 100000000).toFixed(2) + '억';
+  const dscr = c['원리금'] ? ((c['영업이익'] + c['감가상각비']) / c['원리금']) : null;
+  const 부채비율 = c['자본총계'] > 0 ? ((c['부채총계'] || c['차입금']) / c['자본총계'] * 100) : null;
+  return `
+    <div class="sec-head">
+      <h1>📊 재무제표·컨설팅</h1>
+      <p class="sec-desc">올린 월별 실적과 아래 기초값으로 <b>손익계산서·재무상태표</b>를 만듭니다. 금액은 서버가 계산합니다.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><h3 class="serif">⚙️ 재무제표 기초값</h3>
+        <span class="badge badge-mute">한 번만 넣으면 됩니다</span></div>
+      <div class="grid grid-3">
+        <label class="fld"><span>설비 취득원가(원)</span><input id="fb-asset" type="number" value="${b.asset_cost}"></label>
+        <label class="fld"><span>내용연수(년)</span><input id="fb-life" type="number" value="${b.useful_life}"></label>
+        <label class="fld"><span>차입금 원금(원)</span><input id="fb-loan" type="number" value="${b.loan_principal}"></label>
+        <label class="fld"><span>차입 이자율(연, 0.025=2.5%)</span><input id="fb-rate" type="number" step="0.001" value="${b.loan_rate}"></label>
+        <label class="fld"><span>출자금 총액(원)</span><input id="fb-equity" type="number" value="${b.equity}"></label>
+        <label class="fld"><span>기초 현금(원)</span><input id="fb-cash" type="number" value="${b.opening_cash}"
+          ${b.opening_cash_derived ? 'placeholder="비우면 자동"' : ''}></label>
+      </div>
+      <p class="text-mute" style="font-size:12px;margin-top:0;">
+        ${b.opening_cash_derived ? '기초 현금은 <code>차입금 + 출자금 − 설비취득가</code>로 자동 계산했습니다(대차가 맞도록).' : ''}
+        감가상각은 정액법 월할입니다.</p>
+      <button class="btn btn-primary" onclick="finBaseSave()">저장하고 다시 계산</button>
+    </div>
+
+    <div class="grid grid-4 mt-20">
+      <div class="kpi"><div class="kpi-n">${억(c['매출액'])}</div><div class="kpi-l">누적 매출액</div><div class="kpi-sub">${escapeHtml(c['기간'])} · ${c['월수']}개월</div></div>
+      <div class="kpi"><div class="kpi-n" style="color:${c['당기순이익']<0?'var(--danger)':'var(--primary)'};">${억(c['당기순이익'])}</div>
+        <div class="kpi-l">누적 당기순이익</div><div class="kpi-sub">감가상각·이자 반영</div></div>
+      <div class="kpi"><div class="kpi-n">${dscr === null ? '—' : dscr.toFixed(2)}</div><div class="kpi-l">DSCR (상환능력)</div><div class="kpi-sub">1.2 이상 권장</div></div>
+      <div class="kpi"><div class="kpi-n">${부채비율 === null ? '—' : Math.round(부채비율) + '%'}</div><div class="kpi-l">부채비율</div>
+        <div class="kpi-sub">부채총계 ÷ 자본총계${(c['미지급이자']||0) > 0 ? ' · <span style="color:var(--danger);">미지급이자 ' + _fmtN(c['미지급이자']) + '원</span>' : ''}</div></div>
+    </div>
+
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">📄 월별 손익계산서</h3><span class="badge badge-success">서버 계산</span></div>
+      <table class="tbl">
+        <thead><tr><th>월</th><th class="num">발전(kWh)</th><th class="num">매출액</th><th class="num">운영비</th>
+          <th class="num">감가상각비</th><th class="num">영업이익</th><th class="num">이자비용</th><th class="num">당기순이익</th></tr></thead>
+        <tbody>${ms.map(m => `<tr><td><b>${escapeHtml(m.month)}</b></td>
+          <td class="num">${_fmtN(m.kwh)}</td><td class="num">${_fmtN(m['매출액'])}</td>
+          <td class="num">${_fmtN(m['운영비'])}</td><td class="num">${_fmtN(m['감가상각비'])}</td>
+          <td class="num" style="color:${m['영업이익']<0?'var(--danger)':'inherit'};">${_fmtN(m['영업이익'])}</td>
+          <td class="num">${_fmtN(m['이자비용'])}</td>
+          <td class="num" style="color:${m['당기순이익']<0?'var(--danger)':'inherit'};"><b>${_fmtN(m['당기순이익'])}</b></td></tr>`).join('')}
+          <tr class="total"><td>누계</td><td class="num">${_fmtN(c['발전량'])}</td><td class="num">${_fmtN(c['매출액'])}</td>
+            <td class="num">${_fmtN(c['운영비'])}</td><td class="num">${_fmtN(c['감가상각비'])}</td>
+            <td class="num">${_fmtN(c['영업이익'])}</td><td class="num">${_fmtN(c['이자비용'])}</td>
+            <td class="num"><b>${_fmtN(c['당기순이익'])}</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">🏛 월말 재무상태표</h3></div>
+      <table class="tbl">
+        <thead><tr><th>월</th><th class="num">현금</th><th class="num">유형자산</th><th class="num">자산총계</th>
+          <th class="num">차입금</th><th class="num">미지급이자</th><th class="num">부채총계</th>
+          <th class="num">자본금</th><th class="num">이익잉여금</th><th class="num">자본총계</th></tr></thead>
+        <tbody>${ms.map(m => `<tr><td><b>${escapeHtml(m.month)}</b></td>
+          <td class="num">${_fmtN(m['현금'])}</td><td class="num">${_fmtN(m['유형자산'])}</td>
+          <td class="num"><b>${_fmtN(m['자산총계'])}</b></td><td class="num">${_fmtN(m['차입금'])}</td>
+          <td class="num" style="color:${(m['미지급이자']||0)>0?'var(--danger)':'inherit'};">${_fmtN(m['미지급이자']||0)}</td>
+          <td class="num"><b>${_fmtN(m['부채총계']||m['차입금'])}</b></td>
+          <td class="num">${_fmtN(m['자본금'])}</td>
+          <td class="num" style="color:${m['이익잉여금']<0?'var(--danger)':'inherit'};">${_fmtN(m['이익잉여금'])}</td>
+          <td class="num"><b>${_fmtN(m['자본총계'])}</b></td></tr>`).join('')}</tbody>
+      </table>
+      <p class="text-mute" style="font-size:12px;margin:6px 0 0;">
+        대차 검산: 자산총계 − 부채 − 자본 = <b>${_fmtN(c['대차차액'])}원</b>
+        ${c['대차차액'] === 0 ? '<span style="color:var(--primary);"> (일치 ✓)</span>'
+          : '<span style="color:var(--danger);"> — 기초값(설비·차입금·출자금·기초현금)을 다시 확인하세요</span>'}</p>
+    </div>
+
+    ${finFindingsCard(S.findings)}
+    ${finConsultCard()}
+    <p class="text-mute" style="font-size:12px;margin-top:10px;">
+      ${_FIN.때 ? '서버에서 읽은 때 ' + escapeHtml(_FIN.때.slice(0,16).replace('T',' ')) : ''}
+      <button class="btn btn-ghost btn-sm" onclick="finRefresh()">↻ 새로 읽기</button></p>
+  `;
+}
+
+async function finBaseSave(){
+  if(!REAL_API){ toast('체험 모드에서는 저장되지 않습니다.'); return; }
+  const g = id => (document.getElementById(id) || {}).value;
+  try{
+    const res = await fetch('/api/my/finbase', {method:'POST', credentials:'same-origin',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({asset_cost:g('fb-asset'), useful_life:g('fb-life'),
+        loan_principal:g('fb-loan'), loan_rate:g('fb-rate'), equity:g('fb-equity'),
+        opening_cash:g('fb-cash')})});
+    const j = await res.json();
+    if(!j.ok){ toast('저장하지 못했습니다.'); return; }
+    toast('기초값을 저장했습니다. 다시 계산합니다.');
+    finRefresh();
+  }catch(e){ toast('서버에 닿지 못했습니다.'); }
+}
+
+/* ── 연합회 자체 법인 재무제표 ── */
+function fedFinStat(){
+  const S = _FIN.stat;
+  if(!S || !S.statements) return finNotReady('📊 연합회 재무제표·컨설팅');
+  const st = S.statements, c = st.cumulative, ms = st.months;
+  return `
+    <div class="sec-head">
+      <h1>📊 연합회 재무제표·컨설팅 — 자체 사무</h1>
+      <p class="sec-desc">연합회 법인 자신의 손익입니다. 회원조합 정산금은 여기 들어오지 않습니다.</p>
+    </div>
+    ${fedMoneyBar('연합회')}
+    <div class="grid grid-4">
+      <div class="kpi"><div class="kpi-n">${_fmtN(c['회비수입'])}</div><div class="kpi-l">회비 수입(원)</div>
+        <div class="kpi-sub">부과 ${_fmtN(c['회비부과'])} · 미수 ${_fmtN(c['미수회비'])}</div></div>
+      <div class="kpi"><div class="kpi-n">${_fmtN(c['공동사업수입'])}</div><div class="kpi-l">공동사업 수입(원)</div></div>
+      <div class="kpi"><div class="kpi-n">${_fmtN(c['사무국비용'])}</div><div class="kpi-l">사무국 비용(원)</div></div>
+      <div class="kpi"><div class="kpi-n" style="color:${c['당기순이익']<0?'var(--danger)':'var(--primary)'};">${_fmtN(c['당기순이익'])}</div>
+        <div class="kpi-l">당기순이익(원)</div><div class="kpi-sub">기말 적립금 ${_fmtN(c['현금'])}</div></div>
+    </div>
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">📄 월별 손익 (${escapeHtml(c['기간'] || '—')})</h3><span class="badge badge-success">서버 계산</span></div>
+      ${ms.length ? `<table class="tbl">
+        <thead><tr><th>월</th><th class="num">회비 부과</th><th class="num">회비 수납</th><th class="num">공동사업 수입</th>
+          <th class="num">사무국 비용</th><th class="num">당기순이익</th><th class="num">누적 적립금</th></tr></thead>
+        <tbody>${ms.map(m => `<tr><td><b>${escapeHtml(m.month)}</b></td>
+          <td class="num">${_fmtN(m['회비부과'])}</td><td class="num">${_fmtN(m['회비수입'])}</td>
+          <td class="num">${_fmtN(m['공동사업수입'])}</td><td class="num">${_fmtN(m['사무국비용'])}</td>
+          <td class="num" style="color:${m['당기순이익']<0?'var(--danger)':'inherit'};"><b>${_fmtN(m['당기순이익'])}</b></td>
+          <td class="num">${_fmtN(m['누적적립금'])}</td></tr>`).join('')}
+          <tr class="total"><td>누계</td><td class="num">${_fmtN(c['회비부과'])}</td><td class="num">${_fmtN(c['회비수입'])}</td>
+            <td class="num">${_fmtN(c['공동사업수입'])}</td><td class="num">${_fmtN(c['사무국비용'])}</td>
+            <td class="num"><b>${_fmtN(c['당기순이익'])}</b></td><td class="num">${_fmtN(c['현금'])}</td></tr>
+        </tbody></table>` : '<p class="text-mute" style="margin:0;">회비·공동사업 기록이 아직 없습니다.</p>'}
+    </div>
+    ${finFindingsCard(S.findings)}
+    ${finConsultCard()}
+  `;
+}
+
+/* ── 관리자: 컨설팅 보고서·회원 재무 한눈에 (2026-09-29) ── */
+let _ADMFIN = {list:null, fin:null, 때:null, 로딩:false};
+async function admFinLoad(force){
+  if(_ADMFIN.로딩) return;
+  if(_ADMFIN.때 && !force) return;
+  _ADMFIN.로딩 = true;
+  try{
+    if(REAL_API){
+      const opt = {credentials:'same-origin'};
+      const [ls, fs] = await Promise.all([
+        fetch('/api/consult', opt).then(r => r.json()).catch(() => ({ok:false})),
+        fetch('/api/fin/statements', opt).then(r => r.json()).catch(() => ({ok:false})),
+      ]);
+      if(ls.ok) _ADMFIN.list = ls.items || [];
+      if(fs.ok) _ADMFIN.fin = fs;
+    }
+  }catch(e){}
+  _ADMFIN.때 = new Date().toISOString();
+  _ADMFIN.로딩 = false;
+  const main = document.getElementById('appMain');
+  if(main && currentRoute() === 'adm/consult') main.innerHTML = renderAdminPage('consult');
+}
+function admFinRefresh(){ _ADMFIN.때 = null; admFinLoad(true); toast('서버에서 다시 읽는 중입니다.'); }
+
+function admConsult(){
+  const list = _ADMFIN.list;
+  const fin = _ADMFIN.fin;
+  if(!list && !fin) return `<div class="sec-head"><h1>🧾 컨설팅 보고서·회원 재무</h1></div>
+    <div class="card"><p style="margin:0;">${REAL_API ? '불러오는 중…' : '체험 모드에서는 서버 자료를 읽지 않습니다.'}</p></div>`;
+  const items = list || [];
+  const rows = (fin && fin.items) || [];
+  const fed = fin && fin.fed && fin.fed.cumulative;
+  const 경보조합 = rows.filter(r => (r.경보 || []).length);
+  const 억 = v => (v/100000000).toFixed(2);
+  return `
+    <div class="sec-head">
+      <h1>🧾 컨설팅 보고서·회원 재무</h1>
+      <p class="sec-desc">회원조합과 연합회가 신청한 재무건전성 컨설팅 결과를 전부 봅니다. 회원 재무 요약도 같이 놓았습니다.</p>
+    </div>
+    <div class="grid grid-4">
+      <div class="kpi"><div class="kpi-n">${items.length}</div><div class="kpi-l">컨설팅 보고서</div>
+        <div class="kpi-sub">완료 ${items.filter(x=>x.status==='완료').length}</div></div>
+      <div class="kpi"><div class="kpi-n">${rows.length}</div><div class="kpi-l">회원조합</div>
+        <div class="kpi-sub">실적 제출 ${rows.filter(r=>r.cumulative && r.cumulative['월수']).length}곳</div></div>
+      <div class="kpi"><div class="kpi-n" style="color:${경보조합.length?'var(--danger)':'inherit'};">${경보조합.length}</div>
+        <div class="kpi-l">🔴 경보 조합</div><div class="kpi-sub">재무 진단 high</div></div>
+      <div class="kpi"><div class="kpi-n">${items.reduce((a,x)=>a+(x.engine_calls||0),0)}</div>
+        <div class="kpi-l">GPU 엔진 질의</div><div class="kpi-sub">${Math.round(items.reduce((a,x)=>a+(x.engine_ms||0),0)/1000)}초</div></div>
+    </div>
+
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">🧠 컨설팅 보고서 (${items.length})</h3>
+        <button class="btn btn-ghost btn-sm" onclick="admFinRefresh()">↻ 새로 읽기</button></div>
+      ${items.length ? `<table class="tbl">
+        <thead><tr><th>신청일</th><th>대상</th><th>기간</th><th>상태</th><th>진단</th><th>엔진</th><th></th></tr></thead>
+        <tbody>${items.map(x => {
+          const f = x.findings || [];
+          const high = f.filter(y => y.급 === 'high').length;
+          return `<tr>
+            <td style="white-space:nowrap;">${escapeHtml((x.created_at||'').slice(0,16).replace('T',' '))}</td>
+            <td><strong>${escapeHtml(x.village_name || (x.scope === 'fed' ? '연합회(자체)' : '—'))}</strong></td>
+            <td>${escapeHtml(x.period||'')}</td>
+            <td><span class="badge ${x.status==='완료'?'badge-success':'badge-info'}">${escapeHtml(x.status)}</span></td>
+            <td>${high ? `<span class="badge badge-danger">지금 ${high}</span> ` : ''}<span class="text-mute" style="font-size:12px;">전체 ${f.length}</span></td>
+            <td class="text-mute" style="font-size:12px;">${escapeHtml(x.engine||'—')}${x.engine_calls ? ' · ' + x.engine_calls + '문 ' + Math.round((x.engine_ms||0)/1000) + '초' : ''}</td>
+            <td class="tbl-actions"><button class="btn btn-outline btn-sm" onclick="consultOpen('${escapeJs(x.id)}')">보기</button></td>
+          </tr>`; }).join('')}</tbody></table>`
+        : '<p class="text-mute" style="margin:0;">아직 신청된 보고서가 없습니다. 조합·연합회 화면의 「재무제표·컨설팅」에서 신청합니다.</p>'}
+    </div>
+
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">📊 회원조합 재무 요약</h3><span class="badge badge-mute">서버 계산</span></div>
+      ${rows.length ? `<table class="tbl">
+        <thead><tr><th>조합</th><th>설비</th><th>단계</th><th class="num">월수</th><th class="num">매출액(억)</th>
+          <th class="num">영업이익</th><th class="num">당기순이익</th><th class="num">차입금(억)</th><th>경보</th></tr></thead>
+        <tbody>${rows.map(r => { const c = r.cumulative || {};
+          return `<tr><td><strong>${escapeHtml(r.village_name)}</strong></td>
+          <td>${escapeHtml(r.capacity||'')}</td><td><span class="badge badge-info">${escapeHtml(r.phase||'')}</span></td>
+          <td class="num">${c['월수']||0}</td><td class="num">${억(c['매출액']||0)}</td>
+          <td class="num" style="color:${(c['영업이익']||0)<0?'var(--danger)':'inherit'};">${_fmtN(c['영업이익']||0)}</td>
+          <td class="num" style="color:${(c['당기순이익']||0)<0?'var(--danger)':'inherit'};">${_fmtN(c['당기순이익']||0)}</td>
+          <td class="num">${억(c['차입금']||0)}</td>
+          <td>${(r.경보||[]).length ? (r.경보||[]).map(x => `<span class="badge badge-danger" style="margin:1px;">${escapeHtml(x.제목)}</span>`).join('') : '<span class="badge badge-success">양호</span>'}</td>
+          </tr>`; }).join('')}</tbody></table>` : '<p class="text-mute" style="margin:0;">회원조합 실적이 없습니다.</p>'}
+    </div>
+
+    ${fed ? `<div class="card mt-20">
+      <div class="card-title"><h3 class="serif">🤝 연합회 자체 법인</h3></div>
+      <table class="tbl"><tbody>
+        <tr><th>기간</th><td>${escapeHtml(fed['기간']||'—')}</td><th>회비 수납 / 부과</th>
+          <td class="num">${_fmtN(fed['회비수입'])} / ${_fmtN(fed['회비부과'])}</td></tr>
+        <tr><th>공동사업 수입</th><td class="num">${_fmtN(fed['공동사업수입'])}</td>
+          <th>사무국 비용</th><td class="num">${_fmtN(fed['사무국비용'])}</td></tr>
+        <tr><th>당기순이익</th><td class="num"><b>${_fmtN(fed['당기순이익'])}</b></td>
+          <th>기말 적립금</th><td class="num">${_fmtN(fed['현금'])}</td></tr>
+      </tbody></table>
+      <p class="text-mute" style="font-size:12px;margin:6px 0 0;">회원조합 정산금은 이 표에 들어오지 않습니다 — 연합회 자체 회계입니다.</p>
+    </div>` : ''}
+  `;
+}
+
 /* ─── 마이페이지: 내 계정으로 한 일 전체 보기 ─── */
 function memMyPage(u){
   const myDocs = MOCK.documents.filter(d => d._user);
@@ -4643,7 +5157,9 @@ function memMyPage(u){
 }
 
 /* "이번 주 할 일" 카드 (개선안 4-1) — 생애주기 단계·일정 데이터에서 규칙으로 1~3개 도출 */
-function buildTodos(village){
+/* 생애주기 단계에서 나오는 할 일. 2026-09-29 까지 이름이 아래 원장 기반 buildTodos() 와 같아
+   뒤엣것에 덮여 통째로 죽어 있었다(대시보드 '이번 주 할 일' 이 단계 안내를 한 번도 안 보여 줬다). */
+function buildStageTodos(village){
   const todos = [];
   const stage = stageOf(village);
   // ① 7일 내 마감 일정 — 가장 급한 것 하나
@@ -4674,7 +5190,11 @@ function buildTodos(village){
   return todos.slice(0, 3);
 }
 function todoStrip(village){
-  const todos = buildTodos(village);
+  /* 원장·법령·기한에서 나온 급한 것 먼저, 그 다음 생애주기 안내. 합쳐서 3개까지. */
+  const urgent = (typeof buildTodos === 'function' ? buildTodos() : [])
+    .filter(t => t.급 === 'high')
+    .map(t => ({urgent:true, txt:t.제목 + ' — ' + t.한줄, sub:t.묶음, cta:'바로 가기', go:t.가기}));
+  const todos = urgent.concat(buildStageTodos(village)).slice(0, 3);
   if(!todos.length) return '';
   return `<div class="todo-strip">
     <div class="side-label" style="margin-bottom:8px;">☀ 이번 주 할 일</div>
@@ -5509,10 +6029,22 @@ function _inboxFinish(fid, 상태, 요약, 가기){
   if(i){ i.상태 = 상태; i.요약 = 요약; if(가기) i.가기 = 가기; saveInbox(l); }
   inboxRender();
 }
-/* 머리글에서 열 번호 찾기 — 은행·기관마다 이름이 달라 키워드로 본다 */
-function _colOf(head, names, def){
-  const i = head.findIndex(function(h){ return names.some(function(n){ return h.indexOf(n) !== -1; }); });
-  return i >= 0 ? i : def;
+/* 머리글에서 열 번호 찾기 — 은행·기관마다 이름이 달라 키워드로 본다.
+   🔴 **이름 목록의 순서가 우선순위다.** 머리글을 먼저 훑으면 안 된다 —
+   한전 명세서처럼 'SMP정산금 · REC정산금 · 정산금액' 이 나란히 있으면
+   '정산금' 이라는 키워드가 SMP 열에 먼저 걸려 **총액 대신 62%만 잡힌다**
+   (2026-09-29 부하시험에서 실제로 났다: 8개월 정산 1억 1,232만 → 6,964만).
+   그래서 이름을 바깥 고리로 돌려 앞에 적은 이름을 먼저 찾는다.
+   skip 에 든 열 번호는 이미 다른 항목이 가져간 것이라 건너뛴다. */
+function _colOf(head, names, def, skip){
+  const 제외 = skip || [];
+  for(let n = 0; n < names.length; n++){
+    for(let i = 0; i < head.length; i++){
+      if(제외.indexOf(i) !== -1) continue;
+      if(String(head[i]).indexOf(names[n]) !== -1) return i;
+    }
+  }
+  return def;
 }
 
 /* ① REMS 발전량 — 일별로 모은다(시간별 파일이면 날짜로 합산) */
@@ -5573,11 +6105,13 @@ function inboxParseKepco(file, fid){
     if(dup){ powerRejectDup(dup, fid, '한전 정산명세'); return; }
 
     const head = rows[0].map(function(h){ return String(h).trim(); });
-    const iYm  = _colOf(head, ['정산월','거래월','년월','월','일자','기간'], 0);
-    const iKwh = _colOf(head, ['전력량','판매전력','발전량','kWh'], 1);
+    const iYm  = _colOf(head, ['정산월','거래월','년월','기간','일자','월'], 0);
+    const iKwh = _colOf(head, ['판매전력량','전력량','판매전력','발전량','kWh'], 1);
     const iSmp = _colOf(head, ['SMP','계통한계','smp'], -1);
     const iRec = _colOf(head, ['REC','인증서','rec'], -1);
-    const iAmt = _colOf(head, ['정산금','판매대금','금액','합계','대금'], -1);
+    // 총액 열 — '정산금액·합계' 를 '정산금' 보다 먼저 찾고, SMP·REC 열은 건너뛴다
+    const iAmt = _colOf(head, ['정산금액','판매대금','합계금액','합계','대금','정산금','금액'], -1,
+                        [iSmp, iRec].filter(function(x){ return x >= 0; }));
 
     const P = loadPower();
     let n = 0, 갱신 = 0, 총액 = 0, 건너뜀 = 0;
@@ -5587,11 +6121,12 @@ function inboxParseKepco(file, fid){
       const m = /(\d{4})-?(\d{1,2})/.exec(raw);
       if(!m){ 건너뜀++; return; }
       const ym = m[1] + '-' + String(m[2]).padStart(2, '0');
+      const _smp = iSmp >= 0 ? _closingNum(r[iSmp]) : 0;
+      const _rec = iRec >= 0 ? _closingNum(r[iRec]) : 0;
       const rec = {
-        ym: ym, kwh: _closingNum(r[iKwh]),
-        smp: iSmp >= 0 ? _closingNum(r[iSmp]) : 0,
-        rec: iRec >= 0 ? _closingNum(r[iRec]) : 0,
-        amount: iAmt >= 0 ? _closingNum(r[iAmt]) : 0,
+        ym: ym, kwh: _closingNum(r[iKwh]), smp: _smp, rec: _rec,
+        // 총액 열이 없으면 SMP+REC 로 만든다. 둘 다 없으면 0 이고 화면이 '—' 로 표시한다
+        amount: iAmt >= 0 ? _closingNum(r[iAmt]) : (_smp + _rec),
         file: file.name
       };
       총액 += rec.amount;
@@ -7060,6 +7595,7 @@ function memClosing(){
     {icon:'💌', name:'배당·햇빛소득 통지문', cycle:'분기', desc:'원천징수 계산·건강보험료 영향 안내 포함 — 지급·원천징수 메뉴에서 생성'},
   ];
   const bankFiles = MOCK.uploads.filter(f => f.kind === 'bank' && f._text);
+  const inboxTx = ((MOCK.tax && MOCK.tax.bank) || []).length;
   return `
     <div class="sec-head">
       <h1>📁 월마감·보고서</h1>
@@ -7068,7 +7604,7 @@ function memClosing(){
 
     <div class="grid grid-4">
       <div class="kpi"><div class="kpi-n">9</div><div class="kpi-l">월 정기업무</div><div class="kpi-sub">아래 체크리스트</div></div>
-      <div class="kpi"><div class="kpi-n">${bankFiles.length}</div><div class="kpi-l">마감 사용 가능한 통장 CSV</div><div class="kpi-sub">회계·세무 메뉴에서 업로드</div></div>
+      <div class="kpi"><div class="kpi-n">${bankFiles.length + (inboxTx ? 1 : 0)}</div><div class="kpi-l">마감 사용 가능한 통장 자료</div><div class="kpi-sub">${inboxTx ? '자료함 거래 ' + inboxTx.toLocaleString() + '건' : '회계·세무 메뉴에서 업로드'}</div></div>
       <div class="kpi"><div class="kpi-n">${MOCK.closings.length}</div><div class="kpi-l">생성된 월마감 보고서</div><div class="kpi-sub">아래 목록</div></div>
       <div class="kpi"><div class="kpi-n">21건</div><div class="kpi-l">연간 반복 업무</div><div class="kpi-sub">분기 5 · 반기 4 · 연 8 포함</div></div>
     </div>
@@ -7078,7 +7614,7 @@ function memClosing(){
       <p class="text-mute" style="margin-top:0;font-size:13px;">
         통장 거래내역 CSV를 자동 분류·기장하고, 한전 정산 수입의 50/10/20/20 배분 계산과 실제 이체 대조,
         계정과목별 집계까지 담은 <strong>월간 운영보고서</strong>를 생성합니다.
-        ${bankFiles.length ? '' : '먼저 <a href="#/mem/accounting" style="color:var(--primary);">회계·세무 자동화</a>에서 통장 CSV를 업로드하거나, 실행 창에서 직접 파일을 선택하세요.'}
+        ${(bankFiles.length || inboxTx) ? '' : '먼저 <a href="#/mem/inbox" style="color:var(--primary);">자료함</a>이나 <a href="#/mem/accounting" style="color:var(--primary);">회계·세무 자동화</a>에 통장 내역을 올리거나, 실행 창에서 직접 파일을 선택하세요.'}
       </p>
       <button class="btn btn-primary" onclick="closingStart()">📁 월 마감 실행</button>
     </div>
@@ -7183,21 +7719,26 @@ function closingStart(){
   const prev = new Date(now.getFullYear(), now.getMonth()-1, 1);   // 기본값: 지난달 (로컬 기준)
   const defYm = `${prev.getFullYear()}-${String(prev.getMonth()+1).padStart(2,'0')}`;
   const bankFiles = MOCK.uploads.filter(f => f.kind === 'bank' && f._text);
+  // 실계정이면 소속 조합을 기본으로 고른다 — 매번 목록에서 찾게 하지 않는다
+  const _myName = (_myVillage && _myVillage.name) || '';
+  // 자료함으로 올린 통장 거래(MOCK.tax.bank)가 있으면 그것도 마감에 쓸 수 있다
+  const taxRows = (MOCK.tax && MOCK.tax.bank) || [];
   showDyn({
     title: '월 마감 실행',
     sub: '통장 거래내역을 자동 분류하고 월간 운영보고서를 생성합니다.',
     body: `
       <div class="form-row"><label>대상 조합 <span style="color:var(--danger);">*</span></label>
         <select class="select" id="cl-village">
-          ${MOCK.villages.map(v => `<option value="${escapeHtml(v.name)}">${escapeHtml(v.name)}</option>`).join('')}
-        </select></div>
+          ${MOCK.villages.map(v => `<option value="${escapeHtml(v.name)}"${v.name === _myName ? ' selected' : ''}>${escapeHtml(v.name)}</option>`).join('')}
+        </select>${_myName ? '<p class="text-mute" style="font-size:12px;margin:4px 0 0;">내 소속 조합이 기본으로 잡혀 있습니다.</p>' : ''}</div>
       <div class="form-row"><label>대상 월 <span style="color:var(--danger);">*</span></label>
         <input class="input" id="cl-period" type="month" value="${defYm}"></div>
       <div class="form-row"><label>통장 거래내역 (업로드된 CSV)</label>
         <select class="select" id="cl-file">
+          ${taxRows.length ? `<option value="__inbox__">📥 자료함에 올린 통장 거래 ${taxRows.length}건 (${escapeHtml(taxRows[0].date)} ~ ${escapeHtml(taxRows[taxRows.length-1].date)})</option>` : ''}
           ${bankFiles.length
             ? bankFiles.map(f => `<option value="${escapeJs(f.id)}">${escapeHtml(f.name)} (${escapeHtml(f.date)})</option>`).join('')
-            : '<option value="">— 업로드된 통장 CSV 없음 —</option>'}
+            : (taxRows.length ? '' : '<option value="">— 올린 통장 자료 없음 —</option>')}
         </select></div>
       <div class="form-row"><label>또는 CSV 파일 직접 선택 (선택 시 이 파일 우선)</label>
         <input class="input" id="cl-direct" type="file" accept=".csv"></div>`,
@@ -7217,6 +7758,18 @@ function closingRun(){
     return;
   }
   const fid = document.getElementById('cl-file').value;
+  // 자료함(📥)으로 올린 통장 거래도 마감에 쓴다 — 2026-09-29 전에는 회계 메뉴 업로드만 됐다.
+  // 파서가 CSV 를 먹으므로 저장된 거래를 같은 모양의 CSV 로 되돌려 넘긴다.
+  if(fid === '__inbox__'){
+    const rows = (MOCK.tax && MOCK.tax.bank) || [];
+    if(!rows.length){ toast('자료함에 통장 거래가 없습니다.'); return; }
+    const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+    const csv = ['거래일,적요,출금,입금,잔액']
+      .concat(rows.map(t => [t.date, q(t.desc), t.out || 0, t.inn || 0, t.bal || 0].join(',')))
+      .join('\n');
+    _closingProcess(village, ym, csv, '자료함 통장 거래 ' + rows.length + '건');
+    return;
+  }
   const f = MOCK.uploads.find(x => x.id === fid && x._text);
   if(!f){ toast('통장 CSV를 선택하거나 파일을 직접 첨부해주세요.'); return; }
   _closingProcess(village, ym, f._text, f.name);
@@ -7246,7 +7799,7 @@ function _closingProcess(village, ym, csvText, fileName){
   if(rows.length < 2){ toast('CSV에서 거래를 읽지 못했습니다. 파일 내용을 확인해주세요.'); return; }
   // 열 위치 탐색 (헤더명 기준, 못 찾으면 표준 순서 가정)
   const head = rows[0].map(h => String(h).trim());
-  const col = (names, def) => { const i = head.findIndex(h => names.some(n => h.includes(n))); return i >= 0 ? i : def; };
+  const col = (names, def) => _colOf(head, names, def);   // 이름 순서가 우선순위 (_colOf 주석 참조)
   const iDate = col(['일자','날짜','거래일'], 0), iDesc = col(['적요','내용'], 1),
         iOut = col(['출금'], 2), iIn = col(['입금'], 3), iBal = col(['잔액'], 4), iBr = col(['거래점','취급'], 5);
   const txAll = rows.slice(1).map(r => ({
@@ -7300,6 +7853,11 @@ function _closingReport(village, ym, tx, fileName){
     return {name, r, plan, actual, diff: actual - plan};
   });
   const hasTransfers = splitRows.some(s => s.actual > 0);
+  /* 이 통장이 곧 그 용도의 계좌면 이체할 필요가 없다(주계좌=공동사업 계좌가 흔하다).
+     정산금에서 실제로 빠져나간 배분 이체를 뺀 나머지가 그대로 남아 있으면 '주계좌 보유'로 본다 —
+     2026-09-29 전에는 이것도 '이체 없음'으로 나와 미이행처럼 보였다. */
+  const 이체합 = splitRows.reduce((a, x) => a + x.actual, 0);
+  const 잔류 = Math.max(0, settle - 이체합);
   return `
     <h3 style="margin-top:0;">1. 월간 요약</h3>
     <table class="tbl"><tbody>
@@ -7318,13 +7876,18 @@ function _closingReport(village, ym, tx, fileName){
       <thead><tr><th>배분 항목</th><th>비율</th><th>배분 기준액</th>${hasTransfers ? '<th>실제 이체액</th><th>차이</th>' : ''}</tr></thead>
       <tbody>${splitRows.map(s => `
         <tr><td>${s.name}</td><td>${Math.round(s.r*100)}%</td><td class="num">${_fmtN(s.plan)}원</td>
-        ${hasTransfers ? `<td class="num">${s.actual ? _fmtN(s.actual)+'원' : '<span style="color:#b58900;">이체 없음</span>'}</td>
-        <td class="num">${s.actual ? (s.diff === 0 ? '<span style="color:var(--primary);">일치 ✓</span>' : `<span style="color:var(--danger);">${s.diff>0?'+':''}${_fmtN(s.diff)}원</span>`) : '—'}</td>` : ''}</tr>`).join('')}
+        ${hasTransfers ? `<td class="num">${s.actual ? _fmtN(s.actual)+'원'
+          : (잔류 >= s.plan ? '<span style="color:#666;">주계좌 보유</span>' : '<span style="color:#b58900;">이체 없음</span>')}</td>
+        <td class="num">${s.actual ? (s.diff === 0 ? '<span style="color:var(--primary);">일치 ✓</span>' : `<span style="color:var(--danger);">${s.diff>0?'+':''}${_fmtN(s.diff)}원</span>`)
+          : (잔류 >= s.plan ? '<span style="color:var(--primary);">이체 불필요 ✓</span>' : '—')}</td>` : ''}</tr>`).join('')}
         <tr class="total"><td>합계</td><td>100%</td><td class="num">${_fmtN(settle)}원</td>
         ${hasTransfers ? `<td class="num">${_fmtN(splitRows.reduce((s,x)=>s+x.actual,0))}원</td><td></td>` : ''}</tr>
       </tbody>
     </table>
     ${!hasTransfers ? `<div class="section"><strong>📨 자금 배분 지시서</strong> — 정산금 입금이 확인되었습니다. 위 기준액대로 4개 계좌 이체를 집행하세요 (이체 실행·승인은 사람이 합니다).</div>` : ''}
+    ${hasTransfers && splitRows.some(s => !s.actual && 잔류 >= s.plan) ? `<p style="font-size:12px;color:#666;margin:6px 0 0;">
+      ※ <b>주계좌 보유</b> = 이 통장이 그 용도의 계좌여서 따로 이체할 필요가 없다는 뜻입니다.
+      정산금에서 다른 계좌로 나간 ${_fmtN(이체합)}원을 뺀 ${_fmtN(잔류)}원이 이 통장에 남아 그 몫을 담고 있습니다.</p>` : ''}
     ` : `
     <h3>2. 수익 배분</h3>
     <p style="font-size:12.5px;color:#666;">이달 한전 전력판매 수입이 없어 배분 계산을 생략합니다. (상업발전 전 단계이거나 정산 미도래)</p>
@@ -7485,6 +8048,11 @@ function memChat(){
 /* AI 상담 상세 — 주제별 예시 질문 모음 + 같은 입력란(chatIn/chatBody → sendChat 공용, /api/ai/chat = GPU 엔진).
    예시는 9/25 대조 시험에서 엔진이 강했던 공고문·서류·절차 영역 위주. 법령 조문은 법령·인허가 탭으로 안내.
    9/26 실측: 짧은 구어체는 엔진이 insufficient로 물러서는 일이 잦아, 12개 모두 엔진이 근거와 함께 답한 문장만 남김. 바꿀 땐 UTF-8로 다시 재 볼 것. */
+/* 예시 질문은 엔진에 3회씩 재 보고 고른 문장만 싣는다 (2026-09-29 실측).
+   짧은 구어체는 엔진이 "근거를 못 찾았다"로 물러선다 — 교체 전 반드시 ask_probe.py -n 3 으로 잴 것.
+   바뀐 것: 「발전사업 허가 절차를 순서대로」(1/3) · 「한전 계통연계 검토의견서에서…」(1/3)
+            · 「정관에 꼭 넣어야 할 조항」(1/3) · 「자부담 15%는 어떻게」(1/3, 엔진에 근거 자체가 없어 내림)
+   자부담·융자 재원은 엔진 근거가 0건이라 예시에서 빼고 아래 안내로 메뉴를 가리킨다. */
 const ASK_GROUPS = [
   ['👥 참여 요건', [
     '햇빛소득마을 협동조합의 조합원이 될 수 있는 사람의 요건을 공고문 기준으로 알려 주세요. 나이·거주기간·기준일을 포함해 주세요.',
@@ -7493,18 +8061,18 @@ const ASK_GROUPS = [
   ]],
   ['🏗 설립·절차', [
     '햇빛소득마을 공모에 신청할 때 제출해야 하는 서류는 무엇인가요?',
-    '발전사업 허가 절차를 순서대로 알려주세요.',
+    '햇빛소득마을 발전사업의 인허가는 어떤 순서로 진행되며 각 단계에서 어느 기관에 무엇을 신청해야 합니까?',
     '햇빛소득마을 사업은 어떤 단계로 진행되나요?',
   ]],
   ['⚡ 설비·수익', [
     '태양광 모듈의 탄소배출량 기준은 얼마이고 무엇으로 증명하나요?',
-    '자부담 15%는 어떻게 마련할 수 있나요?',
+    '햇빛소득마을 선정 이후 사업이 취소되는 사유에는 어떤 것이 있습니까?',
     '햇빛소득마을이 받을 수 있는 REC 주민참여 추가 가중치는 최대 얼마이며, 어떤 조건에서 최대치가 됩니까?',
   ]],
   ['📄 서류 점검', [
-    '한전 계통연계 검토의견서에서 사업계획서 쓸 때 꼭 확인할 항목은?',
+    '한국전력의 계통연계 검토의견서를 사업계획서에 첨부할 때 반드시 확인해야 하는 항목은 무엇입니까?',
     '공고문이 요구하는 협동조합 정관 필수요건은 무엇인가요?',
-    '정관에 꼭 넣어야 할 조항이 있나요?',
+    '햇빛소득마을 사업계획서에 반드시 담아야 하는 항목은 무엇입니까?',
   ]],
 ];
 function memAsk(){
@@ -7513,6 +8081,9 @@ function memAsk(){
       <h1>GPU 엔진 질문 모음</h1>
       <p class="sec-desc">주제별 예시 질문을 누르면 햇소자 GPU 엔진(EXAONE)에 바로 묻습니다. 직접 입력해도 됩니다.
         <a href="#/mem/chat" style="margin-left:6px;">← AI 상담</a></p>
+      <p class="text-mute" style="font-size:12.5px;margin-top:-4px;">
+        <b>자부담·융자 재원</b>은 엔진이 근거로 가진 문서에 없습니다 —
+        <a href="#/mem/finance" style="color:var(--primary);">자부담·융자 신청</a> 메뉴에 절차·서류·계산이 정리돼 있습니다.</p>
     </div>
     <div class="ask-groups">
       ${ASK_GROUPS.map(([title, qs]) => `
@@ -11327,6 +11898,7 @@ function renderAdminPage(page){
     case 'content':    return admContent();
     case 'logs':       return admLogs();
     case 'taxkpi':     return admTaxKpi();
+    case 'consult':    return admConsult();
     default:           return admDashboard();
   }
 }
@@ -12214,7 +12786,7 @@ function taxImportBank(files){
     const rows = _closingCsvParse(text);
     if(rows.length < 2){ toast('CSV에서 거래를 읽지 못했습니다.'); return; }
     const head = rows[0].map(h => String(h).trim());
-    const col = (names, def) => { const i = head.findIndex(h => names.some(n => h.includes(n))); return i >= 0 ? i : def; };
+    const col = (names, def) => _colOf(head, names, def);   // 이름 순서가 우선순위 (_colOf 주석 참조)
     const iDate = col(['일자','날짜','거래일'],0), iDesc = col(['적요','내용','거래내용'],1), iOut = col(['출금'],2), iIn = col(['입금'],3), iBal = col(['잔액'],4);
     let n = 0;
     for(const r of rows.slice(1)){
