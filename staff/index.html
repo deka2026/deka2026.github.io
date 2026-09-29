@@ -118,6 +118,27 @@ footer{max-width:1000px;margin:0 auto;padding:22px 16px 40px;font-size:12px;colo
 
   <!-- 본문 -->
   <main id="app" style="display:none">
+    <div id="tempWarn" class="warnbox" style="display:none">
+      🔑 <b>임시 비밀번호를 쓰고 계십니다.</b> 남이 내 이름으로 질문하고 문서를 만들 수 있으니
+      지금 바꿔 주세요. → <button class="btn sm" id="openPw" style="margin-left:6px">비밀번호 바꾸기</button>
+    </div>
+
+    <section class="card" id="pwCard" style="display:none;max-width:460px">
+      <h2>비밀번호 바꾸기</h2>
+      <p class="sub">새 비밀번호는 <b>8자 이상</b>이어야 합니다. 바꾸면 다른 기기의 로그인은 모두 끊깁니다.</p>
+      <label for="pwOld">지금 비밀번호</label>
+      <input type="password" id="pwOld" autocomplete="current-password">
+      <label for="pwNew">새 비밀번호 (8자 이상)</label>
+      <input type="password" id="pwNew" autocomplete="new-password">
+      <label for="pwNew2">새 비밀번호 확인</label>
+      <input type="password" id="pwNew2" autocomplete="new-password">
+      <div class="row" style="margin-top:14px">
+        <button class="btn primary" id="pwSave">바꾸기</button>
+        <button class="btn sm" id="pwClose">닫기</button>
+        <span id="pwMsg" class="note" style="margin:0"></span>
+      </div>
+    </section>
+
     <div class="tabs">
       <button class="tab on" data-tab="ask">질문하기</button>
       <button class="tab" data-tab="doc">문서 만들기</button>
@@ -258,7 +279,9 @@ async function 화면(){
   if(!사용자){ $('#gate').style.display='block'; $('#app').style.display='none'; $('#topRight').innerHTML=''; return; }
   $('#gate').style.display='none'; $('#app').style.display='block';
   $('#topRight').innerHTML = `<span>${피하기(사용자.name||사용자.username)}</span>
+     <button class="btn sm" id="pwBtn">비밀번호</button>
      <button class="btn sm" id="outBtn">로그아웃</button>`;
+  $('#pwBtn').onclick = 비밀번호칸열기;
   $('#outBtn').onclick = async () => {
     await fetch('/api/auth/logout',{method:'POST',credentials:'same-origin'});
     사용자=null; location.reload();
@@ -273,6 +296,7 @@ async function 상태읽기(){
     const e=d.engine||{}, k=d.kb||{};
     $('#topRight').insertAdjacentHTML('afterbegin',
       `<span class="pill ${e.ok?'ok':'bad'}">${e.ok?'HPC 엔진 정상':'엔진 점검중'}</span>`);
+    if(d.user && d.user.temp_password) $('#tempWarn').style.display='block';
     $('#infoBox').innerHTML = `
       <table><tr><th>항목</th><th>값</th></tr>
       <tr><td>고성능컴퓨팅 엔진</td><td>${e.ok?'정상':'응답 없음'} · ${피하기(e.backend||'-')} · ${피하기(e.base||'')}</td></tr>
@@ -309,7 +333,8 @@ function 글붙이기(who, cls, text, 출처, 꼬리){
   box.appendChild(만들기('div','who', who + (꼬리?`<span style="font-weight:400">${피하기(꼬리)}</span>`:'')));
   const b = 만들기('div','body'); b.textContent = text; box.appendChild(b);
   출처붙이기(box, 출처);
-  $('#thread').prepend(box);
+  $('#thread').appendChild(box);
+  box.scrollIntoView({behavior:'smooth', block:'nearest'});
   return box;
 }
 $('#clearBtn').onclick = () => { 이력=[]; $('#thread').innerHTML=''; };
@@ -410,6 +435,39 @@ $('#copyBtn').onclick = async () => {
   try{ await navigator.clipboard.writeText($('#docBody').textContent); $('#copyBtn').textContent='복사했습니다'; }
   catch(e){ $('#copyBtn').textContent='복사 실패'; }
   setTimeout(()=>$('#copyBtn').textContent='본문 복사', 1600);
+};
+
+/* ── 비밀번호 ── */
+function 비밀번호칸열기(){
+  $('#pwCard').style.display='block';
+  $('#pwMsg').textContent='';
+  $('#pwCard').scrollIntoView({behavior:'smooth', block:'start'});
+  $('#pwOld').focus();
+}
+$('#openPw').onclick = 비밀번호칸열기;
+$('#pwClose').onclick = () => { $('#pwCard').style.display='none'; };
+$('#pwSave').onclick = async () => {
+  const 옛 = $('#pwOld').value, 새 = $('#pwNew').value, 확인 = $('#pwNew2').value;
+  const 알림 = $('#pwMsg');
+  if(새.length < 8){ 알림.textContent = '새 비밀번호는 8자 이상이어야 합니다.'; return; }
+  if(새 !== 확인){ 알림.textContent = '새 비밀번호 확인이 다릅니다.'; return; }
+  const b = $('#pwSave'); b.disabled = true; 알림.textContent = '바꾸는 중…';
+  try{
+    const r = await fetch('/api/auth/change-password', {method:'POST', credentials:'same-origin',
+      headers:{'Content-Type':'application/json'}, body: JSON.stringify({old:옛, new:새})});
+    const d = await r.json().catch(()=>({}));
+    if(!r.ok || !d.ok){
+      알림.textContent = d.error === 'invalid_credentials' ? '지금 비밀번호가 맞지 않습니다.'
+                       : d.error === 'weak_password' ? '새 비밀번호는 8자 이상이어야 합니다.'
+                       : (d.message || '바꾸지 못했습니다.');
+      return;
+    }
+    알림.textContent = '바뀌었습니다.';
+    $('#pwOld').value = $('#pwNew').value = $('#pwNew2').value = '';
+    $('#tempWarn').style.display = 'none';
+    setTimeout(()=>{ $('#pwCard').style.display='none'; }, 1200);
+  }catch(e){ 알림.textContent = e.message; }
+  finally{ b.disabled = false; }
 };
 
 /* ── 문서함 ── */
