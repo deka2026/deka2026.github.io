@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>직원전용 질문 | 사회혁신교육원</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="사교원 직원 전용 — 사내 자료를 근거로 고성능컴퓨팅 시스템이 답하고 문서를 만듭니다.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%234a6741'/><text x='16' y='22' text-anchor='middle' font-size='14' fill='%23f7f3ee'>問</text></svg>">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef2e7; --card:#fff; --ink:#1e2b1c; --ink2:#3d5238; --muted:#6e8469;
+  --green:#4a6741; --green-l:#5d7f54; --green-50:#eef3ea;
+  --line:rgba(60,80,50,.22); --warn:#9a5b2a; --danger:#a33a2a;
+  --sh:0 2px 8px rgba(30,43,28,.10); --sh2:0 10px 28px rgba(30,43,28,.18);
+  --font:'Pretendard Variable','Pretendard',-apple-system,sans-serif;
+  --serif:Georgia,'Noto Serif KR',serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#161b15; --card:#1e2620; --ink:#e8eee4; --ink2:#c2d0bb; --muted:#8fa389;
+    --green:#8fbb7e; --green-l:#a6cd96; --green-50:#243024; --line:rgba(200,220,190,.18);
+    --sh:0 2px 8px rgba(0,0,0,.4); --sh2:0 10px 28px rgba(0,0,0,.5);
+  }
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.62;font-size:15px}
+a{color:var(--green);text-decoration:none}
+.wrap{max-width:1000px;margin:0 auto;padding:0 16px 60px}
+header.top{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.top-in{max-width:1000px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{font-family:var(--serif);font-weight:700;font-size:17px;display:flex;align-items:center;gap:8px}
+.brand .dot{width:26px;height:26px;border-radius:50%;background:var(--green);color:#f7f3ee;display:grid;place-items:center;font-size:14px}
+.lock{font-size:11px;font-weight:700;color:var(--green);border:1px solid var(--line);border-radius:999px;padding:2px 9px}
+.top-right{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
+.btn{font-family:inherit;font-size:14px;border-radius:9px;padding:9px 16px;border:1px solid var(--line);
+     background:var(--card);color:var(--ink);cursor:pointer;transition:.15s}
+.btn:hover{border-color:var(--green-l)}
+.btn.primary{background:var(--green);border-color:var(--green);color:#f7f3ee;font-weight:600}
+.btn.primary:hover{background:var(--green-l)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.sm{padding:5px 11px;font-size:12.5px}
+.tabs{display:flex;gap:6px;margin:20px 0 16px;flex-wrap:wrap}
+.tab{padding:9px 18px;border-radius:999px;border:1px solid var(--line);background:var(--card);
+     cursor:pointer;font-size:14px;font-family:inherit;color:var(--ink2)}
+.tab.on{background:var(--green);border-color:var(--green);color:#f7f3ee;font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:var(--sh);margin-bottom:16px}
+h2{font-family:var(--serif);font-size:19px;margin-bottom:6px}
+.sub{font-size:13.5px;color:var(--muted);margin-bottom:14px}
+label{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin:12px 0 5px}
+input[type=text],input[type=password],textarea,select{
+  width:100%;font-family:inherit;font-size:15px;padding:10px 12px;border:1px solid var(--line);
+  border-radius:9px;background:var(--bg);color:var(--ink)}
+textarea{resize:vertical;min-height:90px;line-height:1.6}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--green-l);outline-offset:-1px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.pill{font-size:12px;padding:3px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.pill.ok{color:var(--green);border-color:var(--green-l)}
+.pill.bad{color:var(--danger);border-color:var(--danger)}
+.modes{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.mode{font-size:12.5px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);
+      background:var(--card);cursor:pointer;color:var(--ink2);font-family:inherit}
+.mode.on{background:var(--green-50);border-color:var(--green-l);color:var(--green);font-weight:600}
+.msg{margin:14px 0;padding:14px 16px;border-radius:12px;border:1px solid var(--line)}
+.msg.q{background:var(--green-50);border-color:var(--green-l)}
+.msg.q .who{color:var(--green)}
+.msg .who{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;display:flex;gap:8px;align-items:center}
+.body{white-space:pre-wrap;word-break:break-word}
+.body h3{font-size:16px;margin:12px 0 6px;font-family:var(--serif)}
+.srcs{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
+.srcs summary{cursor:pointer;font-size:12.5px;color:var(--muted);font-weight:600}
+.srcs li{font-size:12.5px;color:var(--ink2);margin:6px 0 0 4px;list-style:none}
+.srcs .tag{font-size:11px;border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:var(--muted);margin-right:6px}
+.note{font-size:12.5px;color:var(--muted);margin-top:10px;line-height:1.55}
+.warnbox{background:rgba(154,91,42,.10);border:1px solid rgba(154,91,42,.35);color:var(--warn);
+         padding:11px 14px;border-radius:10px;font-size:13.5px;margin:12px 0}
+.steps{margin-top:14px}
+.step{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.step:last-child{border-bottom:0}
+.step .n{width:24px;height:24px;border-radius:50%;background:var(--green-50);color:var(--green);
+         display:grid;place-items:center;font-size:12px;font-weight:700;flex:none}
+.step.done .n{background:var(--green);color:#f7f3ee}
+.step .st{margin-left:auto;font-size:12px;color:var(--muted);flex:none}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid var(--line);border-top-color:var(--green);
+      border-radius:50%;animation:sp .8s linear infinite;vertical-align:-2px}
+@keyframes sp{to{transform:rotate(360deg)}}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:10px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--muted);font-weight:600;font-size:12.5px}
+.empty{color:var(--muted);font-size:14px;padding:18px 0;text-align:center}
+footer{max-width:1000px;margin:0 auto;padding:22px 16px 40px;font-size:12px;color:var(--muted);
+       border-top:1px solid var(--line);text-align:center}
+@media(max-width:640px){.wrap{padding:0 12px 48px}.card{padding:16px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <div class="brand"><span class="dot">問</span> 직원전용 질문 <span class="lock">🔒 사내</span></div>
+    <div class="top-right" id="topRight"></div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- 로그인 -->
+  <section id="gate" class="card" style="display:none;max-width:420px;margin:40px auto">
+    <h2>직원 로그인</h2>
+    <p class="sub">사교원 직원 계정으로 들어오세요. 계정은 관리자가 만듭니다.</p>
+    <label for="u">아이디</label>
+    <input type="text" id="u" autocomplete="username">
+    <label for="p">비밀번호</label>
+    <input type="password" id="p" autocomplete="current-password">
+    <div style="margin-top:16px"><button class="btn primary" style="width:100%" id="loginBtn">로그인</button></div>
+    <p class="note" id="gateMsg"></p>
+  </section>
+
+  <!-- 본문 -->
+  <main id="app" style="display:none">
+    <div class="tabs">
+      <button class="tab on" data-tab="ask">질문하기</button>
+      <button class="tab" data-tab="doc">문서 만들기</button>
+      <button class="tab" data-tab="box">내 문서함</button>
+      <button class="tab" data-tab="info">자료·엔진</button>
+    </div>
+
+    <!-- 질문 -->
+    <section id="tab-ask">
+      <div class="card">
+        <h2>무엇이든 물어보세요</h2>
+        <p class="sub">사교원 서버에 있는 자료(개인정보 제외)를 찾아, 고성능컴퓨팅 시스템이 답을 씁니다.</p>
+        <textarea id="q" placeholder="예) 망남마을 어촌신활력 사업의 올해 추진 상황을 정리해줘&#10;예) 햇빛소득마을 공모에서 계통검토의견서가 언제 필요한가&#10;예) 우리 정관상 이사회 소집 요건이 뭐야"></textarea>
+        <div class="modes">
+          <button class="mode on" data-mode="사교원자료">🏢 사교원 자료만</button>
+          <button class="mode" data-mode="전체">🌐 사교원 자료 + 엔진 지식</button>
+          <span class="note" style="margin:0 0 0 4px">기본은 사내 자료만 씁니다. 자료 밖 내용은 (일반지식)으로 표시됩니다.</span>
+        </div>
+        <div class="row" style="margin-top:14px">
+          <button class="btn primary" id="askBtn">질문하기</button>
+          <button class="btn sm" id="clearBtn">대화 비우기</button>
+          <span id="askState" class="note" style="margin:0"></span>
+        </div>
+      </div>
+      <div id="thread"></div>
+    </section>
+
+    <!-- 문서 -->
+    <section id="tab-doc" style="display:none">
+      <div class="card">
+        <h2>문서 만들기</h2>
+        <p class="sub">설명을 적으면 목차를 짜고, 절마다 사내 근거를 찾아 본문을 씁니다. 한글(.hwpx)로 내려받습니다.</p>
+        <label for="dTitle">문서 제목</label>
+        <input type="text" id="dTitle" placeholder="예) 2026년 망남마을 어촌신활력 상반기 추진상황 보고">
+        <label for="dKind">문서 종류</label>
+        <select id="dKind">
+          <option>보고서</option><option>사업계획</option><option>검토서</option>
+          <option>공문</option><option>회의자료</option><option>요약</option>
+        </select>
+        <label for="dAsk">어떤 문서인지 설명</label>
+        <textarea id="dAsk" placeholder="누가 읽는지, 무엇을 담아야 하는지, 꼭 들어가야 할 수치나 항목을 적어주세요."></textarea>
+        <div class="row" style="margin-top:14px">
+          <button class="btn primary" id="planBtn">① 목차 만들기</button>
+          <span id="docState" class="note" style="margin:0"></span>
+        </div>
+      </div>
+      <div class="card" id="planCard" style="display:none">
+        <h2 id="planTitle"></h2>
+        <p class="sub">절 제목을 고쳐도 됩니다. 확인하면 절마다 차례로 씁니다(절당 10~25초).</p>
+        <div id="planList"></div>
+        <div class="row" style="margin-top:14px">
+          <button class="btn primary" id="writeBtn">② 본문 작성 시작</button>
+          <button class="btn sm" id="addSecBtn">절 추가</button>
+        </div>
+        <div class="steps" id="steps"></div>
+      </div>
+      <div class="card" id="resultCard" style="display:none">
+        <h2>완성된 문서</h2>
+        <div class="row" style="margin-bottom:12px">
+          <button class="btn primary" id="dlHwpx">📄 한글(.hwpx) 내려받기</button>
+          <button class="btn" id="dlMd">📝 마크다운(.md)</button>
+          <button class="btn sm" id="copyBtn">본문 복사</button>
+        </div>
+        <div class="warnbox">초안입니다. 수치와 근거를 담당자가 확인한 뒤 제출하세요.</div>
+        <div class="body" id="docBody"></div>
+      </div>
+    </section>
+
+    <!-- 문서함 -->
+    <section id="tab-box" style="display:none">
+      <div class="card">
+        <h2>내 문서함</h2>
+        <p class="sub">만든 문서는 서버에 남습니다. 다시 내려받거나 지울 수 있습니다.</p>
+        <div id="boxList"><p class="empty">불러오는 중…</p></div>
+      </div>
+    </section>
+
+    <!-- 정보 -->
+    <section id="tab-info" style="display:none">
+      <div class="card">
+        <h2>이 창은 어떻게 답을 만드나</h2>
+        <p class="sub">근거 찾기는 사교원 서버가, 글쓰기는 고성능컴퓨팅 시스템이 합니다.</p>
+        <div class="body" style="margin-top:8px">① 질문이 들어오면 <b>사교원 로컬 서버</b>의 자료 색인에서 관련 대목을 찾습니다.
+② 그 대목에서 <b>개인정보를 지운 사본</b>만 골라냅니다(주민번호·연락처·전자우편·계좌 등은 색인 단계에서 이미 삭제되어 있습니다).
+③ 질문과 근거를 <b>NIPA 고성능컴퓨팅(H200) 엔진</b>에 보내 답·문서를 쓰게 합니다.
+④ 답과 함께 <b>어느 자료에서 나왔는지</b>를 같이 보여줍니다.
+
+회원·신청·상담·계정 정보가 담긴 표는 색인 대상에서 아예 빠져 있습니다.</div>
+        <div id="infoBox" style="margin-top:16px"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<footer>사회혁신교육원 사회적협동조합 · 직원전용 · 외부 공개 금지</footer>
+
+<script>
+const $ = s => document.querySelector(s);
+const 만들기 = (t,c,h) => { const e=document.createElement(t); if(c)e.className=c; if(h!==undefined)e.innerHTML=h; return e; };
+const 피하기 = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+let 사용자=null, 모드='사교원자료', 이력=[], 현재문서=null;
+
+async function 부르기(길, 옵션={}){
+  const r = await fetch(길, {credentials:'same-origin', ...옵션});
+  let d = null; try { d = await r.json(); } catch(e){}
+  if(r.status===401){ 사용자=null; 화면(); throw new Error('로그인이 필요합니다.'); }
+  if(r.status===403) throw new Error((d&&d.message)||'권한이 없습니다.');
+  return d || {};
+}
+async function 보내기(길, 몸){
+  return 부르기(길, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(몸)});
+}
+
+/* ── 로그인 ── */
+async function 나확인(){
+  try{
+    const r = await fetch('/api/auth/me', {credentials:'same-origin'});
+    if(!r.ok) return null;
+    const d = await r.json();
+    return d.user || d;
+  }catch(e){ return null; }
+}
+$('#loginBtn').onclick = async () => {
+  const b=$('#loginBtn'); b.disabled=true; $('#gateMsg').textContent='';
+  try{
+    const r = await fetch('/api/auth/login', {method:'POST', credentials:'same-origin',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({username:$('#u').value.trim(), password:$('#p').value})});
+    const d = await r.json().catch(()=>({}));
+    if(!r.ok){ $('#gateMsg').textContent = d.message || d.error || '로그인에 실패했습니다.'; return; }
+    사용자 = d.user || d; await 화면();
+  } finally { b.disabled=false; }
+};
+$('#p').addEventListener('keydown', e => { if(e.key==='Enter') $('#loginBtn').click(); });
+
+async function 화면(){
+  if(!사용자) 사용자 = await 나확인();
+  if(!사용자){ $('#gate').style.display='block'; $('#app').style.display='none'; $('#topRight').innerHTML=''; return; }
+  $('#gate').style.display='none'; $('#app').style.display='block';
+  $('#topRight').innerHTML = `<span>${피하기(사용자.name||사용자.username)}</span>
+     <button class="btn sm" id="outBtn">로그아웃</button>`;
+  $('#outBtn').onclick = async () => {
+    await fetch('/api/auth/logout',{method:'POST',credentials:'same-origin'});
+    사용자=null; location.reload();
+  };
+  상태읽기();
+}
+
+async function 상태읽기(){
+  try{
+    const d = await 부르기('/api/staff/status');
+    if(!d.ok) return;
+    const e=d.engine||{}, k=d.kb||{};
+    $('#topRight').insertAdjacentHTML('afterbegin',
+      `<span class="pill ${e.ok?'ok':'bad'}">${e.ok?'HPC 엔진 정상':'엔진 점검중'}</span>`);
+    $('#infoBox').innerHTML = `
+      <table><tr><th>항목</th><th>값</th></tr>
+      <tr><td>고성능컴퓨팅 엔진</td><td>${e.ok?'정상':'응답 없음'} · ${피하기(e.backend||'-')} · ${피하기(e.base||'')}</td></tr>
+      <tr><td>색인된 사내 문서</td><td>${(k.docs||0).toLocaleString()}건 · 조각 ${(k.chunks||0).toLocaleString()}개</td></tr>
+      <tr><td>색인에서 삭제한 개인정보</td><td>${(k.redacted||0).toLocaleString()}건</td></tr>
+      <tr><td>마지막 색인 시각</td><td>${피하기(k.built_at||'-')}</td></tr>
+      <tr><td>자료 갈래</td><td>${(k.sources||[]).map(s=>`${피하기(s.source)} ${s.n}`).join(' · ')||'-'}</td></tr>
+      </table>`;
+  }catch(e){}
+}
+
+/* ── 탭 ── */
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  t.classList.add('on');
+  ['ask','doc','box','info'].forEach(n => $('#tab-'+n).style.display = (n===t.dataset.tab?'block':'none'));
+  if(t.dataset.tab==='box') 문서함();
+});
+document.querySelectorAll('.mode').forEach(m => m.onclick = () => {
+  document.querySelectorAll('.mode').forEach(x=>x.classList.remove('on'));
+  m.classList.add('on'); 모드 = m.dataset.mode;
+});
+
+/* ── 질문 ── */
+function 출처붙이기(부모, 출처){
+  if(!출처 || !출처.length) return;
+  const d = 만들기('details','srcs');
+  d.innerHTML = `<summary>근거로 쓴 사내 자료 ${출처.length}건 보기</summary>` +
+    '<ul>' + 출처.map(s=>`<li><span class="tag">${피하기(s.source)}</span>(자료${s.n}) ${피하기(s.title)}${s.heading&&s.heading!==s.title?' / '+피하기(s.heading):''}</li>`).join('') + '</ul>';
+  부모.appendChild(d);
+}
+function 글붙이기(who, cls, text, 출처, 꼬리){
+  const box = 만들기('div','msg '+cls);
+  box.appendChild(만들기('div','who', who + (꼬리?`<span style="font-weight:400">${피하기(꼬리)}</span>`:'')));
+  const b = 만들기('div','body'); b.textContent = text; box.appendChild(b);
+  출처붙이기(box, 출처);
+  $('#thread').prepend(box);
+  return box;
+}
+$('#clearBtn').onclick = () => { 이력=[]; $('#thread').innerHTML=''; };
+$('#askBtn').onclick = async () => {
+  const q = $('#q').value.trim(); if(!q) return;
+  const b=$('#askBtn'); b.disabled=true;
+  $('#askState').innerHTML = '<span class="spin"></span> 사내 자료를 찾아 고성능컴퓨팅에 맡기는 중…';
+  글붙이기('질문','q',q);
+  $('#q').value='';
+  try{
+    const d = await 보내기('/api/staff/ask', {question:q, mode:모드, history:이력});
+    if(d.no_source){ 글붙이기('답변','', d.message, []); }
+    else if(!d.ok){ 글붙이기('답변','', d.message||'답을 받지 못했습니다.', d.sources); }
+    else {
+      글붙이기('답변','', d.answer, d.sources,
+        ` · ${d.backend||'HPC'} · ${(d.engine_ms/1000||0).toFixed(1)}초 · 근거 ${d.kb_hits}건`);
+      이력.push({role:'user',content:q}); 이력.push({role:'assistant',content:d.answer});
+      if(이력.length>12) 이력 = 이력.slice(-12);
+    }
+  }catch(e){ 글붙이기('답변','', e.message); }
+  finally{ b.disabled=false; $('#askState').textContent=''; }
+};
+$('#q').addEventListener('keydown', e => { if(e.key==='Enter' && (e.metaKey||e.ctrlKey)) $('#askBtn').click(); });
+
+/* ── 문서 ── */
+function 목차그리기(절들){
+  $('#planList').innerHTML = '';
+  절들.forEach((s,i)=>{
+    const row = 만들기('div','row'); row.style.margin='6px 0';
+    row.innerHTML = `<span class="pill">${i+1}</span>`;
+    const inp = 만들기('input'); inp.type='text'; inp.value=s; inp.style.flex='1';
+    inp.dataset.i = i; row.appendChild(inp);
+    const del = 만들기('button','btn sm','삭제');
+    del.onclick = () => { 현재문서.sections.splice(i,1); 목차그리기(현재문서.sections); };
+    row.appendChild(del);
+    inp.oninput = () => { 현재문서.sections[i] = inp.value; };
+    $('#planList').appendChild(row);
+  });
+}
+$('#addSecBtn').onclick = () => { 현재문서.sections.push('새 절'); 목차그리기(현재문서.sections); };
+
+$('#planBtn').onclick = async () => {
+  const 요청 = $('#dAsk').value.trim();
+  if(!요청){ $('#docState').textContent='어떤 문서인지 설명을 적어주세요.'; return; }
+  const b=$('#planBtn'); b.disabled=true;
+  $('#docState').innerHTML='<span class="spin"></span> 목차를 짜는 중…';
+  $('#resultCard').style.display='none';
+  try{
+    const d = await 보내기('/api/staff/doc/plan',
+      {title:$('#dTitle').value.trim(), request:요청, kind:$('#dKind').value});
+    if(!d.ok){ $('#docState').textContent = d.message||'목차를 만들지 못했습니다.'; return; }
+    현재문서 = d;
+    $('#planTitle').textContent = d.title;
+    목차그리기(d.sections);
+    $('#planCard').style.display='block';
+    $('#steps').innerHTML='';
+    $('#docState').textContent='';
+    $('#planCard').scrollIntoView({behavior:'smooth', block:'start'});
+  }catch(e){ $('#docState').textContent = e.message; }
+  finally{ b.disabled=false; }
+};
+
+$('#writeBtn').onclick = async () => {
+  if(!현재문서) return;
+  const b=$('#writeBtn'); b.disabled=true; $('#addSecBtn').disabled=true;
+  const 절들 = 현재문서.sections.filter(s=>s && s.trim());
+  $('#steps').innerHTML='';
+  const 줄들 = 절들.map((s,i)=>{
+    const el = 만들기('div','step', `<span class="n">${i+1}</span><span>${피하기(s)}</span><span class="st">대기</span>`);
+    $('#steps').appendChild(el); return el;
+  });
+  // 서버가 가진 목차를 화면 것으로 맞춘다 — 사람이 고친 제목으로 써야 한다
+  try{ await 보내기('/api/staff/doc/plan_update', {doc_id:현재문서.doc_id, sections:절들}); }catch(e){}
+  let 실패=0;
+  for(let i=0;i<절들.length;i++){
+    줄들[i].querySelector('.st').innerHTML='<span class="spin"></span> 작성중';
+    try{
+      const d = await 보내기('/api/staff/doc/section', {doc_id:현재문서.doc_id, index:i});
+      if(d.ok){ 줄들[i].classList.add('done');
+        줄들[i].querySelector('.st').textContent = `${d.text.length}자 · ${((d.engine_ms||0)/1000).toFixed(1)}초`;
+      } else { 실패++; 줄들[i].querySelector('.st').textContent = d.message||'실패'; }
+    }catch(e){ 실패++; 줄들[i].querySelector('.st').textContent = e.message; }
+  }
+  try{
+    const f = await 보내기('/api/staff/doc/finish', {doc_id:현재문서.doc_id});
+    if(f.ok){
+      $('#docBody').textContent = f.markdown;
+      $('#resultCard').style.display='block';
+      $('#resultCard').scrollIntoView({behavior:'smooth', block:'start'});
+    } else { $('#docState').textContent = f.message||'문서를 합치지 못했습니다.'; }
+  }catch(e){ $('#docState').textContent = e.message; }
+  b.disabled=false; $('#addSecBtn').disabled=false;
+};
+
+$('#dlHwpx').onclick = () => 현재문서 && (location.href = `/api/staff/docs/${현재문서.doc_id}/download?fmt=hwpx`);
+$('#dlMd').onclick  = () => 현재문서 && (location.href = `/api/staff/docs/${현재문서.doc_id}/download?fmt=md`);
+$('#copyBtn').onclick = async () => {
+  try{ await navigator.clipboard.writeText($('#docBody').textContent); $('#copyBtn').textContent='복사했습니다'; }
+  catch(e){ $('#copyBtn').textContent='복사 실패'; }
+  setTimeout(()=>$('#copyBtn').textContent='본문 복사', 1600);
+};
+
+/* ── 문서함 ── */
+async function 문서함(){
+  const 자리 = $('#boxList'); 자리.innerHTML='<p class="empty">불러오는 중…</p>';
+  try{
+    const d = await 부르기('/api/staff/docs');
+    if(!d.docs || !d.docs.length){ 자리.innerHTML='<p class="empty">아직 만든 문서가 없습니다.</p>'; return; }
+    자리.innerHTML = '<table><tr><th>제목</th><th>종류</th><th>상태</th><th>만든 때</th><th></th></tr>' +
+      d.docs.map(x=>`<tr><td>${피하기(x.title)}</td><td>${피하기(x.kind)}</td><td>${피하기(x.status)}</td>
+        <td>${피하기((x.created_at||'').slice(0,16))}</td>
+        <td style="white-space:nowrap">
+          <a class="btn sm" href="/api/staff/docs/${x.id}/download?fmt=hwpx">한글</a>
+          <a class="btn sm" href="/api/staff/docs/${x.id}/download?fmt=md">md</a>
+          <button class="btn sm" data-del="${x.id}">삭제</button></td></tr>`).join('') + '</table>';
+    자리.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
+      if(!confirm('이 문서를 지울까요?')) return;
+      await 부르기('/api/staff/docs/'+b.dataset.del, {method:'DELETE'});
+      문서함();
+    });
+  }catch(e){ 자리.innerHTML = `<p class="empty">${피하기(e.message)}</p>`; }
+}
+
+화면();
+</script>
+</body>
+</html>
