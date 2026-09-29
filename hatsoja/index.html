@@ -1605,6 +1605,7 @@ const ROLE_MENUS = {
       ['mem','accounting','🧾','회계·세무 자료이관'],
       ['mem','taxpay','💸','지급·원천징수'],
       ['mem','ledgers','📒','표준장부·거래처'],
+      ['mem','dist','💧','수익 배분 계획'],
       ['mem','finstat','📊','재무제표·컨설팅'],
       ['mem','closing','📁','월마감·보고서'],
       ['mem','members','👥','조합원 관리'],
@@ -1827,6 +1828,7 @@ const MENU_DESC = {
   feddues:['회비 부과·수납','회원조합 정산금을 기준으로 회비를 산정해 부과하고 수납을 기록합니다'],
   fedbiz:['공동사업','공동 REC 판매·공동 O&M 등 연합회 공동사업의 성과를 회비와 대비해 봅니다'],
   fedbooks:['연합회 회계·결산','연합회 자체 수입(회비·공동사업)과 지출만 담은 회계입니다'],
+  dist:['수익 배분 계획','발전수익을 ①원리금 ②운영관리비 ③공동사업 ④배당 순위로 배분하고, 사업기간 20년을 버티는지 따집니다'],
   finstat:['재무제표·컨설팅','올린 실적과 기초값으로 손익계산서·재무상태표를 만들고, GPU 엔진 근거로 재무건전성 컨설팅 보고서를 받습니다'],
   fedfinstat:['재무제표·컨설팅','연합회 법인 자신의 손익과 재무건전성 진단입니다'],
   consult:['컨설팅 보고서·회원 재무','회원조합·연합회가 신청한 컨설팅 결과와 재무 요약을 전부 봅니다'],
@@ -2254,6 +2256,7 @@ function navigate(){
     if(scope === 'mem' && FED_PAGES.indexOf(page) !== -1) fedLoad(page);
     if(scope === 'mem' && FIN_PAGES.indexOf(page) !== -1) finLoad(page);
     if(scope === 'adm' && page === 'consult') admFinLoad();
+    if(scope === 'mem' && page === 'dist') distLoad();
     if(scope === 'mem' && page === 'power' && _MY_MONTHLY === null) powerLoadMine();
   }
   updateConvenienceUI(scope, page || 'dashboard');
@@ -2363,6 +2366,7 @@ function renderMemberPage(page){
     case 'fedbooks':  return fedBooksPage();
     case 'finstat':   return memFinStat();
     case 'fedfinstat':return fedFinStat();
+    case 'dist':      return memDist();
     case 'docs':      return memDocs();
     case 'review':    return memReview();
     case 'law':       return memLaw();
@@ -3797,11 +3801,17 @@ function memPower(){
     이상수 = 1; 이용률 = '17.3';
   }
   const max = Math.max(...months.map(m => m[1]), 1);
+  /* 배분은 고정 비율이 아니라 우선순위다 (2026-09-29 2차 — 자세한 계획은 #/mem/dist).
+     최근 달 실적에서 ①원리금 ②운영관리비를 먼저 떼고 남은 것이 ③④ 의 재원이다. */
+  const _last = 실측 ? _real[_real.length - 1] : null;
+  const _원리금 = _last ? _last.debt : Math.round(settle * 0.2);
+  const _운영 = _last ? _last.expense : Math.round(settle * 0.14);
+  const _남은 = Math.max(0, settle - _원리금 - _운영);
   const SPLIT = [
-    ['마을공동사업', 0.5, '인건비·운영비 포함 — 공동사업 계좌'],
-    ['지역화폐 배당', 0.1, '조합원 배당 적립 — 배당적립 계좌'],
-    ['내부 적립', 0.2, '수선충당금 등 — 수선적립 계좌'],
-    ['융자 상환', 0.2, '원리금 납부 — 융자상환 계좌'],
+    ['① 정책융자 원리금', _원리금, '이차보전 반영 약정액 — 최우선. 못 내면 연체이자가 붙습니다'],
+    ['② 운영관리비', _운영, 'O&M·보험·인건비·세무 + 수선충당·운전자금'],
+    ['③ 공동사업', Math.round(_남은 * 0.6), '①②를 채우고 남은 몫 가운데 총회가 정한 비율'],
+    ['④ 배당', _남은 - Math.round(_남은 * 0.6), '맨 마지막 — 법정적립금을 채운 뒤'],
   ];
   const fund = Math.round(settle * 0.1);
   return `
@@ -3839,18 +3849,23 @@ function memPower(){
     </div>
 
     <div class="card" style="margin-bottom:16px;">
-      <div class="card-title"><h3 class="serif">${실측 ? '최근 달' : '이달'} 수익 배분 자동 계산 (50 · 10 · 20 · 20)</h3>
-        ${실측 ? '<span class="badge badge-success">실측</span>' : '<span class="badge badge-mute">예시</span>'}</div>
+      <div class="card-title"><h3 class="serif">${실측 ? '최근 달' : '이달'} 수익 배분 — 우선순위 폭포</h3>
+        ${실측 ? '<span class="badge badge-success">실측</span>' : '<span class="badge badge-mute">예시</span>'}
+        <a class="btn btn-outline btn-sm" href="#/mem/dist">💧 20년 배분 계획</a></div>
       <table class="tbl">
-        <thead><tr><th>배분 항목</th><th>비율</th><th>이달 배분액</th><th>용도</th></tr></thead>
+        <thead><tr><th>순위</th><th>이달 금액</th><th>비중</th><th>무엇인가</th></tr></thead>
         <tbody>
-          ${SPLIT.map(([name, r, use]) => `
-            <tr><td><strong>${name}</strong></td><td>${Math.round(r*100)}%</td>
-            <td><strong>${fmtWon(settle * r)}</strong></td>
+          ${SPLIT.map(([name, amt, use]) => `
+            <tr><td><strong>${name}</strong></td>
+            <td><strong>${fmtWon(amt)}</strong></td>
+            <td>${settle > 0 ? Math.round(amt / settle * 100) + '%' : '—'}</td>
             <td class="text-mute" style="font-size:12.5px;">${use}</td></tr>`).join('')}
         </tbody>
       </table>
-      <p class="text-mute" style="font-size:12.5px;">※ 정산금 입금이 확인되면 4개 계좌 이체 지시서가 자동 생성됩니다(이체 실행은 사람이 승인). 배분 비율은 조합 총회 의결로 정합니다.</p>
+      <p class="text-mute" style="font-size:12.5px;">※ <b>고정 비율(50/10/20/20)을 쓰지 않습니다.</b>
+        조합마다 융자 조건이 달라 같은 비율로는 어떤 조합이 이자도 못 냅니다.
+        위에서부터 채우고 남는 것만 아래로 갑니다 — 배당이 맨 뒤라 남는 게 없으면 저절로 0 입니다.
+        이체 실행·승인은 사람이 하고, 순위는 총회 의결로 정합니다.</p>
     </div>
 
     <div class="card">
@@ -5075,6 +5090,185 @@ function admConsult(){
       <p class="text-mute" style="font-size:12px;margin:6px 0 0;">회원조합 정산금은 이 표에 들어오지 않습니다 — 연합회 자체 회계입니다.</p>
     </div>` : ''}
   `;
+}
+
+
+/* ==================== 수익 배분 계획 — 우선순위 폭포식 (2026-09-29 2차) ====================
+   🔴 고정 비율(50/10/20/20)을 쓰지 않는다. 조합마다 융자 조건·부지 조건이 달라서
+      같은 비율을 씌우면 어떤 조합은 이자도 못 낸다(부하시험에서 9개 조합 전부 발생).
+      순위로 간다 — ①정책융자 원리금(이차보전 반영) ②운영관리비 ③공동사업 ④배당.
+      위에서부터 채우고 남는 것만 아래로. 배당은 맨 뒤라 남는 게 없으면 저절로 0 이 된다. */
+
+const DIST_STEPS = [
+  ['①', '정책융자 원리금', '이차보전 반영. 못 채우면 그 해는 밖에서 꿔야 한다 — 최우선', 'var(--danger)'],
+  ['②', '운영관리비', 'O&M·보험·계통·부지·세무·인건비 + 수선충당 + 운전자금', '#b58900'],
+  ['③', '공동사업', '①②를 채우고 남은 몫 가운데 총회가 정한 비율', 'var(--primary)'],
+  ['④', '배당', '맨 마지막. 법정적립금을 채운 뒤에만', '#4a7'],
+];
+let _DIST = {plan:null, solve:null, findings:null, 때:null, 로딩:false};
+
+async function distLoad(force){
+  if(_DIST.로딩) return;
+  if(_DIST.때 && !force) return;
+  _DIST.로딩 = true;
+  try{
+    if(REAL_API){
+      const j = await fetch('/api/my/distsolve', {credentials:'same-origin'}).then(r => r.json());
+      if(j.ok){ _DIST.plan = j.plan; _DIST.solve = j.solve; _DIST.findings = j.findings; }
+    }
+  }catch(e){}
+  _DIST.때 = new Date().toISOString();
+  _DIST.로딩 = false;
+  const main = document.getElementById('appMain');
+  if(main && currentRoute() === 'mem/dist') main.innerHTML = renderMemberPage('dist');
+}
+function distRefresh(){ _DIST.때 = null; distLoad(true); toast('다시 계산하는 중입니다.'); }
+
+function memDist(){
+  const P = _DIST.plan;
+  if(!P) return `<div class="sec-head"><h1>💧 수익 배분 계획 (20년)</h1></div>
+    <div class="card"><p style="margin:0;">${REAL_API ? '계산하는 중…'
+      : '체험 모드에서는 계획을 세우지 않습니다. 실계정으로 로그인하면 올린 실적으로 자동 계산됩니다.'}</p></div>`;
+  const j = P['판정'], p = P.policy, sv = _DIST.solve || {};
+  const 미산출 = j['사업기간_운영가능'] === null;
+  const 가능 = j['사업기간_운영가능'] === true;
+  const y1 = (P.years || [])[0];
+  return `
+    <div class="sec-head">
+      <h1>💧 수익 배분 계획 (20년)</h1>
+      <p class="sec-desc">발전수익을 <b>순위대로</b> 배분합니다. 고정 비율표를 쓰지 않습니다 —
+        조합마다 융자 조건이 달라 같은 비율로는 어떤 조합이 이자도 못 냅니다.</p>
+    </div>
+
+    <div class="card" style="border-left:4px solid var(--primary);">
+      <div class="card-title"><h3 class="serif">배분 순위</h3><span class="badge badge-primary">총회 의결 사항</span></div>
+      ${DIST_STEPS.map(([n, t, d, c], i) => `
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:8px 0;${i ? 'border-top:1px solid var(--line);' : ''}">
+          <div style="font-size:20px;font-weight:700;color:${c};min-width:28px;">${n}</div>
+          <div style="flex:1;"><b>${t}</b>
+            <div class="text-mute" style="font-size:12.5px;">${d}</div></div>
+          <div class="num" style="min-width:120px;text-align:right;">
+            ${y1 ? _fmtN(y1[n + (t === '정책융자 원리금' ? '원리금' : t === '운영관리비' ? '운영관리비' : t === '공동사업' ? '공동사업' : '배당')] || 0) + '원' : '—'}
+            <div class="text-mute" style="font-size:11px;">1년차</div></div>
+        </div>`).join('')}
+    </div>
+
+    <div class="grid grid-4 mt-20">
+      <div class="kpi"><div class="kpi-n" style="color:${미산출 ? 'inherit' : (가능 ? 'var(--primary)' : 'var(--danger)')};">
+        ${미산출 ? '—' : (가능 ? '가능' : '부족')}</div>
+        <div class="kpi-l">사업기간 20년 운영</div>
+        <div class="kpi-sub">${미산출 ? '실적이 없습니다' : (가능 ? '전 구간 발전수익으로 감당' : j['첫_부도연차'] + '년차부터 모자람')}</div></div>
+      <div class="kpi"><div class="kpi-n">${_fmtN(j['현재_연매출'] || 0)}</div><div class="kpi-l">연매출 기준(원)</div>
+        <div class="kpi-sub">실적 ${P['실적월']}개월 연환산</div></div>
+      <div class="kpi"><div class="kpi-n">${j['손익분기_연매출'] ? _fmtN(j['손익분기_연매출']) : '—'}</div>
+        <div class="kpi-l">손익분기 연매출(원)</div><div class="kpi-sub">①+② 를 딱 맞추는 선</div></div>
+      <div class="kpi"><div class="kpi-n">${j['최저DSCR'] === null ? '—' : j['최저DSCR']}</div><div class="kpi-l">최저 DSCR</div>
+        <div class="kpi-sub">1.2 이상 권장</div></div>
+    </div>
+
+    ${미산출 ? '' : (가능 ? `
+    <div class="card mt-20" style="border:2px solid var(--primary);">
+      <div class="card-title"><h3 class="serif">✅ 지금 조건으로 20년을 버팁니다</h3></div>
+      <p style="margin:0;">최저 DSCR <b>${j['최저DSCR']}</b> · 최저 운전자금 <b>${_fmtN(j['최저_운전자금'])}원</b>.
+      이 순위(①→②→③→④)를 <b>총회 의결로 못 박아 두세요.</b> 순위를 흔들면 배당이 앞으로 나오고 상환이 뒤로 밀립니다.</p>
+    </div>` : `
+    <div class="card mt-20" style="border:2px solid var(--danger);">
+      <div class="card-title"><h3 class="serif">⚠ 지금 조건으로는 ${j['첫_부도연차']}년차부터 모자랍니다</h3>
+        <button class="btn btn-primary btn-sm" onclick="distApply()">이 조건으로 맞추기</button></div>
+      <p style="margin-top:0;">감당 가능한 연 원리금은 <b>${_fmtN(j['감당가능_연원리금'])}원</b>인데
+        현재 약정은 <b>${_fmtN(j['현재_연원리금'])}원</b>입니다.</p>
+      ${(sv['필요조치'] && sv['필요조치'].length) ? `
+        <table class="tbl"><thead><tr><th>바꿀 것</th><th>얼마로</th><th>성격</th></tr></thead>
+        <tbody>${sv['필요조치'].map(a => `<tr><td><b>${escapeHtml(a['항목'])}</b></td>
+          <td>${escapeHtml(a['값'])}</td><td class="text-mute" style="font-size:12.5px;">${escapeHtml(a['확정여부'])}</td></tr>`).join('')}</tbody></table>
+        <p class="text-mute" style="font-size:12.5px;">위 셋을 적용하면 20년을 버팁니다 — <b>가장 적게 바꾸는 조합</b>으로 찾은 것입니다.
+        「이 조건으로 맞추기」를 누르면 계획에 반영됩니다(실제 약정 변경은 지자체·대주와 따로 협의해야 합니다).</p>`
+        : `<p class="text-mute" style="font-size:12.5px;">${escapeHtml(sv['말'] || '조정으로는 해결되지 않습니다.')}</p>`}
+    </div>`)}
+
+    ${(_DIST.findings || []).length ? finFindingsCard(_DIST.findings) : ''}
+
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">⚙️ 배분·융자 조건</h3>
+        <button class="btn btn-outline btn-sm" onclick="distSave()">저장하고 다시 계산</button></div>
+      <div class="grid grid-3">
+        <label class="fld"><span>정책융자 원금(원)</span><input id="dp-loan" type="number" value="${p.policy_loan}"></label>
+        <label class="fld"><span>약정 금리</span><input id="dp-rate" type="number" step="0.001" value="${p.policy_rate}"></label>
+        <label class="fld"><span>이차보전(%p, 0.025=2.5%p)</span><input id="dp-sub" type="number" step="0.001" value="${p.subsidy_rate}"></label>
+        <label class="fld"><span>거치(년)</span><input id="dp-grace" type="number" value="${p.policy_grace}"></label>
+        <label class="fld"><span>상환(년)</span><input id="dp-term" type="number" value="${p.policy_term}"></label>
+        <label class="fld"><span>자부담 융자 원금(원)</span><input id="dp-loc" type="number" value="${p.local_loan}"></label>
+        <label class="fld"><span>수선충당 요율</span><input id="dp-rep" type="number" step="0.001" value="${p.repair_rate}"></label>
+        <label class="fld"><span>운전자금(개월)</span><input id="dp-wc" type="number" value="${p.work_cap_months}"></label>
+        <label class="fld"><span>③공동사업 몫(잔여 중)</span><input id="dp-biz" type="number" step="0.01" value="${p.biz_share}"></label>
+      </div>
+      <p class="text-mute" style="font-size:12px;margin:0;">
+        실부담 금리 = 약정 − 이차보전 = <b>${(P['실부담금리']*100).toFixed(2)}%</b> ·
+        정책융자 연 원리금 <b>${_fmtN(P['정책융자원리금'])}원</b>
+        ${P['일회성비용'] ? ' · 일회성 비용 ' + _fmtN(P['일회성비용']) + '원은 경상 운영비에서 뺐습니다' : ''}<br>
+        🔴 <b>이차보전은 확정이 아닙니다.</b> 전남광주 민심정책이 협동조합 정책자금 2.5% 이차보전을 추진 중이라는
+        정리(2026-06-15)에 근거한 값이므로, 기본값은 0으로 두었습니다. 지자체에 확인한 뒤 넣으세요.</p>
+    </div>
+
+    ${미산출 ? '' : `
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">📅 연도별 배분 (20년)</h3>
+        <button class="btn btn-ghost btn-sm" onclick="distRefresh()">↻ 다시 계산</button></div>
+      <table class="tbl">
+        <thead><tr><th>연차</th><th class="num">매출</th><th class="num">①원리금</th><th class="num">②운영관리비</th>
+          <th class="num">③공동사업</th><th class="num">④배당</th><th class="num">필수부족</th>
+          <th class="num">운전자금</th><th class="num">DSCR</th><th>판정</th></tr></thead>
+        <tbody>${P.years.map(y => `<tr${y['판정']==='부도' ? ' style="background:rgba(200,0,0,.05);"' : ''}>
+          <td><b>${y['연차']}</b></td><td class="num">${_fmtN(y['매출'])}</td>
+          <td class="num">${_fmtN(y['①원리금'])}</td><td class="num">${_fmtN(y['②운영관리비'])}</td>
+          <td class="num">${_fmtN(y['③공동사업'])}</td><td class="num"><b>${_fmtN(y['④배당'])}</b></td>
+          <td class="num" style="color:${y['필수부족']>0?'var(--danger)':'inherit'};">${_fmtN(y['필수부족'])}</td>
+          <td class="num" style="color:${y['운전자금잔액']<0?'var(--danger)':'inherit'};">${_fmtN(y['운전자금잔액'])}</td>
+          <td class="num">${y['DSCR'] === null ? '—' : y['DSCR']}</td>
+          <td><span class="badge ${y['판정']==='부도'?'badge-danger':(y['판정']==='적립부족'?'badge-warn':'badge-success')}">${y['판정']}</span></td>
+        </tr>`).join('')}
+          <tr class="total"><td>20년 누계</td><td class="num">${_fmtN(P['누적']['매출'])}</td>
+            <td class="num">${_fmtN(P['누적']['①원리금'])}</td><td class="num">${_fmtN(P['누적']['②운영관리비'])}</td>
+            <td class="num">${_fmtN(P['누적']['③공동사업'])}</td><td class="num"><b>${_fmtN(P['누적']['④배당'])}</b></td>
+            <td colspan="4"></td></tr>
+        </tbody>
+      </table>
+      <p class="text-mute" style="font-size:12px;margin:6px 0 0;">
+        발전량 열화 ${(p.degrade*100).toFixed(1)}%/년 · 운영비 상승 ${(p.opex_infl*100).toFixed(1)}%/년 ·
+        대수선 ${p.major_year}년차 설비비의 ${(p.major_rate*100).toFixed(0)}% 가정.
+        <b>적립부족</b>은 당장 안 터지지만 대수선 때 터집니다 —
+        수선충당 요율이 ${(j['필요_수선충당률']||0)*100 > p.repair_rate*100
+          ? `<b style="color:var(--danger);">${((j['필요_수선충당률']||0)*100).toFixed(1)}% 는 돼야</b> 합니다(현재 ${(p.repair_rate*100).toFixed(1)}%)`
+          : '지금 수준이면 충분합니다'}.</p>
+    </div>`}
+  `;
+}
+
+async function distSave(){
+  if(!REAL_API){ toast('체험 모드에서는 저장되지 않습니다.'); return; }
+  const g = id => (document.getElementById(id) || {}).value;
+  const p = _DIST.plan ? _DIST.plan.policy : {};
+  const body = Object.assign({}, p, {
+    policy_loan:g('dp-loan'), policy_rate:g('dp-rate'), subsidy_rate:g('dp-sub'),
+    policy_grace:g('dp-grace'), policy_term:g('dp-term'), local_loan:g('dp-loc'),
+    repair_rate:g('dp-rep'), work_cap_months:g('dp-wc'), biz_share:g('dp-biz'),
+  });
+  try{
+    const j = await fetch('/api/my/distpolicy', {method:'POST', credentials:'same-origin',
+      headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)}).then(r => r.json());
+    if(!j.ok){ toast('저장하지 못했습니다.'); return; }
+    toast('배분 조건을 저장했습니다.'); distRefresh();
+  }catch(e){ toast('서버에 닿지 못했습니다.'); }
+}
+
+async function distApply(){
+  if(!REAL_API){ toast('체험 모드에서는 반영되지 않습니다.'); return; }
+  if(!confirm('찾아낸 조건을 배분 계획에 반영할까요? (실제 약정 변경은 지자체·대주와 따로 협의해야 합니다)')) return;
+  try{
+    const j = await fetch('/api/my/distsolve/apply', {method:'POST', credentials:'same-origin'}).then(r => r.json());
+    if(!j.ok){ toast(j.error === 'no_solution' ? '조정만으로는 해결되지 않습니다.' : '반영하지 못했습니다.'); return; }
+    toast('반영했습니다. 다시 계산합니다.'); distRefresh();
+  }catch(e){ toast('서버에 닿지 못했습니다.'); }
 }
 
 /* ─── 마이페이지: 내 계정으로 한 일 전체 보기 ─── */
@@ -6340,8 +6534,9 @@ async function powerSubmitMonth(ym, 조용히){
   if(!REAL_API){ toast('체험 모드에서는 제출되지 않습니다. 실계정으로 로그인하면 연합회에 올라갑니다.'); return false; }
   const m = powerLocalMonths().filter(function(x){ return x.month === ym; })[0];
   if(!m){ toast('그 달 자료가 없습니다.'); return false; }
-  const 배분 = {};
-  CLOSING_SPLIT.forEach(function(s){ 배분[s[0]] = Math.round(m.revenue * s[1]); });
+  // 배분은 고정 비율이 아니라 실제 집행 기준 — 원리금·운영비는 통장에서 잡힌 값을 그대로 보낸다
+  const 배분 = {'①원리금': m.debt, '②운영관리비': m.expense,
+                '③공동사업+④배당': Math.max(0, m.revenue - m.debt - m.expense)};
   try{
     const res = await fetch('/api/my/monthly', {method:'POST', credentials:'same-origin',
       headers:{'Content-Type':'application/json'},
@@ -7846,16 +8041,30 @@ function _closingReport(village, ym, tx, fileName){
     byAcct[k].inn += t.inn; byAcct[k].out += t.out; byAcct[k].n++;
   }
   const aggr = Object.values(byAcct).sort((a,b) => (b.inn + b.out) - (a.inn + a.out));
-  // 50/10/20/20 배분 계산 vs 실제 이체 대조
-  const splitRows = CLOSING_SPLIT.map(([name, r, tag]) => {
-    const plan = Math.round(settle * r);
-    const actual = tx.filter(t => t.acct === '내부이체' && t.biz === tag).reduce((s,t) => s + t.out, 0);
-    return {name, r, plan, actual, diff: actual - plan};
+  /* 배분 대조 — 고정 비율이 아니라 **순위**로 본다(2026-09-29 2차).
+     이 달 정산금이 ①원리금 → ②운영관리비 → ③공동사업 → ④배당 순으로 어디까지 닿았는지 본다. */
+  const 운영계정 = ['인건비(급여)','4대보험료','제세공과금','임차료','수도광열비','통신비','수선유지비',
+                    '지급수수료','사무용품비','회의비','소모품비','차량유지비','여비교통비','홍보비'];
+  const 실제 = {
+    원리금: tx.filter(t => t.acct === '융자원리금' || (t.acct === '내부이체' && t.biz === '융자상환(20%)'))
+              .reduce((s,t) => s + t.out, 0),
+    운영: tx.filter(t => 운영계정.indexOf(t.acct) !== -1 || (t.acct === '내부이체' && t.biz === '내부적립(20%)'))
+            .reduce((s,t) => s + t.out, 0),
+    공동: tx.filter(t => t.acct === '내부이체' && t.biz === '공동사업(50%)').reduce((s,t) => s + t.out, 0),
+    배당: tx.filter(t => t.acct === '내부이체' && t.biz === '배당적립(10%)').reduce((s,t) => s + t.out, 0),
+  };
+  let _잔 = settle;
+  const splitRows = [
+    ['① 정책융자 원리금', 실제.원리금, '이차보전 반영 약정액 — 최우선'],
+    ['② 운영관리비',     실제.운영,   'O&M·보험·인건비·세무 + 수선충당·운전자금'],
+    ['③ 공동사업',       실제.공동,   '①② 를 채우고 남은 몫 가운데 총회가 정한 비율'],
+    ['④ 배당',           실제.배당,   '맨 마지막 — 법정적립금을 채운 뒤'],
+  ].map(([name, actual, desc]) => {
+    const row = {name, desc, actual, 잔후: Math.max(0, _잔 - actual)};
+    _잔 = row.잔후;
+    return row;
   });
   const hasTransfers = splitRows.some(s => s.actual > 0);
-  /* 이 통장이 곧 그 용도의 계좌면 이체할 필요가 없다(주계좌=공동사업 계좌가 흔하다).
-     정산금에서 실제로 빠져나간 배분 이체를 뺀 나머지가 그대로 남아 있으면 '주계좌 보유'로 본다 —
-     2026-09-29 전에는 이것도 '이체 없음'으로 나와 미이행처럼 보였다. */
   const 이체합 = splitRows.reduce((a, x) => a + x.actual, 0);
   const 잔류 = Math.max(0, settle - 이체합);
   return `
@@ -7870,27 +8079,32 @@ function _closingReport(village, ym, tx, fileName){
     </tbody></table>
 
     ${settle > 0 ? `
-    <h3>2. 수익 배분 계산 (50 / 10 / 20 / 20)</h3>
-    <p style="font-size:12px;color:#666;margin:4px 0 8px;">한전 전력판매 수입 <strong>${_fmtN(settle)}원</strong> 기준 배분 기준액${hasTransfers ? ' — 실제 이체와 자동 대조' : ''}</p>
+    <h3>2. 수익 배분 — 우선순위 폭포</h3>
+    <p style="font-size:12px;color:#666;margin:4px 0 8px;">한전 전력판매 수입 <strong>${_fmtN(settle)}원</strong>이
+      ①→④ 순서로 어디까지 닿았는지 봅니다. <b>고정 비율표를 쓰지 않습니다</b> — 조합마다 융자 조건이 달라서입니다.</p>
     <table class="tbl">
-      <thead><tr><th>배분 항목</th><th>비율</th><th>배분 기준액</th>${hasTransfers ? '<th>실제 이체액</th><th>차이</th>' : ''}</tr></thead>
+      <thead><tr><th>순위</th><th>실제 집행액</th><th>집행 후 남은 재원</th><th>무엇인가</th></tr></thead>
       <tbody>${splitRows.map(s => `
-        <tr><td>${s.name}</td><td>${Math.round(s.r*100)}%</td><td class="num">${_fmtN(s.plan)}원</td>
-        ${hasTransfers ? `<td class="num">${s.actual ? _fmtN(s.actual)+'원'
-          : (잔류 >= s.plan ? '<span style="color:#666;">주계좌 보유</span>' : '<span style="color:#b58900;">이체 없음</span>')}</td>
-        <td class="num">${s.actual ? (s.diff === 0 ? '<span style="color:var(--primary);">일치 ✓</span>' : `<span style="color:var(--danger);">${s.diff>0?'+':''}${_fmtN(s.diff)}원</span>`)
-          : (잔류 >= s.plan ? '<span style="color:var(--primary);">이체 불필요 ✓</span>' : '—')}</td>` : ''}</tr>`).join('')}
-        <tr class="total"><td>합계</td><td>100%</td><td class="num">${_fmtN(settle)}원</td>
-        ${hasTransfers ? `<td class="num">${_fmtN(splitRows.reduce((s,x)=>s+x.actual,0))}원</td><td></td>` : ''}</tr>
+        <tr><td><strong>${s.name}</strong></td>
+        <td class="num">${s.actual ? _fmtN(s.actual)+'원' : '<span style="color:#b58900;">집행 없음</span>'}</td>
+        <td class="num">${_fmtN(s.잔후)}원</td>
+        <td class="text-mute" style="font-size:12px;">${s.desc}</td></tr>`).join('')}
+        <tr class="total"><td>합계</td><td class="num">${_fmtN(이체합)}원</td>
+        <td class="num">${_fmtN(잔류)}원</td><td class="text-mute" style="font-size:12px;">남은 재원은 주계좌에 있습니다</td></tr>
       </tbody>
     </table>
-    ${!hasTransfers ? `<div class="section"><strong>📨 자금 배분 지시서</strong> — 정산금 입금이 확인되었습니다. 위 기준액대로 4개 계좌 이체를 집행하세요 (이체 실행·승인은 사람이 합니다).</div>` : ''}
-    ${hasTransfers && splitRows.some(s => !s.actual && 잔류 >= s.plan) ? `<p style="font-size:12px;color:#666;margin:6px 0 0;">
-      ※ <b>주계좌 보유</b> = 이 통장이 그 용도의 계좌여서 따로 이체할 필요가 없다는 뜻입니다.
-      정산금에서 다른 계좌로 나간 ${_fmtN(이체합)}원을 뺀 ${_fmtN(잔류)}원이 이 통장에 남아 그 몫을 담고 있습니다.</p>` : ''}
+    ${실제.원리금 === 0 && settle > 0 ? `<div class="section" style="border-left:3px solid var(--danger);">
+      <strong>⚠ 이 달 원리금 집행이 안 보입니다.</strong> 최우선 순위인데 통장에서 나간 기록이 없습니다 —
+      다른 계좌에서 나갔다면 그 통장도 올려 주세요.</div>` : ''}
+    ${!hasTransfers ? `<div class="section"><strong>📨 자금 배분 지시서</strong> — 정산금 입금이 확인되었습니다.
+      <a href="#/mem/dist">수익 배분 계획</a>의 순위대로 집행하세요 (이체 실행·승인은 사람이 합니다).</div>` : ''}
+    <p style="font-size:12px;color:#666;margin:6px 0 0;">
+      ※ 순위는 <b>①정책융자 원리금 → ②운영관리비 → ③공동사업 → ④배당</b> 입니다.
+      배당이 맨 뒤라 남는 게 없으면 저절로 0 이 됩니다 — 그게 이 구조의 요점입니다.</p>
     ` : `
     <h3>2. 수익 배분</h3>
-    <p style="font-size:12.5px;color:#666;">이달 한전 전력판매 수입이 없어 배분 계산을 생략합니다. (상업발전 전 단계이거나 정산 미도래)</p>
+    <p style="font-size:12.5px;color:#666;">이달 한전 전력판매 수입이 없어 배분을 계산하지 않았습니다.
+    (상업발전 전 단계이거나 정산 미도래)</p>
     `}
 
     <h3>3. 계정과목별 집계</h3>
