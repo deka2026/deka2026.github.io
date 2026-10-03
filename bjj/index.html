@@ -8,6 +8,7 @@
 <meta property="og:title" content="주짓수 룰북">
 <meta property="og:description" content="벨트×연맹 금지 기술·득점·경기 시간 조회 + 룰 퀴즈">
 <meta property="og:type" content="website">
+<meta property="og:image" content="https://sakyowon.co.kr/bjj/og.png">
 <meta property="og:url" content="https://sakyowon.co.kr/bjj/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%231e4fb8'/%3E%3Crect x='8' y='27' width='48' height='10' rx='2' fill='%23fff'/%3E%3Crect x='42' y='27' width='8' height='10' fill='%23111'/%3E%3C/svg%3E">
 <link rel="manifest" href="manifest.webmanifest">
@@ -240,7 +241,7 @@ const BELT_INFO={ // IBJJF 졸업규정 v2.4
 };
 const TIMES={ // 분. IBJJF 규정집 v6.1
  ibjjf:{adult:{white:5,blue:6,purple:7,brown:8,black:10}, m1:{white:5,blue:5,purple:6,brown:6,black:6}, m2:{white:5,blue:5,purple:5,brown:5,black:5}, juv:{white:5,blue:5,purple:5}},
- adcc:{all:'예선 10분 + 연장 5분 (전반 5분은 무득점). 결승·앱솔루트 결승·슈퍼파이트 20분 + 연장 10분×2 (전반 10분 무득점). 일부 부문은 6분/8분 축소 형식.'},
+ adcc:{all:'예선 10분 + 연장 5분 (전반 5분은 무득점). 결승·앱솔루트 결승·슈퍼파이트 20분 + 연장 10분×2 (전반 10분 무득점). 선발전(Trials)은 예선 6분 + 연장 3분, 결승 8분 + 연장 4분(각각 전반 무득점).'},
  sub:{all:'본경기 10분(무득점). 못 끝내면 연장 최대 3라운드.'}
 };
 const KIDS_TIME={k1:[['4~6세',2],['7~9세',3],['10~12세',4]],k2:[['13~15세',4]]};
@@ -286,7 +287,7 @@ const FED_DESC={
 /* IBJJF 금지기술표(v6.1 29쪽)의 6열을 그대로 둔다.
    c = [4~12세, 13~15세, 16~17세 전 벨트 + 성인·마스터 화이트, 블루·퍼플, 브라운·블랙(성인 노기 제외), 성인 브라운·블랙 노기]
    ok=허용, no=금지. adcc/sub: ok·no·chk(규정에 명시 없음 → 대회 확인) */
-const A='ok',X='no',C='chk';
+const A='ok',X='no',C='chk',P='cond';
 const ALL_X=[X,X,X,X,X,X], ALL_A=[A,A,A,A,A,A];
 const TECHS=[
  // 유소년 전용 금지(표 1~8행)
@@ -301,7 +302,7 @@ const TECHS=[
  {name:'클로즈드 가드 안에서 다리로 갈비·신장 압박',en:'Closed guard compressing kidneys/ribs',cat:'압박 관절기',c:[X,X,X,A,A,A],adcc:C,sub:C},
  {name:'리스트락(손목)',en:'Wrist lock',cat:'팔 관절기',c:[X,X,X,A,A,A],adcc:A,sub:A},
  {name:'머리를 바깥쪽에 둔 싱글렉 테이크다운',en:'Single leg with head outside',cat:'테이크다운',c:[X,X,X,A,A,A],adcc:A,sub:A,notes:{ibjjf:'금지 기술이지만 페널티는 주지 않는다(규정집 표 주석).'}},
- {name:'점핑 클로즈드 가드(플라잉 암바·트라이앵글 포함)',en:'Jumping closed guard',cat:'가드 진입',c:[X,X,X,A,A,A],juvColor:A,adcc:C,sub:C,notes:{ibjjf:'15세 이하 전 벨트와 모든 연령의 화이트벨트 금지(6.2.2-W). 16~17세 블루·퍼플은 허용. 테이크다운 방어 중 점프하면 상대에게 2점.'}},
+ {name:'점핑 클로즈드 가드(플라잉 암바·트라이앵글 포함)',en:'Jumping closed guard',cat:'가드 진입',c:[X,X,X,A,A,A],juvColor:A,adcc:P,sub:A,notes:{adcc:'반칙은 아니지만 자발적으로 앉아 3초 이상 머물면 -1점(결승은 처음부터, 예선은 득점 구간부터).',ibjjf:'15세 이하 전 벨트와 모든 연령의 화이트벨트 금지(6.2.2-W). 16~17세 블루·퍼플은 허용. 테이크다운 방어 중 점프하면 상대에게 2점.'}},
  // 브라운·블랙부터 허용(12~16행)
  {name:'바이셉 슬라이서',en:'Bicep slicer',cat:'압박 관절기',c:[X,X,X,X,A,A],adcc:A,sub:A},
  {name:'카프 슬라이서',en:'Calf slicer',cat:'압박 관절기',c:[X,X,X,X,A,A],adcc:A,sub:A},
@@ -314,7 +315,7 @@ const TECHS=[
  {name:'니 리핑(무릎 안쪽으로 다리 걸기)',en:'Knee reaping',cat:'다리 관절기',c:[X,X,X,X,X,A],adcc:A,sub:A,notes:{ibjjf:'성인 브라운·블랙 노기만 허용. 도복은 전 벨트 금지, 마스터부는 노기라도 금지.'}},
  {name:'토홀드에서 발을 바깥쪽으로 누르기',en:'Toe hold with outward pressure',cat:'다리 관절기',c:[X,X,X,X,X,A],adcc:A,sub:A},
  // 전 부문 금지(21~26행 + 6.2.2 J)
- {name:'슬램(들어서 내리꽂기)',en:'Slam',cat:'반칙',c:ALL_X,adcc:C,sub:C,notes:{adcc:'서브미션에 걸린 상태에서만 허용. 상대가 서브미션을 풀면 슬램도 멈춰야 한다.',sub:'이벤트마다 다르다. 대부분 금지.'}},
+ {name:'슬램(들어서 내리꽂기)',en:'Slam',cat:'반칙',c:ALL_X,adcc:P,sub:C,notes:{adcc:'서브미션에 걸린 상태에서만 허용. 상대가 서브미션을 풀면 슬램도 멈춰야 한다.',sub:'이벤트마다 다르다. 대부분 금지.'}},
  {name:'초크 없는 척추 꺾기(트위스터 등)',en:'Spinal lock without choke (twister)',cat:'반칙',c:ALL_X,adcc:A,sub:C,notes:{adcc:'트위스터·캔오프너는 허용으로 명시.'}},
  {name:'넥크랭크(양어깨 가두고 목 누르기·풀넬슨)',en:'Neck crank (full nelson)',cat:'반칙',c:ALL_X,adcc:X,sub:C,notes:{adcc:'양어깨를 가두고 목을 아래로 누르는 동작은 금지.'}},
  {name:'가위 테이크다운(카니바사미)',en:'Scissor takedown',cat:'반칙',c:ALL_X,adcc:C,sub:C},
@@ -322,7 +323,7 @@ const TECHS=[
  {name:'싱글렉 방어 중 벨트 잡고 머리로 던지기',en:'Belt grab throw onto head',cat:'반칙',c:ALL_X,adcc:X,sub:X},
  {name:'머리·목으로 떨어뜨리는 수플렉스',en:'Suplex landing on head/neck',cat:'반칙',c:ALL_X,adcc:X,sub:X},
  {name:'손으로 코·입 막기',en:'Blocking air with the hands',cat:'반칙',c:ALL_X,adcc:X,sub:X},
- // 표에 없는 기본 기술(전 부문 허용)
+ // 표 3행 + 표에 없는 기본 기술
  {name:'스트레이트 풋락(발목)',en:'Straight ankle lock',cat:'다리 관절기',c:[X,X,A,A,A,A],adcc:A,sub:A},
  {name:'암바',en:'Armbar (juji-gatame)',cat:'팔 관절기',c:ALL_A,adcc:A,sub:A},
  {name:'키무라 · 아메리카나',en:'Kimura / Americana',cat:'팔 관절기',c:ALL_A,adcc:A,sub:A},
@@ -351,7 +352,7 @@ const TERMS=[
  ['하프 가드','Half guard','Meia-guarda','상대 한 다리만 잡은 가드'],
  ['사이드 컨트롤','Side control','Cem quilos(100킬로)','옆에서 누르는 포지션'],
  ['마운트','Mount','Montada','상대 몸통 위에 올라탄 포지션 (IBJJF 4점)'],
- ['백','Back control','Pegada nas costas','등 뒤를 잡은 포지션 (IBJJF 4점)'],
+ ['백','Back control','Pegada pelas costas','등 뒤를 잡은 포지션 (IBJJF 4점)'],
  ['니온벨리','Knee on belly','Joelho na barriga','무릎을 배에 얹은 포지션 (2점)'],
  ['터틀','Turtle','Tartaruga','엎드려 웅크린 방어 자세'],
  ['스윕','Sweep','Raspagem','아래에서 위로 뒤집기 (2점)'],
@@ -373,9 +374,9 @@ const TERMS=[
  ['보우 앤 애로우','Bow and arrow choke','Estrangulamento arco e flecha','깃을 잡고 활 당기듯 조르는 초크'],
  ['니바','Kneebar','Chave de joelho','무릎을 펴서 꺾는 관절기'],
  ['풋락','Foot lock','Chave de pé','발목을 꺾는 관절기'],
- ['토홀드','Toe hold','Chave de pé(torção)','발을 비트는 관절기'],
+ ['토홀드','Toe hold','Mata-leão no pé','발을 비트는 관절기'],
  ['힐훅','Heel hook','Chave de calcanhar','뒤꿈치를 비틀어 무릎을 꺾는 관절기'],
- ['니 리핑','Knee reaping','Ceifada de joelho','상대 무릎 안쪽으로 다리를 걸어 비트는 자세'],
+ ['니 리핑','Knee reaping','Cruzada de perna','상대 무릎 안쪽으로 다리를 걸어 비트는 자세'],
  ['스트라이프','Stripe','Grau','벨트에 붙이는 흰 띠. 최대 4개'],
  ['승급','Promotion','Graduação','벨트나 스트라이프를 받는 것'],
  ['프로페소르','Professor','Professor','블랙벨트 지도자 호칭'],
@@ -391,7 +392,7 @@ const TERMS=[
 /* ───────────── 유틸 ───────────── */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const pill=v=>v==='ok'?'<span class="pill ok">허용</span>':v==='no'?'<span class="pill no">금지</span>':v==='na'?'<span class="pill chk">해당 없음</span>':'<span class="pill chk">대회 확인</span>';
+const pill=v=>v==='ok'?'<span class="pill ok">허용</span>':v==='no'?'<span class="pill no">금지</span>':v==='cond'?'<span class="pill cond">조건부 허용</span>':v==='na'?'<span class="pill chk">해당 없음</span>':'<span class="pill chk">대회 확인</span>';
 const beltName=id=>BELTS.find(b=>b.id===id).name;
 let store={};try{store=JSON.parse(localStorage.getItem('bjj-rulebook')||'{}')}catch(e){store={}}
 function save(){try{localStorage.setItem('bjj-rulebook',JSON.stringify(store))}catch(e){}}
@@ -399,8 +400,8 @@ function toast(msg){const t=document.createElement('div');t.className='toast';t.
 
 /* 허용 판정. 모든 화면이 이 함수 하나를 쓴다. */
 function allow(tc,f,gi,age,belt){
+  if(tc.giOnly&&(gi==='nogi'||f!=='ibjjf')) return 'na';
   if(f!=='ibjjf') return tc[f];
-  if(tc.giOnly&&gi==='nogi') return 'na';
   const c=tc.c;
   if(age==='k1') return c[0];
   if(age==='k2') return c[1];
@@ -464,7 +465,7 @@ function renderRule(){
     const v=allow(tc,f,gi,age,belt); if(v==='na')return;
     const note=tc.notes&&tc.notes[f];
     const item=`<li><span class="n">${esc(tc.name)}<small>${esc(tc.en)}${note?' · '+esc(note):''}</small></span>${pill(v)}</li>`;
-    (v==='ok'?allowed:v==='no'?banned:check).push(item);
+    (v==='ok'||v==='cond'?allowed:v==='no'?banned:check).push(item);
   });
   html+=`<div class="cards"><div class="card"><h3>금지 기술 <span class="pill no">${banned.length}</span></h3><ul class="list">${banned.join('')||'<li class="muted">없음</li>'}</ul></div>`;
   html+=`<div class="card"><h3>허용 기술 <span class="pill ok">${allowed.length}</span></h3><ul class="list">${allowed.join('')||'<li class="muted">없음</li>'}</ul>${check.length?`<h3>규정에 명시 없음 <span class="pill chk">${check.length}</span></h3><p class="small muted">공식 규칙 문서에 항목이 없다. 대회 주최측에 확인한다.</p><ul class="list">${check.join('')}</ul>`:''}</div></div>`;
@@ -555,7 +556,7 @@ function makeQ(depth){
   }
   if(type==='score'){
     const f=rnd(['ibjjf','adcc']); const r=rnd(SCORE[f]);
-    let opts=shuffle([...new Set([r[1],2,3,4])]).slice(0,4); if(!opts.includes(r[1]))opts[0]=r[1]; opts=shuffle(opts);
+    let opts=shuffle([2,3,4]);
     return {q:`${f.toUpperCase()} 규정에서 「${r[0]}」은 몇 점인가?`,opts:opts.map(o=>o+'점'),ans:opts.indexOf(r[1]),expl:`${f.toUpperCase()} ${r[0]}: ${r[1]}점. ${r[2]||''}`,key:'score:'+f+':'+r[0]};
   }
   if(type==='time')return makeQ_time();
