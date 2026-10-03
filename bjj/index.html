@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="주짓수 벨트별 금지 기술·득점·경기 시간을 IBJJF·ADCC·서브미션 온리 기준으로 바로 찾아보고 퀴즈로 익히는 룰북">
+<meta name="theme-color" content="#1e4fb8">
+<meta property="og:title" content="주짓수 룰북">
+<meta property="og:description" content="벨트×연맹 금지 기술·득점·경기 시간 조회 + 룰 퀴즈">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://sakyowon.co.kr/bjj/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%231e4fb8'/%3E%3Crect x='8' y='27' width='48' height='10' rx='2' fill='%23fff'/%3E%3Crect x='42' y='27' width='8' height='10' fill='%23111'/%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.webmanifest">
+<!--ART-START-->
+<title>주짓수 룰북</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Gothic+A1:wght@800&display=swap">
+<style>
+/* 레이아웃: 상단 고정 헤더 + 탭(좁으면 두 줄), 본문 한 열 최대 880px. 벨트 색은 의미색이라 테마와 무관하게 고정. */
+:root{
+  --bg:#f5f4f0; --surface:#ffffff; --surface2:#ecebe6; --fg:#1b1d22; --muted:#5c6069; --line:#d9d7d0;
+  --accent:#1e4fb8; --accent-fg:#ffffff; --ok:#1f7a3a; --ok-bg:#e3f3e8; --no:#b42323; --no-bg:#fbe5e5; --cond:#9a6700; --cond-bg:#fff3d1;
+  --gold:#c9a227;
+  --f-body:"Noto Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-disp:"Gothic A1","Noto Sans KR",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#15171c; --surface:#1e2127; --surface2:#272b33; --fg:#ecedef; --muted:#a3a7b0; --line:#343942;
+  --accent:#5b8df0; --accent-fg:#0d1220; --ok:#5fcf84; --ok-bg:#153a24; --no:#ff7b7b; --no-bg:#4a1c1c; --cond:#f0c35a; --cond-bg:#4a3a10;
+  --gold:#e0bd4a; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#15171c; --surface:#1e2127; --surface2:#272b33; --fg:#ecedef; --muted:#a3a7b0; --line:#343942;
+  --accent:#5b8df0; --accent-fg:#0d1220; --ok:#5fcf84; --ok-bg:#153a24; --no:#ff7b7b; --no-bg:#4a1c1c; --cond:#f0c35a; --cond-bg:#4a3a10;
+  --gold:#e0bd4a; color-scheme:dark }
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.6}
+a{color:var(--accent)}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+input,select,textarea{font:inherit;color:inherit}
+.wrap{max-width:880px;margin:0 auto;padding-inline:16px;padding-block:0 64px}
+
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--bg);border-bottom:1px solid var(--line)}
+.top .wrap{padding-block:12px 0;display:flex;flex-direction:column;gap:8px}
+.brand{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.brand h1{font-family:var(--f-disp);font-size:22px;margin:0;letter-spacing:-.01em}
+.brand .ver{font-size:12px;color:var(--muted);background:var(--surface2);padding:2px 8px;border-radius:999px}
+.brand .share{margin-left:auto;font-size:13px;color:var(--accent);padding:4px 8px;border-radius:8px}
+.brand .share:hover{background:var(--surface2)}
+nav.tabs{display:flex;flex-wrap:wrap;gap:2px}
+nav.tabs button{padding:8px 12px;border-bottom:3px solid transparent;color:var(--muted);font-weight:500;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--fg);border-color:var(--accent)}
+nav.tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:6px}
+
+main section.tab{display:none;padding-top:18px}
+main section.tab.on{display:block}
+h2{font-family:var(--f-disp);font-size:19px;margin:22px 0 10px;text-wrap:balance}
+h3{font-size:15px;margin:16px 0 6px;font-weight:700}
+p{margin:6px 0}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+
+.ctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px}
+.ctl label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);min-width:0}
+.ctl select{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);min-width:0}
+.ctl select:disabled{opacity:.45}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);font-size:13px}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.belt-seg button{display:inline-flex;align-items:center;gap:6px}
+.dot{width:12px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.25);display:inline-block}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;min-width:0}
+.card h3{margin-top:0}
+.big{font-family:var(--f-disp);font-size:34px;line-height:1.1;font-variant-numeric:tabular-nums}
+.big small{font-size:14px;font-family:var(--f-body);color:var(--muted);margin-left:4px}
+
+table{border-collapse:collapse;width:100%;font-size:14px}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:var(--surface2);font-weight:600;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:center;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+.pill{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+.ok{background:var(--ok-bg);color:var(--ok)}
+.no{background:var(--no-bg);color:var(--no)}
+.cond{background:var(--cond-bg);color:var(--cond)}
+.chk{background:var(--surface2);color:var(--muted)}
+
+ul.list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+ul.list li{display:flex;justify-content:space-between;gap:10px;align-items:baseline;padding:6px 0;border-bottom:1px dashed var(--line)}
+ul.list li:last-child{border-bottom:0}
+ul.list li .n{min-width:0}
+ul.list li .n small{display:block;color:var(--muted);font-size:12px}
+
+.search{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);margin:12px 0}
+.tech{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.tech summary{cursor:pointer;font-weight:600;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.tech summary .cat{font-weight:400;color:var(--muted);font-size:13px}
+.matrix{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-top:10px}
+.matrix .cell{text-align:center;border-radius:8px;padding:6px 2px;font-size:12px;font-weight:600;min-width:0}
+.matrix .lab{font-size:10.5px;color:var(--muted);font-weight:400;display:block;line-height:1.25;overflow-wrap:anywhere}
+.belt{height:22px;border-radius:4px;border:1px solid rgba(0,0,0,.25);position:relative;overflow:hidden;min-width:120px}
+.belt .bar{position:absolute;top:0;bottom:0;right:14px;width:34px;background:#111}
+.belt .bar.red{background:#b4221c}
+.belt .st{position:absolute;top:0;bottom:0;width:3px;background:#fff}
+.beltrow{display:grid;grid-template-columns:140px 1fr;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.beltrow:last-child{border-bottom:0}
+@media (max-width:480px){.beltrow{grid-template-columns:1fr}}
+
+.quiz{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
+.q{font-size:17px;font-weight:600;margin:6px 0 14px;text-wrap:balance}
+.opts{display:grid;gap:8px}
+.opts button{text-align:left;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.opts button:hover{border-color:var(--accent)}
+.opts button.right{border-color:var(--ok);background:var(--ok-bg)}
+.opts button.wrong{border-color:var(--no);background:var(--no-bg)}
+.opts button:disabled{cursor:default}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:var(--accent);color:var(--accent-fg);font-weight:600}
+.btn.ghost{background:var(--surface2);color:var(--fg)}
+.btn:focus-visible,.opts button:focus-visible,.seg button:focus-visible,.share:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.prog{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;margin-bottom:12px}
+.prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+.expl{margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--surface2);font-size:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.note{border-left:3px solid var(--gold);padding:8px 12px;background:var(--surface);border-radius:0 10px 10px 0;font-size:13px;color:var(--muted);margin-top:16px}
+textarea{width:100%;min-height:80px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);resize:vertical}
+footer{margin-top:40px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+footer ul{padding-left:18px;margin:6px 0}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:999px;font-size:13px;z-index:20}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<header class="top"><div class="wrap">
+  <div class="brand"><h1>주짓수 룰북</h1><span class="ver">IBJJF 규정집 v6.1(2024) · 졸업규정 v2.4(2025) · ADCC · 대조일 2026-10-03</span><button class="share" id="shareBtn" type="button">링크 복사</button></div>
+  <nav class="tabs" role="tablist" id="tabs" aria-label="메뉴">
+    <button role="tab" id="t-rule" aria-controls="tab-rule" data-tab="rule" aria-selected="true">룰북</button>
+    <button role="tab" id="t-tech" aria-controls="tab-tech" data-tab="tech" aria-selected="false" tabindex="-1">기술 찾기</button>
+    <button role="tab" id="t-cmp" aria-controls="tab-cmp" data-tab="cmp" aria-selected="false" tabindex="-1">연맹 비교</button>
+    <button role="tab" id="t-belt" aria-controls="tab-belt" data-tab="belt" aria-selected="false" tabindex="-1">벨트 체계</button>
+    <button role="tab" id="t-quiz" aria-controls="tab-quiz" data-tab="quiz" aria-selected="false" tabindex="-1">퀴즈</button>
+    <button role="tab" id="t-term" aria-controls="tab-term" data-tab="term" aria-selected="false" tabindex="-1">용어</button>
+  </nav>
+</div></header>
+
+<main class="wrap">
+
+<!-- ───────── 룰북 ───────── -->
+<section class="tab on" id="tab-rule" role="tabpanel" aria-labelledby="t-rule">
+  <div class="ctl">
+    <label>연맹 · 룰셋
+      <select id="selFed"><option value="ibjjf">IBJJF (국제브라질주짓수연맹)</option><option value="adcc">ADCC (서브미션 레슬링)</option><option value="sub">서브미션 온리 (EBI 방식)</option></select>
+    </label>
+    <label>복장
+      <select id="selGi"><option value="gi">도복(Gi)</option><option value="nogi">노기(No-Gi)</option></select>
+    </label>
+    <label>연령부
+      <select id="selAge"><option value="adult">성인 (18~29세)</option><option value="m1">마스터 1 (30~35세)</option><option value="m2">마스터 2 이상 (36세~)</option><option value="juv">주베나일 (16~17세)</option><option value="k2">유소년 (13~15세)</option><option value="k1">유소년 (4~12세)</option></select>
+    </label>
+  </div>
+  <div class="row" id="beltSeg" style="margin-top:12px"></div>
+  <div id="ruleOut"></div>
+  <div class="note">IBJJF 점수는 해당 포지션을 <b>3초간 안정적으로 유지</b>해야 인정된다. 서브미션(탭)이 나오면 점수와 무관하게 경기가 끝난다. 이 앱은 공식 규정집을 요약·재구성한 것이므로 대회 출전 전 주최측 최신 규정을 반드시 확인한다.</div>
+</section>
+
+<!-- ───────── 기술 찾기 ───────── -->
+<section class="tab" id="tab-tech" role="tabpanel" aria-labelledby="t-tech">
+  <p class="muted small">기술 이름을 치면 IBJJF 금지기술표의 6개 구분(연령·벨트)과 ADCC·서브미션 온리 기준이 한눈에 보인다.</p>
+  <input class="search" id="techQ" type="search" placeholder="예: 힐훅, 리스트락, 니바, 슬램 …" autocomplete="off" aria-label="기술 검색">
+  <div class="seg" id="techCat"></div>
+  <div id="techList" style="margin-top:12px"></div>
+</section>
+
+<!-- ───────── 연맹 비교 ───────── -->
+<section class="tab" id="tab-cmp" role="tabpanel" aria-labelledby="t-cmp">
+  <p class="muted small">같은 상황이 연맹마다 어떻게 다른지 나란히 본다.</p>
+  <div class="tw"><table id="cmpTbl"></table></div>
+  <h2>연맹별 한 줄 성격</h2>
+  <div class="cards" id="fedCards"></div>
+</section>
+
+<!-- ───────── 벨트 체계 ───────── -->
+<section class="tab" id="tab-belt" role="tabpanel" aria-labelledby="t-belt">
+  <h2>성인 벨트 (16세 이상)</h2>
+  <div class="card" id="beltAdult"></div>
+  <h2>블랙벨트 단(degree)</h2>
+  <div class="tw"><table id="beltBlack"></table></div>
+  <h2>유소년 벨트 (4~15세)</h2>
+  <div class="tw"><table id="beltKids"></table></div>
+  <div class="note">스트라이프는 벨트당 최대 4개. 수련기간은 IBJJF 졸업 규정의 <b>최소</b> 기간이며 실제 승급은 지도자가 기량·태도를 보고 결정한다. 16세가 되는 해에는 직전 벨트에 따라 바뀐다. 화이트는 화이트를 유지할 수 있고, 그레이·옐로우·오렌지는 블루로, 그린은 지도자 판단에 따라 블루 또는 퍼플로 올라간다(졸업규정 2.2.3).</div>
+</section>
+
+<!-- ───────── 퀴즈 ───────── -->
+<section class="tab" id="tab-quiz" role="tabpanel" aria-labelledby="t-quiz">
+  <div class="quiz" id="quizBox"></div>
+  <h2>오답 노트</h2>
+  <p class="muted small">이 기기에만 저장된다. 다시 맞히면 지워진다.</p>
+  <div id="wrongList" class="card"></div>
+</section>
+
+<!-- ───────── 용어 ───────── -->
+<section class="tab" id="tab-term" role="tabpanel" aria-labelledby="t-term">
+  <input class="search" id="termQ" type="search" placeholder="한국어·영어·포르투갈어 아무거나" autocomplete="off" aria-label="용어 검색">
+  <div class="tw"><table id="termTbl"></table></div>
+</section>
+
+<footer>
+  <b>기준 자료</b>
+  <ul>
+    <li>IBJJF 규정집 v6.1 (2024년 6월) 및 졸업 규정 v2.4 (2025년 6월) — <a href="https://ibjjf.com/books-videos" target="_blank" rel="noopener">ibjjf.com/books-videos</a></li>
+    <li>ADCC 공식 규칙 — <a href="https://adcombat.com/adcc-rules-and-regulations/" target="_blank" rel="noopener">adcombat.com</a></li>
+    <li>서브미션 온리는 이벤트마다 다르며, 여기서는 EBI 방식을 2차 자료로 정리했다. 공식 원문과 대조하지 못했다.</li>
+  </ul>
+  <p>마지막 대조일 2026년 10월 3일. 원문을 복제하지 않고 요약·재구성했다. 최신 개정이 있으면 이 표가 틀릴 수 있으니 대회 전 주최측 규정을 확인한다. 이 페이지는 방문자 정보를 수집하지 않으며, 퀴즈 기록은 이 기기 안에만 저장된다. 글꼴은 Google Fonts에서 불러온다.</p>
+  <h3>틀린 곳을 알려주세요</h3>
+  <form id="fbForm">
+    <textarea id="fbMsg" placeholder="어느 탭의 어떤 항목이 어떻게 틀렸는지, 근거 규정 조항이 있으면 함께 적어 주세요." aria-label="의견"></textarea>
+    <div class="row"><button class="btn" type="submit">보내기</button><span id="fbOut" class="small"></span></div>
+  </form>
+</footer>
+</main>
+
+<script>
+/* ───────────── 데이터 ───────────── */
+const BELTS=[
+ {id:'white',name:'화이트',hex:'#f4f4f2'},
+ {id:'blue',name:'블루',hex:'#1e4fb8'},
+ {id:'purple',name:'퍼플',hex:'#6b2fa0'},
+ {id:'brown',name:'브라운',hex:'#6b3e1e'},
+ {id:'black',name:'블랙',hex:'#141414'}
+];
+const BELT_INFO={ // IBJJF 졸업규정 v2.4
+ white:{age:'제한 없음',min:'규정 없음'},
+ blue:{age:'16세',min:'2년 (주베나일 블루 출신·성인 블루 세계챔피언은 면제)'},
+ purple:{age:'16세',min:'1년 6개월'},
+ brown:{age:'18세',min:'1년'},
+ black:{age:'19세 (브라운 성인 세계챔피언은 18세)',min:'단(degree)별 별도'}
+};
+const TIMES={ // 분. IBJJF 규정집 v6.1
+ ibjjf:{adult:{white:5,blue:6,purple:7,brown:8,black:10}, m1:{white:5,blue:5,purple:6,brown:6,black:6}, m2:{white:5,blue:5,purple:5,brown:5,black:5}, juv:{white:5,blue:5,purple:5}},
+ adcc:{all:'예선 10분 + 연장 5분 (전반 5분은 무득점). 결승·앱솔루트 결승·슈퍼파이트 20분 + 연장 10분×2 (전반 10분 무득점). 일부 부문은 6분/8분 축소 형식.'},
+ sub:{all:'본경기 10분(무득점). 못 끝내면 연장 최대 3라운드.'}
+};
+const KIDS_TIME={k1:[['4~6세',2],['7~9세',3],['10~12세',4]],k2:[['13~15세',4]]};
+
+const SCORE={
+ ibjjf:[
+  ['테이크다운',2,'상대를 넘어뜨리고 위 포지션 3초 유지'],
+  ['스윕',2,'가드에서 위로 뒤집고 3초 유지'],
+  ['니온벨리',2,'무릎을 배·가슴에 얹고 3초 유지'],
+  ['가드 패스',3,'다리를 지나 사이드 등으로 통제, 3초 유지'],
+  ['마운트',4,'상대 몸통 위에 올라타 3초 유지'],
+  ['백 마운트(훅)',4,'등 뒤에서 양 훅을 넣고 3초 유지'],
+  ['백 컨트롤',4,'백 포지션 통제, 3초 유지']
+ ],
+ adcc:[
+  ['테이크다운',2,'가드·하프가드로 떨어지면 2점'],
+  ['클린 테이크다운',4,'가드를 거치지 않고 바로 패스 포지션이면 4점'],
+  ['스윕',2,'가드를 거치면 2점'],
+  ['클린 스윕',4,'바로 패스 포지션이면 4점'],
+  ['니온벨리',2,''],
+  ['가드 패스',3,''],
+  ['마운트',2,''],
+  ['백 마운트(훅)',3,'']
+ ],
+ sub:[]
+};
+const PENALTY={
+ ibjjf:['1회 경고(기록만)','2회 상대에게 어드밴티지','3회 상대에게 2점','4회 실격','소극적 경기(스톨링)는 20초 뒤 페널티','더블 가드 풀은 20초 안에 한쪽이 올라와야 한다'],
+ adcc:['가드 풀링 등 자발적으로 앉아 3초 이상 머물면 -1점','접촉을 끊고 물러나며 교전을 피하면 -1점','소극성: "WARNING PASSIVITY" 경고 2회 뒤 -1점. 첫 감점 이후에는 경고 없이 바로 -1점씩','전반 무득점 구간의 소극성 경고는 후반 시작과 함께 감점으로 이어진다','감점 시점: 예선은 득점 구간과 연장에서만, 결승·슈퍼파이트는 무득점 구간부터 적용'],
+ sub:['소극성은 심판 경고(이벤트마다 다름)']
+};
+const TIE={
+ ibjjf:'점수 → 어드밴티지 → 페널티 수 → 심판 판정',
+ adcc:'연장(예선 5분, 결승 10분×2) → 그래도 동점이면 경기 전체의 공격성을 기준으로 심판 판정',
+ sub:'연장전: 공격자가 백 또는 스파이더웹(암바) 포지션을 골라 시작. 서브미션 성공, 아니면 이스케이프에 걸린 시간이 짧은 쪽이 승'
+};
+const FED_DESC={
+ ibjjf:{name:'IBJJF',desc:'가장 널리 쓰이는 표준. 연령·벨트별로 금지 기술과 경기 시간이 다르고, 어드밴티지·페널티로 승부를 가린다. 노기 힐훅·니 리핑은 성인 브라운·블랙에게만 열려 있고 마스터부는 노기라도 금지다.'},
+ adcc:{name:'ADCC',desc:'노기 서브미션 레슬링의 세계 대회. 벨트 구분이 없고, 전반은 무득점이라 서브미션을 유도하며 후반부터 점수가 붙는다. 힐훅을 포함한 다리 관절기, 트위스터, 캔오프너가 허용되고 슬램은 서브미션에 걸린 상태에서만 허용된다.'},
+ sub:{name:'서브미션 온리(EBI 방식)',desc:'점수 없이 서브미션만으로 승부. 본경기에서 못 끝내면 연장전에서 백·암바 포지션을 번갈아 잡고 시작한다. 프로 이벤트에서 많이 쓰며 세부 규칙은 이벤트마다 다르다.'}
+};
+
+/* IBJJF 금지기술표(v6.1 29쪽)의 6열을 그대로 둔다.
+   c = [4~12세, 13~15세, 16~17세 전 벨트 + 성인·마스터 화이트, 블루·퍼플, 브라운·블랙(성인 노기 제외), 성인 브라운·블랙 노기]
+   ok=허용, no=금지. adcc/sub: ok·no·chk(규정에 명시 없음 → 대회 확인) */
+const A='ok',X='no',C='chk';
+const ALL_X=[X,X,X,X,X,X], ALL_A=[A,A,A,A,A,A];
+const TECHS=[
+ // 유소년 전용 금지(표 1~8행)
+ {name:'다리를 벌려 꺾는 서브미션',en:'Submission stretching legs apart',cat:'유소년 제한',c:[X,A,A,A,A,A],adcc:C,sub:C},
+ {name:'척추 꺾기를 동반한 초크',en:'Choke with spinal lock',cat:'유소년 제한',c:[X,X,A,A,A,A],adcc:C,sub:C},
+ {name:'에제키엘 초크',en:'Ezekiel choke',cat:'초크',c:[X,X,A,A,A,A],adcc:A,sub:A},
+ {name:'전면 길로틴',en:'Frontal guillotine',cat:'초크',c:[X,X,A,A,A,A],adcc:A,sub:A},
+ {name:'오모플라타',en:'Omoplata',cat:'팔 관절기',c:[X,X,A,A,A,A],adcc:A,sub:A},
+ {name:'트라이앵글(머리 당기기)',en:'Triangle pulling the head',cat:'초크',c:[X,X,A,A,A,A],adcc:A,sub:A},
+ {name:'암 트라이앵글',en:'Arm triangle',cat:'초크',c:[X,X,A,A,A,A],adcc:A,sub:A},
+ // 16~17세·화이트 금지(9~11행)
+ {name:'클로즈드 가드 안에서 다리로 갈비·신장 압박',en:'Closed guard compressing kidneys/ribs',cat:'압박 관절기',c:[X,X,X,A,A,A],adcc:C,sub:C},
+ {name:'리스트락(손목)',en:'Wrist lock',cat:'팔 관절기',c:[X,X,X,A,A,A],adcc:A,sub:A},
+ {name:'머리를 바깥쪽에 둔 싱글렉 테이크다운',en:'Single leg with head outside',cat:'테이크다운',c:[X,X,X,A,A,A],adcc:A,sub:A,notes:{ibjjf:'금지 기술이지만 페널티는 주지 않는다(규정집 표 주석).'}},
+ {name:'점핑 클로즈드 가드(플라잉 암바·트라이앵글 포함)',en:'Jumping closed guard',cat:'가드 진입',c:[X,X,X,A,A,A],juvColor:A,adcc:C,sub:C,notes:{ibjjf:'15세 이하 전 벨트와 모든 연령의 화이트벨트 금지(6.2.2-W). 16~17세 블루·퍼플은 허용. 테이크다운 방어 중 점프하면 상대에게 2점.'}},
+ // 브라운·블랙부터 허용(12~16행)
+ {name:'바이셉 슬라이서',en:'Bicep slicer',cat:'압박 관절기',c:[X,X,X,X,A,A],adcc:A,sub:A},
+ {name:'카프 슬라이서',en:'Calf slicer',cat:'압박 관절기',c:[X,X,X,X,A,A],adcc:A,sub:A},
+ {name:'니바(무릎 관절기)',en:'Kneebar',cat:'다리 관절기',c:[X,X,X,X,A,A],adcc:A,sub:A},
+ {name:'토홀드(발 비틀기)',en:'Toe hold',cat:'다리 관절기',c:[X,X,X,X,A,A],adcc:A,sub:A},
+ {name:'스트레이트 풋락에서 공격받지 않는 발 쪽으로 회전',en:'Foot lock turning toward the free foot',cat:'다리 관절기',c:[X,X,X,X,A,A],adcc:A,sub:A,notes:{ibjjf:'2024년 v6 개정으로 브라운·블랙은 회전 방향 제한이 풀렸다.'}},
+ // 성인 브라운·블랙 노기만(17~20행)
+ {name:'힐훅',en:'Heel hook',cat:'다리 관절기',c:[X,X,X,X,X,A],adcc:A,sub:A,notes:{ibjjf:'성인 브라운·블랙 노기만 허용. 도복은 전 벨트 금지, 마스터부는 노기라도 금지.'}},
+ {name:'무릎을 비트는 관절기',en:'Locks twisting the knees',cat:'다리 관절기',c:[X,X,X,X,X,A],adcc:A,sub:A},
+ {name:'니 리핑(무릎 안쪽으로 다리 걸기)',en:'Knee reaping',cat:'다리 관절기',c:[X,X,X,X,X,A],adcc:A,sub:A,notes:{ibjjf:'성인 브라운·블랙 노기만 허용. 도복은 전 벨트 금지, 마스터부는 노기라도 금지.'}},
+ {name:'토홀드에서 발을 바깥쪽으로 누르기',en:'Toe hold with outward pressure',cat:'다리 관절기',c:[X,X,X,X,X,A],adcc:A,sub:A},
+ // 전 부문 금지(21~26행 + 6.2.2 J)
+ {name:'슬램(들어서 내리꽂기)',en:'Slam',cat:'반칙',c:ALL_X,adcc:C,sub:C,notes:{adcc:'서브미션에 걸린 상태에서만 허용. 상대가 서브미션을 풀면 슬램도 멈춰야 한다.',sub:'이벤트마다 다르다. 대부분 금지.'}},
+ {name:'초크 없는 척추 꺾기(트위스터 등)',en:'Spinal lock without choke (twister)',cat:'반칙',c:ALL_X,adcc:A,sub:C,notes:{adcc:'트위스터·캔오프너는 허용으로 명시.'}},
+ {name:'넥크랭크(양어깨 가두고 목 누르기·풀넬슨)',en:'Neck crank (full nelson)',cat:'반칙',c:ALL_X,adcc:X,sub:C,notes:{adcc:'양어깨를 가두고 목을 아래로 누르는 동작은 금지.'}},
+ {name:'가위 테이크다운(카니바사미)',en:'Scissor takedown',cat:'반칙',c:ALL_X,adcc:C,sub:C},
+ {name:'손가락 뒤로 꺾기',en:'Bending fingers backwards',cat:'반칙',c:ALL_X,adcc:X,sub:X},
+ {name:'싱글렉 방어 중 벨트 잡고 머리로 던지기',en:'Belt grab throw onto head',cat:'반칙',c:ALL_X,adcc:X,sub:X},
+ {name:'머리·목으로 떨어뜨리는 수플렉스',en:'Suplex landing on head/neck',cat:'반칙',c:ALL_X,adcc:X,sub:X},
+ {name:'손으로 코·입 막기',en:'Blocking air with the hands',cat:'반칙',c:ALL_X,adcc:X,sub:X},
+ // 표에 없는 기본 기술(전 부문 허용)
+ {name:'스트레이트 풋락(발목)',en:'Straight ankle lock',cat:'다리 관절기',c:[X,X,A,A,A,A],adcc:A,sub:A},
+ {name:'암바',en:'Armbar (juji-gatame)',cat:'팔 관절기',c:ALL_A,adcc:A,sub:A},
+ {name:'키무라 · 아메리카나',en:'Kimura / Americana',cat:'팔 관절기',c:ALL_A,adcc:A,sub:A},
+ {name:'트라이앵글(머리 당기지 않음)',en:'Triangle choke',cat:'초크',c:ALL_A,adcc:A,sub:A},
+ {name:'리어 네이키드 초크',en:'Rear naked choke (mata-leão)',cat:'초크',c:ALL_A,adcc:A,sub:A},
+ {name:'크로스 칼라 초크 · 보우앤애로우',en:'Cross collar / Bow and arrow',cat:'초크',c:ALL_A,giOnly:true,adcc:C,sub:C,notes:{ibjjf:'도복 깃을 쓰는 기술. 노기에서는 성립하지 않는다.'}}
+];
+const COLS=['4~12세','13~15세','16~17세 전벨트 · 화이트','블루·퍼플','브라운·블랙(도복·마스터)','성인 브라운·블랙 노기'];
+const KIDS_BELTS=[
+ ['화이트','4~15세','입문'],
+ ['그레이','4~15세','그레이-화이트 · 그레이 · 그레이-블랙'],
+ ['옐로우','7~15세','옐로우-화이트 · 옐로우 · 옐로우-블랙'],
+ ['오렌지','10~15세','오렌지-화이트 · 오렌지 · 오렌지-블랙'],
+ ['그린','13~15세','그린-화이트 · 그린 · 그린-블랙']
+];
+const BLACK_DEG=[
+ ['블랙 → 1단','3년'],['1단 → 2단','3년'],['2단 → 3단','3년'],['3단 → 4단','5년'],['4단 → 5단','5년'],['5단 → 6단','5년'],
+ ['6단 → 7단 (코랄 흑적, 50세 이상)','7년'],['7단 → 8단 (코랄 적백, 57세 이상)','7년'],['8단 → 9단 (레드, 67세 이상)','10년'],['10단 (레드)','창시 가문에게만 수여']
+];
+const TERMS=[
+ ['오스','Oss','—','인사·대답·기합'],
+ ['도복','Gi / Kimono','Kimono','도복 입고 하는 경기'],
+ ['노기','No-Gi','Sem kimono','도복 없이 래시가드·쇼츠로 하는 경기'],
+ ['가드','Guard','Guarda','아래에서 다리로 상대를 통제하는 포지션'],
+ ['클로즈드 가드','Closed guard','Guarda fechada','발목을 교차해 허리를 잠근 가드'],
+ ['하프 가드','Half guard','Meia-guarda','상대 한 다리만 잡은 가드'],
+ ['사이드 컨트롤','Side control','Cem quilos(100킬로)','옆에서 누르는 포지션'],
+ ['마운트','Mount','Montada','상대 몸통 위에 올라탄 포지션 (IBJJF 4점)'],
+ ['백','Back control','Pegada nas costas','등 뒤를 잡은 포지션 (IBJJF 4점)'],
+ ['니온벨리','Knee on belly','Joelho na barriga','무릎을 배에 얹은 포지션 (2점)'],
+ ['터틀','Turtle','Tartaruga','엎드려 웅크린 방어 자세'],
+ ['스윕','Sweep','Raspagem','아래에서 위로 뒤집기 (2점)'],
+ ['패스','Guard pass','Passagem','가드를 지나 사이드로 가기 (3점)'],
+ ['테이크다운','Takedown','Queda','서서 상대를 넘어뜨리기 (2점)'],
+ ['서브미션','Submission','Finalização','관절기·초크로 항복 받기'],
+ ['탭','Tap','Bater','항복 신호. 손바닥으로 두세 번 두드림'],
+ ['어드밴티지','Advantage','Vantagem','득점 직전까지 간 공격에 주는 보조 점수'],
+ ['페널티','Penalty','Punição','반칙·소극성에 주는 벌점'],
+ ['스톨링','Stalling','Falta de combatividade','소극적으로 시간만 끄는 행위'],
+ ['암바','Armbar','Chave de braço','팔꿈치를 펴서 꺾는 관절기'],
+ ['트라이앵글','Triangle','Triângulo','다리로 삼각형을 만들어 조르는 초크'],
+ ['키무라','Kimura','Kimura / Chave de ombro','어깨를 뒤로 비트는 관절기'],
+ ['아메리카나','Americana','Americana','어깨를 위로 비트는 관절기'],
+ ['오모플라타','Omoplata','Omoplata','다리로 거는 어깨 관절기'],
+ ['리어 네이키드 초크','Rear naked choke','Mata-leão','뒤에서 팔로 조르는 초크'],
+ ['길로틴','Guillotine','Guilhotina','앞에서 목을 감아 조르는 초크'],
+ ['에제키엘','Ezekiel choke','Ezequiel','소매를 잡고 조르는 초크'],
+ ['보우 앤 애로우','Bow and arrow choke','Estrangulamento arco e flecha','깃을 잡고 활 당기듯 조르는 초크'],
+ ['니바','Kneebar','Chave de joelho','무릎을 펴서 꺾는 관절기'],
+ ['풋락','Foot lock','Chave de pé','발목을 꺾는 관절기'],
+ ['토홀드','Toe hold','Chave de pé(torção)','발을 비트는 관절기'],
+ ['힐훅','Heel hook','Chave de calcanhar','뒤꿈치를 비틀어 무릎을 꺾는 관절기'],
+ ['니 리핑','Knee reaping','Ceifada de joelho','상대 무릎 안쪽으로 다리를 걸어 비트는 자세'],
+ ['스트라이프','Stripe','Grau','벨트에 붙이는 흰 띠. 최대 4개'],
+ ['승급','Promotion','Graduação','벨트나 스트라이프를 받는 것'],
+ ['프로페소르','Professor','Professor','블랙벨트 지도자 호칭'],
+ ['메스트리','Master','Mestre','고단자(통상 코랄 이상) 호칭'],
+ ['롤링','Rolling / Sparring','Rola','자유 대련'],
+ ['드릴','Drill','Repetição','기술 반복 연습'],
+ ['데라히바 가드','De la Riva guard','Guarda De la Riva','상대 다리 바깥쪽을 감는 오픈 가드'],
+ ['베림볼로','Berimbolo','Berimbolo','뒤구르기로 백을 잡는 기술'],
+ ['50/50','Fifty-fifty','Cinquenta-cinquenta','서로 다리를 교차해 얽힌 포지션'],
+ ['더블 가드 풀','Double guard pull','Dupla puxada','둘 다 가드를 당겨 앉은 상황. IBJJF는 20초 안에 한쪽이 올라와야 함']
+];
+
+/* ───────────── 유틸 ───────────── */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pill=v=>v==='ok'?'<span class="pill ok">허용</span>':v==='no'?'<span class="pill no">금지</span>':v==='na'?'<span class="pill chk">해당 없음</span>':'<span class="pill chk">대회 확인</span>';
+const beltName=id=>BELTS.find(b=>b.id===id).name;
+let store={};try{store=JSON.parse(localStorage.getItem('bjj-rulebook')||'{}')}catch(e){store={}}
+function save(){try{localStorage.setItem('bjj-rulebook',JSON.stringify(store))}catch(e){}}
+function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),1800)}
+
+/* 허용 판정. 모든 화면이 이 함수 하나를 쓴다. */
+function allow(tc,f,gi,age,belt){
+  if(f!=='ibjjf') return tc[f];
+  if(tc.giOnly&&gi==='nogi') return 'na';
+  const c=tc.c;
+  if(age==='k1') return c[0];
+  if(age==='k2') return c[1];
+  if(age==='juv') return belt==='white'?c[2]:(tc.juvColor||c[2]);
+  if(belt==='white') return c[2];
+  if(belt==='blue'||belt==='purple') return c[3];
+  return (gi==='nogi'&&age==='adult')?c[5]:c[4];
+}
+const beltsFor=age=>age==='juv'?BELTS.slice(0,3):(age==='k1'||age==='k2')?[]:BELTS;
+
+/* ───────────── 탭 ───────────── */
+const TAB_IDS=['rule','tech','cmp','belt','quiz','term'];
+const tabs=$('#tabs');
+function showTab(id,focus){
+  tabs.querySelectorAll('button').forEach(b=>{const on=b.dataset.tab===id;b.setAttribute('aria-selected',on);b.tabIndex=on?0:-1;if(on&&focus)b.focus()});
+  document.querySelectorAll('main .tab').forEach(s=>s.classList.toggle('on',s.id==='tab-'+id));
+  store.tab=id;save();
+  if(location.hash!=='#'+id){try{history.replaceState(null,'','#'+id)}catch(e){}}
+}
+tabs.addEventListener('click',e=>{const b=e.target.closest('button');if(b)showTab(b.dataset.tab)});
+tabs.addEventListener('keydown',e=>{
+  const i=TAB_IDS.indexOf(store.tab||'rule');
+  if(e.key==='ArrowRight'){e.preventDefault();showTab(TAB_IDS[(i+1)%TAB_IDS.length],true)}
+  else if(e.key==='ArrowLeft'){e.preventDefault();showTab(TAB_IDS[(i-1+TAB_IDS.length)%TAB_IDS.length],true)}
+  else if(e.key==='Home'){e.preventDefault();showTab(TAB_IDS[0],true)}
+  else if(e.key==='End'){e.preventDefault();showTab(TAB_IDS[TAB_IDS.length-1],true)}
+});
+$('#shareBtn').onclick=async()=>{
+  const url=location.href.split('#')[0];
+  try{await navigator.clipboard.writeText(url);toast('링크를 복사했다')}
+  catch(e){window.prompt('이 주소를 복사하세요',url);}
+};
+
+/* ───────────── 룰북 ───────────── */
+const state={fed:'ibjjf',gi:'gi',age:'adult',belt:store.belt||'white',giBefore:'gi'};
+function renderBeltSeg(){
+  const seg=$('#beltSeg');
+  if(state.fed!=='ibjjf'){seg.innerHTML='<span class="muted small">이 룰셋은 벨트·복장·연령 구분 없이 같은 규칙을 적용한다.</span>';return}
+  const list=beltsFor(state.age);
+  if(!list.length){seg.innerHTML='<span class="muted small">유소년부는 벨트와 무관하게 연령으로 금지 기술이 정해진다.</span>';return}
+  if(!list.some(b=>b.id===state.belt))state.belt=list[0].id;
+  seg.innerHTML='<div class="seg belt-seg" role="group" aria-label="벨트">'+list.map(b=>`<button type="button" data-belt="${b.id}" aria-pressed="${state.belt===b.id}"><i class="dot" style="background:${b.hex}"></i>${b.name}</button>`).join('')+'</div>';
+  seg.querySelectorAll('button').forEach(b=>b.onclick=()=>{state.belt=b.dataset.belt;store.belt=state.belt;save();renderRule()});
+}
+const AGE_LABEL={adult:'성인',m1:'마스터 1',m2:'마스터 2 이상',juv:'주베나일',k1:'유소년 4~12세',k2:'유소년 13~15세'};
+function renderRule(){
+  renderBeltSeg();
+  const f=state.fed,gi=state.gi,age=state.age,belt=state.belt;
+  let html='<div class="cards">';
+  let t;
+  if(f==='ibjjf'){
+    if(KIDS_TIME[age]) t='<div class="tw"><table>'+KIDS_TIME[age].map(r=>`<tr><td>${r[0]}</td><td class="num">${r[1]}분</td></tr>`).join('')+'</table></div>';
+    else t=`<div class="big">${TIMES.ibjjf[age][belt]}<small>분</small></div><p class="muted small">${AGE_LABEL[age]} · ${beltName(belt)}벨트 · ${gi==='gi'?'도복':'노기'}</p>`;
+  } else t=`<p>${esc(TIMES[f].all)}</p>`;
+  html+=`<div class="card"><h3>경기 시간</h3>${t}</div>`;
+  const sc=SCORE[f];
+  html+=`<div class="card"><h3>득점</h3>`+(sc.length?'<ul class="list">'+sc.map(r=>`<li><span class="n">${esc(r[0])}${r[2]?`<small>${esc(r[2])}</small>`:''}</span><b style="font-variant-numeric:tabular-nums">${r[1]}점</b></li>`).join('')+'</ul>':'<p>점수 없음. 서브미션만으로 승부한다.</p>')+`</div>`;
+  html+='</div>';
+  const allowed=[],banned=[],check=[];
+  TECHS.forEach(tc=>{
+    const v=allow(tc,f,gi,age,belt); if(v==='na')return;
+    const note=tc.notes&&tc.notes[f];
+    const item=`<li><span class="n">${esc(tc.name)}<small>${esc(tc.en)}${note?' · '+esc(note):''}</small></span>${pill(v)}</li>`;
+    (v==='ok'?allowed:v==='no'?banned:check).push(item);
+  });
+  html+=`<div class="cards"><div class="card"><h3>금지 기술 <span class="pill no">${banned.length}</span></h3><ul class="list">${banned.join('')||'<li class="muted">없음</li>'}</ul></div>`;
+  html+=`<div class="card"><h3>허용 기술 <span class="pill ok">${allowed.length}</span></h3><ul class="list">${allowed.join('')||'<li class="muted">없음</li>'}</ul>${check.length?`<h3>규정에 명시 없음 <span class="pill chk">${check.length}</span></h3><p class="small muted">공식 규칙 문서에 항목이 없다. 대회 주최측에 확인한다.</p><ul class="list">${check.join('')}</ul>`:''}</div></div>`;
+  html+=`<div class="cards"><div class="card"><h3>페널티·감점</h3><ul class="list">${PENALTY[f].map(p=>`<li><span class="n">${esc(p)}</span></li>`).join('')}</ul></div><div class="card"><h3>동점 처리</h3><p>${esc(TIE[f])}</p></div></div>`;
+  $('#ruleOut').innerHTML=html;
+}
+function syncControls(){
+  const ib=state.fed==='ibjjf';
+  $('#selGi').disabled=!ib; $('#selAge').disabled=!ib;
+  if(!ib){state.giBefore=state.gi;state.gi='nogi';$('#selGi').value='nogi'}
+  else{state.gi=state.giBefore;$('#selGi').value=state.gi}
+}
+$('#selFed').onchange=e=>{state.fed=e.target.value;syncControls();renderRule()};
+$('#selGi').onchange=e=>{state.gi=e.target.value;state.giBefore=state.gi;renderRule()};
+$('#selAge').onchange=e=>{state.age=e.target.value;renderRule()};
+
+/* ───────────── 기술 찾기 ───────────── */
+let techCat='전체';
+const cats=['전체',...new Set(TECHS.map(t=>t.cat))];
+$('#techCat').innerHTML=cats.map(c=>`<button type="button" data-c="${c}" aria-pressed="${c===techCat}">${c}</button>`).join('');
+$('#techCat').onclick=e=>{const b=e.target.closest('button');if(!b)return;techCat=b.dataset.c;$('#techCat').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.c===techCat));renderTech()};
+$('#techQ').oninput=renderTech;
+function matrix(t){return '<div class="matrix">'+t.c.map((v,i)=>`<div class="cell ${v}"><span class="lab">${COLS[i]}</span>${v==='ok'?'허용':'금지'}</div>`).join('')+'</div>'}
+function renderTech(){
+  const q=$('#techQ').value.trim().toLowerCase();
+  const list=TECHS.filter(t=>(techCat==='전체'||t.cat===techCat)&&(!q||t.name.toLowerCase().includes(q)||t.en.toLowerCase().includes(q)));
+  $('#techList').innerHTML=list.map(t=>{
+    const notes=t.notes?Object.entries(t.notes).map(([k,v])=>`<p class="small muted" style="margin-top:6px"><b>${FED_DESC[k].name}</b> ${esc(v)}</p>`).join(''):'';
+    const extra=t.juvColor?`<p class="small muted" style="margin-top:6px">16~17세 블루·퍼플: ${pill(t.juvColor)}</p>`:'';
+    return `<details class="tech" ${q&&list.length<=3?'open':''}><summary><span>${esc(t.name)} <span class="cat">${esc(t.en)}</span></span><span class="cat">${esc(t.cat)}</span></summary>
+   <h3>IBJJF 금지기술표 (6개 구분)</h3>${matrix(t)}${t.giOnly?'<p class="small muted" style="margin-top:6px">도복 전용 기술.</p>':''}${extra}
+   <div class="row"><span>ADCC ${pill(t.adcc)}</span><span>서브미션 온리 ${pill(t.sub)}</span></div>${notes}</details>`}).join('')||'<p class="muted">해당하는 기술이 없다.</p>';
+}
+
+/* ───────────── 연맹 비교 ───────────── */
+function renderCmp(){
+  const rows=[
+   ['득점 시작','경기 시작부터','전반 무득점, 후반부터','점수 없음'],
+   ['테이크다운','2점','2점 (클린 4점)','—'],
+   ['스윕','2점','2점 (클린 4점)','—'],
+   ['니온벨리','2점','2점','—'],
+   ['가드 패스','3점','3점','—'],
+   ['마운트','4점','2점','—'],
+   ['백','4점','3점(훅)','—'],
+   ['어드밴티지','있음','없음','없음'],
+   ['가드 풀링','허용(더블 가드 풀 20초 제한)','-1점 (예선은 득점 구간부터, 결승은 처음부터)','허용'],
+   ['힐훅·니 리핑','성인 브라운·블랙 노기만','허용','허용'],
+   ['슬램','금지','서브미션에 걸린 상태에서만 허용','대회 확인'],
+   ['트위스터','금지','허용','대회 확인'],
+   ['벨트 구분','있음(시간·기술)','없음','없음'],
+   ['동점 처리','어드밴티지 → 페널티 → 판정','연장 → 판정','연장전(포지션 선택)']
+  ];
+  $('#cmpTbl').innerHTML='<thead><tr><th>항목</th><th>IBJJF</th><th>ADCC</th><th>서브미션 온리</th></tr></thead><tbody>'+rows.map(r=>`<tr>${r.map((c,i)=>`<td${i?'':' style="font-weight:600"'}>${esc(c)}</td>`).join('')}</tr>`).join('')+'</tbody>';
+  $('#fedCards').innerHTML=Object.values(FED_DESC).map(f=>`<div class="card"><h3>${esc(f.name)}</h3><p class="small">${esc(f.desc)}</p></div>`).join('');
+}
+
+/* ───────────── 벨트 ───────────── */
+function beltSvg(b,stripes){
+  const bar=b.id==='black'?'<i class="bar red"></i>':'<i class="bar"></i>';
+  let st='';for(let i=0;i<stripes;i++)st+=`<i class="st" style="right:${18+i*7}px"></i>`;
+  return `<div class="belt" style="background:${b.hex}" role="img" aria-label="${b.name}벨트">${bar}${st}</div>`;
+}
+function renderBelt(){
+  $('#beltAdult').innerHTML=BELTS.map((b,i)=>`<div class="beltrow">${beltSvg(b,Math.min(i,4))}<div><b>${b.name}</b> <span class="muted small">최소 연령 ${esc(BELT_INFO[b.id].age)} · 다음 벨트까지 최소 ${esc(BELT_INFO[b.id].min)} · 성인 경기 ${TIMES.ibjjf.adult[b.id]}분</span></div></div>`).join('');
+  $('#beltBlack').innerHTML='<thead><tr><th>구간</th><th class="num">최소 기간</th></tr></thead><tbody>'+BLACK_DEG.map(r=>`<tr><td>${r[0]}</td><td class="num">${r[1]}</td></tr>`).join('')+'</tbody>';
+  $('#beltKids').innerHTML='<thead><tr><th>벨트</th><th class="num">연령</th><th>단계</th></tr></thead><tbody>'+KIDS_BELTS.map(r=>`<tr><td>${r[0]}</td><td class="num">${r[1]}</td><td>${r[2]}</td></tr>`).join('')+'</tbody>';
+}
+
+/* ───────────── 용어 ───────────── */
+function renderTerm(){
+  const q=$('#termQ').value.trim().toLowerCase();
+  const rows=TERMS.filter(r=>!q||r.join(' ').toLowerCase().includes(q));
+  $('#termTbl').innerHTML='<thead><tr><th>한국어</th><th>영어</th><th>포르투갈어</th><th>뜻</th></tr></thead><tbody>'+rows.map(r=>`<tr><td style="font-weight:600">${esc(r[0])}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td><td>${esc(r[3])}</td></tr>`).join('')+'</tbody>';
+}
+$('#termQ').oninput=renderTerm;
+
+/* ───────────── 퀴즈 ───────────── */
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(p=>p[1]);
+function makeQ(depth){
+  depth=depth||0;
+  const type=rnd(['tech','tech','score','time','term']);
+  if(type==='tech'){
+    const t=rnd(TECHS.filter(x=>x.cat!=='반칙'&&x.cat!=='유소년 제한')); const age=rnd(['adult','adult','m1','juv']); const b=rnd(beltsFor(age)); const gi=rnd(['gi','nogi']);
+    const v=allow(t,'ibjjf',gi,age,b.id); if(v!=='ok'&&v!=='no'){return depth<20?makeQ(depth+1):makeQ_time()}
+    return {q:`IBJJF ${gi==='gi'?'도복':'노기'} ${AGE_LABEL[age]}부 ${b.name}벨트는 「${t.name}」을(를) 할 수 있다.`,opts:['O 할 수 있다','X 할 수 없다'],ans:v==='ok'?0:1,
+      expl:`${t.name}: IBJJF ${gi==='gi'?'도복':'노기'} ${AGE_LABEL[age]} ${b.name}벨트에서 ${v==='ok'?'허용':'금지'}.${t.notes&&t.notes.ibjjf?' '+t.notes.ibjjf:''}`,key:'tech:'+t.name+':'+age+':'+b.id+':'+gi};
+  }
+  if(type==='score'){
+    const f=rnd(['ibjjf','adcc']); const r=rnd(SCORE[f]);
+    let opts=shuffle([...new Set([r[1],2,3,4])]).slice(0,4); if(!opts.includes(r[1]))opts[0]=r[1]; opts=shuffle(opts);
+    return {q:`${f.toUpperCase()} 규정에서 「${r[0]}」은 몇 점인가?`,opts:opts.map(o=>o+'점'),ans:opts.indexOf(r[1]),expl:`${f.toUpperCase()} ${r[0]}: ${r[1]}점. ${r[2]||''}`,key:'score:'+f+':'+r[0]};
+  }
+  if(type==='time')return makeQ_time();
+  const t=rnd(TERMS); const others=shuffle(TERMS.filter(x=>x!==t)).slice(0,3); const opts=shuffle([t,...others]);
+  return {q:`「${t[0]}」(${t[1]})의 뜻은?`,opts:opts.map(o=>o[3]),ans:opts.indexOf(t),expl:`${t[0]} = ${t[1]} / ${t[2]}: ${t[3]}`,key:'term:'+t[0]};
+}
+function makeQ_time(){
+  const b=rnd(BELTS); const ans=TIMES.ibjjf.adult[b.id]; let opts=shuffle([5,6,7,8,10]).slice(0,4); if(!opts.includes(ans))opts[0]=ans; opts=shuffle(opts);
+  return {q:`IBJJF 성인부 ${b.name}벨트 경기 시간은?`,opts:opts.map(o=>o+'분'),ans:opts.indexOf(ans),expl:`성인 ${b.name}벨트는 ${ans}분. 화이트 5 · 블루 6 · 퍼플 7 · 브라운 8 · 블랙 10분. 마스터부는 더 짧다.`,key:'time:'+b.id};
+}
+let quiz=null;
+function startQuiz(){quiz={qs:Array.from({length:10},()=>makeQ()),i:0,score:0};renderQuiz()}
+function renderQuiz(){
+  const box=$('#quizBox');
+  if(!quiz){box.innerHTML=`<h3 style="margin-top:0">룰 퀴즈 10문제</h3><p class="small muted">연령·벨트별 허용 기술, 득점, 경기 시간, 용어가 섞여 나온다. 문제는 룰북 데이터에서 그때그때 만들어지므로 매번 다르다.</p><div class="row"><button class="btn" id="qStart" type="button">시작</button>${store.best!=null?`<span class="muted small">최고 기록 ${store.best}/10</span>`:''}</div>`;$('#qStart').onclick=startQuiz;return}
+  if(quiz.i>=quiz.qs.length){
+    if(store.best==null||quiz.score>store.best){store.best=quiz.score;save()}
+    box.innerHTML=`<h3 style="margin-top:0">결과</h3><div class="big">${quiz.score}<small>/ 10</small></div><p class="small muted">${quiz.score>=9?'심판 해도 되겠다.':quiz.score>=6?'대회 나가기 전 금지 기술만 한 번 더.':'룰북 탭에서 내 벨트부터 다시 보자.'}</p><div class="row"><button class="btn" id="qAgain" type="button">다시</button></div>`;
+    $('#qAgain').onclick=startQuiz;renderWrong();return}
+  const q=quiz.qs[quiz.i];
+  box.innerHTML=`<div class="prog"><i style="width:${quiz.i/10*100}%"></i></div><p class="small muted">${quiz.i+1} / 10</p><div class="q">${esc(q.q)}</div><div class="opts">${q.opts.map((o,i)=>`<button type="button" data-i="${i}">${esc(o)}</button>`).join('')}</div><div id="qExpl"></div>`;
+  box.querySelectorAll('.opts button').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.i; box.querySelectorAll('.opts button').forEach(x=>{x.disabled=true;if(+x.dataset.i===q.ans)x.classList.add('right')});
+    if(i===q.ans){quiz.score++;if(store.wrong)delete store.wrong[q.key]}
+    else{b.classList.add('wrong');store.wrong=store.wrong||{};store.wrong[q.key]={q:q.q,a:q.opts[q.ans]}}
+    save();
+    $('#qExpl').innerHTML=`<div class="expl">${i===q.ans?'정답. ':'오답. '}${esc(q.expl)}</div><div class="row"><button class="btn" id="qNext" type="button">다음</button></div>`;
+    $('#qNext').onclick=()=>{quiz.i++;renderQuiz()};
+  });
+}
+function renderWrong(){
+  const w=store.wrong||{};const ks=Object.keys(w);
+  $('#wrongList').innerHTML=ks.length?'<ul class="list">'+ks.map(k=>`<li><span class="n">${esc(w[k].q)}<small>정답: ${esc(w[k].a)}</small></span></li>`).join('')+'</ul>':'<p class="muted small">아직 틀린 문제가 없다.</p>';
+}
+
+/* ───────────── 의견 보내기 ───────────── */
+$('#fbForm').onsubmit=async e=>{
+  e.preventDefault();
+  const msg=$('#fbMsg').value.trim(); const out=$('#fbOut');
+  if(!msg){out.textContent='내용을 적어 주세요.';return}
+  out.textContent='보내는 중…';
+  try{
+    const r=await fetch('/api/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({msg,page:'bjj-rulebook',url:location.href,ua:navigator.userAgent.slice(0,200)})});
+    if(!r.ok)throw new Error(r.status);
+    out.textContent='받았습니다. 고맙습니다.';$('#fbMsg').value='';
+  }catch(err){out.textContent='전송에 실패했다. sakyowon@sakyowon.co.kr 로 보내 주세요.'}
+};
+
+/* ───────────── 시작 ───────────── */
+renderRule();renderTech();renderCmp();renderBelt();renderTerm();renderQuiz();renderWrong();
+const h=location.hash.replace('#','');
+showTab(TAB_IDS.includes(h)?h:(store.tab||'rule'));
+</script>
+<!--ART-END-->
+<script>
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}
+</script>
+</body>
+</html>
