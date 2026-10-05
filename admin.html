@@ -228,6 +228,14 @@ table.members tr:last-child td{border-bottom:none;}
         <label for="su-org">소속</label>
         <input id="su-org" name="org">
       </div>
+      <div class="field">
+        <label for="su-tier">회원 종류</label>
+        <select id="su-tier" name="tier">
+          <option value="general">일반회원 — 바로 가입</option>
+          <option value="data">자료회원 — 정책지원관 지원시스템 (관리자 승인)</option>
+          <option value="staff">직원회원 — 그룹웨어 (관리자 승인)</option>
+        </select>
+      </div>
       <button type="submit" class="btn btn-primary">가입 신청</button>
       <div id="signup-msg" class="msg"></div>
     </form>
@@ -438,11 +446,12 @@ $('#signup-form').addEventListener('submit', async e => {
   const name = $('#su-name').value.trim(); if (name) body.name = name;
   const contact = $('#su-contact').value.trim(); if (contact) body.contact = contact;
   const org = $('#su-org').value.trim(); if (org) body.org = org;
+  body.tier = $('#su-tier').value;
   const r = await api('/api/auth/signup', { method: 'POST', body });
   btn.disabled = false;
   if (r.ok) {
     e.target.reset();
-    return showMsg($('#signup-msg'), '가입 신청이 접수되었습니다. 관리자 승인 후 로그인할 수 있습니다.', 'okay');
+    return showMsg($('#signup-msg'), r.status === 'approved' ? '일반회원으로 가입되었습니다. 바로 로그인할 수 있습니다.' : '가입 신청이 접수되었습니다. 관리자 승인 후 로그인할 수 있습니다.', 'okay');
   }
   showMsg($('#signup-msg'), errText(r), 'error');
 });
@@ -591,12 +600,13 @@ $('#fb-filters').addEventListener('click', e => {
 
 /* ── 회원 승인 탭 ── */
 const M_STATUS_KO = { pending: '대기', approved: '승인됨', rejected: '거절됨' };
-const ROLE_KO = { member: '일반', staff: '직원', admin: '이사장·관리자' };
+const ROLE_KO = { general: '일반회원', data: '자료회원', staff: '직원회원', admin: '이사장·관리자', member: '회원(옛 값)', coop: '회원협동조합(햇소자)', federation: '연합회(햇소자)' };
+const TIER_USE = { data: '정책지원관 지원시스템', staff: '그룹웨어' };
 /* 역할 변경은 서버에서 admin만 허용 — UI도 admin에게만, 자기 자신은 제외 */
 function roleCell(m) {
   const role = m.role || 'member';
   if (currentUser && currentUser.role === 'admin' && m.id !== currentUser.id) {
-    return `<select class="role-sel" data-id="${esc(m.id)}">${['member','staff','admin']
+    return `<select class="role-sel" data-id="${esc(m.id)}">${['general','data','staff','admin','coop','federation','member']
       .map(r => `<option value="${r}"${r === role ? ' selected' : ''}>${ROLE_KO[r]}</option>`).join('')}</select>`;
   }
   return esc(ROLE_KO[role] || role);
@@ -628,7 +638,7 @@ async function loadMembers() {
         <td>${esc(m.org) || '—'}</td>
         <td>${fmtDate(m.applied_at)}</td>
         <td><span class="status-pill st-${esc(m.status)}">${M_STATUS_KO[m.status] || esc(m.status)}</span></td>
-        <td>${roleCell(m)}</td>
+        <td>${roleCell(m)}${m.requested_role && m.status !== 'approved' ? `<div style="font-size:.78rem;color:#b7791f;margin-top:3px">신청: ${esc(ROLE_KO[m.requested_role] || m.requested_role)} — 승인하면 이 등급이 됩니다(${esc(TIER_USE[m.requested_role] || '')})</div>` : ''}</td>
         <td><div class="row-actions">
           ${m.status !== 'approved' ? `<button class="btn btn-sm act-approve" data-id="${esc(m.id)}" data-set="approved">승인</button>` : ''}
           ${m.status !== 'rejected' ? `<button class="btn btn-sm act-reject" data-id="${esc(m.id)}" data-set="rejected">거절</button>` : ''}

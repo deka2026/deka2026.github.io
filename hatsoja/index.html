@@ -1642,6 +1642,7 @@ function normalizeRole(r, status){
     case 'federation': case 'union': case 'fed': case '연합회':        return 'federation';
     case 'coop': case 'member': case 'village': case '회원협동조합': case '회원': return 'coop';
     case 'guest': case 'visitor': case 'pending': case '손님':         return 'guest';
+    case 'general': case 'data':                                      return 'guest';   // 2026-10-05 사교원 일반·자료회원은 햇소자에선 손님
     default: return 'coop';   // 역할 미지정 통합계정은 종전대로 회원 취급
   }
 }
