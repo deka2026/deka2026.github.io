@@ -195,8 +195,8 @@ table.members tr:last-child td{border-bottom:none;}
     <!-- 로그인 폼 -->
     <form id="login-form">
       <div class="field">
-        <label for="login-username">아이디</label>
-        <input id="login-username" name="username" autocomplete="username" required>
+        <label for="login-username">아이디 (이메일)</label>
+        <input id="login-username" name="username" inputmode="email" autocomplete="username" placeholder="name@example.com" required>
       </div>
       <div class="field">
         <label for="login-password">비밀번호</label>
@@ -209,8 +209,8 @@ table.members tr:last-child td{border-bottom:none;}
     <!-- 가입 신청 폼 -->
     <form id="signup-form" class="hidden">
       <div class="field">
-        <label for="su-username">아이디 <span style="font-weight:400;color:var(--ink-faint)">(3자 이상)</span></label>
-        <input id="su-username" name="username" autocomplete="username" required minlength="3">
+        <label for="su-username">아이디 <span style="font-weight:400;color:var(--ink-faint)">(이메일 주소)</span></label>
+        <input id="su-username" name="username" type="email" autocomplete="email" placeholder="name@example.com" required>
       </div>
       <div class="field">
         <label for="su-password">비밀번호 <span style="font-weight:400;color:var(--ink-faint)">(8자 이상)</span></label>
@@ -222,7 +222,7 @@ table.members tr:last-child td{border-bottom:none;}
       </div>
       <div class="field">
         <label for="su-contact">연락처</label>
-        <input id="su-contact" name="contact" placeholder="전화번호 또는 이메일">
+        <input id="su-contact" name="contact" placeholder="010-0000-0000">
       </div>
       <div class="field">
         <label for="su-org">소속</label>
@@ -377,7 +377,8 @@ const ERROR_TEXT = {
   not_approved: '가입 승인 대기 중입니다. 관리자 승인 후 로그인할 수 있습니다.',
   username_taken: '이미 사용 중인 아이디입니다.',
   weak_password: '비밀번호는 8자 이상이어야 합니다.',
-  invalid_username: '아이디는 3자 이상이어야 합니다.',
+  invalid_username: '아이디는 이메일 주소로 입력해 주세요.',
+  invalid_email: '아이디는 이메일 주소로 입력해 주세요.',
   forbidden: '관리자 권한이 필요합니다.',
 };
 function errText(r, fallback) {
@@ -439,8 +440,10 @@ $('#signup-form').addEventListener('submit', async e => {
   e.preventDefault();
   const btn = e.target.querySelector('[type=submit]'); btn.disabled = true;
   clearMsg($('#signup-msg'));
+  const email = $('#su-username').value.trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { btn.disabled = false; return showMsg($('#signup-msg'), '아이디는 이메일 주소로 입력해 주세요.', 'error'); }
   const body = {
-    username: $('#su-username').value.trim(),
+    username: email,
     password: $('#su-password').value,
   };
   const name = $('#su-name').value.trim(); if (name) body.name = name;
