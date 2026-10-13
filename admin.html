@@ -205,6 +205,7 @@ table.members tr:last-child td{border-bottom:none;}
       </div>
       <button type="submit" class="btn btn-primary">로그인</button>
       <div id="login-msg" class="msg"></div>
+      <p class="msg" style="margin-top:6px"><a href="#" id="forgot-link">비밀번호를 잊으셨나요?</a> 가입 이메일로 임시 비밀번호를 보냅니다.</p>
     </form>
 
     <!-- 가입 신청 폼 -->
@@ -503,6 +504,14 @@ document.querySelectorAll('[data-switch]').forEach(a => a.addEventListener('clic
   clearMsg($('#login-msg')); clearMsg($('#signup-msg'));
 }));
 
+document.addEventListener('click', async e => {
+  const fl = e.target.closest('#forgot-link'); if(!fl) return;
+  e.preventDefault();
+  const email = ($('#login-username').value || '').trim() || prompt('가입한 이메일:') || '';
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return showMsg($('#login-msg'), '이메일 주소를 입력해 주세요.', 'error');
+  await api('/api/auth/forgot', { method:'POST', body:{ email: email.trim().toLowerCase() } });
+  showMsg($('#login-msg'), '가입된 이메일이면 임시 비밀번호를 보냈습니다. 메일함을 확인해 주세요.', 'okay');
+});
 $('#login-form').addEventListener('submit', async e => {
   e.preventDefault();
   const btn = e.target.querySelector('[type=submit]'); btn.disabled = true;
