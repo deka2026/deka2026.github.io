@@ -195,7 +195,7 @@ table.members tr:last-child td{border-bottom:none;}
     <!-- 로그인 폼 -->
     <form id="login-form">
       <div class="field">
-        <label for="login-username">아이디 (이메일)</label>
+        <label for="login-username">이메일 <span style="font-weight:400;color:var(--ink-faint)">(옛 아이디도 당분간 됩니다)</span></label>
         <input id="login-username" name="username" inputmode="email" autocomplete="username" placeholder="name@example.com" required>
       </div>
       <div class="field">
@@ -430,7 +430,7 @@ async function api(path, opts = {}) {
 }
 
 const ERROR_TEXT = {
-  invalid_credentials: '아이디 또는 비밀번호가 올바르지 않습니다.',
+  invalid_credentials: '이메일(또는 아이디) 또는 비밀번호가 올바르지 않습니다. 비밀번호를 잊으셨으면 통합관리자에게 임시 비밀번호를 요청하세요.',
   not_approved: '가입 승인 대기 중입니다. 관리자 승인 후 로그인할 수 있습니다.',
   username_taken: '이미 사용 중인 아이디입니다.',
   weak_password: '비밀번호는 8자 이상이어야 합니다.',
