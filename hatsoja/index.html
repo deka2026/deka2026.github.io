@@ -1862,7 +1862,12 @@ function showGlossary(){
 }
 
 function applyUnifiedUser(user, {redirect = true, silent = false} = {}){
-  const role = normalizeRole(user.role, user.status);   // admin·staff→관리자 / federation→연합회 / 그 외→회원협동조합 / 승인 전→손님
+  let role = normalizeRole(user.role, user.status);
+  // 2026-10-13 통합 개편: 매니저(staff)는 햇소자 회원이 아니다 → 「햇소자관리」 체크권한이 있을 때만 관리자, 없으면 손님.
+  const perms = user.perms || [];
+  if(String(user.role).toLowerCase() === 'staff' || String(user.role).toLowerCase() === 'manager'){
+    role = perms.includes('햇소자관리') ? 'admin' : 'guest';
+  }
   setUser({email: user.username, name: user.name || user.username, role,
            village: '', loginAt: new Date().toISOString(), unified: true});
   if(redirect) location.hash = roleHome(role);
