@@ -209,33 +209,45 @@ table.members tr:last-child td{border-bottom:none;}
     <!-- 가입 신청 폼 -->
     <form id="signup-form" class="hidden">
       <div class="field">
-        <label for="su-username">아이디 <span style="font-weight:400;color:var(--ink-faint)">(이메일 주소)</span></label>
-        <input id="su-username" name="username" type="email" autocomplete="email" placeholder="name@example.com" required>
+        <label for="su-username">이메일 <span style="font-weight:400;color:var(--ink-faint)">(로그인 아이디)</span></label>
+        <input id="su-username" name="email" type="email" autocomplete="email" placeholder="name@example.com" required>
       </div>
       <div class="field">
         <label for="su-password">비밀번호 <span style="font-weight:400;color:var(--ink-faint)">(8자 이상)</span></label>
         <input id="su-password" name="password" type="password" autocomplete="new-password" required minlength="8">
       </div>
       <div class="field">
-        <label for="su-name">이름</label>
-        <input id="su-name" name="name">
+        <label for="su-name">이름 <span style="color:var(--danger)">*</span></label>
+        <input id="su-name" name="name" autocomplete="name" required>
       </div>
       <div class="field">
-        <label for="su-contact">연락처</label>
-        <input id="su-contact" name="contact" placeholder="010-0000-0000">
+        <label>활동지역 <span style="color:var(--danger)">*</span></label>
+        <div style="display:flex;gap:6px">
+          <select id="su-sido" style="flex:1"><option value="">광역</option></select>
+          <select id="su-sigungu" style="flex:1"><option value="">시군구</option></select>
+        </div>
       </div>
       <div class="field">
-        <label for="su-org">소속</label>
-        <input id="su-org" name="org">
+        <label for="su-contact">전화번호 <span id="su-contact-req" style="font-weight:400;color:var(--ink-faint)">(일반이용자는 선택)</span></label>
+        <input id="su-contact" name="contact" inputmode="tel" placeholder="010-0000-0000">
       </div>
       <div class="field">
-        <label for="su-tier">회원 종류</label>
+        <label for="su-org">소속 <span style="font-weight:400;color:var(--ink-faint)">(선택)</span></label>
+        <input id="su-org" name="org" placeholder="마을·조합·기관">
+      </div>
+      <div class="field">
+        <label for="su-tier">회원 등급</label>
         <select id="su-tier" name="tier">
-          <option value="general">일반회원 — 바로 가입</option>
-          <option value="data">자료회원 — 정책지원관 지원시스템 (관리자 승인)</option>
-          <option value="staff">직원회원 — 그룹웨어 (관리자 승인)</option>
+          <option value="general">일반이용자 — 바로 가입</option>
+          <option value="coop">조합회원 — 햇빛소득마을 조합 (승인 후)</option>
+          <option value="federation">연합회회원 — 햇빛소득마을 연합회 (승인 후)</option>
+          <option value="staff">매니저회원 — 사교원 그룹웨어 (통합관리자 승인 후)</option>
         </select>
       </div>
+      <label class="field" style="display:flex;gap:8px;align-items:flex-start;font-size:13px;cursor:pointer">
+        <input type="checkbox" id="su-consent" style="margin-top:4px">
+        <span>(필수) 통합 계정 발급을 위한 개인정보 수집·이용에 동의합니다. <a href="account-privacy.html" target="_blank" rel="noopener">처리방침 보기</a></span>
+      </label>
       <button type="submit" class="btn btn-primary">가입 신청</button>
       <div id="signup-msg" class="msg"></div>
     </form>
@@ -266,7 +278,7 @@ table.members tr:last-child td{border-bottom:none;}
 
   <div class="tabs">
     <button class="tab-btn active" data-tab="sites">사이트 관리</button>
-    <button class="tab-btn" data-tab="members">회원 승인 <span id="cnt-members" class="cnt hidden"></span></button>
+    <button class="tab-btn" data-tab="members">회원·권한 <span id="cnt-members" class="cnt hidden"></span></button>
     <button class="tab-btn" data-tab="feedback">개선의견 <span id="cnt-feedback" class="cnt hidden"></span></button>
     <button class="tab-btn hidden" data-tab="hr" id="tab-btn-hr">인사기록</button>
   </div>
@@ -276,19 +288,26 @@ table.members tr:last-child td{border-bottom:none;}
     <div class="panel">
       <div id="sites-body" class="loading">불러오는 중…</div>
       <div class="site-note">
-        콘텐츠 수정·새 페이지·디자인 변경은 <strong>데카</strong>에게 지시하시면 처리됩니다.
-        서버·배포·키 관련은 <strong>지미(본부)</strong> 담당입니다.
+        콘텐츠 수정·새 페이지·디자인 변경은 <strong>데카</strong>에게 지시하시면 처리됩니다(배포까지 데카가 합니다). 품앗이 쪽 터널·DNS만 <strong>지미</strong> 담당입니다.
       </div>
     </div>
   </div>
 
-  <!-- 회원 승인 탭 -->
+  <!-- 회원·권한 탭 -->
   <div id="tab-members" class="hidden">
-    <div class="filters" id="member-filters">
+    <div class="filters" id="member-filters" style="align-items:center">
       <button class="chip active" data-status="pending">대기</button>
       <button class="chip" data-status="approved">승인됨</button>
       <button class="chip" data-status="rejected">거절됨</button>
       <button class="chip" data-status="">전체</button>
+      <select id="member-role" style="margin-left:6px;padding:5px 8px;border:1px solid var(--line);border-radius:8px;font-size:13px">
+        <option value="">모든 등급</option>
+        <option value="admin">통합관리자</option><option value="staff">매니저회원</option><option value="federation">연합회회원</option><option value="coop">조합회원</option><option value="general">일반이용자</option>
+      </select>
+      <input id="member-q" placeholder="이름·이메일·연락처·소속 검색" style="margin-left:auto;min-width:220px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px">
+    </div>
+    <div class="site-note" style="border:1px solid var(--line-soft);border-radius:var(--radius-sm);margin-bottom:12px">
+      등급은 <strong>통합관리자 › 매니저 › 연합회 › 조합 › 일반이용자</strong> 순입니다. 매니저의 그룹웨어·관리 기능과 「정책지원관 지원시스템」은 등급이 아니라 <strong>체크권한</strong>으로 엽니다 — 각 줄의 「권한」을 눌러 체크하세요. 등급 변경·매니저 승인·비밀번호 초기화·삭제는 통합관리자만 할 수 있습니다.
     </div>
     <div class="panel">
       <div id="members-body" class="loading">불러오는 중…</div>
@@ -322,6 +341,44 @@ table.members tr:last-child td{border-bottom:none;}
       <iframe id="hr-frame" data-src="https://hr.sakyowon.co.kr/" title="사교원 인사기록"
               style="display:block;width:100%;height:78vh;border:0;background:#fff"></iframe>
     </div>
+  </div>
+</div>
+
+<!-- ══ 이메일 등록 모달 (옛 아이디 회원의 첫 로그인) ══ -->
+<div id="email-modal" class="modal-back hidden">
+  <div class="modal">
+    <h2>로그인 이메일 등록</h2>
+    <p style="margin:-4px 0 12px;font-size:13px;color:var(--ink-soft)">2026-10-13부터 로그인 아이디가 <strong>이메일</strong>로 바뀝니다. 지금 아이디(<span id="email-cur-username"></span>)로도 당분간 들어올 수 있지만, 이메일을 한 번 등록해 두면 모든 사교원 사이트에서 같은 이메일로 로그인합니다.</p>
+    <form id="email-form">
+      <div class="field"><label for="em-email">이메일</label><input id="em-email" type="email" autocomplete="email" required placeholder="name@example.com"></div>
+      <div class="field"><label for="em-pw">현재 비밀번호 (본인 확인)</label><input id="em-pw" type="password" autocomplete="current-password" required></div>
+      <div id="em-msg" class="msg"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="em-later">나중에</button>
+        <button type="submit" class="btn btn-primary">등록</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ══ 회원 정보 편집 모달 (통합관리자) ══ -->
+<div id="edit-modal" class="modal-back hidden">
+  <div class="modal">
+    <h2>회원 정보 편집</h2>
+    <form id="edit-form">
+      <input type="hidden" id="ed-id">
+      <div class="field"><label for="ed-name">이름</label><input id="ed-name"></div>
+      <div class="field"><label for="ed-email">이메일 (로그인 아이디)</label><input id="ed-email" type="email"></div>
+      <div class="field"><label for="ed-contact">전화번호</label><input id="ed-contact" inputmode="tel"></div>
+      <div class="field"><label>활동지역</label><div style="display:flex;gap:6px"><select id="ed-sido" style="flex:1"></select><select id="ed-sigungu" style="flex:1"></select></div></div>
+      <div class="field"><label for="ed-org">소속</label><input id="ed-org"></div>
+      <div class="field"><label for="ed-memo">메모</label><input id="ed-memo"></div>
+      <div id="ed-msg" class="msg"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="ed-cancel">닫기</button>
+        <button type="submit" class="btn btn-primary">저장</button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -377,10 +434,36 @@ const ERROR_TEXT = {
   not_approved: '가입 승인 대기 중입니다. 관리자 승인 후 로그인할 수 있습니다.',
   username_taken: '이미 사용 중인 아이디입니다.',
   weak_password: '비밀번호는 8자 이상이어야 합니다.',
-  invalid_username: '아이디는 이메일 주소로 입력해 주세요.',
-  invalid_email: '아이디는 이메일 주소로 입력해 주세요.',
-  forbidden: '관리자 권한이 필요합니다.',
+  invalid_username: '로그인 아이디는 이메일 주소입니다.',
+  invalid_email: '이메일 주소 형식이 아닙니다.',
+  email_taken: '이미 가입된 이메일입니다.',
+  name_required: '이름을 적어 주세요.',
+  region_required: '활동지역(광역·시군구)을 골라 주세요.',
+  contact_required: '승인 안내를 받을 전화번호를 적어 주세요.',
+  invalid_contact: '전화번호 형식이 올바르지 않습니다 (예: 010-0000-0000).',
+  consent_required: '개인정보 수집·이용에 동의해 주세요.',
+  bad_tier: '회원 등급을 골라 주세요.',
+  forbidden: '권한이 없습니다. 통합관리자만 할 수 있는 작업이거나, 체크권한이 필요합니다.',
 };
+
+/* ── 지역 목록 (/api/regions) ── */
+let REGIONS = null;
+async function loadRegions() {
+  if (REGIONS) return REGIONS;
+  const r = await api('/api/regions');
+  REGIONS = (r.ok && r.regions) || {};
+  return REGIONS;
+}
+async function fillRegionSelects(sidoEl, sigEl, sido = '', sigungu = '') {
+  const R = await loadRegions();
+  sidoEl.innerHTML = '<option value="">광역</option>' + Object.keys(R).map(k => `<option value="${esc(k)}"${k === sido ? ' selected' : ''}>${esc(k)}</option>`).join('');
+  const fillSig = () => {
+    const list = R[sidoEl.value] || [];
+    sigEl.innerHTML = '<option value="">시군구</option>' + list.map(k => `<option value="${esc(k)}"${k === sigungu ? ' selected' : ''}>${esc(k)}</option>`).join('');
+  };
+  sidoEl.onchange = () => { sigungu = ''; fillSig(); };
+  fillSig();
+}
 function errText(r, fallback) {
   if (r.status === 429) return '요청이 잠시 제한되었습니다. 1분 후 다시 시도해 주세요.';
   return ERROR_TEXT[r.error] || fallback || '처리하지 못했습니다. 잠시 후 다시 시도해 주세요.';
@@ -436,25 +519,27 @@ $('#login-form').addEventListener('submit', async e => {
   showMsg($('#login-msg'), errText(r), 'error');
 });
 
+fillRegionSelects($('#su-sido'), $('#su-sigungu'));
+$('#su-tier').addEventListener('change', () => { $('#su-contact-req').textContent = $('#su-tier').value === 'general' ? '(일반이용자는 선택)' : '(필수)'; });
 $('#signup-form').addEventListener('submit', async e => {
   e.preventDefault();
   const btn = e.target.querySelector('[type=submit]'); btn.disabled = true;
   clearMsg($('#signup-msg'));
   const email = $('#su-username').value.trim().toLowerCase();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { btn.disabled = false; return showMsg($('#signup-msg'), '아이디는 이메일 주소로 입력해 주세요.', 'error'); }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { btn.disabled = false; return showMsg($('#signup-msg'), '이메일 주소 형식이 아닙니다.', 'error'); }
   const body = {
-    username: email,
+    email, username: email,
     password: $('#su-password').value,
+    name: $('#su-name').value.trim(),
+    region_sido: $('#su-sido').value, region_sigungu: $('#su-sigungu').value,
+    contact: $('#su-contact').value.trim(), org: $('#su-org').value.trim(),
+    tier: $('#su-tier').value, consent: $('#su-consent').checked,
   };
-  const name = $('#su-name').value.trim(); if (name) body.name = name;
-  const contact = $('#su-contact').value.trim(); if (contact) body.contact = contact;
-  const org = $('#su-org').value.trim(); if (org) body.org = org;
-  body.tier = $('#su-tier').value;
   const r = await api('/api/auth/signup', { method: 'POST', body });
   btn.disabled = false;
   if (r.ok) {
-    e.target.reset();
-    return showMsg($('#signup-msg'), r.status === 'approved' ? '일반회원으로 가입되었습니다. 바로 로그인할 수 있습니다.' : '가입 신청이 접수되었습니다. 관리자 승인 후 로그인할 수 있습니다.', 'okay');
+    e.target.reset(); fillRegionSelects($('#su-sido'), $('#su-sigungu'));
+    return showMsg($('#signup-msg'), r.status === 'approved' ? '일반이용자로 가입되었습니다. 바로 로그인할 수 있습니다.' : '가입 신청이 접수되었습니다. 승인되면 로그인할 수 있습니다.', 'okay');
   }
   showMsg($('#signup-msg'), errText(r), 'error');
 });
@@ -467,14 +552,27 @@ let fbStatus = '미확인';
 function enterDash(user) {
   currentUser = user;
   $('#user-name').textContent = user.name || '';
-  $('#user-role').textContent = user.role === 'admin' ? '이사장·관리자' : '직원';
-  $('#tab-btn-hr').classList.toggle('hidden', user.role !== 'admin'); // 인사기록은 이사장·관리자만
+  $('#user-role').textContent = user.role_ko || (user.role === 'admin' ? '통합관리자' : '매니저회원');
+  const perms = user.perms || [];
+  $('#tab-btn-hr').classList.toggle('hidden', !(user.role === 'admin' || perms.includes('인사열람'))); // 인사기록
   show('dash-view');
   loadSites();
   loadMembers();
   loadFeedback();
   checkTempPassword();
+  if (user.email_missing) {
+    $('#email-cur-username').textContent = user.username;
+    $('#email-form').reset(); clearMsg($('#em-msg'));
+    $('#email-modal').classList.remove('hidden');
+  }
 }
+$('#em-later').addEventListener('click', () => $('#email-modal').classList.add('hidden'));
+$('#email-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const r = await api('/api/auth/set-email', { method: 'POST', body: { email: $('#em-email').value.trim().toLowerCase(), password: $('#em-pw').value } });
+  if (r.ok) { showMsg($('#em-msg'), '등록했습니다. 다음부터 이 이메일로 로그인하세요.', 'okay'); if (currentUser) currentUser.email_missing = false; setTimeout(() => $('#email-modal').classList.add('hidden'), 1200); return; }
+  showMsg($('#em-msg'), errText(r), 'error');
+});
 
 /* 임시 비밀번호로 들어왔으면 바꾸는 창을 바로 띄운다 (2026-10-05) */
 async function checkTempPassword() {
@@ -487,16 +585,21 @@ async function checkTempPassword() {
 
 /* ── 사이트 관리 탭 ── */
 const SITES = [
-  { name: '사교원 메인', desc: '법인 소개 · 문의 접수 · 햇빛소득마을 업무도우미',
-    url: 'https://sakyowon.poomasi.org/', repo: 'haeory-cyber/sakyowon-site',
-    manage: '회원 승인 · 개선의견 탭에서 관리' },
-  { name: '사교원 허브', desc: '사교원 관련 사이트 모음 대문 (sakyowon.co.kr)',
-    url: 'https://sakyowon.co.kr/', repo: 'deka2026/sakyowon-hub' },
-  { name: '연대지능 공동위키', desc: '지식베이스 (Quartz) — 문서 검토·머지는 데카 담당',
-    url: 'https://wiki.poomasi.org/', repo: 'deka2026/sakyowon-wiki' },
+  { name: '사교원 홈페이지', desc: '소개 · 연구실 · 교육 · 쇼핑 · 문의 — 홈페이지 관리자(회계·세무·인사·자산·가족 메신저)',
+    url: 'https://home.sakyowon.co.kr/', repo: 'haeory-cyber/sakyowon-site', adminUrl: 'https://home.sakyowon.co.kr/#/admin' },
+  { name: '사교원 허브', desc: '통합 첫 화면 — 메뉴 트리·AI 대화창·통합 계정 (sakyowon.co.kr)',
+    url: 'https://sakyowon.co.kr/', repo: 'deka2026/deka2026.github.io' },
+  { name: '연대지능활동가 아카데미', desc: '실습 15단계 · 학습 7단계 · 자격증 · 지식 검증 게임',
+    url: 'https://sakyowon.co.kr/academy-site/', repo: 'deka2026/academy-site' },
+  { name: '연대지능 공동위키', desc: '품앗이 지식베이스 — 첫 화면 연결 단추만, 별도 운영',
+    url: 'https://wiki.poomasi.org/', repo: '' },
+  { name: '사교원 위키', desc: '사교원 공개 위키(Quartz) — 메타-기록은 2026-10-13부터 비공개',
+    url: 'https://sakyowon.co.kr/sakyowon-wiki/', repo: 'deka2026/sakyowon-wiki-site' },
+  { name: '주짓수 룰북', desc: '통합관리자 전용 · 외부 비공개 (2026-10-13)',
+    url: 'https://sakyowon.co.kr/bjj/', repo: '' },
   { name: '망남마을협동조합', desc: '마을 협동조합 홍보 사이트',
     url: 'https://sakyowon.co.kr/mangnam-coop/', repo: 'deka2026/mangnam-coop' },
-  { name: '망남 어촌신활력', desc: '어촌신활력증진사업 안내·소식·업무자동화 — 자체서버 본편 가동, 통합 계정으로 관리자 접속',
+  { name: '어촌신활력증진사업 (망남·양양)', desc: '안내·소식·기획안·KPI·예산 집행실적·주민 관계도·문자 — 양양 카테고리는 개편 4-2단계에서 채움',
     url: 'https://vitality.sakyowon.co.kr/', repo: 'deka2026/mangnam-vitality',
     adminUrl: 'https://vitality.sakyowon.co.kr/admin' },
   { name: '고향사랑기부제', desc: '27개 시군구 정보 — 2주 1회 정기 갱신',
@@ -601,31 +704,47 @@ $('#fb-filters').addEventListener('click', e => {
   loadFeedback();
 });
 
-/* ── 회원 승인 탭 ── */
+/* ── 회원·권한 탭 (2026-10-13 통합 계정 2판) ── */
 const M_STATUS_KO = { pending: '대기', approved: '승인됨', rejected: '거절됨' };
-const ROLE_KO = { general: '일반회원', data: '자료회원', staff: '직원회원', admin: '이사장·관리자', member: '회원(옛 값)', coop: '회원협동조합(햇소자)', federation: '연합회(햇소자)' };
-const TIER_USE = { data: '정책지원관 지원시스템', staff: '그룹웨어' };
-/* 역할 변경은 서버에서 admin만 허용 — UI도 admin에게만, 자기 자신은 제외 */
+const ROLE_KO = { admin: '통합관리자', staff: '매니저회원', federation: '연합회회원', coop: '조합회원', general: '일반이용자' };
+const ROLE_LIST = ['admin', 'staff', 'federation', 'coop', 'general'];
+const TIER_USE = { staff: '그룹웨어(매니저)', coop: '햇소자 조합 메뉴', federation: '햇소자 연합회 메뉴', general: '홈페이지·AI' };
+let PERM_CATALOG = null;   // {perms:[{code,group,label}], nonstaff:[...]}
+async function loadPermCatalog() {
+  if (PERM_CATALOG) return PERM_CATALOG;
+  const r = await api('/api/admin/perms');
+  PERM_CATALOG = r.ok ? r : { perms: [], nonstaff: [] };
+  return PERM_CATALOG;
+}
+const isAdmin = () => currentUser && currentUser.role === 'admin';
+const canApprove = () => isAdmin() || (currentUser && (currentUser.perms || []).includes('회원승인'));
+const canGrant = () => isAdmin() || (currentUser && (currentUser.perms || []).includes('권한부여'));
+
 function roleCell(m) {
-  const role = m.role || 'member';
-  if (currentUser && currentUser.role === 'admin' && m.id !== currentUser.id) {
-    return `<select class="role-sel" data-id="${esc(m.id)}">${['general','data','staff','admin','coop','federation','member']
+  const role = m.role || 'general';
+  if (isAdmin() && m.id !== currentUser.id) {
+    return `<select class="role-sel" data-id="${esc(m.id)}">${ROLE_LIST
       .map(r => `<option value="${r}"${r === role ? ' selected' : ''}>${ROLE_KO[r]}</option>`).join('')}</select>`;
   }
   return esc(ROLE_KO[role] || role);
 }
 const fmtDate = s => { if (!s) return '—'; const d = new Date(s); return isNaN(d) ? esc(s) : `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`; };
+let memberQ = '', memberRole = '', _qTimer = null;
+$('#member-q').addEventListener('input', () => { clearTimeout(_qTimer); _qTimer = setTimeout(() => { memberQ = $('#member-q').value.trim(); loadMembers(); }, 300); });
+$('#member-role').addEventListener('change', () => { memberRole = $('#member-role').value; loadMembers(); });
 
 async function loadMembers() {
   const box = $('#members-body');
   box.className = 'loading'; box.textContent = '불러오는 중…';
-  const q = memberStatus ? `?status=${memberStatus}` : '';
-  const r = await api('/api/admin/members' + q);
+  const qs = new URLSearchParams();
+  if (memberStatus) qs.set('status', memberStatus);
+  if (memberQ) qs.set('q', memberQ);
+  if (memberRole) qs.set('role', memberRole);
+  const r = await api('/api/admin/members' + (qs.toString() ? '?' + qs : ''));
   if (!guard(r)) return;
-  if (!r.ok) { box.className = 'empty'; box.textContent = errText(r); return; }
+  if (!r.ok) { box.className = 'empty'; box.textContent = r.status === 403 ? '회원 목록은 통합관리자이거나 「회원열람·회원승인」 체크권한이 있는 매니저만 볼 수 있습니다.' : errText(r); return; }
   const items = r.items || [];
-  // 대기 건수 배지
-  if (memberStatus === 'pending') {
+  if (memberStatus === 'pending' && !memberQ && !memberRole) {
     const cnt = $('#cnt-members');
     cnt.textContent = items.length;
     cnt.classList.toggle('hidden', items.length === 0);
@@ -633,21 +752,28 @@ async function loadMembers() {
   if (!items.length) { box.className = 'empty'; box.textContent = '해당하는 회원이 없습니다.'; return; }
   box.className = '';
   box.innerHTML = `<table class="members">
-    <thead><tr><th>이름</th><th>연락처</th><th>소속</th><th>신청일</th><th>상태</th><th>역할</th><th>처리</th></tr></thead>
+    <thead><tr><th>이름 · 이메일</th><th>지역 · 연락처</th><th>소속</th><th>가입일</th><th>상태</th><th>등급</th><th>처리</th></tr></thead>
     <tbody>${items.map(m => `
-      <tr>
-        <td><strong>${esc(m.name) || '—'}</strong>${m.username ? `<div style="font-size:.78rem;color:#888">${esc(m.username)}</div>` : ''}</td>
-        <td>${esc(m.contact) || '—'}</td>
-        <td>${esc(m.org) || '—'}</td>
+      <tr data-row="${esc(m.id)}">
+        <td><strong>${esc(m.name) || '—'}</strong><div style="font-size:.78rem;color:#888">${esc(m.email || m.username)}${m.email ? '' : ' <span style="color:#b7791f">(이메일 미등록)</span>'}</div></td>
+        <td>${esc([m.region_sido, m.region_sigungu].filter(Boolean).join(' ')) || '—'}<div style="font-size:.78rem;color:#888">${esc(m.contact) || ''}</div></td>
+        <td>${esc(m.org) || '—'}${m.memo ? `<div style="font-size:.78rem;color:#888">메모: ${esc(m.memo)}</div>` : ''}</td>
         <td>${fmtDate(m.applied_at)}</td>
         <td><span class="status-pill st-${esc(m.status)}">${M_STATUS_KO[m.status] || esc(m.status)}</span></td>
-        <td>${roleCell(m)}${m.requested_role && m.status !== 'approved' ? `<div style="font-size:.78rem;color:#b7791f;margin-top:3px">신청: ${esc(ROLE_KO[m.requested_role] || m.requested_role)} — 승인하면 이 등급이 됩니다(${esc(TIER_USE[m.requested_role] || '')})</div>` : ''}</td>
+        <td>${roleCell(m)}${m.requested_role && m.status !== 'approved' ? `<div style="font-size:.78rem;color:#b7791f;margin-top:3px">신청: ${esc(ROLE_KO[m.requested_role] || m.requested_role)} — 승인하면 이 등급(${esc(TIER_USE[m.requested_role] || '')})</div>` : ''}
+          ${m.role !== 'admin' ? `<div style="font-size:.76rem;color:#666;margin-top:3px">권한 ${(m.perms || []).length}개${(m.perms || []).length ? ': ' + esc((m.perms || []).join('·')) : ''}</div>` : ''}</td>
         <td><div class="row-actions">
-          ${m.status !== 'approved' ? `<button class="btn btn-sm act-approve" data-id="${esc(m.id)}" data-set="approved">승인</button>` : ''}
-          ${m.status !== 'rejected' ? `<button class="btn btn-sm act-reject" data-id="${esc(m.id)}" data-set="rejected">거절</button>` : ''}
-          ${m.status !== 'pending' ? `<button class="btn btn-sm act-pending" data-id="${esc(m.id)}" data-set="pending">대기로</button>` : ''}
+          ${canApprove() && m.status !== 'approved' ? `<button class="btn btn-sm act-approve" data-id="${esc(m.id)}" data-set="approved">승인</button>` : ''}
+          ${canApprove() && m.status !== 'rejected' && m.role !== 'admin' ? `<button class="btn btn-sm act-reject" data-id="${esc(m.id)}" data-set="rejected">거절</button>` : ''}
+          ${canApprove() && m.status !== 'pending' && m.role !== 'admin' ? `<button class="btn btn-sm act-pending" data-id="${esc(m.id)}" data-set="pending">대기로</button>` : ''}
+          ${m.role !== 'admin' && (isAdmin() || canGrant()) ? `<button class="btn btn-sm btn-ghost act-perms" data-id="${esc(m.id)}" data-role="${esc(m.role)}">권한</button>` : ''}
+          ${isAdmin() ? `<button class="btn btn-sm btn-ghost act-edit" data-id="${esc(m.id)}">편집</button>` : ''}
+          ${isAdmin() && m.id !== currentUser.id ? `<button class="btn btn-sm btn-ghost act-reset" data-id="${esc(m.id)}" title="임시 비밀번호 발급">비번 초기화</button>` : ''}
+          ${isAdmin() && m.role !== 'admin' ? `<button class="btn btn-sm act-reject act-delete" data-id="${esc(m.id)}">삭제</button>` : ''}
         </div></td>
-      </tr>`).join('')}</tbody></table>`;
+      </tr>
+      <tr class="perm-row hidden" data-perm-row="${esc(m.id)}"><td colspan="7" style="background:var(--paper-soft)"></td></tr>`).join('')}</tbody></table>`;
+  window._members = Object.fromEntries(items.map(m => [String(m.id), m]));
 }
 
 $('#members-body').addEventListener('change', async e => {
@@ -659,7 +785,79 @@ $('#members-body').addEventListener('change', async e => {
   loadMembers();
 });
 
+async function renderPermPanel(id, role) {
+  const row = $(`[data-perm-row="${id}"]`);
+  if (!row.classList.contains('hidden')) { row.classList.add('hidden'); return; }
+  const cat = await loadPermCatalog();
+  const cur = await api(`/api/admin/members/${id}/perms`);
+  const have = new Set((cur.ok && cur.perms) || []);
+  const allowed = role === 'staff' ? cat.perms : cat.perms.filter(p => cat.nonstaff.includes(p.code));
+  const editable = p => isAdmin() || (canGrant() && p.code === '정책지원관');
+  const groups = {};
+  allowed.forEach(p => { (groups[p.group] = groups[p.group] || []).push(p); });
+  const cell = row.querySelector('td');
+  cell.innerHTML = `<div style="padding:10px 6px">
+    <div style="font-size:13px;color:var(--ink-soft);margin-bottom:8px">${role === 'staff' ? '매니저 체크권한 — 체크한 것만 열립니다.' : '이 등급에는 「정책지원관 지원시스템」 체크권한만 줄 수 있습니다.'}</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px">
+    ${Object.entries(groups).map(([g, ps]) => `<div style="background:#fff;border:1px solid var(--line-soft);border-radius:8px;padding:8px 10px">
+      <div style="font-weight:600;font-size:13px;margin-bottom:4px">${esc(g)}</div>
+      ${ps.map(p => `<label style="display:flex;gap:6px;align-items:flex-start;font-size:13px;margin:3px 0;cursor:pointer"><input type="checkbox" class="perm-chk" value="${esc(p.code)}"${have.has(p.code) ? ' checked' : ''}${editable(p) ? '' : ' disabled'} style="margin-top:3px"><span><strong>${esc(p.code)}</strong> <span style="color:#777">${esc(p.label)}</span></span></label>`).join('')}
+    </div>`).join('')}
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
+      <button class="btn btn-primary btn-sm perm-save" data-id="${esc(id)}">권한 저장</button>
+      <button class="btn btn-ghost btn-sm perm-close" data-id="${esc(id)}">닫기</button>
+      <span class="msg perm-msg"></span>
+    </div></div>`;
+  row.classList.remove('hidden');
+}
+
 $('#members-body').addEventListener('click', async e => {
+  const pb = e.target.closest('.act-perms'); if (pb) return renderPermPanel(pb.dataset.id, pb.dataset.role);
+  const pc = e.target.closest('.perm-close'); if (pc) { $(`[data-perm-row="${pc.dataset.id}"]`).classList.add('hidden'); return; }
+  const ps = e.target.closest('.perm-save');
+  if (ps) {
+    const row = $(`[data-perm-row="${ps.dataset.id}"]`);
+    const perms = [...row.querySelectorAll('.perm-chk:checked')].map(c => c.value);
+    ps.disabled = true;
+    const r = await api(`/api/admin/members/${ps.dataset.id}/perms`, { method: 'PUT', body: { perms } });
+    ps.disabled = false;
+    if (!guard(r)) return;
+    const msg = row.querySelector('.perm-msg');
+    if (!r.ok) { showMsg(msg, errText(r), 'error'); return; }
+    showMsg(msg, `저장했습니다 (${(r.perms || []).length}개).`, 'okay');
+    setTimeout(loadMembers, 700);
+    return;
+  }
+  const ed = e.target.closest('.act-edit');
+  if (ed) {
+    const m = (window._members || {})[ed.dataset.id]; if (!m) return;
+    $('#ed-id').value = m.id; $('#ed-name').value = m.name || ''; $('#ed-email').value = m.email || '';
+    $('#ed-contact').value = m.contact || ''; $('#ed-org').value = m.org || ''; $('#ed-memo').value = m.memo || '';
+    await fillRegionSelects($('#ed-sido'), $('#ed-sigungu'), m.region_sido || '', m.region_sigungu || '');
+    clearMsg($('#ed-msg')); $('#edit-modal').classList.remove('hidden');
+    return;
+  }
+  const rs = e.target.closest('.act-reset');
+  if (rs) {
+    const m = (window._members || {})[rs.dataset.id] || {};
+    if (!confirm(`${m.name || m.username} 님에게 임시 비밀번호를 발급할까요? 기존 비밀번호와 로그인 세션은 모두 끊깁니다.`)) return;
+    const r = await api(`/api/admin/members/${rs.dataset.id}/reset-password`, { method: 'POST', body: {} });
+    if (!guard(r)) return;
+    if (!r.ok) return alert(errText(r));
+    prompt('임시 비밀번호입니다. 이 창을 닫으면 다시 볼 수 없습니다 — 본인에게 전해 주세요.', r.temp_password);
+    return;
+  }
+  const dl = e.target.closest('.act-delete');
+  if (dl) {
+    const m = (window._members || {})[dl.dataset.id] || {};
+    if (!confirm(`${m.name || m.username} (${m.email || m.username}) 계정을 삭제할까요? 되돌릴 수 없습니다.`)) return;
+    const r = await api(`/api/admin/members/${dl.dataset.id}`, { method: 'DELETE' });
+    if (!guard(r)) return;
+    if (!r.ok) return alert(errText(r));
+    loadMembers();
+    return;
+  }
   const btn = e.target.closest('button[data-set]'); if (!btn) return;
   const status = btn.dataset.set;
   const body = { status };
@@ -673,6 +871,18 @@ $('#members-body').addEventListener('click', async e => {
   if (!guard(r)) return;
   if (!r.ok) { alert(errText(r)); btn.disabled = false; return; }
   loadMembers();
+});
+
+$('#ed-cancel').addEventListener('click', () => $('#edit-modal').classList.add('hidden'));
+$('#edit-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const body = { name: $('#ed-name').value.trim(), email: $('#ed-email').value.trim().toLowerCase(), contact: $('#ed-contact').value.trim(),
+    org: $('#ed-org').value.trim(), memo: $('#ed-memo').value.trim(), region_sido: $('#ed-sido').value, region_sigungu: $('#ed-sigungu').value };
+  const r = await api(`/api/admin/members/${$('#ed-id').value}`, { method: 'PATCH', body });
+  if (!guard(r)) return;
+  if (!r.ok) return showMsg($('#ed-msg'), errText(r), 'error');
+  showMsg($('#ed-msg'), '저장했습니다.', 'okay');
+  setTimeout(() => { $('#edit-modal').classList.add('hidden'); loadMembers(); }, 600);
 });
 
 /* ── 개선의견 탭 ── */

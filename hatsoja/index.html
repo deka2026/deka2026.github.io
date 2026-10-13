@@ -1400,9 +1400,11 @@ footer{
       <div class="form-row"><label>아이디 (이메일 주소)</label><input class="input" id="su-id" type="email" autocomplete="email" placeholder="name@example.com" onblur="checkUsernameAvail()" oninput="clearUsernameCheck()">
         <div class="form-hint" id="su-id-check"></div></div>
       <div class="form-row"><label>비밀번호 (8자 이상)</label><input class="input" id="su-pw" type="password"></div>
-      <div class="form-row"><label>이름</label><input class="input" id="su-name"></div>
-      <div class="form-row"><label>연락처</label><input class="input" id="su-contact" placeholder="010-0000-0000"></div>
+      <div class="form-row"><label>이름 <span style="color:#b03a3a">*</span></label><input class="input" id="su-name" autocomplete="name"></div>
+      <div class="form-row"><label>활동지역 <span style="color:#b03a3a">*</span></label><div style="display:flex;gap:6px"><select class="input" id="su-sido" style="flex:1"><option value="">광역</option></select><select class="input" id="su-sigungu" style="flex:1"><option value="">시군구</option></select></div></div>
+      <div class="form-row"><label>전화번호 <span class="text-mute text-small">(조합·연합회 신청은 필수)</span></label><input class="input" id="su-contact" inputmode="tel" placeholder="010-0000-0000"></div>
       <div class="form-row"><label>소속 마을·조직 (선택)</label><input class="input" id="su-org"></div>
+      <div class="form-row"><label>회원 등급</label><select class="input" id="su-tier"><option value="coop">조합회원 — 햇빛소득마을 회원협동조합 (승인 후)</option><option value="federation">연합회회원 — 연합회 (승인 후)</option><option value="general">일반이용자 — 둘러보기·AI 질문 (바로 가입)</option></select></div>
       <label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;margin-bottom:10px;cursor:pointer;">
         <input type="checkbox" id="su-consent" style="margin-top:3px;">
         <span>(필수) 계정 발급을 위한 개인정보 수집·이용에 동의합니다. <a href="#/pub/privacy" target="_blank">처리방침</a></span>
@@ -1643,7 +1645,7 @@ function normalizeRole(r, status){
     case 'coop': case 'member': case 'village': case '회원협동조합': case '회원': return 'coop';
     case 'guest': case 'visitor': case 'pending': case '손님':         return 'guest';
     case 'general': case 'data':                                      return 'guest';   // 2026-10-05 사교원 일반·자료회원은 햇소자에선 손님
-    default: return 'coop';   // 역할 미지정 통합계정은 종전대로 회원 취급
+    default: return 'guest';  // 2026-10-13 통합 개편: 모르는 역할은 손님(이전엔 조합회원으로 열려 있었다)
   }
 }
 function roleLabel(r){ return (ROLES[normalizeRole(r)] || ROLES.guest).label; }
@@ -1992,7 +1994,7 @@ async function doLogin(){
 function toggleSignup(show){
   const p = document.getElementById('signupPanel');
   p.style.display = show === undefined ? (p.style.display === 'none' ? '' : 'none') : (show ? '' : 'none');
-  if(p.style.display !== 'none') togglePwReset(false);
+  if(p.style.display !== 'none'){ togglePwReset(false); fillRegionsHatsoja(); }
 }
 function togglePwReset(show){
   const p = document.getElementById('pwResetPanel');
@@ -2030,6 +2032,15 @@ async function submitPwReset(){
 /* 아이디 실시간 중복 확인 (개선안 1-3) — 전용 API(/api/auth/check-username)가 생기면
    자동으로 동작하고, 아직 없으면(404 등) 조용히 건너뛴다. 제출 후 실패해도 입력값은 유지된다. */
 let _availSeq = 0;
+let _REGIONS_H = null;
+async function fillRegionsHatsoja(){
+  const sido = document.getElementById('su-sido'), sig = document.getElementById('su-sigungu');
+  if(!sido || sido.dataset.ready || !REAL_API) return;
+  try{ const r = await fetch('/api/regions'); const d = await r.json(); _REGIONS_H = d.regions || {}; }catch(e){ _REGIONS_H = {}; }
+  sido.innerHTML = '<option value="">광역</option>' + Object.keys(_REGIONS_H).map(k => `<option value="${k}">${k}</option>`).join('');
+  sido.onchange = () => { sig.innerHTML = '<option value="">시군구</option>' + (_REGIONS_H[sido.value] || []).map(k => `<option value="${k}">${k}</option>`).join(''); };
+  sido.dataset.ready = '1';
+}
 async function checkUsernameAvail(){
   const el = document.getElementById('su-id');
   const out = document.getElementById('su-id-check');
@@ -2058,12 +2069,18 @@ async function doSignup(){
   const pw = document.getElementById('su-pw').value;
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(id)){ toast('아이디는 이메일 주소로 입력해 주세요.'); return; }
   if(pw.length < 8){ toast('비밀번호는 8자 이상이어야 합니다.'); return; }
+  const tier = (document.getElementById('su-tier') || {}).value || 'coop';
+  const sido = (document.getElementById('su-sido') || {}).value || '', sigungu = (document.getElementById('su-sigungu') || {}).value || '';
+  if(!document.getElementById('su-name').value.trim()){ toast('이름을 적어 주세요.'); return; }
+  if(!sido || !sigungu){ toast('활동지역(광역·시군구)을 골라 주세요.'); return; }
+  if(tier !== 'general' && !document.getElementById('su-contact').value.trim()){ toast('승인 안내를 받을 전화번호를 적어 주세요.'); return; }
   if(!document.getElementById('su-consent').checked){ toast('개인정보 수집·이용에 동의해 주세요.'); return; }
   if(!REAL_API){ toast('가입 신청은 sakyowon.co.kr/hatsoja 에서 할 수 있습니다.'); return; }
   try{
     const res = await fetch('/api/auth/signup', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({username:id, password:pw,
+      body: JSON.stringify({email:id, username:id, password:pw, tier, consent:true,
+        region_sido: sido, region_sigungu: sigungu,
         name: document.getElementById('su-name').value.trim(),
         contact: document.getElementById('su-contact').value.trim(),
         org: document.getElementById('su-org').value.trim()}),
@@ -2081,7 +2098,7 @@ async function doSignup(){
       });
       return;
     }
-    if(d.error === 'username_taken'){
+    if(d.error === 'username_taken' || d.error === 'email_taken'){
       // 다른 입력값은 그대로 두고 아이디만 고치면 되게 (개선안 1-3)
       const el = document.getElementById('su-id');
       const out = document.getElementById('su-id-check');
@@ -2089,7 +2106,7 @@ async function doSignup(){
       if(out) out.innerHTML = '<span class="avail-no">✗ 이미 사용 중인 아이디입니다. 아이디만 바꿔서 다시 눌러 주세요. (다른 입력은 그대로 유지됩니다)</span>';
       return;
     }
-    const msgs = {weak_password:'비밀번호는 8자 이상이어야 합니다.', invalid_username:'아이디는 이메일 주소로 입력해 주세요.', invalid_email:'아이디는 이메일 주소로 입력해 주세요.'};
+    const msgs = {weak_password:'비밀번호는 8자 이상이어야 합니다.', invalid_username:'이메일 주소 형식이 아닙니다.', invalid_email:'이메일 주소 형식이 아닙니다.', region_required:'활동지역을 골라 주세요.', contact_required:'전화번호를 적어 주세요.', invalid_contact:'전화번호 형식이 올바르지 않습니다.', consent_required:'개인정보 수집·이용에 동의해 주세요.', name_required:'이름을 적어 주세요.'};
     toast(msgs[d.error] || '가입 신청에 실패했습니다. 잠시 후 다시 시도해 주세요.');
   }catch(e){ toast('가입 서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요. 급하시면 070-4196-4677.'); }
 }
