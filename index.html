@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>사회혁신교육원 사회적협동조합 | 사교원 관계 사이트 허브</title>
-<meta name="description" content="사회혁신교육원 사회적협동조합(사교원)의 공식 홈페이지·아카데미·위키·프로젝트 사이트로 연결되는 관문 페이지. 전남광주통합특별시·전북특별자치도를 중심으로 활동합니다.">
+<title>사교원 — 사회혁신교육원 사회적협동조합 통합사이트</title>
+<meta name="description" content="사회혁신교육원 사회적협동조합(사교원) 통합사이트 — 소개·연구실·교육·사업·쇼핑·참여·그룹웨어를 한 화면에서. 상단 AI 도우미에게 바로 물어보세요.">
 <link rel="canonical" href="https://sakyowon.co.kr/">
-<meta property="og:title" content="사회혁신교육원 사회적협동조합 | 사교원 관계 사이트 허브">
-<meta property="og:description" content="사교원의 모든 사이트를 한곳에서 — 홈페이지, 아카데미, 위키, 프로젝트">
+<meta property="og:title" content="사교원 통합사이트 — 사회혁신교육원 사회적협동조합">
+<meta property="og:description" content="소개·연구실·교육·사업·쇼핑·참여·그룹웨어 — 사교원의 모든 메뉴를 한눈에, AI 도우미와 함께">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://sakyowon.co.kr/">
 <meta property="og:image" content="https://sakyowon.co.kr/icon-512.png">
@@ -45,225 +45,77 @@
 <meta name="apple-mobile-web-app-title" content="사교원 허브">
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
 <style>
-  :root {
-    --bg-deep: #c5d3b3;
-    --bg-card: #ffffff;
-    --text-primary: #1e2b1c;
-    --text-secondary: #3d5238;
-    --text-muted: #6e8469;
-    --accent-green: #4a6741;
-    --accent-green-light: #5d7f54;
-    --border-subtle: rgba(60, 80, 50, 0.22);
-    --shadow-sm: 0 2px 6px rgba(30,43,28,0.10);
-    --shadow-md: 0 10px 28px rgba(30,43,28,0.20);
-    --font-serif: Georgia, 'Noto Serif KR', serif;
-    --font-body: 'Pretendard Variable', 'Pretendard', -apple-system, sans-serif;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: var(--bg-deep);
-    color: var(--text-primary);
-    font-family: var(--font-body);
-    line-height: 1.6;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-  .wrap { max-width: 880px; margin: 0 auto; padding: 56px 20px 40px; width: 100%; flex: 1; }
-  header { text-align: center; margin-bottom: 44px; }
-  .logo {
-    width: 170px; height: 170px;
-    display: inline-block;
-    margin-bottom: 16px;
-  }
-  .logo svg { width: 100%; height: 100%; display: block; }
-  h1 { font-family: var(--font-serif); font-size: clamp(24px, 5vw, 32px); font-weight: 700; letter-spacing: -0.01em; }
-  .subtitle { margin-top: 10px; font-size: 15px; color: var(--text-muted); }
-
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
-  .site-btn {
-    display: flex; flex-direction: column; gap: 6px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
-    border-radius: 14px;
-    padding: 22px 22px 18px;
-    text-decoration: none;
-    color: var(--text-primary);
-    box-shadow: var(--shadow-sm);
-    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
-  }
-  .site-btn:hover, .site-btn:focus-visible {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--accent-green-light);
-    outline: none;
-  }
-  .site-btn .icon { font-size: 26px; line-height: 1; margin-bottom: 4px; }
-  .site-btn .name { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
-  .site-btn .name .arrow { color: var(--accent-green); font-weight: 400; }
-  .site-btn .desc { font-size: 13.5px; color: var(--text-secondary); }
-  .site-btn .url { margin-top: auto; padding-top: 10px; font-size: 12px; color: var(--text-muted); word-break: break-all; }
-  /* 비활성 버튼: 사이트는 그대로 두고 허브에서 연결만 막는다. 다시 켤 때는 data-href를 href로, is-disabled·aria-disabled를 지우면 된다 */
-  .site-btn.is-disabled { opacity: .45; filter: grayscale(1); cursor: not-allowed; box-shadow: none; }
-  .site-btn.is-disabled:hover, .site-btn.is-disabled:focus-visible { transform: none; box-shadow: none; border-color: var(--border-subtle); }
-  .site-btn .off { font-size: 11px; font-weight: 600; color: var(--text-muted); border: 1px solid var(--border-subtle); border-radius: 999px; padding: 1px 8px; vertical-align: middle; }
-
-  .section-label {
-    font-size: 13px; font-weight: 700; color: var(--accent-green);
-    letter-spacing: 0.08em; text-transform: uppercase;
-    margin: 36px 0 14px; padding-left: 2px;
-  }
-  .section-label:first-of-type { margin-top: 0; }
-
-  footer { text-align: center; padding: 28px 16px 36px; font-size: 12.5px; color: var(--text-muted); border-top: 1px solid var(--border-subtle); }
-  footer .fname { font-family: var(--font-serif); font-weight: 700; color: var(--text-secondary); }
-
-  /* 홈 화면 추가 안내 */
-  .install-bar { display: none; text-align: center; margin: 36px 0 0; }
-  .install-bar.show { display: block; }
-  .install-btn {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: var(--accent-green); color: #f7f3ee;
-    border: none; border-radius: 12px; padding: 12px 26px;
-    font-size: 15px; font-weight: 700; font-family: var(--font-body);
-    cursor: pointer; box-shadow: var(--shadow-sm);
-    transition: transform .15s ease, box-shadow .15s ease;
-  }
-  .install-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-  .install-note { margin-top: 10px; font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+  :root{--bg:#f5f1e6;--card:#fff;--ink:#1e2b1c;--ink2:#3d5238;--mute:#6e8469;--g9:#0d3b2c;--g7:#2c5842;--g6:#4a6741;--g1:#dbe4d0;--g0:#edf2e5;--gold:#b47d14;--gold1:#f6eac9;--line:rgba(60,80,50,.2);--danger:#b03a3a;--r:14px;--font:'Pretendard Variable',Pretendard,-apple-system,sans-serif;--serif:Georgia,'Noto Serif KR',serif}
+  *{box-sizing:border-box}html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.6}
+  a{color:var(--g7);text-decoration:none}
+  .wrap{max-width:1120px;margin:0 auto;padding:18px 16px 60px}
+  .top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:6px 0 14px;border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:10px}.brand .mark{width:40px;height:40px;border-radius:50%;background:var(--g6);color:#faf6ec;font-family:var(--serif);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px}
+  .brand h1{margin:0;font-size:20px;font-family:var(--serif);color:var(--g9)}.brand .sub{font-size:12px;color:var(--mute)}
+  .sp{flex:1}.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font-size:13px;cursor:pointer;color:var(--ink);font-family:inherit}
+  .btn.p{background:var(--g7);color:#fff;border-color:var(--g7)}.btn.sm{padding:4px 10px;font-size:12px}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:var(--g0);border:1px solid var(--g1);border-radius:999px;padding:5px 12px;font-size:13px}
+  .hero{display:grid;grid-template-columns:1.3fr 1fr;gap:18px;margin:18px 0}
+  .hero .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px 22px}
+  .hero h2{margin:0 0 6px;font-family:var(--serif);font-size:22px;color:var(--g9)}.hero p{margin:0 0 10px;color:var(--ink2)}
+  .ask{display:flex;gap:8px;margin-top:10px}.ask input{flex:1;height:42px;border:1px solid var(--line);border-radius:10px;padding:0 14px;font-size:15px;font-family:inherit}.ask button{height:42px;border:none;background:var(--g7);color:#fff;border-radius:10px;padding:0 16px;font-size:14px;cursor:pointer}
+  .ex{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.ex button{border:1px solid var(--g1);background:var(--g0);border-radius:999px;padding:4px 10px;font-size:12px;cursor:pointer;color:var(--g7)}
+  .tiers{font-size:13px;color:var(--ink2);line-height:1.8}.tiers b{color:var(--g9)}
+  .tree{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px;margin-top:6px}
+  .grp{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px 10px}
+  .grp h3{margin:0 0 8px;font-size:16px;font-family:var(--serif);color:var(--g9);display:flex;align-items:center;gap:8px}.grp h3 .ic{font-size:18px}.grp h3 .lock{font-size:12px;color:var(--gold);font-family:var(--font);font-weight:400}
+  .grp ul{list-style:none;margin:0;padding:0 0 0 8px;border-left:2px solid var(--g1)}.grp li{position:relative;padding:3px 0 3px 14px}.grp li::before{content:"";position:absolute;left:-2px;top:16px;width:10px;height:2px;background:var(--g1)}
+  .grp li a{color:var(--ink);display:flex;align-items:center;gap:6px;flex-wrap:wrap}.grp li a:hover{color:var(--g7)}.grp li .d{font-size:12px;color:var(--mute)}
+  .grp li.sub{padding-left:28px}.grp li.sub::before{width:22px;left:-2px}
+  .grp li.locked a{color:var(--mute)}.grp li.locked a::before{content:"🔒";font-size:11px}
+  .grp li.soon a::after{content:"준비 중";font-size:11px;color:var(--gold);background:var(--gold1);border-radius:8px;padding:0 6px}
+  .grp li.ext a::after{content:"↗";font-size:11px;color:var(--mute)}
+  .who{font-size:13px;color:var(--ink2)}.who b{color:var(--g9)}
+  .install-bar{display:none;margin:18px 0 0;text-align:center}.install-bar.show{display:block}.install-btn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 16px;cursor:pointer;font-family:inherit}.install-note{font-size:12px;color:var(--mute);margin:6px 0 0}
+  footer{max-width:1120px;margin:0 auto;padding:18px 16px 40px;font-size:12.5px;color:var(--mute);border-top:1px solid var(--line);line-height:1.8}
+  .modal-back{position:fixed;inset:0;background:rgba(20,30,20,.45);display:none;align-items:center;justify-content:center;z-index:2147482000;padding:16px}.modal-back.on{display:flex}
+  .modal{background:#fff;border-radius:16px;width:100%;max-width:440px;max-height:92vh;overflow:auto;padding:22px 22px 18px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+  .modal h2{margin:0 0 4px;font-family:var(--serif);font-size:20px;color:var(--g9)}.modal .sub{font-size:13px;color:var(--mute);margin:0 0 12px}
+  .tabs{display:flex;gap:6px;margin-bottom:12px}.tabs button{flex:1;border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px;cursor:pointer;font-family:inherit}.tabs button.on{background:var(--g7);color:#fff;border-color:var(--g7)}
+  .f{margin-bottom:10px}.f label{display:block;font-size:13px;color:var(--ink2);margin-bottom:4px}.f input,.f select{width:100%;height:38px;border:1px solid var(--line);border-radius:8px;padding:0 10px;font-size:14px;font-family:inherit;background:#fff}
+  .f .two{display:flex;gap:6px}.f .two select{flex:1}
+  .msg{font-size:13px;min-height:18px;margin:4px 0 8px}.msg.err{color:var(--danger)}.msg.ok{color:#2e8b57}
+  .mbtn{width:100%;height:40px;border:none;background:var(--g7);color:#fff;border-radius:8px;font-size:14px;cursor:pointer;font-family:inherit}.mbtn:disabled{opacity:.5}
+  .ghost{width:100%;height:36px;border:1px solid var(--line);background:#fff;border-radius:8px;font-size:13px;cursor:pointer;margin-top:6px;font-family:inherit}
+  .req{color:var(--danger)}
+  @media(max-width:760px){.hero{grid-template-columns:1fr}.brand h1{font-size:17px}}
 </style>
+<script src="/ai-dock.js" defer></script>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <div class="logo" aria-label="사교원 로고 — coop change beyound, social meta platform">
-      <svg viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg" role="img">
-        <defs>
-          <path id="arcTop" d="M 58 300 A 242 242 0 0 1 542 300" fill="none"/>
-          <path id="arcBottom" d="M 48 300 A 252 252 0 0 0 552 300" fill="none"/>
-        </defs>
-        <!-- 바깥 파란 원 -->
-        <circle cx="300" cy="300" r="200" fill="none" stroke="#1e3d98" stroke-width="12"/>
-        <!-- 노랑: 아치 + 우상단 연결선 -->
-        <g fill="none" stroke="#f2cf5b" stroke-width="13" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M 210 262 L 210 180 Q 210 132 258 132 L 262 132 Q 310 132 310 180 L 310 196"/>
-          <path d="M 310 196 L 425 196 L 425 144"/>
-        </g>
-        <!-- 빨강: 좌측 곡선 + 기둥 2개 + 수평선 -->
-        <g fill="none" stroke="#e2342b" stroke-width="13" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M 107 246 L 158 246 Q 182 246 182 270 L 182 316"/>
-          <path d="M 133 312 L 133 352"/>
-          <path d="M 165 312 L 165 352"/>
-          <path d="M 107 352 L 322 352"/>
-        </g>
-        <!-- 초록: 고리 + 연결선 + 하단 선/곡선 -->
-        <g fill="none" stroke="#0a9d49" stroke-width="13" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="392" cy="278" r="33"/>
-          <path d="M 425 278 L 499 278"/>
-          <path d="M 322 352 L 322 499"/>
-          <path d="M 322 392 L 478 392"/>
-          <path d="M 440 392 Q 440 460 390 478"/>
-        </g>
-        <!-- 원형 문구 -->
-        <g fill="#1e3d98" font-family="'Trebuchet MS','Segoe UI',Verdana,sans-serif" font-weight="700" letter-spacing="4">
-          <text font-size="42"><textPath href="#arcTop" startOffset="50%" text-anchor="middle">coop change beyound</textPath></text>
-          <text font-size="42"><textPath href="#arcBottom" startOffset="50%" text-anchor="middle">social meta platform</textPath></text>
-        </g>
-      </svg>
+  <div class="top">
+    <div class="brand"><div class="mark">L&amp;L</div><div><h1>사교원 통합사이트</h1><div class="sub">사회혁신교육원 사회적협동조합 · 소개 · 연구실 · 교육 · 사업 · 쇼핑 · 참여 · 그룹웨어</div></div></div>
+    <div class="sp"></div>
+    <span class="who" id="who"></span>
+    <button class="btn p" id="btnLogin">로그인 · 회원가입</button>
+    <button class="btn" id="btnLogout" style="display:none">로그아웃</button>
+  </div>
+
+  <div class="hero">
+    <div class="card">
+      <h2>무엇이든 AI 도우미에게 물어보세요</h2>
+      <p>화면 맨 위 <b>사교원 AI</b> 칸은 모든 페이지에 따라다닙니다. 지금 보는 화면을 근거로 답하고, 파일·이미지를 올려 묻고, 문서를 써서 한글(hwpx)로 내려받습니다. 연산은 과기정통부 고성능컴퓨팅(HPC) 엔진이 맡고, 개인정보는 보내기 전에 가립니다.</p>
+      <div class="ask"><input id="heroQ" placeholder="예: 사교원은 어떤 곳인가요? / 햇빛소득마을 신청 절차는?"><button id="heroAsk">물어보기</button></div>
+      <div class="ex"><button data-q="사교원은 어떤 조직이고 무슨 일을 하나요?">사교원 소개</button><button data-q="햇빛소득마을 공모에 참여하려면 어떤 서류가 필요한가요?">햇소자 서류</button><button data-q="연대지능활동가 아카데미는 무엇을 배우나요?">아카데미</button><button data-q="교육 프로그램 비용은 어떻게 계산하나요?">교육 견적</button></div>
     </div>
-    <h1>사회혁신교육원 사회적협동조합</h1>
-    <p class="subtitle">사교원 관계 사이트 허브 — 모든 사이트를 한곳에서</p>
-  </header>
-
-  <!--
-    ★ 새 사이트 추가하는 법 ★
-    아래 <a class="site-btn"> 블록 하나를 통째로 복사해서
-    알맞은 섹션 그리드 안에 붙여넣고 아이콘·이름·설명·주소(href, .url)만 바꾸면 됩니다.
-  -->
-
-  <div class="section-label">공식</div>
-  <div class="grid">
-    <a class="site-btn" href="https://home.sakyowon.co.kr" target="_blank" rel="noopener">
-      <span class="icon">🏛️</span>
-      <span class="name">사교원 홈페이지 <span class="arrow">↗</span></span>
-      <span class="desc">사회혁신교육원 공식 홈 — 소개·사업·문의</span>
-      <span class="url">home.sakyowon.co.kr</span>
-    </a>
-    <a class="site-btn" href="https://sakyowon.co.kr/academy-site/" target="_blank" rel="noopener">
-      <span class="icon">🎓</span>
-      <span class="name">연대지능활동가 아카데미 <span class="arrow">↗</span></span>
-      <span class="desc">활동가 교육·평가·지식 검증 플랫폼</span>
-      <span class="url">sakyowon.co.kr/academy-site</span>
-    </a>
-    <a class="site-btn" href="https://sakyowon.co.kr/hatsoja/" target="_blank" rel="noopener">
-      <span class="icon">☀️</span>
-      <span class="name">햇소자 <span class="arrow">↗</span></span>
-      <span class="desc">햇빛소득마을 통합 운영 플랫폼 — 신청·진단부터 조합 설립, 정산·배당, 마을비즈니스까지 (통합 계정 로그인)</span>
-      <span class="url">sakyowon.co.kr/hatsoja</span>
-    </a>
-    <a class="site-btn is-disabled" data-href="https://sakyowon.co.kr/hometown-love/" aria-disabled="true" tabindex="-1">
-      <span class="icon">🏡</span>
-      <span class="name">고향사랑기부제 정보센터 <span class="off">비활성</span></span>
-      <span class="desc">전남광주통합특별시 27개 시군구 운영현황·기부금 사용·답례품 안내</span>
-      <span class="url">sakyowon.co.kr/hometown-love</span>
-    </a>
-    <a class="site-btn" href="https://sakyowon.co.kr/mangnam-coop/" target="_blank" rel="noopener">
-      <span class="icon">🌊</span>
-      <span class="name">망남마을협동조합 <span class="arrow">↗</span></span>
-      <span class="desc">완도 망남마을 협동조합 — 마을식당·편의점, 빈집임대, 낚시산장, 고향사랑기부</span>
-      <span class="url">sakyowon.co.kr/mangnam-coop</span>
-    </a>
-    <a class="site-btn" href="https://vitality.sakyowon.co.kr/" target="_blank" rel="noopener">
-      <span class="icon">🐟</span>
-      <span class="name">망남 어촌신활력증진사업 <span class="arrow">↗</span></span>
-      <span class="desc">완도 망남생활권 어촌신활력증진사업 — 사업 안내·소식·성과·문의</span>
-      <span class="url">vitality.sakyowon.co.kr</span>
-    </a>
-    <a class="site-btn" href="https://sakyowon.co.kr/teamlearning-site/" target="_blank" rel="noopener">
-      <span class="icon">🌱</span>
-      <span class="name">사회혁신팀러닝 <span class="arrow">↗</span></span>
-      <span class="desc">팀러닝 자문·컨설팅 — 질문·계획안 보완·자료조사</span>
-      <span class="url">sakyowon.co.kr/teamlearning-site</span>
-    </a>
-    <a class="site-btn is-disabled" data-href="https://seonamhae-grand.pages.dev/" aria-disabled="true" tabindex="-1">
-      <span class="icon">🌊</span>
-      <span class="name">서남해 그랜드 <span class="off">비활성</span></span>
-      <span class="desc">전남광주 서남권 광역 관광 허브 — 지도·테마 루트·현지 정보</span>
-      <span class="url">seonamhae-grand.pages.dev</span>
-    </a>
+    <div class="card">
+      <h2>회원 등급</h2>
+      <div class="tiers">
+        <b>통합관리자</b> › <b>매니저회원</b>(사교원 직원, 체크권한으로 그룹웨어·관리 기능) › <b>연합회회원</b>(햇빛소득마을 연합회) › <b>조합회원</b>(회원협동조합) › <b>일반이용자</b>(교육·쇼핑·문의·AI 질문) › 비로그인(둘러보기·안내 질문)<br>
+        가입은 이메일 하나로, 로그인은 이메일+비밀번호. 조합·연합회·매니저는 승인 뒤 열립니다. 🔒 표시는 로그인이나 승인·체크권한이 필요한 메뉴입니다.
+      </div>
+      <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn sm" id="btnSignup">회원가입</button><a class="btn sm" href="account-privacy.html">개인정보처리방침</a></div>
+    </div>
   </div>
 
-  <div class="section-label">위키 · 지식</div>
-  <div class="grid">
-    <a class="site-btn" href="https://wiki.poomasi.org" target="_blank" rel="noopener">
-      <span class="icon">🤝</span>
-      <span class="name">연대지능 위키 <span class="arrow">↗</span></span>
-      <span class="desc">활동가들이 함께 만드는 공동 지식 저장소</span>
-      <span class="url">wiki.poomasi.org</span>
-    </a>
-    <a class="site-btn" href="https://sakyowon.co.kr/sakyowon-wiki/" target="_blank" rel="noopener">
-      <span class="icon">📚</span>
-      <span class="name">사교원 위키 <span class="arrow">↗</span></span>
-      <span class="desc">학습 기록·프로젝트·로컬리스트 자료 아카이브</span>
-      <span class="url">sakyowon.co.kr/sakyowon-wiki</span>
-    </a>
-  </div>
-
-  <div class="section-label">직원 전용</div>
-  <div class="grid">
-    <a class="site-btn" href="https://gw.sakyowon.co.kr/" rel="nofollow">
-      <span class="icon">&#128188;</span>
-      <span class="name">사교원 그룹웨어 <span class="arrow">&#8599;</span></span>
-      <span class="desc">메일·결재·출퇴근·휴가·인사·회계와 직원전용 질문, 보고서·기획안 작성을 한 화면에서 — 허브 계정으로 로그인</span>
-      <span class="url">gw.sakyowon.co.kr</span>
-    </a>
-    <a class="site-btn" href="https://home.sakyowon.co.kr/#/policy" rel="nofollow">
-      <span class="icon">&#127963;</span>
-      <span class="name">정책지원관 지원시스템 <span class="arrow">&#8599;</span></span>
-      <span class="desc">사교원 홈페이지 연구실 안으로 옮겼습니다 — 공약·근거조례, 문서 작성, 뉴스 브리핑, 의정소통. 로그인 필요</span>
-      <span class="url">home.sakyowon.co.kr › 연구실</span>
-    </a>
-  </div>
+  <div class="tree" id="tree"></div>
 
   <div class="install-bar" id="installBar">
     <button class="install-btn" id="installBtn">&#128241; 홈 화면에 바로가기 추가</button>
@@ -272,65 +124,227 @@
 </div>
 
 <footer>
-  <span class="fname">사회혁신교육원 사회적협동조합</span><br>
-  본사 : 대전광역시 서구 관저중로80번길 8, 3층<br>
-  사업자등록번호 : 397-82-00424<br>
-  사업 : 교육 · 컨설팅 · IT<br>
-  활동 지역 : 전남광주통합특별시 · 전북특별자치도<br>
-  <a href="https://sakyowon.co.kr/admin.html" rel="nofollow" style="display:inline-block;margin-top:8px;padding:5px 14px;border:1px solid rgba(128,128,128,.45);border-radius:999px;font-size:12px;color:inherit;text-decoration:none">🔐 통합 관리자</a>
-  <a href="https://sakyowon.co.kr/data.html" rel="nofollow" style="display:inline-block;margin-top:8px;margin-left:6px;padding:5px 14px;border:1px solid rgba(128,128,128,.45);border-radius:999px;font-size:12px;color:inherit;text-decoration:none">▦ 데이터 저장소</a>
+  <b>사회혁신교육원 사회적협동조합</b> · 본사 대전광역시 서구 관저중로80번길 8, 3층 · 사업자등록번호 397-82-00424 · 교육·컨설팅·IT · 활동 지역 전남광주통합특별시·전북특별자치도<br>
+  <a href="admin.html" rel="nofollow">🔐 통합 관리자</a> · <a href="data.html" rel="nofollow">▦ 데이터 저장소</a> · <a href="account-privacy.html">개인정보처리방침</a> · <a href="https://wiki.poomasi.org/" target="_blank" rel="noopener">연대지능 위키 ↗</a> · <a href="sakyowon-wiki/">사교원 위키</a>
 </footer>
 
+<!-- 로그인 / 회원가입 -->
+<div class="modal-back" id="authModal">
+  <div class="modal">
+    <div class="tabs"><button id="tabLogin" class="on">로그인</button><button id="tabSignup">회원가입</button></div>
+    <div id="vLogin">
+      <h2>로그인</h2><p class="sub">사교원 통합 계정 하나로 모든 사이트에 들어갑니다.</p>
+      <div class="f"><label>이메일 <span style="color:var(--mute);font-weight:400">(옛 아이디도 당분간 됩니다)</span></label><input id="lgEmail" inputmode="email" autocomplete="username" placeholder="name@example.com"></div>
+      <div class="f"><label>비밀번호</label><input id="lgPw" type="password" autocomplete="current-password"></div>
+      <div class="msg" id="lgMsg"></div>
+      <button class="mbtn" id="lgBtn">로그인</button>
+      <p class="sub" style="margin-top:10px">비밀번호를 잊으셨으면 통합관리자(sakyowon@sakyowon.co.kr)에게 임시 비밀번호를 요청하세요.</p>
+    </div>
+    <div id="vSignup" style="display:none">
+      <h2>회원가입</h2><p class="sub">일반이용자는 바로, 조합·연합회·매니저는 승인 뒤 쓸 수 있습니다.</p>
+      <div class="f"><label>회원 등급</label><select id="suTier"><option value="general">일반이용자 — 바로 가입</option><option value="coop">조합회원 — 햇빛소득마을 회원협동조합 (승인 후)</option><option value="federation">연합회회원 — 햇빛소득마을 연합회 (승인 후)</option><option value="staff">매니저회원 — 사교원 그룹웨어 (통합관리자 승인 후)</option></select></div>
+      <div class="f"><label>이메일 <span class="req">*</span> (로그인 아이디)</label><input id="suEmail" type="email" autocomplete="email" placeholder="name@example.com"></div>
+      <div class="f"><label>비밀번호 <span class="req">*</span> (8자 이상)</label><input id="suPw" type="password" autocomplete="new-password"></div>
+      <div class="f"><label>이름 <span class="req">*</span></label><input id="suName" autocomplete="name"></div>
+      <div class="f"><label>활동지역 <span class="req">*</span></label><div class="two"><select id="suSido"><option value="">광역</option></select><select id="suSigungu"><option value="">시군구</option></select></div></div>
+      <div class="f"><label>전화번호 <span id="suContactReq" style="color:var(--mute);font-weight:400">(일반이용자는 선택)</span></label><input id="suContact" inputmode="tel" placeholder="010-0000-0000"></div>
+      <div class="f"><label>소속 (선택)</label><input id="suOrg" placeholder="마을·조합·기관"></div>
+      <label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;margin:4px 0 10px;cursor:pointer"><input type="checkbox" id="suConsent" style="margin-top:3px"><span>(필수) 통합 계정 발급을 위한 개인정보 수집·이용에 동의합니다. <a href="account-privacy.html" target="_blank">처리방침</a></span></label>
+      <div class="msg" id="suMsg"></div>
+      <button class="mbtn" id="suBtn">가입 신청</button>
+    </div>
+    <button class="ghost" id="authClose">닫기</button>
+  </div>
+</div>
+
+<!-- 옛 아이디 회원의 이메일 등록 -->
+<div class="modal-back" id="emailModal">
+  <div class="modal">
+    <h2>로그인 이메일 등록</h2><p class="sub">로그인 아이디가 이메일로 바뀌었습니다. 이메일을 등록하면 다음부터 그 주소로 들어옵니다.</p>
+    <div class="f"><label>이메일</label><input id="emEmail" type="email" autocomplete="email"></div>
+    <div class="f"><label>현재 비밀번호 (본인 확인)</label><input id="emPw" type="password" autocomplete="current-password"></div>
+    <div class="msg" id="emMsg"></div>
+    <button class="mbtn" id="emBtn">등록</button><button class="ghost" id="emLater">나중에</button>
+  </div>
+</div>
+
 <script>
-// 서비스워커 등록 (PWA 설치 요건)
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(function () {});
+'use strict';
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function api(path, opts = {}) {
+  const res = await fetch(path, { credentials: 'same-origin', headers: opts.body ? { 'Content-Type': 'application/json' } : {}, ...opts, body: opts.body ? JSON.stringify(opts.body) : undefined });
+  let d = {}; try { d = await res.json(); } catch (_) {}
+  return { status: res.status, ...d };
 }
+const ERR = { invalid_credentials: '이메일(또는 아이디) 또는 비밀번호가 올바르지 않습니다.', not_approved: '가입 승인 대기 중입니다. 승인되면 로그인할 수 있습니다.', rate_limited: '요청이 잠시 제한되었습니다. 1분 후 다시 시도해 주세요.',
+  invalid_email: '이메일 주소 형식이 아닙니다.', email_taken: '이미 가입된 이메일입니다.', username_taken: '이미 가입된 이메일입니다.', weak_password: '비밀번호는 8자 이상이어야 합니다.', name_required: '이름을 적어 주세요.',
+  region_required: '활동지역(광역·시군구)을 골라 주세요.', contact_required: '승인 안내를 받을 전화번호를 적어 주세요.', invalid_contact: '전화번호 형식이 올바르지 않습니다 (예: 010-0000-0000).', consent_required: '개인정보 수집·이용에 동의해 주세요.', upstream_unavailable: '계정 서버에 연결할 수 없습니다.' };
+const errText = r => r.status === 429 ? ERR.rate_limited : (ERR[r.error] || '처리하지 못했습니다. 잠시 후 다시 시도해 주세요.');
 
+/* ── 메뉴 트리 — 등급·체크권한에 따라 🔒 표시 ──
+   need: 'login' 로그인 | 'perm:정책지원관' 체크권한 | 'role:staff' 매니저 이상 | 'role:coop' 조합 이상 | 'role:federation' 연합회 이상 | 'admin' */
+const HOME = 'https://home.sakyowon.co.kr/#/';
+const TREE = [
+  { ic: '🏛️', name: '소개', items: [
+    { t: '사교원 소개', d: '지향·활동·걸어온 길·특장점', h: HOME + 'about' },
+    { t: '경영공시', d: '정관·규약 · 재무제표 · 조합원 현황', h: HOME + 'disclosure' },
+  ]},
+  { ic: '🔬', name: '연구실', items: [
+    { t: '연구자료', d: '보고서 31건 검색·열람', h: HOME + 'research' },
+    { t: '정책지원관 지원시스템', d: '공약·조례·문서작성·브리핑 — 체크권한', h: HOME + 'policy', need: 'perm:정책지원관' },
+    { t: '고향사랑기부제 정보', d: '전남광주 27개 시군구 운영현황·답례품', h: '/hometown-love/' },
+    { t: '시민재생에너지 AI', d: '고성능컴퓨팅 과제 소개', h: '/cre/' },
+    { t: '사교원 위키', d: '공개 지식 431쪽 (별도 운영)', h: '/sakyowon-wiki/', ext: true },
+    { t: '연대지능 위키', d: '품앗이 공동 지식베이스', h: 'https://wiki.poomasi.org/', ext: true },
+  ]},
+  { ic: '🎓', name: '교육', items: [
+    { t: '연대지능활동가 아카데미', d: '실습 15단계 · 학습 7단계 · 자격증 · 지식 검증 게임', h: '/academy-site/' },
+    { t: '교육프로그램 신청', d: '주민자치 · 연대지능 활동가 · 문제해결 팀러닝 — 필요 진단과 견적', h: HOME + 'shop/edu' },
+    { t: '사회혁신팀러닝', d: '자문·컨설팅 (통합 개편 중)', h: '/teamlearning-site/', soon: true },
+  ]},
+  { ic: '☀️', name: '사업', items: [
+    { t: '햇빛소득마을 (햇소자)', d: '신청·진단 → 조합 설립 → 정산·배당 — 조합·연합회 회원', h: '/hatsoja/' },
+    { t: '어촌신활력증진사업', d: '사업 안내 · 소식 · 기획안/보고서 · KPI · 예산 집행실적', h: 'https://vitality.sakyowon.co.kr/' },
+    { t: '망남 (완도 망남생활권)', d: '', h: 'https://vitality.sakyowon.co.kr/', sub: true },
+    { t: '양양 (강원 양양)', d: '망남과 같은 구성으로 채우는 중', h: 'https://vitality.sakyowon.co.kr/', sub: true, soon: true },
+    { t: '망남마을협동조합', d: '마을사업 · 마을학교 · 플로깅 · 물멍 예약 · 경영공시', h: '/mangnam-coop/' },
+  ]},
+  { ic: '🛒', name: '쇼핑', items: [
+    { t: '상품', d: '도서·굿즈·지역특산', h: HOME + 'shop' },
+    { t: '장바구니', d: '', h: HOME + 'cart' },
+  ]},
+  { ic: '💬', name: '참여', items: [
+    { t: '문의', d: '교육·사업·제휴 문의', h: HOME + 'contact' },
+    { t: '활동가 의견', d: '아카데미 의견 게시판', h: '/academy-site/#feedback' },
+    { t: '사이트 개선 의견', d: 'AI 도우미에게 바로 말해도 됩니다', h: HOME + 'contact' },
+  ]},
+  { ic: '🗂️', name: '그룹웨어', lock: '매니저회원 · 체크권한', items: [
+    { t: '직원전용 질문', d: '사내 자료 근거 답변(고성능컴퓨팅)', h: 'https://gw.sakyowon.co.kr/#staff', need: 'role:staff' },
+    { t: '보고서·기획안 작성', d: '개요 → 절별 작성 → 한글', h: 'https://gw.sakyowon.co.kr/#docs', need: 'role:staff' },
+    { t: '메일 · 결재 · 월간보고', d: '체크권한별', h: 'https://gw.sakyowon.co.kr/#home', need: 'role:staff' },
+    { t: '입찰 제안서 · 협동조합 설립 지원', d: '체크권한별', h: 'https://gw.sakyowon.co.kr/#bid', need: 'role:staff' },
+    { t: '근태 (출퇴근·휴가)', d: 'GPS 출퇴근 · 휴가 결재', h: 'https://work.sakyowon.co.kr/', need: 'role:staff' },
+    { t: '인사기록', d: '체크권한 「인사열람」', h: 'https://hr.sakyowon.co.kr/', need: 'perm:인사열람' },
+    { t: '회계 · 세무 · 자산', d: '체크권한별', h: HOME + 'admin/accounting', need: 'perm:회계' },
+  ]},
+  { ic: '👨‍👩‍👧', name: '가족 메신저', lock: '초대받은 분만', items: [
+    { t: 'family.sakyowon.co.kr', d: '초대링크로 입장 · 사진·파일', h: 'https://family.sakyowon.co.kr/', ext: true },
+  ]},
+  { ic: '🔐', name: '관리', lock: '통합관리자 · 체크권한', items: [
+    { t: '회원 · 권한', d: '승인 · 등급 · 체크권한 · 비번 초기화', h: '/admin.html', need: 'perm:회원열람' },
+    { t: '사이트 관리 · 개선의견', d: '', h: '/admin.html', need: 'role:staff' },
+    { t: '홈페이지 관리자', d: '회계·세무·인사·자산·가족 메신저 · 콘텐츠', h: HOME + 'admin', need: 'role:staff' },
+    { t: '데이터 저장소', d: '엑셀 → 표 → SQL', h: '/data.html', need: 'perm:데이터읽기' },
+    { t: '주짓수 룰북', d: '통합관리자 전용', h: '/bjj/', need: 'admin' },
+  ]},
+];
+const RANK = { admin: 5, staff: 4, federation: 3, coop: 2, general: 1 };
+let me = null;
+function allowed(need) {
+  if (!need) return true;
+  if (!me) return false;
+  if (me.role === 'admin') return true;
+  if (need === 'login') return true;
+  if (need === 'admin') return false;
+  if (need.startsWith('perm:')) return (me.perms || []).includes(need.slice(5));
+  if (need.startsWith('role:')) return (RANK[me.role] || 0) >= (RANK[need.slice(5)] || 9);
+  return false;
+}
+function renderTree() {
+  $('#tree').innerHTML = TREE.map(g => `<div class="grp"><h3><span class="ic">${g.ic}</span>${esc(g.name)}${g.lock ? `<span class="lock">🔒 ${esc(g.lock)}</span>` : ''}</h3><ul>${g.items.map(it => {
+    const ok = allowed(it.need);
+    const cls = [it.sub ? 'sub' : '', ok ? '' : 'locked', it.soon ? 'soon' : '', it.ext ? 'ext' : ''].filter(Boolean).join(' ');
+    const href = ok ? it.h : '#login';
+    const title = ok ? '' : ' title="로그인·승인·체크권한이 필요합니다"';
+    return `<li class="${cls}"><a href="${esc(href)}"${title}${it.ext ? ' target="_blank" rel="noopener"' : ''}>${esc(it.t)}${it.d ? `<span class="d">${esc(it.d)}</span>` : ''}</a></li>`;
+  }).join('')}</ul></div>`).join('');
+}
+function setWho() {
+  if (me) { $('#who').innerHTML = `<b>${esc(me.name || me.email || me.username)}</b> · ${esc(me.role_ko || '')}` + (me.email ? '' : ' · <a href="#" id="whoEmail">이메일 등록</a>'); $('#btnLogin').style.display = 'none'; $('#btnLogout').style.display = ''; }
+  else { $('#who').textContent = ''; $('#btnLogin').style.display = ''; $('#btnLogout').style.display = 'none'; }
+  renderTree();
+}
+async function boot() {
+  const r = await api('/api/auth/me');
+  me = (r.ok && r.user) ? r.user : null;
+  setWho();
+  if (location.hash === '#login') openAuth('login');
+  if (location.hash === '#signup') openAuth('signup');
+}
+/* 로그인·가입 창 */
+function openAuth(tab) { $('#authModal').classList.add('on'); authTab(tab || 'login'); fillRegions(); }
+function closeAuth() { $('#authModal').classList.remove('on'); if (location.hash === '#login' || location.hash === '#signup') history.replaceState(null, '', location.pathname); }
+function authTab(t) { $('#vLogin').style.display = t === 'login' ? '' : 'none'; $('#vSignup').style.display = t === 'signup' ? '' : 'none'; $('#tabLogin').classList.toggle('on', t === 'login'); $('#tabSignup').classList.toggle('on', t === 'signup'); }
+let REG = null;
+async function fillRegions() {
+  const sido = $('#suSido'), sig = $('#suSigungu'); if (sido.dataset.ready) return;
+  if (!REG) { const r = await api('/api/regions'); REG = (r.ok && r.regions) || {}; }
+  sido.innerHTML = '<option value="">광역</option>' + Object.keys(REG).map(k => `<option value="${esc(k)}">${esc(k)}</option>`).join('');
+  sido.onchange = () => { sig.innerHTML = '<option value="">시군구</option>' + (REG[sido.value] || []).map(k => `<option value="${esc(k)}">${esc(k)}</option>`).join(''); };
+  sido.dataset.ready = '1';
+}
+$('#btnLogin').addEventListener('click', () => openAuth('login'));
+$('#btnSignup').addEventListener('click', () => openAuth('signup'));
+$('#authClose').addEventListener('click', closeAuth);
+$('#tabLogin').addEventListener('click', () => authTab('login'));
+$('#tabSignup').addEventListener('click', () => authTab('signup'));
+$('#suTier').addEventListener('change', () => { $('#suContactReq').textContent = $('#suTier').value === 'general' ? '(일반이용자는 선택)' : '(필수)'; });
+window.addEventListener('hashchange', () => { if (location.hash === '#login') openAuth('login'); if (location.hash === '#signup') openAuth('signup'); });
+document.addEventListener('click', e => { const a = e.target.closest('a[href="#login"]'); if (a) { e.preventDefault(); openAuth('login'); } const w = e.target.closest('#whoEmail'); if (w) { e.preventDefault(); $('#emailModal').classList.add('on'); } });
+$('#lgPw').addEventListener('keydown', e => { if (e.key === 'Enter') $('#lgBtn').click(); });
+$('#lgBtn').addEventListener('click', async () => {
+  const b = $('#lgBtn'); b.disabled = true; $('#lgMsg').className = 'msg'; $('#lgMsg').textContent = '';
+  const r = await api('/api/auth/login', { method: 'POST', body: { email: $('#lgEmail').value.trim(), username: $('#lgEmail').value.trim(), password: $('#lgPw').value } });
+  b.disabled = false;
+  if (!r.ok) { $('#lgMsg').className = 'msg err'; $('#lgMsg').textContent = errText(r); return; }
+  me = r.user; $('#lgPw').value = ''; closeAuth(); setWho();
+  if (me.email_missing) { $('#emailModal').classList.add('on'); }
+  if (window.skAiDock) location.reload();
+});
+$('#suBtn').addEventListener('click', async () => {
+  const v = id => $(id).value.trim();
+  const body = { email: v('#suEmail').toLowerCase(), username: v('#suEmail').toLowerCase(), password: $('#suPw').value, name: v('#suName'), tier: $('#suTier').value, region_sido: $('#suSido').value, region_sigungu: $('#suSigungu').value, contact: v('#suContact'), org: v('#suOrg'), consent: $('#suConsent').checked };
+  const m = $('#suMsg'); m.className = 'msg'; m.textContent = '';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)) { m.className = 'msg err'; m.textContent = ERR.invalid_email; return; }
+  if (body.password.length < 8) { m.className = 'msg err'; m.textContent = ERR.weak_password; return; }
+  if (!body.name) { m.className = 'msg err'; m.textContent = ERR.name_required; return; }
+  if (!body.region_sido || !body.region_sigungu) { m.className = 'msg err'; m.textContent = ERR.region_required; return; }
+  if (body.tier !== 'general' && !body.contact) { m.className = 'msg err'; m.textContent = ERR.contact_required; return; }
+  if (!body.consent) { m.className = 'msg err'; m.textContent = ERR.consent_required; return; }
+  const b = $('#suBtn'); b.disabled = true;
+  const r = await api('/api/auth/signup', { method: 'POST', body });
+  b.disabled = false;
+  if (!r.ok) { m.className = 'msg err'; m.textContent = errText(r); return; }
+  m.className = 'msg ok'; m.textContent = r.status === 'approved' ? '가입되었습니다. 로그인해 주세요.' : '가입 신청이 접수되었습니다. 승인되면 로그인할 수 있습니다.';
+  if (r.status === 'approved') { $('#lgEmail').value = body.email; setTimeout(() => authTab('login'), 900); }
+});
+$('#btnLogout').addEventListener('click', async () => { await api('/api/auth/logout', { method: 'POST' }); me = null; setWho(); location.reload(); });
+$('#emLater').addEventListener('click', () => $('#emailModal').classList.remove('on'));
+$('#emBtn').addEventListener('click', async () => {
+  const r = await api('/api/auth/set-email', { method: 'POST', body: { email: $('#emEmail').value.trim().toLowerCase(), password: $('#emPw').value } });
+  const m = $('#emMsg'); if (r.ok) { m.className = 'msg ok'; m.textContent = '등록했습니다.'; if (me) { me.email = r.email; me.email_missing = false; } setWho(); setTimeout(() => $('#emailModal').classList.remove('on'), 900); }
+  else { m.className = 'msg err'; m.textContent = errText(r); }
+});
+/* 첫 화면 질문 → 상단 AI 도우미로 */
+function heroAsk() { const q = $('#heroQ').value.trim(); if (!q) return; $('#heroQ').value = ''; if (window.skAiDock) window.skAiDock.ask(q); else setTimeout(heroAsk, 300); }
+$('#heroAsk').addEventListener('click', heroAsk);
+$('#heroQ').addEventListener('keydown', e => { if (e.key === 'Enter') heroAsk(); });
+document.querySelectorAll('.ex button').forEach(b => b.addEventListener('click', () => { if (window.skAiDock) window.skAiDock.ask(b.dataset.q); }));
+renderTree();
+boot();
+
+// 서비스워커 등록 (PWA 설치 요건)
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(function () {}); }
 (function () {
-  var bar = document.getElementById('installBar');
-  var btn = document.getElementById('installBtn');
-  var note = document.getElementById('installNote');
-
-  // 이미 홈 화면 앱으로 열려 있으면 안내를 숨긴다
+  var bar = document.getElementById('installBar'), btn = document.getElementById('installBtn'), note = document.getElementById('installNote');
   var standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   if (standalone) return;
-
   var deferredPrompt = null;
-
-  // 안드로이드 크롬 등: 설치 프롬프트를 잡아두었다가 버튼으로 실행
-  window.addEventListener('beforeinstallprompt', function (e) {
-    e.preventDefault();
-    deferredPrompt = e;
-    bar.classList.add('show');
-  });
-
-  window.addEventListener('appinstalled', function () {
-    bar.classList.remove('show');
-  });
-
-  btn.addEventListener('click', function () {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      deferredPrompt = null;
-    } else {
-      showManualGuide();
-    }
-  });
-
-  function showManualGuide() {
-    var ua = navigator.userAgent;
-    if (/iPhone|iPad|iPod/.test(ua)) {
-      note.innerHTML = 'Safari 하단의 <b>공유 버튼(&#11014;&#65039;)</b>을 누른 뒤<br><b>"홈 화면에 추가"</b>를 선택하세요.';
-    } else {
-      note.innerHTML = '브라우저 메뉴(&#8942;)에서 <b>"홈 화면에 추가"</b> 또는 <b>"앱 설치"</b>를 선택하세요.';
-    }
-  }
-
-  // iOS는 beforeinstallprompt가 없으므로 버튼을 항상 보여주고 수동 안내
-  if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-    bar.classList.add('show');
-  }
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferredPrompt = e; bar.classList.add('show'); });
+  window.addEventListener('appinstalled', function () { bar.classList.remove('show'); });
+  btn.addEventListener('click', function () { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; } else { note.innerHTML = /iPhone|iPad|iPod/.test(navigator.userAgent) ? 'Safari 하단의 <b>공유 버튼</b>을 누른 뒤 <b>"홈 화면에 추가"</b>를 선택하세요.' : '브라우저 메뉴(⋮)에서 <b>"홈 화면에 추가"</b> 또는 <b>"앱 설치"</b>를 선택하세요.'; } });
+  if (/iPhone|iPad|iPod/.test(navigator.userAgent)) bar.classList.add('show');
 })();
 </script>
 </body>
