@@ -62,7 +62,26 @@
   .ask{display:flex;gap:8px;margin-top:10px}.ask input{flex:1;height:42px;border:1px solid var(--line);border-radius:10px;padding:0 14px;font-size:15px;font-family:inherit}.ask button{height:42px;border:none;background:var(--g7);color:#fff;border-radius:10px;padding:0 16px;font-size:14px;cursor:pointer}
   .ex{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.ex button{border:1px solid var(--g1);background:var(--g0);border-radius:999px;padding:4px 10px;font-size:12px;cursor:pointer;color:var(--g7)}
   .tiers{font-size:13px;color:var(--ink2);line-height:1.8}.tiers b{color:var(--g9)}
-  .tree{display:grid;grid-template-columns:repeat(auto-fill,minmax(480px,1fr));gap:14px;margin-top:6px}
+  .app{display:grid;grid-template-columns:1fr;gap:16px;margin-top:6px;align-items:start}
+  body.in .app{grid-template-columns:270px minmax(0,1fr)}
+  .tree{display:grid;grid-template-columns:repeat(auto-fill,minmax(480px,1fr));gap:14px}
+  body.in .tree{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+  /* 사이드바 — 로그인 때만 */
+  .side{display:none;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 12px 10px;position:sticky;top:72px;max-height:calc(100vh - 84px);overflow:auto}
+  body.in .side{display:block}
+  .side .me{font-size:13px;color:var(--ink2);padding:0 4px 8px;border-bottom:1px solid var(--line);margin-bottom:6px}.side .me b{color:var(--g9)}
+  .side .hint{font-size:11.5px;color:var(--mute);padding:0 4px 6px}
+  .ss{border-radius:10px;margin-bottom:4px}.ss.drag{opacity:.4}.ss.over{outline:2px dashed var(--g6);outline-offset:-2px}
+  .ss .sh{display:flex;align-items:center;gap:6px;padding:6px 6px;border-radius:8px;cursor:grab;user-select:none}.ss .sh:hover{background:var(--g0)}
+  .ss .sh .hd{color:var(--mute);font-size:14px;cursor:grab}.ss .sh .nm{flex:1;font-weight:600;font-size:14px;color:var(--g9)}
+  .ss .sh .mv{border:none;background:none;color:var(--mute);cursor:pointer;font-size:11px;padding:2px 3px;line-height:1}.ss .sh .mv:hover{color:var(--g7)}.ss .sh .mv:disabled{opacity:.25;cursor:default}
+  .ss ul{list-style:none;margin:0 0 4px;padding:0 0 0 22px}.ss li a{display:block;font-size:13px;padding:3px 6px;border-radius:6px;color:var(--ink)}.ss li a:hover{background:var(--g0);color:var(--g7)}
+  .side .lockbox{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line)}.side .lockbox h4{margin:0 0 4px;font-size:13px;color:var(--gold);display:flex;gap:6px;align-items:center}
+  .side .lockbox .sn{font-size:11.5px;color:var(--mute);padding:4px 6px 0}.side .lockbox ul{padding-left:10px;margin:0}.side .lockbox li a{color:var(--mute);display:flex;justify-content:space-between;gap:6px;font-size:12.5px}
+  .side .lockbox li a .rq{font-size:11px;color:var(--gold);white-space:nowrap}
+  .grp.lockgrp h3{color:var(--gold)}.grp.lockgrp li a{color:var(--mute)}.grp.lockgrp li a .rq{font-size:11px;color:var(--gold);background:var(--gold1);border-radius:8px;padding:0 6px}
+  .sideTog{display:none}
+  @media(max-width:760px){body.in .app{grid-template-columns:1fr}.side{position:static;max-height:none}.sideTog{display:inline-flex;margin:0 0 8px}body.in .side{display:none}body.in.sideOpen .side{display:block}}
   .secs{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px 18px}
   .sec h4{margin:6px 0 4px;font-size:14px;color:var(--g7);display:flex;align-items:center;gap:6px}.sec h4 .ic{font-size:15px}
   .gate{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--g0);border-style:dashed}
@@ -88,7 +107,7 @@
   .mbtn{width:100%;height:40px;border:none;background:var(--g7);color:#fff;border-radius:8px;font-size:14px;cursor:pointer;font-family:inherit}.mbtn:disabled{opacity:.5}
   .ghost{width:100%;height:36px;border:1px solid var(--line);background:#fff;border-radius:8px;font-size:13px;cursor:pointer;margin-top:6px;font-family:inherit}
   .req{color:var(--danger)}
-  @media(max-width:760px){.hero{grid-template-columns:1fr}.brand h1{font-size:17px}.tree{grid-template-columns:1fr}}
+  @media(max-width:760px){.hero{grid-template-columns:1fr}.brand h1{font-size:17px}.tree{grid-template-columns:1fr!important}}
 </style>
 <script src="/ai-dock.js" defer></script>
 </head>
@@ -113,13 +132,17 @@
       <h2>회원 등급</h2>
       <div class="tiers">
         <b>통합관리자</b> › <b>매니저회원</b>(사교원 직원, 체크권한으로 그룹웨어·관리 기능) › <b>연합회회원</b>(햇빛소득마을 연합회) › <b>조합회원</b>(회원협동조합) › <b>일반이용자</b>(교육·쇼핑·문의·AI 질문) › 비로그인(둘러보기·안내 질문)<br>
-        가입은 이메일 하나로, 로그인은 이메일+비밀번호. 조합·연합회·매니저는 승인 뒤 열립니다. 🔒 표시는 로그인이나 승인·체크권한이 필요한 메뉴입니다.
+        가입은 이메일 하나로, 로그인은 이메일+비밀번호. 조합·연합회·매니저는 승인 뒤 열립니다. 로그인하면 왼쪽 사이드바에 내 등급으로 열리는 메뉴만 모이고, 아직 못 여는 메뉴는 맨 아래 「권한 승인이 필요한 메뉴」에 따로 보입니다. 사이드바 순서를 바꾸면 본화면도 그 순서로 바뀝니다.
       </div>
       <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn sm" id="btnSignup">회원가입</button><a class="btn sm" href="account-privacy.html">개인정보처리방침</a></div>
     </div>
   </div>
 
-  <div class="tree" id="tree"></div>
+  <button class="btn sideTog" id="sideTog">☰ 내 메뉴</button>
+  <div class="app" id="app">
+    <aside class="side" id="side" aria-label="내 메뉴"></aside>
+    <div class="tree" id="tree"></div>
+  </div>
 
   <div class="install-bar" id="installBar">
     <button class="install-btn" id="installBtn">&#128241; 홈 화면에 바로가기 추가</button>
@@ -162,6 +185,7 @@
 </div>
 
 <!-- 옛 아이디 회원의 이메일 등록 -->
+<div class="modal-back" id="lockModal"><div class="modal"><h2>🔒 권한 승인이 필요한 메뉴</h2><p class="sub" id="lockTitle"></p><div class="tiers" id="lockBody"></div><button class="ghost" id="lockClose">닫기</button></div></div>
 <div class="modal-back" id="emailModal">
   <div class="modal">
     <h2>로그인 이메일 등록</h2><p class="sub">로그인 아이디가 이메일로 바뀌었습니다. 이메일을 등록하면 다음부터 그 주소로 들어옵니다.</p>
@@ -247,8 +271,10 @@ const TREE = [
   ]},
 ];
 const RANK = { admin: 5, staff: 4, federation: 3, coop: 2, general: 1 };
+const ROLE_KO = { admin: '통합관리자', staff: '매니저회원', federation: '연합회회원', coop: '조합회원', general: '일반이용자' };
 let me = null;
 let gateOpen = false;
+let prefs = {};                       // 계정별 설정(/api/auth/prefs) — menu_order
 function allowed(need) {
   if (!need) return true;
   if (!me) return false;
@@ -259,27 +285,122 @@ function allowed(need) {
   if (need.startsWith('role:')) return (RANK[me.role] || 0) >= (RANK[need.slice(5)] || 9);
   return false;
 }
-function renderItems(items) {
-  return items.map(it => {
-    const ok = allowed(it.need);
-    const cls = [it.sub ? 'sub' : '', ok ? '' : 'locked', it.soon ? 'soon' : '', it.ext ? 'ext' : ''].filter(Boolean).join(' ');
-    const href = ok ? it.h : '#login';
-    const title = ok ? '' : ' title="로그인·승인·체크권한이 필요합니다"';
-    return `<li class="${cls}"><a href="${esc(href)}"${title}${it.ext ? ' target="_blank" rel="noopener"' : ''}>${esc(it.t)}${it.d ? `<span class="d">${esc(it.d)}</span>` : ''}</a></li>`;
-  }).join('');
+/* 잠긴 메뉴에 무엇이 필요한지 한국어로 */
+function needText(need) {
+  if (!need) return '';
+  if (!me) return '로그인';
+  if (need === 'login') return '로그인';
+  if (need === 'admin') return '통합관리자 전용';
+  if (need.startsWith('perm:')) return '체크권한 「' + need.slice(5) + '」';
+  if (need.startsWith('role:')) return (ROLE_KO[need.slice(5)] || need.slice(5)) + ' 승인';
+  return '승인';
 }
+/* 8개 소분류를 한 줄로 — 사이드바·개인 순서의 단위 */
+const SECTIONS = []; TREE.forEach((g, gi) => g.secs.forEach(sc => SECTIONS.push(Object.assign({ key: sc.name, gi }, sc))));
+const DEFAULT_ORDER = SECTIONS.map(sc => sc.key);
+function myOrder() {
+  const saved = Array.isArray(prefs.menu_order) ? prefs.menu_order.filter(k => DEFAULT_ORDER.includes(k)) : [];
+  return saved.concat(DEFAULT_ORDER.filter(k => !saved.includes(k)));
+}
+function itemLi(it, ok) {
+  const cls = [it.sub ? 'sub' : '', ok ? '' : 'locked', it.soon ? 'soon' : '', it.ext ? 'ext' : ''].filter(Boolean).join(' ');
+  const href = ok ? it.h : (me ? '#locked' : '#login');
+  const title = ok ? '' : ' title="' + esc(needText(it.need)) + '이 필요합니다"';
+  const rq = (ok || !me) ? '' : `<span class="rq">${esc(needText(it.need))}</span>`;
+  return `<li class="${cls}"><a href="${esc(href)}"${title} data-need="${esc(it.need || '')}" data-t="${esc(it.t)}"${(ok && it.ext) ? ' target="_blank" rel="noopener"' : ''}>${esc(it.t)}${it.d ? `<span class="d">${esc(it.d)}</span>` : ''}${rq}</a></li>`;
+}
+function renderItems(items) { return items.map(it => itemLi(it, allowed(it.need))).join(''); }
 function renderGroup(g) {
   return `<div class="grp"><h3><span class="ic">${g.ic}</span>${esc(g.name)}${g.lock ? `<span class="lock">🔒 ${esc(g.lock)}</span>` : ''}</h3><div class="secs">${g.secs.map(sc =>
     `<div class="sec"><h4><span class="ic">${sc.ic}</span>${esc(sc.name)}</h4><ul>${renderItems(sc.items)}</ul></div>`).join('')}</div></div>`;
 }
-function renderTree() {
+/* ① 비로그인 첫 화면 — 묶음 전부(그룹웨어·관리는 단추만) */
+function renderPublic() {
   $('#tree').innerHTML = TREE.map(g => {
     if (!g.gate) return renderGroup(g);
-    if (!allowed(g.gate)) return '';                       // 매니저·통합관리자가 아니면 첫 화면에 흔적 없음
-    if (gateOpen) return renderGroup(g);
-    return `<div class="grp gate"><button class="btn p" id="gateBtn">${g.ic} ${esc(g.name)} 열기</button><span class="hint">🔒 ${esc(g.lock)} — 단추를 누르면 메뉴가 펼쳐집니다</span></div>`;
+    if (allowed(g.gate) && gateOpen) return renderGroup(g);
+    return `<div class="grp gate"><button class="btn p" id="gateBtn">${g.ic} ${esc(g.name)} 열기</button><span class="hint">🔒 ${esc(g.lock)} — ${allowed(g.gate) ? '단추를 누르면 메뉴가 펼쳐집니다' : '로그인하면 열립니다'}</span></div>`;
   }).join('');
-  const gb = $('#gateBtn'); if (gb) gb.addEventListener('click', () => { gateOpen = true; renderTree(); });
+  const gb = $('#gateBtn'); if (gb) gb.addEventListener('click', () => { if (allowed(TREE.find(g => g.gate).gate)) { gateOpen = true; renderPublic(); } else openAuth('login'); });
+}
+/* ② 로그인 뒤 — 내 순서대로 열리는 메뉴, 맨 끝에 잠긴 메뉴 */
+function splitMine() {
+  const open = [], locked = [];
+  myOrder().forEach(k => {
+    const sc = SECTIONS.find(x => x.key === k);
+    const ok = sc.items.filter(it => allowed(it.need)), no = sc.items.filter(it => !allowed(it.need));
+    if (ok.length) open.push({ sc, items: ok });
+    if (no.length) locked.push({ sc, items: no });
+  });
+  return { open, locked };
+}
+function renderMain() {
+  const { open, locked } = splitMine();
+  $('#tree').innerHTML = open.map(({ sc, items }) =>
+    `<div class="grp" data-sec="${esc(sc.key)}"><h3><span class="ic">${sc.ic}</span>${esc(sc.name)}</h3><ul>${renderItems(items)}</ul></div>`).join('') +
+    (locked.length ? `<div class="grp lockgrp" data-sec="__locked"><h3><span class="ic">🔒</span>권한 승인이 필요한 메뉴</h3><div class="secs">${locked.map(({ sc, items }) =>
+      `<div class="sec"><h4><span class="ic">${sc.ic}</span>${esc(sc.name)}</h4><ul>${renderItems(items)}</ul></div>`).join('')}</div></div>` : '');
+}
+function renderSide() {
+  const { open, locked } = splitMine();
+  const n = open.length;
+  $('#side').innerHTML = `<div class="me"><b>${esc(me.name || me.email || me.username)}</b> · ${esc(me.role_ko || ROLE_KO[me.role] || '')}</div>
+    <div class="hint">⠿ 끌어서 또는 ▲▼ 로 순서를 바꾸면 본화면도 그 순서로 보입니다</div>` +
+    open.map(({ sc, items }, i) => `<div class="ss" draggable="true" data-sec="${esc(sc.key)}"><div class="sh"><span class="hd">⠿</span><span class="ic">${sc.ic}</span><span class="nm">${esc(sc.name)}</span><button class="mv" data-mv="-1" data-sec="${esc(sc.key)}" title="위로"${i === 0 ? ' disabled' : ''}>▲</button><button class="mv" data-mv="1" data-sec="${esc(sc.key)}" title="아래로"${i === n - 1 ? ' disabled' : ''}>▼</button></div><ul>${items.map(it => `<li><a href="${esc(it.h)}"${it.ext ? ' target="_blank" rel="noopener"' : ''}>${esc(it.t)}</a></li>`).join('')}</ul></div>`).join('') +
+    (locked.length ? `<div class="lockbox"><h4>🔒 권한 승인이 필요한 메뉴</h4>${locked.map(({ sc, items }) => `<div class="sn">${sc.ic} ${esc(sc.name)}</div><ul>${items.map(it => `<li><a href="#locked" data-need="${esc(it.need || '')}" data-t="${esc(it.t)}">${esc(it.t)}<span class="rq">${esc(needText(it.need))}</span></a></li>`).join('')}</ul>`).join('')}</div>` : '');
+  // ▲▼
+  $('#side').querySelectorAll('.mv').forEach(b => b.addEventListener('click', () => moveSec(b.dataset.sec, +b.dataset.mv)));
+  // 끌어서 놓기
+  let dragKey = null;
+  $('#side').querySelectorAll('.ss').forEach(el => {
+    el.addEventListener('dragstart', e => { dragKey = el.dataset.sec; el.classList.add('drag'); e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', dragKey); } catch (_) {} });
+    el.addEventListener('dragend', () => { el.classList.remove('drag'); $('#side').querySelectorAll('.ss.over').forEach(x => x.classList.remove('over')); });
+    el.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; el.classList.add('over'); });
+    el.addEventListener('dragleave', () => el.classList.remove('over'));
+    el.addEventListener('drop', e => { e.preventDefault(); el.classList.remove('over'); if (dragKey && dragKey !== el.dataset.sec) placeSec(dragKey, el.dataset.sec); dragKey = null; });
+  });
+}
+/* 순서 바꾸기 — 열린 소분류끼리만 움직이고, 잠긴 소분류는 원래 자리에 남긴다 */
+function moveSec(key, dir) {
+  const order = myOrder(); const openKeys = splitMine().open.map(o => o.sc.key);
+  const i = openKeys.indexOf(key), j = i + dir; if (i < 0 || j < 0 || j >= openKeys.length) return;
+  const a = order.indexOf(openKeys[i]), b = order.indexOf(openKeys[j]);
+  order[a] = openKeys[j]; order[b] = openKeys[i];
+  saveOrder(order);
+}
+function placeSec(key, beforeKey) {
+  const order = myOrder().filter(k => k !== key);
+  order.splice(order.indexOf(beforeKey), 0, key);
+  saveOrder(order);
+}
+function saveOrder(order) {
+  prefs.menu_order = order;
+  try { localStorage.setItem('sk_menu_order_' + me.id, JSON.stringify(order)); } catch (_) {}
+  renderSide(); renderMain();
+  api('/api/auth/prefs', { method: 'POST', body: { menu_order: order } }).then(r => { if (r.ok && r.prefs) prefs = r.prefs; });
+}
+async function loadPrefs() {
+  prefs = {};
+  try { const c = localStorage.getItem('sk_menu_order_' + me.id); if (c) prefs.menu_order = JSON.parse(c); } catch (_) {}
+  const r = await api('/api/auth/prefs');
+  if (r.ok && r.prefs) { prefs = r.prefs; }
+}
+function renderTree() {
+  document.body.classList.toggle('in', !!me);
+  if (!me) { $('#side').innerHTML = ''; renderPublic(); return; }
+  renderSide(); renderMain();
+}
+/* 잠긴 메뉴를 누르면 — 무엇이 필요한지 안내 */
+function openLock(a) {
+  const need = a.dataset.need || '', t = a.dataset.t || '';
+  $('#lockTitle').textContent = t;
+  let how;
+  if (need === 'admin') how = '통합관리자만 쓰는 메뉴입니다.';
+  else if (need.startsWith('perm:')) how = `통합관리자가 회원·권한 화면에서 체크권한 「${need.slice(5)}」을 켜 주어야 열립니다. 필요하면 <a href="${HOME}contact">문의</a>로 요청해 주세요.`;
+  else if (need.startsWith('role:')) how = `${ROLE_KO[need.slice(5)] || ''} 등급 승인이 필요합니다. 회원가입 때 해당 등급을 신청했거나, 지금 등급을 올리려면 <a href="${HOME}contact">문의</a>로 요청해 주세요.`;
+  else how = '로그인이 필요합니다.';
+  $('#lockBody').innerHTML = `지금 등급: <b>${esc(me ? (me.role_ko || ROLE_KO[me.role] || '') : '비로그인')}</b> · 필요한 것: <b>${esc(needText(need))}</b><br>${how}`;
+  $('#lockModal').classList.add('on');
 }
 function setWho() {
   if (me) { $('#who').innerHTML = `<b>${esc(me.name || me.email || me.username)}</b> · ${esc(me.role_ko || '')}` + (me.email ? '' : ' · <a href="#" id="whoEmail">이메일 등록</a>'); $('#btnLogin').style.display = 'none'; $('#btnLogout').style.display = ''; }
@@ -289,6 +410,7 @@ function setWho() {
 async function boot() {
   const r = await api('/api/auth/me');
   me = (r.ok && r.user) ? r.user : null;
+  if (me) await loadPrefs();
   setWho();
   if (location.hash === '#login') openAuth('login');
   if (location.hash === '#signup') openAuth('signup');
@@ -312,14 +434,16 @@ $('#tabLogin').addEventListener('click', () => authTab('login'));
 $('#tabSignup').addEventListener('click', () => authTab('signup'));
 $('#suTier').addEventListener('change', () => { $('#suContactReq').textContent = $('#suTier').value === 'general' ? '(일반이용자는 선택)' : '(필수)'; });
 window.addEventListener('hashchange', () => { if (location.hash === '#login') openAuth('login'); if (location.hash === '#signup') openAuth('signup'); });
-document.addEventListener('click', e => { const a = e.target.closest('a[href="#login"]'); if (a) { e.preventDefault(); openAuth('login'); } const w = e.target.closest('#whoEmail'); if (w) { e.preventDefault(); $('#emailModal').classList.add('on'); } });
+$('#lockClose').addEventListener('click', () => $('#lockModal').classList.remove('on'));
+$('#sideTog').addEventListener('click', () => document.body.classList.toggle('sideOpen'));
+document.addEventListener('click', e => { const l = e.target.closest('a[href="#locked"]'); if (l) { e.preventDefault(); openLock(l); return; } const a = e.target.closest('a[href="#login"]'); if (a) { e.preventDefault(); openAuth('login'); } const w = e.target.closest('#whoEmail'); if (w) { e.preventDefault(); $('#emailModal').classList.add('on'); } });
 $('#lgPw').addEventListener('keydown', e => { if (e.key === 'Enter') $('#lgBtn').click(); });
 $('#lgBtn').addEventListener('click', async () => {
   const b = $('#lgBtn'); b.disabled = true; $('#lgMsg').className = 'msg'; $('#lgMsg').textContent = '';
   const r = await api('/api/auth/login', { method: 'POST', body: { email: $('#lgEmail').value.trim(), username: $('#lgEmail').value.trim(), password: $('#lgPw').value } });
   b.disabled = false;
   if (!r.ok) { $('#lgMsg').className = 'msg err'; $('#lgMsg').textContent = errText(r); return; }
-  me = r.user; $('#lgPw').value = ''; closeAuth(); setWho();
+  me = r.user; $('#lgPw').value = ''; closeAuth(); await loadPrefs(); setWho();
   if (me.email_missing) { $('#emailModal').classList.add('on'); }
   if (window.skAiDock) location.reload();
 });
