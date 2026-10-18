@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>사교원 — 사회혁신교육원 사회적협동조합 통합사이트</title>
-<meta name="description" content="사회혁신교육원 사회적협동조합(사교원) 통합사이트 — 소개·연구실·교육·사업·쇼핑·참여·그룹웨어를 한 화면에서. 상단 AI 도우미에게 바로 물어보세요.">
+<meta name="description" content="사회혁신교육원 사회적협동조합(사교원) 통합사이트 — 소개·연구실·참여, 교육·사업·쇼핑을 한 화면에서. 상단 AI 도우미에게 바로 물어보세요.">
 <link rel="canonical" href="https://sakyowon.co.kr/">
 <meta property="og:title" content="사교원 통합사이트 — 사회혁신교육원 사회적협동조합">
-<meta property="og:description" content="소개·연구실·교육·사업·쇼핑·참여·그룹웨어 — 사교원의 모든 메뉴를 한눈에, AI 도우미와 함께">
+<meta property="og:description" content="소개·연구실·참여 · 교육·사업·쇼핑 — 사교원의 모든 메뉴를 한눈에, AI 도우미와 함께">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://sakyowon.co.kr/">
 <meta property="og:image" content="https://sakyowon.co.kr/icon-512.png">
@@ -62,7 +62,11 @@
   .ask{display:flex;gap:8px;margin-top:10px}.ask input{flex:1;height:42px;border:1px solid var(--line);border-radius:10px;padding:0 14px;font-size:15px;font-family:inherit}.ask button{height:42px;border:none;background:var(--g7);color:#fff;border-radius:10px;padding:0 16px;font-size:14px;cursor:pointer}
   .ex{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.ex button{border:1px solid var(--g1);background:var(--g0);border-radius:999px;padding:4px 10px;font-size:12px;cursor:pointer;color:var(--g7)}
   .tiers{font-size:13px;color:var(--ink2);line-height:1.8}.tiers b{color:var(--g9)}
-  .tree{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px;margin-top:6px}
+  .tree{display:grid;grid-template-columns:repeat(auto-fill,minmax(480px,1fr));gap:14px;margin-top:6px}
+  .secs{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px 18px}
+  .sec h4{margin:6px 0 4px;font-size:14px;color:var(--g7);display:flex;align-items:center;gap:6px}.sec h4 .ic{font-size:15px}
+  .gate{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--g0);border-style:dashed}
+  .gate .hint{font-size:12.5px;color:var(--mute)}.gate .btn{font-size:14px;padding:9px 18px}
   .grp{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px 10px}
   .grp h3{margin:0 0 8px;font-size:16px;font-family:var(--serif);color:var(--g9);display:flex;align-items:center;gap:8px}.grp h3 .ic{font-size:18px}.grp h3 .lock{font-size:12px;color:var(--gold);font-family:var(--font);font-weight:400}
   .grp ul{list-style:none;margin:0;padding:0 0 0 8px;border-left:2px solid var(--g1)}.grp li{position:relative;padding:3px 0 3px 14px}.grp li::before{content:"";position:absolute;left:-2px;top:16px;width:10px;height:2px;background:var(--g1)}
@@ -84,14 +88,14 @@
   .mbtn{width:100%;height:40px;border:none;background:var(--g7);color:#fff;border-radius:8px;font-size:14px;cursor:pointer;font-family:inherit}.mbtn:disabled{opacity:.5}
   .ghost{width:100%;height:36px;border:1px solid var(--line);background:#fff;border-radius:8px;font-size:13px;cursor:pointer;margin-top:6px;font-family:inherit}
   .req{color:var(--danger)}
-  @media(max-width:760px){.hero{grid-template-columns:1fr}.brand h1{font-size:17px}}
+  @media(max-width:760px){.hero{grid-template-columns:1fr}.brand h1{font-size:17px}.tree{grid-template-columns:1fr}}
 </style>
 <script src="/ai-dock.js" defer></script>
 </head>
 <body>
 <div class="wrap">
   <div class="top">
-    <div class="brand"><div class="mark">L&amp;L</div><div><h1>사교원 통합사이트</h1><div class="sub">사회혁신교육원 사회적협동조합 · 소개 · 연구실 · 교육 · 사업 · 쇼핑 · 참여 · 그룹웨어</div></div></div>
+    <div class="brand"><div class="mark">L&amp;L</div><div><h1>사교원 통합사이트</h1><div class="sub">사회혁신교육원 사회적협동조합 · 소개·연구실·참여 · 교육·사업·쇼핑</div></div></div>
     <div class="sp"></div>
     <span class="who" id="who"></span>
     <button class="btn p" id="btnLogin">로그인 · 회원가입</button>
@@ -182,64 +186,69 @@ const ERR = { invalid_credentials: '이메일(또는 아이디) 또는 비밀번
   region_required: '활동지역(광역·시군구)을 골라 주세요.', contact_required: '승인 안내를 받을 전화번호를 적어 주세요.', invalid_contact: '전화번호 형식이 올바르지 않습니다 (예: 010-0000-0000).', consent_required: '개인정보 수집·이용에 동의해 주세요.', upstream_unavailable: '계정 서버에 연결할 수 없습니다.' };
 const errText = r => r.status === 429 ? ERR.rate_limited : (ERR[r.error] || '처리하지 못했습니다. 잠시 후 다시 시도해 주세요.');
 
-/* ── 메뉴 트리 — 등급·체크권한에 따라 🔒 표시 ──
+/* ── 메뉴 트리 — 4묶음(이사장 지시 10-18): ①소개·연구실·참여 ②교육·사업·쇼핑 ③그룹웨어·관리(매니저·통합관리자만, 첫 화면엔 단추만) · 가족 메신저는 첫 화면에서 빼고 관리 안 통합관리자 전용
    need: 'login' 로그인 | 'perm:정책지원관' 체크권한 | 'role:staff' 매니저 이상 | 'role:coop' 조합 이상 | 'role:federation' 연합회 이상 | 'admin' */
 const HOME = 'https://home.sakyowon.co.kr/#/';
 const TREE = [
-  { ic: '🏛️', name: '소개', items: [
-    { t: '사교원 소개', d: '지향·활동·걸어온 길·특장점', h: HOME + 'about' },
-    { t: '경영공시', d: '정관·규약 · 재무제표 · 조합원 현황', h: HOME + 'disclosure' },
+  { ic: '🏛️', name: '소개 · 연구실 · 참여', secs: [
+    { ic: '🏛️', name: '소개', items: [
+      { t: '사교원 소개', d: '지향·활동·걸어온 길·특장점', h: HOME + 'about' },
+      { t: '경영공시', d: '정관·규약 · 재무제표 · 조합원 현황', h: HOME + 'disclosure' },
+    ]},
+    { ic: '🔬', name: '연구실', items: [
+      { t: '연구자료', d: '보고서 31건 검색·열람', h: HOME + 'research' },
+      { t: '정책지원관 지원시스템', d: '공약·조례·문서작성·브리핑 — 체크권한', h: HOME + 'policy', need: 'perm:정책지원관' },
+      { t: '시민재생에너지 AI', d: '고성능컴퓨팅 과제 소개', h: '/cre/' },
+      { t: '사교원 위키', d: '공개 지식 431쪽 (별도 운영)', h: '/sakyowon-wiki/', ext: true },
+      { t: '연대지능 위키', d: '품앗이 공동 지식베이스', h: 'https://wiki.poomasi.org/', ext: true },
+    ]},
+    { ic: '💬', name: '참여', items: [
+      { t: '문의', d: '교육·사업·제휴 문의', h: HOME + 'contact' },
+      { t: '활동가 의견', d: '아카데미 의견 게시판', h: '/academy-site/#feedback' },
+      { t: '사이트 개선 의견', d: 'AI 도우미에게 바로 말해도 됩니다', h: HOME + 'contact' },
+    ]},
   ]},
-  { ic: '🔬', name: '연구실', items: [
-    { t: '연구자료', d: '보고서 31건 검색·열람', h: HOME + 'research' },
-    { t: '정책지원관 지원시스템', d: '공약·조례·문서작성·브리핑 — 체크권한', h: HOME + 'policy', need: 'perm:정책지원관' },
-    { t: '시민재생에너지 AI', d: '고성능컴퓨팅 과제 소개', h: '/cre/' },
-    { t: '사교원 위키', d: '공개 지식 431쪽 (별도 운영)', h: '/sakyowon-wiki/', ext: true },
-    { t: '연대지능 위키', d: '품앗이 공동 지식베이스', h: 'https://wiki.poomasi.org/', ext: true },
+  { ic: '🎓', name: '교육 · 사업 · 쇼핑', secs: [
+    { ic: '🎓', name: '교육', items: [
+      { t: '연대지능활동가 아카데미', d: '실습 15단계 · 학습 7단계 · 자격증 · 지식 검증 게임', h: '/academy-site/' },
+      { t: '교육프로그램 신청', d: '주민자치 · 연대지능 활동가 · 문제해결 팀러닝 — 필요 진단과 견적', h: HOME + 'shop/edu' },
+      { t: '사회혁신팀러닝', d: '자문·컨설팅 (통합 개편 중)', h: '/teamlearning-site/', soon: true },
+    ]},
+    { ic: '☀️', name: '사업', items: [
+      { t: '햇빛소득마을 (햇소자)', d: '신청·진단 → 조합 설립 → 정산·배당 — 조합·연합회 회원', h: '/hatsoja/' },
+      { t: '어촌신활력증진사업', d: '사업 안내 · 소식 · 기획안/보고서 · KPI · 예산 집행실적', h: 'https://vitality.sakyowon.co.kr/' },
+      { t: '망남 (완도 망남생활권)', d: '', h: 'https://vitality.sakyowon.co.kr/', sub: true },
+      { t: '양양 (강원 양양)', d: '망남과 같은 구성으로 채우는 중', h: 'https://vitality.sakyowon.co.kr/', sub: true, soon: true },
+      { t: '망남마을협동조합', d: '마을사업 · 마을학교 · 플로깅 · 물멍 예약 · 경영공시', h: '/mangnam-coop/' },
+    ]},
+    { ic: '🛒', name: '쇼핑', items: [
+      { t: '상품', d: '도서·굿즈·지역특산', h: HOME + 'shop' },
+      { t: '장바구니', d: '', h: HOME + 'cart' },
+    ]},
   ]},
-  { ic: '🎓', name: '교육', items: [
-    { t: '연대지능활동가 아카데미', d: '실습 15단계 · 학습 7단계 · 자격증 · 지식 검증 게임', h: '/academy-site/' },
-    { t: '교육프로그램 신청', d: '주민자치 · 연대지능 활동가 · 문제해결 팀러닝 — 필요 진단과 견적', h: HOME + 'shop/edu' },
-    { t: '사회혁신팀러닝', d: '자문·컨설팅 (통합 개편 중)', h: '/teamlearning-site/', soon: true },
-  ]},
-  { ic: '☀️', name: '사업', items: [
-    { t: '햇빛소득마을 (햇소자)', d: '신청·진단 → 조합 설립 → 정산·배당 — 조합·연합회 회원', h: '/hatsoja/' },
-    { t: '어촌신활력증진사업', d: '사업 안내 · 소식 · 기획안/보고서 · KPI · 예산 집행실적', h: 'https://vitality.sakyowon.co.kr/' },
-    { t: '망남 (완도 망남생활권)', d: '', h: 'https://vitality.sakyowon.co.kr/', sub: true },
-    { t: '양양 (강원 양양)', d: '망남과 같은 구성으로 채우는 중', h: 'https://vitality.sakyowon.co.kr/', sub: true, soon: true },
-    { t: '망남마을협동조합', d: '마을사업 · 마을학교 · 플로깅 · 물멍 예약 · 경영공시', h: '/mangnam-coop/' },
-  ]},
-  { ic: '🛒', name: '쇼핑', items: [
-    { t: '상품', d: '도서·굿즈·지역특산', h: HOME + 'shop' },
-    { t: '장바구니', d: '', h: HOME + 'cart' },
-  ]},
-  { ic: '💬', name: '참여', items: [
-    { t: '문의', d: '교육·사업·제휴 문의', h: HOME + 'contact' },
-    { t: '활동가 의견', d: '아카데미 의견 게시판', h: '/academy-site/#feedback' },
-    { t: '사이트 개선 의견', d: 'AI 도우미에게 바로 말해도 됩니다', h: HOME + 'contact' },
-  ]},
-  { ic: '🗂️', name: '그룹웨어', lock: '매니저회원 · 체크권한', items: [
-    { t: '직원전용 질문', d: '사내 자료 근거 답변(고성능컴퓨팅)', h: 'https://gw.sakyowon.co.kr/#staff', need: 'role:staff' },
-    { t: '보고서·기획안 작성', d: '개요 → 절별 작성 → 한글', h: 'https://gw.sakyowon.co.kr/#docs', need: 'role:staff' },
-    { t: '메일 · 결재 · 월간보고', d: '체크권한별', h: 'https://gw.sakyowon.co.kr/#home', need: 'role:staff' },
-    { t: '입찰 제안서 · 협동조합 설립 지원', d: '체크권한별', h: 'https://gw.sakyowon.co.kr/#bid', need: 'role:staff' },
-    { t: '근태 (출퇴근·휴가)', d: 'GPS 출퇴근 · 휴가 결재', h: 'https://work.sakyowon.co.kr/', need: 'role:staff' },
-    { t: '인사기록', d: '체크권한 「인사열람」', h: 'https://hr.sakyowon.co.kr/', need: 'perm:인사열람' },
-    { t: '회계 · 세무 · 자산', d: '체크권한별', h: HOME + 'admin/accounting', need: 'perm:회계' },
-  ]},
-  { ic: '👨‍👩‍👧', name: '가족 메신저', lock: '초대받은 분만', items: [
-    { t: 'family.sakyowon.co.kr', d: '초대링크로 입장 · 사진·파일', h: 'https://family.sakyowon.co.kr/', ext: true },
-  ]},
-  { ic: '🔐', name: '관리', lock: '통합관리자 · 체크권한', items: [
-    { t: '회원 · 권한', d: '승인 · 등급 · 체크권한 · 비번 초기화', h: '/admin.html', need: 'perm:회원열람' },
-    { t: '사이트 관리 · 개선의견', d: '', h: '/admin.html', need: 'role:staff' },
-    { t: '홈페이지 관리자', d: '회계·세무·인사·자산·가족 메신저 · 콘텐츠', h: HOME + 'admin', need: 'role:staff' },
-    { t: '데이터 저장소', d: '엑셀 → 표 → SQL', h: '/data.html', need: 'perm:데이터읽기' },
-    { t: '주짓수 룰북', d: '통합관리자 전용', h: '/bjj/', need: 'admin' },
+  { ic: '🗂️', name: '그룹웨어 · 관리', gate: 'role:staff', lock: '매니저회원 · 통합관리자', secs: [
+    { ic: '🗂️', name: '그룹웨어', items: [
+      { t: '직원전용 질문', d: '사내 자료 근거 답변(고성능컴퓨팅)', h: 'https://gw.sakyowon.co.kr/#staff', need: 'role:staff' },
+      { t: '보고서·기획안 작성', d: '개요 → 절별 작성 → 한글', h: 'https://gw.sakyowon.co.kr/#docs', need: 'role:staff' },
+      { t: '메일 · 결재 · 월간보고', d: '체크권한별', h: 'https://gw.sakyowon.co.kr/#home', need: 'role:staff' },
+      { t: '입찰 제안서 · 협동조합 설립 지원', d: '체크권한별', h: 'https://gw.sakyowon.co.kr/#bid', need: 'role:staff' },
+      { t: '근태 (출퇴근·휴가)', d: 'GPS 출퇴근 · 휴가 결재', h: 'https://work.sakyowon.co.kr/', need: 'role:staff' },
+      { t: '인사기록', d: '체크권한 「인사열람」', h: 'https://hr.sakyowon.co.kr/', need: 'perm:인사열람' },
+      { t: '회계 · 세무 · 자산', d: '체크권한별', h: HOME + 'admin/accounting', need: 'perm:회계' },
+    ]},
+    { ic: '🔐', name: '관리', items: [
+      { t: '회원 · 권한', d: '승인 · 등급 · 체크권한 · 비번 초기화', h: '/admin.html', need: 'perm:회원열람' },
+      { t: '사이트 관리 · 개선의견', d: '', h: '/admin.html', need: 'role:staff' },
+      { t: '홈페이지 관리자', d: '회계·세무·인사·자산 · 콘텐츠', h: HOME + 'admin', need: 'role:staff' },
+      { t: '데이터 저장소', d: '엑셀 → 표 → SQL', h: '/data.html', need: 'perm:데이터읽기' },
+      { t: '가족 메신저 관리', d: '초대·구성원·설정 — 통합관리자 전용', h: HOME + 'admin/family', need: 'admin' },
+      { t: '주짓수 룰북', d: '통합관리자 전용', h: '/bjj/', need: 'admin' },
+    ]},
   ]},
 ];
 const RANK = { admin: 5, staff: 4, federation: 3, coop: 2, general: 1 };
 let me = null;
+let gateOpen = false;
 function allowed(need) {
   if (!need) return true;
   if (!me) return false;
@@ -250,14 +259,27 @@ function allowed(need) {
   if (need.startsWith('role:')) return (RANK[me.role] || 0) >= (RANK[need.slice(5)] || 9);
   return false;
 }
-function renderTree() {
-  $('#tree').innerHTML = TREE.map(g => `<div class="grp"><h3><span class="ic">${g.ic}</span>${esc(g.name)}${g.lock ? `<span class="lock">🔒 ${esc(g.lock)}</span>` : ''}</h3><ul>${g.items.map(it => {
+function renderItems(items) {
+  return items.map(it => {
     const ok = allowed(it.need);
     const cls = [it.sub ? 'sub' : '', ok ? '' : 'locked', it.soon ? 'soon' : '', it.ext ? 'ext' : ''].filter(Boolean).join(' ');
     const href = ok ? it.h : '#login';
     const title = ok ? '' : ' title="로그인·승인·체크권한이 필요합니다"';
     return `<li class="${cls}"><a href="${esc(href)}"${title}${it.ext ? ' target="_blank" rel="noopener"' : ''}>${esc(it.t)}${it.d ? `<span class="d">${esc(it.d)}</span>` : ''}</a></li>`;
-  }).join('')}</ul></div>`).join('');
+  }).join('');
+}
+function renderGroup(g) {
+  return `<div class="grp"><h3><span class="ic">${g.ic}</span>${esc(g.name)}${g.lock ? `<span class="lock">🔒 ${esc(g.lock)}</span>` : ''}</h3><div class="secs">${g.secs.map(sc =>
+    `<div class="sec"><h4><span class="ic">${sc.ic}</span>${esc(sc.name)}</h4><ul>${renderItems(sc.items)}</ul></div>`).join('')}</div></div>`;
+}
+function renderTree() {
+  $('#tree').innerHTML = TREE.map(g => {
+    if (!g.gate) return renderGroup(g);
+    if (!allowed(g.gate)) return '';                       // 매니저·통합관리자가 아니면 첫 화면에 흔적 없음
+    if (gateOpen) return renderGroup(g);
+    return `<div class="grp gate"><button class="btn p" id="gateBtn">${g.ic} ${esc(g.name)} 열기</button><span class="hint">🔒 ${esc(g.lock)} — 단추를 누르면 메뉴가 펼쳐집니다</span></div>`;
+  }).join('');
+  const gb = $('#gateBtn'); if (gb) gb.addEventListener('click', () => { gateOpen = true; renderTree(); });
 }
 function setWho() {
   if (me) { $('#who').innerHTML = `<b>${esc(me.name || me.email || me.username)}</b> · ${esc(me.role_ko || '')}` + (me.email ? '' : ' · <a href="#" id="whoEmail">이메일 등록</a>'); $('#btnLogin').style.display = 'none'; $('#btnLogout').style.display = ''; }
