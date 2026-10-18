@@ -81,6 +81,11 @@
   .side .lockbox li a .rq{font-size:11px;color:var(--gold);white-space:nowrap}
   .grp.lockgrp h3{color:var(--gold)}.grp.lockgrp li a{color:var(--mute)}.grp.lockgrp li a .rq{font-size:11px;color:var(--gold);background:var(--gold1);border-radius:8px;padding:0 6px}
   .sideTog{display:none}
+  /* 관리자 전용 등급 미리보기 띠(임시) */
+  .pv{display:none;align-items:center;gap:6px;flex-wrap:wrap;background:var(--gold1);border:1px solid #e6cf8a;border-radius:10px;padding:8px 12px;margin:0 0 10px;font-size:13px;color:#6b4a06}
+  .pv.on{display:flex}.pv b{margin-right:4px}.pv button{border:1px solid #d9bd6a;background:#fff;border-radius:999px;padding:4px 10px;font-size:12.5px;cursor:pointer;font-family:inherit;color:#6b4a06}
+  .pv button.cur{background:var(--gold);color:#fff;border-color:var(--gold)}.pv .now{margin-left:auto;font-size:12px}
+  .pvnote{font-size:11.5px;color:var(--gold);padding:0 4px 4px}
   @media(max-width:760px){body.in .app{grid-template-columns:1fr}.side{position:static;max-height:none}.sideTog{display:inline-flex;margin:0 0 8px}body.in .side{display:none}body.in.sideOpen .side{display:block}}
   .secs{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px 18px}
   .sec h4{margin:6px 0 4px;font-size:14px;color:var(--g7);display:flex;align-items:center;gap:6px}.sec h4 .ic{font-size:15px}
@@ -118,6 +123,7 @@
     <div class="sp"></div>
     <span class="who" id="who"></span>
     <button class="btn p" id="btnLogin">로그인 · 회원가입</button>
+    <button class="btn" id="btnPw" style="display:none">비밀번호 변경</button>
     <button class="btn" id="btnLogout" style="display:none">로그아웃</button>
   </div>
 
@@ -138,6 +144,7 @@
     </div>
   </div>
 
+  <div class="pv" id="pv"><b>🧪 등급별 미리보기(임시, 통합관리자만)</b><span id="pvBtns"></span><span class="now" id="pvNow"></span></div>
   <button class="btn sideTog" id="sideTog">☰ 내 메뉴</button>
   <div class="app" id="app">
     <aside class="side" id="side" aria-label="내 메뉴"></aside>
@@ -186,6 +193,16 @@
 
 <!-- 옛 아이디 회원의 이메일 등록 -->
 <div class="modal-back" id="lockModal"><div class="modal"><h2>🔒 권한 승인이 필요한 메뉴</h2><p class="sub" id="lockTitle"></p><div class="tiers" id="lockBody"></div><button class="ghost" id="lockClose">닫기</button></div></div>
+<div class="modal-back" id="pwModal">
+  <div class="modal">
+    <h2>비밀번호 변경</h2><p class="sub" id="pwNote">8자 이상. 바꾸면 그룹웨어·인사기록·근태·의정소통에도 같이 적용되고, 다른 기기의 로그인은 모두 끊깁니다.</p>
+    <div class="f"><label>현재(또는 임시) 비밀번호</label><input id="pwOld" type="password" autocomplete="current-password"></div>
+    <div class="f"><label>새 비밀번호</label><input id="pwNew" type="password" autocomplete="new-password"></div>
+    <div class="f"><label>새 비밀번호 확인</label><input id="pwNew2" type="password" autocomplete="new-password"></div>
+    <div class="msg" id="pwMsg"></div>
+    <button class="mbtn" id="pwBtn">바꾸기</button><button class="ghost" id="pwLater">나중에</button>
+  </div>
+</div>
 <div class="modal-back" id="emailModal">
   <div class="modal">
     <h2>로그인 이메일 등록</h2><p class="sub">로그인 아이디가 이메일로 바뀌었습니다. 이메일을 등록하면 다음부터 그 주소로 들어옵니다.</p>
@@ -272,7 +289,9 @@ const TREE = [
 ];
 const RANK = { admin: 5, staff: 4, federation: 3, coop: 2, general: 1 };
 const ROLE_KO = { admin: '통합관리자', staff: '매니저회원', federation: '연합회회원', coop: '조합회원', general: '일반이용자' };
-let me = null;
+let me = null;                        // 화면을 그리는 기준(미리보기 중엔 가짜 등급)
+let realMe = null;                    // 실제 로그인 계정
+let preview = null;                   // 통합관리자 등급별 미리보기(임시) — 'none' | role 키
 let gateOpen = false;
 let prefs = {};                       // 계정별 설정(/api/auth/prefs) — menu_order
 function allowed(need) {
@@ -344,7 +363,7 @@ function renderMain() {
 function renderSide() {
   const { open, locked } = splitMine();
   const n = open.length;
-  $('#side').innerHTML = `<div class="me"><b>${esc(me.name || me.email || me.username)}</b> · ${esc(me.role_ko || ROLE_KO[me.role] || '')}</div>
+  $('#side').innerHTML = `<div class="me"><b>${esc(me.name || me.email || me.username)}</b> · ${esc(me.role_ko || ROLE_KO[me.role] || '')}</div>` + (preview ? `<div class="pvnote">🧪 미리보기 — 순서를 바꿔도 저장되지 않습니다</div>` : '') + `
     <div class="hint">⠿ 끌어서 또는 ▲▼ 로 순서를 바꾸면 본화면도 그 순서로 보입니다</div>` +
     open.map(({ sc, items }, i) => `<div class="ss" draggable="true" data-sec="${esc(sc.key)}"><div class="sh"><span class="hd">⠿</span><span class="ic">${sc.ic}</span><span class="nm">${esc(sc.name)}</span><button class="mv" data-mv="-1" data-sec="${esc(sc.key)}" title="위로"${i === 0 ? ' disabled' : ''}>▲</button><button class="mv" data-mv="1" data-sec="${esc(sc.key)}" title="아래로"${i === n - 1 ? ' disabled' : ''}>▼</button></div><ul>${items.map(it => `<li><a href="${esc(it.h)}"${it.ext ? ' target="_blank" rel="noopener"' : ''}>${esc(it.t)}</a></li>`).join('')}</ul></div>`).join('') +
     (locked.length ? `<div class="lockbox"><h4>🔒 권한 승인이 필요한 메뉴</h4>${locked.map(({ sc, items }) => `<div class="sn">${sc.ic} ${esc(sc.name)}</div><ul>${items.map(it => `<li><a href="#locked" data-need="${esc(it.need || '')}" data-t="${esc(it.t)}">${esc(it.t)}<span class="rq">${esc(needText(it.need))}</span></a></li>`).join('')}</ul>`).join('')}</div>` : '');
@@ -375,8 +394,9 @@ function placeSec(key, beforeKey) {
 }
 function saveOrder(order) {
   prefs.menu_order = order;
-  try { localStorage.setItem('sk_menu_order_' + me.id, JSON.stringify(order)); } catch (_) {}
   renderSide(); renderMain();
+  if (preview) return;                // 미리보기 중엔 저장하지 않는다
+  try { localStorage.setItem('sk_menu_order_' + me.id, JSON.stringify(order)); } catch (_) {}
   api('/api/auth/prefs', { method: 'POST', body: { menu_order: order } }).then(r => { if (r.ok && r.prefs) prefs = r.prefs; });
 }
 async function loadPrefs() {
@@ -384,6 +404,42 @@ async function loadPrefs() {
   try { const c = localStorage.getItem('sk_menu_order_' + me.id); if (c) prefs.menu_order = JSON.parse(c); } catch (_) {}
   const r = await api('/api/auth/prefs');
   if (r.ok && r.prefs) { prefs = r.prefs; }
+}
+/* ── 통합관리자 등급별 미리보기(임시, 2026-10-18 이사장 지시) — 화면만 바꾼다. 서버 세션·저장은 실제 계정 그대로 */
+const MENU_PERMS = []; SECTIONS.forEach(sc => sc.items.forEach(it => { if (it.need && it.need.startsWith('perm:') && !MENU_PERMS.includes(it.need.slice(5))) MENU_PERMS.push(it.need.slice(5)); }));
+const PREVIEWS = [
+  { k: 'none', t: '비로그인', mk: () => null },
+  { k: 'general', t: '일반이용자', mk: () => ({ id: 'pv', name: '일반이용자(미리보기)', role: 'general', role_ko: '일반이용자', perms: [] }) },
+  { k: 'coop', t: '조합회원', mk: () => ({ id: 'pv', name: '조합회원(미리보기)', role: 'coop', role_ko: '조합회원', perms: [] }) },
+  { k: 'federation', t: '연합회회원', mk: () => ({ id: 'pv', name: '연합회회원(미리보기)', role: 'federation', role_ko: '연합회회원', perms: [] }) },
+  { k: 'staff0', t: '매니저(체크권한 없음)', mk: () => ({ id: 'pv', name: '매니저(미리보기)', role: 'staff', role_ko: '매니저회원', perms: [] }) },
+  { k: 'staff1', t: '매니저(체크권한 전부)', mk: () => ({ id: 'pv', name: '매니저(미리보기)', role: 'staff', role_ko: '매니저회원', perms: MENU_PERMS.slice() }) },
+];
+let savedPrefs = null;
+function setPreview(k) {
+  if (!realMe || realMe.role !== 'admin') return;
+  if (k === null) { preview = null; me = realMe; if (savedPrefs) { prefs = savedPrefs; savedPrefs = null; } gateOpen = false; renderPv(); renderTree(); return; }
+  const pv = PREVIEWS.find(p => p.k === k); if (!pv) return;
+  if (!preview) savedPrefs = prefs;    // 실제 순서는 지켜 두고
+  preview = k; prefs = {}; me = pv.mk(); gateOpen = false;
+  renderPv(); renderTree();
+}
+function renderPv() {
+  const bar = $('#pv'); bar.classList.toggle('on', !!(realMe && realMe.role === 'admin'));
+  if (!realMe || realMe.role !== 'admin') return;
+  $('#pvBtns').innerHTML = PREVIEWS.map(p => `<button data-pv="${p.k}" class="${preview === p.k ? 'cur' : ''}">${esc(p.t)}</button>`).join('') + `<button data-pv="" class="${preview ? '' : 'cur'}">통합관리자(원래대로)</button>`;
+  $('#pvNow').textContent = preview ? '지금 보는 화면: ' + PREVIEWS.find(p => p.k === preview).t + ' 기준 (실제 로그인은 ' + (realMe.name || realMe.username) + ')' : '실제 화면';
+  $('#pvBtns').querySelectorAll('button').forEach(b => b.addEventListener('click', () => setPreview(b.dataset.pv || null)));
+}
+/* ── 비밀번호 변경 (임시 비밀번호로 들어오면 바로 띄운다) */
+function openPw(tempNote) {
+  $('#pwNote').textContent = (tempNote ? '지금 임시 비밀번호로 로그인하셨습니다. 본인만 아는 비밀번호(8자 이상)로 바꿔 주세요. ' : '') + '바꾸면 그룹웨어·인사기록·근태·의정소통에도 같이 적용되고, 다른 기기의 로그인은 모두 끊깁니다.';
+  $('#pwMsg').className = 'msg'; $('#pwMsg').textContent = ''; $('#pwOld').value = ''; $('#pwNew').value = ''; $('#pwNew2').value = '';
+  $('#pwModal').classList.add('on');
+}
+async function checkTempPassword() {
+  const r = await api('/api/auth/password-status');
+  if (r.ok && r.temp) openPw(true);
 }
 function renderTree() {
   document.body.classList.toggle('in', !!me);
@@ -403,15 +459,18 @@ function openLock(a) {
   $('#lockModal').classList.add('on');
 }
 function setWho() {
-  if (me) { $('#who').innerHTML = `<b>${esc(me.name || me.email || me.username)}</b> · ${esc(me.role_ko || '')}` + (me.email ? '' : ' · <a href="#" id="whoEmail">이메일 등록</a>'); $('#btnLogin').style.display = 'none'; $('#btnLogout').style.display = ''; }
-  else { $('#who').textContent = ''; $('#btnLogin').style.display = ''; $('#btnLogout').style.display = 'none'; }
+  const u = realMe;
+  if (u) { $('#who').innerHTML = `<b>${esc(u.name || u.email || u.username)}</b> · ${esc(u.role_ko || '')}` + (u.email ? '' : ' · <a href="#" id="whoEmail">이메일 등록</a>'); $('#btnLogin').style.display = 'none'; $('#btnLogout').style.display = ''; $('#btnPw').style.display = ''; }
+  else { $('#who').textContent = ''; $('#btnLogin').style.display = ''; $('#btnLogout').style.display = 'none'; $('#btnPw').style.display = 'none'; }
+  renderPv();
   renderTree();
 }
 async function boot() {
   const r = await api('/api/auth/me');
-  me = (r.ok && r.user) ? r.user : null;
+  me = realMe = (r.ok && r.user) ? r.user : null;
   if (me) await loadPrefs();
   setWho();
+  if (me) checkTempPassword();
   if (location.hash === '#login') openAuth('login');
   if (location.hash === '#signup') openAuth('signup');
 }
@@ -443,8 +502,9 @@ $('#lgBtn').addEventListener('click', async () => {
   const r = await api('/api/auth/login', { method: 'POST', body: { email: $('#lgEmail').value.trim(), username: $('#lgEmail').value.trim(), password: $('#lgPw').value } });
   b.disabled = false;
   if (!r.ok) { $('#lgMsg').className = 'msg err'; $('#lgMsg').textContent = errText(r); return; }
-  me = r.user; $('#lgPw').value = ''; closeAuth(); await loadPrefs(); setWho();
+  me = realMe = r.user; preview = null; $('#lgPw').value = ''; closeAuth(); await loadPrefs(); setWho();
   if (me.email_missing) { $('#emailModal').classList.add('on'); }
+  else checkTempPassword();
   if (window.skAiDock) location.reload();
 });
 $('#lgForgot').addEventListener('click', async (e) => {
@@ -471,7 +531,21 @@ $('#suBtn').addEventListener('click', async () => {
   m.className = 'msg ok'; m.textContent = r.status === 'approved' ? '가입되었습니다. 로그인해 주세요.' : '가입 신청이 접수되었습니다. 승인되면 로그인할 수 있습니다.';
   if (r.status === 'approved') { $('#lgEmail').value = body.email; setTimeout(() => authTab('login'), 900); }
 });
-$('#btnLogout').addEventListener('click', async () => { await api('/api/auth/logout', { method: 'POST' }); me = null; setWho(); location.reload(); });
+$('#btnLogout').addEventListener('click', async () => { await api('/api/auth/logout', { method: 'POST' }); me = realMe = null; preview = null; setWho(); location.reload(); });
+$('#btnPw').addEventListener('click', () => openPw(false));
+$('#pwLater').addEventListener('click', () => $('#pwModal').classList.remove('on'));
+$('#pwBtn').addEventListener('click', async () => {
+  const m = $('#pwMsg'); m.className = 'msg'; m.textContent = '';
+  const o = $('#pwOld').value, n = $('#pwNew').value, n2 = $('#pwNew2').value;
+  if (n.length < 8) { m.className = 'msg err'; m.textContent = ERR.weak_password; return; }
+  if (n !== n2) { m.className = 'msg err'; m.textContent = '새 비밀번호 두 칸이 다릅니다.'; return; }
+  if (n === o) { m.className = 'msg err'; m.textContent = '지금 비밀번호와 다른 것으로 정해 주세요.'; return; }
+  const b = $('#pwBtn'); b.disabled = true;
+  const r = await api('/api/auth/change-password', { method: 'POST', body: { old: o, new: n } });
+  b.disabled = false;
+  if (!r.ok) { m.className = 'msg err'; m.textContent = r.error === 'invalid_credentials' ? '현재 비밀번호가 맞지 않습니다.' : errText(r); return; }
+  m.className = 'msg ok'; m.textContent = '바꿨습니다.'; setTimeout(() => $('#pwModal').classList.remove('on'), 900);
+});
 $('#emLater').addEventListener('click', () => $('#emailModal').classList.remove('on'));
 $('#emBtn').addEventListener('click', async () => {
   const r = await api('/api/auth/set-email', { method: 'POST', body: { email: $('#emEmail').value.trim().toLowerCase(), password: $('#emPw').value } });
