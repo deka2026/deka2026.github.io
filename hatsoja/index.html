@@ -1551,6 +1551,10 @@ const ROLE_MENUS = {
       ['mem','library','📚','공지·자료실'],
       ['mem','chat','💬','AI 상담'],
     ]],
+    /* 2026-10-22 상담 체인(분류→도구→RAG→HPC→출처·기준일)은 관리자가 먼저 써 보는 실험실 뒤에 둔다. 라이브 /api/ai/chat 은 그대로. */
+    ['실험실', [
+      ['adm','lab','🧪','상담 체인 실험실'],
+    ]],
   ],
   /* 연합회 메뉴는 두 갈래로 나눈다 (2026-09-29).
      ① 협동조합 회원 지원업무 — 남(회원조합)의 일을 돕는 업무. 자료는 서버에서 읽고 편집은 안 한다.
@@ -1796,6 +1800,7 @@ const MENU_DESC = {
   inquiries:['문의 처리','상담 신청과 문의를 접수·처리합니다'],
   content:['콘텐츠 관리','공지·FAQ·자료실 게시물을 관리합니다'],
   logs:['시스템 로그','회원·관리자의 활동 기록을 봅니다'],
+  lab:['상담 체인 실험실','질문을 분류해 도구·근거(RAG)로 보내고 출처·기준일을 붙이는 새 상담 체인을 관리자가 먼저 써 봅니다'],
   structure:['마을회·조합 설계','마을회와 조합의 구조·역할을 설계합니다'],
   cost:['사업비·부품 구성','설비 규모별 사업비와 부품 구성을 계산합니다'],
   finance:['자부담·융자 신청','자부담 비율과 융자 신청 서류를 준비합니다'],
@@ -8366,13 +8371,18 @@ async function sendChat(){
     body.scrollTop = body.scrollHeight;
     let answer = '', meta = null;
     try{
-      const res = await fetch('/api/ai/chat', {
+      const lab = location.hash.startsWith('#/adm/lab');   // 2026-10-22 관리자 실험실 → 새 상담 체인
+      const roleSel = document.getElementById('labRole');
+      const res = await fetch(lab ? '/api/ai/lab/chat' : '/api/ai/chat', {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({prompt: q, history: _chatHistory.slice(-10),
           context: '햇소자(햇빛소득마을 통합 운영 플랫폼) 이용자 상담 — 마을협동조합 설립·운영·발전사업'
-            + (_screenName ? ` (사용자가 직전에 보던 화면: ${_screenName})` : '')}),
+            + (_screenName ? ` (사용자가 직전에 보던 화면: ${_screenName})` : ''),
+          role_hint: lab && roleSel ? roleSel.value : ''}),
       });
       const d = await res.json();
+      const labMeta = document.getElementById('labMeta');
+      if(lab && labMeta) labMeta.textContent = JSON.stringify(d, null, 1);
       answer = d && d.answer ? d.answer : '';
       meta = answer && d && typeof d === 'object' ? d : null;   // 근거·엔진·request_id (표시용, 이력에는 안 넣음)
     }catch(e){ answer = ''; meta = null; }
@@ -8410,6 +8420,7 @@ function chatMetaHtml(d){
     let n = '';
     if(s.type === 'wiki' && s.node) n = String(s.node).split('#')[0];
     else if(s.type === 'law' && s.ref) n = String(s.ref);
+    else if((s.type === 'rag' || s.type === 'tool') && s.title) n = String(s.title) + (s.date ? ` (기준일 ${s.date})` : '');   // 상담 체인 근거
     n = n.trim();
     if(n && !names.includes(n)) names.push(n);
   });
@@ -8423,6 +8434,10 @@ function chatMetaHtml(d){
   const be = typeof d.backend === 'string' ? d.backend : '';
   let badge = '', note = '';
   if(be === 'anthropic') badge = '일반 AI';
+  else if(be === 'hpc-chain'){   // 2026-10-22 상담 체인: 분류 › 도구 · 근거 수 · 경로(hpc/template/fallback)
+    badge = `상담 체인 · ${d.분류 || ''}${d.도구 ? ' › ' + d.도구 : ''} · 근거 ${srcs.length}건${d.경로 ? ' · ' + d.경로 : ''}`;
+    if(d.insufficient !== true) note = 'AI 답변은 참고용입니다. 출처·기준일을 확인하세요.';
+  }
   else if(be.startsWith('poome')) badge = d.engine_status != null ? `엔진 일시 불가 (${d.engine_status})` : '';
   else if(be){
     badge = `GPU 엔진 · 근거 ${srcs.length}건`;
@@ -12135,6 +12150,7 @@ function renderAdminPage(page){
     case 'inquiries':  return admInquiries();
     case 'content':    return admContent();
     case 'logs':       return admLogs();
+    case 'lab':        return admLab();
     case 'taxkpi':     return admTaxKpi();
     case 'consult':    return admConsult();
     default:           return admDashboard();
@@ -12607,6 +12623,66 @@ function admContent(){
       </div>
     </div>
   `;
+}
+
+/* ─── 상담 체인 실험실 (2026-10-22, 관리자 전용) ───
+   같은 chatIn/chatBody/sendChat 을 쓰되 #/adm/lab 에서는 /api/ai/lab/chat(새 체인)으로 간다. 라이브 /api/ai/chat 은 그대로. */
+const LAB_PRESETS = [
+  ['⚡ 발전량 조회', '전남 7월 태양광 발전량은 얼마나 되나요?'],
+  ['💰 수익 계산', '500kW 설비면 20년 동안 수익이 얼마나 되나요?'],
+  ['⚖️ 법령 검색', '성장촉진지역 협동조합의 계통 우선접속 근거 법령이 뭔가요?'],
+  ['📝 서류 작성', '창립총회 회의록 초안을 만들어 주세요'],
+  ['📅 일정 확인', '선정일이 2026-07-31 이면 발전사업허가는 언제까지 받아야 하나요?'],
+  ['💬 일반 상담', '조합원 자격 요건은 무엇인가요? 주민 기준일도 알려주세요'],
+];
+function admLab(){
+  setTimeout(labLoadHealth, 0);
+  return `
+    <div class="sec-head">
+      <h1>🧪 상담 체인 실험실</h1>
+      <p class="sec-desc">질문 → 가리기 → 분류(규칙·HPC 한 단어) → 도구/법령/서류/RAG 가지 → HPC 답 → 출력 파서 → 출처·기준일.
+        근거가 없으면 지어내지 않고 「없음」으로 답합니다. 관리자만 보이며 라이브 AI 상담에는 아직 영향이 없습니다.</p>
+    </div>
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-title"><h3 class="serif">체인 상태</h3>
+        <label style="font-size:13px;display:flex;align-items:center;gap:6px;">역할 틀
+          <select class="select" id="labRole" style="width:auto;">
+            <option value="">자동(등급 기준)</option><option value="마을조합">마을조합 사무장용</option><option value="연합회">연합회용</option>
+          </select></label></div>
+      <div id="labHealth" class="text-mute" style="font-size:13px;">상태 확인 중…</div>
+    </div>
+    <div class="card" style="margin-bottom:14px;">
+      <h3 class="serif" style="margin:0 0 8px;">분류별 예시 질문</h3>
+      <div class="ask-groups"><div class="card ask-group">
+        ${LAB_PRESETS.map(([t,q]) => `<button class="ask-q" onclick="askPreset('${escapeJs(q)}')"><b>${escapeHtml(t)}</b> — ${escapeHtml(q)}</button>`).join('')}
+      </div></div>
+    </div>
+    <div class="card">
+      <div class="chat-body" id="chatBody">
+        <div class="msg ai">예시 질문을 누르거나 직접 입력하세요. 답 아래에 분류·도구·근거 조각·출처·기준일이 붙습니다.</div>
+      </div>
+      <div class="chat-input">
+        <input class="input" id="chatIn" placeholder="질문을 입력하세요..." onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="btn btn-primary" onclick="sendChat()">보내기</button>
+      </div>
+      <details style="margin-top:10px;"><summary class="text-mute" style="cursor:pointer;font-size:13px;">마지막 응답 원문(JSON)</summary>
+        <pre id="labMeta" style="font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere;max-height:360px;overflow:auto;background:var(--primary-50);padding:10px;border-radius:8px;"></pre></details>
+    </div>
+  `;
+}
+async function labLoadHealth(){
+  const el = document.getElementById('labHealth');
+  if(!el) return;
+  if(!REAL_API){ el.textContent = '(데모 모드) 실서버에서만 체인 상태를 읽습니다.'; return; }
+  try{
+    const r = await fetch('/api/ai/lab/health');
+    const d = await r.json();
+    if(!d || !d.ok){ el.textContent = '실험실을 열 수 없습니다: ' + ((d && d.error) || r.status); return; }
+    const rag = d.rag || {};
+    el.innerHTML = `엔진 ${d.engine ? '연결' : '미설정'} · 라이브 적용 ${d.live ? '켜짐' : '꺼짐(실험실만)'} ·
+      RAG 조각 ${rag.chunks || 0}개 (${escapeHtml(rag.mode || '-')}${rag.model ? ', ' + escapeHtml(rag.model) : ''}, 색인 ${escapeHtml(rag.built_at || '-')}) ·
+      도구 ${(d.tools || []).length}개: ${escapeHtml((d.tools || []).join(', '))}`;
+  }catch(e){ el.textContent = '상태 확인 실패: ' + e; }
 }
 
 function admLogs(){
