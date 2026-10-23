@@ -2761,7 +2761,7 @@ function finCalc(){
       <b style="color:#9c6a00;">상환능력 배수(DSCR)가 1.2에 못 미칩니다</b>
       <p class="text-mute" style="font-size:13px;margin:4px 0 0;">금융기관은 통상 발전수익이 원리금의 1.2배 이상일 때 안정적으로 봅니다.
       마을 자체 조달을 늘리거나 상환기간을 늘리는 방향으로 조정해 상담하세요.</p></div>` : ''}
-    <p class="text-mute" style="font-size:12.5px;">※ 이용률 15.4%, 한전 매입 165원/kWh, 운영비 매출의 14%
+    <p class="text-mute" style="font-size:12.5px;">※ 이용률 15.4%(전남 2025 실측 15.35% — 에너지공단 RPS 태양광 발전량÷설비용량, 전력거래소 월별 분포 교차검증), 한전 매입 165원/kWh, 운영비 매출의 14%
     (유지관리 6 + 보험 2 + 시설교체 적립 4 + 시스템비용 적립 2) 가정의 <b>추산</b>입니다.
     신협 금리·기간은 <b>예시 기본값</b>이며 실제 조건은 신협 심사로 결정됩니다. 토지 임대료가 있으면 남는 돈은 그만큼 줄어듭니다.
     <b>자부담까지 융자로 채우면 설치비 전액이 차입이 되어 20년 부담이 커진다는 점</b>을 총회에서 충분히 설명하세요.</p>`;
@@ -8706,7 +8706,7 @@ function svCalc(){
       <p class="text-mute" style="font-size:13px;margin:4px 0 0;">설치비·금리·임대료를 낮추거나 자부담을 늘려 융자 규모를 줄여야 합니다.
       <b>"사업비 조달이 가능한가"와 "20년간 사업을 유지할 수 있는가"는 별개의 문제입니다.</b>
       업체가 제시한 설치비와 예상 수익을 이 표에 넣어 직접 확인하고, 여러 업체 견적을 비교하세요.</p></div>` : ''}
-    <p class="text-mute" style="font-size:12.5px;">※ 이용률 15.4%, 1MW 설치비 약 16억 원, 정책융자 최대 85%(자부담 15%) 기준의 <b>추산</b>입니다.
+    <p class="text-mute" style="font-size:12.5px;">※ 이용률 15.4%(전남 2025 실측 15.35%, 에너지공단 RPS 태양광 기준·기준일 2025-12-31), 1MW 설치비 약 16억 원, 정책융자 최대 85%(자부담 15%) 기준의 <b>추산</b>입니다.
     단가·금리·상환조건·임대료가 마을마다 달라 실제 순수익은 변동되므로, 업체와 신협이 제시한 실제 숫자를 넣어 다시 계산하세요.
     부지 매입비와 ESS 설치비는 설치비·자부담 15% 산정에서 별도이며 위 계산에도 포함되지 않았습니다.
     업체가 말하는 <b>&quot;1MW 15억&quot;에는 토목비와 계통비가 빠져 있는 경우가 많습니다</b> — 계약 전에 포함 여부를 확인하세요.
@@ -12634,7 +12634,31 @@ const LAB_PRESETS = [
   ['📝 서류 작성', '창립총회 회의록 초안을 만들어 주세요'],
   ['📅 일정 확인', '선정일이 2026-07-31 이면 발전사업허가는 언제까지 받아야 하나요?'],
   ['💬 일반 상담', '조합원 자격 요건은 무엇인가요? 주민 기준일도 알려주세요'],
+  // 2026-10-23 2차(1~3회차 시사점): 실측 이용률 · 저발전 진단(회귀) — 숫자 답에는 「검산: …」·기준일이 반드시 붙는다
+  ['📈 실측 이용률', '전남 태양광 실측 이용률은 얼마나 되나요?'],
+  ['🔍 저발전 진단(마을)', '신흥리 마을 8월 발전량이 정상인가요? 점검이 필요한지 봐 주세요'],
+  ['🔍 저발전 진단(전체)', '8월에 점검이 필요한 마을이 있나요?'],
 ];
+/* CSV·엑셀 올리기 손질 시험 — 서버 공용 함수(hatsoja_tools.tidy)가 인코딩 판별·「-」·합계 행·시도 별칭을 처리하고
+   「검산: 행 N → M, 합계 일치」 한 줄을 돌려준다. 파일은 서버에 저장되지 않는다(실험실 전용, 관리자). */
+async function labTidy(file){
+  const out = document.getElementById('labTidyOut');
+  if(!file || !out) return;
+  if(!REAL_API){ out.textContent = '(데모 모드) 실서버에서만 손질합니다.'; return; }
+  out.textContent = file.name + ' 손질 중…';
+  try{
+    const fd = new FormData(); fd.append('file', file, file.name);
+    const r = await fetch('/api/ai/lab/tidy', {method:'POST', credentials:'same-origin', body: fd});
+    const d = await r.json();
+    if(!d || !d.ok){ out.textContent = '손질 실패: ' + ((d && (d.answer || d.error)) || r.status); return; }
+    const head = (d.열 || []).slice(0, 8);
+    const rows = (d.미리보기 || []).map(x => '<tr>' + head.map(h => '<td>' + escapeHtml(x[h] == null ? '' : String(x[h])) + '</td>').join('') + '</tr>').join('');
+    out.innerHTML = '<div class="msg-badge">' + escapeHtml(d.검산 || '') + '</div>'
+      + (d.결측 ? '<div class="text-mute" style="font-size:12px;">결측(미입력은 미입력으로 둠): ' + escapeHtml(Object.entries(d.결측).map(([k,v]) => k + ' ' + v).join(', ')) + '</div>' : '')
+      + '<table class="tbl" style="font-size:12px;"><thead><tr>' + head.map(h => '<th>' + escapeHtml(h) + '</th>').join('') + '</tr></thead><tbody>' + rows + '</tbody></table>'
+      + '<div class="text-mute" style="font-size:12px;">기준일: ' + escapeHtml(d.기준일 || '') + '</div>';
+  }catch(e){ out.textContent = '서버에 닿지 못했습니다: ' + e; }
+}
 function admLab(){
   setTimeout(labLoadHealth, 0);
   return `
@@ -12657,9 +12681,15 @@ function admLab(){
         ${LAB_PRESETS.map(([t,q]) => `<button class="ask-q" onclick="askPreset('${escapeJs(q)}')"><b>${escapeHtml(t)}</b> — ${escapeHtml(q)}</button>`).join('')}
       </div></div>
     </div>
+    <div class="card" style="margin-bottom:14px;">
+      <h3 class="serif" style="margin:0 0 6px;">📎 CSV·엑셀 올리기 손질 시험</h3>
+      <p class="text-mute" style="font-size:12.5px;margin:0 0 8px;">UTF-8·CP949 자동 판별, 「-」·빈칸은 결측(앞 값으로 채우지 않음), 합계·소계 행 제거 후 합과 대조, 시도 이름 별칭(전라남도→전남). 파일은 저장되지 않습니다.</p>
+      <input class="input" type="file" id="labTidyFile" accept=".csv,.xlsx,.txt" onchange="labTidy(this.files[0])">
+      <div id="labTidyOut" class="text-mute" style="font-size:13px;margin-top:8px;"></div>
+    </div>
     <div class="card">
       <div class="chat-body" id="chatBody">
-        <div class="msg ai">예시 질문을 누르거나 직접 입력하세요. 답 아래에 분류·도구·근거 조각·출처·기준일이 붙습니다.</div>
+        <div class="msg ai">예시 질문을 누르거나 직접 입력하세요. 답 아래에 분류·도구·근거 조각·출처·기준일이 붙습니다. 숫자 도구(발전량·생산량·수익·이용률·저발전 진단) 답에는 「검산: …」 한 줄과 기준일이 반드시 붙습니다.</div>
       </div>
       <div class="chat-input">
         <input class="input" id="chatIn" placeholder="질문을 입력하세요..." onkeydown="if(event.key==='Enter')sendChat()">
@@ -12681,7 +12711,9 @@ async function labLoadHealth(){
     const rag = d.rag || {};
     el.innerHTML = `엔진 ${d.engine ? '연결' : '미설정'} · 라이브 적용 ${d.live ? '켜짐' : '꺼짐(실험실만)'} ·
       RAG 조각 ${rag.chunks || 0}개 (${escapeHtml(rag.mode || '-')}${rag.model ? ', ' + escapeHtml(rag.model) : ''}, 색인 ${escapeHtml(rag.built_at || '-')}) ·
-      도구 ${(d.tools || []).length}개: ${escapeHtml((d.tools || []).join(', '))}`;
+      도구 ${(d.tools || []).length}개: ${escapeHtml((d.tools || []).join(', '))}`
+      + (d.이용률 && d.이용률.연간_pct != null ? ` · 전남 실측 이용률 ${escapeHtml(String(d.이용률.연간_pct))}% (기준일 ${escapeHtml(d.이용률.기준일 || '-')})` : '')
+      + (d.저발전모델 && d.저발전모델.MAE_검증_kWh != null ? ` · 저발전 회귀 학습 ${escapeHtml(d.저발전모델.학습기간 || '-')} / 검증 ${escapeHtml(d.저발전모델.검증기간 || '-')}, MAE ${escapeHtml(String(d.저발전모델.MAE_검증_kWh))} kWh, ${escapeHtml(d.저발전모델.재학습 || '')}` : '');
   }catch(e){ el.textContent = '상태 확인 실패: ' + e; }
 }
 
