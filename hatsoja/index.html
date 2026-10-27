@@ -486,6 +486,7 @@ input,select,textarea{font-family:inherit;font-size:14px;}
 .msg-src .msg-src-more{color:#999;}
 .msg-act{margin-top:8px;}
 .msg-badge{margin-top:6px;font-size:0.75em;color:#888;}
+.lab-ab{display:grid;grid-template-columns:1fr 1fr;gap:12px;} .lab-ab-col{border:1px solid var(--line,#e5e7eb);border-radius:8px;padding:8px;} @media(max-width:720px){.lab-ab{grid-template-columns:1fr;}}   /* 2026-10-27 A/B 비교 두 칸 */
 .msg-note{margin-top:2px;font-size:0.75em;color:#888;}
 .chat-input{display:flex;gap:8px;}
 .ask-groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:16px;}
@@ -8378,7 +8379,8 @@ async function sendChat(){
         body: JSON.stringify({prompt: q, history: _chatHistory.slice(-10),
           context: '햇소자(햇빛소득마을 통합 운영 플랫폼) 이용자 상담 — 마을협동조합 설립·운영·발전사업'
             + (_screenName ? ` (사용자가 직전에 보던 화면: ${_screenName})` : ''),
-          role_hint: lab && roleSel ? roleSel.value : ''}),
+          role_hint: lab && roleSel ? roleSel.value : '',
+          config: lab ? labConfig() : undefined}),   // 2026-10-27 구성(엔진·프롬프트) — 실험실에서만
       });
       const d = await res.json();
       const labMeta = document.getElementById('labMeta');
@@ -8435,7 +8437,8 @@ function chatMetaHtml(d){
   let badge = '', note = '';
   if(be === 'anthropic') badge = '일반 AI';
   else if(be === 'hpc-chain'){   // 2026-10-22 상담 체인: 분류 › 도구 · 근거 수 · 경로(hpc/template/fallback)
-    badge = `상담 체인 · ${d.분류 || ''}${d.도구 ? ' › ' + d.도구 : ''} · 근거 ${srcs.length}건${d.경로 ? ' · ' + d.경로 : ''}`;
+    badge = `상담 체인 · ${d.분류 || ''}${d.도구 ? ' › ' + d.도구 : ''} · 근거 ${srcs.length}건${d.경로 ? ' · ' + d.경로 : ''}`
+      + (d.구성 && d.구성.엔진 ? ` · 구성 ${labConfigLabel(d.구성)}` : '');   // 2026-10-27 구성 교체 표시
     if(d.insufficient !== true) note = 'AI 답변은 참고용입니다. 출처·기준일을 확인하세요.';
   }
   else if(be.startsWith('poome')) badge = d.engine_status != null ? `엔진 일시 불가 (${d.engine_status})` : '';
@@ -12638,6 +12641,8 @@ const LAB_PRESETS = [
   ['📈 실측 이용률', '전남 태양광 실측 이용률은 얼마나 되나요?'],
   ['🔍 저발전 진단(마을)', '신흥리 마을 8월 발전량이 정상인가요? 점검이 필요한지 봐 주세요'],
   ['🔍 저발전 진단(전체)', '8월에 점검이 필요한 마을이 있나요?'],
+  // 2026-10-27 3차(5회차 시사점): 마을 여러 곳을 RunnableParallel × batch 로 한꺼번에(엔진 0회)
+  ['🏘️ 마을평가(한눈에)', '8월 마을별 발전 현황을 한눈에 비교해 줘'],
 ];
 /* CSV·엑셀 올리기 손질 시험 — 서버 공용 함수(hatsoja_tools.tidy)가 인코딩 판별·「-」·합계 행·시도 별칭을 처리하고
    「검산: 행 N → M, 합계 일치」 한 줄을 돌려준다. 파일은 서버에 저장되지 않는다(실험실 전용, 관리자). */
@@ -12659,6 +12664,42 @@ async function labTidy(file){
       + '<div class="text-mute" style="font-size:12px;">기준일: ' + escapeHtml(d.기준일 || '') + '</div>';
   }catch(e){ out.textContent = '서버에 닿지 못했습니다: ' + e; }
 }
+/* 2026-10-27 구성 교체·A/B 비교 — 수업 5회차 configurable_alternatives·batch. 서버 /api/ai/lab/ab 가 두 구성을 동시에 돌려 results[2] 로 준다. */
+function labConfig(){
+  const e = document.getElementById('labEngine'), p = document.getElementById('labPrompt');
+  return {엔진: e ? e.value : 'hpc', 프롬프트: p ? p.value : '기본'};
+}
+function labConfigLabel(c){ return c ? `엔진=${c.엔진 || 'hpc'} · 프롬프트=${c.프롬프트 || '기본'}` : ''; }
+async function labAB(){
+  const inp = document.getElementById('chatIn');
+  const body = document.getElementById('chatBody');
+  if(!inp || !body) return;
+  const q = inp.value.trim();
+  if(!q) return;
+  const A = labConfig();
+  const B = {엔진: A.엔진, 프롬프트: A.프롬프트 === '간결' ? '기본' : '간결'};
+  body.insertAdjacentHTML('beforeend', `<div class="msg user">${escapeHtml(q)} <span class="text-mute" style="font-size:12px;">(A/B 비교)</span></div>`);
+  inp.value = '';
+  if(!REAL_API){ body.insertAdjacentHTML('beforeend', `<div class="msg ai">(데모 모드) 실서버에서만 A/B 비교를 돌립니다.</div>`); return; }
+  body.insertAdjacentHTML('beforeend', `<div class="msg ai" id="chat-pending-ab">A·B 두 구성으로 동시에 작성 중…</div>`);
+  body.scrollTop = body.scrollHeight;
+  let d = null;
+  try{
+    const roleSel = document.getElementById('labRole');
+    const res = await fetch('/api/ai/lab/ab', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({prompt: q, configs: [A, B], role_hint: roleSel ? roleSel.value : ''})});
+    d = await res.json();
+  }catch(e){ d = null; }
+  const labMeta = document.getElementById('labMeta');
+  if(labMeta) labMeta.textContent = JSON.stringify(d, null, 1);
+  const pending = document.getElementById('chat-pending-ab');
+  if(!pending) return;
+  pending.removeAttribute('id');
+  if(!d || !d.ok || !Array.isArray(d.results)){ pending.textContent = '(A/B 비교 실패) ' + ((d && (d.answer || d.error)) || '서버에 닿지 못했습니다.'); return; }
+  pending.innerHTML = '<div class="lab-ab">' + d.results.map((r, i) => `<div class="lab-ab-col"><div class="msg-badge">${i === 0 ? 'A' : 'B'} · ${escapeHtml(labConfigLabel(r.구성))}${r.엔진ms != null ? ' · ' + r.엔진ms + 'ms' : ''}</div>`
+    + chatAnswerHtml(r.answer || '') + chatMetaHtml(r) + '</div>').join('') + '</div>';
+  body.scrollTop = body.scrollHeight;
+}
 function admLab(){
   setTimeout(labLoadHealth, 0);
   return `
@@ -12672,7 +12713,12 @@ function admLab(){
         <label style="font-size:13px;display:flex;align-items:center;gap:6px;">역할 틀
           <select class="select" id="labRole" style="width:auto;">
             <option value="">자동(등급 기준)</option><option value="마을조합">마을조합 사무장용</option><option value="연합회">연합회용</option>
-          </select></label></div>
+          </select></label>
+        <!-- 2026-10-27 구성 교체(수업 5회차 configurable_alternatives): 엔진·프롬프트를 실행 순간에 갈아 끼운다. 서버 허용 목록 밖 값은 기본으로 -->
+        <label style="font-size:13px;display:flex;align-items:center;gap:6px;">엔진
+          <select class="select" id="labEngine" style="width:auto;"><option value="hpc">HPC(기본)</option><option value="template">템플릿(엔진 0회)</option></select></label>
+        <label style="font-size:13px;display:flex;align-items:center;gap:6px;">프롬프트
+          <select class="select" id="labPrompt" style="width:auto;"><option value="기본">기본(3~6문장)</option><option value="간결">간결(2문장·숫자 먼저)</option></select></label></div>
       <div id="labHealth" class="text-mute" style="font-size:13px;">상태 확인 중…</div>
     </div>
     <div class="card" style="margin-bottom:14px;">
@@ -12689,11 +12735,12 @@ function admLab(){
     </div>
     <div class="card">
       <div class="chat-body" id="chatBody">
-        <div class="msg ai">예시 질문을 누르거나 직접 입력하세요. 답 아래에 분류·도구·근거 조각·출처·기준일이 붙습니다. 숫자 도구(발전량·생산량·수익·이용률·저발전 진단) 답에는 「검산: …」 한 줄과 기준일이 반드시 붙습니다.</div>
+        <div class="msg ai">예시 질문을 누르거나 직접 입력하세요. 답 아래에 분류·도구·근거 조각·출처·기준일이 붙습니다. 숫자 도구(발전량·생산량·수익·이용률·저발전 진단·마을평가) 답에는 「검산: …」 한 줄과 기준일이 반드시 붙습니다. 질문 옆에는 오늘 날짜·상담 대상 조합·실적 최신 달이 [맥락]으로 붙어 「다음 달」「올해」를 오늘 기준으로 풉니다. 「A/B 비교」는 지금 구성과 프롬프트를 바꾼 구성을 동시에 돌려 나란히 보여 줍니다.</div>
       </div>
       <div class="chat-input">
         <input class="input" id="chatIn" placeholder="질문을 입력하세요..." onkeydown="if(event.key==='Enter')sendChat()">
         <button class="btn btn-primary" onclick="sendChat()">보내기</button>
+        <button class="btn btn-outline" onclick="labAB()" title="같은 질문을 지금 구성(A)과 프롬프트를 바꾼 구성(B)으로 동시에 돌려 나란히 봅니다">A/B 비교</button>
       </div>
       <details style="margin-top:10px;"><summary class="text-mute" style="cursor:pointer;font-size:13px;">마지막 응답 원문(JSON)</summary>
         <pre id="labMeta" style="font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere;max-height:360px;overflow:auto;background:var(--primary-50);padding:10px;border-radius:8px;"></pre></details>
@@ -12713,7 +12760,8 @@ async function labLoadHealth(){
       RAG 조각 ${rag.chunks || 0}개 (${escapeHtml(rag.mode || '-')}${rag.model ? ', ' + escapeHtml(rag.model) : ''}, 색인 ${escapeHtml(rag.built_at || '-')}) ·
       도구 ${(d.tools || []).length}개: ${escapeHtml((d.tools || []).join(', '))}`
       + (d.이용률 && d.이용률.연간_pct != null ? ` · 전남 실측 이용률 ${escapeHtml(String(d.이용률.연간_pct))}% (기준일 ${escapeHtml(d.이용률.기준일 || '-')})` : '')
-      + (d.저발전모델 && d.저발전모델.MAE_검증_kWh != null ? ` · 저발전 회귀 학습 ${escapeHtml(d.저발전모델.학습기간 || '-')} / 검증 ${escapeHtml(d.저발전모델.검증기간 || '-')}, MAE ${escapeHtml(String(d.저발전모델.MAE_검증_kWh))} kWh, ${escapeHtml(d.저발전모델.재학습 || '')}` : '');
+      + (d.저발전모델 && d.저발전모델.MAE_검증_kWh != null ? ` · 저발전 회귀 학습 ${escapeHtml(d.저발전모델.학습기간 || '-')} / 검증 ${escapeHtml(d.저발전모델.검증기간 || '-')}, MAE ${escapeHtml(String(d.저발전모델.MAE_검증_kWh))} kWh, ${escapeHtml(d.저발전모델.재학습 || '')}` : '')
+      + (d.구성대안 ? ` · 갈아 끼울 수 있는 부품: ${escapeHtml(Object.entries(d.구성대안).map(([k,v]) => k + '(' + v.join('/') + ')').join(', '))}` : '');
   }catch(e){ el.textContent = '상태 확인 실패: ' + e; }
 }
 
