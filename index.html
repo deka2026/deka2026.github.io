@@ -160,6 +160,13 @@
   .ftabs{display:flex;gap:6px;margin:4px 0}.ftabs button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 12px;cursor:pointer;font-family:inherit;font-size:0.8667rem}.ftabs button.on{background:var(--g7);color:#fff;border-color:var(--g7)}
   .flist{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}.flist th,.flist td{padding:7px 10px;text-align:left;border-top:1px solid var(--g1);font-size:0.9rem;vertical-align:middle}.flist th{background:var(--g0);font-weight:600;border-top:none;font-size:0.8333rem}.flist td.n{white-space:nowrap;color:var(--mute);font-size:0.8333rem}.flist .act{display:flex;gap:4px;flex-wrap:wrap}.flist .nm a{cursor:pointer}
   .quota{display:flex;gap:8px;align-items:center;font-size:0.8333rem;color:var(--mute)}.qbar{height:8px;background:var(--g1);border-radius:4px;overflow:hidden;flex:1;max-width:240px}.qbar i{display:block;height:100%;background:var(--g6)}
+  .ro{background:var(--gold1);border:1px solid #e6cf8a;border-radius:10px;padding:6px 12px;margin:6px 0;font-size:0.8667rem;color:#6b4a06}.flist .rotag{font-size:0.7333rem;color:var(--gold);background:var(--gold1);border-radius:8px;padding:0 6px;margin-left:4px}
+  /* 내 자료 연결하기(6단계) */
+  .links{margin-top:26px;padding-top:14px;border-top:1px solid var(--line)}.lgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px;margin-top:10px}
+  .lcard h3{flex-wrap:wrap;align-items:center}.lcard h3 .btn{font-weight:400}.lcard .steps{margin:4px 0 8px;padding-left:20px;font-size:0.9rem}.lcard .steps li{margin:3px 0}.lcard .lim{font-size:0.8rem;color:var(--mute);border-top:1px dashed var(--g1);padding-top:6px;margin:6px 0 0}.lcard .lim b{color:var(--ink2)}
+  .lcard .inl{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:4px}.lcard .inl input{flex:1;min-width:160px;height:34px;border:1px solid var(--line);border-radius:8px;padding:0 10px;font-size:0.8667rem;font-family:inherit}
+  .lcard code,.kbig{font-family:ui-monospace,Menlo,Consolas,monospace;background:var(--g0);padding:2px 6px;border-radius:6px;font-size:0.8667rem;word-break:break-all}.kbig{display:block;font-size:1.2rem;padding:10px 12px;margin:8px 0;text-align:center;user-select:all}
+  .klist{list-style:none;margin:6px 0 0;padding:0;font-size:0.8333rem}.klist li{display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-top:1px dashed var(--g1);padding:4px 0}.klist li:first-child{border-top:none}.klist .meta{color:var(--mute)}.klist .sp{flex:1}
   /* 2단계 인증 창 */
   .bk{display:grid;grid-template-columns:1fr 1fr;gap:4px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:0.9333rem;background:var(--g0);padding:8px;border-radius:8px;margin:6px 0}
   .tfqr{text-align:center;margin:8px 0}.tfqr svg{width:180px;height:180px}.tfsec{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:0.8667rem;background:var(--g0);padding:6px 8px;border-radius:6px;word-break:break-all}
@@ -274,7 +281,56 @@
         </div>
         <div class="quota" id="fQuota"></div>
         <div class="msg" id="fMsg" aria-live="polite"></div>
+        <div class="ro" id="fRo" hidden role="note">📥 PC 에서 자동으로 올라온 자료(읽기 전용)입니다. 여기서는 올리거나 지울 수 없고, 고치려면 PC 쪽 폴더에서 바꾸면 됩니다.</div>
         <table class="flist" aria-label="파일 목록"><thead><tr><th>이름</th><th>크기</th><th>수정</th><th>동작</th></tr></thead><tbody id="fList"></tbody></table>
+
+        <!-- ⑥단계 내 자료 연결하기(기획안 4.2 갈래 2·3·4) -->
+        <section class="links" id="fLinks" aria-labelledby="flT">
+          <div class="secT"><h2 id="flT">내 자료 연결하기</h2><p class="sub">내 PC·네트워크 드라이브·조직 서버의 자료를 이 폴더로 이어 둡니다. 웹 「올리기」만으로 충분하면 건너뛰어도 됩니다.</p></div>
+          <div class="msg" id="flMsg" aria-live="polite"></div>
+          <table class="flist" aria-label="연결 상태"><thead><tr><th>종류</th><th>라벨</th><th>상태</th><th>마지막 수신</th><th>파일 수</th><th>용량(MB)</th><th>동작</th></tr></thead><tbody id="flList"><tr><td colspan="7" class="n">아직 연결한 것이 없습니다</td></tr></tbody></table>
+          <div class="lgrid">
+            <section class="dcard lcard" aria-labelledby="lc1T">
+              <h3 id="lc1T"><span>💻 내 PC 폴더 자동 올리기</span><button class="btn sm" type="button" data-say="내 컴퓨터 자료 자동으로 올리고 싶어" aria-label="내 PC 폴더 자동 올리기를 상담창에 묻기">💬 상담창에 묻기</button></h3>
+              <p class="sub" style="margin:0 0 6px">PC 의 지정 폴더가 서버로 계속 복사됩니다(Syncthing). 큰 파일·많은 파일에 알맞습니다.</p>
+              <ol class="steps">
+                <li>설치기를 내려받아 설치합니다: <a id="flInst" href="#" download>⬇️ 설치기 내려받기</a></li>
+                <li>설치 뒤 Syncthing 화면 오른쪽 위 「작업 › 기기 ID 보기」를 엽니다.</li>
+                <li>그 기기 ID 를 아래 칸에 붙여넣고 「등록」을 누릅니다.
+                  <form class="inl" id="flSyncForm"><input id="flDev" placeholder="기기 ID (예: ABCDEFG-HIJKLMN-…)" aria-label="Syncthing 기기 ID" autocomplete="off" spellcheck="false"><button class="btn sm p" type="submit" id="flSyncBtn">등록</button></form>
+                  <div class="msg" id="flSyncMsg" aria-live="polite"></div></li>
+                <li>PC 의 Syncthing 에서 「폴더 추가」 → 공유 상대로 서버 기기 <code id="flSrvDev">(등록하면 표시)</code> 를 고르고, 폴더 라벨은 <code id="flLabel">(등록하면 표시)</code> <button class="btn sm" type="button" data-cp="#flLabel" aria-label="폴더 라벨 복사">복사</button> 로 적습니다.<div class="msg" id="flNext"></div></li>
+                <li>10분 안에 서버가 자동 승인합니다. 상태는 위 표에서 봅니다.</li>
+              </ol>
+              <p class="lim"><b>알려진 제약</b> 서버는 받기 전용이지만, PC 에서 지우거나 바뀐 파일은 서버에도 그대로 반영됩니다. 이전 판은 버전 보관으로 되살립니다(올라온 자료는 「PC 동기화(읽기 전용)」 폴더에).</p>
+            </section>
+            <section class="dcard lcard" aria-labelledby="lc2T">
+              <h3 id="lc2T"><span>🗂️ 네트워크 드라이브</span><button class="btn sm" type="button" data-say="내 컴퓨터 자료 자동으로 올리고 싶어" aria-label="네트워크 드라이브 연결을 상담창에 묻기">💬 상담창에 묻기</button></h3>
+              <p class="sub" style="margin:0 0 6px">윈도우 탐색기에 내 폴더를 「사교원 드라이브」로 붙여 직접 열고 저장합니다(웹다브).</p>
+              <div class="inl"><span>주소</span><code id="flDav">(불러오는 중)</code><button class="btn sm" type="button" data-cp="#flDav" aria-label="드라이브 주소 복사">복사</button></div>
+              <form class="inl" id="flKeyForm"><input id="flKeyLabel" placeholder="열쇠 이름 (예: 사무실 PC)" aria-label="열쇠 이름" maxlength="40"><button class="btn sm p" type="submit" id="flKeyBtn">🔑 전용 열쇠 만들기</button></form>
+              <div class="msg" id="flKeyMsg" aria-live="polite"></div>
+              <ul class="klist" id="flKeys" aria-label="발급한 열쇠"></ul>
+              <ol class="steps">
+                <li>탐색기 「내 PC」 → 「네트워크 드라이브 연결」</li>
+                <li>폴더 칸에 위 주소를 붙여넣고 「다른 자격 증명을 사용하여 연결」 체크</li>
+                <li>아이디는 사이트 아이디, 비밀번호 칸에는 사이트 비밀번호가 아니라 위에서 만든 <b>전용 열쇠</b></li>
+                <li>드라이브 이름이 뜨면 끝. 파일을 넣으면 바로 내 폴더에 들어갑니다</li>
+              </ol>
+              <p class="lim"><b>알려진 제약</b> 윈도우 기본 기능은 파일 약 50MB 한도, 서버는 파일 하나 100MB 한도. 마이크로소프트가 사용 중단 예정 기능으로 정했습니다. 맥·휴대폰은 별도 앱(웹다브 클라이언트)이 필요합니다.</p>
+            </section>
+            <section class="dcard lcard" aria-labelledby="lc3T">
+              <h3 id="lc3T"><span>🏢 조직 서버·NAS 자동 업로드</span><button class="btn sm" type="button" data-say="내 컴퓨터 자료 자동으로 올리고 싶어" aria-label="조직 서버 연결을 상담창에 묻기">💬 상담창에 묻기</button></h3>
+              <p class="sub" style="margin:0 0 6px">자체 서버나 NAS 가 있는 조합·기관은 그 장비의 「클라우드 동기화(WebDAV)」에 같은 주소와 전용 열쇠를 넣어 예약 실행합니다.</p>
+              <ol class="steps">
+                <li>NAS 관리 화면 → 클라우드 동기화 → 「WebDAV」 추가, 주소는 위 네트워크 드라이브 주소</li>
+                <li>계정은 사이트 아이디, 비밀번호는 전용 열쇠(위 단추로 만든 것, 이 연결에만 쓰는 것으로 따로)</li>
+                <li>방향은 「NAS → 서버」 한쪽, 주기는 하루 1회 이상. 열쇠는 그 폴더 하나에만 듣고 지우기는 막습니다</li>
+              </ol>
+              <p class="lim"><b>안내</b> 개인정보 처리 위탁 약정을 맺은 조합·기관만 쓸 수 있습니다. 약정은 <a href="https://home.sakyowon.co.kr/#/contact" target="_blank" rel="noopener">문의하기 ↗</a> 로, 설정할 사람이 없으면 데카가 원격으로 도와드립니다.</p>
+            </section>
+          </div>
+        </section>
       </main>
 
       <!-- ⑥ 꾸미기 (#/custom) -->
@@ -359,6 +415,16 @@
     <h2 id="tfH">🔐 2단계 인증</h2><p class="sub" id="tfState">상태를 확인하는 중…</p>
     <div id="tfBody"></div>
     <button class="ghost" id="tfClose">닫기</button>
+  </div>
+</div>
+<div class="modal-back" id="keyModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="kmH">
+    <h2 id="kmH">🔑 전용 열쇠</h2><p class="sub" id="kmSub">이 창을 닫으면 다시 볼 수 없습니다. 지금 복사해 두세요.</p>
+    <code class="kbig" id="kmKey" aria-label="전용 열쇠"></code>
+    <div class="tiers">주소: <code id="kmUrl"></code><br>아이디: <code id="kmUser"></code></div>
+    <div class="msg" id="kmMsg" aria-live="polite"></div>
+    <button class="mbtn" type="button" id="kmCopy">열쇠 복사</button>
+    <button class="ghost" id="kmClose">닫기</button>
   </div>
 </div>
 
@@ -968,7 +1034,7 @@ const fmtSize = n => { n = +n || 0; if (n < 1024) return n + ' B'; if (n < 10485
 const fmtTime = t => { if (!t) return ''; const d = typeof t === 'number' ? new Date(t * (t < 1e12 ? 1000 : 1)) : new Date(t); return isNaN(d) ? String(t) : d.toLocaleString('ko-KR', { year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }); };
 const fsJoin = name => (FS.path ? FS.path + '/' : '') + name;
 function fsMsg(txt, ok) { const m = $('#fMsg'); m.className = 'msg' + (txt ? (ok ? ' ok' : ' err') : ''); m.textContent = txt || ''; }
-function renderFiles() { fsMsg(''); fsLoad(); }
+function renderFiles() { fsMsg(''); fsLoad(); renderLinks(); }
 function fsCrumb() {
   const parts = FS.path ? FS.path.split('/').filter(Boolean) : [];
   let acc = '';
@@ -983,12 +1049,16 @@ async function fsLoad() {
   if (r.ok && r.quota) { const pct = Math.min(100, Math.round(((+r.used || 0) / (+r.quota || 1)) * 100)); $('#fQuota').innerHTML = `<span>사용량</span><div class="qbar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" aria-label="사용량 ${pct}%"><i style="width:${pct}%"></i></div><span>${fmtSize(r.used)} / ${fmtSize(r.quota)} (${pct}%)</span>`; }
   else if (FS.tab !== 'trash') $('#fQuota').innerHTML = '';
   if (!r.ok) { fsMsg(r.status === 401 ? ERR.unauthorized : (r.status === 404 || r.error === 'network' ? '내 폴더 서버가 아직 열리지 않았습니다.' : reasonText(r))); }
+  /* PC 동기화(읽기 전용) 가상 폴더 안: 새 폴더·올리기·지우기 숨기고 안내만(6단계) */
+  const ro = FS.tab !== 'trash' && r.ok && r.readonly === true;
+  FS.ro = ro; $('#fRo').hidden = !ro; $('#fMk').hidden = ro; $('label[for="fUp"]').hidden = ro;
   const rows = (FS.tab !== 'trash' && FS.path) ? [`<tr><td class="nm" colspan="4"><a href="#/files" data-fp="${esc(FS.path.split('/').slice(0, -1).join('/'))}">⬆️ 위 폴더로</a></td></tr>`] : [];
   items.forEach(it => {
     const name = it.name || it.path || '';
     const p = it.path || fsJoin(name);
+    const itRo = ro || it.readonly === true;
     if (FS.tab === 'trash') rows.push(`<tr><td class="nm">${it.dir ? '📁' : '📄'} ${esc(name)}</td><td class="n">${it.dir ? '' : fmtSize(it.size)}</td><td class="n">${esc(fmtTime(it.mtime || it.deleted_at))}</td><td class="act"><button class="btn sm" type="button" data-fa="restore" data-p="${esc(p)}">♻️ 복원</button></td></tr>`);
-    else rows.push(`<tr><td class="nm">${it.dir ? `📁 <a href="#/files" data-fp="${esc(p)}">${esc(name)}</a>` : `📄 ${esc(name)}`}</td><td class="n">${it.dir ? '' : fmtSize(it.size)}</td><td class="n">${esc(fmtTime(it.mtime))}</td><td class="act">${it.dir ? '' : `<a class="btn sm" href="/api/my/files/download?path=${encodeURIComponent(p)}" download>⬇️ 내려받기</a>`}<button class="btn sm" type="button" data-fa="delete" data-p="${esc(p)}" data-n="${esc(name)}">🗑️ 지우기</button></td></tr>`);
+    else rows.push(`<tr><td class="nm">${it.dir ? `📁 <a href="#/files" data-fp="${esc(p)}">${esc(name)}</a>` : `📄 ${esc(name)}`}${it.readonly === true ? '<span class="rotag">읽기 전용</span>' : ''}</td><td class="n">${it.dir ? '' : fmtSize(it.size)}</td><td class="n">${esc(fmtTime(it.mtime))}</td><td class="act">${it.dir ? '' : `<a class="btn sm" href="/api/my/files/download?path=${encodeURIComponent(p)}" download>⬇️ 내려받기</a>`}${itRo ? '' : `<button class="btn sm" type="button" data-fa="delete" data-p="${esc(p)}" data-n="${esc(name)}">🗑️ 지우기</button>`}</td></tr>`);
   });
   $('#fList').innerHTML = rows.length ? rows.join('') : `<tr><td colspan="4" class="n">${FS.tab === 'trash' ? '휴지통이 비어 있습니다' : (r.ok ? '비어 있습니다 — 「올리기」로 파일을 넣거나 「새 폴더」를 만들어 보세요' : '목록을 불러오지 못했습니다')}</td></tr>`;
 }
@@ -1026,6 +1096,80 @@ $('#fMk').addEventListener('click', async () => {
 });
 $('#fUp').addEventListener('change', function () { fsUpload(this.files); this.value = ''; });
 $('#fRef').addEventListener('click', () => { fsMsg(''); fsLoad(); });
+
+/* ── ⑥단계 내 자료 연결하기(기획안 4.2 갈래 2·3·4) — /api/my/files/links · /api/my/files/keys. 실패하면 조용히 빈 상태 */
+const LK = { links: [], keys: [], server_device: '', label: '', installer: '', dav_url: '' };
+const LK_KIND = { syncthing: '💻 PC 자동 올리기', webdav: '🗂️ 네트워크 드라이브', nas: '🏢 조직 서버·NAS' };
+const LK_STATE = { device_ok: '기기 등록됨', syncing: '동기화 중', key: '열쇠 발급됨', removed: '끊김' };
+const fmtMB = n => { n = +n || 0; return n ? (n / 1048576).toFixed(n < 10485760 ? 2 : 1) : '0'; };
+function lkMsg(sel, txt, ok) { const m = $(sel); if (!m) return; m.className = 'msg' + (txt ? (ok ? ' ok' : ' err') : ''); m.textContent = txt || ''; }
+async function copyText(t, sel) { try { await navigator.clipboard.writeText(t); lkMsg(sel, '복사했습니다.', true); } catch (_) { lkMsg(sel, '복사하지 못했습니다. 직접 적어 주세요.'); } }
+function renderLinkTable() {
+  const rows = LK.links.map(l => `<tr><td>${esc(LK_KIND[l.kind] || l.kind || '')}</td><td class="nm">${esc(l.label || '')}${l.device ? ` <span class="n">(${esc(String(l.device).slice(0, 7))}…)</span>` : ''}</td><td class="n">${esc(LK_STATE[l.status] || l.status || '')}</td><td class="n">${esc(fmtTime(l.last_seen)) || '—'}</td><td class="n">${l.files == null ? '—' : esc(l.files)}</td><td class="n">${fmtMB(l.bytes)}</td><td class="act">${l.status === 'removed' ? '' : `<button class="btn sm" type="button" data-la="unlink" data-id="${esc(l.id)}" data-n="${esc(l.label || l.kind)}" aria-label="「${esc(l.label || l.kind)}」 연결 끊기">⛔ 끊기</button>`}</td></tr>`);
+  $('#flList').innerHTML = rows.length ? rows.join('') : '<tr><td colspan="7" class="n">아직 연결한 것이 없습니다</td></tr>';
+}
+function renderKeyList() {
+  $('#flKeys').innerHTML = LK.keys.map(k => `<li><span>🔑 ${esc(k.label || '(이름 없음)')}</span><span class="meta">만든 날 ${esc(fmtTime(k.created_at)) || '—'} · 마지막 사용 ${esc(fmtTime(k.last_used)) || '없음'}</span><span class="sp"></span><button class="btn sm" type="button" data-la="keydel" data-id="${esc(k.id)}" data-n="${esc(k.label || '')}" aria-label="열쇠 「${esc(k.label || '')}」 폐기">폐기</button></li>`).join('');
+}
+function renderLinkMeta() {
+  const inst = $('#flInst'); if (LK.installer) { inst.href = LK.installer; inst.removeAttribute('aria-disabled'); } else { inst.href = '#'; inst.setAttribute('aria-disabled', 'true'); }
+  $('#flSrvDev').textContent = LK.server_device || '(등록하면 표시)';
+  $('#flLabel').textContent = LK.label || '(등록하면 표시)';
+  $('#flDav').textContent = LK.dav_url || '(아직 열리지 않았습니다)';
+}
+async function renderLinks() {
+  const [a, b] = await Promise.all([api('/api/my/files/links'), api('/api/my/files/keys')]);
+  if (!me || currentRoute() !== 'files') return;
+  LK.links = (a.ok && Array.isArray(a.links)) ? a.links : [];
+  LK.server_device = a.ok && a.server_device || ''; LK.label = a.ok && a.label || ''; LK.installer = a.ok && a.installer || ''; LK.dav_url = (a.ok && a.dav_url) || (b.ok && b.url) || '';
+  LK.keys = (b.ok && Array.isArray(b.items)) ? b.items : [];
+  renderLinkMeta(); renderLinkTable(); renderKeyList();
+}
+$('#flSyncForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const dev = $('#flDev').value.trim().toUpperCase();
+  if (!dev) { lkMsg('#flSyncMsg', '기기 ID 를 붙여넣어 주세요.'); return; }
+  if (!/^[A-Z0-9-]{20,}$/.test(dev)) { lkMsg('#flSyncMsg', '기기 ID 모양이 아닙니다. Syncthing 「작업 › 기기 ID 보기」의 글자를 그대로 붙여넣어 주세요.'); return; }
+  $('#flSyncBtn').disabled = true; lkMsg('#flSyncMsg', '등록하는 중…', true);
+  const r = await api('/api/my/files/links/syncthing', { method: 'POST', body: { device_id: dev } });
+  $('#flSyncBtn').disabled = false;
+  if (!r.ok) { lkMsg('#flSyncMsg', reasonText(r)); return; }
+  if (r.server_device) LK.server_device = r.server_device; if (r.label) LK.label = r.label; renderLinkMeta();
+  lkMsg('#flSyncMsg', '등록했습니다. 다음은 ④ 단계 — PC 에서 폴더를 추가해 주세요.', true);
+  $('#flNext').className = 'msg ok'; $('#flNext').textContent = r.next || ''; $('#flDev').value = '';
+  renderLinks();
+});
+$('#flKeyForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const label = $('#flKeyLabel').value.trim() || '네트워크 드라이브';
+  $('#flKeyBtn').disabled = true; lkMsg('#flKeyMsg', '만드는 중…', true);
+  const r = await api('/api/my/files/keys', { method: 'POST', body: { label } });
+  $('#flKeyBtn').disabled = false;
+  if (!r.ok || !r.key) { lkMsg('#flKeyMsg', reasonText(r)); return; }
+  lkMsg('#flKeyMsg', `「${label}」 열쇠를 만들었습니다. 열린 창에서 복사해 두세요.`, true); $('#flKeyLabel').value = '';
+  $('#kmKey').textContent = r.key; $('#kmUrl').textContent = r.url || LK.dav_url || ''; $('#kmUser').textContent = r.username || (me && (me.username || me.email)) || '';
+  $('#kmSub').textContent = (r.note ? r.note + ' ' : '') + '이 창을 닫으면 다시 볼 수 없습니다. 지금 복사해 두세요.';
+  $('#kmMsg').className = 'msg'; $('#kmMsg').textContent = '';
+  $('#keyModal').classList.add('on'); $('#kmCopy').focus();
+  renderLinks();
+});
+$('#kmCopy').addEventListener('click', () => copyText($('#kmKey').textContent, '#kmMsg'));
+$('#kmClose').addEventListener('click', () => { $('#keyModal').classList.remove('on'); $('#kmKey').textContent = ''; });
+$('#fLinks').addEventListener('click', async e => {
+  const s = e.target.closest('button[data-say]'); if (s) { say(s.dataset.say); return; }
+  const i = e.target.closest('#flInst'); if (i && i.getAttribute('aria-disabled') === 'true') { e.preventDefault(); lkMsg('#flSyncMsg', '설치기 주소를 아직 받지 못했습니다. 잠시 후 새로고침해 주세요.'); return; }
+  const c = e.target.closest('button[data-cp]'); if (c) { copyText($(c.dataset.cp).textContent, c.dataset.cp === '#flDav' ? '#flKeyMsg' : '#flSyncMsg'); return; }
+  const b = e.target.closest('button[data-la]'); if (!b) return;
+  if (b.dataset.la === 'unlink') {
+    if (!confirm(`「${b.dataset.n}」 연결을 끊을까요? 이미 올라온 자료는 그대로 남습니다.`)) return;
+    const r = await api('/api/my/files/links/' + encodeURIComponent(b.dataset.id), { method: 'DELETE' });
+    lkMsg('#flMsg', r.ok ? ('끊었습니다.' + (r.note ? ' ' + r.note : '')) : reasonText(r), r.ok); renderLinks();
+  } else if (b.dataset.la === 'keydel') {
+    if (!confirm(`열쇠 「${b.dataset.n}」을(를) 폐기할까요? 이 열쇠로 붙어 있던 드라이브·NAS 는 바로 끊깁니다.`)) return;
+    const r = await api('/api/my/files/keys/' + encodeURIComponent(b.dataset.id), { method: 'DELETE' });
+    lkMsg('#flKeyMsg', r.ok ? '폐기했습니다.' : reasonText(r), r.ok); renderLinks();
+  }
+});
 
 /* ── 글자 크기(가+ 가−) — html font-size 100/112/125%, localStorage */
 const FS_LV = [100, 112, 125];
@@ -1076,7 +1220,7 @@ document.addEventListener('click', e => {
   const s = e.target.closest('[data-say]'); if (s) { say(s.dataset.say); }
 });
 /* 모든 창은 Esc 로 닫힌다 */
-document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; const open = document.querySelectorAll('.modal-back.on'); if (!open.length) return; open.forEach(m => m.classList.remove('on')); if (['#login', '#signup', '#/login', '#/signup'].includes(location.hash)) { history.replaceState(null, '', location.pathname); route(); } });
+document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; const open = document.querySelectorAll('.modal-back.on'); if (!open.length) return; open.forEach(m => m.classList.remove('on')); if ($('#keyModal') && open[0] && [...open].includes($('#keyModal'))) $('#kmKey').textContent = ''; if (['#login', '#signup', '#/login', '#/signup'].includes(location.hash)) { history.replaceState(null, '', location.pathname); route(); } });
 $('#lgPw').addEventListener('keydown', e => { if (e.key === 'Enter') $('#lgBtn').click(); });
 $('#lgCode').addEventListener('keydown', e => { if (e.key === 'Enter') $('#lgBtn').click(); });
 $('#lgBtn').addEventListener('click', () => doLogin(LG));
