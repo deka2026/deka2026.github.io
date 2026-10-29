@@ -149,6 +149,11 @@
   function card(cls, html) { var d = document.createElement('div'); d.className = 'card ' + cls; d.innerHTML = html; $('msgs').appendChild(d); $('panel').scrollTop = $('panel').scrollHeight; return d; }
   function screenLink(r) { return r.screen ? ' <a href="' + esc(r.screen) + '" target="_blank">화면으로 열기 ↗</a>' : ''; }
   function showResult(r) {
+    if (r.open) {   // 화면 열기 도구(AX 🟠12): 링크를 보여 주고 바로 연다
+      card('r-read', '<h4>➡️ ' + esc(r.text || '') + '</h4><div class="btns"><a class="opt" href="' + esc(r.open) + '">지금 열기</a></div>');
+      setTimeout(function () { try { location.href = r.open; } catch (e) {} }, 700);
+      return;
+    }
     var c = card('r-read', '<h4>' + (r.ok === false ? '⚠️ ' : '✅ ') + esc(r.name || '') + '</h4><div>' + esc(r.text || '') + screenLink(r) + '</div>' + tableOf(r.data) +
       (r.undo ? '<div class="btns"><button class="opt" data-undo="' + r.log_id + '">되돌리기</button></div>' : ''));
     var b = c.querySelector('[data-undo]');
@@ -162,7 +167,7 @@
     });
   }
   function showConfirm(r, old) {
-    var html = '<h4>' + esc(r.risk_ko) + ' · ' + esc(r.name) + '</h4><div class="pv">' + esc(r.preview) + '</div>' + (r.note ? '<div class="note">' + esc(r.note) + '</div>' : '') +
+    var html = '<h4>' + esc(r.risk_ko) + ' · ' + esc(r.name) + '</h4><div class="pv">' + esc(r.preview) + '</div>' + (r.note ? '<div class="note"' + (r.irreversible ? ' style="color:#a8321f;font-weight:600"' : '') + '>' + esc(r.note) + '</div>' : '') +
       (r.need_reauth ? '<div style="margin-top:6px"><span class="note">본인 확인(비밀번호) — 이 칸은 대화 기록에 남지 않습니다</span><br><input type="password" id="pw_' + esc(r.plan_id) + '" autocomplete="current-password"></div>' : '') +
       '<div class="btns"><button class="pb" data-run="1">' + (r.risk === 'send' ? '보내기' : '실행') + '</button><button class="pb ghost" data-cancel="1">취소</button>' + screenLink(r) + '</div>';
     var c = old || card('r-' + r.risk, '');
@@ -185,7 +190,12 @@
       if (r.kind === 'result') { showResult(r); return true; }
       if (r.kind === 'confirm') { showConfirm(r); return true; }
       if (r.kind === 'need') { state.pending = { tool: r.tool, prev: q }; addMsg('ai', esc(r.text)); return true; }
-      if (r.kind === 'locked') { card('r-read', '<div>🔒 ' + esc(r.text) + '</div>' + (r.screen ? '<div class="btns"><a class="opt" href="' + API + '/#/map">둘러보기에서 보기</a>' + (r.can_request ? '<a class="opt" href="https://home.sakyowon.co.kr/#/contact">권한 요청 문의</a>' : '') + '</div>' : '')); return true; }
+      if (r.kind === 'locked') {
+        var lc = card('r-read', '<div>🔒 ' + esc(r.text) + '</div><div class="btns"><a class="opt" href="' + API + '/#/map">둘러보기에서 보기</a>' + (r.can_request ? '<button class="opt" data-req="1">권한 요청 보내기</button>' : '') + '</div>');
+        var rb = lc.querySelector('[data-req]');
+        if (rb) rb.addEventListener('click', function () { rb.disabled = true; var w = addMsg('ai', '요청 중…'); plan((r.need || '').replace(/^perm:/, '').split('|')[0] + ' 권한 요청', w, 'perm.request').then(function (ok) { if (!ok) { w.className = 'm err'; w.textContent = '요청을 보내지 못했습니다.'; } }); });
+        return true;
+      }
       if (r.kind === 'ask') {
         var c = card('r-read', '<div>' + esc(r.text) + '</div><div class="btns">' + r.options.map(function (o) { return '<button class="opt" data-t="' + esc(o.id) + '">' + esc(o.name) + '</button>'; }).join('') + '<button class="opt" data-t="">그냥 질문이에요</button></div>');
         Array.prototype.forEach.call(c.querySelectorAll('[data-t]'), function (b) { b.addEventListener('click', function () {
