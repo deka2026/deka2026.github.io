@@ -76,6 +76,7 @@
     '.files{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}.chip{font-size:12px;background:#fff7e0;border:1px solid #e0c070;border-radius:12px;padding:2px 9px}' +
     '.draft{border:1px solid #d9d2c0;border-radius:8px;padding:10px 14px;background:#fffdf7;margin-top:8px;line-height:1.6}' +
     '.list{display:flex;flex-direction:column;gap:4px}.li{display:flex;gap:8px;align-items:center;padding:6px 8px;border:1px solid #eee;border-radius:8px;cursor:pointer;font-size:13px}.li:hover{background:#faf6ec}.li .t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
+    '.card{align-self:flex-start;max-width:92%;border:1px solid #c9b86b;background:#fffbe8;border-radius:12px;padding:10px 14px;line-height:1.55}.card.r-send,.card.r-perm,.card.r-delete{border-color:#c0392b;background:#fff3f0}.card h4{margin:0 0 6px;font-size:14px}.card .pv{font-size:13px;background:#fff;border:1px solid #e6e1d3;border-radius:8px;padding:6px 10px;margin:6px 0;white-space:pre-wrap}.card .btns{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}.card .opt{border:1px solid #2c5842;background:#fff;color:#2c5842;border-radius:16px;padding:4px 12px;cursor:pointer;font-size:13px}.card .opt:hover{background:#edf2e5}.card input[type=password]{border:1px solid #d9d2c0;border-radius:8px;padding:6px 8px;font-size:14px}.card a{color:#2c5842}' +
     '@media(max-width:640px){.logo span{display:none}.who{display:none}.b.lbl{display:none}}' +
     '</style>' +
     '<div class="bar">' +
@@ -136,7 +137,89 @@
   function setThread(id) { state.thread = id; try { if (id) sessionStorage.setItem('skai_thread', id); else sessionStorage.removeItem('skai_thread'); } catch (e) {} }
   function renderFiles() { $('files').innerHTML = state.files.map(function (f) { return '<span class="chip">📎 ' + esc(f.name) + ' (' + f.chars + '자)</span>'; }).join(''); }
 
+  // ── 상담 실행기(AX 개편 1단계): 지시 한 줄 → 도구 판별 → 읽기는 즉시, 그 밖은 확인 카드 ──
+  function tableOf(data) {
+    var rows = Array.isArray(data) ? data : (data && Array.isArray(data.items) ? data.items : null);
+    if (!rows || !rows.length || typeof rows[0] !== 'object') return '';
+    var keys = Object.keys(rows[0]).slice(0, 8);
+    return '<table><tr>' + keys.map(function (k) { return '<th>' + esc(k) + '</th>'; }).join('') + '</tr>' +
+      rows.slice(0, 30).map(function (r) { return '<tr>' + keys.map(function (k) { var v = r[k]; return '<td>' + esc(v != null && typeof v === 'object' ? JSON.stringify(v) : v) + '</td>'; }).join('') + '</tr>'; }).join('') + '</table>' +
+      (rows.length > 30 ? '<div class="note">' + rows.length + '건 중 30건만 표시</div>' : '');
+  }
+  function card(cls, html) { var d = document.createElement('div'); d.className = 'card ' + cls; d.innerHTML = html; $('msgs').appendChild(d); $('panel').scrollTop = $('panel').scrollHeight; return d; }
+  function screenLink(r) { return r.screen ? ' <a href="' + esc(r.screen) + '" target="_blank">화면으로 열기 ↗</a>' : ''; }
+  function showResult(r) {
+    var c = card('r-read', '<h4>' + (r.ok === false ? '⚠️ ' : '✅ ') + esc(r.name || '') + '</h4><div>' + esc(r.text || '') + screenLink(r) + '</div>' + tableOf(r.data) +
+      (r.undo ? '<div class="btns"><button class="opt" data-undo="' + r.log_id + '">되돌리기</button></div>' : ''));
+    var b = c.querySelector('[data-undo]');
+    if (b) b.addEventListener('click', function () { b.disabled = true; api('/api/ai/exec/undo/' + b.getAttribute('data-undo'), { method: 'POST' }).then(function (u) { addMsg(u.ok ? 'ai' : 'err', esc(u.text || '')); }); });
+  }
+  function runPlan(r, c) {
+    var btns = c.querySelector('.btns'); btns.innerHTML = '<span class="note">실행 중…</span>';
+    api('/api/ai/exec/run', { method: 'POST', body: { plan_id: r.plan_id } }).then(function (x) {
+      if (x.error === 'reauth_required') { btns.innerHTML = '<span class="note">재인증이 필요합니다.</span>'; showConfirm(Object.assign({}, r, { need_reauth: true }), c); return; }
+      c.remove(); showResult(x);
+    });
+  }
+  function showConfirm(r, old) {
+    var html = '<h4>' + esc(r.risk_ko) + ' · ' + esc(r.name) + '</h4><div class="pv">' + esc(r.preview) + '</div>' + (r.note ? '<div class="note">' + esc(r.note) + '</div>' : '') +
+      (r.need_reauth ? '<div style="margin-top:6px"><span class="note">본인 확인(비밀번호) — 이 칸은 대화 기록에 남지 않습니다</span><br><input type="password" id="pw_' + esc(r.plan_id) + '" autocomplete="current-password"></div>' : '') +
+      '<div class="btns"><button class="pb" data-run="1">' + (r.risk === 'send' ? '보내기' : '실행') + '</button><button class="pb ghost" data-cancel="1">취소</button>' + screenLink(r) + '</div>';
+    var c = old || card('r-' + r.risk, '');
+    c.className = 'card r-' + r.risk; c.innerHTML = html;
+    c.querySelector('[data-cancel]').addEventListener('click', function () { c.remove(); addMsg('ai', '취소했습니다.'); });
+    c.querySelector('[data-run]').addEventListener('click', function () {
+      if (r.need_reauth) {
+        var pw = c.querySelector('input[type=password]'); var v = pw ? pw.value : '';
+        if (!v) { pw.focus(); return; }
+        api('/api/ai/exec/reauth', { method: 'POST', body: { password: v } }).then(function (a) { if (!a.ok) { addMsg('err', '비밀번호가 맞지 않습니다.'); return; } r.need_reauth = false; runPlan(r, c); });
+        return;
+      }
+      runPlan(r, c);
+    });
+  }
+  function plan(q, wait, toolHint) {
+    return api('/api/ai/exec/plan', { method: 'POST', body: { thread_id: state.thread, message: q, tool: toolHint || null } }).then(function (r) {
+      if (!r.ok || r.kind === 'none') return false;           // 도구 아님 → 보통 질문으로
+      wait.remove(); state.pending = null;
+      if (r.kind === 'result') { showResult(r); return true; }
+      if (r.kind === 'confirm') { showConfirm(r); return true; }
+      if (r.kind === 'need') { state.pending = { tool: r.tool, prev: q }; addMsg('ai', esc(r.text)); return true; }
+      if (r.kind === 'locked') { card('r-read', '<div>🔒 ' + esc(r.text) + '</div>' + (r.screen ? '<div class="btns"><a class="opt" href="' + API + '/#/map">둘러보기에서 보기</a>' + (r.can_request ? '<a class="opt" href="https://home.sakyowon.co.kr/#/contact">권한 요청 문의</a>' : '') + '</div>' : '')); return true; }
+      if (r.kind === 'ask') {
+        var c = card('r-read', '<div>' + esc(r.text) + '</div><div class="btns">' + r.options.map(function (o) { return '<button class="opt" data-t="' + esc(o.id) + '">' + esc(o.name) + '</button>'; }).join('') + '<button class="opt" data-t="">그냥 질문이에요</button></div>');
+        Array.prototype.forEach.call(c.querySelectorAll('[data-t]'), function (b) { b.addEventListener('click', function () {
+          c.remove(); var t = b.getAttribute('data-t'); if (!t) { ask(q); return; }
+          var w = addMsg('ai', '확인 중…'); plan(q, w, t).then(function (ok) { if (!ok) { w.remove(); ask(q); } });
+        }); });
+        return true;
+      }
+      addMsg(r.kind === 'refused' ? 'err' : 'ai', esc(r.text || '')); return true;
+    });
+  }
+  function ask(q) {
+    var wait = addMsg('ai', '생각 중…'); state.busy = true; $('send').disabled = true;
+    api('/api/ai/dock/chat', { method: 'POST', body: { thread_id: state.thread, message: q, page: { url: location.href, title: document.title, text: pageText() } } })
+      .then(function (r) {
+        state.busy = false; $('send').disabled = false;
+        if (r.thread_id) setThread(r.thread_id);
+        if (r.ok) { wait.innerHTML = md(r.answer); if (state.me) { state.me.used = r.used; state.me.limit = r.limit; setWho(); } }
+        else { wait.className = 'm err'; wait.textContent = r.answer || r.message || (r.status === 429 ? '오늘 한도에 닿았습니다.' : '답을 받지 못했습니다. 잠시 뒤 다시 시도해 주세요.'); }
+      });
+  }
   function send() {
+    var q = $('q').value.trim(); if (!q || state.busy) return;
+    $('q').value = ''; open(true); tab('chat');
+    addMsg('user', esc(q));
+    var hint = null, full = q;
+    if (state.pending) { hint = state.pending.tool; full = state.pending.prev + ' ' + q; }
+    var wait = addMsg('ai', '확인 중…'); state.busy = true; $('send').disabled = true;
+    plan(full, wait, hint).then(function (handled) {
+      state.busy = false; $('send').disabled = false;
+      if (!handled) { wait.remove(); ask(q); }
+    });
+  }
+  function sendOld() {
     var q = $('q').value.trim(); if (!q || state.busy) return;
     $('q').value = ''; open(true); tab('chat');
     addMsg('user', esc(q)); var wait = addMsg('ai', '생각 중…'); state.busy = true; $('send').disabled = true;
@@ -205,6 +288,9 @@
     });
   }
 
+  // 다른 화면(개인페이지·둘러보기)이 「이렇게 말해 보세요」 예시를 넣을 때 쓴다 (AX 2단계)
+  window.skai = { say: function (t, go) { try { $('q').value = String(t || ''); open(true); tab('chat'); if (go) send(); else $('q').focus(); } catch (e) {} },
+                  open: function () { open(true); tab('chat'); } };
   $('send').addEventListener('click', send);
   $('q').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); send(); } });
   $('q').addEventListener('focus', function () { if ($('msgs').children.length) open(true); });
