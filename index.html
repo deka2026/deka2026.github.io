@@ -793,7 +793,7 @@ function currentRoute() {
 let AXLOCK = false;   // 26-10-30 이사장 지시: 개편이 끝날 때까지 새 화면은 통합관리자만(/api/ax/lock)
 function route() {
   const h = location.hash || '';
-  if (AXLOCK && !(realMe && realMe.role === 'admin') && currentRoute() !== 'classic' && !['#login', '#/login', '#signup', '#/signup'].includes(h)) {
+  if (AXLOCK && !(realMe && realMe.role === 'admin') && !(typeof GT !== 'undefined' && GT.pending) && currentRoute() !== 'classic' && !['#login', '#/login', '#signup', '#/signup'].includes(h)) {   // 2단계 코드 기다리는 세션은 관문에 남긴다(알파언니 N3)
     location.replace('#/classic'); return;
   }
   const ab = $('#axLockBar'); if (ab) ab.hidden = !AXLOCK;
