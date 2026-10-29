@@ -226,6 +226,7 @@
 
   <!-- ⑤ 옛 첫 화면 머리(#/classic) -->
   <div id="vClassic" class="view">
+    <div id="axLockBar" role="status" hidden style="margin:10px 0 14px;padding:10px 14px;border:1px solid #e0c070;background:#fff7e0;border-radius:10px;font-size:14px">🛠️ 사교원 사이트를 새 모습으로 고치는 중입니다. 작업이 끝날 때까지 지금 화면으로 이용해 주세요. 근태·그룹웨어 등 업무 화면은 그대로 쓰실 수 있습니다.</div>
     <div class="hero">
       <div class="card">
         <h2>무엇이든 AI 도우미에게 물어보세요</h2>
@@ -789,8 +790,13 @@ function currentRoute() {
   if (h.startsWith('#/classic')) return 'classic';
   return 'home';
 }
+let AXLOCK = false;   // 26-10-30 이사장 지시: 개편이 끝날 때까지 새 화면은 통합관리자만(/api/ax/lock)
 function route() {
   const h = location.hash || '';
+  if (AXLOCK && !(realMe && realMe.role === 'admin') && currentRoute() !== 'classic' && !['#login', '#/login', '#signup', '#/signup'].includes(h)) {
+    location.replace('#/classic'); return;
+  }
+  const ab = $('#axLockBar'); if (ab) ab.hidden = !AXLOCK;
   if (h === '#login' || h === '#/login') openAuth('login');
   if (h === '#signup' || h === '#/signup') openAuth('signup');
   const r = currentRoute();
@@ -1185,6 +1191,8 @@ $('#fsDown').addEventListener('click', () => stepFont(-1));
 
 async function boot() {
   applyFont();
+  const lk = await api('/api/ax/lock');
+  AXLOCK = !!(lk && lk.ok && lk.locked);
   const r = await api('/api/auth/me');
   me = realMe = (r.ok && r.user) ? r.user : null;
   if (!me && r.error === 'twofa_required') GT.pending = true;   // 비밀번호는 통과, 코드만 남은 세션
