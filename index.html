@@ -46,22 +46,24 @@
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
 <style>
   :root{--bg:#f5f1e6;--card:#fff;--ink:#1e2b1c;--ink2:#3d5238;--mute:#6e8469;--g9:#0d3b2c;--g7:#2c5842;--g6:#4a6741;--g1:#dbe4d0;--g0:#edf2e5;--gold:#b47d14;--gold1:#f6eac9;--line:rgba(60,80,50,.2);--danger:#b03a3a;--r:14px;--font:'Pretendard Variable',Pretendard,-apple-system,sans-serif;--serif:Georgia,'Noto Serif KR',serif}
+  /* 글자 크기 — html 의 font-size 를 100/112/125% 로 바꾸면(가+ 가−) rem 단위 글자가 함께 커진다 */
+  html{font-size:15px}
   *{box-sizing:border-box}html,body{margin:0;padding:0}
-  body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.6}
+  body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:1rem;line-height:1.6}
   a{color:var(--g7);text-decoration:none}
   .wrap{max-width:1120px;margin:0 auto;padding:18px 16px 60px}
   .top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:6px 0 14px;border-bottom:1px solid var(--line)}
-  .brand{display:flex;align-items:center;gap:10px}.brand .mark{width:40px;height:40px;border-radius:50%;background:var(--g6);color:#faf6ec;font-family:var(--serif);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px}
-  .brand h1{margin:0;font-size:20px;font-family:var(--serif);color:var(--g9)}.brand .sub{font-size:12px;color:var(--mute)}
-  .sp{flex:1}.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font-size:13px;cursor:pointer;color:var(--ink);font-family:inherit}
-  .btn.p{background:var(--g7);color:#fff;border-color:var(--g7)}.btn.sm{padding:4px 10px;font-size:12px}
-  .chip{display:inline-flex;align-items:center;gap:6px;background:var(--g0);border:1px solid var(--g1);border-radius:999px;padding:5px 12px;font-size:13px}
+  .brand{display:flex;align-items:center;gap:10px}.brand .mark{width:40px;height:40px;border-radius:50%;background:var(--g6);color:#faf6ec;font-family:var(--serif);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:0.9333rem}
+  .brand h1{margin:0;font-size:1.3333rem;font-family:var(--serif);color:var(--g9)}.brand .sub{font-size:0.8rem;color:var(--mute)}
+  .sp{flex:1}.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font-size:0.8667rem;cursor:pointer;color:var(--ink);font-family:inherit}
+  .btn.p{background:var(--g7);color:#fff;border-color:var(--g7)}.btn.sm{padding:4px 10px;font-size:0.8rem}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:var(--g0);border:1px solid var(--g1);border-radius:999px;padding:5px 12px;font-size:0.8667rem}
   .hero{display:grid;grid-template-columns:1.3fr 1fr;gap:18px;margin:18px 0}
   .hero .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px 22px}
-  .hero h2{margin:0 0 6px;font-family:var(--serif);font-size:22px;color:var(--g9)}.hero p{margin:0 0 10px;color:var(--ink2)}
-  .ask{display:flex;gap:8px;margin-top:10px}.ask input{flex:1;height:42px;border:1px solid var(--line);border-radius:10px;padding:0 14px;font-size:15px;font-family:inherit}.ask button{height:42px;border:none;background:var(--g7);color:#fff;border-radius:10px;padding:0 16px;font-size:14px;cursor:pointer}
-  .ex{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.ex button{border:1px solid var(--g1);background:var(--g0);border-radius:999px;padding:4px 10px;font-size:12px;cursor:pointer;color:var(--g7)}
-  .tiers{font-size:13px;color:var(--ink2);line-height:1.8}.tiers b{color:var(--g9)}
+  .hero h2{margin:0 0 6px;font-family:var(--serif);font-size:1.4667rem;color:var(--g9)}.hero p{margin:0 0 10px;color:var(--ink2)}
+  .ask{display:flex;gap:8px;margin-top:10px}.ask input{flex:1;height:42px;border:1px solid var(--line);border-radius:10px;padding:0 14px;font-size:1rem;font-family:inherit}.ask button{height:42px;border:none;background:var(--g7);color:#fff;border-radius:10px;padding:0 16px;font-size:0.9333rem;cursor:pointer}
+  .ex{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.ex button{border:1px solid var(--g1);background:var(--g0);border-radius:999px;padding:4px 10px;font-size:0.8rem;cursor:pointer;color:var(--g7)}
+  .tiers{font-size:0.8667rem;color:var(--ink2);line-height:1.8}.tiers b{color:var(--g9)}
   .app{display:grid;grid-template-columns:1fr;gap:16px;margin-top:6px;align-items:start}
   body.in .app{grid-template-columns:270px minmax(0,1fr)}
   .tree{display:grid;grid-template-columns:repeat(auto-fill,minmax(480px,1fr));gap:14px}
@@ -69,86 +71,223 @@
   /* 사이드바 — 로그인 때만 */
   .side{display:none;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 12px 10px;position:sticky;top:72px;max-height:calc(100vh - 84px);overflow:auto}
   body.in .side{display:block}
-  .side .me{font-size:13px;color:var(--ink2);padding:0 4px 8px;border-bottom:1px solid var(--line);margin-bottom:6px}.side .me b{color:var(--g9)}
-  .side .hint{font-size:11.5px;color:var(--mute);padding:0 4px 6px}
+  .side .me{font-size:0.8667rem;color:var(--ink2);padding:0 4px 8px;border-bottom:1px solid var(--line);margin-bottom:6px}.side .me b{color:var(--g9)}
+  .side .hint{font-size:0.7667rem;color:var(--mute);padding:0 4px 6px}
   .ss{border-radius:10px;margin-bottom:4px}.ss.drag{opacity:.4}.ss.over{outline:2px dashed var(--g6);outline-offset:-2px}
   .ss .sh{display:flex;align-items:center;gap:6px;padding:6px 6px;border-radius:8px;cursor:grab;user-select:none}.ss .sh:hover{background:var(--g0)}
-  .ss .sh .hd{color:var(--mute);font-size:14px;cursor:grab}.ss .sh .nm{flex:1;font-weight:600;font-size:14px;color:var(--g9)}
-  .ss .sh .mv{border:none;background:none;color:var(--mute);cursor:pointer;font-size:11px;padding:2px 3px;line-height:1}.ss .sh .mv:hover{color:var(--g7)}.ss .sh .mv:disabled{opacity:.25;cursor:default}
-  .ss ul{list-style:none;margin:0 0 4px;padding:0 0 0 22px}.ss li a{display:block;font-size:13px;padding:3px 6px;border-radius:6px;color:var(--ink)}.ss li a:hover{background:var(--g0);color:var(--g7)}
-  .side .lockbox{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line)}.side .lockbox h4{margin:0 0 4px;font-size:13px;color:var(--gold);display:flex;gap:6px;align-items:center}
-  .side .lockbox .sn{font-size:11.5px;color:var(--mute);padding:4px 6px 0}.side .lockbox ul{padding-left:10px;margin:0}.side .lockbox li a{color:var(--mute);display:flex;justify-content:space-between;gap:6px;font-size:12.5px}
-  .side .lockbox li a .rq{font-size:11px;color:var(--gold);white-space:nowrap}
-  .grp.lockgrp h3{color:var(--gold)}.grp.lockgrp li a{color:var(--mute)}.grp.lockgrp li a .rq{font-size:11px;color:var(--gold);background:var(--gold1);border-radius:8px;padding:0 6px}
+  .ss .sh .hd{color:var(--mute);font-size:0.9333rem;cursor:grab}.ss .sh .nm{flex:1;font-weight:600;font-size:0.9333rem;color:var(--g9)}
+  .ss .sh .mv,.pick .mv,.clist .mv{border:none;background:none;color:var(--mute);cursor:pointer;font-size:0.7333rem;padding:2px 3px;line-height:1;font-family:inherit}.ss .sh .mv:hover,.pick .mv:hover,.clist .mv:hover{color:var(--g7)}.ss .sh .mv:disabled,.pick .mv:disabled,.clist .mv:disabled{opacity:.25;cursor:default}
+  .ss ul{list-style:none;margin:0 0 4px;padding:0 0 0 22px}.ss li a{display:block;font-size:0.8667rem;padding:3px 6px;border-radius:6px;color:var(--ink)}.ss li a:hover{background:var(--g0);color:var(--g7)}
+  .side .lockbox{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line)}.side .lockbox h4{margin:0 0 4px;font-size:0.8667rem;color:var(--gold);display:flex;gap:6px;align-items:center}
+  .side .lockbox .sn{font-size:0.7667rem;color:var(--mute);padding:4px 6px 0}.side .lockbox ul{padding-left:10px;margin:0}.side .lockbox li a{color:var(--mute);display:flex;justify-content:space-between;gap:6px;font-size:0.8333rem}
+  .side .lockbox li a .rq{font-size:0.7333rem;color:var(--gold);white-space:nowrap}
+  .grp.lockgrp h3{color:var(--gold)}.grp.lockgrp li a{color:var(--mute)}.grp.lockgrp li a .rq{font-size:0.7333rem;color:var(--gold);background:var(--gold1);border-radius:8px;padding:0 6px}
   .sideTog{display:none}
+  /* 새 사이드바(개인페이지) — 고정 메뉴·고른 메뉴·바닥 */
+  .side .fix{list-style:none;margin:0 0 6px;padding:0}.side .fix li a{display:block;font-size:0.9333rem;font-weight:600;padding:5px 6px;border-radius:8px;color:var(--g9)}.side .fix li a:hover,.side .fix li a.cur{background:var(--g0)}
+  .side .pick{list-style:none;margin:0;padding:0}.side .pick li{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:8px;user-select:none}.side .pick li:hover{background:var(--g0)}.side .pick li .hd{color:var(--mute);cursor:grab}.side .pick li a{flex:1;font-size:0.9rem;color:var(--ink)}.side .pick li a:hover{color:var(--g7)}
+  .side .sfoot{margin-top:10px;padding-top:8px;border-top:1px solid var(--line);font-size:0.9rem;font-weight:600}.side .sfoot a{display:block;padding:4px 6px;border-radius:8px}.side .sfoot a:hover{background:var(--g0)}
   /* 관리자 전용 등급 미리보기 띠(임시) */
-  .pv{display:none;align-items:center;gap:6px;flex-wrap:wrap;background:var(--gold1);border:1px solid #e6cf8a;border-radius:10px;padding:8px 12px;margin:0 0 10px;font-size:13px;color:#6b4a06}
-  .pv.on{display:flex}.pv b{margin-right:4px}.pv button{border:1px solid #d9bd6a;background:#fff;border-radius:999px;padding:4px 10px;font-size:12.5px;cursor:pointer;font-family:inherit;color:#6b4a06}
-  .pv button.cur{background:var(--gold);color:#fff;border-color:var(--gold)}.pv .now{margin-left:auto;font-size:12px}
-  .pvnote{font-size:11.5px;color:var(--gold);padding:0 4px 4px}
+  .pv{display:none;align-items:center;gap:6px;flex-wrap:wrap;background:var(--gold1);border:1px solid #e6cf8a;border-radius:10px;padding:8px 12px;margin:0 0 10px;font-size:0.8667rem;color:#6b4a06}
+  .pv.on{display:flex}.pv b{margin-right:4px}.pv button{border:1px solid #d9bd6a;background:#fff;border-radius:999px;padding:4px 10px;font-size:0.8333rem;cursor:pointer;font-family:inherit;color:#6b4a06}
+  .pv button.cur{background:var(--gold);color:#fff;border-color:var(--gold)}.pv .now{margin-left:auto;font-size:0.8rem}
+  .pvnote{font-size:0.7667rem;color:var(--gold);padding:0 4px 4px}
   @media(max-width:760px){body.in .app{grid-template-columns:1fr}.side{position:static;max-height:none}.sideTog{display:inline-flex;margin:0 0 8px}body.in .side{display:none}body.in.sideOpen .side{display:block}}
   .secs{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px 18px}
-  .sec h4{margin:6px 0 4px;font-size:14px;color:var(--g7);display:flex;align-items:center;gap:6px}.sec h4 .ic{font-size:15px}
+  .sec h4{margin:6px 0 4px;font-size:0.9333rem;color:var(--g7);display:flex;align-items:center;gap:6px}.sec h4 .ic{font-size:1rem}
   .gate{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--g0);border-style:dashed}
-  .gate .hint{font-size:12.5px;color:var(--mute)}.gate .btn{font-size:14px;padding:9px 18px}
+  .gate .hint{font-size:0.8333rem;color:var(--mute)}.gate .btn{font-size:0.9333rem;padding:9px 18px}
   .grp{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px 10px}
-  .grp h3{margin:0 0 8px;font-size:16px;font-family:var(--serif);color:var(--g9);display:flex;align-items:center;gap:8px}.grp h3 .ic{font-size:18px}.grp h3 .lock{font-size:12px;color:var(--gold);font-family:var(--font);font-weight:400}
+  .grp h3{margin:0 0 8px;font-size:1.0667rem;font-family:var(--serif);color:var(--g9);display:flex;align-items:center;gap:8px}.grp h3 .ic{font-size:1.2rem}.grp h3 .lock{font-size:0.8rem;color:var(--gold);font-family:var(--font);font-weight:400}
   .grp ul{list-style:none;margin:0;padding:0 0 0 8px;border-left:2px solid var(--g1)}.grp li{position:relative;padding:3px 0 3px 14px}.grp li::before{content:"";position:absolute;left:-2px;top:16px;width:10px;height:2px;background:var(--g1)}
-  .grp li a{color:var(--ink);display:flex;align-items:center;gap:6px;flex-wrap:wrap}.grp li a:hover{color:var(--g7)}.grp li .d{font-size:12px;color:var(--mute)}
+  .grp li a{color:var(--ink);display:flex;align-items:center;gap:6px;flex-wrap:wrap}.grp li a:hover{color:var(--g7)}.grp li .d{font-size:0.8rem;color:var(--mute)}
   .grp li.sub{padding-left:28px}.grp li.sub::before{width:22px;left:-2px}
-  .grp li.locked a{color:var(--mute)}.grp li.locked a::before{content:"🔒";font-size:11px}
-  .grp li.soon a::after{content:"준비 중";font-size:11px;color:var(--gold);background:var(--gold1);border-radius:8px;padding:0 6px}
-  .grp li.ext a::after{content:"↗";font-size:11px;color:var(--mute)}
-  .who{font-size:13px;color:var(--ink2)}.who b{color:var(--g9)}
-  .install-bar{display:none;margin:18px 0 0;text-align:center}.install-bar.show{display:block}.install-btn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 16px;cursor:pointer;font-family:inherit}.install-note{font-size:12px;color:var(--mute);margin:6px 0 0}
-  footer{max-width:1120px;margin:0 auto;padding:18px 16px 40px;font-size:12.5px;color:var(--mute);border-top:1px solid var(--line);line-height:1.8}
+  .grp li.locked a{color:var(--mute)}.grp li.locked a::before{content:"🔒";font-size:0.7333rem}
+  .grp li.soon a::after{content:"준비 중";font-size:0.7333rem;color:var(--gold);background:var(--gold1);border-radius:8px;padding:0 6px}
+  .grp li.ext a::after{content:"↗";font-size:0.7333rem;color:var(--mute)}
+  .who{font-size:0.8667rem;color:var(--ink2)}.who b{color:var(--g9)}
+  .install-bar{display:none;margin:18px 0 0;text-align:center}.install-bar.show{display:block}.install-btn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 16px;cursor:pointer;font-family:inherit}.install-note{font-size:0.8rem;color:var(--mute);margin:6px 0 0}
+  footer{max-width:1120px;margin:0 auto;padding:18px 16px 40px;font-size:0.8333rem;color:var(--mute);border-top:1px solid var(--line);line-height:1.8}
   .modal-back{position:fixed;inset:0;background:rgba(20,30,20,.45);display:none;align-items:center;justify-content:center;z-index:2147482000;padding:16px}.modal-back.on{display:flex}
   .modal{background:#fff;border-radius:16px;width:100%;max-width:440px;max-height:92vh;overflow:auto;padding:22px 22px 18px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
-  .modal h2{margin:0 0 4px;font-family:var(--serif);font-size:20px;color:var(--g9)}.modal .sub{font-size:13px;color:var(--mute);margin:0 0 12px}
+  .modal h2{margin:0 0 4px;font-family:var(--serif);font-size:1.3333rem;color:var(--g9)}.modal .sub{font-size:0.8667rem;color:var(--mute);margin:0 0 12px}
   .tabs{display:flex;gap:6px;margin-bottom:12px}.tabs button{flex:1;border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px;cursor:pointer;font-family:inherit}.tabs button.on{background:var(--g7);color:#fff;border-color:var(--g7)}
-  .f{margin-bottom:10px}.f label{display:block;font-size:13px;color:var(--ink2);margin-bottom:4px}.f input,.f select{width:100%;height:38px;border:1px solid var(--line);border-radius:8px;padding:0 10px;font-size:14px;font-family:inherit;background:#fff}
+  .f{margin-bottom:10px}.f label{display:block;font-size:0.8667rem;color:var(--ink2);margin-bottom:4px}.f input,.f select{width:100%;height:38px;border:1px solid var(--line);border-radius:8px;padding:0 10px;font-size:0.9333rem;font-family:inherit;background:#fff}
   .f .two{display:flex;gap:6px}.f .two select{flex:1}
-  .msg{font-size:13px;min-height:18px;margin:4px 0 8px}.msg.err{color:var(--danger)}.msg.ok{color:#2e8b57}
-  .mbtn{width:100%;height:40px;border:none;background:var(--g7);color:#fff;border-radius:8px;font-size:14px;cursor:pointer;font-family:inherit}.mbtn:disabled{opacity:.5}
-  .ghost{width:100%;height:36px;border:1px solid var(--line);background:#fff;border-radius:8px;font-size:13px;cursor:pointer;margin-top:6px;font-family:inherit}
+  .msg{font-size:0.8667rem;min-height:18px;margin:4px 0 8px}.msg.err{color:var(--danger)}.msg.ok{color:#2e8b57}
+  .mbtn{width:100%;height:40px;border:none;background:var(--g7);color:#fff;border-radius:8px;font-size:0.9333rem;cursor:pointer;font-family:inherit}.mbtn:disabled{opacity:.5}
+  .ghost{width:100%;height:36px;border:1px solid var(--line);background:#fff;border-radius:8px;font-size:0.8667rem;cursor:pointer;margin-top:6px;font-family:inherit}
   .req{color:var(--danger)}
-  @media(max-width:760px){.hero{grid-template-columns:1fr}.brand h1{font-size:17px}.tree{grid-template-columns:1fr!important}}
+  @media(max-width:760px){.hero{grid-template-columns:1fr}.brand h1{font-size:1.1333rem}.tree{grid-template-columns:1fr!important}}
+  /* ── 2단계(AX 개편) 화면 — 라우트별 보기 */
+  .view:not(.on){display:none}
+  .topnav{display:flex;gap:4px;flex-wrap:wrap;padding:8px 0 0;font-size:0.8667rem}.topnav a{padding:4px 10px;border-radius:999px;color:var(--ink2)}.topnav a:hover{background:var(--g0)}.topnav a.cur{background:var(--g0);color:var(--g9);font-weight:600}
+  .fs{display:inline-flex;gap:2px}.fs button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 9px;font-size:0.8rem;cursor:pointer;font-family:inherit;color:var(--ink)}
+  /* 로그인 관문 */
+  .gate2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:26px auto 14px;max-width:880px}
+  .gate2 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px 24px}
+  .gate2 h2{margin:0 0 4px;font-family:var(--serif);font-size:1.4667rem;color:var(--g9)}.gate2 .sub{font-size:0.8667rem;color:var(--mute);margin:0 0 12px}
+  .gate2 .links{margin-top:10px;font-size:0.8667rem}
+  .tour{text-align:center;display:flex;flex-direction:column;justify-content:center;gap:10px;background:var(--g0)!important;border-style:dashed!important}
+  .tour p{margin:0;color:var(--ink2)}
+  .btn.big{font-size:1.2rem;padding:14px 28px;justify-content:center;align-self:center}
+  .intro{max-width:880px;margin:10px auto 4px;text-align:center;color:var(--ink2);font-size:0.9333rem}
+  .intro .lk{margin-top:8px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  .gnote{max-width:880px;margin:4px auto 0;text-align:center;color:var(--mute);font-size:0.8333rem}
+  /* 개인페이지 */
+  .secT{display:flex;align-items:center;gap:10px;margin:4px 0 8px;flex-wrap:wrap}.secT h2{margin:0;font-family:var(--serif);font-size:1.2667rem;color:var(--g9)}.secT .sub{font-size:0.8333rem;color:var(--mute);margin:0}
+  .dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+  .dcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}.dcard h3{margin:0 0 6px;font-size:1rem;color:var(--g9);display:flex;justify-content:space-between;gap:6px;align-items:baseline}.dcard .asof{font-weight:400;font-size:0.7667rem;color:var(--mute);white-space:nowrap}
+  .dcard ul{list-style:none;margin:0;padding:0}.dcard li{display:flex;justify-content:space-between;gap:8px;font-size:0.8667rem;padding:3px 0;border-top:1px dashed var(--g1)}.dcard li b{color:var(--g7);white-space:nowrap}.dcard .empty{font-size:0.8333rem;color:var(--mute);margin:4px 0 0}
+  .chatspot{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin:16px 0}
+  .quick{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 8px}.quick button{border:1px solid var(--g1);background:var(--g0);border-radius:999px;padding:6px 12px;font-size:0.8667rem;cursor:pointer;color:var(--g7);font-family:inherit;text-align:left}
+  .chatspot .hint,.quick .hint{font-size:0.8333rem;color:var(--mute);margin:0}
+  .nlist{list-style:none;margin:0;padding:0;background:var(--card);border:1px solid var(--line);border-radius:var(--r)}.nlist li{display:flex;gap:10px;align-items:baseline;padding:8px 14px;border-top:1px solid var(--g1);font-size:0.9rem}.nlist li:first-child{border-top:none}.nlist .src{font-size:0.7667rem;background:var(--g0);border:1px solid var(--g1);border-radius:8px;padding:0 7px;white-space:nowrap}.nlist .dt{margin-left:auto;font-size:0.8rem;color:var(--mute);white-space:nowrap}.nlist .empty{color:var(--mute)}
+  .tfband{background:var(--gold1);border:1px solid #e6cf8a;border-radius:10px;padding:8px 12px;margin:0 0 12px;font-size:0.8667rem;color:#6b4a06;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.tfband[hidden]{display:none}
+  /* 둘러보기 */
+  .mapgrp{margin-bottom:14px}.mapsec{margin:8px 0 12px}
+  .mcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+  .mcard{border:1px solid var(--g1);border-radius:10px;padding:10px 12px;background:#fff;display:flex;flex-direction:column}.mcard h4{margin:0 0 4px;font-size:0.9667rem;color:var(--g9)}.mcard.sub h4::before{content:"└ ";color:var(--mute)}.mcard .d{margin:0 0 8px;font-size:0.8333rem;color:var(--mute);flex:1}
+  .mcard .row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.mcard.locked h4{color:var(--mute)}.mcard .rq{font-size:0.7333rem;color:var(--gold);background:var(--gold1);border-radius:8px;padding:0 6px}
+  .mcard .exq{display:block;width:100%;text-align:left;margin-top:8px;border:1px dashed var(--g1);background:var(--g0);border-radius:8px;padding:6px 10px;font-size:0.8333rem;color:var(--g7);cursor:pointer;font-family:inherit}.mcard .exq:hover{border-style:solid}
+  /* 꾸미기 */
+  .cgrid{display:grid;grid-template-columns:1fr 1fr 230px;gap:14px;align-items:start}
+  .clist{list-style:none;margin:0;padding:0}.clist li{display:flex;align-items:center;gap:6px;padding:5px 4px;border-top:1px dashed var(--g1);font-size:0.9rem}.clist li:first-child{border-top:none}.clist li label{flex:1;display:flex;gap:6px;align-items:center;cursor:pointer}.clist .meta{font-size:0.7667rem;color:var(--mute)}
+  .mini{font-size:0.8333rem;background:var(--g0);border-radius:10px;padding:8px 10px}.mini .h{font-weight:600;color:var(--g9);margin:6px 0 2px}.mini ul{list-style:none;margin:0;padding:0 0 0 8px}.mini li{padding:1px 0}
+  .cbar{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+  /* 내 폴더 */
+  .fbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:8px 0}.crumb{font-size:0.9rem}.crumb a{padding:2px 4px;border-radius:6px}.crumb a:hover{background:var(--g0)}.crumb .sep{color:var(--mute);margin:0 2px}
+  .ftabs{display:flex;gap:6px;margin:4px 0}.ftabs button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 12px;cursor:pointer;font-family:inherit;font-size:0.8667rem}.ftabs button.on{background:var(--g7);color:#fff;border-color:var(--g7)}
+  .flist{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}.flist th,.flist td{padding:7px 10px;text-align:left;border-top:1px solid var(--g1);font-size:0.9rem;vertical-align:middle}.flist th{background:var(--g0);font-weight:600;border-top:none;font-size:0.8333rem}.flist td.n{white-space:nowrap;color:var(--mute);font-size:0.8333rem}.flist .act{display:flex;gap:4px;flex-wrap:wrap}.flist .nm a{cursor:pointer}
+  .quota{display:flex;gap:8px;align-items:center;font-size:0.8333rem;color:var(--mute)}.qbar{height:8px;background:var(--g1);border-radius:4px;overflow:hidden;flex:1;max-width:240px}.qbar i{display:block;height:100%;background:var(--g6)}
+  /* 2단계 인증 창 */
+  .bk{display:grid;grid-template-columns:1fr 1fr;gap:4px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:0.9333rem;background:var(--g0);padding:8px;border-radius:8px;margin:6px 0}
+  .tfqr{text-align:center;margin:8px 0}.tfqr svg{width:180px;height:180px}.tfsec{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:0.8667rem;background:var(--g0);padding:6px 8px;border-radius:6px;word-break:break-all}
+  @media(max-width:760px){.gate2,.cgrid{grid-template-columns:1fr}.btn.big{font-size:1.0667rem}}
 </style>
 <script src="/ai-dock.js" defer></script>
 </head>
 <body>
 <div class="wrap">
-  <div class="top">
+  <header class="top">
     <div class="brand"><div class="mark">L&amp;L</div><div><h1>사교원 통합사이트</h1><div class="sub">사회혁신교육원 사회적협동조합 · 소개·연구실·참여 · 교육·사업·쇼핑</div></div></div>
     <div class="sp"></div>
+    <span class="fs" role="group" aria-label="글자 크기"><button type="button" id="fsDown" aria-label="글자 작게">가−</button><button type="button" id="fsUp" aria-label="글자 크게">가+</button></span>
     <span class="who" id="who"></span>
     <button class="btn p" id="btnLogin">로그인 · 회원가입</button>
     <button class="btn" id="btnPw" style="display:none">비밀번호 변경</button>
+    <button class="btn" id="btnTwofa" style="display:none">2단계 인증</button>
     <button class="btn" id="btnLogout" style="display:none">로그아웃</button>
-  </div>
+  </header>
+  <nav class="topnav" aria-label="화면 이동" id="topnav">
+    <a href="#/" data-r="home">🏠 내 페이지</a><a href="#/map" data-r="map">🗺️ 둘러보기</a><a href="#/files" data-r="files" class="needin">📁 내 폴더</a><a href="#/custom" data-r="custom" class="needin">🎨 꾸미기</a><a href="#/classic" data-r="classic">옛 첫 화면</a>
+  </nav>
 
-  <div class="hero">
-    <div class="card">
-      <h2>무엇이든 AI 도우미에게 물어보세요</h2>
-      <p>화면 맨 위 <b>사교원 AI</b> 칸은 모든 페이지에 따라다닙니다. 지금 보는 화면을 근거로 답하고, 파일·이미지를 올려 묻고, 문서를 써서 한글(hwpx)로 내려받습니다. 연산은 과기정통부 고성능컴퓨팅(HPC) 엔진이 맡고, 개인정보는 보내기 전에 가립니다.</p>
-      <div class="ask"><input id="heroQ" placeholder="예: 사교원은 어떤 곳인가요? / 햇빛소득마을 신청 절차는?"><button id="heroAsk">물어보기</button></div>
-      <div class="ex"><button data-q="사교원은 어떤 조직이고 무슨 일을 하나요?">사교원 소개</button><button data-q="햇빛소득마을 공모에 참여하려면 어떤 서류가 필요한가요?">햇소자 서류</button><button data-q="연대지능활동가 아카데미는 무엇을 배우나요?">아카데미</button><button data-q="교육 프로그램 비용은 어떻게 계산하나요?">교육 견적</button></div>
-    </div>
-    <div class="card">
-      <h2>회원 등급</h2>
-      <div class="tiers">
-        <b>통합관리자</b> › <b>매니저회원</b>(사교원 직원, 체크권한으로 그룹웨어·관리 기능) › <b>연합회회원</b>(햇빛소득마을 연합회) › <b>조합회원</b>(회원협동조합) › <b>일반이용자</b>(교육·쇼핑·문의·AI 질문) › 비로그인(둘러보기·안내 질문)<br>
-        가입은 이메일 하나로, 로그인은 이메일+비밀번호. 조합·연합회·매니저는 승인 뒤 열립니다. 로그인하면 왼쪽 사이드바에 내 등급으로 열리는 메뉴만 모이고, 아직 못 여는 메뉴는 맨 아래 「권한 승인이 필요한 메뉴」에 따로 보입니다. 사이드바 순서를 바꾸면 본화면도 그 순서로 바뀝니다.
-      </div>
-      <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn sm" id="btnSignup">회원가입</button><a class="btn sm" href="account-privacy.html">개인정보처리방침</a></div>
-    </div>
-  </div>
-
+  <!-- 통합관리자 등급별 미리보기 띠 — 관문·둘러보기에서도 보여야 「원래대로」로 돌아온다 -->
   <div class="pv" id="pv"><b>🧪 등급별 미리보기(임시, 통합관리자만)</b><span id="pvBtns"></span><span class="now" id="pvNow"></span></div>
-  <button class="btn sideTog" id="sideTog">☰ 내 메뉴</button>
-  <div class="app" id="app">
-    <aside class="side" id="side" aria-label="내 메뉴"></aside>
-    <div class="tree" id="tree"></div>
+
+  <!-- ① 로그인 관문 (비로그인 #/) -->
+  <section id="vGate" class="view" aria-label="로그인 관문">
+    <div class="gate2">
+      <form class="card" id="gtForm" aria-labelledby="gtTitle" novalidate>
+        <h2 id="gtTitle">로그인</h2><p class="sub">사교원 통합 계정 하나로 모든 사이트에 들어갑니다.</p>
+        <div class="f"><label for="gtEmail">이메일 <span style="color:var(--mute);font-weight:400">(옛 아이디도 됩니다)</span></label><input id="gtEmail" inputmode="email" autocomplete="username" placeholder="name@example.com"></div>
+        <div class="f"><label for="gtPw">비밀번호</label><input id="gtPw" type="password" autocomplete="current-password"></div>
+        <div class="f" id="gtCodeBox" hidden><label for="gtCode">2단계 인증 코드</label><input id="gtCode" inputmode="numeric" autocomplete="one-time-code" placeholder="인증 앱 6자리 · 이메일 코드 · 백업 코드"></div>
+        <div class="msg" id="gtMsg" aria-live="polite"></div>
+        <button class="mbtn" id="gtBtn" type="submit">로그인</button>
+        <p class="links"><a href="#" id="gtForgot">비밀번호 찾기</a> · <a href="#/signup">회원가입</a></p>
+      </form>
+      <div class="card tour">
+        <h2>로그인 없이 둘러보기</h2>
+        <p>사교원의 모든 화면과, 상담창에 어떻게 말하면 되는지를 한눈에 봅니다.</p>
+        <a class="btn p big" href="#/map" id="gtMap">🗺️ 둘러보기</a>
+        <p class="sub" style="margin:0"><a href="#/classic">옛 첫 화면으로 보기</a></p>
+      </div>
+    </div>
+    <p class="intro">사회혁신교육원 사회적협동조합(사교원)은 연대지능활동가 교육, 햇빛소득마을·어촌신활력 사업, 정책 연구를 하는 사회적협동조합입니다.
+      <span class="lk"><a class="btn" href="https://home.sakyowon.co.kr/#/shop/edu">🎓 교육 신청</a><a class="btn" href="https://home.sakyowon.co.kr/#/contact">💬 문의</a><a class="btn" href="https://home.sakyowon.co.kr/#/about">사교원 소개</a></span>
+    </p>
+    <p class="gnote">비회원 상담은 화면 맨 위 <b>사교원 AI</b> 띠에서 바로 할 수 있습니다(하루 10회).</p>
+  </section>
+
+  <!-- ② 둘러보기 (#/map, 공개) -->
+  <main id="vMap" class="view" aria-label="둘러보기 — 사이트맵">
+    <div class="secT"><h2>둘러보기 — 말로 쓰는 사이트맵</h2><p class="sub">화면으로 바로 가거나, 예시를 눌러 상담창에 그 말을 넣어 보세요. 🔒 는 어떤 회원이 쓰는지 적혀 있습니다.</p></div>
+    <div id="mapBody"></div>
+  </main>
+
+  <!-- ⑤ 옛 첫 화면 머리(#/classic) -->
+  <div id="vClassic" class="view">
+    <div class="hero">
+      <div class="card">
+        <h2>무엇이든 AI 도우미에게 물어보세요</h2>
+        <p>화면 맨 위 <b>사교원 AI</b> 칸은 모든 페이지에 따라다닙니다. 지금 보는 화면을 근거로 답하고, 파일·이미지를 올려 묻고, 문서를 써서 한글(hwpx)로 내려받습니다. 연산은 과기정통부 고성능컴퓨팅(HPC) 엔진이 맡고, 개인정보는 보내기 전에 가립니다.</p>
+        <div class="ask"><input id="heroQ" placeholder="예: 사교원은 어떤 곳인가요? / 햇빛소득마을 신청 절차는?" aria-label="질문"><button id="heroAsk">물어보기</button></div>
+        <div class="ex"><button data-q="사교원은 어떤 조직이고 무슨 일을 하나요?">사교원 소개</button><button data-q="햇빛소득마을 공모에 참여하려면 어떤 서류가 필요한가요?">햇소자 서류</button><button data-q="연대지능활동가 아카데미는 무엇을 배우나요?">아카데미</button><button data-q="교육 프로그램 비용은 어떻게 계산하나요?">교육 견적</button></div>
+      </div>
+      <div class="card">
+        <h2>회원 등급</h2>
+        <div class="tiers">
+          <b>통합관리자</b> › <b>매니저회원</b>(사교원 직원, 체크권한으로 그룹웨어·관리 기능) › <b>연합회회원</b>(햇빛소득마을 연합회) › <b>조합회원</b>(회원협동조합) › <b>일반이용자</b>(교육·쇼핑·문의·AI 질문) › 비로그인(둘러보기·안내 질문)<br>
+          가입은 이메일 하나로, 로그인은 이메일+비밀번호. 조합·연합회·매니저는 승인 뒤 열립니다. 로그인하면 왼쪽 사이드바에 내 등급으로 열리는 메뉴만 모이고, 아직 못 여는 메뉴는 맨 아래 「권한 승인이 필요한 메뉴」에 따로 보입니다. 사이드바 순서를 바꾸면 본화면도 그 순서로 바뀝니다.
+        </div>
+        <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn sm" id="btnSignup">회원가입</button><a class="btn sm" href="account-privacy.html">개인정보처리방침</a><a class="btn sm" href="#/">새 첫 화면으로</a></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 공통 틀 — 사이드바 + 본문(옛 트리 / 개인페이지 / 내 폴더 / 꾸미기) -->
+  <div id="shell" class="view">
+    <button class="btn sideTog" id="sideTog" aria-controls="side" aria-expanded="false">☰ 내 메뉴</button>
+    <div class="app" id="app">
+      <aside class="side" id="side" aria-label="내 메뉴"></aside>
+      <div class="tree view" id="tree"></div>
+
+      <!-- ③ 개인페이지 (로그인 #/) -->
+      <main id="homeMain" class="view" aria-label="내 페이지">
+        <div class="tfband" id="tfBanner" hidden>🔐 발송·결재·권한 기능을 쓰려면 2단계 인증을 켜 주세요. <button class="btn sm" type="button" id="tfBannerBtn">지금 켜기</button></div>
+        <section aria-labelledby="dashT">
+          <div class="secT"><h2 id="dashT">대시보드</h2><a href="#/custom" class="btn sm">🎨 꾸미기</a></div>
+          <div class="dgrid" id="dash"></div>
+        </section>
+        <section class="chatspot" aria-labelledby="chatT">
+          <div class="secT"><h2 id="chatT">상담창</h2><p class="sub">단추를 누르면 상담창에 그 말이 들어갑니다.</p></div>
+          <div class="quick" id="quick" role="group" aria-label="자주 쓰는 지시"></div>
+          <p class="hint">상담창은 화면 맨 위 <b>사교원 AI</b> 띠입니다 ▲</p>
+        </section>
+        <section aria-labelledby="ntT">
+          <div class="secT"><h2 id="ntT">공지·소식</h2><p class="sub">아카데미 · 사교원 · 위키 · 연대지능 위키 · 망남</p></div>
+          <ul class="nlist" id="notices"></ul>
+        </section>
+      </main>
+
+      <!-- ④ 내 폴더 (#/files) -->
+      <main id="vFiles" class="view" aria-label="내 폴더">
+        <div class="secT"><h2>내 폴더</h2><p class="sub">서버에 두는 내 자료. 상담창이 이 폴더의 파일을 바로 읽고 씁니다.</p></div>
+        <div class="ftabs" role="tablist"><button type="button" role="tab" data-ft="files" class="on" aria-selected="true">내 파일</button><button type="button" role="tab" data-ft="trash" aria-selected="false">🗑️ 휴지통 (7일 보관)</button></div>
+        <div class="fbar">
+          <nav class="crumb" aria-label="폴더 경로" id="fCrumb"></nav><span class="sp"></span>
+          <button class="btn sm" type="button" id="fMk">📁 새 폴더</button>
+          <label class="btn sm" for="fUp">⬆️ 올리기</label><input type="file" id="fUp" multiple hidden aria-label="올릴 파일 고르기">
+          <button class="btn sm" type="button" id="fRef" aria-label="목록 새로고침">↻ 새로고침</button>
+        </div>
+        <div class="quota" id="fQuota"></div>
+        <div class="msg" id="fMsg" aria-live="polite"></div>
+        <table class="flist" aria-label="파일 목록"><thead><tr><th>이름</th><th>크기</th><th>수정</th><th>동작</th></tr></thead><tbody id="fList"></tbody></table>
+      </main>
+
+      <!-- ⑥ 꾸미기 (#/custom) -->
+      <main id="vCustom" class="view" aria-label="내 페이지 꾸미기">
+        <div class="secT"><h2>내 페이지 꾸미기</h2><p class="sub">체크하면 넣고, ▲▼ 로 순서를 바꿉니다. 저장하면 어느 기기에서 로그인해도 같습니다.</p></div>
+        <div class="cgrid">
+          <section class="grp" aria-labelledby="cDashT"><h3 id="cDashT">📊 대시보드 칸</h3><ul class="clist" id="cDash"></ul></section>
+          <section class="grp" aria-labelledby="cSideT"><h3 id="cSideT">📌 사이드바 메뉴</h3><ul class="clist" id="cSide"></ul></section>
+          <aside class="grp" aria-labelledby="cPrevT"><h3 id="cPrevT">미리보기</h3><div class="mini" id="cPrev"></div></aside>
+        </div>
+        <div class="cbar"><button class="btn p" type="button" id="cSave">저장</button><button class="btn" type="button" id="cReset">등급 기본 구성으로</button><span class="msg" id="cMsg" aria-live="polite"></span></div>
+      </main>
+    </div>
   </div>
 
   <div class="install-bar" id="installBar">
@@ -159,57 +298,67 @@
 
 <footer>
   <b>사회혁신교육원 사회적협동조합</b> · 본사 대전광역시 서구 관저중로80번길 8, 3층 · 사업자등록번호 397-82-00424 · 교육·컨설팅·IT · 활동 지역 전남광주통합특별시·전북특별자치도<br>
-  <a href="admin.html" rel="nofollow">🔐 통합 관리자</a> · <a href="data.html" rel="nofollow">▦ 데이터 저장소</a> · <a href="account-privacy.html">개인정보처리방침</a> · <a href="https://wiki.poomasi.org/" target="_blank" rel="noopener">연대지능 위키 ↗</a> · <a href="sakyowon-wiki/">사교원 위키</a>
+  <a href="admin.html" rel="nofollow">🔐 통합 관리자</a> · <a href="data.html" rel="nofollow">▦ 데이터 저장소</a> · <a href="account-privacy.html">개인정보처리방침</a> · <a href="https://wiki.poomasi.org/" target="_blank" rel="noopener">연대지능 위키 ↗</a> · <a href="sakyowon-wiki/">사교원 위키</a> · <a href="#/map">둘러보기</a> · <a href="#/classic">옛 첫 화면</a>
 </footer>
 
 <!-- 로그인 / 회원가입 -->
 <div class="modal-back" id="authModal">
-  <div class="modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="lgTitle">
     <div class="tabs"><button id="tabLogin" class="on">로그인</button><button id="tabSignup">회원가입</button></div>
     <div id="vLogin">
-      <h2>로그인</h2><p class="sub">사교원 통합 계정 하나로 모든 사이트에 들어갑니다.</p>
-      <div class="f"><label>이메일 <span style="color:var(--mute);font-weight:400">(옛 아이디도 당분간 됩니다)</span></label><input id="lgEmail" inputmode="email" autocomplete="username" placeholder="name@example.com"></div>
-      <div class="f"><label>비밀번호</label><input id="lgPw" type="password" autocomplete="current-password"></div>
-      <div class="msg" id="lgMsg"></div>
+      <h2 id="lgTitle">로그인</h2><p class="sub">사교원 통합 계정 하나로 모든 사이트에 들어갑니다.</p>
+      <div class="f"><label for="lgEmail">이메일 <span style="color:var(--mute);font-weight:400">(옛 아이디도 당분간 됩니다)</span></label><input id="lgEmail" inputmode="email" autocomplete="username" placeholder="name@example.com"></div>
+      <div class="f"><label for="lgPw">비밀번호</label><input id="lgPw" type="password" autocomplete="current-password"></div>
+      <div class="f" id="lgCodeBox" hidden><label for="lgCode">2단계 인증 코드</label><input id="lgCode" inputmode="numeric" autocomplete="one-time-code" placeholder="인증 앱 6자리 · 이메일 코드 · 백업 코드"></div>
+      <div class="msg" id="lgMsg" aria-live="polite"></div>
       <button class="mbtn" id="lgBtn">로그인</button>
       <p class="sub" style="margin-top:10px"><a href="#" id="lgForgot">비밀번호를 잊으셨나요?</a> 가입한 이메일로 임시 비밀번호를 보내 드립니다.</p>
     </div>
     <div id="vSignup" style="display:none">
       <h2>회원가입</h2><p class="sub">일반이용자는 바로, 조합·연합회·매니저는 승인 뒤 쓸 수 있습니다.</p>
-      <div class="f"><label>회원 등급</label><select id="suTier"><option value="general">일반이용자 — 바로 가입</option><option value="coop">조합회원 — 햇빛소득마을 회원협동조합 (승인 후)</option><option value="federation">연합회회원 — 햇빛소득마을 연합회 (승인 후)</option><option value="staff">매니저회원 — 사교원 그룹웨어 (통합관리자 승인 후)</option></select></div>
-      <div class="f"><label>이메일 <span class="req">*</span> (로그인 아이디)</label><input id="suEmail" type="email" autocomplete="email" placeholder="name@example.com"></div>
-      <div class="f"><label>비밀번호 <span class="req">*</span> (8자 이상)</label><input id="suPw" type="password" autocomplete="new-password"></div>
-      <div class="f"><label>이름 <span class="req">*</span></label><input id="suName" autocomplete="name"></div>
-      <div class="f"><label>활동지역 <span class="req">*</span></label><div class="two"><select id="suSido"><option value="">광역</option></select><select id="suSigungu"><option value="">시군구</option></select></div></div>
-      <div class="f"><label>전화번호 <span id="suContactReq" style="color:var(--mute);font-weight:400">(일반이용자는 선택)</span></label><input id="suContact" inputmode="tel" placeholder="010-0000-0000"></div>
-      <div class="f"><label>소속 (선택)</label><input id="suOrg" placeholder="마을·조합·기관"></div>
+      <div class="f"><label for="suTier">회원 등급</label><select id="suTier"><option value="general">일반이용자 — 바로 가입</option><option value="coop">조합회원 — 햇빛소득마을 회원협동조합 (승인 후)</option><option value="federation">연합회회원 — 햇빛소득마을 연합회 (승인 후)</option><option value="staff">매니저회원 — 사교원 그룹웨어 (통합관리자 승인 후)</option></select></div>
+      <div class="f"><label for="suEmail">이메일 <span class="req">*</span> (로그인 아이디)</label><input id="suEmail" type="email" autocomplete="email" placeholder="name@example.com"></div>
+      <div class="f"><label for="suPw">비밀번호 <span class="req">*</span> (8자 이상)</label><input id="suPw" type="password" autocomplete="new-password"></div>
+      <div class="f"><label for="suName">이름 <span class="req">*</span></label><input id="suName" autocomplete="name"></div>
+      <div class="f"><label for="suSido">활동지역 <span class="req">*</span></label><div class="two"><select id="suSido" aria-label="광역"><option value="">광역</option></select><select id="suSigungu" aria-label="시군구"><option value="">시군구</option></select></div></div>
+      <div class="f"><label for="suContact">전화번호 <span id="suContactReq" style="color:var(--mute);font-weight:400">(일반이용자는 선택)</span></label><input id="suContact" inputmode="tel" placeholder="010-0000-0000"></div>
+      <div class="f"><label for="suOrg">소속 (선택)</label><input id="suOrg" placeholder="마을·조합·기관"></div>
       <label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;margin:4px 0 10px;cursor:pointer"><input type="checkbox" id="suConsent" style="margin-top:3px"><span>(필수) 통합 계정 발급을 위한 개인정보 수집·이용에 동의합니다. <a href="account-privacy.html" target="_blank">처리방침</a></span></label>
-      <div class="msg" id="suMsg"></div>
+      <div class="msg" id="suMsg" aria-live="polite"></div>
       <button class="mbtn" id="suBtn">가입 신청</button>
     </div>
     <button class="ghost" id="authClose">닫기</button>
   </div>
 </div>
 
-<!-- 옛 아이디 회원의 이메일 등록 -->
-<div class="modal-back" id="lockModal"><div class="modal"><h2>🔒 권한 승인이 필요한 메뉴</h2><p class="sub" id="lockTitle"></p><div class="tiers" id="lockBody"></div><button class="ghost" id="lockClose">닫기</button></div></div>
+<!-- 잠긴 메뉴 안내 -->
+<div class="modal-back" id="lockModal"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="lockH"><h2 id="lockH">🔒 권한 승인이 필요한 메뉴</h2><p class="sub" id="lockTitle"></p><div class="tiers" id="lockBody"></div><button class="ghost" id="lockClose">닫기</button></div></div>
 <div class="modal-back" id="pwModal">
-  <div class="modal">
-    <h2>비밀번호 변경</h2><p class="sub" id="pwNote">8자 이상. 바꾸면 그룹웨어·인사기록·근태·의정소통에도 같이 적용되고, 다른 기기의 로그인은 모두 끊깁니다.</p>
-    <div class="f"><label>현재(또는 임시) 비밀번호</label><input id="pwOld" type="password" autocomplete="current-password"></div>
-    <div class="f"><label>새 비밀번호</label><input id="pwNew" type="password" autocomplete="new-password"></div>
-    <div class="f"><label>새 비밀번호 확인</label><input id="pwNew2" type="password" autocomplete="new-password"></div>
-    <div class="msg" id="pwMsg"></div>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pwH">
+    <h2 id="pwH">비밀번호 변경</h2><p class="sub" id="pwNote">8자 이상. 바꾸면 그룹웨어·인사기록·근태·의정소통에도 같이 적용되고, 다른 기기의 로그인은 모두 끊깁니다.</p>
+    <div class="f"><label for="pwOld">현재(또는 임시) 비밀번호</label><input id="pwOld" type="password" autocomplete="current-password"></div>
+    <div class="f"><label for="pwNew">새 비밀번호</label><input id="pwNew" type="password" autocomplete="new-password"></div>
+    <div class="f"><label for="pwNew2">새 비밀번호 확인</label><input id="pwNew2" type="password" autocomplete="new-password"></div>
+    <div class="msg" id="pwMsg" aria-live="polite"></div>
     <button class="mbtn" id="pwBtn">바꾸기</button><button class="ghost" id="pwLater">나중에</button>
   </div>
 </div>
+<!-- 옛 아이디 회원의 이메일 등록 -->
 <div class="modal-back" id="emailModal">
-  <div class="modal">
-    <h2>로그인 이메일 등록</h2><p class="sub">로그인 아이디가 이메일로 바뀌었습니다. 이메일을 등록하면 다음부터 그 주소로 들어옵니다.</p>
-    <div class="f"><label>이메일</label><input id="emEmail" type="email" autocomplete="email"></div>
-    <div class="f"><label>현재 비밀번호 (본인 확인)</label><input id="emPw" type="password" autocomplete="current-password"></div>
-    <div class="msg" id="emMsg"></div>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="emH">
+    <h2 id="emH">로그인 이메일 등록</h2><p class="sub">로그인 아이디가 이메일로 바뀌었습니다. 이메일을 등록하면 다음부터 그 주소로 들어옵니다.</p>
+    <div class="f"><label for="emEmail">이메일</label><input id="emEmail" type="email" autocomplete="email"></div>
+    <div class="f"><label for="emPw">현재 비밀번호 (본인 확인)</label><input id="emPw" type="password" autocomplete="current-password"></div>
+    <div class="msg" id="emMsg" aria-live="polite"></div>
     <button class="mbtn" id="emBtn">등록</button><button class="ghost" id="emLater">나중에</button>
+  </div>
+</div>
+<!-- 2단계 인증 설정 -->
+<div class="modal-back" id="tfModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tfH">
+    <h2 id="tfH">🔐 2단계 인증</h2><p class="sub" id="tfState">상태를 확인하는 중…</p>
+    <div id="tfBody"></div>
+    <button class="ghost" id="tfClose">닫기</button>
   </div>
 </div>
 
@@ -217,73 +366,86 @@
 'use strict';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+/* 서버 호출 — 네트워크 실패도 {ok:false, error:'network'} 로 돌려서 화면이 깨지지 않게 (2단계 13번) */
 async function api(path, opts = {}) {
-  const res = await fetch(path, { credentials: 'same-origin', headers: opts.body ? { 'Content-Type': 'application/json' } : {}, ...opts, body: opts.body ? JSON.stringify(opts.body) : undefined });
-  let d = {}; try { d = await res.json(); } catch (_) {}
-  return { status: res.status, ...d };
+  try {
+    const res = await fetch(path, { credentials: 'same-origin', headers: opts.body ? { 'Content-Type': 'application/json' } : {}, ...opts, body: opts.body ? JSON.stringify(opts.body) : undefined });
+    let d = {}; try { d = await res.json(); } catch (_) {}
+    return { status: res.status, ...d };
+  } catch (_) { return { status: 0, ok: false, error: 'network' }; }
+}
+async function apiForm(path, fd) {
+  try { const res = await fetch(path, { method: 'POST', credentials: 'same-origin', body: fd }); let d = {}; try { d = await res.json(); } catch (_) {} return { status: res.status, ...d }; }
+  catch (_) { return { status: 0, ok: false, error: 'network' }; }
 }
 const ERR = { invalid_credentials: '이메일(또는 아이디) 또는 비밀번호가 올바르지 않습니다.', not_approved: '가입 승인 대기 중입니다. 승인되면 로그인할 수 있습니다.', rate_limited: '요청이 잠시 제한되었습니다. 1분 후 다시 시도해 주세요.',
   invalid_email: '이메일 주소 형식이 아닙니다.', email_taken: '이미 가입된 이메일입니다.', username_taken: '이미 가입된 이메일입니다.', weak_password: '비밀번호는 8자 이상이어야 합니다.', name_required: '이름을 적어 주세요.',
-  region_required: '활동지역(광역·시군구)을 골라 주세요.', contact_required: '승인 안내를 받을 전화번호를 적어 주세요.', invalid_contact: '전화번호 형식이 올바르지 않습니다 (예: 010-0000-0000).', consent_required: '개인정보 수집·이용에 동의해 주세요.', upstream_unavailable: '계정 서버에 연결할 수 없습니다.' };
+  region_required: '활동지역(광역·시군구)을 골라 주세요.', contact_required: '승인 안내를 받을 전화번호를 적어 주세요.', invalid_contact: '전화번호 형식이 올바르지 않습니다 (예: 010-0000-0000).', consent_required: '개인정보 수집·이용에 동의해 주세요.', upstream_unavailable: '계정 서버에 연결할 수 없습니다.',
+  network: '서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.', unauthorized: '로그인이 필요합니다.', twofa_required: '2단계 인증 코드를 입력해 주세요.', invalid_code: '인증 코드가 맞지 않습니다.', code_expired: '인증 코드 시간이 지났습니다. 다시 받아 주세요.', not_found: '없는 항목입니다.' };
 const errText = r => r.status === 429 ? ERR.rate_limited : (ERR[r.error] || '처리하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+/* 거절 사유를 그대로 보여야 하는 곳(내 폴더): 아는 코드는 한국어로, 모르는 글은 서버가 준 사유 그대로 */
+const reasonText = r => r.status === 429 ? ERR.rate_limited : (ERR[r.error] || r.reason || r.message || r.error || '처리하지 못했습니다.');
+/* 상담창(ai-dock)에 말 넣기 — ai-dock 이 window.skai.say 를 노출한다. 없으면 조용히 무시 */
+function say(t) { if (window.skai && typeof window.skai.say === 'function') { try { window.skai.say(t); } catch (_) {} } }
 
 /* ── 메뉴 트리 — 4묶음(이사장 지시 10-18): ①소개·연구실·참여 ②교육·사업·쇼핑 ③그룹웨어·관리(매니저·통합관리자만, 첫 화면엔 단추만) · 가족 메신저는 첫 화면에서 빼고 관리 안 통합관리자 전용
-   need: 'login' 로그인 | 'perm:정책지원관' 체크권한 | 'role:staff' 매니저 이상 | 'role:coop' 조합 이상 | 'role:federation' 연합회 이상 | 'admin' */
+   need: 'login' 로그인 | 'perm:정책지원관' 체크권한 | 'role:staff' 매니저 이상 | 'role:coop' 조합 이상 | 'role:federation' 연합회 이상 | 'admin'
+   id: 2단계 꾸미기·사이드바(prefs.side)가 쓰는 고정 키 — 바꾸면 저장된 설정이 버려진다 */
 const HOME = 'https://home.sakyowon.co.kr/#/';
 const TREE = [
   { ic: '🏛️', name: '소개 · 연구실 · 참여', secs: [
     { ic: '🏛️', name: '소개', items: [
-      { t: '사교원 소개', d: '지향·활동·걸어온 길·특장점', h: HOME + 'about' },
-      { t: '경영공시', d: '정관·규약 · 재무제표 · 조합원 현황', h: HOME + 'disclosure' },
+      { id: 'about', t: '사교원 소개', d: '지향·활동·걸어온 길·특장점', h: HOME + 'about' },
+      { id: 'disclosure', t: '경영공시', d: '정관·규약 · 재무제표 · 조합원 현황', h: HOME + 'disclosure' },
     ]},
     { ic: '🔬', name: '연구실', items: [
-      { t: '연구자료', d: '보고서 31건 검색·열람', h: HOME + 'research' },
-      { t: '정책지원관 지원시스템', d: '공약·조례·문서작성·브리핑 — 체크권한', h: HOME + 'policy', need: 'perm:정책지원관' },
-      { t: '시민재생에너지 AI', d: '고성능컴퓨팅 과제 소개', h: '/cre/' },
-      { t: '사교원 위키', d: '공개 지식 431쪽 (별도 운영)', h: '/sakyowon-wiki/', ext: true },
-      { t: '연대지능 위키', d: '품앗이 공동 지식베이스', h: 'https://wiki.poomasi.org/', ext: true },
+      { id: 'research', t: '연구자료', d: '보고서 31건 검색·열람', h: HOME + 'research' },
+      { id: 'policy', t: '정책지원관 지원시스템', d: '공약·조례·문서작성·브리핑 — 체크권한', h: HOME + 'policy', need: 'perm:정책지원관' },
+      { id: 'cre', t: '시민재생에너지 AI', d: '고성능컴퓨팅 과제 소개', h: '/cre/' },
+      { id: 'wiki', t: '사교원 위키', d: '공개 지식 431쪽 (별도 운영)', h: '/sakyowon-wiki/', ext: true },
+      { id: 'poomasi-wiki', t: '연대지능 위키', d: '품앗이 공동 지식베이스', h: 'https://wiki.poomasi.org/', ext: true },
     ]},
     { ic: '💬', name: '참여', items: [
-      { t: '문의', d: '교육·사업·제휴 문의', h: HOME + 'contact' },
-      { t: '활동가 의견', d: '아카데미 의견 게시판', h: '/academy-site/#feedback' },
-      { t: '사이트 개선 의견', d: 'AI 도우미에게 바로 말해도 됩니다', h: HOME + 'contact' },
+      { id: 'contact', t: '문의', d: '교육·사업·제휴 문의', h: HOME + 'contact' },
+      { id: 'feedback', t: '활동가 의견', d: '아카데미 의견 게시판', h: '/academy-site/#feedback' },
+      { id: 'site-feedback', t: '사이트 개선 의견', d: 'AI 도우미에게 바로 말해도 됩니다', h: HOME + 'contact' },
     ]},
   ]},
   { ic: '🎓', name: '교육 · 사업 · 쇼핑', secs: [
     { ic: '🎓', name: '교육', items: [
-      { t: '연대지능활동가 아카데미', d: '실습 15단계 · 학습 7단계 · 자격증 · 지식 검증 게임', h: '/academy-site/' },
-      { t: '교육프로그램 신청', d: '주민자치 · 연대지능 활동가 · 문제해결 팀러닝 — 필요 진단과 견적', h: HOME + 'shop/edu' },
-      { t: '사회혁신팀러닝', d: '자문·컨설팅 (통합 개편 중)', h: '/teamlearning-site/', soon: true },
+      { id: 'academy', t: '연대지능활동가 아카데미', d: '실습 15단계 · 학습 7단계 · 자격증 · 지식 검증 게임', h: '/academy-site/' },
+      { id: 'edu', t: '교육프로그램 신청', d: '주민자치 · 연대지능 활동가 · 문제해결 팀러닝 — 필요 진단과 견적', h: HOME + 'shop/edu' },
+      { id: 'teamlearning', t: '사회혁신팀러닝', d: '자문·컨설팅 (통합 개편 중)', h: '/teamlearning-site/', soon: true },
     ]},
     { ic: '☀️', name: '사업', items: [
-      { t: '햇빛소득마을 (햇소자)', d: '신청·진단 → 조합 설립 → 정산·배당 — 조합·연합회 회원', h: '/hatsoja/' },
-      { t: '어촌신활력증진사업', d: '사업 안내 · 소식 · 기획안/보고서 · KPI · 예산 집행실적', h: 'https://vitality.sakyowon.co.kr/' },
-      { t: '망남 (완도 망남생활권)', d: '', h: 'https://vitality.sakyowon.co.kr/', sub: true },
-      { t: '양양 (강원 양양)', d: '망남과 같은 구성으로 채우는 중', h: 'https://vitality.sakyowon.co.kr/', sub: true, soon: true },
-      { t: '망남마을협동조합', d: '마을사업 · 마을학교 · 플로깅 · 물멍 예약 · 경영공시', h: '/mangnam-coop/' },
+      { id: 'hatsoja', t: '햇빛소득마을 (햇소자)', d: '신청·진단 → 조합 설립 → 정산·배당 — 조합·연합회 회원', h: '/hatsoja/' },
+      { id: 'vitality', t: '어촌신활력증진사업', d: '사업 안내 · 소식 · 기획안/보고서 · KPI · 예산 집행실적', h: 'https://vitality.sakyowon.co.kr/' },
+      { id: 'mangnam', t: '망남 (완도 망남생활권)', d: '', h: 'https://vitality.sakyowon.co.kr/', sub: true },
+      { id: 'yangyang', t: '양양 (강원 양양)', d: '망남과 같은 구성으로 채우는 중', h: 'https://vitality.sakyowon.co.kr/', sub: true, soon: true },
+      { id: 'mangnam-coop', t: '망남마을협동조합', d: '마을사업 · 마을학교 · 플로깅 · 물멍 예약 · 경영공시', h: '/mangnam-coop/' },
     ]},
     { ic: '🛒', name: '쇼핑', items: [
-      { t: '상품', d: '도서·굿즈·지역특산', h: HOME + 'shop' },
-      { t: '장바구니', d: '', h: HOME + 'cart' },
+      { id: 'shop', t: '상품', d: '도서·굿즈·지역특산', h: HOME + 'shop' },
+      { id: 'cart', t: '장바구니', d: '', h: HOME + 'cart' },
     ]},
   ]},
   { ic: '🗂️', name: '그룹웨어 · 관리', gate: 'role:staff', lock: '매니저회원 · 통합관리자', secs: [
     { ic: '🗂️', name: '그룹웨어', items: [
-      { t: '직원전용 질문', d: '사내 자료 근거 답변(고성능컴퓨팅)', h: 'https://gw.sakyowon.co.kr/#staff', need: 'role:staff' },
-      { t: '보고서·기획안 작성', d: '개요 → 절별 작성 → 한글', h: 'https://gw.sakyowon.co.kr/#docs', need: 'role:staff' },
-      { t: '메일 · 결재 · 월간보고', d: '체크권한별', h: 'https://gw.sakyowon.co.kr/#home', need: 'role:staff' },
-      { t: '입찰 제안서 · 협동조합 설립 지원', d: '체크권한별', h: 'https://gw.sakyowon.co.kr/#bid', need: 'role:staff' },
-      { t: '근태 (출퇴근·휴가)', d: 'GPS 출퇴근 · 휴가 결재', h: 'https://work.sakyowon.co.kr/', need: 'role:staff' },
-      { t: '인사기록', d: '체크권한 「인사열람」', h: 'https://hr.sakyowon.co.kr/', need: 'perm:인사열람' },
-      { t: '회계 · 세무 · 자산', d: '체크권한별', h: HOME + 'admin/accounting', need: 'perm:회계' },
+      { id: 'gw-staff', t: '직원전용 질문', d: '사내 자료 근거 답변(고성능컴퓨팅)', h: 'https://gw.sakyowon.co.kr/#staff', need: 'role:staff' },
+      { id: 'gw-docs', t: '보고서·기획안 작성', d: '개요 → 절별 작성 → 한글', h: 'https://gw.sakyowon.co.kr/#docs', need: 'role:staff' },
+      { id: 'gw-home', t: '메일 · 결재 · 월간보고', d: '체크권한별', h: 'https://gw.sakyowon.co.kr/#home', need: 'role:staff' },
+      { id: 'gw-bid', t: '입찰 제안서 · 협동조합 설립 지원', d: '체크권한별', h: 'https://gw.sakyowon.co.kr/#bid', need: 'role:staff' },
+      { id: 'work', t: '근태 (출퇴근·휴가)', d: 'GPS 출퇴근 · 휴가 결재', h: 'https://work.sakyowon.co.kr/', need: 'role:staff' },
+      { id: 'hr', t: '인사기록', d: '체크권한 「인사열람」', h: 'https://hr.sakyowon.co.kr/', need: 'perm:인사열람' },
+      { id: 'accounting', t: '회계 · 세무 · 자산', d: '체크권한별', h: HOME + 'admin/accounting', need: 'perm:회계' },
     ]},
     { ic: '🔐', name: '관리', items: [
-      { t: '회원 · 권한', d: '승인 · 등급 · 체크권한 · 비번 초기화', h: '/admin.html', need: 'perm:회원열람' },
-      { t: '사이트 관리 · 개선의견', d: '', h: '/admin.html', need: 'role:staff' },
-      { t: '홈페이지 관리자', d: '회계·세무·인사·자산 · 콘텐츠', h: HOME + 'admin', need: 'role:staff' },
-      { t: '데이터 저장소', d: '엑셀 → 표 → SQL', h: '/data.html', need: 'perm:데이터읽기' },
-      { t: '가족 메신저 관리', d: '초대·구성원·설정 — 통합관리자 전용', h: HOME + 'admin/family', need: 'admin' },
-      { t: '주짓수 룰북', d: '통합관리자 전용', h: '/bjj/', need: 'admin' },
+      { id: 'admin-members', t: '회원 · 권한', d: '승인 · 등급 · 체크권한 · 비번 초기화', h: '/admin.html', need: 'perm:회원열람' },
+      { id: 'admin-site', t: '사이트 관리 · 개선의견', d: '', h: '/admin.html', need: 'role:staff' },
+      { id: 'home-admin', t: '홈페이지 관리자', d: '회계·세무·인사·자산 · 콘텐츠', h: HOME + 'admin', need: 'role:staff' },
+      { id: 'data', t: '데이터 저장소', d: '엑셀 → 표 → SQL', h: '/data.html', need: 'perm:데이터읽기' },
+      { id: 'family', t: '가족 메신저 관리', d: '초대·구성원·설정 — 통합관리자 전용', h: HOME + 'admin/family', need: 'admin' },
+      { id: 'bjj', t: '주짓수 룰북', d: '통합관리자 전용', h: '/bjj/', need: 'admin' },
     ]},
   ]},
 ];
@@ -293,7 +455,7 @@ let me = null;                        // 화면을 그리는 기준(미리보기
 let realMe = null;                    // 실제 로그인 계정
 let preview = null;                   // 통합관리자 등급별 미리보기(임시) — 'none' | role 키
 let gateOpen = false;
-let prefs = {};                       // 계정별 설정(/api/auth/prefs) — menu_order
+let prefs = {};                       // 계정별 설정(/api/auth/prefs) — menu_order · dash · side · quick
 function allowed(need) {
   if (!need) return true;
   if (!me) return false;
@@ -314,9 +476,20 @@ function needText(need) {
   if (need.startsWith('role:')) return (ROLE_KO[need.slice(5)] || need.slice(5)) + ' 승인';
   return '승인';
 }
+/* 둘러보기용 — 로그인 여부와 무관하게 「어떤 회원이 쓰는지」 */
+function whoText(need) {
+  if (!need) return '';
+  if (need === 'login') return '로그인 회원';
+  if (need === 'admin') return '통합관리자';
+  if (need.startsWith('perm:')) return '매니저 · 체크권한 「' + need.slice(5) + '」';
+  if (need.startsWith('role:')) return (ROLE_KO[need.slice(5)] || need.slice(5)) + ' 이상';
+  return '승인 회원';
+}
 /* 8개 소분류를 한 줄로 — 사이드바·개인 순서의 단위 */
 const SECTIONS = []; TREE.forEach((g, gi) => g.secs.forEach(sc => SECTIONS.push(Object.assign({ key: sc.name, gi }, sc))));
 const DEFAULT_ORDER = SECTIONS.map(sc => sc.key);
+/* 메뉴 항목을 한 줄로 — 꾸미기·새 사이드바(prefs.side)의 단위 */
+const ALL_ITEMS = []; SECTIONS.forEach(sc => sc.items.forEach(it => ALL_ITEMS.push(Object.assign({ sec: sc.key, secIc: sc.ic }, it))));
 function myOrder() {
   const saved = Array.isArray(prefs.menu_order) ? prefs.menu_order.filter(k => DEFAULT_ORDER.includes(k)) : [];
   return saved.concat(DEFAULT_ORDER.filter(k => !saved.includes(k)));
@@ -333,7 +506,7 @@ function renderGroup(g) {
   return `<div class="grp"><h3><span class="ic">${g.ic}</span>${esc(g.name)}${g.lock ? `<span class="lock">🔒 ${esc(g.lock)}</span>` : ''}</h3><div class="secs">${g.secs.map(sc =>
     `<div class="sec"><h4><span class="ic">${sc.ic}</span>${esc(sc.name)}</h4><ul>${renderItems(sc.items)}</ul></div>`).join('')}</div></div>`;
 }
-/* ① 비로그인 첫 화면 — 묶음 전부(그룹웨어·관리는 단추만) */
+/* ① (옛 화면) 비로그인 — 묶음 전부(그룹웨어·관리는 단추만) */
 function renderPublic() {
   $('#tree').innerHTML = TREE.map(g => {
     if (!g.gate) return renderGroup(g);
@@ -342,7 +515,7 @@ function renderPublic() {
   }).join('');
   const gb = $('#gateBtn'); if (gb) gb.addEventListener('click', () => { if (allowed(TREE.find(g => g.gate).gate)) { gateOpen = true; renderPublic(); } else openAuth('login'); });
 }
-/* ② 로그인 뒤 — 내 순서대로 열리는 메뉴, 맨 끝에 잠긴 메뉴 */
+/* ② (옛 화면) 로그인 뒤 — 내 순서대로 열리는 메뉴, 맨 끝에 잠긴 메뉴 */
 function splitMine() {
   const open = [], locked = [];
   myOrder().forEach(k => {
@@ -360,24 +533,35 @@ function renderMain() {
     (locked.length ? `<div class="grp lockgrp" data-sec="__locked"><h3><span class="ic">🔒</span>권한 승인이 필요한 메뉴</h3><div class="secs">${locked.map(({ sc, items }) =>
       `<div class="sec"><h4><span class="ic">${sc.ic}</span>${esc(sc.name)}</h4><ul>${renderItems(items)}</ul></div>`).join('')}</div></div>` : '');
 }
-function renderSide() {
-  const { open, locked } = splitMine();
+/* 소분류 블록(⠿ ▲▼) — 옛 사이드바와 새 사이드바가 같이 쓴다 */
+function secBlocks(open) {
   const n = open.length;
-  $('#side').innerHTML = `<div class="me"><b>${esc(me.name || me.email || me.username)}</b> · ${esc(me.role_ko || ROLE_KO[me.role] || '')}</div>` + (preview ? `<div class="pvnote">🧪 미리보기 — 순서를 바꿔도 저장되지 않습니다</div>` : '') + `
-    <div class="hint">⠿ 끌어서 또는 ▲▼ 로 순서를 바꾸면 본화면도 그 순서로 보입니다</div>` +
-    open.map(({ sc, items }, i) => `<div class="ss" draggable="true" data-sec="${esc(sc.key)}"><div class="sh"><span class="hd">⠿</span><span class="ic">${sc.ic}</span><span class="nm">${esc(sc.name)}</span><button class="mv" data-mv="-1" data-sec="${esc(sc.key)}" title="위로"${i === 0 ? ' disabled' : ''}>▲</button><button class="mv" data-mv="1" data-sec="${esc(sc.key)}" title="아래로"${i === n - 1 ? ' disabled' : ''}>▼</button></div><ul>${items.map(it => `<li><a href="${esc(it.h)}"${it.ext ? ' target="_blank" rel="noopener"' : ''}>${esc(it.t)}</a></li>`).join('')}</ul></div>`).join('') +
-    (locked.length ? `<div class="lockbox"><h4>🔒 권한 승인이 필요한 메뉴</h4>${locked.map(({ sc, items }) => `<div class="sn">${sc.ic} ${esc(sc.name)}</div><ul>${items.map(it => `<li><a href="#locked" data-need="${esc(it.need || '')}" data-t="${esc(it.t)}">${esc(it.t)}<span class="rq">${esc(needText(it.need))}</span></a></li>`).join('')}</ul>`).join('')}</div>` : '');
-  // ▲▼
-  $('#side').querySelectorAll('.mv').forEach(b => b.addEventListener('click', () => moveSec(b.dataset.sec, +b.dataset.mv)));
-  // 끌어서 놓기
+  return open.map(({ sc, items }, i) => `<div class="ss" draggable="true" data-sec="${esc(sc.key)}"><div class="sh"><span class="hd" aria-hidden="true">⠿</span><span class="ic">${sc.ic}</span><span class="nm">${esc(sc.name)}</span><button class="mv" data-mv="-1" data-sec="${esc(sc.key)}" title="위로" aria-label="${esc(sc.name)} 위로"${i === 0 ? ' disabled' : ''}>▲</button><button class="mv" data-mv="1" data-sec="${esc(sc.key)}" title="아래로" aria-label="${esc(sc.name)} 아래로"${i === n - 1 ? ' disabled' : ''}>▼</button></div><ul>${items.map(it => `<li><a href="${esc(it.h)}"${it.ext ? ' target="_blank" rel="noopener"' : ''}>${esc(it.t)}</a></li>`).join('')}</ul></div>`).join('');
+}
+function lockBox(locked) {
+  return locked.length ? `<div class="lockbox"><h4>🔒 권한 승인이 필요한 메뉴</h4>${locked.map(({ sc, items }) => `<div class="sn">${sc.ic} ${esc(sc.name)}</div><ul>${items.map(it => `<li><a href="#locked" data-need="${esc(it.need || '')}" data-t="${esc(it.t)}">${esc(it.t)}<span class="rq">${esc(needText(it.need))}</span></a></li>`).join('')}</ul>`).join('')}</div>` : '';
+}
+/* 끌어서 놓기 — root 안의 sel 요소들을 dataset[key] 로 식별, 놓으면 onPlace(끈 키, 놓은 자리 키) */
+function wireDrag(root, sel, key, onPlace) {
   let dragKey = null;
-  $('#side').querySelectorAll('.ss').forEach(el => {
-    el.addEventListener('dragstart', e => { dragKey = el.dataset.sec; el.classList.add('drag'); e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', dragKey); } catch (_) {} });
-    el.addEventListener('dragend', () => { el.classList.remove('drag'); $('#side').querySelectorAll('.ss.over').forEach(x => x.classList.remove('over')); });
+  root.querySelectorAll(sel).forEach(el => {
+    el.addEventListener('dragstart', e => { dragKey = el.dataset[key]; el.classList.add('drag'); e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', dragKey); } catch (_) {} });
+    el.addEventListener('dragend', () => { el.classList.remove('drag'); root.querySelectorAll(sel + '.over').forEach(x => x.classList.remove('over')); });
     el.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; el.classList.add('over'); });
     el.addEventListener('dragleave', () => el.classList.remove('over'));
-    el.addEventListener('drop', e => { e.preventDefault(); el.classList.remove('over'); if (dragKey && dragKey !== el.dataset.sec) placeSec(dragKey, el.dataset.sec); dragKey = null; });
+    el.addEventListener('drop', e => { e.preventDefault(); el.classList.remove('over'); if (dragKey && dragKey !== el.dataset[key]) onPlace(dragKey, el.dataset[key]); dragKey = null; });
   });
+}
+function wireSecBlocks() {
+  $('#side').querySelectorAll('.mv[data-mv]').forEach(b => b.addEventListener('click', () => moveSec(b.dataset.sec, +b.dataset.mv)));
+  wireDrag($('#side'), '.ss[data-sec]', 'sec', placeSec);
+}
+/* 옛 사이드바(#/classic) */
+function renderSide() {
+  const { open, locked } = splitMine();
+  $('#side').innerHTML = `<div class="me"><b>${esc(me.name || me.email || me.username)}</b> · ${esc(me.role_ko || ROLE_KO[me.role] || '')}</div>` + (preview ? `<div class="pvnote">🧪 미리보기 — 순서를 바꿔도 저장되지 않습니다</div>` : '') + `
+    <div class="hint">⠿ 끌어서 또는 ▲▼ 로 순서를 바꾸면 본화면도 그 순서로 보입니다 · <a href="#/">새 첫 화면</a></div>` + secBlocks(open) + lockBox(locked);
+  wireSecBlocks();
 }
 /* 순서 바꾸기 — 열린 소분류끼리만 움직이고, 잠긴 소분류는 원래 자리에 남긴다 */
 function moveSec(key, dir) {
@@ -394,10 +578,10 @@ function placeSec(key, beforeKey) {
 }
 function saveOrder(order) {
   prefs.menu_order = order;
-  renderSide(); renderMain();
+  reSide();
   if (preview) return;                // 미리보기 중엔 저장하지 않는다
   try { localStorage.setItem('sk_menu_order_' + me.id, JSON.stringify(order)); } catch (_) {}
-  api('/api/auth/prefs', { method: 'POST', body: { menu_order: order } }).then(r => { if (r.ok && r.prefs) prefs = r.prefs; });
+  api('/api/auth/prefs', { method: 'POST', body: { menu_order: order } }).then(r => { if (r.ok && r.prefs) prefs = Object.assign({}, prefs, r.prefs); });
 }
 async function loadPrefs() {
   prefs = {};
@@ -405,6 +589,69 @@ async function loadPrefs() {
   const r = await api('/api/auth/prefs');
   if (r.ok && r.prefs) { prefs = r.prefs; }
 }
+/* 사이드바·본문 다시 그리기 — 지금 라우트에 맞는 쪽으로 */
+function reSide() {
+  if (!me) return;
+  if (currentRoute() === 'classic') { renderSide(); renderMain(); } else renderSideHome();
+}
+
+/* ── 도구 대장(/api/ai/exec/tools) — 둘러보기 예시·사이드바 도구·자주 쓰는 지시의 원천. 실패해도 빈 목록 */
+const TOOLS = { items: [], locked: [], loaded: false };
+let toolsP = null;
+function loadTools() {
+  if (toolsP) return toolsP;
+  toolsP = api('/api/ai/exec/tools').then(r => { if (r.ok) { TOOLS.items = Array.isArray(r.items) ? r.items : []; TOOLS.locked = Array.isArray(r.locked) ? r.locked : []; } TOOLS.loaded = true; return TOOLS; });
+  return toolsP;
+}
+const normUrl = u => String(u || '').replace(/^https?:\/\/(www\.)?sakyowon\.co\.kr/, '').replace(/\/+$/, '') || '/';
+function toolFor(it) { return TOOLS.items.find(t => (t.screen && normUrl(t.screen) === normUrl(it.h)) || (t.name && t.name === it.t)) || null; }
+
+/* ── 새 사이드바(개인페이지·내 폴더·꾸미기) — 내 페이지 / 내 폴더 / 내가 고른 메뉴 / 🔒 / 둘러보기 */
+function sideFlat() {
+  const ids = Array.isArray(prefs.side) ? prefs.side : [];
+  if (!ids.length) return null;
+  const out = [];
+  ids.forEach(id => {
+    const it = ALL_ITEMS.find(x => x.id === id);
+    if (it) { if (allowed(it.need)) out.push(it); return; }
+    const t = TOOLS.items.find(x => x.id === id);
+    if (t) out.push({ id: t.id, t: t.name, h: t.screen || '#/', tool: true });
+  });
+  return out.length ? out : null;
+}
+function renderSideHome() {
+  if (!me) return;
+  const r = currentRoute();
+  const { open, locked } = splitMine();
+  const flat = sideFlat();
+  const mid = flat
+    ? `<ul class="pick" id="pick" aria-label="내가 고른 메뉴">${flat.map((it, i) => `<li class="ss" draggable="true" data-id="${esc(it.id)}"><span class="hd" aria-hidden="true">⠿</span><a href="${esc(it.h)}"${it.ext ? ' target="_blank" rel="noopener"' : ''}>${it.tool ? '🤖 ' : ''}${esc(it.t)}</a><button class="mv" data-pm="-1" data-id="${esc(it.id)}" aria-label="${esc(it.t)} 위로"${i === 0 ? ' disabled' : ''}>▲</button><button class="mv" data-pm="1" data-id="${esc(it.id)}" aria-label="${esc(it.t)} 아래로"${i === flat.length - 1 ? ' disabled' : ''}>▼</button></li>`).join('')}</ul>`
+    : secBlocks(open);
+  $('#side').innerHTML = `<div class="me"><b>${esc(me.name || me.email || me.username)}</b> · ${esc(me.role_ko || ROLE_KO[me.role] || '')}</div>` + (preview ? `<div class="pvnote">🧪 미리보기 — 순서를 바꿔도 저장되지 않습니다</div>` : '') +
+    `<nav aria-label="내 페이지"><ul class="fix"><li><a href="#/"${r === 'home' ? ' class="cur" aria-current="page"' : ''}>🏠 내 페이지</a></li><li><a href="#/files"${r === 'files' ? ' class="cur" aria-current="page"' : ''}>📁 내 폴더</a></li></ul></nav>
+    <div class="hint">내가 고른 메뉴 — ⠿ 끌어서 또는 ▲▼ 로 순서 · <a href="#/custom">🎨 꾸미기</a></div>` + mid + lockBox(locked) +
+    `<nav class="sfoot" aria-label="사이트맵"><a href="#/map">🗺️ 둘러보기(사이트맵)</a></nav>`;
+  if (flat) {
+    $('#side').querySelectorAll('.mv[data-pm]').forEach(b => b.addEventListener('click', () => moveSideId(b.dataset.id, +b.dataset.pm)));
+    wireDrag($('#side'), '.pick .ss', 'id', placeSideId);
+  } else wireSecBlocks();
+}
+function visibleSideIds() { return (sideFlat() || []).map(it => it.id); }
+function saveSide(visible) {
+  const rest = (Array.isArray(prefs.side) ? prefs.side : []).filter(id => !visible.includes(id));
+  prefs.side = visible.concat(rest);
+  reSide();
+  if (preview) return;
+  api('/api/auth/prefs', { method: 'POST', body: { side: prefs.side } }).then(r => { if (r.ok && r.prefs) prefs = Object.assign({}, prefs, r.prefs); });
+}
+function moveSideId(id, dir) {
+  const v = visibleSideIds(); const i = v.indexOf(id), j = i + dir; if (i < 0 || j < 0 || j >= v.length) return;
+  v[i] = v[j]; v[j] = id; saveSide(v);
+}
+function placeSideId(id, beforeId) {
+  const v = visibleSideIds().filter(x => x !== id); v.splice(v.indexOf(beforeId), 0, id); saveSide(v);
+}
+
 /* ── 통합관리자 등급별 미리보기(임시, 2026-10-18 이사장 지시) — 화면만 바꾼다. 서버 세션·저장은 실제 계정 그대로 */
 const MENU_PERMS = []; SECTIONS.forEach(sc => sc.items.forEach(it => { if (it.need && it.need.startsWith('perm:') && !MENU_PERMS.includes(it.need.slice(5))) MENU_PERMS.push(it.need.slice(5)); }));
 const PREVIEWS = [
@@ -418,11 +665,11 @@ const PREVIEWS = [
 let savedPrefs = null;
 function setPreview(k) {
   if (!realMe || realMe.role !== 'admin') return;
-  if (k === null) { preview = null; me = realMe; if (savedPrefs) { prefs = savedPrefs; savedPrefs = null; } gateOpen = false; renderPv(); renderTree(); return; }
+  if (k === null) { preview = null; me = realMe; if (savedPrefs) { prefs = savedPrefs; savedPrefs = null; } gateOpen = false; renderPv(); route(); return; }
   const pv = PREVIEWS.find(p => p.k === k); if (!pv) return;
   if (!preview) savedPrefs = prefs;    // 실제 순서는 지켜 두고
   preview = k; prefs = {}; me = pv.mk(); gateOpen = false;
-  renderPv(); renderTree();
+  renderPv(); route();
 }
 function renderPv() {
   const bar = $('#pv'); bar.classList.toggle('on', !!(realMe && realMe.role === 'admin'));
@@ -435,12 +682,13 @@ function renderPv() {
 function openPw(tempNote) {
   $('#pwNote').textContent = (tempNote ? '지금 임시 비밀번호로 로그인하셨습니다. 본인만 아는 비밀번호(8자 이상)로 바꿔 주세요. ' : '') + '바꾸면 그룹웨어·인사기록·근태·의정소통에도 같이 적용되고, 다른 기기의 로그인은 모두 끊깁니다.';
   $('#pwMsg').className = 'msg'; $('#pwMsg').textContent = ''; $('#pwOld').value = ''; $('#pwNew').value = ''; $('#pwNew2').value = '';
-  $('#pwModal').classList.add('on');
+  $('#pwModal').classList.add('on'); $('#pwOld').focus();
 }
 async function checkTempPassword() {
   const r = await api('/api/auth/password-status');
   if (r.ok && r.temp) openPw(true);
 }
+/* 옛 화면(#/classic) 본문 */
 function renderTree() {
   document.body.classList.toggle('in', !!me);
   if (!me) { $('#side').innerHTML = ''; renderPublic(); return; }
@@ -456,27 +704,353 @@ function openLock(a) {
   else if (need.startsWith('role:')) how = `${ROLE_KO[need.slice(5)] || ''} 등급 승인이 필요합니다. 회원가입 때 해당 등급을 신청했거나, 지금 등급을 올리려면 <a href="${HOME}contact">문의</a>로 요청해 주세요.`;
   else how = '로그인이 필요합니다.';
   $('#lockBody').innerHTML = `지금 등급: <b>${esc(me ? (me.role_ko || ROLE_KO[me.role] || '') : '비로그인')}</b> · 필요한 것: <b>${esc(needText(need))}</b><br>${how}`;
-  $('#lockModal').classList.add('on');
+  $('#lockModal').classList.add('on'); $('#lockClose').focus();
 }
 function setWho() {
   const u = realMe;
-  if (u) { $('#who').innerHTML = `<b>${esc(u.name || u.email || u.username)}</b> · ${esc(u.role_ko || '')}` + (u.email ? '' : ' · <a href="#" id="whoEmail">이메일 등록</a>'); $('#btnLogin').style.display = 'none'; $('#btnLogout').style.display = ''; $('#btnPw').style.display = ''; }
-  else { $('#who').textContent = ''; $('#btnLogin').style.display = ''; $('#btnLogout').style.display = 'none'; $('#btnPw').style.display = 'none'; }
+  if (u) { $('#who').innerHTML = `<b>${esc(u.name || u.email || u.username)}</b> · ${esc(u.role_ko || '')}` + (u.email ? '' : ' · <a href="#" id="whoEmail">이메일 등록</a>'); $('#btnLogin').style.display = 'none'; $('#btnLogout').style.display = ''; $('#btnPw').style.display = ''; $('#btnTwofa').style.display = ''; }
+  else { $('#who').textContent = ''; $('#btnLogin').style.display = ''; $('#btnLogout').style.display = 'none'; $('#btnPw').style.display = 'none'; $('#btnTwofa').style.display = 'none'; }
   renderPv();
-  renderTree();
+  route();
 }
+
+/* ── 라우터(해시): #/ 비로그인=로그인 관문·로그인=개인페이지 | #/map 둘러보기 | #/custom 꾸미기 | #/files 내 폴더 | #/classic 옛 화면 | #/login #/signup 창 */
+function currentRoute() {
+  const h = location.hash || '';
+  if (h.startsWith('#/map')) return 'map';
+  if (h.startsWith('#/custom')) return 'custom';
+  if (h.startsWith('#/files')) return 'files';
+  if (h.startsWith('#/classic')) return 'classic';
+  return 'home';
+}
+function route() {
+  const h = location.hash || '';
+  if (h === '#login' || h === '#/login') openAuth('login');
+  if (h === '#signup' || h === '#/signup') openAuth('signup');
+  const r = currentRoute();
+  document.body.classList.toggle('in', !!me);
+  document.body.dataset.route = r;
+  const needLogin = (r === 'custom' || r === 'files') && !me;
+  const gate = (r === 'home' && !me) || needLogin;
+  const shell = r === 'classic' || (!!me && (r === 'home' || r === 'files' || r === 'custom'));
+  const show = (id, on) => $(id).classList.toggle('on', !!on);
+  show('#vGate', gate); show('#vClassic', r === 'classic'); show('#shell', shell); show('#tree', r === 'classic');
+  show('#homeMain', !!me && r === 'home'); show('#vFiles', !!me && r === 'files'); show('#vCustom', !!me && r === 'custom'); show('#vMap', r === 'map');
+  $('#topnav').querySelectorAll('a').forEach(a => { a.classList.toggle('cur', a.dataset.r === r); if (a.dataset.r === r) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); a.hidden = a.classList.contains('needin') && !me; });
+  if (gate) renderGate(needLogin);
+  if (r === 'classic') renderTree();
+  if (me && r === 'home') { renderSideHome(); renderHome(); }
+  if (me && r === 'files') { renderSideHome(); renderFiles(); }
+  if (me && r === 'custom') { renderSideHome(); renderCustom(); }
+  if (r === 'map') renderMap();
+  if (!shell && !gate) document.body.classList.remove('sideOpen');
+}
+
+/* ── ① 로그인 관문 */
+const GT = { email: '#gtEmail', pw: '#gtPw', code: '#gtCode', box: '#gtCodeBox', msg: '#gtMsg', btn: '#gtBtn', pending: false };
+const LG = { email: '#lgEmail', pw: '#lgPw', code: '#lgCode', box: '#lgCodeBox', msg: '#lgMsg', btn: '#lgBtn', pending: false };
+function renderGate(needLogin) {
+  const m = $('#gtMsg');
+  if (GT.pending) { $('#gtCodeBox').hidden = false; $('#gtBtn').textContent = '코드 확인'; if (!m.textContent) { m.className = 'msg ok'; m.textContent = '비밀번호가 확인되었습니다. 2단계 인증 코드를 입력해 주세요.'; } }
+  else if (needLogin && !m.textContent) { m.className = 'msg'; m.textContent = '이 화면은 로그인한 뒤에 쓸 수 있습니다.'; }
+}
+/* 로그인 흐름(관문 카드·창 공용) — 응답 twofa:"pending" 이면 코드 칸을 열고 /api/auth/2fa/verify 로 */
+async function doLogin(ui) {
+  const m = $(ui.msg), b = $(ui.btn); m.className = 'msg'; m.textContent = ''; b.disabled = true;
+  let r;
+  if (ui.pending) {
+    const code = $(ui.code).value.trim();
+    if (!code) { b.disabled = false; m.className = 'msg err'; m.textContent = '인증 코드를 입력해 주세요.'; $(ui.code).focus(); return; }
+    r = await api('/api/auth/2fa/verify', { method: 'POST', body: { code } });
+  } else {
+    const id = $(ui.email).value.trim();
+    r = await api('/api/auth/login', { method: 'POST', body: { email: id, username: id, password: $(ui.pw).value } });
+  }
+  b.disabled = false;
+  if (!r.ok) { m.className = 'msg err'; m.textContent = errText(r); return; }
+  if (r.twofa === 'pending') {
+    ui.pending = true; $(ui.box).hidden = false; $(ui.code).value = ''; $(ui.code).focus(); b.textContent = '코드 확인';
+    const em = Array.isArray(r.methods) && r.methods.includes('email');
+    m.className = 'msg ok'; m.textContent = '비밀번호가 확인되었습니다. 2단계 인증 코드를 입력해 주세요' + (em ? ' (인증 앱 또는 이메일 코드)' : '') + '.';
+    return;
+  }
+  let u = r.user; if (!u) { const w = await api('/api/auth/me'); u = (w.ok && w.user) || null; }
+  if (!u) { m.className = 'msg err'; m.textContent = errText(r); return; }
+  ui.pending = false; $(ui.box).hidden = true; b.textContent = '로그인';
+  await loggedIn(u);
+}
+async function loggedIn(user) {
+  me = realMe = user; preview = null; GT.pending = LG.pending = false;
+  $('#lgPw').value = ''; $('#gtPw').value = ''; $('#gtMsg').textContent = '';
+  closeAuth(); await loadPrefs(); setWho();
+  if (me.email_missing) { $('#emailModal').classList.add('on'); }
+  else checkTempPassword();
+  loadTwofa();
+  if (window.skAiDock) location.reload();
+}
+async function forgot(emailEl, msgEl) {
+  const email = ($(emailEl).value || '').trim() || prompt('가입한 이메일을 입력하세요:') || '';
+  const m = $(msgEl);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) { m.className = 'msg err'; m.textContent = '이메일 주소를 입력해 주세요.'; return; }
+  await api('/api/auth/forgot', { method: 'POST', body: { email: email.trim().toLowerCase() } });
+  m.className = 'msg ok'; m.textContent = '가입된 이메일이면 임시 비밀번호를 보냈습니다. 메일함을 확인해 주세요.';
+}
+
+/* ── ③ 개인페이지: 대시보드 → 상담창 자리 → 공지·소식 */
+const CARD_DEFS = { todo: '오늘 할 일', work: '근태', approvals: '결재함', budget: '사업비 집행', bids: '입찰 공고', village: '내 마을', briefing: '의정 브리핑', academy: '아카데미', org: '조직 일정·연락처', files: '내 폴더', recent: '최근 대화', members: '회원 관리' };
+function defaultDash(u) {
+  const r = u ? u.role : ''; const c = ['todo', 'academy', 'files', 'recent'];
+  if (['coop', 'federation', 'staff', 'admin'].includes(r)) c.push('village');
+  if (['staff', 'admin'].includes(r)) c.push('work', 'approvals', 'bids');
+  if (r === 'admin') c.push('members', 'org');
+  return c;
+}
+function myDash() { const d = Array.isArray(prefs.dash) ? prefs.dash.filter(x => CARD_DEFS[x]) : []; return d.length ? d : defaultDash(me); }
+const onHome = () => !!me && currentRoute() === 'home';
+async function renderDash() {
+  const ids = myDash(), box = $('#dash');
+  const ph = (id, txt) => `<article class="dcard" data-card="${esc(id)}"><h3>${esc(CARD_DEFS[id])}<span class="asof">—</span></h3><p class="empty">${txt}</p></article>`;
+  box.innerHTML = ids.map(id => ph(id, '불러오는 중…')).join('');
+  const r = await api('/api/me/dashboard?cards=' + encodeURIComponent(ids.join(',')));
+  if (!onHome()) return;
+  if (!r.ok || !r.cards) { box.innerHTML = ids.map(id => ph(id, '아직 자료가 없습니다')).join(''); return; }
+  box.innerHTML = ids.filter(id => r.cards[id]).map(id => {
+    const c = r.cards[id] || {}; const items = Array.isArray(c.items) ? c.items : [];
+    return `<article class="dcard" data-card="${esc(id)}"><h3>${esc(c.title || CARD_DEFS[id])}<span class="asof" title="기준 시각">${esc(c.asof || '')}</span></h3>` +
+      (items.length ? `<ul>${items.map(i => `<li>${i.href ? `<a href="${esc(i.href)}">${esc(i.label)}</a>` : `<span>${esc(i.label)}</span>`}<b>${esc(i.value ?? '')}</b></li>`).join('')}</ul>` : '<p class="empty">없음</p>') +
+      (c.note ? `<p class="empty">${esc(c.note)}</p>` : '') + '</article>';
+  }).join('') || '<p class="empty">보일 칸이 없습니다. <a href="#/custom">꾸미기</a>에서 골라 주세요.</p>';
+}
+/* 자주 쓰는 지시 — prefs.quick + 최근 실행한 도구의 예시, 최근 실행이 없으면 영역별 1개씩, 모두 합쳐 8개 */
+async function renderQuick() {
+  const box = $('#quick');
+  const list = (Array.isArray(prefs.quick) ? prefs.quick : []).filter(x => typeof x === 'string' && x.trim()).slice(0, 12);
+  const [tools, log] = await Promise.all([loadTools(), api('/api/ai/exec/log')]);
+  if (!onHome()) return;
+  const add = x => { if (x && list.length < 8 && !list.includes(x)) list.push(x); };
+  const recent = (log.ok && Array.isArray(log.items)) ? log.items : [];
+  recent.forEach(e => { const t = tools.items.find(x => x.id === e.tool); if (t) add((t.examples || [])[0]); });
+  if (!recent.length) { const seen = {}; tools.items.forEach(t => { const ex = (t.examples || [])[0]; if (!ex || seen[t.area]) return; seen[t.area] = 1; add(ex); }); }
+  box.innerHTML = list.length ? list.slice(0, 8).map(x => `<button type="button" data-say="${esc(x)}" title="상담창에 넣기">${esc(x)}</button>`).join('') : '<p class="hint">자주 쓰는 지시가 쌓이면 여기에 단추로 나옵니다.</p>';
+}
+async function renderNotices() {
+  const r = await api('/api/notices?limit=20');
+  if (!onHome()) return;
+  const items = (r.ok && Array.isArray(r.items)) ? r.items : [];
+  $('#notices').innerHTML = items.length ? items.map(n => `<li><span class="src">${esc(n.src || '사교원')}</span>${n.href ? `<a href="${esc(n.href)}">${esc(n.title)}</a>` : `<span>${esc(n.title)}</span>`}<span class="dt">${esc(n.date || '')}</span></li>`).join('') : '<li class="empty">아직 공지가 없습니다</li>';
+}
+function renderHome() {
+  renderTfBanner();
+  renderDash(); renderQuick(); renderNotices();
+  loadTools().then(() => { if (onHome() && Array.isArray(prefs.side) && prefs.side.length) renderSideHome(); });  // 도구 id 가 든 사이드바는 대장이 온 뒤 다시
+}
+
+/* ── ⑦ 2단계 인증 */
+let tf = null;                        // {enabled, required, methods, email_masked}
+async function loadTwofa() { const r = await api('/api/auth/2fa/status'); tf = r.ok ? r : null; renderTfBanner(); return tf; }
+function renderTfBanner() { const b = $('#tfBanner'); if (b) b.hidden = !(tf && tf.required && !tf.enabled); }
+function openTf() {
+  $('#tfModal').classList.add('on'); tfView('loading');
+  loadTwofa().then(t => tfView(t ? (t.enabled ? 'on' : 'off') : 'err'));
+}
+function tfView(v, data) {
+  const st = $('#tfState'), body = $('#tfBody');
+  const req = tf && tf.required ? '<p class="sub">매니저 이상·체크권한 보유자는 발송·결재·권한 기능을 쓰려면 꼭 켜야 합니다.</p>' : '';
+  if (v === 'loading') { st.textContent = '상태를 확인하는 중…'; body.innerHTML = ''; return; }
+  if (v === 'err') { st.textContent = '2단계 인증 상태를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'; body.innerHTML = ''; return; }
+  if (v === 'off') {
+    st.textContent = '지금 꺼져 있습니다.';
+    body.innerHTML = req + '<p class="sub">휴대폰 인증 앱(Google Authenticator·Microsoft Authenticator 등)에 등록하면, 로그인할 때 비밀번호 다음에 앱의 6자리 번호를 넣습니다.' + (tf && Array.isArray(tf.methods) && tf.methods.includes('email') ? ' 이메일 코드(' + esc(tf.email_masked || '') + ')도 쓸 수 있습니다.' : '') + '</p><button class="mbtn" type="button" id="tfSetup">인증 앱 등록</button><div class="msg" id="tfMsg" aria-live="polite"></div>';
+    $('#tfSetup').addEventListener('click', async () => {
+      const b = $('#tfSetup'); b.disabled = true; const r = await api('/api/auth/2fa/setup', { method: 'POST' }); b.disabled = false;
+      if (!r.ok) { $('#tfMsg').className = 'msg err'; $('#tfMsg').textContent = errText(r); return; }
+      tfView('setup', r);
+    });
+    return;
+  }
+  if (v === 'setup') {
+    st.textContent = '인증 앱으로 아래 QR 을 찍거나 열쇠 글자를 입력한 뒤, 앱에 뜬 6자리 번호를 넣어 주세요.';
+    body.innerHTML = `<div class="tfqr" id="tfQr"></div><p class="sub" style="margin:0 0 4px">열쇠 글자(직접 입력용)</p><div class="tfsec" id="tfSecret"></div>
+      <div class="f" style="margin-top:10px"><label for="tfCode">앱에 뜬 6자리 번호</label><input id="tfCode" inputmode="numeric" autocomplete="one-time-code"></div>
+      <div class="msg" id="tfMsg" aria-live="polite"></div><button class="mbtn" type="button" id="tfEnable">켜기</button>`;
+    $('#tfQr').innerHTML = (data && data.qr_svg && /^\s*<svg[\s\S]*<\/svg>\s*$/i.test(data.qr_svg)) ? data.qr_svg : '<p class="sub">QR 을 그리지 못했습니다. 아래 열쇠 글자를 앱에 입력해 주세요.</p>';
+    $('#tfSecret').textContent = (data && data.secret) || '';
+    $('#tfCode').focus();
+    const go = async () => {
+      const code = $('#tfCode').value.trim(); const m = $('#tfMsg');
+      if (!code) { m.className = 'msg err'; m.textContent = '6자리 번호를 입력해 주세요.'; return; }
+      const b = $('#tfEnable'); b.disabled = true; const r = await api('/api/auth/2fa/enable', { method: 'POST', body: { code } }); b.disabled = false;
+      if (!r.ok) { m.className = 'msg err'; m.textContent = errText(r); return; }
+      tf = Object.assign({}, tf || {}, { enabled: true }); renderTfBanner(); tfView('codes', r);
+    };
+    $('#tfEnable').addEventListener('click', go);
+    $('#tfCode').addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+    return;
+  }
+  if (v === 'codes') {
+    const codes = (data && Array.isArray(data.backup_codes)) ? data.backup_codes : [];
+    st.textContent = '켜졌습니다. 아래 백업 코드 8개를 안전한 곳에 적어 두세요 — 휴대폰을 잃었을 때 한 번씩 쓸 수 있습니다.';
+    body.innerHTML = `<div class="bk" id="tfBk">${codes.map(c => `<span>${esc(c)}</span>`).join('')}</div><button class="ghost" type="button" id="tfCopy">백업 코드 복사</button><div class="msg" id="tfMsg" aria-live="polite"></div>`;
+    $('#tfCopy').addEventListener('click', async () => { try { await navigator.clipboard.writeText(codes.join('\n')); $('#tfMsg').className = 'msg ok'; $('#tfMsg').textContent = '복사했습니다.'; } catch (_) { $('#tfMsg').className = 'msg err'; $('#tfMsg').textContent = '복사하지 못했습니다. 직접 적어 주세요.'; } });
+    return;
+  }
+  if (v === 'on') {
+    st.textContent = '켜져 있습니다 (인증 앱).';
+    body.innerHTML = req + `<p class="sub">끄려면 지금 앱의 6자리 번호(또는 백업 코드)를 넣어 주세요.</p><div class="f"><label for="tfOff">인증 코드</label><input id="tfOff" inputmode="numeric" autocomplete="one-time-code"></div><div class="msg" id="tfMsg" aria-live="polite"></div><button class="ghost" type="button" id="tfDisable">끄기</button>`;
+    $('#tfDisable').addEventListener('click', async () => {
+      const code = $('#tfOff').value.trim(); const m = $('#tfMsg');
+      if (!code) { m.className = 'msg err'; m.textContent = '인증 코드를 입력해 주세요.'; return; }
+      if (!confirm('2단계 인증을 끄시겠습니까?')) return;
+      const r = await api('/api/auth/2fa/disable', { method: 'POST', body: { code } });
+      if (!r.ok) { m.className = 'msg err'; m.textContent = errText(r); return; }
+      tf = Object.assign({}, tf || {}, { enabled: false }); renderTfBanner(); tfView('off');
+    });
+  }
+}
+
+/* ── ② 둘러보기(#/map) — TREE 3묶음을 카드로, 도구 대장이 있으면 「상담창에 이렇게 말해 보세요」 예시를 붙인다 */
+function mapCard(it) {
+  const ok = allowed(it.need);
+  const tool = toolFor(it); const ex = tool && Array.isArray(tool.examples) ? tool.examples[0] : '';
+  const href = ok ? it.h : (me ? '#locked' : '#/signup');
+  const go = ok ? `<a class="btn sm" href="${esc(it.h)}"${it.ext ? ' target="_blank" rel="noopener"' : ''}>화면으로 가기${it.ext ? ' ↗' : ''}</a>` : `<a class="btn sm" href="${esc(href)}" data-need="${esc(it.need || '')}" data-t="${esc(it.t)}">${me ? '권한 안내' : '가입하고 쓰기'}</a>`;
+  return `<article class="mcard${ok ? '' : ' locked'}${it.sub ? ' sub' : ''}"><h4>${ok ? '' : '🔒 '}${esc(it.t)}${it.soon ? ' <span class="rq">준비 중</span>' : ''}</h4><p class="d">${esc(it.d || (tool && tool.desc) || '')}</p><div class="row">${go}${ok ? '' : `<span class="rq">${esc(whoText(it.need))}</span>`}</div>` +
+    (ex ? `<button type="button" class="exq" data-say="${esc(ex)}">상담창에 이렇게 말해 보세요: “${esc(ex)}”</button>` : '') + '</article>';
+}
+function renderMap() {
+  const draw = () => { if (currentRoute() !== 'map') return; $('#mapBody').innerHTML = TREE.map(g => `<section class="grp mapgrp" aria-label="${esc(g.name)}"><h3><span class="ic">${g.ic}</span>${esc(g.name)}${g.lock ? `<span class="lock">🔒 ${esc(g.lock)}</span>` : ''}</h3>${g.secs.map(sc => `<div class="mapsec"><h4 class="sec" style="margin:6px 0 6px;font-size:14px;color:var(--g7)">${sc.ic} ${esc(sc.name)}</h4><div class="mcards">${sc.items.map(mapCard).join('')}</div></div>`).join('')}</section>`).join(''); };
+  draw();                              // 대장이 없어도 TREE 만으로 먼저 그린다
+  loadTools().then(() => { if (TOOLS.items.length) draw(); });
+}
+
+/* ── ⑥ 꾸미기(#/custom) — 대시보드 칸 · 사이드바 메뉴 체크·▲▼ · 미리보기 · 저장 */
+const CUST = { defs: [], dash: [], side: [], avail: [] };
+function sectionOrderedIds(avail) { const out = []; myOrder().forEach(k => avail.filter(i => i.sec === k).forEach(i => out.push(i.id))); avail.filter(i => !i.sec).forEach(i => out.push(i.id)); return out; }
+async function renderCustom() {
+  const [r] = await Promise.all([api('/api/me/dashboard/cards'), loadTools()]);
+  if (!me || currentRoute() !== 'custom') return;
+  const defs = (r.ok && Array.isArray(r.cards) && r.cards.length) ? r.cards.filter(c => c && c.id) : Object.keys(CARD_DEFS).map(id => ({ id, title: CARD_DEFS[id] }));
+  CUST.defs = defs;
+  const chosen = myDash().filter(id => defs.find(d => d.id === id));
+  CUST.dash = chosen.map(id => ({ id, on: true })).concat(defs.filter(d => !chosen.includes(d.id)).map(d => ({ id: d.id, on: false })));
+  const avail = ALL_ITEMS.filter(it => allowed(it.need)).slice();
+  TOOLS.items.forEach(t => { if (!ALL_ITEMS.find(it => toolFor(it) === t)) avail.push({ id: t.id, t: t.name, h: t.screen || '#/', tool: true, area: t.area }); });
+  CUST.avail = avail;
+  const saved = Array.isArray(prefs.side) ? prefs.side.filter(id => avail.find(i => i.id === id)) : [];
+  const cur = saved.length ? saved : sectionOrderedIds(avail.filter(i => !i.tool));
+  CUST.side = cur.map(id => ({ id, on: true })).concat(avail.filter(i => !cur.includes(i.id)).map(i => ({ id: i.id, on: false })));
+  drawCustom();
+}
+function drawCustom() {
+  const row = (kind, x, i, n, label, meta) => `<li><label><input type="checkbox" data-ck="${kind}" data-id="${esc(x.id)}"${x.on ? ' checked' : ''}> <span>${label}</span>${meta ? `<span class="meta">${meta}</span>` : ''}</label><button class="mv" type="button" data-cm="${kind}" data-id="${esc(x.id)}" data-mv="-1" aria-label="${esc(label)} 위로"${i === 0 ? ' disabled' : ''}>▲</button><button class="mv" type="button" data-cm="${kind}" data-id="${esc(x.id)}" data-mv="1" aria-label="${esc(label)} 아래로"${i === n - 1 ? ' disabled' : ''}>▼</button></li>`;
+  $('#cDash').innerHTML = CUST.dash.map((x, i) => { const d = CUST.defs.find(c => c.id === x.id) || {}; return row('dash', x, i, CUST.dash.length, esc(d.title || CARD_DEFS[x.id] || x.id), esc([d.need, d.refresh].filter(Boolean).join(' · '))); }).join('');
+  $('#cSide').innerHTML = CUST.side.map((x, i) => { const it = CUST.avail.find(a => a.id === x.id) || {}; return row('side', x, i, CUST.side.length, (it.tool ? '🤖 ' : '') + esc(it.t || x.id), esc(it.tool ? ('상담창 도구' + (it.area ? ' · ' + it.area : '')) : (it.sec || ''))); }).join('');
+  const dashOn = CUST.dash.filter(x => x.on), sideOn = CUST.side.filter(x => x.on);
+  $('#cPrev').innerHTML = `<div class="h">📊 대시보드</div><ul>${dashOn.length ? dashOn.map(x => `<li>▫ ${esc((CUST.defs.find(c => c.id === x.id) || {}).title || CARD_DEFS[x.id] || x.id)}</li>`).join('') : '<li>(없음)</li>'}</ul>
+    <div class="h">🏠 내 페이지</div><div class="h">📁 내 폴더</div><div class="h">📌 내가 고른 메뉴</div><ul>${sideOn.length ? sideOn.map(x => `<li>· ${esc((CUST.avail.find(a => a.id === x.id) || {}).t || x.id)}</li>`).join('') : '<li>(없음 — 소분류 순서대로 보입니다)</li>'}</ul><div class="h">🗺️ 둘러보기</div>`;
+}
+function custMove(kind, id, dir) { const arr = CUST[kind]; const i = arr.findIndex(x => x.id === id), j = i + dir; if (i < 0 || j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; drawCustom(); }
+$('#vCustom').addEventListener('change', e => { const c = e.target.closest('input[data-ck]'); if (!c) return; const x = CUST[c.dataset.ck].find(y => y.id === c.dataset.id); if (x) x.on = c.checked; drawCustom(); });
+$('#vCustom').addEventListener('click', e => { const b = e.target.closest('button[data-cm]'); if (b) custMove(b.dataset.cm, b.dataset.id, +b.dataset.mv); });
+$('#cSave').addEventListener('click', async () => {
+  const dash = CUST.dash.filter(x => x.on).map(x => x.id), side = CUST.side.filter(x => x.on).map(x => x.id), m = $('#cMsg');
+  prefs.dash = dash; prefs.side = side;
+  if (preview) { m.className = 'msg'; m.textContent = '미리보기 중엔 저장하지 않습니다.'; return; }
+  const b = $('#cSave'); b.disabled = true; const r = await api('/api/auth/prefs', { method: 'POST', body: { dash, side } }); b.disabled = false;
+  if (r.ok) { if (r.prefs) prefs = Object.assign({}, prefs, r.prefs); m.className = 'msg ok'; m.textContent = '저장했습니다. 내 페이지에 반영됩니다.'; renderSideHome(); }
+  else { m.className = 'msg err'; m.textContent = '저장하지 못했습니다: ' + errText(r); }
+});
+$('#cReset').addEventListener('click', () => { prefs.dash = []; prefs.side = []; $('#cMsg').className = 'msg'; $('#cMsg').textContent = '등급 기본 구성으로 돌렸습니다. 「저장」을 누르면 계정에 남습니다.'; renderCustom(); });
+
+/* ── ④ 내 폴더(#/files) */
+const FS = { path: '', tab: 'files', items: [] };
+const fmtSize = n => { n = +n || 0; if (n < 1024) return n + ' B'; if (n < 1048576) return (n / 1024).toFixed(1) + ' KB'; if (n < 1073741824) return (n / 1048576).toFixed(1) + ' MB'; return (n / 1073741824).toFixed(2) + ' GB'; };
+const fmtTime = t => { if (!t) return ''; const d = typeof t === 'number' ? new Date(t * (t < 1e12 ? 1000 : 1)) : new Date(t); return isNaN(d) ? String(t) : d.toLocaleString('ko-KR', { year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }); };
+const fsJoin = name => (FS.path ? FS.path + '/' : '') + name;
+function fsMsg(txt, ok) { const m = $('#fMsg'); m.className = 'msg' + (txt ? (ok ? ' ok' : ' err') : ''); m.textContent = txt || ''; }
+function renderFiles() { fsMsg(''); fsLoad(); }
+function fsCrumb() {
+  const parts = FS.path ? FS.path.split('/').filter(Boolean) : [];
+  let acc = '';
+  $('#fCrumb').innerHTML = (FS.tab === 'trash' ? '<b>🗑️ 휴지통</b>' : `<a href="#/files" data-fp="">📁 내 폴더</a>` + parts.map(p => { acc += (acc ? '/' : '') + p; return `<span class="sep">›</span><a href="#/files" data-fp="${esc(acc)}">${esc(p)}</a>`; }).join(''));
+}
+async function fsLoad() {
+  fsCrumb();
+  const r = await api(FS.tab === 'trash' ? '/api/my/files/trash' : '/api/my/files?path=' + encodeURIComponent(FS.path));
+  if (!me || currentRoute() !== 'files') return;
+  const items = (r.ok && Array.isArray(r.items)) ? r.items : [];
+  FS.items = items;
+  if (r.ok && r.quota) { const pct = Math.min(100, Math.round(((+r.used || 0) / (+r.quota || 1)) * 100)); $('#fQuota').innerHTML = `<span>사용량</span><div class="qbar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" aria-label="사용량 ${pct}%"><i style="width:${pct}%"></i></div><span>${fmtSize(r.used)} / ${fmtSize(r.quota)} (${pct}%)</span>`; }
+  else if (FS.tab !== 'trash') $('#fQuota').innerHTML = '';
+  if (!r.ok) { fsMsg(r.status === 401 ? ERR.unauthorized : (r.status === 404 || r.error === 'network' ? '내 폴더 서버가 아직 열리지 않았습니다.' : reasonText(r))); }
+  const rows = (FS.tab !== 'trash' && FS.path) ? [`<tr><td class="nm" colspan="4"><a href="#/files" data-fp="${esc(FS.path.split('/').slice(0, -1).join('/'))}">⬆️ 위 폴더로</a></td></tr>`] : [];
+  items.forEach(it => {
+    const name = it.name || it.path || '';
+    const p = it.path || fsJoin(name);
+    if (FS.tab === 'trash') rows.push(`<tr><td class="nm">${it.dir ? '📁' : '📄'} ${esc(name)}</td><td class="n">${it.dir ? '' : fmtSize(it.size)}</td><td class="n">${esc(fmtTime(it.mtime || it.deleted_at))}</td><td class="act"><button class="btn sm" type="button" data-fa="restore" data-p="${esc(p)}">♻️ 복원</button></td></tr>`);
+    else rows.push(`<tr><td class="nm">${it.dir ? `📁 <a href="#/files" data-fp="${esc(p)}">${esc(name)}</a>` : `📄 ${esc(name)}`}</td><td class="n">${it.dir ? '' : fmtSize(it.size)}</td><td class="n">${esc(fmtTime(it.mtime))}</td><td class="act">${it.dir ? '' : `<a class="btn sm" href="/api/my/files/download?path=${encodeURIComponent(p)}" download>⬇️ 내려받기</a>`}<button class="btn sm" type="button" data-fa="delete" data-p="${esc(p)}" data-n="${esc(name)}">🗑️ 지우기</button></td></tr>`);
+  });
+  $('#fList').innerHTML = rows.length ? rows.join('') : `<tr><td colspan="4" class="n">${FS.tab === 'trash' ? '휴지통이 비어 있습니다' : (r.ok ? '비어 있습니다 — 「올리기」로 파일을 넣거나 「새 폴더」를 만들어 보세요' : '목록을 불러오지 못했습니다')}</td></tr>`;
+}
+async function fsUpload(files) {
+  if (!files || !files.length) return;
+  fsMsg(files.length + '개 올리는 중…', true);
+  let fail = 0;
+  for (const f of Array.from(files)) {
+    const fd = new FormData(); fd.append('path', FS.path); fd.append('file', f, f.name);
+    const r = await apiForm('/api/my/files/upload', fd);
+    if (!r.ok) { fail++; fsMsg(`「${f.name}」 올리지 못했습니다: ${reasonText(r)}`); }
+  }
+  if (!fail) fsMsg('올렸습니다.', true);
+  fsLoad();
+}
+$('#vFiles').addEventListener('click', async e => {
+  const c = e.target.closest('a[data-fp]'); if (c) { e.preventDefault(); FS.tab = 'files'; FS.path = c.dataset.fp || ''; fsTabs(); fsMsg(''); fsLoad(); return; }
+  const t = e.target.closest('button[data-ft]'); if (t) { FS.tab = t.dataset.ft; fsTabs(); fsMsg(''); fsLoad(); return; }
+  const b = e.target.closest('button[data-fa]'); if (!b) return;
+  if (b.dataset.fa === 'delete') {
+    if (!confirm(`「${b.dataset.n}」을(를) 지울까요? 7일 동안 휴지통에 보관됩니다.`)) return;
+    const r = await api('/api/my/files/delete', { method: 'POST', body: { path: b.dataset.p } });
+    fsMsg(r.ok ? '휴지통으로 옮겼습니다.' : reasonText(r), r.ok); fsLoad();
+  } else if (b.dataset.fa === 'restore') {
+    const r = await api('/api/my/files/restore', { method: 'POST', body: { path: b.dataset.p } });
+    fsMsg(r.ok ? '복원했습니다.' : reasonText(r), r.ok); fsLoad();
+  }
+});
+function fsTabs() { $('#vFiles').querySelectorAll('button[data-ft]').forEach(b => { const on = b.dataset.ft === FS.tab; b.classList.toggle('on', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); }); }
+$('#fMk').addEventListener('click', async () => {
+  const name = (prompt('새 폴더 이름:') || '').trim(); if (!name) return;
+  if (/[\\/:*?"<>|]/.test(name)) { fsMsg('폴더 이름에 \\ / : * ? " < > | 는 쓸 수 없습니다.'); return; }
+  const r = await api('/api/my/files/mkdir', { method: 'POST', body: { path: fsJoin(name) } });
+  fsMsg(r.ok ? '만들었습니다.' : reasonText(r), r.ok); fsLoad();
+});
+$('#fUp').addEventListener('change', function () { fsUpload(this.files); this.value = ''; });
+$('#fRef').addEventListener('click', () => { fsMsg(''); fsLoad(); });
+
+/* ── 글자 크기(가+ 가−) — html font-size 100/112/125%, localStorage */
+const FS_LV = [100, 112, 125];
+function applyFont() {
+  let v = 100; try { v = +localStorage.getItem('sk_font') || 100; } catch (_) {}
+  if (!FS_LV.includes(v)) v = 100;
+  document.documentElement.style.fontSize = (15 * v / 100) + 'px'; document.documentElement.dataset.fs = v;
+  $('#fsDown').disabled = v === FS_LV[0]; $('#fsUp').disabled = v === FS_LV[FS_LV.length - 1];
+}
+function stepFont(d) { const v = +document.documentElement.dataset.fs || 100; const i = Math.max(0, Math.min(FS_LV.length - 1, FS_LV.indexOf(v) + d)); try { localStorage.setItem('sk_font', String(FS_LV[i])); } catch (_) {} applyFont(); }
+$('#fsUp').addEventListener('click', () => stepFont(1));
+$('#fsDown').addEventListener('click', () => stepFont(-1));
+
 async function boot() {
+  applyFont();
   const r = await api('/api/auth/me');
   me = realMe = (r.ok && r.user) ? r.user : null;
+  if (!me && r.error === 'twofa_required') GT.pending = true;   // 비밀번호는 통과, 코드만 남은 세션
   if (me) await loadPrefs();
   setWho();
-  if (me) checkTempPassword();
-  if (location.hash === '#login') openAuth('login');
-  if (location.hash === '#signup') openAuth('signup');
+  if (me) { checkTempPassword(); loadTwofa(); }
 }
 /* 로그인·가입 창 */
-function openAuth(tab) { $('#authModal').classList.add('on'); authTab(tab || 'login'); fillRegions(); }
-function closeAuth() { $('#authModal').classList.remove('on'); if (location.hash === '#login' || location.hash === '#signup') history.replaceState(null, '', location.pathname); }
+function openAuth(tab) { $('#authModal').classList.add('on'); authTab(tab || 'login'); fillRegions(); setTimeout(() => { const f = $(tab === 'signup' ? '#suEmail' : '#lgEmail'); if (f) f.focus(); }, 0); }
+function closeAuth() { $('#authModal').classList.remove('on'); if (['#login', '#signup', '#/login', '#/signup'].includes(location.hash)) { history.replaceState(null, '', location.pathname); route(); } }
 function authTab(t) { $('#vLogin').style.display = t === 'login' ? '' : 'none'; $('#vSignup').style.display = t === 'signup' ? '' : 'none'; $('#tabLogin').classList.toggle('on', t === 'login'); $('#tabSignup').classList.toggle('on', t === 'signup'); }
 let REG = null;
 async function fillRegions() {
@@ -492,28 +1066,23 @@ $('#authClose').addEventListener('click', closeAuth);
 $('#tabLogin').addEventListener('click', () => authTab('login'));
 $('#tabSignup').addEventListener('click', () => authTab('signup'));
 $('#suTier').addEventListener('change', () => { $('#suContactReq').textContent = $('#suTier').value === 'general' ? '(일반이용자는 선택)' : '(필수)'; });
-window.addEventListener('hashchange', () => { if (location.hash === '#login') openAuth('login'); if (location.hash === '#signup') openAuth('signup'); });
+window.addEventListener('hashchange', route);
 $('#lockClose').addEventListener('click', () => $('#lockModal').classList.remove('on'));
-$('#sideTog').addEventListener('click', () => document.body.classList.toggle('sideOpen'));
-document.addEventListener('click', e => { const l = e.target.closest('a[href="#locked"]'); if (l) { e.preventDefault(); openLock(l); return; } const a = e.target.closest('a[href="#login"]'); if (a) { e.preventDefault(); openAuth('login'); } const w = e.target.closest('#whoEmail'); if (w) { e.preventDefault(); $('#emailModal').classList.add('on'); } });
+$('#sideTog').addEventListener('click', () => { const on = document.body.classList.toggle('sideOpen'); $('#sideTog').setAttribute('aria-expanded', on ? 'true' : 'false'); });
+document.addEventListener('click', e => {
+  const l = e.target.closest('a[href="#locked"]'); if (l) { e.preventDefault(); openLock(l); return; }
+  const a = e.target.closest('a[href="#login"]'); if (a) { e.preventDefault(); openAuth('login'); return; }
+  const w = e.target.closest('#whoEmail'); if (w) { e.preventDefault(); $('#emailModal').classList.add('on'); return; }
+  const s = e.target.closest('[data-say]'); if (s) { say(s.dataset.say); }
+});
+/* 모든 창은 Esc 로 닫힌다 */
+document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; const open = document.querySelectorAll('.modal-back.on'); if (!open.length) return; open.forEach(m => m.classList.remove('on')); if (['#login', '#signup', '#/login', '#/signup'].includes(location.hash)) { history.replaceState(null, '', location.pathname); route(); } });
 $('#lgPw').addEventListener('keydown', e => { if (e.key === 'Enter') $('#lgBtn').click(); });
-$('#lgBtn').addEventListener('click', async () => {
-  const b = $('#lgBtn'); b.disabled = true; $('#lgMsg').className = 'msg'; $('#lgMsg').textContent = '';
-  const r = await api('/api/auth/login', { method: 'POST', body: { email: $('#lgEmail').value.trim(), username: $('#lgEmail').value.trim(), password: $('#lgPw').value } });
-  b.disabled = false;
-  if (!r.ok) { $('#lgMsg').className = 'msg err'; $('#lgMsg').textContent = errText(r); return; }
-  me = realMe = r.user; preview = null; $('#lgPw').value = ''; closeAuth(); await loadPrefs(); setWho();
-  if (me.email_missing) { $('#emailModal').classList.add('on'); }
-  else checkTempPassword();
-  if (window.skAiDock) location.reload();
-});
-$('#lgForgot').addEventListener('click', async (e) => {
-  e.preventDefault();
-  const email = ($('#lgEmail').value || '').trim() || prompt('가입한 이메일을 입력하세요:') || '';
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())){ $('#lgMsg').className='msg err'; $('#lgMsg').textContent='이메일 주소를 입력해 주세요.'; return; }
-  await api('/api/auth/forgot', { method:'POST', body:{ email: email.trim().toLowerCase() } });
-  $('#lgMsg').className='msg ok'; $('#lgMsg').textContent='가입된 이메일이면 임시 비밀번호를 보냈습니다. 메일함을 확인해 주세요.';
-});
+$('#lgCode').addEventListener('keydown', e => { if (e.key === 'Enter') $('#lgBtn').click(); });
+$('#lgBtn').addEventListener('click', () => doLogin(LG));
+$('#gtForm').addEventListener('submit', e => { e.preventDefault(); doLogin(GT); });
+$('#lgForgot').addEventListener('click', e => { e.preventDefault(); forgot('#lgEmail', '#lgMsg'); });
+$('#gtForgot').addEventListener('click', e => { e.preventDefault(); forgot('#gtEmail', '#gtMsg'); });
 $('#suBtn').addEventListener('click', async () => {
   const v = id => $(id).value.trim();
   const body = { email: v('#suEmail').toLowerCase(), username: v('#suEmail').toLowerCase(), password: $('#suPw').value, name: v('#suName'), tier: $('#suTier').value, region_sido: $('#suSido').value, region_sigungu: $('#suSigungu').value, contact: v('#suContact'), org: v('#suOrg'), consent: $('#suConsent').checked };
@@ -531,8 +1100,11 @@ $('#suBtn').addEventListener('click', async () => {
   m.className = 'msg ok'; m.textContent = r.status === 'approved' ? '가입되었습니다. 로그인해 주세요.' : '가입 신청이 접수되었습니다. 승인되면 로그인할 수 있습니다.';
   if (r.status === 'approved') { $('#lgEmail').value = body.email; setTimeout(() => authTab('login'), 900); }
 });
-$('#btnLogout').addEventListener('click', async () => { await api('/api/auth/logout', { method: 'POST' }); me = realMe = null; preview = null; setWho(); location.reload(); });
+$('#btnLogout').addEventListener('click', async () => { await api('/api/auth/logout', { method: 'POST' }); me = realMe = null; preview = null; tf = null; setWho(); location.reload(); });
 $('#btnPw').addEventListener('click', () => openPw(false));
+$('#btnTwofa').addEventListener('click', openTf);
+$('#tfBannerBtn').addEventListener('click', openTf);
+$('#tfClose').addEventListener('click', () => $('#tfModal').classList.remove('on'));
 $('#pwLater').addEventListener('click', () => $('#pwModal').classList.remove('on'));
 $('#pwBtn').addEventListener('click', async () => {
   const m = $('#pwMsg'); m.className = 'msg'; m.textContent = '';
@@ -552,12 +1124,12 @@ $('#emBtn').addEventListener('click', async () => {
   const m = $('#emMsg'); if (r.ok) { m.className = 'msg ok'; m.textContent = '등록했습니다.'; if (me) { me.email = r.email; me.email_missing = false; } setWho(); setTimeout(() => $('#emailModal').classList.remove('on'), 900); }
   else { m.className = 'msg err'; m.textContent = errText(r); }
 });
-/* 첫 화면 질문 → 상단 AI 도우미로 */
+/* 옛 첫 화면 질문 → 상단 AI 도우미로 */
 function heroAsk() { const q = $('#heroQ').value.trim(); if (!q) return; $('#heroQ').value = ''; if (window.skAiDock) window.skAiDock.ask(q); else setTimeout(heroAsk, 300); }
 $('#heroAsk').addEventListener('click', heroAsk);
 $('#heroQ').addEventListener('keydown', e => { if (e.key === 'Enter') heroAsk(); });
 document.querySelectorAll('.ex button').forEach(b => b.addEventListener('click', () => { if (window.skAiDock) window.skAiDock.ask(b.dataset.q); }));
-renderTree();
+route();
 boot();
 
 // 서비스워커 등록 (PWA 설치 요건)
