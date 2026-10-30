@@ -227,12 +227,36 @@ function needLogin(el, what) {
       <div class="field"><label>아이디 또는 이메일</label><input name="u" autocomplete="username"></div>
       <div class="field"><label>비밀번호</label><input name="p" type="password" autocomplete="current-password"></div>
     </form>
+    <div class="field hidden lg-code"><label>2단계 인증 코드 (인증 앱 또는 이메일로 받은 6자리)</label><input name="c" inputmode="numeric" autocomplete="one-time-code"></div>
+    <div class="msg hidden lg-msg"></div>
     <div class="btns"><button class="btn p lg-btn">로그인</button><a class="btn s" href="/">회원가입·첫 화면</a></div>`;
   el.classList.remove('hidden');
+  const 말 = (t, ok) => { const m = el.querySelector('.lg-msg'); m.textContent = t; m.className = 'msg lg-msg' + (ok ? ' ok' : ' err'); };
+  let pending = false;
+  const 끝 = async r => {
+    let u = r.user; if (!u) { const w = await api('/api/auth/me'); u = (w.ok && w.user) || null; }
+    if (u) { toast('로그인했습니다'); location.reload(); } else 말(r.message || '로그인하지 못했습니다. 아이디·비밀번호를 확인해 주세요.');
+  };
   el.querySelector('.lg-btn').onclick = async () => {
-    const f = el.querySelector('form');
-    const r = await api('/api/auth/login', { body: { username: f.u.value.trim(), password: f.p.value } });
-    if (r.ok && r.user) { toast('로그인했습니다'); location.reload(); } else toast(r.error || r.message || '로그인 실패', true);
+    const f = el.querySelector('form'), b = el.querySelector('.lg-btn'); b.disabled = true;
+    let r;
+    if (pending) {
+      const code = el.querySelector('.lg-code input').value.trim();
+      r = await api('/api/auth/2fa/verify', { body: { code } });
+      b.disabled = false;
+      if (!r.ok) { 말(r.error === 'invalid_code' ? '인증 코드가 맞지 않습니다.' : (r.message || '코드를 확인하지 못했습니다.')); return; }
+      return 끝(r);
+    }
+    const id = f.u.value.trim();
+    r = await api('/api/auth/login', { body: { email: id, username: id, password: f.p.value } });
+    b.disabled = false;
+    if (!r.ok) { 말(r.message || (r.error === 'invalid_credentials' ? '아이디 또는 비밀번호가 맞지 않습니다.' : '로그인하지 못했습니다.')); return; }
+    if (r.twofa === 'pending') {          // 2단계 인증을 쓰는 동안: 코드 칸을 연다(첫 화면과 같은 흐름)
+      pending = true; el.querySelector('.lg-code').classList.remove('hidden'); b.textContent = '코드 확인';
+      말('비밀번호가 확인되었습니다. 2단계 인증 코드를 입력해 주세요' + (r.email_sent ? ` (이메일 ${r.email_masked || ''} 로 보냈습니다)` : '') + '.', true);
+      el.querySelector('.lg-code input').focus(); return;
+    }
+    끝(r);
   };
 }
 
