@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>입찰정보 — 사회혁신교육원 사회적협동조합</title>
+<meta name="description" content="나라장터·한국에너지공단 입찰 공고를 사교원 사업과 발전사업자(햇빛발전협동조합) 분야로 골라 게시하고, 텔레그램 알림과 제안서·구비서류 작업대를 제공합니다.">
+<meta name="theme-color" content="#4a6741">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%234a6741'/><text x='16' y='22' text-anchor='middle' font-size='16' fill='%23FAF6EC'>☀</text></svg>">
+<style>
+:root{
+  --paper:#FAF6EC; --paper-soft:#F1EBD9; --card:#FFFFFF;
+  --ink:#1C2621; --ink-soft:#4F5A50; --ink-faint:#8B9188;
+  --green-900:#0D3B2C; --green-700:#2C5842; --green-600:#4A6741; --green-100:#DBE4D0; --green-50:#EDF2E5;
+  --gold-600:#B47D14; --gold-100:#F6EAC9; --danger:#B03A3A; --blue-600:#2F5D8A; --blue-100:#DCE7F2;
+  --line:#D9D2C0; --line-soft:#EBE5D5;
+  --shadow-sm:0 1px 2px rgba(28,38,33,.05), 0 3px 10px rgba(28,38,33,.05);
+  --radius:14px; --radius-sm:10px;
+  --font-sans:'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,'Malgun Gothic',sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-sans);font-size:14.5px;line-height:1.6}
+a{color:var(--green-700)}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:14px}
+.hidden{display:none!important}
+header.top{background:var(--green-900);color:#FAF6EC;padding:14px 16px}
+header.top .in{max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header.top h1{font-size:18px;margin:0;font-weight:700}
+header.top .sub{font-size:12.5px;opacity:.8}
+header.top .who{margin-left:auto;font-size:13px}
+header.top .who a{color:#F6EAC9}
+nav.tabs{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+nav.tabs .in{max-width:1080px;margin:0 auto;display:flex;gap:2px;overflow-x:auto;padding:0 8px}
+nav.tabs a{padding:12px 14px;text-decoration:none;color:var(--ink-soft);font-weight:600;white-space:nowrap;border-bottom:3px solid transparent}
+nav.tabs a.on{color:var(--green-700);border-bottom-color:var(--green-600)}
+main{max-width:1080px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--line-soft);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:16px;margin-bottom:14px}
+.lead{color:var(--ink-soft);font-size:13.5px;margin:0 0 12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 12px;font-size:13px;color:var(--ink-soft)}
+.chip.on{background:var(--green-600);border-color:var(--green-600);color:#fff}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:8px}
+.filters select,.filters input{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:var(--radius-sm);background:#fff}
+.meta{font-size:12.5px;color:var(--ink-faint)}
+.item{border:1px solid var(--line-soft);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px;background:#fff;cursor:pointer}
+.item:hover{border-color:var(--green-100)}
+.item.open{border-color:var(--green-600)}
+.item .t{font-weight:600}
+.item .row{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:13px;color:var(--ink-soft);margin-top:4px}
+.tag{display:inline-block;font-size:11.5px;padding:1px 8px;border-radius:6px;margin-right:4px;font-weight:600}
+.tag.g{background:var(--green-50);color:var(--green-700)} .tag.y{background:var(--gold-100);color:#7a5300}
+.tag.o{background:#F8E1D4;color:#8a3d12} .tag.w{background:#ECECEC;color:#555} .tag.b{background:var(--blue-100);color:var(--blue-600)}
+.tag.d{background:#F5D9D9;color:var(--danger)}
+.detail{margin-top:10px;border-top:1px dashed var(--line);padding-top:10px;cursor:default}
+.detail table{border-collapse:collapse;width:100%;font-size:13px}
+.detail td{border-bottom:1px solid var(--line-soft);padding:5px 6px;vertical-align:top}
+.detail td:first-child{color:var(--ink-faint);width:120px;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:600}
+.btn.p{background:var(--green-600);color:#fff} .btn.p:hover{background:var(--green-700)}
+.btn.s{background:#fff;border:1px solid var(--line);color:var(--ink)}
+.btn.d{background:#fff;border:1px solid #e5b9b9;color:var(--danger)}
+.btn:disabled{opacity:.5;cursor:default}
+.btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.field{margin-bottom:10px}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--ink-soft);margin-bottom:4px}
+.field input,.field select,.field textarea{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:var(--radius-sm);background:#fff}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:0 14px}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0}
+.steps li{counter-increment:s;padding:10px 0 10px 40px;position:relative;border-bottom:1px solid var(--line-soft)}
+.steps li:before{content:counter(s);position:absolute;left:0;top:10px;width:28px;height:28px;border-radius:50%;background:var(--green-600);color:#fff;text-align:center;line-height:28px;font-weight:700}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{background:#D9E4F2;font-weight:500;padding:6px;border:1px solid var(--line-soft);text-align:center}
+.tbl td{padding:6px;border:1px solid var(--line-soft);vertical-align:top}
+.tbl input,.tbl textarea{width:100%;border:1px solid var(--line-soft);border-radius:6px;padding:4px 6px;font-size:13px}
+.empty{color:var(--ink-faint);text-align:center;padding:24px}
+.msg{padding:10px 12px;border-radius:var(--radius-sm);background:var(--gold-100);color:#6b4a00;font-size:13.5px;margin:8px 0}
+.msg.ok{background:var(--green-50);color:var(--green-700)} .msg.err{background:#F5D9D9;color:var(--danger)}
+.mdview{background:#fff;border:1px solid var(--line-soft);border-radius:var(--radius-sm);padding:14px;max-height:560px;overflow:auto}
+.mdview h1{font-size:19px} .mdview h2{font-size:16.5px;border-bottom:1px solid var(--line-soft)} .mdview h3{font-size:15px}
+.mdview table{border-collapse:collapse;margin:8px 0} .mdview td,.mdview th{border:1px solid var(--line);padding:4px 8px;font-size:13px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--green-900);color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:50;max-width:90vw}
+.toast.show{opacity:1} .toast.err{background:var(--danger)}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:4px 10px;font-size:13.5px}
+.kv div:nth-child(odd){color:var(--ink-faint)}
+@media (max-width:600px){ .kv{grid-template-columns:1fr} .detail td:first-child{width:90px} }
+</style>
+</head>
+<body>
+<header class="top"><div class="in">
+  <div><h1>☀️ 입찰정보</h1><div class="sub">나라장터·한국에너지공단 공고 — 사교원 사업 · 발전사업자(햇빛발전협동조합)</div></div>
+  <div class="who" id="who"></div>
+</div></header>
+<nav class="tabs"><div class="in">
+  <a href="#board" data-tab="board">공고 게시판</a>
+  <a href="#alerts" data-tab="alerts">알림 받기</a>
+  <a href="#work" data-tab="work">제안서·구비서류</a>
+  <a href="#org" data-tab="org">우리 조직 정보</a>
+</div></nav>
+<main>
+
+<!-- 게시판 -->
+<section id="v-board">
+  <div class="card">
+    <p class="lead">개찰이 앞으로 30일 안인 나라장터 용역·공사·물품과 한국에너지공단 사업공고 가운데 분야에 맞는 것만 매일 아침 모읍니다. 공고마다 <b style="font-weight:600">참여 길</b>(바로 응찰 · 면허 필요 · 제조·납품 · 신청·등록)을 붙였습니다.</p>
+    <div class="chips" id="f-field"></div>
+    <div class="filters">
+      <select id="f-route"><option value="">참여 길 전체</option></select>
+      <select id="f-kind"><option value="">갈래 전체</option><option>용역</option><option>공사</option><option>물품</option><option>공모·지원</option></select>
+      <select id="f-sido"><option value="">지역 전체</option></select>
+      <input id="f-q" placeholder="공고명·기관 검색">
+    </div>
+    <div class="meta" id="b-meta" style="margin-top:8px"></div>
+  </div>
+  <div id="b-list"></div>
+</section>
+
+<!-- 알림 받기 -->
+<section id="v-alerts" class="hidden">
+  <div class="card">
+    <h2 style="margin:0 0 8px;font-size:17px">텔레그램으로 입찰 알림 받기</h2>
+    <p class="lead">사교원 입찰 방과 같은 방식으로, 고른 조건에 맞는 새 공고를 텔레그램으로 받습니다. 혼자 받아도 되고, 조합 단체방에 넣어 함께 받아도 됩니다.</p>
+    <ol class="steps">
+      <li><b style="font-weight:600">텔레그램 설치</b> — 휴대폰 앱스토어·플레이스토어에서 「Telegram」을 설치하고 전화번호로 가입합니다. PC는 <a href="https://desktop.telegram.org/" target="_blank" rel="noopener">desktop.telegram.org</a>.</li>
+      <li><b style="font-weight:600">조건 고르기</b> — 아래에서 분야·지역·참여 길·낱말을 고르고 「알림 설정 저장」을 누릅니다(로그인 필요).</li>
+      <li><b style="font-weight:600">데카봇 연결</b> — 저장한 설정의 「나에게 연결」(1:1)이나 「단체방에 연결」을 누르면 텔레그램이 열립니다. <b style="font-weight:600">시작(START)</b>을 누르면 연결됩니다. 단체방은 방을 고른 뒤 봇 추가를 허락하면 됩니다.</li>
+      <li><b style="font-weight:600">확인</b> — 「지금 시험 발송」을 누르면 조건에 맞는 열린 공고가 바로 옵니다. 그 뒤로는 매일 아침(또는 고른 주기) 새 공고만 옵니다.</li>
+    </ol>
+  </div>
+  <div class="card" id="a-need-login"></div>
+  <div id="a-subs"></div>
+  <div class="card hidden" id="a-form">
+    <h3 style="margin:0 0 8px;font-size:15.5px" id="a-form-title">새 알림 설정</h3>
+    <div class="field"><label>분야</label><div class="chips" id="a-fields"></div></div>
+    <div class="field"><label>지역 (안 고르면 전국)</label><div class="chips" id="a-regions"></div></div>
+    <div class="field"><label>참여 길 (안 고르면 전부)</label><div class="chips" id="a-routes"></div></div>
+    <div class="grid2">
+      <div class="field"><label>공고명에 들어갈 낱말 (쉼표로, 비우면 전부)</label><input id="a-words" placeholder="예: 태양광, 유지관리, 영농형"></div>
+      <div class="field"><label>마감까지 최소 남은 날</label><select id="a-min"><option value="1">1일</option><option value="3" selected>3일</option><option value="5">5일</option><option value="7">7일</option></select></div>
+      <div class="field"><label>보내는 주기</label><select id="a-period"><option value="1" selected>매일(새 공고 있을 때만)</option><option value="3">3일마다</option><option value="7">매주</option></select></div>
+    </div>
+    <div class="btns"><button class="btn p" id="a-save">알림 설정 저장</button><button class="btn s" id="a-cancel">닫기</button></div>
+  </div>
+</section>
+
+<!-- 제안서·구비서류 -->
+<section id="v-work" class="hidden">
+  <div class="card" id="w-need-login"></div>
+  <div id="w-list"></div>
+  <div id="w-proj"></div>
+</section>
+
+<!-- 우리 조직 -->
+<section id="v-org" class="hidden">
+  <div class="card" id="o-need-login"></div>
+  <div id="o-body" class="hidden">
+    <div class="card">
+      <h2 style="margin:0 0 6px;font-size:17px">우리 조직 정보</h2>
+      <p class="lead">제안서·입찰서류에 들어갈 기초자료입니다. 한 번 적어 두면 모든 입찰 건에 쓰입니다. 사람 이름은 AI 에 보내지 않고 〔인력01〕 같은 표식으로 바꿔 보낸 뒤 이 서버에서 되돌립니다. 주민번호·연락처는 적지 마세요.</p>
+      <div class="grid2" id="o-company"></div>
+    </div>
+    <div class="card">
+      <h3 style="margin:0 0 6px;font-size:15.5px">수행실적 (발전소 운영·시공·연구·교육 등)</h3>
+      <div style="overflow-x:auto"><table class="tbl" id="o-ach"></table></div>
+      <div class="btns"><button class="btn s" id="o-ach-add">+ 실적 한 줄</button></div>
+    </div>
+    <div class="card">
+      <h3 style="margin:0 0 6px;font-size:15.5px">참여 인력</h3>
+      <div style="overflow-x:auto"><table class="tbl" id="o-ppl"></table></div>
+      <div class="btns"><button class="btn s" id="o-ppl-add">+ 사람 한 명</button></div>
+    </div>
+    <div class="card">
+      <h3 style="margin:0 0 6px;font-size:15.5px">늘 갖춰 둘 서류</h3>
+      <p class="lead">공공 입찰에 거의 매번 내는 서류입니다. 갖춘 것에 표시하고 유효기간을 적어 두면 입찰서류 문서에 반영됩니다.</p>
+      <div style="overflow-x:auto"><table class="tbl" id="o-docs"></table></div>
+    </div>
+    <div class="btns" style="margin-bottom:30px"><button class="btn p" id="o-save">조직 정보 저장</button></div>
+  </div>
+</section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+let me = null, board = { items: [], fields: {} }, field = '발전사업', openNo = null, subsInfo = null, editSub = null, org = null, stdDocs = [];
+let projTimer = null;
+const ROUTE_TAG = { '바로 응찰': 'g', '확인 필요': 'y', '면허 필요': 'o', '제조·납품': 'w', '신청·등록': 'b', '정보': 'b' };
+const 요일 = '일월화수목금토';
+
+async function api(path, opts = {}) {
+  const isForm = opts.body instanceof FormData;
+  let res;
+  try {
+    res = await fetch(path, { credentials: 'same-origin', method: opts.method || (opts.body ? 'POST' : 'GET'),
+      headers: opts.body && !isForm ? { 'Content-Type': 'application/json' } : {},
+      body: opts.body ? (isForm ? opts.body : JSON.stringify(opts.body)) : undefined });
+  } catch (e) { return { ok: false, error: '서버에 닿지 못했습니다' }; }
+  let d = {};
+  try { d = await res.json(); } catch (_) {}
+  if (!res.ok) return { ok: false, status: res.status, error: d.detail || d.message || d.error || ('오류 ' + res.status) };
+  return d;
+}
+let tt;
+function toast(t, err) { const el = $('#toast'); el.textContent = t; el.className = 'toast show' + (err ? ' err' : ''); clearTimeout(tt); tt = setTimeout(() => el.className = 'toast', 2800); }
+function won(v) {
+  if (!v) return '금액 공고 참조';
+  if (v >= 1e8) { const 억 = Math.floor(v / 1e8), 만 = Math.floor((v % 1e8) / 1e4); return 억 + '억' + (만 ? ' ' + 만.toLocaleString() + '만원' : '원'); }
+  return Math.floor(v / 1e4).toLocaleString() + '만원';
+}
+function dl(s) {
+  if (!s) return '';
+  const d = new Date(s.replace(' ', 'T'));
+  if (d.getFullYear() >= 2099) return '상시(예산 소진 시까지)';
+  const t = new Date(); t.setHours(0, 0, 0, 0); const dd = new Date(d); dd.setHours(0, 0, 0, 0);
+  const n = Math.round((dd - t) / 864e5);
+  return `${d.getMonth() + 1}/${d.getDate()}(${요일[d.getDay()]}) ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} · ${n < 0 ? '마감' : 'D-' + n}`;
+}
+function needLogin(el, what) {
+  el.innerHTML = `<b style="font-weight:600">「${esc(what)}」은 사교원 통합 계정으로 로그인한 뒤 쓸 수 있습니다.</b>
+    <p class="lead" style="margin:6px 0 10px">계정이 없으면 사교원 첫 화면에서 회원가입(무료)을 하세요. 승인되면 바로 쓸 수 있습니다.</p>
+    <form id="lf-${what.length}" class="grid2" onsubmit="return false">
+      <div class="field"><label>아이디 또는 이메일</label><input name="u" autocomplete="username"></div>
+      <div class="field"><label>비밀번호</label><input name="p" type="password" autocomplete="current-password"></div>
+    </form>
+    <div class="btns"><button class="btn p lg-btn">로그인</button><a class="btn s" href="/">회원가입·첫 화면</a></div>`;
+  el.classList.remove('hidden');
+  el.querySelector('.lg-btn').onclick = async () => {
+    const f = el.querySelector('form');
+    const r = await api('/api/auth/login', { body: { username: f.u.value.trim(), password: f.p.value } });
+    if (r.ok && r.user) { toast('로그인했습니다'); location.reload(); } else toast(r.error || r.message || '로그인 실패', true);
+  };
+}
+
+/* ── 진입·탭 ── */
+async function boot() {
+  const r = await api('/api/auth/me');
+  me = (r.ok && r.user) || null;
+  $('#who').innerHTML = me ? `${esc(me.name || me.username)}님 · <a href="/">사교원 첫 화면</a>` : `<a href="/">로그인·회원가입</a>`;
+  await loadBoard();
+  route();
+}
+function route() {
+  const h = location.hash.slice(1);
+  let tab = 'board';
+  if (h.startsWith('alerts')) tab = 'alerts';
+  else if (h.startsWith('work') || h.startsWith('p=')) tab = 'work';
+  else if (h.startsWith('org')) tab = 'org';
+  document.querySelectorAll('nav.tabs a').forEach(a => a.classList.toggle('on', a.dataset.tab === tab));
+  ['board', 'alerts', 'work', 'org'].forEach(t => $('#v-' + t).classList.toggle('hidden', t !== tab));
+  clearInterval(projTimer);
+  if (tab === 'board') { if (h.startsWith('n=')) { openNo = decodeURIComponent(h.slice(2)); field = ''; renderFieldChips(); } renderBoard(); }
+  if (tab === 'alerts') loadAlerts();
+  if (tab === 'work') loadWork(h.startsWith('p=') ? +h.slice(2) : null);
+  if (tab === 'org') loadOrg();
+}
+window.addEventListener('hashchange', route);
+
+/* ── 게시판 ── */
+async function loadBoard() {
+  const r = await api('/api/bids/list');
+  if (!r.ok) { $('#b-list').innerHTML = `<div class="msg err">${esc(r.error)}</div>`; return; }
+  board = r;
+  renderFieldChips();
+  const routes = [...new Set(r.items.map(x => x.route))];
+  $('#f-route').innerHTML = '<option value="">참여 길 전체</option>' + routes.map(x => `<option>${esc(x)}</option>`).join('');
+  const sidos = [...new Set(r.items.flatMap(x => x.sido))].sort();
+  $('#f-sido').innerHTML = '<option value="">지역 전체</option>' + sidos.map(x => `<option>${esc(x)}</option>`).join('');
+  $('#b-meta').textContent = `마지막 수집 ${r.updated ? r.updated.replace('T', ' ') : '-'} · 열린 공고 ${r.items.length}건 · 금액은 추정가격(없으면 배정예산)`;
+}
+function renderFieldChips() {
+  const f = Object.entries(board.fields || {});
+  $('#f-field').innerHTML = [['', '전체']].concat(f.map(([k, v]) => [k, k === '발전사업' ? '☀️ 발전사업자' : '사교원 사업'])).map(([k, v]) =>
+    `<button class="chip ${field === k ? 'on' : ''}" data-f="${esc(k)}">${esc(v)}</button>`).join('');
+  $('#f-field').querySelectorAll('button').forEach(b => b.onclick = () => { field = b.dataset.f; renderFieldChips(); renderBoard(); });
+}
+['#f-route', '#f-kind', '#f-sido'].forEach(s => $(s).onchange = renderBoard);
+$('#f-q').oninput = () => { clearTimeout(window._q); window._q = setTimeout(renderBoard, 200); };
+function renderBoard() {
+  const rt = $('#f-route').value, kd = $('#f-kind').value, sd = $('#f-sido').value, q = $('#f-q').value.replace(/\s/g, '');
+  const list = (board.items || []).filter(x => (!field || x.fields.includes(field)) && (!rt || x.route === rt) && (!kd || x.kind === kd) &&
+    (!sd || x.sido.includes(sd)) && (!q || (x.title + (x.demand || '') + (x.org || '')).replace(/\s/g, '').includes(q)));
+  if (!list.length) { $('#b-list').innerHTML = '<div class="card empty">조건에 맞는 열린 공고가 없습니다.</div>'; return; }
+  $('#b-list').innerHTML = list.map(x => `
+    <div class="item ${openNo === x.no ? 'open' : ''}" data-no="${esc(x.no)}">
+      <div><span class="tag ${ROUTE_TAG[x.route] || 'w'}">${esc(x.route)}</span><span class="tag w">${esc(x.kind)}</span>${x.focus ? `<span class="tag y">📍${esc(x.focus)}</span>` : ''}${x.fields.includes('발전사업') ? '<span class="tag g">☀️ 발전사업</span>' : ''}${x.fields.includes('사교원') ? '<span class="tag b">사교원</span>' : ''}</div>
+      <div class="t">${esc(x.title)}</div>
+      <div class="row"><span>${esc(x.demand || x.org || '')}</span><span>${esc(x.source === '나라장터' ? won(x.price || x.budget) : x.method || '')}</span><span>마감 ${esc(dl(x.deadline))}</span>${x.sido.length ? `<span>${esc(x.sido.join('·'))}</span>` : ''}</div>
+      <div class="detail-slot"></div>
+    </div>`).join('');
+  $('#b-list').querySelectorAll('.item').forEach(el => el.onclick = e => {
+    if (e.target.closest('.detail')) return;
+    const no = el.dataset.no;
+    if (openNo === no) { openNo = null; el.classList.remove('open'); el.querySelector('.detail-slot').innerHTML = ''; return; }
+    openNo = no; renderBoard();
+  });
+  if (openNo) {
+    const el = [...$('#b-list').querySelectorAll('.item')].find(e => e.dataset.no === openNo);
+    if (el) { openDetail(el, openNo); el.scrollIntoView({ block: 'nearest' }); }
+  }
+}
+async function openDetail(el, no) {
+  const slot = el.querySelector('.detail-slot');
+  slot.innerHTML = '<div class="detail meta">불러오는 중…</div>';
+  const r = await api('/api/bids/item/' + encodeURIComponent(no));
+  if (!r.ok) { slot.innerHTML = `<div class="detail msg err">${esc(r.error)}</div>`; return; }
+  const x = r.item, ex = x.extra || {};
+  const rows = [['참여 길', `${x.route} — ${x.note || ''}`], ['공고기관', x.org], ['수요기관', x.demand], ['갈래·업종', [x.kind, x.industry].filter(Boolean).join(' · ')],
+    ['추정가격', x.price ? won(x.price) : ''], ['배정예산', x.budget ? won(x.budget) : ''], ['계약방법', x.method], ['낙찰방법', x.award],
+    ['공동수급', ex.cmmnSpldmdMethdNm], ['참가자격 등록 마감', ex.bidQlfctRgstDt], ['입찰 마감', dl(x.deadline)], ['공고번호', x.source === '나라장터' ? x.no : ''], ['걸린 말', (x.words || []).join(', ')]]
+    .filter(r => r[1]);
+  slot.innerHTML = `<div class="detail">
+    <table>${rows.map(([k, v]) => `<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>`).join('')}</table>
+    ${x.files && x.files.length ? `<div style="margin-top:8px"><b style="font-weight:600;font-size:13px">첨부 문서</b><ul style="margin:4px 0;padding-left:18px;font-size:13px">${x.files.map(f => `<li><span class="tag w">${esc(f.kind)}</span><a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.name)}</a></li>`).join('')}</ul></div>` : ''}
+    ${x.files_error ? `<div class="msg">${esc(x.files_error)}</div>` : ''}
+    <div class="btns">
+      ${x.url ? `<a class="btn s" href="${esc(x.url)}" target="_blank" rel="noopener">원문 공고 열기 ↗</a>` : ''}
+      <button class="btn p" data-start>이 공고로 제안서·구비서류 준비 →</button>
+      <button class="btn s" data-copy>링크 복사</button>
+    </div>
+    <p class="meta" style="margin:8px 0 0">참여 길은 공고 칸(주력업종·물품분류·용역분류)으로 자동으로 가른 것입니다. 참가자격은 반드시 공고문에서 확인하세요.</p>
+  </div>`;
+  slot.querySelector('[data-copy]').onclick = () => { navigator.clipboard && navigator.clipboard.writeText(location.origin + '/bids/#n=' + encodeURIComponent(no)); toast('링크를 복사했습니다'); };
+  slot.querySelector('[data-start]').onclick = async () => {
+    if (!me) { toast('로그인이 필요합니다 — 제안서 탭에서 로그인하세요', true); location.hash = 'work'; return; }
+    const b = slot.querySelector('[data-start]'); b.disabled = true; b.textContent = '첨부 내려받는 중…';
+    const r2 = await api('/api/bids/projects', { body: { no } });
+    if (!r2.ok) { b.disabled = false; b.textContent = '이 공고로 제안서·구비서류 준비 →'; toast(r2.error, true); return; }
+    location.hash = 'p=' + r2.id;
+  };
+}
+
+/* ── 알림 받기 ── */
+async function loadAlerts() {
+  if (!me) { needLogin($('#a-need-login'), '알림 받기'); $('#a-subs').innerHTML = ''; return; }
+  $('#a-need-login').classList.add('hidden');
+  const r = await api('/api/bids/subs');
+  if (!r.ok) { $('#a-subs').innerHTML = `<div class="msg err">${esc(r.error)}</div>`; return; }
+  subsInfo = r;
+  $('#a-subs').innerHTML = (r.subs.length ? r.subs.map(s => `
+    <div class="card">
+      <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+        <b style="font-weight:600">알림 ${s.id}</b>
+        ${s.linked ? `<span class="tag g">연결됨 — ${esc(s.chat_title || '')}</span>` : '<span class="tag d">텔레그램 연결 전</span>'}
+        ${s.active ? '' : '<span class="tag w">꺼짐</span>'}
+      </div>
+      <div class="kv" style="margin-top:6px">
+        <div>분야</div><div>${esc(s.fields.join(' · ') || '전체')}</div>
+        <div>지역</div><div>${esc(s.regions.join(' · ') || '전국')}</div>
+        <div>참여 길</div><div>${esc(s.routes.join(' · ') || '전부')}</div>
+        <div>낱말</div><div>${esc(s.words.join(', ') || '-')}</div>
+        <div>마감 여유·주기</div><div>${s.min_days}일 이상 · ${s.period_days === 1 ? '매일' : s.period_days + '일마다'}</div>
+        <div>마지막 발송</div><div>${esc((s.last_sent || '-').replace('T', ' '))}</div>
+      </div>
+      ${s.linked ? '' : `<div class="msg">아래 단추를 누르면 텔레그램이 열립니다. <b style="font-weight:600">시작(START)</b>을 누르면 연결됩니다. 단체방은 방을 고르고 봇 추가를 허락하세요. 단추가 안 되면 데카봇(@${esc(r.bot)})에게 이 글을 그대로 보내세요: <code>${esc(s.start_text)}</code></div>`}
+      <div class="btns">
+        ${s.linked ? `<button class="btn p" data-test="${s.id}">지금 시험 발송</button><button class="btn s" data-unlink="${s.id}">연결 끊기</button>` :
+          `<a class="btn p" href="${esc(s.link_private)}" target="_blank" rel="noopener">나에게 연결(1:1)</a><a class="btn s" href="${esc(s.link_group)}" target="_blank" rel="noopener">단체방에 연결</a><button class="btn s" data-reload>연결 확인</button>`}
+        <button class="btn s" data-edit="${s.id}">조건 바꾸기</button>
+        <button class="btn s" data-toggle="${s.id}">${s.active ? '잠시 끄기' : '다시 켜기'}</button>
+        <button class="btn d" data-del="${s.id}">지우기</button>
+      </div>
+    </div>`).join('') : '<div class="card empty">아직 알림 설정이 없습니다.</div>') +
+    `<div class="btns" style="margin-bottom:14px"><button class="btn p" id="a-new">+ 새 알림 설정</button></div>`;
+  $('#a-new').onclick = () => openSubForm(null);
+  const by = id => r.subs.find(s => s.id === +id);
+  $('#a-subs').querySelectorAll('[data-edit]').forEach(b => b.onclick = () => openSubForm(by(b.dataset.edit)));
+  $('#a-subs').querySelectorAll('[data-reload]').forEach(b => b.onclick = loadAlerts);
+  $('#a-subs').querySelectorAll('[data-del]').forEach(b => b.onclick = async () => { if (!confirm('이 알림 설정을 지울까요?')) return; const x = await api(`/api/bids/subs/${b.dataset.del}/delete`, { body: {} }); x.ok ? loadAlerts() : toast(x.error, true); });
+  $('#a-subs').querySelectorAll('[data-unlink]').forEach(b => b.onclick = async () => { if (!confirm('텔레그램 연결을 끊을까요? 다시 연결하려면 새 링크를 누르면 됩니다.')) return; const x = await api(`/api/bids/subs/${b.dataset.unlink}/unlink`, { body: {} }); x.ok ? loadAlerts() : toast(x.error, true); });
+  $('#a-subs').querySelectorAll('[data-test]').forEach(b => b.onclick = async () => { b.disabled = true; const x = await api(`/api/bids/subs/${b.dataset.test}/test`, { body: {} }); b.disabled = false; x.ok ? toast(`보냈습니다 — 맞는 공고 ${x.n}건`) : toast(x.error, true); });
+  $('#a-subs').querySelectorAll('[data-toggle]').forEach(b => b.onclick = async () => { const s = by(b.dataset.toggle); const x = await api('/api/bids/subs', { body: { ...s, active: !s.active } }); x.ok ? loadAlerts() : toast(x.error, true); });
+}
+function chipSet(el, all, picked, label) {
+  el.innerHTML = all.map(v => `<button class="chip ${picked.includes(v) ? 'on' : ''}" data-v="${esc(v)}">${esc(label ? label(v) : v)}</button>`).join('');
+  el.querySelectorAll('button').forEach(b => b.onclick = () => b.classList.toggle('on'));
+}
+const chipVals = el => [...el.querySelectorAll('.chip.on')].map(b => b.dataset.v);
+function openSubForm(s) {
+  editSub = s;
+  $('#a-form-title').textContent = s ? `알림 ${s.id} 조건 바꾸기` : '새 알림 설정';
+  chipSet($('#a-fields'), Object.keys(board.fields || {}), s ? s.fields : ['발전사업'], v => board.fields[v]);
+  chipSet($('#a-regions'), subsInfo.sido, s ? s.regions : []);
+  chipSet($('#a-routes'), subsInfo.routes, s ? s.routes : []);
+  $('#a-words').value = s ? s.words.join(', ') : '';
+  $('#a-min').value = String(s ? s.min_days : 3);
+  $('#a-period').value = String(s ? s.period_days : 1);
+  $('#a-form').classList.remove('hidden');
+  $('#a-form').scrollIntoView({ behavior: 'smooth' });
+}
+$('#a-cancel').onclick = () => $('#a-form').classList.add('hidden');
+$('#a-save').onclick = async () => {
+  const body = { id: editSub && editSub.id, fields: chipVals($('#a-fields')), regions: chipVals($('#a-regions')), routes: chipVals($('#a-routes')),
+    words: $('#a-words').value.split(',').map(x => x.trim()).filter(Boolean), min_days: +$('#a-min').value, period_days: +$('#a-period').value,
+    active: editSub ? editSub.active : true };
+  if (!body.fields.length) { toast('분야를 하나 이상 고르세요', true); return; }
+  const r = await api('/api/bids/subs', { body });
+  if (!r.ok) { toast(r.error, true); return; }
+  $('#a-form').classList.add('hidden');
+  toast(editSub ? '조건을 바꿨습니다' : '저장했습니다 — 이제 텔레그램을 연결하세요');
+  loadAlerts();
+};
+
+/* ── 제안서 작업대 ── */
+async function loadWork(pid) {
+  if (!me) { needLogin($('#w-need-login'), '제안서·구비서류 작업대'); $('#w-list').innerHTML = ''; $('#w-proj').innerHTML = ''; return; }
+  $('#w-need-login').classList.add('hidden');
+  if (pid) { $('#w-list').innerHTML = `<div class="btns" style="margin:0 0 10px"><a class="btn s" href="#work">← 내 입찰 건 목록</a></div>`; return loadProject(pid); }
+  $('#w-proj').innerHTML = '';
+  const r = await api('/api/bids/projects');
+  if (!r.ok) { $('#w-list').innerHTML = `<div class="msg err">${esc(r.error)}</div>`; return; }
+  $('#w-list').innerHTML = `<div class="card"><h2 style="margin:0 0 6px;font-size:17px">제안서·구비서류 작업대</h2>
+    <p class="lead">공고 게시판에서 공고를 열고 「이 공고로 제안서·구비서류 준비」를 누르면 여기 건이 생기고 공고문·과업지시서·제안요청서가 자동으로 붙습니다.
+    ① 문서 분석 → ② 참가자격 점검 → ③ 정성·정량제안서 → ④ 구비서류 순서로 쓰세요. 먼저 <a href="#org">우리 조직 정보</a>를 채우면 훨씬 정확해집니다.</p>
+    <div class="btns"><a class="btn s" href="#board">공고 게시판으로</a><button class="btn s" id="w-blank">공고 없이 직접 만들기(파일 올려서)</button></div></div>` +
+    (r.projects.length ? r.projects.map(p => `<div class="item" onclick="location.hash='p=${p.id}'">
+      <div><span class="tag ${p.status === '분석됨' ? 'g' : 'w'}">${esc(p.status)}</span>${p.kind ? `<span class="tag w">${esc(p.kind)}</span>` : ''}${p.job ? '<span class="tag y">작업 중</span>' : ''}</div>
+      <div class="t">${esc(p.title)}</div><div class="row"><span>${esc(p.org || '')}</span>${p.deadline ? `<span>마감 ${esc(dl(p.deadline))}</span>` : ''}</div></div>`).join('')
+      : '<div class="card empty">아직 입찰 건이 없습니다.</div>');
+  $('#w-blank').onclick = async () => {
+    const t = prompt('입찰 건 이름(공고명)을 적으세요'); if (!t) return;
+    const x = await api('/api/bids/projects', { body: { title: t } });
+    x.ok ? (location.hash = 'p=' + x.id) : toast(x.error, true);
+  };
+}
+function list(a) { return (a || []).filter(Boolean); }
+async function loadProject(pid) {
+  const r = await api('/api/bids/projects/' + pid);
+  if (!r.ok) { $('#w-proj').innerHTML = `<div class="msg err">${esc(r.error)}</div>`; return; }
+  const p = r.project, a = p.analysis, n = p.notice || {};
+  if (!org) { const o = await api('/api/bids/org'); org = o.ok ? o.org : { people: [], docs: {}, company: {} }; }
+  const 서류 = list(a && a.submission_docs).map(d => d.name).filter(Boolean);
+  const busy = !!p.job || p.outputs.some(o => o.status === '진행');
+  $('#w-proj').innerHTML = `
+  <div class="card">
+    <div><span class="tag ${ROUTE_TAG[n.route] || 'w'}">${esc(n.route || '직접')}</span>${p.kind ? `<span class="tag w">${esc(p.kind)}</span>` : ''}</div>
+    <h2 style="margin:4px 0;font-size:17px">${esc(p.title)}</h2>
+    <div class="meta">${esc(p.org || '')} ${p.deadline ? '· 마감 ' + esc(dl(p.deadline)) : ''} ${n.note ? '· ' + esc(n.note) : ''}</div>
+    ${p.job_error ? `<div class="msg err">${esc(p.job_error)}</div>` : ''}
+  </div>
+  <div class="card">
+    <h3 style="margin:0 0 6px;font-size:15.5px">1. 발주 문서</h3>
+    ${p.files.filter(f => f.kind !== '구비서류').map(f => `<div style="font-size:13.5px;padding:3px 0"><span class="tag w">${esc(f.kind)}</span><a href="/api/bids/projects/${p.id}/files/${f.id}">${esc(f.filename)}</a> <span class="meta">${f.chars ? f.chars.toLocaleString() + '자 읽음' : ''}</span> <a href="#" data-fdel="${f.id}" style="color:var(--danger);font-size:12px">지우기</a></div>`).join('') || '<div class="meta">아직 문서가 없습니다. 공고문·과업지시서·제안요청서를 올리세요.</div>'}
+    <div class="btns"><label class="btn s">파일 올리기<input type="file" multiple class="hidden" id="w-up"></label>
+      <button class="btn p" id="w-analyze" ${busy ? 'disabled' : ''}>${a ? '다시 분석' : '문서 분석'}</button></div>
+    ${p.job ? `<div class="msg">⏳ ${esc(p.job)} — 몇 분 걸립니다. 이 화면을 닫아도 계속됩니다.</div>` : ''}
+  </div>
+  ${a ? `<div class="card">
+    <h3 style="margin:0 0 6px;font-size:15.5px">2. 분석 결과</h3>
+    <div class="kv">
+      <div>개요</div><div>${esc(a.overview)}</div>
+      <div>예산·기간</div><div>${esc([a.budget, a.period].filter(Boolean).join(' · '))}</div>
+      <div>제출 마감</div><div>${esc(a.deadline)}</div>
+      <div>참가자격</div><div>${list(a.eligibility).map(esc).join('<br>')}</div>
+      <div>평가</div><div>${list((a.evaluation || {}).quantitative).concat(list((a.evaluation || {}).qualitative)).map(x => esc(`${x.item} ${x.score || ''}`)).join(' · ')} ${esc((a.evaluation || {}).note || '')}</div>
+      <div>까다로운 점</div><div>${list(a.risks).map(esc).join('<br>')}</div>
+    </div>
+    ${a._meta && a._meta.cut ? '<div class="msg">문서가 길어 앞부분만 분석했습니다.</div>' : ''}
+  </div>
+  <div class="card">
+    <h3 style="margin:0 0 6px;font-size:15.5px">3. 구비서류 점검</h3>
+    <p class="lead">이 공고의 제출서류와 늘 갖춰 둘 서류입니다. 준비한 것에 표시하세요. 발급한 서류 파일도 여기 올려 둘 수 있습니다(이 건에만 보관).</p>
+    <table class="tbl"><tr><th>서류</th><th>근거</th><th>준비</th><th>메모</th></tr>
+      ${서류.map(d => ckRow(d, '이 공고', p.checklist)).join('')}
+      ${stdDocsCache().map(d => ckRow(d.name, '상시 — ' + d.where, p.checklist, (org.docs[d.name] || {}).ok)).join('')}
+    </table>
+    ${p.files.filter(f => f.kind === '구비서류').map(f => `<div style="font-size:13px;padding:2px 0">📎 <a href="/api/bids/projects/${p.id}/files/${f.id}">${esc(f.filename)}</a> <a href="#" data-fdel="${f.id}" style="color:var(--danger);font-size:12px">지우기</a></div>`).join('')}
+    <div class="btns"><button class="btn p" id="w-ck">점검 저장</button><label class="btn s">서류 파일 올리기<input type="file" multiple class="hidden" id="w-up2"></label></div>
+  </div>
+  <div class="card">
+    <h3 style="margin:0 0 6px;font-size:15.5px">4. 문서 만들기</h3>
+    <div class="field"><label>만들 문서</label><select id="w-kind">
+      <option>참가자격 점검</option><option>정성제안서</option><option>정량제안서</option><option>입찰서류</option></select></div>
+    <div class="field"><label>참여 인력 (우리 조직 정보에 적은 사람 중)</label>
+      ${org.people.length ? org.people.map(x => `<label style="display:flex;gap:6px;align-items:center;font-weight:400;margin:2px 0"><input type="checkbox" value="${esc(x.id)}" class="w-pp" style="width:auto"> ${esc(x.name)} <span class="meta">${esc((x.data || {}).직위 || '')} ${esc((x.data || {}).자격 || '')}</span></label>`).join('') : '<div class="meta">아직 없습니다 — <a href="#org">우리 조직 정보</a>에서 넣으세요.</div>'}
+    </div>
+    <div class="field"><label>추가 지시 (선택)</label><textarea id="w-extra" rows="2" placeholder="예: 지역 주민 참여와 발전수익 공유를 강조"></textarea></div>
+    <div class="btns"><button class="btn p" id="w-gen" ${p.outputs.filter(o => o.status === '진행').length >= 2 ? 'disabled' : ''}>만들기</button></div>
+    <p class="meta">AI 초안입니다(고성능컴퓨팅 우선). 한 문서에 1~5분 걸립니다. 하루에 분석 6번·문서 15개까지.</p>
+    <div id="w-outs">${p.outputs.map(o => `<div class="item" style="cursor:default">
+      <div><span class="tag ${o.status === '완료' ? 'g' : o.status === '실패' ? 'd' : 'y'}">${esc(o.status)}</span><b style="font-weight:600">${esc(o.kind)}</b> <span class="meta">${esc((o.updated || '').replace('T', ' '))}</span></div>
+      ${o.status === '진행' ? `<div class="meta">⏳ ${esc(o.progress)}</div>` : ''}${o.error ? `<div class="msg err">${esc(o.error)}</div>` : ''}
+      ${o.status === '완료' ? `<div class="btns"><button class="btn s" data-view="${o.id}">보기·고치기</button><a class="btn p" href="/api/bids/outputs/${o.id}/download?fmt=hwpx">한글(hwpx)</a><a class="btn s" href="/api/bids/outputs/${o.id}/download?fmt=md">마크다운</a><button class="btn d" data-odel="${o.id}">지우기</button></div>` : ''}
+      ${o.status === '실패' ? `<div class="btns"><button class="btn d" data-odel="${o.id}">지우기</button></div>` : ''}
+      <div class="ov"></div></div>`).join('')}</div>
+  </div>` : ''}`;
+  const up = async (input, kind) => {
+    const fd = new FormData(); [...input.files].forEach(f => fd.append('files', f)); if (kind) fd.append('kind', kind);
+    const x = await api(`/api/bids/projects/${p.id}/files`, { body: fd });
+    x.ok ? (toast(`${x.n}개 올렸습니다`), loadProject(p.id)) : toast(x.error, true);
+  };
+  $('#w-up').onchange = e => up(e.target, '');
+  if ($('#w-up2')) $('#w-up2').onchange = e => up(e.target, '구비서류');
+  $('#w-proj').querySelectorAll('[data-fdel]').forEach(b => b.onclick = async e => { e.preventDefault(); if (!confirm('이 파일을 지울까요?')) return; const x = await api(`/api/bids/projects/${p.id}/files/${b.dataset.fdel}/delete`, { body: {} }); x.ok ? loadProject(p.id) : toast(x.error, true); });
+  $('#w-analyze').onclick = async () => { const x = await api(`/api/bids/projects/${p.id}/analyze`, { body: {} }); x.ok ? (toast('분석을 시작했습니다'), loadProject(p.id)) : toast(x.error, true); };
+  if (a) {
+    $('#w-ck').onclick = async () => {
+      const ck = {}; $('#w-proj').querySelectorAll('tr[data-doc]').forEach(tr => ck[tr.dataset.doc] = { ok: tr.querySelector('input[type=checkbox]').checked, memo: tr.querySelector('input[type=text]').value });
+      const x = await api(`/api/bids/projects/${p.id}/checklist`, { body: { checklist: ck } }); x.ok ? toast('저장했습니다') : toast(x.error, true);
+    };
+    $('#w-gen').onclick = async () => {
+      const people = [...document.querySelectorAll('.w-pp:checked')].map(c => ({ id: c.value }));
+      const x = await api(`/api/bids/projects/${p.id}/generate`, { body: { kind: $('#w-kind').value, people, extra: $('#w-extra').value } });
+      x.ok ? (toast('만들기 시작 — 몇 분 걸립니다'), loadProject(p.id)) : toast(x.error, true);
+    };
+    $('#w-proj').querySelectorAll('[data-odel]').forEach(b => b.onclick = async () => { if (!confirm('이 문서를 지울까요?')) return; const x = await api(`/api/bids/outputs/${b.dataset.odel}/delete`, { body: {} }); x.ok ? loadProject(p.id) : toast(x.error, true); });
+    $('#w-proj').querySelectorAll('[data-view]').forEach(b => b.onclick = () => viewOut(b.closest('.item').querySelector('.ov'), +b.dataset.view));
+  }
+  clearInterval(projTimer);
+  if (busy) projTimer = setInterval(() => { if (location.hash === '#p=' + p.id) loadProject(p.id); else clearInterval(projTimer); }, 6000);
+}
+function stdDocsCache() { return stdDocs; }
+function ckRow(name, why, ck, def) {
+  const c = ck[name] || {};
+  const on = c.ok != null ? c.ok : !!def;
+  return `<tr data-doc="${esc(name)}"><td>${esc(name)}</td><td class="meta">${esc(why)}</td><td style="text-align:center"><input type="checkbox" ${on ? 'checked' : ''} style="width:auto"></td><td><input type="text" value="${esc(c.memo || '')}"></td></tr>`;
+}
+function md2html(md) {
+  const lines = md.split('\n'); let out = '', inTbl = false, inUl = false;
+  const inline = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+  for (const ln of lines) {
+    if (/^\|/.test(ln)) {
+      if (/^\|\s*-/.test(ln) || /^\|(-+\|)+$/.test(ln.replace(/\s/g, ''))) continue;
+      if (!inTbl) { out += '<table>'; inTbl = true; }
+      out += '<tr>' + ln.replace(/^\||\|$/g, '').split('|').map(c => `<td>${inline(c.trim())}</td>`).join('') + '</tr>'; continue;
+    } else if (inTbl) { out += '</table>'; inTbl = false; }
+    if (/^\s*[-*] /.test(ln)) { if (!inUl) { out += '<ul>'; inUl = true; } out += `<li>${inline(ln.replace(/^\s*[-*] /, ''))}</li>`; continue; }
+    else if (inUl) { out += '</ul>'; inUl = false; }
+    const h = ln.match(/^(#{1,4}) (.*)/);
+    if (h) out += `<h${h[1].length}>${inline(h[2])}</h${h[1].length}>`;
+    else if (/^-> /.test(ln)) out += `<p style="text-align:center">${inline(ln.slice(3))}</p>`;
+    else if (ln.trim()) out += `<p>${inline(ln)}</p>`;
+  }
+  return out + (inTbl ? '</table>' : '') + (inUl ? '</ul>' : '');
+}
+async function viewOut(el, oid) {
+  if (el.innerHTML) { el.innerHTML = ''; return; }
+  const r = await api('/api/bids/outputs/' + oid);
+  if (!r.ok) { toast(r.error, true); return; }
+  el.innerHTML = `<div class="mdview" style="margin-top:8px">${md2html(r.output.md)}</div>
+    <details style="margin-top:6px"><summary class="meta" style="cursor:pointer">마크다운으로 고치기</summary>
+    <textarea rows="18" style="width:100%;margin-top:6px;font-family:monospace;font-size:12.5px">${esc(r.output.md)}</textarea>
+    <div class="btns"><button class="btn p">고친 내용 저장</button></div></details>`;
+  el.querySelector('details .btn').onclick = async () => {
+    const x = await api('/api/bids/outputs/' + oid, { body: { md: el.querySelector('textarea').value } });
+    x.ok ? (toast('저장했습니다 — 한글 내려받기에 반영됩니다'), el.innerHTML = '', viewOut(el, oid)) : toast(x.error, true);
+  };
+}
+
+/* ── 우리 조직 ── */
+const CO_KEYS = ['법인명', '법인형태', '사업자등록번호', '대표자', '설립일', '소재지', '직원수', '주요사업분야', '면허·등록(전기공사업 등)',
+  '발전사업 허가·설비(용량·준공)', '인가·등록·인증', '나라장터 경쟁입찰참가자격 등록', '신용평가등급', '연혁', '소개'];
+const ACH = [['사업명', 220], ['발주처', 120], ['계약기간_시작', 90], ['계약기간_끝', 90], ['계약금액', 100], ['분야', 100], ['역할', 80]];
+const PPL = [['name', '이름', 80], ['kind', '구분', 60], ['직위', '직위', 80], ['자격', '자격', 120], ['분야경력년수', '경력(년)', 60], ['최종학력', '학력', 90], ['경력요약', '경력 요약', 220]];
+async function loadOrg() {
+  if (!me) { needLogin($('#o-need-login'), '우리 조직 정보'); return; }
+  $('#o-need-login').classList.add('hidden'); $('#o-body').classList.remove('hidden');
+  const r = await api('/api/bids/org'); if (!r.ok) { toast(r.error, true); return; }
+  org = r.org;
+  $('#o-company').innerHTML = CO_KEYS.map(k => `<div class="field" ${['연혁', '소개'].includes(k) ? 'style="grid-column:1/-1"' : ''}><label>${esc(k)}</label>${['연혁', '소개'].includes(k) ? `<textarea rows="3" data-k="${esc(k)}">${esc(org.company[k] || '')}</textarea>` : `<input data-k="${esc(k)}" value="${esc(org.company[k] || '')}">`}</div>`).join('');
+  drawAch(); drawPpl(); drawDocs();
+}
+function drawAch() {
+  $('#o-ach').innerHTML = '<tr>' + ACH.map(([k]) => `<th>${esc(k.replace('계약기간_', '기간 '))}</th>`).join('') + '<th></th></tr>' +
+    org.achievements.map((a, i) => '<tr>' + ACH.map(([k, w]) => `<td><input style="min-width:${w}px" data-i="${i}" data-k="${k}" value="${esc(a[k] || '')}"></td>`).join('') + `<td><button class="btn d" data-adel="${i}">×</button></td></tr>`).join('');
+  $('#o-ach').querySelectorAll('input').forEach(x => x.oninput = () => org.achievements[x.dataset.i][x.dataset.k] = x.value);
+  $('#o-ach').querySelectorAll('[data-adel]').forEach(b => b.onclick = () => { org.achievements.splice(+b.dataset.adel, 1); drawAch(); });
+}
+function drawPpl() {
+  $('#o-ppl').innerHTML = '<tr>' + PPL.map(([, l]) => `<th>${esc(l)}</th>`).join('') + '<th></th></tr>' +
+    org.people.map((p, i) => '<tr>' + PPL.map(([k, , w]) => {
+      const v = (k === 'name' || k === 'kind') ? p[k] : (p.data || {})[k];
+      return `<td><input style="min-width:${w}px" data-i="${i}" data-k="${k}" value="${esc(v || '')}"></td>`;
+    }).join('') + `<td><button class="btn d" data-pdel="${i}">×</button></td></tr>`).join('');
+  $('#o-ppl').querySelectorAll('input').forEach(x => x.oninput = () => {
+    const p = org.people[x.dataset.i]; if (x.dataset.k === 'name' || x.dataset.k === 'kind') p[x.dataset.k] = x.value; else { p.data = p.data || {}; p.data[x.dataset.k] = x.value; }
+  });
+  $('#o-ppl').querySelectorAll('[data-pdel]').forEach(b => b.onclick = () => { org.people.splice(+b.dataset.pdel, 1); drawPpl(); });
+}
+function drawDocs() {
+  $('#o-docs').innerHTML = '<tr><th>서류</th><th>발급처·유의</th><th>갖춤</th><th>유효기간</th></tr>' + stdDocs.map(d => {
+    const v = org.docs[d.name] || {};
+    return `<tr data-d="${esc(d.name)}"><td>${esc(d.name)}</td><td class="meta">${esc(d.where)}</td><td style="text-align:center"><input type="checkbox" ${v.ok ? 'checked' : ''} style="width:auto"></td><td><input value="${esc(v.until || '')}" placeholder="2027-03-31"></td></tr>`;
+  }).join('');
+}
+$('#o-ach-add').onclick = () => { org.achievements.push({}); drawAch(); };
+$('#o-ppl-add').onclick = () => { org.people.push({ id: 'p' + Date.now().toString(36), name: '', kind: '직원', data: {} }); drawPpl(); };
+$('#o-save').onclick = async () => {
+  const company = {}; $('#o-company').querySelectorAll('[data-k]').forEach(x => company[x.dataset.k] = x.value);
+  const docs = {}; $('#o-docs').querySelectorAll('tr[data-d]').forEach(tr => docs[tr.dataset.d] = { ok: tr.querySelector('input[type=checkbox]').checked, until: tr.querySelector('input:not([type])').value });
+  const r = await api('/api/bids/org', { body: { company, achievements: org.achievements, people: org.people, docs } });
+  if (r.ok) { org = r.org; toast('저장했습니다'); drawAch(); drawPpl(); } else toast(r.error, true);
+};
+
+api('/api/bids/docs-standard').then(r => { stdDocs = (r.ok && r.docs) || []; });
+boot();
+</script>
+<script src="/ai-dock.js" defer></script>
+</body>
+</html>
