@@ -309,7 +309,7 @@
               <h3 id="lc2T"><span>🗂️ 네트워크 드라이브</span><button class="btn sm" type="button" data-say="내 컴퓨터 자료 자동으로 올리고 싶어" aria-label="네트워크 드라이브 연결을 상담창에 묻기">💬 상담창에 묻기</button></h3>
               <p class="sub" style="margin:0 0 6px">윈도우 탐색기에 내 폴더를 「사교원 드라이브」로 붙여 직접 열고 저장합니다(웹다브).</p>
               <div class="inl"><span>주소</span><code id="flDav">(불러오는 중)</code><button class="btn sm" type="button" data-cp="#flDav" aria-label="드라이브 주소 복사">복사</button></div>
-              <form class="inl" id="flKeyForm"><input id="flKeyLabel" placeholder="열쇠 이름 (예: 사무실 PC)" aria-label="열쇠 이름" maxlength="40"><button class="btn sm p" type="submit" id="flKeyBtn">🔑 전용 열쇠 만들기</button></form>
+              <form class="inl" id="flKeyForm"><input id="flKeyLabel" placeholder="열쇠 이름 (예: 사무실 PC)" aria-label="열쇠 이름" maxlength="40"><select id="flKeyMode" aria-label="열쇠 종류"><option value="drive">네트워크 드라이브(지우기 가능)</option><option value="nas">조직 NAS 자동 올리기(지우기·옮기기 불가, 덮으면 옛 판 휴지통)</option></select><button class="btn sm p" type="submit" id="flKeyBtn">🔑 전용 열쇠 만들기</button></form>
               <div class="msg" id="flKeyMsg" aria-live="polite"></div>
               <ul class="klist" id="flKeys" aria-label="발급한 열쇠"></ul>
               <ol class="steps">
@@ -1108,7 +1108,7 @@ $('#fRef').addEventListener('click', () => { fsMsg(''); fsLoad(); });
 /* ── ⑥단계 내 자료 연결하기(기획안 4.2 갈래 2·3·4) — /api/my/files/links · /api/my/files/keys. 실패하면 조용히 빈 상태 */
 const LK = { links: [], keys: [], server_device: '', label: '', installer: '', dav_url: '' };
 const LK_KIND = { syncthing: '💻 PC 자동 올리기', webdav: '🗂️ 네트워크 드라이브', nas: '🏢 조직 서버·NAS' };
-const LK_STATE = { device_ok: '기기 등록됨', syncing: '동기화 중', key: '열쇠 발급됨', removed: '끊김' };
+const LK_STATE = { device_ok: '기기 등록됨', syncing: '동기화 중', key: '열쇠 발급됨', removed: '끊김', over_quota: '한도 넘음(받기는 계속 — 정리해 주세요)' };
 const fmtMB = n => { n = +n || 0; return n ? (n / 1048576).toFixed(n < 10485760 ? 2 : 1) : '0'; };
 function lkMsg(sel, txt, ok) { const m = $(sel); if (!m) return; m.className = 'msg' + (txt ? (ok ? ' ok' : ' err') : ''); m.textContent = txt || ''; }
 async function copyText(t, sel) { try { await navigator.clipboard.writeText(t); lkMsg(sel, '복사했습니다.', true); } catch (_) { lkMsg(sel, '복사하지 못했습니다. 직접 적어 주세요.'); } }
@@ -1117,7 +1117,7 @@ function renderLinkTable() {
   $('#flList').innerHTML = rows.length ? rows.join('') : '<tr><td colspan="7" class="n">아직 연결한 것이 없습니다</td></tr>';
 }
 function renderKeyList() {
-  $('#flKeys').innerHTML = LK.keys.map(k => `<li><span>🔑 ${esc(k.label || '(이름 없음)')}</span><span class="meta">만든 날 ${esc(fmtTime(k.created_at)) || '—'} · 마지막 사용 ${esc(fmtTime(k.last_used)) || '없음'}</span><span class="sp"></span><button class="btn sm" type="button" data-la="keydel" data-id="${esc(k.id)}" data-n="${esc(k.label || '')}" aria-label="열쇠 「${esc(k.label || '')}」 폐기">폐기</button></li>`).join('');
+  $('#flKeys').innerHTML = LK.keys.map(k => `<li><span>🔑 ${esc(k.label || '(이름 없음)')} <span class="n">${k.mode === 'nas' ? '· NAS 전용' : '· 드라이브'}</span></span><span class="meta">만든 날 ${esc(fmtTime(k.created_at)) || '—'} · 마지막 사용 ${esc(fmtTime(k.last_used)) || '없음'}</span><span class="sp"></span><button class="btn sm" type="button" data-la="keydel" data-id="${esc(k.id)}" data-n="${esc(k.label || '')}" aria-label="열쇠 「${esc(k.label || '')}」 폐기">폐기</button></li>`).join('');
 }
 function renderLinkMeta() {
   const inst = $('#flInst'); if (LK.installer) { inst.href = LK.installer; inst.removeAttribute('aria-disabled'); } else { inst.href = '#'; inst.setAttribute('aria-disabled', 'true'); }
@@ -1151,7 +1151,8 @@ $('#flKeyForm').addEventListener('submit', async e => {
   e.preventDefault();
   const label = $('#flKeyLabel').value.trim() || '네트워크 드라이브';
   $('#flKeyBtn').disabled = true; lkMsg('#flKeyMsg', '만드는 중…', true);
-  const r = await api('/api/my/files/keys', { method: 'POST', body: { label } });
+  const mode = ($('#flKeyMode') && $('#flKeyMode').value) || 'drive';
+  const r = await api('/api/my/files/keys', { method: 'POST', body: { label, mode } });
   $('#flKeyBtn').disabled = false;
   if (!r.ok || !r.key) { lkMsg('#flKeyMsg', reasonText(r)); return; }
   lkMsg('#flKeyMsg', `「${label}」 열쇠를 만들었습니다. 열린 창에서 복사해 두세요.`, true); $('#flKeyLabel').value = '';
