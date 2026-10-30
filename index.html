@@ -874,7 +874,7 @@ function defaultDash(u) {
   const r = u ? u.role : ''; const c = ['todo', 'academy', 'files', 'recent'];
   if (['coop', 'federation', 'staff', 'admin'].includes(r)) c.push('village');
   if (['staff', 'admin'].includes(r)) c.push('work', 'approvals', 'bids');
-  if (r === 'admin') c.push('members', 'org');
+  if (r === 'admin') c.push('members', 'org', 'hpc');   // 26-10-30 HPC 사업 실적 칸
   return c;
 }
 function myDash() { const d = Array.isArray(prefs.dash) ? prefs.dash.filter(x => CARD_DEFS[x]) : []; return d.length ? d : defaultDash(me); }
