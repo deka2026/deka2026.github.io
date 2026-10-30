@@ -3802,6 +3802,52 @@ function venSiteScore(){
       : '현장에서 확인하지 못한 항목은 업체에 서면으로 자료를 요구하세요. 특히 <b>실제 발전량 대비 계획 달성률</b>과 <b>계통 접속 소요 기간</b>은 반드시 숫자로 받아야 합니다.'}</p>`;
 }
 
+/* ─── 2026-10-31 전남 평균 대비 우리 마을(에너지AI수업 1·2회차 시각화 적용) ───
+   전남 값: 한국에너지공단 재생에너지 클라우드플랫폼 RPS 태양광 2025 월별 실측 이용률(기준일 2025-12-31).
+   서버 /api/hatsoja/jeonnam-cf 가 있으면 그 값으로 바꾼다(자료 갱신 때 화면을 고치지 않게). */
+let JEONNAM_CF = {연도: 2025, 기준일: '2025-12-31', 연간: 15.35,
+  월: {1:11.53, 2:14.05, 3:16.28, 4:20.04, 5:16.89, 6:18.15, 7:19.74, 8:17.26, 9:13.23, 10:12.84, 11:13.43, 12:10.92}};
+if(typeof REAL_API !== 'undefined' && REAL_API){
+  fetch('/api/hatsoja/jeonnam-cf').then(r => r.ok ? r.json() : null).then(d => {
+    if(d && d.ok && d.월별이용률_pct) JEONNAM_CF = {연도: d.연도, 기준일: d.기준일, 연간: d.연간이용률_pct,
+      월: Object.fromEntries(Object.entries(d.월별이용률_pct).map(([k, v]) => [Number(k), Number(v)]))};
+  }).catch(() => {});
+}
+function cfCompareCard(real, capKw){
+  const cf = JEONNAM_CF;
+  const rows = (real || []).slice(-12).filter(m => m && m.month && m.kwh > 0).map(m => {
+    const y = Number(m.month.slice(0,4)), mo = Number(m.month.slice(5,7));
+    const days = new Date(y, mo, 0).getDate();
+    const 우리 = capKw > 0 ? m.kwh / (capKw * 24 * days) * 100 : null;
+    return {label: mo + '월', 우리, 전남: cf.월[mo]};
+  });
+  const 비교 = capKw > 0 && rows.length > 0;
+  const data = 비교 ? rows : Object.keys(cf.월).map(k => ({label: k + '월', 우리: null, 전남: cf.월[k]}));
+  const max = Math.max(22, ...data.map(r => Math.max(r.우리 || 0, r.전남 || 0)));
+  const bars = data.map(r => `
+    <div style="flex:1;text-align:center;min-width:0;">
+      <div style="display:flex;align-items:flex-end;justify-content:center;gap:2px;height:110px;">
+        ${r.우리 != null ? `<div title="우리 마을 ${r.우리.toFixed(1)}%" style="width:40%;background:var(--primary);border-radius:3px 3px 0 0;height:${Math.round(r.우리/max*105)}px;"></div>` : ''}
+        <div title="전남 ${r.전남}%" style="width:${r.우리 != null ? 40 : 60}%;background:var(--ink-soft);opacity:.45;border-radius:3px 3px 0 0;height:${Math.round((r.전남 || 0)/max*105)}px;"></div>
+      </div>
+      <div style="font-size:11.5px;margin-top:4px;">${r.label}</div>
+      ${r.우리 != null ? `<div style="font-size:11px;color:${r.우리 < r.전남 * 0.8 ? 'var(--danger)' : 'var(--ink-soft)'};">${r.우리.toFixed(1)}/${r.전남}</div>` : `<div style="font-size:11px;color:var(--ink-soft);">${r.전남}</div>`}
+    </div>`).join('');
+  const 낮은달 = 비교 ? rows.filter(r => r.우리 < r.전남 * 0.8).map(r => r.label) : [];
+  return `
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title"><h3 class="serif">전남 평균 대비 우리 마을 — 월 이용률(%)</h3>
+        ${비교 ? '<span class="badge badge-success">우리 마을 실측</span>' : '<span class="badge badge-mute">전남 실측만</span>'}</div>
+      <div style="display:flex;gap:6px;align-items:flex-end;padding:0 4px;">${bars}</div>
+      <p class="text-mute" style="font-size:12.5px;margin-top:8px;">
+        ${비교 ? `<span style="display:inline-block;width:10px;height:10px;background:var(--primary);border-radius:2px;"></span> 우리 마을
+          &nbsp;<span style="display:inline-block;width:10px;height:10px;background:var(--ink-soft);opacity:.45;border-radius:2px;"></span> 전남 같은 달(${cf.연도} 실측).
+          ${낮은달.length ? `<b style="color:var(--danger);">${낮은달.join('·')}</b>은 전남의 80% 아래입니다 — 점검을 권합니다.` : '모든 달이 전남의 80% 이상입니다.'}`
+          : (capKw > 0 ? '자료함에 월별 발전량을 올리면 우리 마을 막대가 함께 그려집니다.' : '조합 현황에 설비용량(kW)을 넣고 월별 발전량을 올리면 우리 마을과 비교됩니다.')}
+        <br>※ 전남 값: 한국에너지공단 재생에너지 클라우드플랫폼 RPS 태양광 발전량÷설비용량(전남광주, 기준일 ${cf.기준일}, 연간 ${cf.연간}%). 날씨가 해마다 달라 같은 달끼리의 참고 비교입니다.</p>
+    </div>`;
+}
+
 /* ─── 발전·정산·배당 (운영 단계 핵심) ─── */
 function memPower(){
   /* 올린 자료가 있으면 그것으로 그린다. 없을 때만 1MW 표준모델 예시를 쓴다.
@@ -3877,6 +3923,7 @@ function memPower(){
       </div>
       <p class="text-mute" style="font-size:12.5px;">※ 무발전일·발전 급락·이용률 미달은 자동 감지되어 점검 지시와 함께 알림이 갑니다.</p>
     </div>
+    ${cfCompareCard(실측 ? _real : [], capKw)}
 
     <div class="card" style="margin-bottom:16px;">
       <div class="card-title"><h3 class="serif">${실측 ? '최근 달' : '이달'} 수익 배분 — 우선순위 폭포</h3>
@@ -8374,15 +8421,19 @@ async function sendChat(){
     try{
       const lab = location.hash.startsWith('#/adm/lab');   // 2026-10-22 관리자 실험실 → 새 상담 체인
       const roleSel = document.getElementById('labRole');
-      const res = await fetch(lab ? '/api/ai/lab/chat' : '/api/ai/chat', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({prompt: q, history: _chatHistory.slice(-10),
+      const url = lab ? '/api/ai/lab/chat' : '/api/ai/chat';
+      const payload = JSON.stringify({prompt: q, history: _chatHistory.slice(-10),
           context: '햇소자(햇빛소득마을 통합 운영 플랫폼) 이용자 상담 — 마을협동조합 설립·운영·발전사업'
             + (_screenName ? ` (사용자가 직전에 보던 화면: ${_screenName})` : ''),
           role_hint: lab && roleSel ? roleSel.value : '',
-          config: lab ? labConfig() : undefined}),   // 2026-10-27 구성(엔진·프롬프트) — 실험실에서만
-      });
-      const d = await res.json();
+          config: lab ? labConfig() : undefined});   // 2026-10-27 구성(엔진·프롬프트) — 실험실에서만
+      // 2026-10-31 진행 단계 스트림 먼저(분류 → 근거 → 답 쓰는 중). 서버에 스트림 길이 없거나 끊기면 예전 한 번 받기로.
+      let d = await chatStream(url + '/stream', payload);
+      if(!d){
+        const res = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: payload});
+        d = await res.json();
+      }
+      chatMemoryNote(d);
       const labMeta = document.getElementById('labMeta');
       if(lab && labMeta) labMeta.textContent = JSON.stringify(d, null, 1);
       answer = d && d.answer ? d.answer : '';
@@ -8406,6 +8457,59 @@ async function sendChat(){
     </div>`);
     body.scrollTop = body.scrollHeight;
   }, 500);
+}
+/* 2026-10-31 진행 단계 스트림 — 서버가 보내는 「분류·근거·작성·완료」를 대기 말풍선에 차례로 보여 준다.
+   스트림 길이 없거나(404·405) 형식이 다르거나 도중에 끊기면 null → 호출한 쪽이 예전 방식으로 다시 묻는다. */
+async function chatStream(url, payload){
+  let res;
+  try{ res = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: payload}); }
+  catch(e){ return null; }
+  if(!res.ok || !res.body || !(res.headers.get('content-type') || '').includes('text/event-stream')) return null;
+  const reader = res.body.getReader(), dec = new TextDecoder();
+  const steps = [];
+  let buf = '';
+  const show = () => {
+    const p = document.getElementById('chat-pending');
+    if(p) p.innerHTML = '답변 작성 중…' + (steps.length ? `<div class="text-mute" style="font-size:12px;margin-top:4px;">${steps.map(escapeHtml).join(' → ')}</div>` : '');
+  };
+  try{
+    while(true){
+      const {value, done} = await reader.read();
+      if(done) break;
+      buf += dec.decode(value, {stream:true});
+      let i;
+      while((i = buf.indexOf('\n\n')) >= 0){
+        const line = buf.slice(0, i).trim(); buf = buf.slice(i + 2);
+        if(!line.startsWith('data:')) continue;
+        let ev; try{ ev = JSON.parse(line.slice(5)); }catch(e){ continue; }
+        if(ev.단계 === '분류') steps.push('분류: ' + (ev.값 || ''));
+        else if(ev.단계 === '근거') steps.push(ev.수 ? `자료 ${ev.수}건 찾음${ev.목록 && ev.목록[0] ? ' (' + ev.목록[0] + ')' : ''}` : '자료 찾음');
+        else if(ev.단계 === '작성') steps.push('답 쓰는 중');
+        else if(ev.단계 === '완료') return ev.결과 || null;
+        else if(ev.단계 === '오류') return null;
+        show();
+      }
+    }
+  }catch(e){ return null; }
+  return null;
+}
+/* 2026-10-31 회원별 대화 기억 안내 — 서버가 기억을 켜 둔 경우에만 상담창 아래에 한 줄. 지우기는 본인 기록만. */
+function chatMemoryNote(d){
+  const m = d && d.기억;
+  const body = document.getElementById('chatBody');
+  if(!m || !m.켜짐 || !body || document.getElementById('chatMemNote')) return;
+  body.insertAdjacentHTML('afterend', `<p id="chatMemNote" class="text-mute" style="font-size:12px;margin:6px 2px;">
+    이 상담은 다음에 이어 묻도록 최근 대화를 30일 기억합니다(개인정보는 가려서 저장).
+    <a href="javascript:void(0)" onclick="clearChatMemory()">기억 지우기</a></p>`);
+}
+async function clearChatMemory(){
+  try{
+    const r = await fetch('/api/ai/memory/clear', {method:'POST'});
+    const d = await r.json();
+    _chatHistory = [];
+    const n = document.getElementById('chatMemNote');
+    if(n) n.textContent = d && d.ok ? `저장된 대화 기억을 지웠습니다(${d.지운줄 || 0}줄).` : '지우지 못했습니다. 잠시 뒤 다시 시도해 주세요.';
+  }catch(e){}
 }
 /* 답 본문 → HTML. 이스케이프 뒤에 같은 줄 안의 **굵게**(비어 있지 않은 짝)만 <b>로. 짝이 안 맞는 **·다른 마크다운은 그대로. */
 function chatAnswerHtml(answer){
