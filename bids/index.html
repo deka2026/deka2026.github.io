@@ -135,7 +135,7 @@ main{max-width:1080px;margin:0 auto;padding:16px}
   <div class="card hidden" id="a-form">
     <h3 style="margin:0 0 8px;font-size:15.5px" id="a-form-title">새 알림 설정</h3>
     <div class="field"><label>분야</label><div class="chips" id="a-fields"></div></div>
-    <div class="field"><label>지역 (안 고르면 전국)</label><div class="chips" id="a-regions"></div></div>
+    <div class="field"><label>지역 (안 고르면 전국 · 지역이 정해지지 않은 전국 공고와 에너지공단 공모는 지역을 골라도 함께 옵니다)</label><div class="chips" id="a-regions"></div></div>
     <div class="field"><label>참여 길 (안 고르면 전부)</label><div class="chips" id="a-routes"></div></div>
     <div class="grid2">
       <div class="field"><label>공고명에 들어갈 낱말 (쉼표로, 비우면 전부)</label><input id="a-words" placeholder="예: 태양광, 유지관리, 영농형"></div>
@@ -215,13 +215,14 @@ function dl(s) {
   if (!s) return '';
   const d = new Date(s.replace(' ', 'T'));
   if (d.getFullYear() >= 2099) return '상시(예산 소진 시까지)';
+  if (d.getFullYear() === 2098) return '접수 기간은 공고문 확인';
   const t = new Date(); t.setHours(0, 0, 0, 0); const dd = new Date(d); dd.setHours(0, 0, 0, 0);
   const n = Math.round((dd - t) / 864e5);
   return `${d.getMonth() + 1}/${d.getDate()}(${요일[d.getDay()]}) ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} · ${n < 0 ? '마감' : 'D-' + n}`;
 }
 function needLogin(el, what) {
   el.innerHTML = `<b style="font-weight:600">「${esc(what)}」은 사교원 통합 계정으로 로그인한 뒤 쓸 수 있습니다.</b>
-    <p class="lead" style="margin:6px 0 10px">계정이 없으면 사교원 첫 화면에서 회원가입(무료)을 하세요. 승인되면 바로 쓸 수 있습니다.</p>
+    <p class="lead" style="margin:6px 0 10px">계정이 없으면 사교원 첫 화면에서 회원가입(무료)을 하세요. 가입 뒤 운영진 승인(보통 하루 안)이 나면 바로 쓸 수 있습니다. 공고 게시판은 로그인 없이 볼 수 있습니다.</p>
     <form id="lf-${what.length}" class="grid2" onsubmit="return false">
       <div class="field"><label>아이디 또는 이메일</label><input name="u" autocomplete="username"></div>
       <div class="field"><label>비밀번호</label><input name="p" type="password" autocomplete="current-password"></div>
