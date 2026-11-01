@@ -905,11 +905,12 @@ async function renderQuick() {
   const add = x => { if (x && list.length < 8 && !list.includes(x)) list.push(x); };
   // 11-01 개선안 4: 실패한 실행은 단추로 남기지 않고, 기본 단추는 시험으로 확인한 지시만(등급별)
   const recent = (log.ok && Array.isArray(log.items)) ? log.items.filter(e => e.ok) : [];
-  recent.forEach(e => { const t = tools.items.find(x => x.id === e.tool); if (t) add((t.examples || [])[0]); });
+  // 11-01 알파언니 🟡8: 최근 실행은 읽기 도구만, 4칸까지(나머지는 확인된 기본 지시)
+  recent.forEach(e => { const t = tools.items.find(x => x.id === e.tool); if (t && t.risk === 'read' && list.length < 4) add((t.examples || [])[0]); });
   const has = id => tools.items.some(x => x.id === id);
   const SAFE = [['myfiles.list', '내 폴더 보여 줘'], ['menu.mine', '내가 쓸 수 있는 메뉴 알려 줘'], ['nav.open', '근태 화면 열어 줘'],
     ['exec.log', '내 실행 기록 보여 줘'], ['routine.cards', '오늘 루틴 뭐 있어'], ['gw.approvals_list', '결재함 보여 줘'],
-    ['prefs.dash_edit', '대시보드에 근태 넣어 줘'], ['hatsoja.view', '우리 마을 서류 뭐가 빠졌어']];
+    ['prefs.dash_edit', '대시보드에 근태 넣어 줘']];
   SAFE.forEach(([id, x]) => { if (has(id)) add(x); });
   if (!list.length) { const seen = {}; tools.items.forEach(t => { const ex = (t.examples || [])[0]; if (!ex || t.risk !== 'read' || seen[t.area]) return; seen[t.area] = 1; add(ex); }); }   // 대장이 달라도 읽기 예시로
   box.innerHTML = list.length ? list.slice(0, 8).map(x => `<button type="button" data-say="${esc(x)}" title="상담창에 넣기">${esc(x)}</button>`).join('') : '<p class="hint">자주 쓰는 지시가 쌓이면 여기에 단추로 나옵니다.</p>';
