@@ -76,6 +76,7 @@
     '.files{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}.chip{font-size:12px;background:#fff7e0;border:1px solid #e0c070;border-radius:12px;padding:2px 9px}' +
     '.draft{border:1px solid #d9d2c0;border-radius:8px;padding:10px 14px;background:#fffdf7;margin-top:8px;line-height:1.6}' +
     '.list{display:flex;flex-direction:column;gap:4px}.li{display:flex;gap:8px;align-items:center;padding:6px 8px;border:1px solid #eee;border-radius:8px;cursor:pointer;font-size:13px}.li:hover{background:#faf6ec}.li .t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
+    '.card .ans{margin:6px 0;line-height:1.6}.card table{border-collapse:collapse;margin:6px 0;font-size:13px}.card th,.card td{border:1px solid #e6e1d3;padding:3px 7px;text-align:left;vertical-align:top}' +
     '.card{align-self:flex-start;max-width:92%;border:1px solid #c9b86b;background:#fffbe8;border-radius:12px;padding:10px 14px;line-height:1.55}.card.r-send,.card.r-perm,.card.r-delete{border-color:#c0392b;background:#fff3f0}.card h4{margin:0 0 6px;font-size:14px}.card .pv{font-size:13px;background:#fff;border:1px solid #e6e1d3;border-radius:8px;padding:6px 10px;margin:6px 0;white-space:pre-wrap}.card .btns{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}.card .opt{border:1px solid #2c5842;background:#fff;color:#2c5842;border-radius:16px;padding:4px 12px;cursor:pointer;font-size:13px}.card .opt:hover{background:#edf2e5}.card input[type=password]{border:1px solid #d9d2c0;border-radius:8px;padding:6px 8px;font-size:14px}.card a{color:#2c5842}' +
     '@media(max-width:640px){.logo span{display:none}.who{display:none}.b.lbl{display:none}}' +
     '</style>' +
@@ -138,9 +139,28 @@
   function renderFiles() { $('files').innerHTML = state.files.map(function (f) { return '<span class="chip">📎 ' + esc(f.name) + ' (' + f.chars + '자)</span>'; }).join(''); }
 
   // ── 상담 실행기(AX 개편 1단계): 지시 한 줄 → 도구 판별 → 읽기는 즉시, 그 밖은 확인 카드 ──
+  // 11-01 개선안 2: 딕셔너리 결과도 보이게 — 답(answer·markdown·text)은 글로, 나머지 값은 「이름 | 값」 표로, 안의 목록은 표로
+  var HIDE = { ok: 1, status: 1, error: 1, route: 1, backend: 1, request_id: 1, reload: 1, user_id: 1 };
+  function dictOf(data) {
+    if (!data || Array.isArray(data) || typeof data !== 'object') return '';
+    var out = '';
+    var ans = ['answer', 'markdown', 'text', 'summary', 'message'].map(function (k) { return data[k]; }).filter(function (v) { return typeof v === 'string' && v.trim(); })[0];
+    if (ans) out += '<div class="ans">' + md(ans) + '</div>';
+    var rows = [];
+    Object.keys(data).forEach(function (k) {
+      var v = data[k];
+      if (HIDE[k] || ['answer', 'markdown', 'text', 'summary', 'message', 'items'].indexOf(k) >= 0 || v == null || v === '') return;
+      if (Array.isArray(v)) { if (v.length && typeof v[0] === 'object') out += tableOf(v); else if (v.length) rows.push([k, v.slice(0, 20).join(', ')]); return; }
+      if (typeof v === 'object') { rows.push([k, Object.keys(v).slice(0, 6).map(function (x) { var y = v[x]; return x + ': ' + (y != null && typeof y === 'object' ? '…' : y); }).join(' · ')]); return; }
+      rows.push([k, typeof v === 'boolean' ? (v ? '예' : '아니오') : String(v)]);
+    });
+    if (rows.length) out += '<table>' + rows.slice(0, 16).map(function (r) { return '<tr><th>' + esc(r[0]) + '</th><td>' + esc(r[1]) + '</td></tr>'; }).join('') + '</table>';
+    return out;
+  }
   function tableOf(data) {
     var rows = Array.isArray(data) ? data : (data && Array.isArray(data.items) ? data.items : null);
-    if (!rows || !rows.length || typeof rows[0] !== 'object') return '';
+    if (!rows && data && typeof data === 'object') return dictOf(data);
+    if (!rows || !rows.length || typeof rows[0] !== 'object') return (data && !Array.isArray(data) && typeof data === 'object') ? dictOf(data) : '';
     var keys = Object.keys(rows[0]).slice(0, 8);
     return '<table><tr>' + keys.map(function (k) { return '<th>' + esc(k) + '</th>'; }).join('') + '</tr>' +
       rows.slice(0, 30).map(function (r) { return '<tr>' + keys.map(function (k) { var v = r[k]; return '<td>' + esc(v != null && typeof v === 'object' ? JSON.stringify(v) : v) + '</td>'; }).join('') + '</tr>'; }).join('') + '</table>' +
@@ -164,6 +184,7 @@
     api('/api/ai/exec/run', { method: 'POST', body: { plan_id: r.plan_id } }).then(function (x) {
       if (x.error === 'reauth_required') { btns.innerHTML = '<span class="note">재인증이 필요합니다.</span>'; showConfirm(Object.assign({}, r, { need_reauth: true }), c); return; }
       c.remove(); showResult(x);
+      if (x.reload) setTimeout(function () { try { location.reload(); } catch (e) {} }, 900);   // 대시보드·사이드바를 바꾼 뒤 새 설정으로
     });
   }
   function showConfirm(r, old) {
