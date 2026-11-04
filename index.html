@@ -139,8 +139,13 @@
     .acctBtn .who b{display:inline-block;max-width:6em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
     html[data-fs="125"] .sideTog{font-size:0;gap:0}html[data-fs="125"] .sideTog::before{content:"☰";font-size:1.2rem}
     #topnav a{font-size:0.7333rem;white-space:nowrap}
-    #vMap .mapchips a,#vMap .mapbar input,#vMap .mcard .exq{min-height:var(--tap)}.side .mv,.clist .mv{min-width:36px;min-height:36px}.side .hint a{display:inline-block;padding:10px 0}
+    #vMap .mapchips a,#vMap .mapbar input,#vMap .mcard .exq,#vMap .msh{min-height:var(--tap)}
+    /* 11-04 개선안 M7: 꾸미기는 탭 셋(칸·메뉴·미리보기) 가운데 하나만, 저장 줄은 아래 탭 위에 붙인다 */
+    #vCustom .ctabs{display:flex;gap:6px;position:sticky;top:calc(64px + env(safe-area-inset-top));z-index:5;background:var(--bg);padding:6px 0;margin-bottom:8px}.ctabs button{flex:1;min-height:var(--tap);border:1px solid var(--line);background:#fff;border-radius:999px;font:inherit;font-size:0.8667rem;cursor:pointer}.ctabs button[aria-selected="true"]{background:var(--g7);color:#fff;border-color:var(--g7)}
+    #vCustom .cgrid>[data-ct]{display:none}#vCustom[data-ct="dash"] .cgrid>[data-ct="dash"],#vCustom[data-ct="side"] .cgrid>[data-ct="side"],#vCustom[data-ct="prev"] .cgrid>[data-ct="prev"]{display:block}
+    #vCustom .cbar{position:sticky;bottom:calc(var(--tabH) + env(safe-area-inset-bottom) + 2px);background:var(--bg);padding:8px 0;z-index:5;border-top:1px solid var(--line)}.side .mv,.clist .mv{min-width:36px;min-height:36px}.side .hint a{display:inline-block;padding:10px 0}
   }
+  .ctabs{display:none}
   .quick .qmore{display:none;border:1px dashed var(--line);background:#fff;color:var(--ink2)}
   @media(prefers-reduced-motion:no-preference){.side{transition:transform .22s ease,visibility .22s}}
   .secs{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px 18px}
@@ -209,7 +214,7 @@
   /* 내 폴더 */
   .fbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:8px 0}.crumb{font-size:0.9rem}.crumb a{padding:2px 4px;border-radius:6px}.crumb a:hover{background:var(--g0)}.crumb .sep{color:var(--mute);margin:0 2px}
   .ftabs{display:flex;gap:6px;margin:4px 0}.ftabs button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 12px;cursor:pointer;font-family:inherit;font-size:0.8667rem}.ftabs button.on{background:var(--g7);color:#fff;border-color:var(--g7)}
-  .flist{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}.flist th,.flist td{padding:7px 10px;text-align:left;border-top:1px solid var(--g1);font-size:0.9rem;vertical-align:middle}.flist th{background:var(--g0);font-weight:600;border-top:none;font-size:0.8333rem}.flist td.n{white-space:nowrap;color:var(--mute);font-size:0.8333rem}.flist .act{display:flex;gap:4px;flex-wrap:wrap}.flist .nm a{cursor:pointer}.mapbar{position:sticky;top:0;z-index:5;background:var(--bg,#fff);padding:8px 0;display:flex;flex-direction:column;gap:8px}.mapbar input{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:1rem}.mapchips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}.mapchips a{flex:0 0 auto;padding:6px 12px;border:1px solid var(--line);border-radius:16px;background:var(--card);font-size:0.8667rem;text-decoration:none;color:inherit;min-height:32px;display:inline-flex;align-items:center}.mcard.hide,.mapsec.hide,.mapgrp.hide{display:none}.cfind{width:100%;box-sizing:border-box;margin:0 0 8px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:0.9rem}.ctools{margin-top:10px}.ctools summary{cursor:pointer;padding:8px 0;font-weight:600;font-size:0.9rem}.clist li.hide{display:none}.flist .nm input[type=checkbox]{width:18px;height:18px;margin:0 6px 0 0;vertical-align:-3px}.flist .nm .rn{width:min(100%,260px);padding:5px 8px;border:1px solid var(--line);border-radius:8px;font-size:0.9rem}
+  .flist{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}.flist th,.flist td{padding:7px 10px;text-align:left;border-top:1px solid var(--g1);font-size:0.9rem;vertical-align:middle}.flist th{background:var(--g0);font-weight:600;border-top:none;font-size:0.8333rem}.flist td.n{white-space:nowrap;color:var(--mute);font-size:0.8333rem}.flist .act{display:flex;gap:4px;flex-wrap:wrap}.flist .nm a{cursor:pointer}.mapbar{position:sticky;top:0;z-index:5;background:var(--bg,#fff);padding:8px 0;display:flex;flex-direction:column;gap:8px}.mapbar input{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:1rem}.mapchips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}.mapchips a{flex:0 0 auto;padding:6px 12px;border:1px solid var(--line);border-radius:16px;background:var(--card);font-size:0.8667rem;text-decoration:none;color:inherit;min-height:32px;display:inline-flex;align-items:center}.mcard.hide,.mapsec.hide,.mapgrp.hide{display:none}.mapsec h4.sec{margin:6px 0}.msh{display:flex;align-items:center;gap:6px;width:100%;border:none;background:none;padding:6px 2px;font:inherit;font-size:0.9333rem;font-weight:600;color:var(--g7);cursor:pointer;text-align:left;min-height:36px}.msh .mn{font-size:0.7667rem;font-weight:400;color:var(--mute);background:var(--g0);border-radius:999px;padding:0 8px}.msh::after{content:"▴";margin-left:auto;color:var(--mute);font-size:0.8rem}.msh[aria-expanded="false"]::after{content:"▾"}.mcards[hidden]{display:none}.cfind{width:100%;box-sizing:border-box;margin:0 0 8px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:0.9rem}.ctools{margin-top:10px}.ctools summary{cursor:pointer;padding:8px 0;font-weight:600;font-size:0.9rem}.clist li.hide{display:none}.flist .nm input[type=checkbox]{width:18px;height:18px;margin:0 6px 0 0;vertical-align:-3px}.flist .nm .rn{width:min(100%,260px);padding:5px 8px;border:1px solid var(--line);border-radius:8px;font-size:0.9rem}
   .fmk,.fsel{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:8px 0;padding:8px 10px;background:var(--g0);border:1px solid var(--g1);border-radius:var(--r);font-size:0.9rem}.fmk input,.fsel select{padding:6px 8px;border:1px solid var(--line);border-radius:8px;font-size:0.9rem;min-height:36px}.fsel select{max-width:200px}
   #vFiles.drop .flist{outline:3px dashed var(--g5,#6a8f6a);outline-offset:-3px}.flist .d{display:block;font-size:0.7667rem;color:var(--mute);font-weight:400}.flist td.n.tt{white-space:normal}
   .quota{display:flex;gap:8px;align-items:center;font-size:0.8333rem;color:var(--mute)}.qbar{height:8px;background:var(--g1);border-radius:4px;overflow:hidden;flex:1;max-width:240px}.qbar i{display:block;height:100%;background:var(--g6)}
@@ -404,11 +409,12 @@
       <!-- ⑥ 꾸미기 (#/custom) -->
       <main id="vCustom" class="view" aria-label="내 페이지 꾸미기">
         <div class="secT"><h2>내 페이지 꾸미기</h2><p class="sub">체크하면 넣고, ▲▼ 로 순서를 바꿉니다. 저장하면 어느 기기에서 로그인해도 같습니다.</p></div>
+        <div class="ctabs" role="tablist" aria-label="꾸미기 묶음"><button type="button" role="tab" data-ct="dash" aria-selected="true" aria-controls="cDashBox">📊 대시보드 칸</button><button type="button" role="tab" data-ct="side" aria-selected="false" aria-controls="cSideBox">📌 메뉴</button><button type="button" role="tab" data-ct="prev" aria-selected="false" aria-controls="cPrevBox">👀 미리보기</button></div>
         <div class="cgrid">
-          <section class="grp" aria-labelledby="cDashT"><h3 id="cDashT">📊 대시보드 칸</h3><ul class="clist" id="cDash"></ul></section>
-          <section class="grp" aria-labelledby="cSideT"><h3 id="cSideT">📌 사이드바 메뉴</h3><input class="cfind" id="cFind" type="search" placeholder="메뉴·도구 찾기 (예: 근태, 입찰)" aria-label="메뉴·도구 찾기"><ul class="clist" id="cSide"></ul>
+          <section class="grp" id="cDashBox" data-ct="dash" aria-labelledby="cDashT"><h3 id="cDashT">📊 대시보드 칸</h3><ul class="clist" id="cDash"></ul></section>
+          <section class="grp" id="cSideBox" data-ct="side" aria-labelledby="cSideT"><h3 id="cSideT">📌 사이드바 메뉴</h3><input class="cfind" id="cFind" type="search" placeholder="메뉴·도구 찾기 (예: 근태, 입찰)" aria-label="메뉴·도구 찾기"><ul class="clist" id="cSide"></ul>
             <details class="ctools" id="cToolsBox"><summary>🤖 상담창 도구 <span id="cToolsN"></span> — 사이드바에도 넣고 싶은 것만 체크</summary><ul class="clist" id="cTools"></ul></details></section>
-          <aside class="grp" aria-labelledby="cPrevT"><h3 id="cPrevT">미리보기</h3><div class="mini" id="cPrev"></div></aside>
+          <aside class="grp" id="cPrevBox" data-ct="prev" aria-labelledby="cPrevT"><h3 id="cPrevT">미리보기</h3><div class="mini" id="cPrev"></div></aside>
         </div>
         <div class="cbar"><button class="btn p" type="button" id="cSave">저장</button><button class="btn" type="button" id="cReset">등급 기본 구성으로</button><span class="msg" id="cMsg" aria-live="polite"></span></div>
       </main>
@@ -1099,20 +1105,26 @@ function mapCard(it) {
 function renderMap() {
   const draw = () => { if (currentRoute() !== 'map') return;
     $('#mapChips').innerHTML = TREE.map((g, gi) => g.secs.map((sc, si) => `<a href="#/map" data-jump="map-${gi}-${si}">${sc.ic} ${esc(sc.name)}</a>`).join('')).join('');
-    $('#mapBody').innerHTML = TREE.map((g, gi) => `<section class="grp mapgrp" aria-label="${esc(g.name)}"><h3><span class="ic">${g.ic}</span>${esc(g.name)}${g.lock ? `<span class="lock">🔒 ${esc(g.lock)}</span>` : ''}</h3>${g.secs.map((sc, si) => `<div class="mapsec" id="map-${gi}-${si}"><h4 class="sec" style="margin:6px 0 6px;font-size:14px;color:var(--g7)">${sc.ic} ${esc(sc.name)}</h4><div class="mcards">${sc.items.map(mapCard).join('')}</div></div>`).join('')}</section>`).join('');
+    $('#mapBody').innerHTML = TREE.map((g, gi) => `<section class="grp mapgrp" aria-label="${esc(g.name)}"><h3><span class="ic">${g.ic}</span>${esc(g.name)}${g.lock ? `<span class="lock">🔒 ${esc(g.lock)}</span>` : ''}</h3>${g.secs.map((sc, si) => { const k = `map-${gi}-${si}`, fold = mapFolded(k, gi + si === 0); return `<div class="mapsec" id="${k}"><h4 class="sec"><button type="button" class="msh" data-ms="${k}" aria-expanded="${!fold}" aria-controls="${k}-c">${sc.ic} ${esc(sc.name)} <span class="mn">${sc.items.length}</span></button></h4><div class="mcards" id="${k}-c"${fold ? ' hidden' : ''}>${sc.items.map(mapCard).join('')}</div></div>`; }).join('')}</section>`).join('');
     mapFind(); };
   draw();                              // 대장이 없어도 TREE 만으로 먼저 그린다
   loadTools().then(() => { if (TOOLS.items.length) draw(); });
 }
+/* 11-04 개선안 M8: 휴대폰은 소분류를 접어 제목만(첫 소분류만 펼침), 데스크탑은 다 펼침. 누른 것은 기억 */
+const mapFold = {};
+function mapFolded(k, first) { return k in mapFold ? mapFold[k] : (MQ_SMALL.matches && !first); }
+function mapSetFold(k, fold) { mapFold[k] = fold; const c = document.getElementById(k + '-c'), b = document.querySelector(`button[data-ms="${k}"]`); if (c) c.hidden = fold; if (b) b.setAttribute('aria-expanded', String(!fold)); }
+$('#mapBody').addEventListener('click', e => { const b = e.target.closest('button[data-ms]'); if (b) mapSetFold(b.dataset.ms, b.getAttribute('aria-expanded') === 'true'); });
 function mapFind() {
   const q = ($('#mapFind').value || '').trim().toLowerCase(); let n = 0;
+  $('#mapBody').querySelectorAll('.mapsec').forEach(sc => { const c = sc.querySelector('.mcards'), k = sc.id; if (c) c.hidden = q ? false : mapFolded(k, k === 'map-0-0'); const b = sc.querySelector('.msh'); if (b) b.setAttribute('aria-expanded', String(c ? !c.hidden : true)); });   // 찾는 동안은 다 펼친다
   $('#mapBody').querySelectorAll('.mcard').forEach(c => { const hit = !q || c.textContent.toLowerCase().includes(q); c.classList.toggle('hide', !hit); if (hit) n++; });
   $('#mapBody').querySelectorAll('.mapsec').forEach(sc => sc.classList.toggle('hide', !sc.querySelector('.mcard:not(.hide)')));
   $('#mapBody').querySelectorAll('.mapgrp').forEach(g => g.classList.toggle('hide', !g.querySelector('.mapsec:not(.hide)')));
   $('#mapNone').hidden = !q || n > 0;
 }
 $('#mapFind').addEventListener('input', mapFind);
-$('#mapChips').addEventListener('click', e => { const a = e.target.closest('a[data-jump]'); if (!a) return; e.preventDefault(); $('#mapFind').value = ''; mapFind(); const t = document.getElementById(a.dataset.jump); if (t) { t.scrollIntoView({ behavior: 'smooth', block: 'start' }); const h = t.querySelector('h4'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); } } });
+$('#mapChips').addEventListener('click', e => { const a = e.target.closest('a[data-jump]'); if (!a) return; e.preventDefault(); $('#mapFind').value = ''; mapFind(); mapSetFold(a.dataset.jump, false); const t = document.getElementById(a.dataset.jump); if (t) { t.scrollIntoView({ behavior: 'smooth', block: 'start' }); const h = t.querySelector('h4'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); } } });
 
 /* ── ⑥ 꾸미기(#/custom) — 대시보드 칸 · 사이드바 메뉴 체크·▲▼ · 미리보기 · 저장 */
 const CUST = { defs: [], dash: [], side: [], avail: [] };
@@ -1161,6 +1173,8 @@ function custFind() {
   if (q && Array.from($('#cTools').querySelectorAll('li')).some(li => !li.classList.contains('hide'))) $('#cToolsBox').open = true;
 }
 $('#cFind').addEventListener('input', custFind);
+$('#vCustom').dataset.ct = 'dash';
+$('#vCustom').querySelector('.ctabs').addEventListener('click', e => { const b = e.target.closest('button[data-ct]'); if (!b) return; $('#vCustom').dataset.ct = b.dataset.ct; $('#vCustom').querySelectorAll('.ctabs button').forEach(x => x.setAttribute('aria-selected', String(x === b))); });
 $('#vCustom').addEventListener('change', e => { const c = e.target.closest('input[data-ck]'); if (!c) return; const x = CUST[c.dataset.ck].find(y => y.id === c.dataset.id); if (x) x.on = c.checked; drawCustom(); });
 $('#vCustom').addEventListener('click', e => { const b = e.target.closest('button[data-cm]'); if (b) custMove(b.dataset.cm, b.dataset.id, +b.dataset.mv); });
 $('#cSave').addEventListener('click', async () => {
