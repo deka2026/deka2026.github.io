@@ -46,6 +46,12 @@ main{max-width:1080px;margin:0 auto;padding:16px}
 .filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:8px}
 .filters select,.filters input{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:var(--radius-sm);background:#fff}
 .meta{font-size:12.5px;color:var(--ink-faint)}
+/* 11-04 개선안 M8: 마감 가까운 순 묶음 — 휴대폰은 첫 묶음만 펼친다 */
+.bgrp{margin-bottom:10px}.bgh{display:flex;align-items:center;gap:8px;width:100%;min-height:44px;border:1px solid var(--line);background:var(--paper-soft);border-radius:var(--radius-sm);padding:8px 14px;font:inherit;font-weight:600;color:var(--ink);cursor:pointer;text-align:left}
+.bgh .n{margin-left:auto;font-weight:400;font-size:13px;color:var(--ink-soft)}.bgh::after{content:"▴";font-size:12px;color:var(--ink-faint)}.bgh[aria-expanded="false"]::after{content:"▾"}.bgb{margin-top:8px}.bgb[hidden]{display:none}
+.lead-more{display:none}
+@media (max-width:760px){.lead.long{display:none}.lead-more{display:block;font-size:13px;color:var(--ink-soft);margin:0 0 8px}.lead-more summary{cursor:pointer;min-height:44px;display:flex;align-items:center}.lead-more p{margin:4px 0 0}}
+.item{scroll-margin-top:12px}
 .item{border:1px solid var(--line-soft);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px;background:#fff;cursor:pointer}
 .item:hover{border-color:var(--green-100)}
 .item.open{border-color:var(--green-600)}
@@ -105,7 +111,8 @@ main{max-width:1080px;margin:0 auto;padding:16px}
 <!-- 게시판 -->
 <section id="v-board">
   <div class="card">
-    <p class="lead">개찰이 앞으로 30일 안인 나라장터 용역·공사·물품과 한국에너지공단 사업공고 가운데 분야에 맞는 것만 매일 아침 모읍니다. 공고마다 <b style="font-weight:600">참여 길</b>(바로 응찰 · 면허 필요 · 제조·납품 · 신청·등록)을 붙였습니다.</p>
+    <details class="lead-more"><summary>이 게시판은? ▾</summary><p id="leadCopy"></p></details>
+    <p class="lead long" id="leadTxt">개찰이 앞으로 30일 안인 나라장터 용역·공사·물품과 한국에너지공단 사업공고 가운데 분야에 맞는 것만 매일 아침 모읍니다. 공고마다 <b style="font-weight:600">참여 길</b>(바로 응찰 · 면허 필요 · 제조·납품 · 신청·등록)을 붙였습니다.</p>
     <div class="chips" id="f-field"></div>
     <div class="filters">
       <select id="f-route"><option value="">참여 길 전체</option></select>
@@ -187,6 +194,7 @@ main{max-width:1080px;margin:0 auto;padding:16px}
 const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 let me = null, board = { items: [], fields: {} }, field = '발전사업', openNo = null, subsInfo = null, editSub = null, org = null, stdDocs = [];
+{ const lc = document.getElementById('leadCopy'), lt = document.getElementById('leadTxt'); if (lc && lt) lc.innerHTML = lt.innerHTML; }   // 11-04 M8: 휴대폰은 설명을 접어 둔다
 let projTimer = null;
 const ROUTE_TAG = { '바로 응찰': 'g', '확인 필요': 'y', '면허 필요': 'o', '제조·납품': 'w', '신청·등록': 'b', '정보': 'b' };
 const 요일 = '일월화수목금토';
@@ -304,18 +312,37 @@ function renderFieldChips() {
 }
 ['#f-route', '#f-kind', '#f-sido'].forEach(s => $(s).onchange = renderBoard);
 $('#f-q').oninput = () => { clearTimeout(window._q); window._q = setTimeout(renderBoard, 200); };
+const BG = [['마감 3일 안', 3], ['마감 7일 안', 7], ['마감 14일 안', 14], ['마감 그 뒤·상시', Infinity]];
+const bFold = {}; let bSig = '';   // 묶음 번호 → 접힘(true). 사용자가 누른 것만 기억, 처음엔 화면 폭으로 정한다
+function bGroupOf(x) {
+  const d = new Date(String(x.deadline || '').replace(' ', 'T')); const t = new Date(); t.setHours(0, 0, 0, 0);
+  const n = isNaN(d) || d.getFullYear() >= 2098 ? Infinity : Math.round((new Date(d).setHours(0, 0, 0, 0) - t) / 864e5);
+  return BG.findIndex(g => n <= g[1]);
+}
 function renderBoard() {
   const rt = $('#f-route').value, kd = $('#f-kind').value, sd = $('#f-sido').value, q = $('#f-q').value.replace(/\s/g, '');
   const list = (board.items || []).filter(x => (!field || x.fields.includes(field)) && (!rt || x.route === rt) && (!kd || x.kind === kd) &&
     (!sd || x.sido.includes(sd)) && (!q || (x.title + (x.demand || '') + (x.org || '')).replace(/\s/g, '').includes(q)));
   if (!list.length) { $('#b-list').innerHTML = '<div class="card empty">조건에 맞는 열린 공고가 없습니다.</div>'; return; }
-  $('#b-list').innerHTML = list.map(x => `
+  const small = window.matchMedia && window.matchMedia('(max-width:760px)').matches;
+  const sig = [field, rt, kd, sd, q, small].join('|'); if (sig !== bSig) { Object.keys(bFold).forEach(k => delete bFold[k]); bSig = sig; }   // 🟡4·6: 분야·필터·화면 폭이 바뀌면 접힘을 새로 셈한다
+  const groups = BG.map(() => []); list.forEach(x => groups[bGroupOf(x)].push(x));
+  const firstNon = groups.findIndex(g => g.length);
+  const itemHtml = x => `
     <div class="item ${openNo === x.no ? 'open' : ''}" data-no="${esc(x.no)}">
       <div><span class="tag ${ROUTE_TAG[x.route] || 'w'}">${esc(x.route)}</span><span class="tag w">${esc(x.kind)}</span>${x.focus ? `<span class="tag y">📍${esc(x.focus)}</span>` : ''}${x.fields.includes('발전사업') ? '<span class="tag g">☀️ 발전사업</span>' : ''}${x.fields.includes('사교원') ? '<span class="tag b">사교원</span>' : ''}</div>
       <div class="t">${esc(x.title)}</div>
       <div class="row"><span>${esc(x.demand || x.org || '')}</span><span>${esc(x.source === '나라장터' ? won(x.price || x.budget) : x.method || '')}</span><span>마감 ${esc(dl(x.deadline))}</span>${x.sido.length ? `<span>${esc(x.sido.join('·'))}</span>` : ''}</div>
       <div class="detail-slot"></div>
-    </div>`).join('');
+    </div>`;
+  $('#b-list').innerHTML = groups.map((g, i) => {
+    if (!g.length) return '';
+    const hasOpen = openNo && g.some(x => x.no === openNo);
+    const filtering = !!(q || rt || kd || sd);   // 🟡4: 검색·필터 중엔 맞는 공고를 다 펼쳐 보인다
+    const folded = i in bFold ? bFold[i] : (filtering || hasOpen ? false : (small && i !== firstNon));
+    return `<section class="bgrp" data-g="${i}"><button type="button" class="bgh" aria-expanded="${!folded}" aria-controls="bg${i}">${BG[i][0]}<span class="n">${g.length}건</span></button><div class="bgb" id="bg${i}"${folded ? ' hidden' : ''}>${g.map(itemHtml).join('')}</div></section>`;
+  }).join('');
+  $('#b-list').querySelectorAll('.bgh').forEach(b => b.onclick = () => { const i = +b.closest('.bgrp').dataset.g, body = b.nextElementSibling; const fold = !body.hidden; body.hidden = fold; b.setAttribute('aria-expanded', String(!fold)); bFold[i] = fold; });
   $('#b-list').querySelectorAll('.item').forEach(el => el.onclick = e => {
     if (e.target.closest('.detail')) return;
     const no = el.dataset.no;
@@ -324,7 +351,7 @@ function renderBoard() {
   });
   if (openNo) {
     const el = [...$('#b-list').querySelectorAll('.item')].find(e => e.dataset.no === openNo);
-    if (el) { openDetail(el, openNo); el.scrollIntoView({ block: 'nearest' }); }
+    if (el) { const g = el.closest('.bgb'); if (g && g.hidden) { g.hidden = false; g.previousElementSibling.setAttribute('aria-expanded', 'true'); } openDetail(el, openNo); el.scrollIntoView({ block: 'start' }); }
   }
 }
 async function openDetail(el, no) {
@@ -623,6 +650,6 @@ $('#o-save').onclick = async () => {
 api('/api/bids/docs-standard').then(r => { stdDocs = (r.ok && r.docs) || []; });
 boot();
 </script>
-<script src="/ai-dock.js" defer></script>
+<script src="/ai-dock.js?v=20261104c" defer></script>
 </body>
 </html>
