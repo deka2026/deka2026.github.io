@@ -79,16 +79,47 @@
     '.card .ans{margin:6px 0;line-height:1.6}.card table{border-collapse:collapse;margin:6px 0;font-size:13px}.card th,.card td{border:1px solid #e6e1d3;padding:3px 7px;text-align:left;vertical-align:top}' +
     '.card{align-self:flex-start;max-width:92%;border:1px solid #c9b86b;background:#fffbe8;border-radius:12px;padding:10px 14px;line-height:1.55}.card.r-send,.card.r-perm,.card.r-delete{border-color:#c0392b;background:#fff3f0}.card h4{margin:0 0 6px;font-size:14px}.card .pv{font-size:13px;background:#fff;border:1px solid #e6e1d3;border-radius:8px;padding:6px 10px;margin:6px 0;white-space:pre-wrap}.card .btns{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}.card .opt{border:1px solid #2c5842;background:#fff;color:#2c5842;border-radius:16px;padding:4px 12px;cursor:pointer;font-size:13px}.card .opt:hover{background:#edf2e5}.card input[type=password]{border:1px solid #d9d2c0;border-radius:8px;padding:6px 8px;font-size:14px}.card .edl{display:block;font-size:12px;color:#6b6450;margin:6px 0 2px}.card .edt{box-sizing:border-box;width:100%;border:1px solid #d9d2c0;border-radius:8px;padding:6px 8px;font-size:14px;font-family:inherit;line-height:1.5}.card a{color:#2c5842}' +
     '@media(max-width:640px){.logo span{display:none}.who{display:none}.b.lbl{display:none}}' +
+    // ── 11-04 화면 개편(개선안 13·M6): 모드 셋 — bar(위 띠) · inline(내 페이지 넓은 상담창) · fab(오른쪽 아래 「상담」 단추 + 아래 판)
+    '.fabbtn,.scrim,.shead,.mic{display:none}' +
+    ':host([data-mode=inline]),:host([data-mode=fab]){position:static;z-index:auto}' +
+    ':host([data-mode=inline]) .logo,:host([data-mode=inline]) .who,:host([data-mode=inline]) #bTog,:host([data-mode=inline]) #bDoc,:host([data-mode=fab]) .logo,:host([data-mode=fab]) .who,:host([data-mode=fab]) #bTog,:host([data-mode=fab]) #bDoc{display:none}' +
+    ':host([data-mode=inline]) .bar,:host([data-mode=fab]) .bar{height:auto;background:transparent;color:inherit;box-shadow:none;padding:0;flex-wrap:wrap;gap:8px}' +
+    ':host([data-mode=inline]) .q,:host([data-mode=fab]) .q{height:52px;border:1.5px solid #4a6741;background:#fff;color:#1c2621;border-radius:12px;font-size:16px;padding:0 14px;order:3}' +
+    ':host([data-mode=inline]) .q::placeholder,:host([data-mode=fab]) .q::placeholder{color:#8a8f84}:host([data-mode=inline]) .q:focus,:host([data-mode=fab]) .q:focus{background:#fff;outline:3px solid #b47d14;outline-offset:1px}' +
+    ':host([data-mode=inline]) .b,:host([data-mode=fab]) .b{height:52px;min-width:52px;border:1px solid #d9d2c0;background:#fff;color:#2c5842;border-radius:12px;padding:0 14px;font-size:15px;display:inline-flex;align-items:center;gap:4px}' +
+    ':host([data-mode=inline]) .b:hover,:host([data-mode=fab]) .b:hover{background:#edf2e5}' +
+    ':host([data-mode=inline]) #bUp,:host([data-mode=fab]) #bUp{order:1}:host([data-mode=inline]) .mic,:host([data-mode=fab]) .mic{display:inline-flex;order:2;color:#6b7280}' +
+    ':host([data-mode=inline]) #send,:host([data-mode=fab]) #send{order:4;background:#2c5842;color:#fff;border-color:#2c5842;font-weight:600;padding:0 22px}' +
+    ':host([data-mode=inline]) .panel{box-shadow:none;border:1px solid #e6e1d3;border-radius:12px;margin-top:10px;max-height:360px}:host([data-mode=inline]) .inner{max-width:none;padding:10px 12px}' +
+    ':host([data-mode=fab]) .q{flex:1 1 100%;order:0}:host([data-mode=fab]) #send{margin-left:auto}' +
+    '.fabbtn{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:calc(var(--skai-bottom,16px) + env(safe-area-inset-bottom));z-index:150;height:56px;min-width:56px;padding:0 20px;border-radius:28px;border:none;background:#0d3b2c;color:#faf6ec;font-size:16px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.28);cursor:pointer;font-family:inherit;align-items:center;gap:6px}' +
+    '.fabbtn:focus-visible,.shead button:focus-visible{outline:3px solid #b47d14;outline-offset:2px}' +
+    ':host([data-mode=fab]) .fabbtn,:host([data-mode=inline][data-fabshow]) .fabbtn{display:inline-flex}:host([data-mode=fab][data-open]) .fabbtn{display:none}' +
+    ':host([data-mode=fab]) .wrap{display:none}' +
+    ':host([data-mode=fab][data-open]) .scrim{display:block;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:2147480999}' +
+    ':host([data-mode=fab][data-open]) .wrap{display:flex;flex-direction:column;position:fixed;left:0;right:0;bottom:0;height:88dvh;max-height:88dvh;z-index:2147481000;background:#fff;border-radius:16px 16px 0 0;box-shadow:0 -6px 24px rgba(0,0,0,.25);padding:0 0 calc(12px + env(safe-area-inset-bottom))}' +
+    ':host([data-mode=fab][data-open]) .shead{display:flex;align-items:center;gap:8px;padding:6px 10px 6px 16px;border-bottom:1px solid #e6e1d3}.shead h2{margin:0;font-size:17px;flex:1;color:#0d3b2c}.shead button{height:44px;min-width:44px;border:1px solid #d9d2c0;background:#fff;border-radius:22px;padding:0 14px;font-size:15px;cursor:pointer;font-family:inherit;color:#2c5842}' +
+    ':host([data-mode=fab][data-open]) .panel{display:block;order:1;flex:1;max-height:none;box-shadow:none;border:none;overflow:auto}:host([data-mode=fab][data-open]) .bar{order:2;padding:10px 12px 0;border-top:1px solid #e6e1d3}' +
+    ':host([data-mode=fab]) .tab{min-height:44px}' +
+    '@media(max-width:760px){:host([data-mode=inline]) .q{flex:1 1 100%;order:0}:host([data-mode=inline]) #send{margin-left:auto}:host([data-mode=inline]) .panel{max-height:50dvh}}' +
+    // 휴대폰 한 줄: [올리기][말하기·준비 중] … [보내기] — 390px 에서 꺾이지 않게 단추 안쪽 여백·글자를 줄인다
+    '@media(max-width:760px){:host([data-mode=inline]) .b,:host([data-mode=fab]) .b{padding:0 11px;font-size:14px}:host([data-mode=inline]) #send,:host([data-mode=fab]) #send{padding:0 18px}:host([data-mode=inline]) .mic,:host([data-mode=fab]) .mic{font-size:12.5px;padding:0 9px}}' +
+    '@media(prefers-reduced-motion:no-preference){:host([data-mode=fab][data-open]) .wrap{animation:up .22s ease-out}@keyframes up{from{transform:translateY(40px);opacity:.6}to{transform:none;opacity:1}}}' +
     '</style>' +
+    '<button class="fabbtn" id="fab" type="button" aria-haspopup="dialog" aria-controls="wrap">💬 상담</button>' +
+    '<div class="scrim" id="scrim"></div>' +
+    '<div class="wrap" id="wrap" aria-labelledby="shT">' +
+    '<div class="shead"><h2 id="shT">상담창</h2><button type="button" id="shX">✕ 닫기</button></div>' +
     '<div class="bar">' +
     '<div class="logo" id="logo">🤖 <b>사교원 AI</b><span> 도우미</span></div>' +
     '<input class="q" id="q" placeholder="이 화면에 대해 물어보세요 — 파일·이미지를 올리고 문서도 만듭니다" autocomplete="off">' +
     '<button class="b" id="send" title="보내기">보내기</button>' +
-    '<button class="b lbl" id="bUp" title="파일·이미지 올리기">📎 업로드</button>' +
+    '<button class="b lbl" id="bUp" title="파일·이미지 올리기">📎 <span class="ul">업로드</span></button>' +
     '<button class="b lbl" id="bDoc" title="문서 작성">📝 문서</button>' +
     '<button class="b" id="bTog" title="열기/닫기">▾</button>' +
     '<span class="who" id="who"></span>' +
     '<input type="file" id="file" style="display:none" multiple>' +
+    '<button class="b mic" id="bMic" type="button" aria-disabled="true" title="음성 입력은 준비 중입니다">🎤 말하기 · 준비 중</button>' +
     '</div>' +
     '<div class="panel" id="panel"><div class="inner">' +
     '<div class="tabs"><button class="tab on" data-t="chat">대화</button><button class="tab" data-t="doc">문서 작성</button><button class="tab" data-t="list">내 대화</button><span class="sp"></span><span class="note" id="note"></span><button class="tab" id="bNew">새 대화</button></div>' +
@@ -97,25 +128,56 @@
     '<div class="row"><textarea class="ta" id="ask" placeholder="예: 올린 공고문을 바탕으로 사업 신청서 초안을 써 줘 (목적·내용·추진일정·예산 절 포함)"></textarea><button class="pb" id="bDraft">초안 쓰기</button></div>' +
     '<div id="draftBox"></div></div>' +
     '<div id="vList" style="display:none"><div class="list" id="list"></div></div>' +
-    '</div></div>';
+    '</div></div></div>';
   document.documentElement.appendChild(host);
   var $ = function (id) { return root.getElementById(id); };
 
   // 본문을 44px 내리고, 맨 위에 고정된 머리띠는 그만큼 밀어 준다
   function pushPage() {
-    var b = document.body; if (!b) return;
+    var b = document.body; if (!b || host.getAttribute('data-mode') !== 'bar') return;   // 11-04: 위 띠일 때만
     var mt = parseFloat(getComputedStyle(b).marginTop) || 0;
-    if (!b.getAttribute('data-skai-pushed')) { b.style.marginTop = (mt + H) + 'px'; b.setAttribute('data-skai-pushed', '1'); }
+    if (!b.getAttribute('data-skai-pushed')) { b.setAttribute('data-skai-mt0', b.style.marginTop || ''); b.style.marginTop = (mt + H) + 'px'; b.setAttribute('data-skai-pushed', '1'); }
     Array.prototype.forEach.call(document.querySelectorAll('header, nav, [role=banner], .topbar, .top-bar, .navbar, .site-header'), function (el) {
       try {
         var cs = getComputedStyle(el);
         if ((cs.position === 'fixed' || cs.position === 'sticky') && (parseFloat(cs.top) || 0) === 0 && !el.getAttribute('data-skai-top')) {
-          el.style.top = H + 'px'; el.setAttribute('data-skai-top', '1');
+          el.setAttribute('data-skai-top0', el.style.top || ''); el.style.top = H + 'px'; el.setAttribute('data-skai-top', '1');
         }
       } catch (e) {}
     });
   }
-  if (document.body) pushPage(); else document.addEventListener('DOMContentLoaded', pushPage);
+  function unpushPage() {   // 11-04: 내 페이지 상담창·휴대폰 단추로 바뀌면 내린 것을 되돌린다
+    var b = document.body; if (!b) return;
+    if (b.getAttribute('data-skai-pushed')) { b.style.marginTop = b.getAttribute('data-skai-mt0') || ''; b.removeAttribute('data-skai-pushed'); b.removeAttribute('data-skai-mt0'); }
+    Array.prototype.forEach.call(document.querySelectorAll('[data-skai-top][data-skai-top0]'), function (el) { el.style.top = el.getAttribute('data-skai-top0') || ''; el.removeAttribute('data-skai-top'); el.removeAttribute('data-skai-top0'); });   // 앱이 일부러 단 표식(data-skai-top 만 있는 것)은 그대로
+  }
+  // ── 모드 정하기: 폭 760px 이하는 fab, 그 위는 bar. 앱이 <html data-skai-mode="bar"> 로 고정할 수 있고, 첫 화면은 skai.mode('inline', 자리)로 바꾼다
+  var MQ = window.matchMedia ? window.matchMedia('(max-width:760px)') : null;
+  var want = window.__skaiMode || { m: 'auto', el: null };
+  var PH = { bar: '이 화면에 대해 물어보세요 — 파일·이미지를 올리고 문서도 만듭니다', wide: '무엇을 도와드릴까요? 예: 결재함 보여 줘', small: '무엇이든 물어보세요' };
+  function autoMode() { var a = document.documentElement.getAttribute('data-skai-mode'); return (a === 'bar' || a === 'fab') ? a : (MQ && MQ.matches ? 'fab' : 'bar'); }
+  function applyMode() {
+    var m = (want.m === 'inline' && want.el) ? 'inline' : ((want.m === 'bar' || want.m === 'fab') ? want.m : autoMode());
+    if (m === 'inline') { if (host.parentNode !== want.el) want.el.appendChild(host); }
+    else if (host.parentNode !== document.documentElement) document.documentElement.appendChild(host);
+    host.setAttribute('data-mode', m);
+    if (m !== 'fab') setSheet(false, true);
+    if (m !== 'inline') host.removeAttribute('data-fabshow');
+    if (m === 'bar') pushPage(); else unpushPage();
+    $('q').placeholder = m === 'bar' ? PH.bar : (m === 'inline' && !(MQ && MQ.matches) ? PH.wide : PH.small);
+  }
+  function setSheet(v, quiet) {   // 휴대폰 아래 판 열고 닫기(대화상자 — 포커스는 판 안에서만, 닫으면 「상담」 단추로)
+    var on = !!v && host.getAttribute('data-mode') === 'fab';
+    var was = host.hasAttribute('data-open');
+    if (on) { host.setAttribute('data-open', ''); $('wrap').setAttribute('role', 'dialog'); $('wrap').setAttribute('aria-modal', 'true'); try { document.documentElement.style.overflow = 'hidden'; } catch (e) {} }
+    else { host.removeAttribute('data-open'); $('wrap').removeAttribute('role'); $('wrap').removeAttribute('aria-modal'); if (was) try { document.documentElement.style.overflow = ''; } catch (e) {} }
+    $('fab').setAttribute('aria-expanded', on ? 'true' : 'false');
+    if (on && !was) setTimeout(function () { try { $('q').focus(); } catch (e) {} }, 30);
+    if (!on && was && !quiet) try { $('fab').focus(); } catch (e) {}
+  }
+  if (MQ) { try { MQ.addEventListener('change', applyMode); } catch (e) { try { MQ.addListener(applyMode); } catch (e2) {} } }
+  applyMode();
+  if (!document.body) document.addEventListener('DOMContentLoaded', pushPage);
   setTimeout(pushPage, 800);
 
   // ── 상태 ──
@@ -126,7 +188,7 @@
   }
   api('/api/ai/dock/me').then(function (r) { state.me = r.ok ? r : {}; setWho(); });
 
-  function open(v) { state.open = v; $('panel').classList.toggle('open', v); $('bTog').textContent = v ? '▴' : '▾'; }
+  function open(v) { state.open = v; $('panel').classList.toggle('open', v); $('bTog').textContent = v ? '▴' : '▾'; if (host.getAttribute('data-mode') === 'fab') setSheet(v); }
   function tab(t) {
     state.tab = t;
     Array.prototype.forEach.call(root.querySelectorAll('.tab[data-t]'), function (b) { b.classList.toggle('on', b.getAttribute('data-t') === t); });
@@ -358,19 +420,41 @@
       Array.prototype.forEach.call(root.querySelectorAll('.li'), function (el) {
         el.addEventListener('click', function (e) {
           if (e.target.classList.contains('del')) { e.stopPropagation(); api('/api/ai/dock/threads/' + el.getAttribute('data-id'), { method: 'DELETE' }).then(loadList); return; }
-          api('/api/ai/dock/threads/' + el.getAttribute('data-id')).then(function (r) {
-            if (!r.ok) return; setThread(r.thread.id); $('msgs').innerHTML = ''; state.files = [];
-            r.items.forEach(function (m) { if (m.role === 'file') { state.files.push({ name: m.meta.name, chars: m.meta.chars }); addMsg('file', '📎 ' + esc(m.meta.name) + ' (' + m.meta.chars + '자)'); } else addMsg(m.role === 'user' ? 'user' : 'ai', m.role === 'user' ? esc(m.content) : md(m.content)); });
-            renderFiles(); tab('chat');
-          });
+          openThread(el.getAttribute('data-id'));
         });
       });
     });
   }
 
+  function openThread(id) {
+    return api('/api/ai/dock/threads/' + encodeURIComponent(id)).then(function (r) {
+      if (!r.ok) return; setThread(r.thread.id); $('msgs').innerHTML = ''; state.files = [];
+      r.items.forEach(function (m) { if (m.role === 'file') { state.files.push({ name: m.meta.name, chars: m.meta.chars }); addMsg('file', '📎 ' + esc(m.meta.name) + ' (' + m.meta.chars + '자)'); } else addMsg(m.role === 'user' ? 'user' : 'ai', m.role === 'user' ? esc(m.content) : md(m.content)); });
+      renderFiles(); tab('chat');
+    });
+  }
   // 다른 화면(개인페이지·둘러보기)이 「이렇게 말해 보세요」 예시를 넣을 때 쓴다 (AX 2단계)
-  window.skai = { say: function (t, go) { try { $('q').value = String(t || ''); open(true); tab('chat'); if (go) send(); else $('q').focus(); } catch (e) {} },
-                  open: function () { open(true); tab('chat'); } };
+  window.skai = { say: function (t, go) { try { $('q').value = String(t || ''); if (go || host.getAttribute('data-mode') !== 'inline') { open(true); tab('chat'); } if (go) send(); else $('q').focus(); } catch (e) {} },
+                  open: function () { open(true); tab('chat'); },
+                  // 11-04 화면 개편: 모드 바꾸기(첫 화면이 부른다) · 내 대화 열기 · 넓은 상담창이 화면 밖이면 떠 있는 단추
+                  mode: function (m, el) { want = { m: m || 'auto', el: el || null }; applyMode(); },
+                  openThread: function (id) { return openThread(id); },
+                  fabShow: function (on) { if (host.getAttribute('data-mode') === 'inline') { if (on) host.setAttribute('data-fabshow', ''); else host.removeAttribute('data-fabshow'); } } };
+  $('fab').addEventListener('click', function () {
+    if (host.getAttribute('data-mode') === 'inline') { try { host.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { host.scrollIntoView(); } setTimeout(function () { $('q').focus(); }, 250); return; }
+    setSheet(true); if ($('msgs').children.length) open(true);
+  });
+  $('scrim').addEventListener('click', function () { open(false); });
+  $('shX').addEventListener('click', function () { open(false); });
+  $('bMic').addEventListener('click', function () { open(true); tab('chat'); addMsg('ai', '🎤 말하기(음성 입력)는 준비 중입니다. 지금은 글로 적어 주세요.'); });
+  root.addEventListener('keydown', function (e) {   // 판이 열려 있으면 Esc 로 닫고, Tab 은 판 안에서만 돈다(그림자 안이라 root.activeElement 로 본다)
+    if (!host.hasAttribute('data-open')) return;
+    if (e.key === 'Escape') { e.preventDefault(); open(false); return; }
+    if (e.key !== 'Tab') return;
+    var f = Array.prototype.filter.call($('wrap').querySelectorAll('button,input,textarea,select,a[href],[tabindex]'), function (x) { return !x.disabled && x.offsetParent !== null && x.getAttribute('tabindex') !== '-1'; });
+    if (!f.length) return; var a = root.activeElement, i = f.indexOf(a);
+    if (e.shiftKey && (i <= 0)) { e.preventDefault(); f[f.length - 1].focus(); } else if (!e.shiftKey && (i === f.length - 1 || i < 0)) { e.preventDefault(); f[0].focus(); }
+  });
   $('send').addEventListener('click', send);
   $('q').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); send(); } });
   $('q').addEventListener('focus', function () { if ($('msgs').children.length) open(true); });
@@ -382,6 +466,6 @@
   $('bNew').addEventListener('click', function () { setThread(null); state.files = []; renderFiles(); $('msgs').innerHTML = ''; $('draftBox').innerHTML = ''; tab('chat'); $('q').focus(); });
   Array.prototype.forEach.call(root.querySelectorAll('.tab[data-t]'), function (b) { b.addEventListener('click', function () { tab(b.getAttribute('data-t')); }); });
   document.addEventListener('dragover', function (e) { if (e.dataTransfer && e.dataTransfer.types && Array.prototype.indexOf.call(e.dataTransfer.types, 'Files') >= 0) e.preventDefault(); });
-  document.addEventListener('drop', function (e) { if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) { e.preventDefault(); upload(e.dataTransfer.files); } });
+  document.addEventListener('drop', function (e) { if (e.defaultPrevented) return; if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) { e.preventDefault(); upload(e.dataTransfer.files); } });
   window.skAiDock = { open: function () { open(true); $('q').focus(); }, ask: function (q) { $('q').value = q; send(); } };
 })();

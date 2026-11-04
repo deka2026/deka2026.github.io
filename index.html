@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>사교원 — 사회혁신교육원 사회적협동조합 통합사이트</title>
 <meta name="description" content="사회혁신교육원 사회적협동조합(사교원) 통합사이트 — 소개·연구실·참여, 교육·사업·쇼핑을 한 화면에서. 상단 AI 도우미에게 바로 물어보세요.">
 <link rel="canonical" href="https://sakyowon.co.kr/">
@@ -92,7 +92,57 @@
   .pv.on{display:flex}.pv b{margin-right:4px}.pv button{border:1px solid #d9bd6a;background:#fff;border-radius:999px;padding:4px 10px;font-size:0.8333rem;cursor:pointer;font-family:inherit;color:#6b4a06}
   .pv button.cur{background:var(--gold);color:#fff;border-color:var(--gold)}.pv .now{margin-left:auto;font-size:0.8rem}
   .pvnote{font-size:0.7667rem;color:var(--gold);padding:0 4px 4px}
-  @media(max-width:760px){body.in .app{grid-template-columns:1fr}.side{position:static;max-height:none}.sideTog{display:inline-flex;margin:0 0 8px}body.in .side{display:none}body.in.sideOpen .side{display:block}}
+  /* 11-04 화면 개편(개선안 13·M4·M5·M6, 알파 시안 docs/사이트AX개편/화면개편/시안) */
+  :root{--tap:44px;--tabH:0px;--skai-bottom:24px}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  :focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+  .acct{position:relative}.acctBtn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 12px 4px 4px;min-height:40px;cursor:pointer;font-family:inherit;color:var(--ink)}
+  .acctBtn .av{width:32px;height:32px;border-radius:50%;background:var(--g1);color:var(--g9);display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8667rem;flex:0 0 auto}
+  .acctMenu{position:absolute;right:0;top:calc(100% + 6px);z-index:2100;min-width:240px;background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:0 8px 24px rgba(0,0,0,.14);padding:8px;display:flex;flex-direction:column;gap:4px}
+  .acctMenu[hidden]{display:none}.acctMenu .btn{justify-content:flex-start;width:100%;min-height:var(--tap);border:none;background:none;text-align:left}.acctMenu .btn:hover{background:var(--g0)}
+  .acctMenu .tfs{margin-left:auto;font-size:0.7667rem;border-radius:999px;padding:1px 8px;background:var(--g0);color:var(--g7)}.acctMenu .tfs.off{background:var(--gold1);color:#6b4a06}
+  .amfs{display:none;align-items:center;gap:6px;padding:4px 6px 8px;border-bottom:1px solid var(--line);margin-bottom:4px;font-size:0.8667rem;color:var(--ink2)}.amfs span{flex:1}.amfs button{min-width:var(--tap);min-height:var(--tap);border:1px solid var(--line);background:#fff;border-radius:999px;font-family:inherit;cursor:pointer}
+  #whoEmailBox a{display:block;padding:8px 10px;font-size:0.8667rem}
+  .pv summary{cursor:pointer;display:flex;align-items:center;gap:6px;list-style:none;min-height:28px}.pv summary::-webkit-details-marker{display:none}.pv summary::after{content:"▾";margin-left:6px}.pv[open] summary::after{content:"▴"}.pv .pvb{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.pv.on{display:block}
+  .drawerHead,.scrim{display:none}
+  .chatspot{padding:16px 18px}.chatspot .secT{margin-bottom:10px}.qrow{display:flex;gap:8px;align-items:flex-start;margin-top:12px}.qrow .ql{font-size:0.8333rem;color:var(--mute);padding-top:9px;white-space:nowrap}.qrow .quick{margin:0}
+  .quick button{min-height:38px}
+  .recent{border-top:1px dashed var(--line);margin-top:12px;padding-top:8px}.recent .rh{font-size:0.8rem;color:var(--mute);margin-bottom:4px}.recent ul{list-style:none;margin:0;padding:0}.recent li button{display:flex;gap:8px;width:100%;align-items:center;border:none;background:none;padding:8px 4px;min-height:var(--tap);cursor:pointer;font-family:inherit;text-align:left;color:var(--ink);border-radius:8px}.recent li button:hover{background:var(--g0)}.recent li .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}.recent li .dt{font-size:0.8rem;color:var(--mute);white-space:nowrap}
+  .gnote .mb,#vClassic .mb{display:none}
+  @media(max-width:760px){
+    :root{--tabH:4rem;--skai-bottom:calc(var(--tabH) + 12px)}
+    body.in .app{grid-template-columns:1fr}
+    header.top{position:sticky;top:0;z-index:50;background:var(--bg);flex-wrap:nowrap;gap:8px;padding:max(8px,env(safe-area-inset-top)) 0 8px;margin:0 -16px;padding-left:16px;padding-right:16px}
+    header.top .brand .sub,header.top .hm,header.top .fs{display:none}header.top .brand h1{font-size:1.2rem;white-space:nowrap}header.top .brand .mark{width:36px;height:36px;font-size:12px}
+    header.top .btn,header.top .acctBtn{white-space:nowrap;flex-shrink:0;min-height:var(--tap)}
+    body.in .sideTog:not([hidden]){display:inline-flex}
+    .acctBtn .who .rl,.acctBtn .who span.r{display:none}
+    .acctMenu{position:fixed;left:16px;right:16px;top:calc(64px + env(safe-area-inset-top))}
+    .amfs{display:flex}
+    #topnav{position:fixed;left:0;right:0;bottom:0;z-index:1000;display:flex;gap:0;margin:0;padding:0 0 env(safe-area-inset-bottom);min-height:calc(var(--tabH) + env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--line);box-shadow:0 -2px 10px rgba(0,0,0,.06)}
+    #topnav a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:0;font-size:0.8rem;min-height:var(--tabH);padding:4px 2px}#topnav a .ti{font-size:1.4rem;line-height:1}#topnav a.cur{background:var(--g0)}#topnav .tabx{display:none}
+    .wrap{padding-bottom:calc(var(--tabH) + 24px + env(safe-area-inset-bottom))}
+    .side{position:fixed;top:0;bottom:0;left:0;width:min(86vw,340px);height:100dvh;max-height:none;z-index:2001;border-radius:0 var(--r) var(--r) 0;transform:translateX(-105%);visibility:hidden;overflow:auto;overscroll-behavior:contain;padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+    body.in .side{display:block}body.sideOpen .side{transform:none;visibility:visible}
+    .drawerHead{display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:-12px;background:var(--card);padding:8px 0;margin:-4px 0 6px;z-index:1}.drawerHead h2{margin:0;font-size:1.0667rem}.drawerHead .btn{min-height:var(--tap)}
+    body.sideOpen .scrim:not([hidden]){display:block;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:2000}
+    html.drawer-open{overflow:hidden}html.drawer-open #sk-ai-dock{visibility:hidden}
+    .side .ss li a,.side .fix li a,.side .sfoot a{min-height:var(--tap);display:flex;align-items:center}
+    .btn.sm,.tabs button,.pv button,.quick button{min-height:var(--tap)}
+    .qrow{flex-direction:column;gap:4px}.qrow .ql{padding-top:0}
+    .chatspot{padding:14px}
+    .gnote .dk,#vClassic .dk{display:none}.gnote .mb,#vClassic .mb{display:inline}
+    .pv .pvsub{display:none}.pv summary{min-height:var(--tap)}
+    .chatspot .secT .sub{display:none}.chatspot .secT{margin-bottom:6px}
+    .quick:not(.all) button[data-say]:nth-of-type(n+4){display:none}.quick button.qmore{display:inline-flex}
+    .recent li:nth-child(n+2){display:none}
+    .acctBtn .who b{display:inline-block;max-width:6em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
+    html[data-fs="125"] .sideTog{font-size:0;gap:0}html[data-fs="125"] .sideTog::before{content:"☰";font-size:1.2rem}
+    #topnav a{font-size:0.7333rem;white-space:nowrap}
+    #vMap .mapchips a,#vMap .mapbar input,#vMap .mcard .exq{min-height:var(--tap)}.side .mv,.clist .mv{min-width:36px;min-height:36px}.side .hint a{display:inline-block;padding:10px 0}
+  }
+  .quick .qmore{display:none;border:1px dashed var(--line);background:#fff;color:var(--ink2)}
+  @media(prefers-reduced-motion:no-preference){.side{transition:transform .22s ease,visibility .22s}}
   .secs{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px 18px}
   .sec h4{margin:6px 0 4px;font-size:0.9333rem;color:var(--g7);display:flex;align-items:center;gap:6px}.sec h4 .ic{font-size:1rem}
   .gate{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--g0);border-style:dashed}
@@ -159,7 +209,9 @@
   /* 내 폴더 */
   .fbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:8px 0}.crumb{font-size:0.9rem}.crumb a{padding:2px 4px;border-radius:6px}.crumb a:hover{background:var(--g0)}.crumb .sep{color:var(--mute);margin:0 2px}
   .ftabs{display:flex;gap:6px;margin:4px 0}.ftabs button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 12px;cursor:pointer;font-family:inherit;font-size:0.8667rem}.ftabs button.on{background:var(--g7);color:#fff;border-color:var(--g7)}
-  .flist{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}.flist th,.flist td{padding:7px 10px;text-align:left;border-top:1px solid var(--g1);font-size:0.9rem;vertical-align:middle}.flist th{background:var(--g0);font-weight:600;border-top:none;font-size:0.8333rem}.flist td.n{white-space:nowrap;color:var(--mute);font-size:0.8333rem}.flist .act{display:flex;gap:4px;flex-wrap:wrap}.flist .nm a{cursor:pointer}.flist .d{display:block;font-size:0.7667rem;color:var(--mute);font-weight:400}.flist td.n.tt{white-space:normal}
+  .flist{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}.flist th,.flist td{padding:7px 10px;text-align:left;border-top:1px solid var(--g1);font-size:0.9rem;vertical-align:middle}.flist th{background:var(--g0);font-weight:600;border-top:none;font-size:0.8333rem}.flist td.n{white-space:nowrap;color:var(--mute);font-size:0.8333rem}.flist .act{display:flex;gap:4px;flex-wrap:wrap}.flist .nm a{cursor:pointer}.mapbar{position:sticky;top:0;z-index:5;background:var(--bg,#fff);padding:8px 0;display:flex;flex-direction:column;gap:8px}.mapbar input{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:1rem}.mapchips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}.mapchips a{flex:0 0 auto;padding:6px 12px;border:1px solid var(--line);border-radius:16px;background:var(--card);font-size:0.8667rem;text-decoration:none;color:inherit;min-height:32px;display:inline-flex;align-items:center}.mcard.hide,.mapsec.hide,.mapgrp.hide{display:none}.cfind{width:100%;box-sizing:border-box;margin:0 0 8px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:0.9rem}.ctools{margin-top:10px}.ctools summary{cursor:pointer;padding:8px 0;font-weight:600;font-size:0.9rem}.clist li.hide{display:none}.flist .nm input[type=checkbox]{width:18px;height:18px;margin:0 6px 0 0;vertical-align:-3px}.flist .nm .rn{width:min(100%,260px);padding:5px 8px;border:1px solid var(--line);border-radius:8px;font-size:0.9rem}
+  .fmk,.fsel{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:8px 0;padding:8px 10px;background:var(--g0);border:1px solid var(--g1);border-radius:var(--r);font-size:0.9rem}.fmk input,.fsel select{padding:6px 8px;border:1px solid var(--line);border-radius:8px;font-size:0.9rem;min-height:36px}.fsel select{max-width:200px}
+  #vFiles.drop .flist{outline:3px dashed var(--g5,#6a8f6a);outline-offset:-3px}.flist .d{display:block;font-size:0.7667rem;color:var(--mute);font-weight:400}.flist td.n.tt{white-space:normal}
   .quota{display:flex;gap:8px;align-items:center;font-size:0.8333rem;color:var(--mute)}.qbar{height:8px;background:var(--g1);border-radius:4px;overflow:hidden;flex:1;max-width:240px}.qbar i{display:block;height:100%;background:var(--g6)}
   .ro{background:var(--gold1);border:1px solid #e6cf8a;border-radius:10px;padding:6px 12px;margin:6px 0;font-size:0.8667rem;color:#6b4a06}.flist .rotag{font-size:0.7333rem;color:var(--gold);background:var(--gold1);border-radius:8px;padding:0 6px;margin-left:4px}
   /* 내 자료 연결하기(6단계) */
@@ -173,26 +225,35 @@
   .tfqr{text-align:center;margin:8px 0}.tfqr svg{width:180px;height:180px}.tfsec{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:0.8667rem;background:var(--g0);padding:6px 8px;border-radius:6px;word-break:break-all}
   @media(max-width:760px){.gate2,.cgrid{grid-template-columns:1fr}.btn.big{font-size:1.0667rem}}
 </style>
-<script src="/ai-dock.js" defer></script>
+<script src="/ai-dock.js?v=20261104c" defer></script><!-- 11-04 알파언니 🟠1: 판 표시 — 캐시된 옛 상담창(4시간)이 새 첫 화면에 붙지 않게, 고칠 때마다 올린다 -->
 </head>
 <body>
 <div class="wrap">
   <header class="top">
-    <div class="brand"><div class="mark">L&amp;L</div><div><h1>사교원 통합사이트</h1><div class="sub">사회혁신교육원 사회적협동조합 · 소개·연구실·참여 · 교육·사업·쇼핑</div></div></div>
+    <button class="btn sideTog" id="sideTog" type="button" aria-controls="sideWrap" aria-expanded="false" hidden>☰ 메뉴</button>
+    <div class="brand"><div class="mark">L&amp;L</div><div><h1>사교원<span class="hm"> 통합사이트</span></h1><div class="sub">사회혁신교육원 사회적협동조합 · 소개·연구실·참여 · 교육·사업·쇼핑</div></div></div>
     <div class="sp"></div>
-    <span class="fs" role="group" aria-label="글자 크기"><button type="button" id="fsDown" aria-label="글자 작게">가−</button><button type="button" id="fsUp" aria-label="글자 크게">가+</button></span>
-    <span class="who" id="who"></span>
+    <span class="fs" role="group" aria-label="글자 크기"><button type="button" id="fsDown" data-fs="-1" aria-label="글자 작게">가−</button><button type="button" id="fsUp" data-fs="1" aria-label="글자 크게">가+</button></span>
     <button class="btn p" id="btnLogin">로그인 · 회원가입</button>
-    <button class="btn" id="btnPw" style="display:none">비밀번호 변경</button>
-    <button class="btn" id="btnTwofa" style="display:none">2단계 인증</button>
-    <button class="btn" id="btnLogout" style="display:none">로그아웃</button>
+    <!-- 11-04 개선안 M4: 비밀번호·2단계·로그아웃·글자 크기·옛 첫 화면을 계정 단추 하나로 -->
+    <div class="acct" id="acct" hidden>
+      <button class="acctBtn" id="acctBtn" type="button" aria-expanded="false" aria-controls="acctMenu"><span class="av" id="acctAv" aria-hidden="true"></span><span class="who" id="who"></span><span aria-hidden="true">▾</span><span class="sr">계정 메뉴</span></button>
+      <div class="acctMenu" id="acctMenu" hidden>
+        <div class="amfs" role="group" aria-label="글자 크기"><span>글자 크기</span><button type="button" data-fs="-1" aria-label="글자 작게">가−</button><button type="button" data-fs="1" aria-label="글자 크게">가+</button></div>
+        <span id="whoEmailBox"></span>
+        <button class="btn" id="btnPw" type="button" style="display:none">🔑 비밀번호 변경</button>
+        <button class="btn" id="btnTwofa" type="button" style="display:none">🔐 2단계 인증 <span class="tfs" id="acctTf"></span></button>
+        <a class="btn" href="#/classic">옛 첫 화면</a>
+        <button class="btn" id="btnLogout" type="button" style="display:none">로그아웃</button>
+      </div>
+    </div>
   </header>
   <nav class="topnav" aria-label="화면 이동" id="topnav">
-    <a href="#/" data-r="home">🏠 내 페이지</a><a href="#/map" data-r="map">🗺️ 둘러보기</a><a href="#/files" data-r="files" class="needin">📁 내 폴더</a><a href="#/custom" data-r="custom" class="needin">🎨 꾸미기</a><a href="#/classic" data-r="classic">옛 첫 화면</a>
+    <a href="#/" data-r="home"><span class="ti" aria-hidden="true">🏠</span> 내 페이지</a><a href="#/map" data-r="map"><span class="ti" aria-hidden="true">🗺️</span> 둘러보기</a><a href="#/files" data-r="files" class="needin"><span class="ti" aria-hidden="true">📁</span> 내 폴더</a><a href="#/custom" data-r="custom" class="needin"><span class="ti" aria-hidden="true">🎨</span> 꾸미기</a><a href="#/classic" data-r="classic" class="tabx">옛 첫 화면</a>
   </nav>
 
   <!-- 통합관리자 등급별 미리보기 띠 — 관문·둘러보기에서도 보여야 「원래대로」로 돌아온다 -->
-  <div class="pv" id="pv"><b>🧪 등급별 미리보기(임시, 통합관리자만)</b><span id="pvBtns"></span><span class="now" id="pvNow"></span></div>
+  <details class="pv" id="pv"><summary><b>🧪 등급 미리보기</b> <span class="pvsub">(임시, 통합관리자만)</span><span class="now" id="pvNow"></span></summary><div class="pvb" id="pvBtns" role="group" aria-label="미리볼 등급"></div></details>
 
   <!-- ① 로그인 관문 (비로그인 #/) -->
   <section id="vGate" class="view" aria-label="로그인 관문">
@@ -216,12 +277,14 @@
     <p class="intro">사회혁신교육원 사회적협동조합(사교원)은 연대지능활동가 교육, 햇빛소득마을·어촌신활력 사업, 정책 연구를 하는 사회적협동조합입니다.
       <span class="lk"><a class="btn" href="https://home.sakyowon.co.kr/#/shop/edu">🎓 교육 신청</a><a class="btn" href="https://home.sakyowon.co.kr/#/contact">💬 문의</a><a class="btn" href="https://home.sakyowon.co.kr/#/about">사교원 소개</a></span>
     </p>
-    <p class="gnote">비회원 상담은 화면 맨 위 <b>사교원 AI</b> 띠에서 바로 할 수 있습니다(하루 10회).</p>
+    <p class="gnote">비회원 상담은 <span class="dk">화면 맨 위 <b>사교원 AI</b> 띠에서</span><span class="mb">오른쪽 아래 <b>💬 상담</b> 단추로</span> 바로 할 수 있습니다(하루 10회).</p>
   </section>
 
   <!-- ② 둘러보기 (#/map, 공개) -->
   <main id="vMap" class="view" aria-label="둘러보기 — 사이트맵">
     <div class="secT"><h2>둘러보기 — 말로 쓰는 사이트맵</h2><p class="sub">화면으로 바로 가거나, 예시를 눌러 상담창에 그 말을 넣어 보세요. 🔒 는 어떤 회원이 쓰는지 적혀 있습니다.</p></div>
+    <div class="mapbar"><input id="mapFind" type="search" placeholder="찾기 (예: 근태, 입찰, 공지)" aria-label="둘러보기에서 찾기"><nav class="mapchips" id="mapChips" aria-label="묶음 바로가기"></nav></div>
+    <p class="msg" id="mapNone" hidden>찾는 말이 든 기능이 없습니다. 상담창에 그대로 물어보셔도 됩니다.</p>
     <div id="mapBody"></div>
   </main>
 
@@ -231,7 +294,7 @@
     <div class="hero">
       <div class="card">
         <h2>무엇이든 AI 도우미에게 물어보세요</h2>
-        <p>화면 맨 위 <b>사교원 AI</b> 칸은 모든 페이지에 따라다닙니다. 지금 보는 화면을 근거로 답하고, 파일·이미지를 올려 묻고, 문서를 써서 한글(hwpx)로 내려받습니다. 연산은 과기정통부 고성능컴퓨팅(HPC) 엔진이 맡고, 개인정보는 보내기 전에 가립니다.</p>
+        <p><span class="dk">화면 맨 위 <b>사교원 AI</b> 칸은</span><span class="mb">오른쪽 아래 <b>💬 상담</b> 단추는</span> 모든 페이지에 따라다닙니다. 지금 보는 화면을 근거로 답하고, 파일·이미지를 올려 묻고, 문서를 써서 한글(hwpx)로 내려받습니다. 연산은 과기정통부 고성능컴퓨팅(HPC) 엔진이 맡고, 개인정보는 보내기 전에 가립니다.</p>
         <div class="ask"><input id="heroQ" placeholder="예: 사교원은 어떤 곳인가요? / 햇빛소득마을 신청 절차는?" aria-label="질문"><button id="heroAsk">물어보기</button></div>
         <div class="ex"><button data-q="사교원은 어떤 조직이고 무슨 일을 하나요?">사교원 소개</button><button data-q="햇빛소득마을 공모에 참여하려면 어떤 서류가 필요한가요?">햇소자 서류</button><button data-q="연대지능활동가 아카데미는 무엇을 배우나요?">아카데미</button><button data-q="교육 프로그램 비용은 어떻게 계산하나요?">교육 견적</button></div>
       </div>
@@ -248,22 +311,23 @@
 
   <!-- 공통 틀 — 사이드바 + 본문(옛 트리 / 개인페이지 / 내 폴더 / 꾸미기) -->
   <div id="shell" class="view">
-    <button class="btn sideTog" id="sideTog" aria-controls="side" aria-expanded="false">☰ 내 메뉴</button>
     <div class="app" id="app">
-      <aside class="side" id="side" aria-label="내 메뉴"></aside>
+      <aside class="side" id="sideWrap" aria-label="내 메뉴"><div class="drawerHead"><h2 id="drawerT">내 메뉴</h2><button class="btn" id="sideClose" type="button">✕ 닫기</button></div><div id="side"></div></aside>
+      <div class="scrim" id="sideScrim" hidden></div>
       <div class="tree view" id="tree"></div>
 
       <!-- ③ 개인페이지 (로그인 #/) -->
       <main id="homeMain" class="view" aria-label="내 페이지">
         <div class="tfband" id="tfBanner" hidden>🔐 발송·결재·권한 기능을 쓰려면 2단계 인증을 켜 주세요. <button class="btn sm" type="button" id="tfBannerBtn">지금 켜기</button></div>
+        <section class="chatspot" id="chatSpot" aria-labelledby="chatT">
+          <div class="secT"><h2 id="chatT">상담창</h2><p class="sub">메뉴를 몰라도 말로 하시면 됩니다. 쓰기·보내기는 확인을 받고 합니다.</p></div>
+          <div id="chatHost"><p class="hint" id="chatWait">상담창을 불러오는 중…</p></div>
+          <div class="qrow"><span class="ql" id="quickL">자주 쓰는 지시</span><div class="quick" id="quick" role="group" aria-labelledby="quickL"></div></div>
+          <div class="recent" id="recent" hidden><div class="rh">최근 대화</div><ul id="recentList"></ul></div>
+        </section>
         <section aria-labelledby="dashT">
           <div class="secT"><h2 id="dashT">대시보드</h2><a href="#/custom" class="btn sm">🎨 꾸미기</a></div>
           <div class="dgrid" id="dash"></div>
-        </section>
-        <section class="chatspot" aria-labelledby="chatT">
-          <div class="secT"><h2 id="chatT">상담창</h2><p class="sub">단추를 누르면 상담창에 그 말이 들어갑니다.</p></div>
-          <div class="quick" id="quick" role="group" aria-label="자주 쓰는 지시"></div>
-          <p class="hint">상담창은 화면 맨 위 <b>사교원 AI</b> 띠입니다 ▲</p>
         </section>
         <section aria-labelledby="ntT">
           <div class="secT"><h2 id="ntT">공지·소식</h2><p class="sub">아카데미 · 사교원 · 위키 · 연대지능 위키 · 망남</p></div>
@@ -281,6 +345,8 @@
           <label class="btn sm" for="fUp">⬆️ 올리기</label><input type="file" id="fUp" multiple hidden aria-label="올릴 파일 고르기">
           <button class="btn sm" type="button" id="fRef" aria-label="목록 새로고침">↻ 새로고침</button>
         </div>
+        <form class="fmk" id="fMkBox" hidden><label for="fMkName">새 폴더 이름</label><input id="fMkName" maxlength="80" autocomplete="off"><button class="btn sm p" type="submit">만들기</button><button class="btn sm" type="button" id="fMkX">취소</button></form>
+        <div class="fsel" id="fSel" hidden role="group" aria-label="고른 파일"><b id="fSelN"></b><button class="btn sm" type="button" id="fSelDel">🗑️ 지우기</button><label for="fSelTo">옮길 곳</label><select id="fSelTo"></select><button class="btn sm" type="button" id="fSelMv">📂 옮기기</button><button class="btn sm" type="button" id="fSelX">선택 풀기</button></div>
         <div class="quota" id="fQuota"></div>
         <div class="msg" id="fMsg" aria-live="polite"></div>
         <div class="ro" id="fRo" hidden role="note">📥 PC 에서 자동으로 올라온 자료(읽기 전용)입니다. 여기서는 올리거나 지울 수 없고, 고치려면 PC 쪽 폴더에서 바꾸면 됩니다.</div>
@@ -340,7 +406,8 @@
         <div class="secT"><h2>내 페이지 꾸미기</h2><p class="sub">체크하면 넣고, ▲▼ 로 순서를 바꿉니다. 저장하면 어느 기기에서 로그인해도 같습니다.</p></div>
         <div class="cgrid">
           <section class="grp" aria-labelledby="cDashT"><h3 id="cDashT">📊 대시보드 칸</h3><ul class="clist" id="cDash"></ul></section>
-          <section class="grp" aria-labelledby="cSideT"><h3 id="cSideT">📌 사이드바 메뉴</h3><ul class="clist" id="cSide"></ul></section>
+          <section class="grp" aria-labelledby="cSideT"><h3 id="cSideT">📌 사이드바 메뉴</h3><input class="cfind" id="cFind" type="search" placeholder="메뉴·도구 찾기 (예: 근태, 입찰)" aria-label="메뉴·도구 찾기"><ul class="clist" id="cSide"></ul>
+            <details class="ctools" id="cToolsBox"><summary>🤖 상담창 도구 <span id="cToolsN"></span> — 사이드바에도 넣고 싶은 것만 체크</summary><ul class="clist" id="cTools"></ul></details></section>
           <aside class="grp" aria-labelledby="cPrevT"><h3 id="cPrevT">미리보기</h3><div class="mini" id="cPrev"></div></aside>
         </div>
         <div class="cbar"><button class="btn p" type="button" id="cSave">저장</button><button class="btn" type="button" id="cReset">등급 기본 구성으로</button><span class="msg" id="cMsg" aria-live="polite"></span></div>
@@ -753,8 +820,8 @@ function setPreview(k) {
 function renderPv() {
   const bar = $('#pv'); bar.classList.toggle('on', !!(realMe && realMe.role === 'admin'));
   if (!realMe || realMe.role !== 'admin') return;
-  $('#pvBtns').innerHTML = PREVIEWS.map(p => `<button data-pv="${p.k}" class="${preview === p.k ? 'cur' : ''}">${esc(p.t)}</button>`).join('') + `<button data-pv="" class="${preview ? '' : 'cur'}">통합관리자(원래대로)</button>`;
-  $('#pvNow').textContent = preview ? '지금 보는 화면: ' + PREVIEWS.find(p => p.k === preview).t + ' 기준 (실제 로그인은 ' + (realMe.name || realMe.username) + ')' : '실제 화면';
+  $('#pvBtns').innerHTML = PREVIEWS.map(p => `<button type="button" data-pv="${p.k}" class="${preview === p.k ? 'cur' : ''}" aria-pressed="${preview === p.k}">${esc(p.t)}</button>`).join('') + `<button type="button" data-pv="" class="${preview ? '' : 'cur'}" aria-pressed="${!preview}">통합관리자(원래대로)</button>`;
+  $('#pvNow').textContent = preview ? '지금: ' + PREVIEWS.find(p => p.k === preview).t + ' 기준 (실제 로그인은 ' + (realMe.name || realMe.username) + ')' : '지금: 통합관리자(원래대로)';
   $('#pvBtns').querySelectorAll('button').forEach(b => b.addEventListener('click', () => setPreview(b.dataset.pv || null)));
 }
 /* ── 비밀번호 변경 (임시 비밀번호로 들어오면 바로 띄운다) */
@@ -787,8 +854,9 @@ function openLock(a) {
 }
 function setWho() {
   const u = realMe;
-  if (u) { $('#who').innerHTML = `<b>${esc(u.name || u.email || u.username)}</b> · ${esc(u.role_ko || '')}` + (u.email ? '' : ' · <a href="#" id="whoEmail">이메일 등록</a>'); $('#btnLogin').style.display = 'none'; $('#btnLogout').style.display = ''; $('#btnPw').style.display = ''; $('#btnTwofa').style.display = ''; }
-  else { $('#who').textContent = ''; $('#btnLogin').style.display = ''; $('#btnLogout').style.display = 'none'; $('#btnPw').style.display = 'none'; $('#btnTwofa').style.display = 'none'; }
+  const nm = u ? String(u.name || u.email || u.username) : '';
+  if (u) { $('#who').innerHTML = `<b>${esc(nm)}</b><span class="r"> · ${esc(u.role_ko || '')}</span>`; $('#acctAv').textContent = nm.slice(0, 1); $('#whoEmailBox').innerHTML = u.email ? '' : '<a href="#" id="whoEmail">✉️ 이메일 등록</a>'; $('#acct').hidden = false; $('#btnLogin').style.display = 'none'; $('#btnLogout').style.display = ''; $('#btnPw').style.display = ''; $('#btnTwofa').style.display = ''; }
+  else { $('#who').textContent = ''; $('#acctAv').textContent = ''; $('#whoEmailBox').innerHTML = ''; $('#acct').hidden = true; closeAcct(false); $('#btnLogin').style.display = ''; $('#btnLogout').style.display = 'none'; $('#btnPw').style.display = 'none'; $('#btnTwofa').style.display = 'none'; }
   renderPv();
   route();
 }
@@ -809,6 +877,8 @@ function route() {
     location.replace('#/classic'); return;
   }
   const ab = $('#axLockBar'); if (ab) ab.hidden = !AXLOCK;
+  $('#topnav').hidden = !!(AXLOCK && !(realMe && realMe.role === 'admin'));   // 11-04 알파언니 🟠4: 잠금 중 비관리자에겐 갈 곳이 옛 화면뿐
+  closeSide(false); closeAcct(false);
   if (h === '#pw') { history.replaceState(null, '', location.pathname); if (me) { openPw(); } else openAuth('login'); }   // 11-01: 상담창 「비밀번호 바꿀래」
   if (h === '#login' || h === '#/login') openAuth('login');
   if (h === '#signup' || h === '#/signup') openAuth('signup');
@@ -824,6 +894,8 @@ function route() {
   show('#vGate', gate); show('#vClassic', r === 'classic'); show('#shell', shell); show('#tree', r === 'classic');
   show('#homeMain', !!me && r === 'home'); show('#vFiles', !!me && r === 'files'); show('#vCustom', !!me && r === 'custom'); show('#vMap', r === 'map');
   $('#topnav').querySelectorAll('a').forEach(a => { a.classList.toggle('cur', a.dataset.r === r); if (a.dataset.r === r) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); a.hidden = a.classList.contains('needin') && !me; });
+  $('#sideTog').hidden = !(me && shell && r !== 'classic');
+  skaiPlace(!!me && r === 'home');
   if (gate) renderGate(needLogin);
   if (r === 'classic') renderTree();
   if (me && r === 'home') { renderSideHome(); renderHome(); }
@@ -925,8 +997,18 @@ async function renderQuick() {
     ['prefs.dash_edit', '대시보드에 근태 넣어 줘']];
   SAFE.forEach(([id, x]) => { if (has(id)) add(x); });
   if (!list.length) { const seen = {}; tools.items.forEach(t => { const ex = (t.examples || [])[0]; if (!ex || t.risk !== 'read' || seen[t.area]) return; seen[t.area] = 1; add(ex); }); }   // 대장이 달라도 읽기 예시로
-  box.innerHTML = list.length ? list.slice(0, 8).map(x => `<button type="button" data-say="${esc(x)}" title="상담창에 넣기">${esc(x)}</button>`).join('') : '<p class="hint">자주 쓰는 지시가 쌓이면 여기에 단추로 나옵니다.</p>';
+  box.innerHTML = list.length ? list.slice(0, 8).map(x => `<button type="button" data-say="${esc(x)}" title="상담창에 넣기">${esc(x)}</button>`).join('') + (list.length > 3 ? '<button type="button" class="qmore" aria-expanded="false">＋ 더 보기</button>' : '') : '<p class="hint">자주 쓰는 지시가 쌓이면 여기에 단추로 나옵니다.</p>';
+  const qm = box.querySelector('.qmore'); if (qm) qm.addEventListener('click', () => { const on = box.classList.toggle('all'); qm.textContent = on ? '－ 접기' : '＋ 더 보기'; qm.setAttribute('aria-expanded', on ? 'true' : 'false'); });   // 휴대폰은 3개 + 더 보기
 }
+/* 11-04 개선안 13: 넓은 상담창 아래 최근 대화 두 줄 — 누르면 상담창에서 그 대화를 이어 연다 */
+async function renderRecent() {
+  const r = await api('/api/ai/dock/threads');
+  if (!onHome()) return;
+  const items = (r.ok && Array.isArray(r.items)) ? r.items.slice(0, 2) : [];
+  $('#recent').hidden = !items.length;
+  $('#recentList').innerHTML = items.map(t => `<li><button type="button" data-thread="${esc(t.id)}"><span aria-hidden="true">🕘</span><span class="t">${esc(t.first || t.title || '(제목 없음)')}</span><span class="dt">${esc(fmtTime(t.updated_at))}</span><span aria-hidden="true">이어서 ›</span></button></li>`).join('');
+}
+$('#recentList').addEventListener('click', e => { const b = e.target.closest('button[data-thread]'); if (b && window.skai && window.skai.openThread) window.skai.openThread(b.dataset.thread); });
 async function renderNotices() {
   const r = await api('/api/notices?limit=20');
   if (!onHome()) return;
@@ -935,14 +1017,14 @@ async function renderNotices() {
 }
 function renderHome() {
   renderTfBanner();
-  renderDash(); renderQuick(); renderNotices();
+  renderDash(); renderQuick(); renderNotices(); renderRecent();
   loadTools().then(() => { if (onHome() && Array.isArray(prefs.side) && prefs.side.length) renderSideHome(); });  // 도구 id 가 든 사이드바는 대장이 온 뒤 다시
 }
 
 /* ── ⑦ 2단계 인증 */
 let tf = null;                        // {enabled, required, methods, email_masked}
 async function loadTwofa() { const r = await api('/api/auth/2fa/status'); tf = r.ok ? r : null; renderTfBanner(); return tf; }
-function renderTfBanner() { const b = $('#tfBanner'); if (b) b.hidden = !(tf && tf.required && !tf.enabled); }
+function renderTfBanner() { const b = $('#tfBanner'); if (b) b.hidden = !(tf && tf.required && !tf.enabled); const t = $('#acctTf'); if (t) { t.textContent = tf ? (tf.enabled ? '켜짐' : '꺼짐') : ''; t.classList.toggle('off', !!(tf && !tf.enabled)); } }
 function openTf() {
   $('#tfModal').classList.add('on'); tfView('loading');
   loadTwofa().then(t => tfView(t ? (t.enabled ? 'on' : 'off') : 'err'));
@@ -1006,17 +1088,31 @@ function tfView(v, data) {
 /* ── ② 둘러보기(#/map) — TREE 3묶음을 카드로, 도구 대장이 있으면 「상담창에 이렇게 말해 보세요」 예시를 붙인다 */
 function mapCard(it) {
   const ok = allowed(it.need);
-  const tool = toolFor(it); const ex = tool && Array.isArray(tool.examples) ? tool.examples[0] : '';
+  const tool = toolFor(it);
+  // 11-04 개선안 21: 도구 대장 예시가 없으면 「○○ 열어 줘」(상담창의 화면 열기 도구가 받는 말)를 예시로 — 모든 카드에 예시
+  const ex = (tool && Array.isArray(tool.examples) && tool.examples[0]) || (ok && !it.ext ? `${it.t.replace(/\s*\(.*\)$/, '')} 열어 줘` : '');
   const href = ok ? it.h : (me ? '#locked' : '#/signup');
   const go = ok ? `<a class="btn sm" href="${esc(it.h)}"${it.ext ? ' target="_blank" rel="noopener"' : ''}>화면으로 가기${it.ext ? ' ↗' : ''}</a>` : `<a class="btn sm" href="${esc(href)}" data-need="${esc(it.need || '')}" data-t="${esc(it.t)}">${me ? '권한 안내' : '가입하고 쓰기'}</a>`;
   return `<article class="mcard${ok ? '' : ' locked'}${it.sub ? ' sub' : ''}"><h4>${ok ? '' : '🔒 '}${esc(it.t)}${it.soon ? ' <span class="rq">준비 중</span>' : ''}</h4><p class="d">${esc(it.d || (tool && tool.desc) || '')}</p><div class="row">${go}${ok ? '' : `<span class="rq">${esc(whoText(it.need))}</span>`}</div>` +
     (ex ? `<button type="button" class="exq" data-say="${esc(ex)}">상담창에 이렇게 말해 보세요: “${esc(ex)}”</button>` : '') + '</article>';
 }
 function renderMap() {
-  const draw = () => { if (currentRoute() !== 'map') return; $('#mapBody').innerHTML = TREE.map(g => `<section class="grp mapgrp" aria-label="${esc(g.name)}"><h3><span class="ic">${g.ic}</span>${esc(g.name)}${g.lock ? `<span class="lock">🔒 ${esc(g.lock)}</span>` : ''}</h3>${g.secs.map(sc => `<div class="mapsec"><h4 class="sec" style="margin:6px 0 6px;font-size:14px;color:var(--g7)">${sc.ic} ${esc(sc.name)}</h4><div class="mcards">${sc.items.map(mapCard).join('')}</div></div>`).join('')}</section>`).join(''); };
+  const draw = () => { if (currentRoute() !== 'map') return;
+    $('#mapChips').innerHTML = TREE.map((g, gi) => g.secs.map((sc, si) => `<a href="#/map" data-jump="map-${gi}-${si}">${sc.ic} ${esc(sc.name)}</a>`).join('')).join('');
+    $('#mapBody').innerHTML = TREE.map((g, gi) => `<section class="grp mapgrp" aria-label="${esc(g.name)}"><h3><span class="ic">${g.ic}</span>${esc(g.name)}${g.lock ? `<span class="lock">🔒 ${esc(g.lock)}</span>` : ''}</h3>${g.secs.map((sc, si) => `<div class="mapsec" id="map-${gi}-${si}"><h4 class="sec" style="margin:6px 0 6px;font-size:14px;color:var(--g7)">${sc.ic} ${esc(sc.name)}</h4><div class="mcards">${sc.items.map(mapCard).join('')}</div></div>`).join('')}</section>`).join('');
+    mapFind(); };
   draw();                              // 대장이 없어도 TREE 만으로 먼저 그린다
   loadTools().then(() => { if (TOOLS.items.length) draw(); });
 }
+function mapFind() {
+  const q = ($('#mapFind').value || '').trim().toLowerCase(); let n = 0;
+  $('#mapBody').querySelectorAll('.mcard').forEach(c => { const hit = !q || c.textContent.toLowerCase().includes(q); c.classList.toggle('hide', !hit); if (hit) n++; });
+  $('#mapBody').querySelectorAll('.mapsec').forEach(sc => sc.classList.toggle('hide', !sc.querySelector('.mcard:not(.hide)')));
+  $('#mapBody').querySelectorAll('.mapgrp').forEach(g => g.classList.toggle('hide', !g.querySelector('.mapsec:not(.hide)')));
+  $('#mapNone').hidden = !q || n > 0;
+}
+$('#mapFind').addEventListener('input', mapFind);
+$('#mapChips').addEventListener('click', e => { const a = e.target.closest('a[data-jump]'); if (!a) return; e.preventDefault(); $('#mapFind').value = ''; mapFind(); const t = document.getElementById(a.dataset.jump); if (t) { t.scrollIntoView({ behavior: 'smooth', block: 'start' }); const h = t.querySelector('h4'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); } } });
 
 /* ── ⑥ 꾸미기(#/custom) — 대시보드 칸 · 사이드바 메뉴 체크·▲▼ · 미리보기 · 저장 */
 const CUST = { defs: [], dash: [], side: [], avail: [] };
@@ -1038,13 +1134,33 @@ async function renderCustom() {
 }
 function drawCustom() {
   const row = (kind, x, i, n, label, meta) => `<li><label><input type="checkbox" data-ck="${kind}" data-id="${esc(x.id)}"${x.on ? ' checked' : ''}> <span>${label}</span>${meta ? `<span class="meta">${meta}</span>` : ''}</label><button class="mv" type="button" data-cm="${kind}" data-id="${esc(x.id)}" data-mv="-1" aria-label="${esc(label)} 위로"${i === 0 ? ' disabled' : ''}>▲</button><button class="mv" type="button" data-cm="${kind}" data-id="${esc(x.id)}" data-mv="1" aria-label="${esc(label)} 아래로"${i === n - 1 ? ' disabled' : ''}>▼</button></li>`;
-  $('#cDash').innerHTML = CUST.dash.map((x, i) => { const d = CUST.defs.find(c => c.id === x.id) || {}; return row('dash', x, i, CUST.dash.length, esc(d.title || CARD_DEFS[x.id] || x.id), esc([d.need, d.refresh].filter(Boolean).join(' · '))); }).join('');
-  $('#cSide').innerHTML = CUST.side.map((x, i) => { const it = CUST.avail.find(a => a.id === x.id) || {}; return row('side', x, i, CUST.side.length, (it.tool ? '🤖 ' : '') + esc(it.t || x.id), esc(it.tool ? ('상담창 도구' + (it.area ? ' · ' + it.area : '')) : (it.sec || ''))); }).join('');
+  // 11-04 개선안 10: 칸 옆 코드(login·role:coop·perm:회계) 대신 한국어, 상담창 도구는 접힌 묶음으로 따로
+  $('#cDash').innerHTML = CUST.dash.map((x, i) => { const d = CUST.defs.find(c => c.id === x.id) || {}; return row('dash', x, i, CUST.dash.length, esc(d.title || CARD_DEFS[x.id] || x.id), esc([d.need ? whoText(d.need) : '', d.refresh ? '갱신 ' + d.refresh : ''].filter(Boolean).join(' · '))); }).join('');
+  const isTool = x => !!(CUST.avail.find(a => a.id === x.id) || {}).tool;
+  const menus = CUST.side.filter(x => !isTool(x)), tools = CUST.side.filter(isTool);
+  const sideRow = (x, i, n) => { const it = CUST.avail.find(a => a.id === x.id) || {}; return row('side', x, i, n, (it.tool ? '🤖 ' : '') + esc(it.t || x.id), esc(it.tool ? (it.area || '') : (it.sec || ''))); };
+  $('#cSide').innerHTML = menus.map((x, i) => sideRow(x, i, menus.length)).join('');
+  $('#cTools').innerHTML = tools.map((x, i) => sideRow(x, i, tools.length)).join('');
+  $('#cToolsN').textContent = `(${tools.length}개 중 ${tools.filter(x => x.on).length}개 넣음)`;
+  if (tools.some(x => x.on)) $('#cToolsBox').open = true;
+  custFind();
   const dashOn = CUST.dash.filter(x => x.on), sideOn = CUST.side.filter(x => x.on);
   $('#cPrev').innerHTML = `<div class="h">📊 대시보드</div><ul>${dashOn.length ? dashOn.map(x => `<li>▫ ${esc((CUST.defs.find(c => c.id === x.id) || {}).title || CARD_DEFS[x.id] || x.id)}</li>`).join('') : '<li>(없음)</li>'}</ul>
     <div class="h">🏠 내 페이지</div><div class="h">📁 내 폴더</div><div class="h">📌 내가 고른 메뉴</div><ul>${sideOn.length ? sideOn.map(x => `<li>· ${esc((CUST.avail.find(a => a.id === x.id) || {}).t || x.id)}</li>`).join('') : '<li>(없음 — 소분류 순서대로 보입니다)</li>'}</ul><div class="h">🗺️ 둘러보기</div>`;
 }
-function custMove(kind, id, dir) { const arr = CUST[kind]; const i = arr.findIndex(x => x.id === id), j = i + dir; if (i < 0 || j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; drawCustom(); }
+function custMove(kind, id, dir) {
+  const arr = CUST[kind]; const i = arr.findIndex(x => x.id === id); if (i < 0) return;
+  // 사이드바는 메뉴끼리·도구끼리만 움직인다(보이지 않는 다른 묶음 항목과 자리를 바꾸지 않게)
+  const same = x => kind !== 'side' || !!(CUST.avail.find(a => a.id === x.id) || {}).tool === !!(CUST.avail.find(a => a.id === id) || {}).tool;
+  let j = i + dir; while (j >= 0 && j < arr.length && !same(arr[j])) j += dir;
+  if (j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; drawCustom();
+}
+function custFind() {
+  const q = ($('#cFind').value || '').trim().toLowerCase();
+  ['#cSide', '#cTools'].forEach(sel => $(sel).querySelectorAll('li').forEach(li => li.classList.toggle('hide', !!q && !li.textContent.toLowerCase().includes(q))));
+  if (q && Array.from($('#cTools').querySelectorAll('li')).some(li => !li.classList.contains('hide'))) $('#cToolsBox').open = true;
+}
+$('#cFind').addEventListener('input', custFind);
 $('#vCustom').addEventListener('change', e => { const c = e.target.closest('input[data-ck]'); if (!c) return; const x = CUST[c.dataset.ck].find(y => y.id === c.dataset.id); if (x) x.on = c.checked; drawCustom(); });
 $('#vCustom').addEventListener('click', e => { const b = e.target.closest('button[data-cm]'); if (b) custMove(b.dataset.cm, b.dataset.id, +b.dataset.mv); });
 $('#cSave').addEventListener('click', async () => {
@@ -1055,10 +1171,19 @@ $('#cSave').addEventListener('click', async () => {
   if (r.ok) { if (r.prefs) prefs = Object.assign({}, prefs, r.prefs); m.className = 'msg ok'; m.textContent = '저장했습니다. 내 페이지에 반영됩니다.'; renderSideHome(); }
   else { m.className = 'msg err'; m.textContent = '저장하지 못했습니다: ' + errText(r); }
 });
-$('#cReset').addEventListener('click', () => { prefs.dash = []; prefs.side = []; $('#cMsg').className = 'msg'; $('#cMsg').textContent = '등급 기본 구성으로 돌렸습니다. 「저장」을 누르면 계정에 남습니다.'; renderCustom(); });
+$('#cReset').addEventListener('click', async () => {   // 11-04 개선안 10: 확인 한 번 뒤 바로 저장(그 전엔 「저장」을 또 눌러야 남았다)
+  if (!confirm('대시보드 칸과 사이드바 메뉴를 등급 기본 구성으로 되돌릴까요? 바로 저장됩니다.')) return;
+  const m = $('#cMsg');
+  prefs.dash = []; prefs.side = [];
+  if (preview) { m.className = 'msg'; m.textContent = '미리보기 중엔 저장하지 않습니다(화면만 돌렸습니다).'; renderCustom(); return; }
+  const r = await api('/api/auth/prefs', { method: 'POST', body: { dash: [], side: [] } });
+  if (r.ok) { if (r.prefs) prefs = Object.assign({}, prefs, r.prefs); m.className = 'msg ok'; m.textContent = '등급 기본 구성으로 되돌려 저장했습니다.'; renderSideHome(); }
+  else { m.className = 'msg err'; m.textContent = '저장하지 못했습니다: ' + errText(r); }
+  renderCustom();
+});
 
 /* ── ④ 내 폴더(#/files) */
-const FS = { path: '', tab: 'files', items: [] };
+const FS = { path: '', tab: 'files', items: [], sel: new Set() };   // sel: 11-04 여러 개 고르기
 const fmtSize = n => { n = +n || 0; if (n < 1024) return n + ' B'; if (n < 1048576) return (n / 1024).toFixed(1) + ' KB'; if (n < 1073741824) return (n / 1048576).toFixed(1) + ' MB'; return (n / 1073741824).toFixed(2) + ' GB'; };
 const fmtTime = t => { if (!t) return ''; const d = typeof t === 'number' ? new Date(t * (t < 1e12 ? 1000 : 1)) : new Date(t); return isNaN(d) ? String(t) : d.toLocaleString('ko-KR', { year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }); };
 const fsJoin = name => (FS.path ? FS.path + '/' : '') + name;
@@ -1092,9 +1217,32 @@ async function fsLoad() {
       const left = it.purge_after ? `${it.purge_after} 지나면 영구 삭제` : '';   // 11-04 알파언니 🟠2: 남은 날 대신 삭제 시각
       rows.push(`<tr><td class="nm">${it.dir ? '📁' : '📄'} ${esc(orig.slice(at + 1))}${dir ? `<span class="d">원래 자리: 📁 ${esc(dir)}</span>` : ''}</td><td class="n">${it.dir ? '' : fmtSize(it.size)}</td><td class="n tt">${esc((it.deleted || '').slice(5) || fmtTime(it.mtime || it.deleted_at))}${left ? `<span class="d">${left}</span>` : ''}</td><td class="act"><button class="btn sm" type="button" data-fa="restore" data-p="${esc(name)}" title="원래 자리로 되돌립니다">♻️ 복원</button></td></tr>`);
     }
-    else rows.push(`<tr><td class="nm">${it.dir ? `📁 <a href="#/files" data-fp="${esc(p)}">${esc(name)}</a>` : `📄 ${esc(name)}`}${it.readonly === true ? '<span class="rotag">읽기 전용</span>' : ''}</td><td class="n">${it.dir ? '' : fmtSize(it.size)}</td><td class="n">${esc(fmtTime(it.mtime))}</td><td class="act">${it.dir ? '' : `<a class="btn sm" href="/api/my/files/download?path=${encodeURIComponent(p)}" download>⬇️ 내려받기</a>`}${itRo ? '' : `<button class="btn sm" type="button" data-fa="delete" data-p="${esc(p)}" data-n="${esc(name)}">🗑️ 지우기</button>`}</td></tr>`);
+    else rows.push(`<tr><td class="nm">${itRo ? '' : `<input type="checkbox" data-sel="${esc(p)}" aria-label="${esc(name)} 고르기"${FS.sel.has(p) ? ' checked' : ''}>`}${it.dir ? `📁 <a href="#/files" data-fp="${esc(p)}">${esc(name)}</a>` : `📄 ${esc(name)}`}${it.readonly === true ? '<span class="rotag">읽기 전용</span>' : ''}</td><td class="n">${it.dir ? '' : fmtSize(it.size)}</td><td class="n">${esc(fmtTime(it.mtime))}</td><td class="act">${it.dir ? '' : `<a class="btn sm" href="/api/my/files/download?path=${encodeURIComponent(p)}" download>⬇️ 내려받기</a>`}${itRo ? '' : `<button class="btn sm" type="button" data-fa="rename" data-p="${esc(p)}" data-n="${esc(name)}">✏️ 이름 바꾸기</button><button class="btn sm" type="button" data-fa="delete" data-p="${esc(p)}" data-n="${esc(name)}">🗑️ 지우기</button>`}</td></tr>`);
   });
-  $('#fList').innerHTML = rows.length ? rows.join('') : `<tr><td colspan="4" class="n">${FS.tab === 'trash' ? '휴지통이 비어 있습니다' : (r.ok ? '비어 있습니다 — 「올리기」로 파일을 넣거나 「새 폴더」를 만들어 보세요' : '목록을 불러오지 못했습니다')}</td></tr>`;
+  $('#fList').innerHTML = rows.length ? rows.join('') : `<tr><td colspan="4" class="n">${FS.tab === 'trash' ? '휴지통이 비어 있습니다' : (r.ok ? '비어 있습니다 — 「올리기」로 파일을 넣거나 「새 폴더」를 만들어 보세요. 파일을 이 목록에 끌어다 놓아도 올라갑니다.' : '목록을 불러오지 못했습니다')}</td></tr>`;
+  { const here = new Set(items.map(it => it.path || fsJoin(it.name || ''))); FS.sel.forEach(p => { if (!here.has(p)) FS.sel.delete(p); }); }   // 🟡12: 지우거나 이름 바꾼 옛 경로를 버린다
+  /* 11-04 개선안 12: 옮길 곳 = 맨 위 · 위 폴더 · 지금 폴더 안의 폴더 */
+  const up = FS.path.split('/').slice(0, -1).join('/');
+  const dests = [['', '📁 내 폴더(맨 위)']].concat(FS.path && up ? [[up, '⬆️ ' + up]] : []).concat(FS.tab === 'trash' || ro ? [] : items.filter(it => it.dir && it.readonly !== true).map(it => { const q = it.path || fsJoin(it.name || ''); return [q, '📁 ' + q]; }));
+  $('#fSelTo').innerHTML = dests.filter(d => d[0] !== FS.path).map(d => `<option value="${esc(d[0])}">${esc(d[1])}</option>`).join('');
+  fsSelBar();
+}
+function fsSelBar() { const n = FS.sel.size; $('#fSel').hidden = !n || FS.tab === 'trash'; $('#fSelN').textContent = n + '개 고름'; }
+async function fsRename(p, oldName, cell) {
+  const nm = cell; const keep = nm.innerHTML;
+  nm.innerHTML = `<input class="rn" value="${esc(oldName)}" aria-label="새 이름"> <button class="btn sm p" type="button" data-rn="ok">저장</button> <button class="btn sm" type="button" data-rn="x">취소</button>`;
+  const inp = nm.querySelector('input.rn'); inp.focus(); const dot = oldName.lastIndexOf('.'); inp.setSelectionRange(0, dot > 0 ? dot : oldName.length);
+  const done = async ok => {
+    if (!ok) { nm.innerHTML = keep; return; }
+    const v = inp.value.trim(); if (!v || v === oldName) { nm.innerHTML = keep; return; }
+    if (/[\\/:*?"<>|]/.test(v) || v.startsWith('.')) { fsMsg('이름에 \\ / : * ? " < > | 는 쓸 수 없고, 점(.)으로 시작할 수 없습니다.'); return; }
+    const dir = p.split('/').slice(0, -1).join('/');
+    const r = await api('/api/my/files/move', { method: 'POST', body: { path: p, to: (dir ? dir + '/' : '') + v } });
+    fsMsg(r.ok ? `이름을 바꿨습니다 — ${v}` : reasonText(r), r.ok); if (r.ok) fsLoad();
+  };
+  nm.querySelector('[data-rn=ok]').addEventListener('click', () => done(true));
+  nm.querySelector('[data-rn=x]').addEventListener('click', () => done(false));
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); done(true); } else if (e.key === 'Escape') done(false); });
 }
 async function fsUpload(files) {
   if (!files || !files.length) return;
@@ -1109,9 +1257,10 @@ async function fsUpload(files) {
   fsLoad();
 }
 $('#vFiles').addEventListener('click', async e => {
-  const c = e.target.closest('a[data-fp]'); if (c) { e.preventDefault(); FS.tab = 'files'; FS.path = c.dataset.fp || ''; fsTabs(); fsMsg(''); fsLoad(); return; }
-  const t = e.target.closest('button[data-ft]'); if (t) { FS.tab = t.dataset.ft; fsTabs(); fsMsg(''); fsLoad(); return; }
+  const c = e.target.closest('a[data-fp]'); if (c) { e.preventDefault(); FS.tab = 'files'; FS.path = c.dataset.fp || ''; FS.sel.clear(); fsTabs(); fsMsg(''); fsLoad(); return; }
+  const t = e.target.closest('button[data-ft]'); if (t) { FS.tab = t.dataset.ft; FS.sel.clear(); fsTabs(); fsMsg(''); fsLoad(); return; }
   const b = e.target.closest('button[data-fa]'); if (!b) return;
+  if (b.dataset.fa === 'rename') { fsRename(b.dataset.p, b.dataset.n, b.closest('tr').querySelector('td.nm')); return; }
   if (b.dataset.fa === 'delete') {
     if (!confirm(`「${b.dataset.n}」을(를) 지울까요? 7일 동안 휴지통에 보관됩니다.`)) return;
     const r = await api('/api/my/files/delete', { method: 'POST', body: { path: b.dataset.p } });
@@ -1122,11 +1271,39 @@ $('#vFiles').addEventListener('click', async e => {
   }
 });
 function fsTabs() { $('#vFiles').querySelectorAll('button[data-ft]').forEach(b => { const on = b.dataset.ft === FS.tab; b.classList.toggle('on', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); }); }
-$('#fMk').addEventListener('click', async () => {
-  const name = (prompt('새 폴더 이름:') || '').trim(); if (!name) return;
-  if (/[\\/:*?"<>|]/.test(name)) { fsMsg('폴더 이름에 \\ / : * ? " < > | 는 쓸 수 없습니다.'); return; }
+$('#fMk').addEventListener('click', () => { const bx = $('#fMkBox'); bx.hidden = !bx.hidden; if (!bx.hidden) { $('#fMkName').value = ''; $('#fMkName').focus(); } });   // 11-04 개선안 12: 브라우저 입력창 대신 화면 안 칸
+$('#fMkX').addEventListener('click', () => { $('#fMkBox').hidden = true; });
+$('#fMkBox').addEventListener('submit', async e => {
+  e.preventDefault();
+  const name = $('#fMkName').value.trim(); if (!name) { $('#fMkName').focus(); return; }
+  if (/[\\/:*?"<>|]/.test(name) || name.startsWith('.')) { fsMsg('폴더 이름에 \\ / : * ? " < > | 는 쓸 수 없고, 점(.)으로 시작할 수 없습니다.'); return; }
   const r = await api('/api/my/files/mkdir', { method: 'POST', body: { path: fsJoin(name) } });
-  fsMsg(r.ok ? '만들었습니다.' : reasonText(r), r.ok); fsLoad();
+  fsMsg(r.ok ? `「${name}」 폴더를 만들었습니다.` : reasonText(r), r.ok); if (r.ok) $('#fMkBox').hidden = true; fsLoad();
+});
+/* 여러 개 고르기 → 지우기·옮기기 */
+$('#fList').addEventListener('change', e => { const c = e.target.closest('input[data-sel]'); if (!c) return; if (c.checked) FS.sel.add(c.dataset.sel); else FS.sel.delete(c.dataset.sel); fsSelBar(); });
+$('#fSelX').addEventListener('click', () => { FS.sel.clear(); fsLoad(); });
+$('#fSelDel').addEventListener('click', async () => {
+  const ps = Array.from(FS.sel); if (!ps.length || !confirm(`고른 ${ps.length}개를 지울까요? 7일 동안 휴지통에 보관됩니다.`)) return;
+  let bad = 0; for (const p of ps) { const r = await api('/api/my/files/delete', { method: 'POST', body: { path: p } }); if (!r.ok) bad++; }
+  FS.sel.clear(); fsMsg(bad ? `${ps.length - bad}개 지웠고 ${bad}개는 지우지 못했습니다.` : `${ps.length}개를 휴지통으로 옮겼습니다.`, !bad); fsLoad();
+});
+$('#fSelMv').addEventListener('click', async () => {
+  const ps = Array.from(FS.sel), to = $('#fSelTo').value; if (!ps.length) return;
+  let bad = 0, why = '';
+  for (const p of ps) { const nm = p.split('/').pop(); const r = await api('/api/my/files/move', { method: 'POST', body: { path: p, to: (to ? to + '/' : '') + nm } }); if (!r.ok) { bad++; why = reasonText(r); } }
+  FS.sel.clear(); fsMsg(bad ? `${ps.length - bad}개 옮겼고 ${bad}개는 못 옮겼습니다: ${why}` : `${ps.length}개를 「${to || '내 폴더(맨 위)'}」로 옮겼습니다.`, !bad); fsLoad();
+});
+/* 끌어다 놓아 올리기 */
+const hasFiles = e => !!(e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files'));
+['dragenter', 'dragover'].forEach(ev => document.addEventListener(ev, e => { if (currentRoute() !== 'files' || !me || !hasFiles(e)) return; e.preventDefault(); $('#vFiles').classList.toggle('drop', FS.tab === 'files' && !FS.ro); }));
+document.addEventListener('dragleave', e => { if (!e.relatedTarget) $('#vFiles').classList.remove('drop'); });
+// 11-04 알파언니 🟠3: 내 폴더 화면에서는 어디에 놓든 여기서 받는다 — 상담창(ai-dock)의 문서 drop 보다 먼저 등록되어 defaultPrevented 로 막는다
+document.addEventListener('drop', e => {
+  if (currentRoute() !== 'files' || !me || !hasFiles(e)) return;
+  e.preventDefault(); $('#vFiles').classList.remove('drop');
+  if (FS.tab !== 'files' || FS.ro) { fsMsg(FS.tab === 'trash' ? '휴지통에는 올릴 수 없습니다. 「내 파일」 탭에서 올려 주세요.' : 'PC 에서 자동으로 올라온 폴더(읽기 전용)에는 올릴 수 없습니다.'); return; }
+  if (e.dataTransfer.files.length) fsUpload(e.dataTransfer.files);
 });
 $('#fUp').addEventListener('change', function () { fsUpload(this.files); this.value = ''; });
 $('#fRef').addEventListener('click', () => { fsMsg(''); fsLoad(); });
@@ -1212,11 +1389,10 @@ function applyFont() {
   let v = 100; try { v = +localStorage.getItem('sk_font') || 100; } catch (_) {}
   if (!FS_LV.includes(v)) v = 100;
   document.documentElement.style.fontSize = (15 * v / 100) + 'px'; document.documentElement.dataset.fs = v;
-  $('#fsDown').disabled = v === FS_LV[0]; $('#fsUp').disabled = v === FS_LV[FS_LV.length - 1];
+  document.querySelectorAll('[data-fs]').forEach(b => { b.disabled = +b.dataset.fs < 0 ? v === FS_LV[0] : v === FS_LV[FS_LV.length - 1]; });   // 머리띠·계정 메뉴 두 벌
 }
 function stepFont(d) { const v = +document.documentElement.dataset.fs || 100; const i = Math.max(0, Math.min(FS_LV.length - 1, FS_LV.indexOf(v) + d)); try { localStorage.setItem('sk_font', String(FS_LV[i])); } catch (_) {} applyFont(); }
-$('#fsUp').addEventListener('click', () => stepFont(1));
-$('#fsDown').addEventListener('click', () => stepFont(-1));
+document.querySelectorAll('[data-fs]').forEach(b => b.addEventListener('click', () => stepFont(+b.dataset.fs)));
 
 async function boot() {
   applyFont();
@@ -1249,7 +1425,57 @@ $('#tabSignup').addEventListener('click', () => authTab('signup'));
 $('#suTier').addEventListener('change', () => { $('#suContactReq').textContent = $('#suTier').value === 'general' ? '(일반이용자는 선택)' : '(필수)'; });
 window.addEventListener('hashchange', route);
 $('#lockClose').addEventListener('click', () => $('#lockModal').classList.remove('on'));
-$('#sideTog').addEventListener('click', () => { const on = document.body.classList.toggle('sideOpen'); $('#sideTog').setAttribute('aria-expanded', on ? 'true' : 'false'); });
+/* ── 11-04 개선안 M5: ☰ 내 메뉴 서랍 — 휴대폰은 왼쪽에서 덮고(닫기·가림막·Esc·링크), 포커스는 서랍 안에서만 */
+const MQ_SMALL = window.matchMedia ? window.matchMedia('(max-width:760px)') : { matches: false };
+const INERT_SEL = 'header.top, #topnav, #pv, #tree, #homeMain, #vFiles, #vCustom, #vMap, footer, .install-bar';
+function openSide() {
+  document.body.classList.add('sideOpen'); document.documentElement.classList.add('drawer-open'); $('#sideTog').setAttribute('aria-expanded', 'true');
+  if (!MQ_SMALL.matches) return;
+  const w = $('#sideWrap'); w.setAttribute('role', 'dialog'); w.setAttribute('aria-modal', 'true'); w.setAttribute('aria-labelledby', 'drawerT'); w.removeAttribute('aria-label');
+  $('#sideScrim').hidden = false;
+  document.querySelectorAll(INERT_SEL).forEach(el => { el.inert = true; });
+  setTimeout(() => $('#sideClose').focus(), 30);
+}
+function closeSide(back) {
+  const was = document.body.classList.contains('sideOpen');
+  document.body.classList.remove('sideOpen'); document.documentElement.classList.remove('drawer-open'); $('#sideTog').setAttribute('aria-expanded', 'false');
+  const w = $('#sideWrap'); w.removeAttribute('role'); w.removeAttribute('aria-modal'); w.removeAttribute('aria-labelledby'); w.setAttribute('aria-label', '내 메뉴');
+  $('#sideScrim').hidden = true;
+  document.querySelectorAll(INERT_SEL).forEach(el => { el.inert = false; });
+  if (was && back !== false) $('#sideTog').focus();
+}
+$('#sideTog').addEventListener('click', () => { if (document.body.classList.contains('sideOpen')) closeSide(); else openSide(); });
+$('#sideClose').addEventListener('click', () => closeSide());
+$('#sideScrim').addEventListener('click', () => closeSide());
+$('#sideWrap').addEventListener('click', e => { if (MQ_SMALL.matches && e.target.closest('#side a[href]:not([href="#locked"])')) closeSide(false); });
+$('#sideWrap').addEventListener('keydown', e => {
+  if (!document.body.classList.contains('sideOpen') || !MQ_SMALL.matches) return;
+  if (e.key === 'Escape') { e.preventDefault(); closeSide(); return; }
+  if (e.key !== 'Tab') return;
+  const f = Array.from($('#sideWrap').querySelectorAll('a[href],button:not([disabled]),input,[tabindex]:not([tabindex="-1"])')).filter(x => x.offsetParent !== null);
+  if (!f.length) return; const i = f.indexOf(document.activeElement);
+  if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); } else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); }
+});
+if (MQ_SMALL.addEventListener) MQ_SMALL.addEventListener('change', () => closeSide(false));
+/* ── 11-04 개선안 M4: 계정 메뉴 */
+function openAcct() { if (MQ_SMALL.matches) $('#acctMenu').style.top = Math.round(document.querySelector('header.top').getBoundingClientRect().bottom + 6) + 'px'; else $('#acctMenu').style.top = ''; $('#acctMenu').hidden = false; $('#acctBtn').setAttribute('aria-expanded', 'true'); const f = Array.from($('#acctMenu').querySelectorAll('button:not([disabled]),a[href]')).find(x => x.offsetParent !== null); if (f) f.focus(); }
+function closeAcct(back) { const was = !$('#acctMenu').hidden; $('#acctMenu').hidden = true; $('#acctBtn').setAttribute('aria-expanded', 'false'); if (was && back !== false) $('#acctBtn').focus(); }
+$('#acctBtn').addEventListener('click', () => { if ($('#acctMenu').hidden) openAcct(); else closeAcct(); });
+$('#acct').addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#acctMenu').hidden) { e.preventDefault(); closeAcct(); } });
+$('#acct').addEventListener('focusout', e => { if (!$('#acctMenu').hidden && e.relatedTarget && !$('#acct').contains(e.relatedTarget)) closeAcct(false); });   // 🟡7: Tab 으로 밖에 나가면 닫는다
+$('#acctMenu').addEventListener('click', e => { if (e.target.closest('button:not([data-fs]),a')) closeAcct(false); });
+document.addEventListener('click', e => { if (!$('#acctMenu').hidden && !e.target.closest('#acct')) closeAcct(false); });
+/* ── 11-04 개선안 13·M6: 상담창 자리 — 내 페이지면 대시보드 위 넓은 상담창(inline), 그 밖은 ai-dock 이 폭 따라 위 띠/「상담」 단추 */
+let chatIO = null;
+function skaiPlace(home) {
+  window.__skaiMode = home ? { m: 'inline', el: $('#chatHost') } : { m: 'auto', el: null };
+  if (window.skai && window.skai.mode) { window.skai.mode(window.__skaiMode.m, window.__skaiMode.el); $('#chatWait').hidden = true; }
+  else if (home) setTimeout(() => { if (!(window.skai && window.skai.mode)) $('#chatWait').textContent = '상담창을 불러오지 못했습니다. 새로고침해 주세요.'; else skaiPlace(currentRoute() === 'home' && !!me); }, 2500);
+  if (home && !chatIO && 'IntersectionObserver' in window) {
+    chatIO = new IntersectionObserver(es => es.forEach(x => { if (window.skai && window.skai.fabShow) window.skai.fabShow(!x.isIntersecting && currentRoute() === 'home'); }), { threshold: 0 });
+    chatIO.observe($('#chatSpot'));
+  }
+}
 document.addEventListener('click', e => {
   const l = e.target.closest('a[href="#locked"]'); if (l) { e.preventDefault(); openLock(l); return; }
   const a = e.target.closest('a[href="#login"]'); if (a) { e.preventDefault(); openAuth('login'); return; }
