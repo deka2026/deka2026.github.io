@@ -190,6 +190,11 @@
     var edits = {};   // 11-04 개선안 6·17: 카드 안에서 고친 제목·본문
     Array.prototype.forEach.call(c.querySelectorAll('[data-edit]'), function (e) { edits[e.getAttribute('data-edit')] = e.value; });
     api('/api/ai/exec/run', { method: 'POST', body: { plan_id: r.plan_id, edits: edits } }).then(function (x) {
+      if (x.error === 'fix_card') {   // 11-04 알파언니 🟠3·4: 빈 칸·남은 빈칸 — 실행하지 않았다, 카드를 그대로 두고 고치게
+        addMsg('err', esc(x.text || '카드를 확인해 주세요.'));
+        r.edit = (r.edit || []).map(function (f) { return Object.assign({}, f, { value: edits[f.name] != null ? edits[f.name] : f.value }); });
+        showConfirm(r, c); return;
+      }
       if (x.error === 'reauth_required') { btns.innerHTML = '<span class="note">재인증이 필요합니다.</span>'; showConfirm(Object.assign({}, r, { need_reauth: true }), c); return; }
       if (!x.name && !x.kind) { c.remove(); addMsg('err', esc(x.text || '실행하지 못했습니다. 다시 말씀해 주세요.')); return; }   // 🟠4: 카드 만료·이미 실행 등은 문장으로
       c.remove(); showResult(x);
