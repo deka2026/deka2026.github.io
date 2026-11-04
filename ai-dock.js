@@ -213,6 +213,10 @@
   }
   function plan(q, wait, toolHint) {
     return api('/api/ai/exec/plan', { method: 'POST', body: { thread_id: state.thread, message: q, tool: toolHint || null } }).then(function (r) {
+      if (r.error === 'ax_locked' && !state.lockNoted && state.me && state.me.user) {     // 개선안 27: 개편 잠금 중 로그인 회원에게 한 번 알리고 보통 대화로(비회원 안내 대화는 그대로)
+        state.lockNoted = true;
+        addMsg('ai', '🔒 ' + esc(r.message || '사이트 개편 작업 중이라 지시 실행(출근 찍기·파일·발송 등)은 잠시 쉬고 있습니다.') + ' 지금은 보통 질문으로 답합니다.');
+      }
       if (!r.ok || r.kind === 'none') return false;           // 도구 아님 → 보통 질문으로
       wait.remove(); state.pending = null;
       if (r.kind === 'result') { showResult(r); return true; }
