@@ -92,7 +92,7 @@
     ':host([data-mode=inline]) #send,:host([data-mode=fab]) #send{order:4;background:#2c5842;color:#fff;border-color:#2c5842;font-weight:600;padding:0 22px}' +
     ':host([data-mode=inline]) .panel{box-shadow:none;border:1px solid #e6e1d3;border-radius:12px;margin-top:10px;max-height:360px}:host([data-mode=inline]) .inner{max-width:none;padding:10px 12px}' +
     ':host([data-mode=fab]) .q{flex:1 1 100%;order:0}:host([data-mode=fab]) #send{margin-left:auto}' +
-    '.fabbtn{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:calc(var(--skai-bottom,16px) + env(safe-area-inset-bottom));z-index:1100;height:56px;min-width:56px;padding:0 20px;border-radius:28px;border:none;background:#0d3b2c;color:#faf6ec;font-size:16px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.28);cursor:pointer;font-family:inherit;align-items:center;gap:6px}' +
+    '.fabbtn{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:calc(var(--skai-bottom,16px) + env(safe-area-inset-bottom));z-index:150;height:56px;min-width:56px;padding:0 20px;border-radius:28px;border:none;background:#0d3b2c;color:#faf6ec;font-size:16px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.28);cursor:pointer;font-family:inherit;align-items:center;gap:6px}' +
     '.fabbtn:focus-visible,.shead button:focus-visible{outline:3px solid #b47d14;outline-offset:2px}' +
     ':host([data-mode=fab]) .fabbtn,:host([data-mode=inline][data-fabshow]) .fabbtn{display:inline-flex}:host([data-mode=fab][data-open]) .fabbtn{display:none}' +
     ':host([data-mode=fab]) .wrap{display:none}' +
@@ -100,7 +100,7 @@
     ':host([data-mode=fab][data-open]) .wrap{display:flex;flex-direction:column;position:fixed;left:0;right:0;bottom:0;height:88dvh;max-height:88dvh;z-index:2147481000;background:#fff;border-radius:16px 16px 0 0;box-shadow:0 -6px 24px rgba(0,0,0,.25);padding:0 0 calc(12px + env(safe-area-inset-bottom))}' +
     ':host([data-mode=fab][data-open]) .shead{display:flex;align-items:center;gap:8px;padding:6px 10px 6px 16px;border-bottom:1px solid #e6e1d3}.shead h2{margin:0;font-size:17px;flex:1;color:#0d3b2c}.shead button{height:44px;min-width:44px;border:1px solid #d9d2c0;background:#fff;border-radius:22px;padding:0 14px;font-size:15px;cursor:pointer;font-family:inherit;color:#2c5842}' +
     ':host([data-mode=fab][data-open]) .panel{display:block;order:1;flex:1;max-height:none;box-shadow:none;border:none;overflow:auto}:host([data-mode=fab][data-open]) .bar{order:2;padding:10px 12px 0;border-top:1px solid #e6e1d3}' +
-    ':host([data-mode=fab]) .tab{min-height:40px}' +
+    ':host([data-mode=fab]) .tab{min-height:44px}' +
     '@media(max-width:760px){:host([data-mode=inline]) .q{flex:1 1 100%;order:0}:host([data-mode=inline]) #send{margin-left:auto}:host([data-mode=inline]) .panel{max-height:50dvh}}' +
     // 휴대폰 한 줄: [올리기][말하기·준비 중] … [보내기] — 390px 에서 꺾이지 않게 단추 안쪽 여백·글자를 줄인다
     '@media(max-width:760px){:host([data-mode=inline]) .b,:host([data-mode=fab]) .b{padding:0 11px;font-size:14px}:host([data-mode=inline]) #send,:host([data-mode=fab]) #send{padding:0 18px}:host([data-mode=inline]) .mic,:host([data-mode=fab]) .mic{font-size:12.5px;padding:0 9px}}' +
@@ -149,7 +149,7 @@
   function unpushPage() {   // 11-04: 내 페이지 상담창·휴대폰 단추로 바뀌면 내린 것을 되돌린다
     var b = document.body; if (!b) return;
     if (b.getAttribute('data-skai-pushed')) { b.style.marginTop = b.getAttribute('data-skai-mt0') || ''; b.removeAttribute('data-skai-pushed'); b.removeAttribute('data-skai-mt0'); }
-    Array.prototype.forEach.call(document.querySelectorAll('[data-skai-top]'), function (el) { el.style.top = el.getAttribute('data-skai-top0') || ''; el.removeAttribute('data-skai-top'); el.removeAttribute('data-skai-top0'); });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-skai-top][data-skai-top0]'), function (el) { el.style.top = el.getAttribute('data-skai-top0') || ''; el.removeAttribute('data-skai-top'); el.removeAttribute('data-skai-top0'); });   // 앱이 일부러 단 표식(data-skai-top 만 있는 것)은 그대로
   }
   // ── 모드 정하기: 폭 760px 이하는 fab, 그 위는 bar. 앱이 <html data-skai-mode="bar"> 로 고정할 수 있고, 첫 화면은 skai.mode('inline', 자리)로 바꾼다
   var MQ = window.matchMedia ? window.matchMedia('(max-width:760px)') : null;

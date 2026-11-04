@@ -108,7 +108,7 @@
   .chatspot{padding:16px 18px}.chatspot .secT{margin-bottom:10px}.qrow{display:flex;gap:8px;align-items:flex-start;margin-top:12px}.qrow .ql{font-size:0.8333rem;color:var(--mute);padding-top:9px;white-space:nowrap}.qrow .quick{margin:0}
   .quick button{min-height:38px}
   .recent{border-top:1px dashed var(--line);margin-top:12px;padding-top:8px}.recent .rh{font-size:0.8rem;color:var(--mute);margin-bottom:4px}.recent ul{list-style:none;margin:0;padding:0}.recent li button{display:flex;gap:8px;width:100%;align-items:center;border:none;background:none;padding:8px 4px;min-height:var(--tap);cursor:pointer;font-family:inherit;text-align:left;color:var(--ink);border-radius:8px}.recent li button:hover{background:var(--g0)}.recent li .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}.recent li .dt{font-size:0.8rem;color:var(--mute);white-space:nowrap}
-  .gnote .mb{display:none}
+  .gnote .mb,#vClassic .mb{display:none}
   @media(max-width:760px){
     :root{--tabH:4rem;--skai-bottom:calc(var(--tabH) + 12px)}
     body.in .app{grid-template-columns:1fr}
@@ -131,7 +131,7 @@
     .btn.sm,.tabs button,.pv button,.quick button{min-height:var(--tap)}
     .qrow{flex-direction:column;gap:4px}.qrow .ql{padding-top:0}
     .chatspot{padding:14px}
-    .gnote .dk{display:none}.gnote .mb{display:inline}
+    .gnote .dk,#vClassic .dk{display:none}.gnote .mb,#vClassic .mb{display:inline}
     .pv .pvsub{display:none}.pv summary{min-height:var(--tap)}
     .chatspot .secT .sub{display:none}.chatspot .secT{margin-bottom:6px}
     .quick:not(.all) button[data-say]:nth-of-type(n+4){display:none}.quick button.qmore{display:inline-flex}
@@ -139,6 +139,7 @@
     .acctBtn .who b{display:inline-block;max-width:6em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
     html[data-fs="125"] .sideTog{font-size:0;gap:0}html[data-fs="125"] .sideTog::before{content:"☰";font-size:1.2rem}
     #topnav a{font-size:0.7333rem;white-space:nowrap}
+    #vMap .mapchips a,#vMap .mapbar input,#vMap .mcard .exq{min-height:var(--tap)}.side .mv,.clist .mv{min-width:36px;min-height:36px}.side .hint a{display:inline-block;padding:10px 0}
   }
   .quick .qmore{display:none;border:1px dashed var(--line);background:#fff;color:var(--ink2)}
   @media(prefers-reduced-motion:no-preference){.side{transition:transform .22s ease,visibility .22s}}
@@ -224,7 +225,7 @@
   .tfqr{text-align:center;margin:8px 0}.tfqr svg{width:180px;height:180px}.tfsec{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:0.8667rem;background:var(--g0);padding:6px 8px;border-radius:6px;word-break:break-all}
   @media(max-width:760px){.gate2,.cgrid{grid-template-columns:1fr}.btn.big{font-size:1.0667rem}}
 </style>
-<script src="/ai-dock.js" defer></script>
+<script src="/ai-dock.js?v=20261104c" defer></script><!-- 11-04 알파언니 🟠1: 판 표시 — 캐시된 옛 상담창(4시간)이 새 첫 화면에 붙지 않게, 고칠 때마다 올린다 -->
 </head>
 <body>
 <div class="wrap">
@@ -293,7 +294,7 @@
     <div class="hero">
       <div class="card">
         <h2>무엇이든 AI 도우미에게 물어보세요</h2>
-        <p>화면 맨 위 <b>사교원 AI</b> 칸은 모든 페이지에 따라다닙니다. 지금 보는 화면을 근거로 답하고, 파일·이미지를 올려 묻고, 문서를 써서 한글(hwpx)로 내려받습니다. 연산은 과기정통부 고성능컴퓨팅(HPC) 엔진이 맡고, 개인정보는 보내기 전에 가립니다.</p>
+        <p><span class="dk">화면 맨 위 <b>사교원 AI</b> 칸은</span><span class="mb">오른쪽 아래 <b>💬 상담</b> 단추는</span> 모든 페이지에 따라다닙니다. 지금 보는 화면을 근거로 답하고, 파일·이미지를 올려 묻고, 문서를 써서 한글(hwpx)로 내려받습니다. 연산은 과기정통부 고성능컴퓨팅(HPC) 엔진이 맡고, 개인정보는 보내기 전에 가립니다.</p>
         <div class="ask"><input id="heroQ" placeholder="예: 사교원은 어떤 곳인가요? / 햇빛소득마을 신청 절차는?" aria-label="질문"><button id="heroAsk">물어보기</button></div>
         <div class="ex"><button data-q="사교원은 어떤 조직이고 무슨 일을 하나요?">사교원 소개</button><button data-q="햇빛소득마을 공모에 참여하려면 어떤 서류가 필요한가요?">햇소자 서류</button><button data-q="연대지능활동가 아카데미는 무엇을 배우나요?">아카데미</button><button data-q="교육 프로그램 비용은 어떻게 계산하나요?">교육 견적</button></div>
       </div>
@@ -876,6 +877,7 @@ function route() {
     location.replace('#/classic'); return;
   }
   const ab = $('#axLockBar'); if (ab) ab.hidden = !AXLOCK;
+  $('#topnav').hidden = !!(AXLOCK && !(realMe && realMe.role === 'admin'));   // 11-04 알파언니 🟠4: 잠금 중 비관리자에겐 갈 곳이 옛 화면뿐
   closeSide(false); closeAcct(false);
   if (h === '#pw') { history.replaceState(null, '', location.pathname); if (me) { openPw(); } else openAuth('login'); }   // 11-01: 상담창 「비밀번호 바꿀래」
   if (h === '#login' || h === '#/login') openAuth('login');
@@ -1218,6 +1220,7 @@ async function fsLoad() {
     else rows.push(`<tr><td class="nm">${itRo ? '' : `<input type="checkbox" data-sel="${esc(p)}" aria-label="${esc(name)} 고르기"${FS.sel.has(p) ? ' checked' : ''}>`}${it.dir ? `📁 <a href="#/files" data-fp="${esc(p)}">${esc(name)}</a>` : `📄 ${esc(name)}`}${it.readonly === true ? '<span class="rotag">읽기 전용</span>' : ''}</td><td class="n">${it.dir ? '' : fmtSize(it.size)}</td><td class="n">${esc(fmtTime(it.mtime))}</td><td class="act">${it.dir ? '' : `<a class="btn sm" href="/api/my/files/download?path=${encodeURIComponent(p)}" download>⬇️ 내려받기</a>`}${itRo ? '' : `<button class="btn sm" type="button" data-fa="rename" data-p="${esc(p)}" data-n="${esc(name)}">✏️ 이름 바꾸기</button><button class="btn sm" type="button" data-fa="delete" data-p="${esc(p)}" data-n="${esc(name)}">🗑️ 지우기</button>`}</td></tr>`);
   });
   $('#fList').innerHTML = rows.length ? rows.join('') : `<tr><td colspan="4" class="n">${FS.tab === 'trash' ? '휴지통이 비어 있습니다' : (r.ok ? '비어 있습니다 — 「올리기」로 파일을 넣거나 「새 폴더」를 만들어 보세요. 파일을 이 목록에 끌어다 놓아도 올라갑니다.' : '목록을 불러오지 못했습니다')}</td></tr>`;
+  { const here = new Set(items.map(it => it.path || fsJoin(it.name || ''))); FS.sel.forEach(p => { if (!here.has(p)) FS.sel.delete(p); }); }   // 🟡12: 지우거나 이름 바꾼 옛 경로를 버린다
   /* 11-04 개선안 12: 옮길 곳 = 맨 위 · 위 폴더 · 지금 폴더 안의 폴더 */
   const up = FS.path.split('/').slice(0, -1).join('/');
   const dests = [['', '📁 내 폴더(맨 위)']].concat(FS.path && up ? [[up, '⬆️ ' + up]] : []).concat(FS.tab === 'trash' || ro ? [] : items.filter(it => it.dir && it.readonly !== true).map(it => { const q = it.path || fsJoin(it.name || ''); return [q, '📁 ' + q]; }));
@@ -1292,9 +1295,16 @@ $('#fSelMv').addEventListener('click', async () => {
   FS.sel.clear(); fsMsg(bad ? `${ps.length - bad}개 옮겼고 ${bad}개는 못 옮겼습니다: ${why}` : `${ps.length}개를 「${to || '내 폴더(맨 위)'}」로 옮겼습니다.`, !bad); fsLoad();
 });
 /* 끌어다 놓아 올리기 */
-['dragenter', 'dragover'].forEach(ev => $('#vFiles').addEventListener(ev, e => { if (FS.tab !== 'files' || FS.ro || !e.dataTransfer || !Array.from(e.dataTransfer.types || []).includes('Files')) return; e.preventDefault(); $('#vFiles').classList.add('drop'); }));
-['dragleave', 'drop'].forEach(ev => $('#vFiles').addEventListener(ev, e => { if (ev === 'dragleave' && $('#vFiles').contains(e.relatedTarget)) return; $('#vFiles').classList.remove('drop'); }));
-$('#vFiles').addEventListener('drop', e => { if (FS.tab !== 'files' || FS.ro || !e.dataTransfer || !e.dataTransfer.files.length) return; e.preventDefault(); fsUpload(e.dataTransfer.files); });
+const hasFiles = e => !!(e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files'));
+['dragenter', 'dragover'].forEach(ev => document.addEventListener(ev, e => { if (currentRoute() !== 'files' || !me || !hasFiles(e)) return; e.preventDefault(); $('#vFiles').classList.toggle('drop', FS.tab === 'files' && !FS.ro); }));
+document.addEventListener('dragleave', e => { if (!e.relatedTarget) $('#vFiles').classList.remove('drop'); });
+// 11-04 알파언니 🟠3: 내 폴더 화면에서는 어디에 놓든 여기서 받는다 — 상담창(ai-dock)의 문서 drop 보다 먼저 등록되어 defaultPrevented 로 막는다
+document.addEventListener('drop', e => {
+  if (currentRoute() !== 'files' || !me || !hasFiles(e)) return;
+  e.preventDefault(); $('#vFiles').classList.remove('drop');
+  if (FS.tab !== 'files' || FS.ro) { fsMsg(FS.tab === 'trash' ? '휴지통에는 올릴 수 없습니다. 「내 파일」 탭에서 올려 주세요.' : 'PC 에서 자동으로 올라온 폴더(읽기 전용)에는 올릴 수 없습니다.'); return; }
+  if (e.dataTransfer.files.length) fsUpload(e.dataTransfer.files);
+});
 $('#fUp').addEventListener('change', function () { fsUpload(this.files); this.value = ''; });
 $('#fRef').addEventListener('click', () => { fsMsg(''); fsLoad(); });
 
@@ -1448,10 +1458,11 @@ $('#sideWrap').addEventListener('keydown', e => {
 });
 if (MQ_SMALL.addEventListener) MQ_SMALL.addEventListener('change', () => closeSide(false));
 /* ── 11-04 개선안 M4: 계정 메뉴 */
-function openAcct() { $('#acctMenu').hidden = false; $('#acctBtn').setAttribute('aria-expanded', 'true'); const f = Array.from($('#acctMenu').querySelectorAll('button:not([disabled]),a[href]')).find(x => x.offsetParent !== null); if (f) f.focus(); }
+function openAcct() { if (MQ_SMALL.matches) $('#acctMenu').style.top = Math.round(document.querySelector('header.top').getBoundingClientRect().bottom + 6) + 'px'; else $('#acctMenu').style.top = ''; $('#acctMenu').hidden = false; $('#acctBtn').setAttribute('aria-expanded', 'true'); const f = Array.from($('#acctMenu').querySelectorAll('button:not([disabled]),a[href]')).find(x => x.offsetParent !== null); if (f) f.focus(); }
 function closeAcct(back) { const was = !$('#acctMenu').hidden; $('#acctMenu').hidden = true; $('#acctBtn').setAttribute('aria-expanded', 'false'); if (was && back !== false) $('#acctBtn').focus(); }
 $('#acctBtn').addEventListener('click', () => { if ($('#acctMenu').hidden) openAcct(); else closeAcct(); });
 $('#acct').addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#acctMenu').hidden) { e.preventDefault(); closeAcct(); } });
+$('#acct').addEventListener('focusout', e => { if (!$('#acctMenu').hidden && e.relatedTarget && !$('#acct').contains(e.relatedTarget)) closeAcct(false); });   // 🟡7: Tab 으로 밖에 나가면 닫는다
 $('#acctMenu').addEventListener('click', e => { if (e.target.closest('button:not([data-fs]),a')) closeAcct(false); });
 document.addEventListener('click', e => { if (!$('#acctMenu').hidden && !e.target.closest('#acct')) closeAcct(false); });
 /* ── 11-04 개선안 13·M6: 상담창 자리 — 내 페이지면 대시보드 위 넓은 상담창(inline), 그 밖은 ai-dock 이 폭 따라 위 띠/「상담」 단추 */
