@@ -140,8 +140,10 @@
     html[data-fs="125"] .sideTog{font-size:0;gap:0}html[data-fs="125"] .sideTog::before{content:"☰";font-size:1.2rem}
     #topnav a{font-size:0.7333rem;white-space:nowrap}
     #vMap .mapchips a,#vMap .mapbar input,#vMap .mcard .exq,#vMap .msh{min-height:var(--tap)}
+    #vMap .mapbar{top:var(--hdrH,64px);z-index:40}#vMap .mapsec{scroll-margin-top:calc(var(--hdrH,64px) + 130px)}   /* 11-04 알파언니 🟠1: 바로가기로 간 소분류 제목이 머리띠·찾기 띠에 가리지 않게 */
+    html[data-route="custom"]{--skai-bottom:calc(var(--tabH) + 72px)}   /* 🟡3: 꾸미기에선 「상담」 단추를 저장 줄 위로 */
     /* 11-04 개선안 M7: 꾸미기는 탭 셋(칸·메뉴·미리보기) 가운데 하나만, 저장 줄은 아래 탭 위에 붙인다 */
-    #vCustom .ctabs{display:flex;gap:6px;position:sticky;top:calc(64px + env(safe-area-inset-top));z-index:5;background:var(--bg);padding:6px 0;margin-bottom:8px}.ctabs button{flex:1;min-height:var(--tap);border:1px solid var(--line);background:#fff;border-radius:999px;font:inherit;font-size:0.8667rem;cursor:pointer}.ctabs button[aria-selected="true"]{background:var(--g7);color:#fff;border-color:var(--g7)}
+    #vCustom .ctabs{display:flex;gap:6px;position:sticky;top:var(--hdrH,64px);z-index:5;background:var(--bg);padding:6px 0;margin-bottom:8px}.ctabs button{flex:1;min-height:var(--tap);border:1px solid var(--line);background:#fff;border-radius:999px;font:inherit;font-size:0.8667rem;cursor:pointer}.ctabs button[aria-pressed="true"]{background:var(--g7);color:#fff;border-color:var(--g7)}
     #vCustom .cgrid>[data-ct]{display:none}#vCustom[data-ct="dash"] .cgrid>[data-ct="dash"],#vCustom[data-ct="side"] .cgrid>[data-ct="side"],#vCustom[data-ct="prev"] .cgrid>[data-ct="prev"]{display:block}
     #vCustom .cbar{position:sticky;bottom:calc(var(--tabH) + env(safe-area-inset-bottom) + 2px);background:var(--bg);padding:8px 0;z-index:5;border-top:1px solid var(--line)}.side .mv,.clist .mv{min-width:36px;min-height:36px}.side .hint a{display:inline-block;padding:10px 0}
   }
@@ -409,7 +411,7 @@
       <!-- ⑥ 꾸미기 (#/custom) -->
       <main id="vCustom" class="view" aria-label="내 페이지 꾸미기">
         <div class="secT"><h2>내 페이지 꾸미기</h2><p class="sub">체크하면 넣고, ▲▼ 로 순서를 바꿉니다. 저장하면 어느 기기에서 로그인해도 같습니다.</p></div>
-        <div class="ctabs" role="tablist" aria-label="꾸미기 묶음"><button type="button" role="tab" data-ct="dash" aria-selected="true" aria-controls="cDashBox">📊 대시보드 칸</button><button type="button" role="tab" data-ct="side" aria-selected="false" aria-controls="cSideBox">📌 메뉴</button><button type="button" role="tab" data-ct="prev" aria-selected="false" aria-controls="cPrevBox">👀 미리보기</button></div>
+        <div class="ctabs" role="group" aria-label="꾸미기 묶음 고르기"><button type="button" data-ct="dash" aria-pressed="true" aria-controls="cDashBox">📊 대시보드 칸</button><button type="button" data-ct="side" aria-pressed="false" aria-controls="cSideBox">📌 메뉴</button><button type="button" data-ct="prev" aria-pressed="false" aria-controls="cPrevBox">👀 미리보기</button></div>
         <div class="cgrid">
           <section class="grp" id="cDashBox" data-ct="dash" aria-labelledby="cDashT"><h3 id="cDashT">📊 대시보드 칸</h3><ul class="clist" id="cDash"></ul></section>
           <section class="grp" id="cSideBox" data-ct="side" aria-labelledby="cSideT"><h3 id="cSideT">📌 사이드바 메뉴</h3><input class="cfind" id="cFind" type="search" placeholder="메뉴·도구 찾기 (예: 근태, 입찰)" aria-label="메뉴·도구 찾기"><ul class="clist" id="cSide"></ul>
@@ -890,7 +892,8 @@ function route() {
   if (h === '#signup' || h === '#/signup') openAuth('signup');
   const r = currentRoute();
   document.body.classList.toggle('in', !!me);
-  document.body.dataset.route = r;
+  document.body.dataset.route = r; document.documentElement.dataset.route = r;
+  { const hd = document.querySelector('header.top'); if (hd) document.documentElement.style.setProperty('--hdrH', Math.round(hd.getBoundingClientRect().height) + 'px'); }
   document.querySelectorAll('.mgronly').forEach(e => { e.hidden = !(me && (RANK[me.role] || 0) >= RANK.staff); });   // 개선안 23: 관리 링크는 매니저 이상
 
   const needLogin = (r === 'custom' || r === 'files') && !me;
@@ -1114,7 +1117,7 @@ function renderMap() {
 const mapFold = {};
 function mapFolded(k, first) { return k in mapFold ? mapFold[k] : (MQ_SMALL.matches && !first); }
 function mapSetFold(k, fold) { mapFold[k] = fold; const c = document.getElementById(k + '-c'), b = document.querySelector(`button[data-ms="${k}"]`); if (c) c.hidden = fold; if (b) b.setAttribute('aria-expanded', String(!fold)); }
-$('#mapBody').addEventListener('click', e => { const b = e.target.closest('button[data-ms]'); if (b) mapSetFold(b.dataset.ms, b.getAttribute('aria-expanded') === 'true'); });
+$('#mapBody').addEventListener('click', e => { const b = e.target.closest('button[data-ms]'); if (!b) return; if (($('#mapFind').value || '').trim()) return; mapSetFold(b.dataset.ms, b.getAttribute('aria-expanded') === 'true'); });   // 찾는 동안은 다 펼친 채로
 function mapFind() {
   const q = ($('#mapFind').value || '').trim().toLowerCase(); let n = 0;
   $('#mapBody').querySelectorAll('.mapsec').forEach(sc => { const c = sc.querySelector('.mcards'), k = sc.id; if (c) c.hidden = q ? false : mapFolded(k, k === 'map-0-0'); const b = sc.querySelector('.msh'); if (b) b.setAttribute('aria-expanded', String(c ? !c.hidden : true)); });   // 찾는 동안은 다 펼친다
@@ -1174,7 +1177,7 @@ function custFind() {
 }
 $('#cFind').addEventListener('input', custFind);
 $('#vCustom').dataset.ct = 'dash';
-$('#vCustom').querySelector('.ctabs').addEventListener('click', e => { const b = e.target.closest('button[data-ct]'); if (!b) return; $('#vCustom').dataset.ct = b.dataset.ct; $('#vCustom').querySelectorAll('.ctabs button').forEach(x => x.setAttribute('aria-selected', String(x === b))); });
+$('#vCustom').querySelector('.ctabs').addEventListener('click', e => { const b = e.target.closest('button[data-ct]'); if (!b) return; $('#vCustom').dataset.ct = b.dataset.ct; $('#vCustom').querySelectorAll('.ctabs button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); });
 $('#vCustom').addEventListener('change', e => { const c = e.target.closest('input[data-ck]'); if (!c) return; const x = CUST[c.dataset.ck].find(y => y.id === c.dataset.id); if (x) x.on = c.checked; drawCustom(); });
 $('#vCustom').addEventListener('click', e => { const b = e.target.closest('button[data-cm]'); if (b) custMove(b.dataset.cm, b.dataset.id, +b.dataset.mv); });
 $('#cSave').addEventListener('click', async () => {

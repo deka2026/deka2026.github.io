@@ -51,6 +51,7 @@ main{max-width:1080px;margin:0 auto;padding:16px}
 .bgh .n{margin-left:auto;font-weight:400;font-size:13px;color:var(--ink-soft)}.bgh::after{content:"▴";font-size:12px;color:var(--ink-faint)}.bgh[aria-expanded="false"]::after{content:"▾"}.bgb{margin-top:8px}.bgb[hidden]{display:none}
 .lead-more{display:none}
 @media (max-width:760px){.lead.long{display:none}.lead-more{display:block;font-size:13px;color:var(--ink-soft);margin:0 0 8px}.lead-more summary{cursor:pointer;min-height:44px;display:flex;align-items:center}.lead-more p{margin:4px 0 0}}
+.item{scroll-margin-top:12px}
 .item{border:1px solid var(--line-soft);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px;background:#fff;cursor:pointer}
 .item:hover{border-color:var(--green-100)}
 .item.open{border-color:var(--green-600)}
@@ -312,7 +313,7 @@ function renderFieldChips() {
 ['#f-route', '#f-kind', '#f-sido'].forEach(s => $(s).onchange = renderBoard);
 $('#f-q').oninput = () => { clearTimeout(window._q); window._q = setTimeout(renderBoard, 200); };
 const BG = [['마감 3일 안', 3], ['마감 7일 안', 7], ['마감 14일 안', 14], ['마감 그 뒤·상시', Infinity]];
-const bFold = {};   // 묶음 번호 → 접힘(true). 사용자가 누른 것만 기억, 처음엔 화면 폭으로 정한다
+const bFold = {}; let bSig = '';   // 묶음 번호 → 접힘(true). 사용자가 누른 것만 기억, 처음엔 화면 폭으로 정한다
 function bGroupOf(x) {
   const d = new Date(String(x.deadline || '').replace(' ', 'T')); const t = new Date(); t.setHours(0, 0, 0, 0);
   const n = isNaN(d) || d.getFullYear() >= 2098 ? Infinity : Math.round((new Date(d).setHours(0, 0, 0, 0) - t) / 864e5);
@@ -324,6 +325,7 @@ function renderBoard() {
     (!sd || x.sido.includes(sd)) && (!q || (x.title + (x.demand || '') + (x.org || '')).replace(/\s/g, '').includes(q)));
   if (!list.length) { $('#b-list').innerHTML = '<div class="card empty">조건에 맞는 열린 공고가 없습니다.</div>'; return; }
   const small = window.matchMedia && window.matchMedia('(max-width:760px)').matches;
+  const sig = [field, rt, kd, sd, q, small].join('|'); if (sig !== bSig) { Object.keys(bFold).forEach(k => delete bFold[k]); bSig = sig; }   // 🟡4·6: 분야·필터·화면 폭이 바뀌면 접힘을 새로 셈한다
   const groups = BG.map(() => []); list.forEach(x => groups[bGroupOf(x)].push(x));
   const firstNon = groups.findIndex(g => g.length);
   const itemHtml = x => `
@@ -336,7 +338,8 @@ function renderBoard() {
   $('#b-list').innerHTML = groups.map((g, i) => {
     if (!g.length) return '';
     const hasOpen = openNo && g.some(x => x.no === openNo);
-    const folded = hasOpen ? false : (i in bFold ? bFold[i] : (small && i !== firstNon));
+    const filtering = !!(q || rt || kd || sd);   // 🟡4: 검색·필터 중엔 맞는 공고를 다 펼쳐 보인다
+    const folded = i in bFold ? bFold[i] : (filtering || hasOpen ? false : (small && i !== firstNon));
     return `<section class="bgrp" data-g="${i}"><button type="button" class="bgh" aria-expanded="${!folded}" aria-controls="bg${i}">${BG[i][0]}<span class="n">${g.length}건</span></button><div class="bgb" id="bg${i}"${folded ? ' hidden' : ''}>${g.map(itemHtml).join('')}</div></section>`;
   }).join('');
   $('#b-list').querySelectorAll('.bgh').forEach(b => b.onclick = () => { const i = +b.closest('.bgrp').dataset.g, body = b.nextElementSibling; const fold = !body.hidden; body.hidden = fold; b.setAttribute('aria-expanded', String(!fold)); bFold[i] = fold; });
@@ -348,7 +351,7 @@ function renderBoard() {
   });
   if (openNo) {
     const el = [...$('#b-list').querySelectorAll('.item')].find(e => e.dataset.no === openNo);
-    if (el) { openDetail(el, openNo); el.scrollIntoView({ block: 'nearest' }); }
+    if (el) { const g = el.closest('.bgb'); if (g && g.hidden) { g.hidden = false; g.previousElementSibling.setAttribute('aria-expanded', 'true'); } openDetail(el, openNo); el.scrollIntoView({ block: 'start' }); }
   }
 }
 async function openDetail(el, no) {
