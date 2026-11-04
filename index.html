@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>사교원 — 사회혁신교육원 사회적협동조합 통합사이트</title>
 <meta name="description" content="사회혁신교육원 사회적협동조합(사교원) 통합사이트 — 소개·연구실·참여, 교육·사업·쇼핑을 한 화면에서. 상단 AI 도우미에게 바로 물어보세요.">
 <link rel="canonical" href="https://sakyowon.co.kr/">
@@ -92,7 +92,56 @@
   .pv.on{display:flex}.pv b{margin-right:4px}.pv button{border:1px solid #d9bd6a;background:#fff;border-radius:999px;padding:4px 10px;font-size:0.8333rem;cursor:pointer;font-family:inherit;color:#6b4a06}
   .pv button.cur{background:var(--gold);color:#fff;border-color:var(--gold)}.pv .now{margin-left:auto;font-size:0.8rem}
   .pvnote{font-size:0.7667rem;color:var(--gold);padding:0 4px 4px}
-  @media(max-width:760px){body.in .app{grid-template-columns:1fr}.side{position:static;max-height:none}.sideTog{display:inline-flex;margin:0 0 8px}body.in .side{display:none}body.in.sideOpen .side{display:block}}
+  /* 11-04 화면 개편(개선안 13·M4·M5·M6, 알파 시안 docs/사이트AX개편/화면개편/시안) */
+  :root{--tap:44px;--tabH:0px;--skai-bottom:24px}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  :focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+  .acct{position:relative}.acctBtn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 12px 4px 4px;min-height:40px;cursor:pointer;font-family:inherit;color:var(--ink)}
+  .acctBtn .av{width:32px;height:32px;border-radius:50%;background:var(--g1);color:var(--g9);display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8667rem;flex:0 0 auto}
+  .acctMenu{position:absolute;right:0;top:calc(100% + 6px);z-index:2100;min-width:240px;background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:0 8px 24px rgba(0,0,0,.14);padding:8px;display:flex;flex-direction:column;gap:4px}
+  .acctMenu[hidden]{display:none}.acctMenu .btn{justify-content:flex-start;width:100%;min-height:var(--tap);border:none;background:none;text-align:left}.acctMenu .btn:hover{background:var(--g0)}
+  .acctMenu .tfs{margin-left:auto;font-size:0.7667rem;border-radius:999px;padding:1px 8px;background:var(--g0);color:var(--g7)}.acctMenu .tfs.off{background:var(--gold1);color:#6b4a06}
+  .amfs{display:none;align-items:center;gap:6px;padding:4px 6px 8px;border-bottom:1px solid var(--line);margin-bottom:4px;font-size:0.8667rem;color:var(--ink2)}.amfs span{flex:1}.amfs button{min-width:var(--tap);min-height:var(--tap);border:1px solid var(--line);background:#fff;border-radius:999px;font-family:inherit;cursor:pointer}
+  #whoEmailBox a{display:block;padding:8px 10px;font-size:0.8667rem}
+  .pv summary{cursor:pointer;display:flex;align-items:center;gap:6px;list-style:none;min-height:28px}.pv summary::-webkit-details-marker{display:none}.pv summary::after{content:"▾";margin-left:6px}.pv[open] summary::after{content:"▴"}.pv .pvb{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.pv.on{display:block}
+  .drawerHead,.scrim{display:none}
+  .chatspot{padding:16px 18px}.chatspot .secT{margin-bottom:10px}.qrow{display:flex;gap:8px;align-items:flex-start;margin-top:12px}.qrow .ql{font-size:0.8333rem;color:var(--mute);padding-top:9px;white-space:nowrap}.qrow .quick{margin:0}
+  .quick button{min-height:38px}
+  .recent{border-top:1px dashed var(--line);margin-top:12px;padding-top:8px}.recent .rh{font-size:0.8rem;color:var(--mute);margin-bottom:4px}.recent ul{list-style:none;margin:0;padding:0}.recent li button{display:flex;gap:8px;width:100%;align-items:center;border:none;background:none;padding:8px 4px;min-height:var(--tap);cursor:pointer;font-family:inherit;text-align:left;color:var(--ink);border-radius:8px}.recent li button:hover{background:var(--g0)}.recent li .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}.recent li .dt{font-size:0.8rem;color:var(--mute);white-space:nowrap}
+  .gnote .mb{display:none}
+  @media(max-width:760px){
+    :root{--tabH:4rem;--skai-bottom:calc(var(--tabH) + 12px)}
+    body.in .app{grid-template-columns:1fr}
+    header.top{position:sticky;top:0;z-index:50;background:var(--bg);flex-wrap:nowrap;gap:8px;padding:max(8px,env(safe-area-inset-top)) 0 8px;margin:0 -16px;padding-left:16px;padding-right:16px}
+    header.top .brand .sub,header.top .hm,header.top .fs{display:none}header.top .brand h1{font-size:1.2rem;white-space:nowrap}header.top .brand .mark{width:36px;height:36px;font-size:12px}
+    header.top .btn,header.top .acctBtn{white-space:nowrap;flex-shrink:0;min-height:var(--tap)}
+    body.in .sideTog:not([hidden]){display:inline-flex}
+    .acctBtn .who .rl,.acctBtn .who span.r{display:none}
+    .acctMenu{position:fixed;left:16px;right:16px;top:calc(64px + env(safe-area-inset-top))}
+    .amfs{display:flex}
+    #topnav{position:fixed;left:0;right:0;bottom:0;z-index:1000;display:flex;gap:0;margin:0;padding:0 0 env(safe-area-inset-bottom);min-height:calc(var(--tabH) + env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--line);box-shadow:0 -2px 10px rgba(0,0,0,.06)}
+    #topnav a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:0;font-size:0.8rem;min-height:var(--tabH);padding:4px 2px}#topnav a .ti{font-size:1.4rem;line-height:1}#topnav a.cur{background:var(--g0)}#topnav .tabx{display:none}
+    .wrap{padding-bottom:calc(var(--tabH) + 24px + env(safe-area-inset-bottom))}
+    .side{position:fixed;top:0;bottom:0;left:0;width:min(86vw,340px);height:100dvh;max-height:none;z-index:2001;border-radius:0 var(--r) var(--r) 0;transform:translateX(-105%);visibility:hidden;overflow:auto;overscroll-behavior:contain;padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+    body.in .side{display:block}body.sideOpen .side{transform:none;visibility:visible}
+    .drawerHead{display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:-12px;background:var(--card);padding:8px 0;margin:-4px 0 6px;z-index:1}.drawerHead h2{margin:0;font-size:1.0667rem}.drawerHead .btn{min-height:var(--tap)}
+    body.sideOpen .scrim:not([hidden]){display:block;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:2000}
+    html.drawer-open{overflow:hidden}html.drawer-open #sk-ai-dock{visibility:hidden}
+    .side .ss li a,.side .fix li a,.side .sfoot a{min-height:var(--tap);display:flex;align-items:center}
+    .btn.sm,.tabs button,.pv button,.quick button{min-height:var(--tap)}
+    .qrow{flex-direction:column;gap:4px}.qrow .ql{padding-top:0}
+    .chatspot{padding:14px}
+    .gnote .dk{display:none}.gnote .mb{display:inline}
+    .pv .pvsub{display:none}.pv summary{min-height:var(--tap)}
+    .chatspot .secT .sub{display:none}.chatspot .secT{margin-bottom:6px}
+    .quick:not(.all) button[data-say]:nth-of-type(n+4){display:none}.quick button.qmore{display:inline-flex}
+    .recent li:nth-child(n+2){display:none}
+    .acctBtn .who b{display:inline-block;max-width:6em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
+    html[data-fs="125"] .sideTog{font-size:0;gap:0}html[data-fs="125"] .sideTog::before{content:"☰";font-size:1.2rem}
+    #topnav a{font-size:0.7333rem;white-space:nowrap}
+  }
+  .quick .qmore{display:none;border:1px dashed var(--line);background:#fff;color:var(--ink2)}
+  @media(prefers-reduced-motion:no-preference){.side{transition:transform .22s ease,visibility .22s}}
   .secs{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px 18px}
   .sec h4{margin:6px 0 4px;font-size:0.9333rem;color:var(--g7);display:flex;align-items:center;gap:6px}.sec h4 .ic{font-size:1rem}
   .gate{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--g0);border-style:dashed}
@@ -180,21 +229,30 @@
 <body>
 <div class="wrap">
   <header class="top">
-    <div class="brand"><div class="mark">L&amp;L</div><div><h1>사교원 통합사이트</h1><div class="sub">사회혁신교육원 사회적협동조합 · 소개·연구실·참여 · 교육·사업·쇼핑</div></div></div>
+    <button class="btn sideTog" id="sideTog" type="button" aria-controls="sideWrap" aria-expanded="false" hidden>☰ 메뉴</button>
+    <div class="brand"><div class="mark">L&amp;L</div><div><h1>사교원<span class="hm"> 통합사이트</span></h1><div class="sub">사회혁신교육원 사회적협동조합 · 소개·연구실·참여 · 교육·사업·쇼핑</div></div></div>
     <div class="sp"></div>
-    <span class="fs" role="group" aria-label="글자 크기"><button type="button" id="fsDown" aria-label="글자 작게">가−</button><button type="button" id="fsUp" aria-label="글자 크게">가+</button></span>
-    <span class="who" id="who"></span>
+    <span class="fs" role="group" aria-label="글자 크기"><button type="button" id="fsDown" data-fs="-1" aria-label="글자 작게">가−</button><button type="button" id="fsUp" data-fs="1" aria-label="글자 크게">가+</button></span>
     <button class="btn p" id="btnLogin">로그인 · 회원가입</button>
-    <button class="btn" id="btnPw" style="display:none">비밀번호 변경</button>
-    <button class="btn" id="btnTwofa" style="display:none">2단계 인증</button>
-    <button class="btn" id="btnLogout" style="display:none">로그아웃</button>
+    <!-- 11-04 개선안 M4: 비밀번호·2단계·로그아웃·글자 크기·옛 첫 화면을 계정 단추 하나로 -->
+    <div class="acct" id="acct" hidden>
+      <button class="acctBtn" id="acctBtn" type="button" aria-expanded="false" aria-controls="acctMenu"><span class="av" id="acctAv" aria-hidden="true"></span><span class="who" id="who"></span><span aria-hidden="true">▾</span><span class="sr">계정 메뉴</span></button>
+      <div class="acctMenu" id="acctMenu" hidden>
+        <div class="amfs" role="group" aria-label="글자 크기"><span>글자 크기</span><button type="button" data-fs="-1" aria-label="글자 작게">가−</button><button type="button" data-fs="1" aria-label="글자 크게">가+</button></div>
+        <span id="whoEmailBox"></span>
+        <button class="btn" id="btnPw" type="button" style="display:none">🔑 비밀번호 변경</button>
+        <button class="btn" id="btnTwofa" type="button" style="display:none">🔐 2단계 인증 <span class="tfs" id="acctTf"></span></button>
+        <a class="btn" href="#/classic">옛 첫 화면</a>
+        <button class="btn" id="btnLogout" type="button" style="display:none">로그아웃</button>
+      </div>
+    </div>
   </header>
   <nav class="topnav" aria-label="화면 이동" id="topnav">
-    <a href="#/" data-r="home">🏠 내 페이지</a><a href="#/map" data-r="map">🗺️ 둘러보기</a><a href="#/files" data-r="files" class="needin">📁 내 폴더</a><a href="#/custom" data-r="custom" class="needin">🎨 꾸미기</a><a href="#/classic" data-r="classic">옛 첫 화면</a>
+    <a href="#/" data-r="home"><span class="ti" aria-hidden="true">🏠</span> 내 페이지</a><a href="#/map" data-r="map"><span class="ti" aria-hidden="true">🗺️</span> 둘러보기</a><a href="#/files" data-r="files" class="needin"><span class="ti" aria-hidden="true">📁</span> 내 폴더</a><a href="#/custom" data-r="custom" class="needin"><span class="ti" aria-hidden="true">🎨</span> 꾸미기</a><a href="#/classic" data-r="classic" class="tabx">옛 첫 화면</a>
   </nav>
 
   <!-- 통합관리자 등급별 미리보기 띠 — 관문·둘러보기에서도 보여야 「원래대로」로 돌아온다 -->
-  <div class="pv" id="pv"><b>🧪 등급별 미리보기(임시, 통합관리자만)</b><span id="pvBtns"></span><span class="now" id="pvNow"></span></div>
+  <details class="pv" id="pv"><summary><b>🧪 등급 미리보기</b> <span class="pvsub">(임시, 통합관리자만)</span><span class="now" id="pvNow"></span></summary><div class="pvb" id="pvBtns" role="group" aria-label="미리볼 등급"></div></details>
 
   <!-- ① 로그인 관문 (비로그인 #/) -->
   <section id="vGate" class="view" aria-label="로그인 관문">
@@ -218,7 +276,7 @@
     <p class="intro">사회혁신교육원 사회적협동조합(사교원)은 연대지능활동가 교육, 햇빛소득마을·어촌신활력 사업, 정책 연구를 하는 사회적협동조합입니다.
       <span class="lk"><a class="btn" href="https://home.sakyowon.co.kr/#/shop/edu">🎓 교육 신청</a><a class="btn" href="https://home.sakyowon.co.kr/#/contact">💬 문의</a><a class="btn" href="https://home.sakyowon.co.kr/#/about">사교원 소개</a></span>
     </p>
-    <p class="gnote">비회원 상담은 화면 맨 위 <b>사교원 AI</b> 띠에서 바로 할 수 있습니다(하루 10회).</p>
+    <p class="gnote">비회원 상담은 <span class="dk">화면 맨 위 <b>사교원 AI</b> 띠에서</span><span class="mb">오른쪽 아래 <b>💬 상담</b> 단추로</span> 바로 할 수 있습니다(하루 10회).</p>
   </section>
 
   <!-- ② 둘러보기 (#/map, 공개) -->
@@ -252,22 +310,23 @@
 
   <!-- 공통 틀 — 사이드바 + 본문(옛 트리 / 개인페이지 / 내 폴더 / 꾸미기) -->
   <div id="shell" class="view">
-    <button class="btn sideTog" id="sideTog" aria-controls="side" aria-expanded="false">☰ 내 메뉴</button>
     <div class="app" id="app">
-      <aside class="side" id="side" aria-label="내 메뉴"></aside>
+      <aside class="side" id="sideWrap" aria-label="내 메뉴"><div class="drawerHead"><h2 id="drawerT">내 메뉴</h2><button class="btn" id="sideClose" type="button">✕ 닫기</button></div><div id="side"></div></aside>
+      <div class="scrim" id="sideScrim" hidden></div>
       <div class="tree view" id="tree"></div>
 
       <!-- ③ 개인페이지 (로그인 #/) -->
       <main id="homeMain" class="view" aria-label="내 페이지">
         <div class="tfband" id="tfBanner" hidden>🔐 발송·결재·권한 기능을 쓰려면 2단계 인증을 켜 주세요. <button class="btn sm" type="button" id="tfBannerBtn">지금 켜기</button></div>
+        <section class="chatspot" id="chatSpot" aria-labelledby="chatT">
+          <div class="secT"><h2 id="chatT">상담창</h2><p class="sub">메뉴를 몰라도 말로 하시면 됩니다. 쓰기·보내기는 확인을 받고 합니다.</p></div>
+          <div id="chatHost"><p class="hint" id="chatWait">상담창을 불러오는 중…</p></div>
+          <div class="qrow"><span class="ql" id="quickL">자주 쓰는 지시</span><div class="quick" id="quick" role="group" aria-labelledby="quickL"></div></div>
+          <div class="recent" id="recent" hidden><div class="rh">최근 대화</div><ul id="recentList"></ul></div>
+        </section>
         <section aria-labelledby="dashT">
           <div class="secT"><h2 id="dashT">대시보드</h2><a href="#/custom" class="btn sm">🎨 꾸미기</a></div>
           <div class="dgrid" id="dash"></div>
-        </section>
-        <section class="chatspot" aria-labelledby="chatT">
-          <div class="secT"><h2 id="chatT">상담창</h2><p class="sub">단추를 누르면 상담창에 그 말이 들어갑니다.</p></div>
-          <div class="quick" id="quick" role="group" aria-label="자주 쓰는 지시"></div>
-          <p class="hint">상담창은 화면 맨 위 <b>사교원 AI</b> 띠입니다 ▲</p>
         </section>
         <section aria-labelledby="ntT">
           <div class="secT"><h2 id="ntT">공지·소식</h2><p class="sub">아카데미 · 사교원 · 위키 · 연대지능 위키 · 망남</p></div>
@@ -760,8 +819,8 @@ function setPreview(k) {
 function renderPv() {
   const bar = $('#pv'); bar.classList.toggle('on', !!(realMe && realMe.role === 'admin'));
   if (!realMe || realMe.role !== 'admin') return;
-  $('#pvBtns').innerHTML = PREVIEWS.map(p => `<button data-pv="${p.k}" class="${preview === p.k ? 'cur' : ''}">${esc(p.t)}</button>`).join('') + `<button data-pv="" class="${preview ? '' : 'cur'}">통합관리자(원래대로)</button>`;
-  $('#pvNow').textContent = preview ? '지금 보는 화면: ' + PREVIEWS.find(p => p.k === preview).t + ' 기준 (실제 로그인은 ' + (realMe.name || realMe.username) + ')' : '실제 화면';
+  $('#pvBtns').innerHTML = PREVIEWS.map(p => `<button type="button" data-pv="${p.k}" class="${preview === p.k ? 'cur' : ''}" aria-pressed="${preview === p.k}">${esc(p.t)}</button>`).join('') + `<button type="button" data-pv="" class="${preview ? '' : 'cur'}" aria-pressed="${!preview}">통합관리자(원래대로)</button>`;
+  $('#pvNow').textContent = preview ? '지금: ' + PREVIEWS.find(p => p.k === preview).t + ' 기준 (실제 로그인은 ' + (realMe.name || realMe.username) + ')' : '지금: 통합관리자(원래대로)';
   $('#pvBtns').querySelectorAll('button').forEach(b => b.addEventListener('click', () => setPreview(b.dataset.pv || null)));
 }
 /* ── 비밀번호 변경 (임시 비밀번호로 들어오면 바로 띄운다) */
@@ -794,8 +853,9 @@ function openLock(a) {
 }
 function setWho() {
   const u = realMe;
-  if (u) { $('#who').innerHTML = `<b>${esc(u.name || u.email || u.username)}</b> · ${esc(u.role_ko || '')}` + (u.email ? '' : ' · <a href="#" id="whoEmail">이메일 등록</a>'); $('#btnLogin').style.display = 'none'; $('#btnLogout').style.display = ''; $('#btnPw').style.display = ''; $('#btnTwofa').style.display = ''; }
-  else { $('#who').textContent = ''; $('#btnLogin').style.display = ''; $('#btnLogout').style.display = 'none'; $('#btnPw').style.display = 'none'; $('#btnTwofa').style.display = 'none'; }
+  const nm = u ? String(u.name || u.email || u.username) : '';
+  if (u) { $('#who').innerHTML = `<b>${esc(nm)}</b><span class="r"> · ${esc(u.role_ko || '')}</span>`; $('#acctAv').textContent = nm.slice(0, 1); $('#whoEmailBox').innerHTML = u.email ? '' : '<a href="#" id="whoEmail">✉️ 이메일 등록</a>'; $('#acct').hidden = false; $('#btnLogin').style.display = 'none'; $('#btnLogout').style.display = ''; $('#btnPw').style.display = ''; $('#btnTwofa').style.display = ''; }
+  else { $('#who').textContent = ''; $('#acctAv').textContent = ''; $('#whoEmailBox').innerHTML = ''; $('#acct').hidden = true; closeAcct(false); $('#btnLogin').style.display = ''; $('#btnLogout').style.display = 'none'; $('#btnPw').style.display = 'none'; $('#btnTwofa').style.display = 'none'; }
   renderPv();
   route();
 }
@@ -816,6 +876,7 @@ function route() {
     location.replace('#/classic'); return;
   }
   const ab = $('#axLockBar'); if (ab) ab.hidden = !AXLOCK;
+  closeSide(false); closeAcct(false);
   if (h === '#pw') { history.replaceState(null, '', location.pathname); if (me) { openPw(); } else openAuth('login'); }   // 11-01: 상담창 「비밀번호 바꿀래」
   if (h === '#login' || h === '#/login') openAuth('login');
   if (h === '#signup' || h === '#/signup') openAuth('signup');
@@ -831,6 +892,8 @@ function route() {
   show('#vGate', gate); show('#vClassic', r === 'classic'); show('#shell', shell); show('#tree', r === 'classic');
   show('#homeMain', !!me && r === 'home'); show('#vFiles', !!me && r === 'files'); show('#vCustom', !!me && r === 'custom'); show('#vMap', r === 'map');
   $('#topnav').querySelectorAll('a').forEach(a => { a.classList.toggle('cur', a.dataset.r === r); if (a.dataset.r === r) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); a.hidden = a.classList.contains('needin') && !me; });
+  $('#sideTog').hidden = !(me && shell && r !== 'classic');
+  skaiPlace(!!me && r === 'home');
   if (gate) renderGate(needLogin);
   if (r === 'classic') renderTree();
   if (me && r === 'home') { renderSideHome(); renderHome(); }
@@ -932,8 +995,18 @@ async function renderQuick() {
     ['prefs.dash_edit', '대시보드에 근태 넣어 줘']];
   SAFE.forEach(([id, x]) => { if (has(id)) add(x); });
   if (!list.length) { const seen = {}; tools.items.forEach(t => { const ex = (t.examples || [])[0]; if (!ex || t.risk !== 'read' || seen[t.area]) return; seen[t.area] = 1; add(ex); }); }   // 대장이 달라도 읽기 예시로
-  box.innerHTML = list.length ? list.slice(0, 8).map(x => `<button type="button" data-say="${esc(x)}" title="상담창에 넣기">${esc(x)}</button>`).join('') : '<p class="hint">자주 쓰는 지시가 쌓이면 여기에 단추로 나옵니다.</p>';
+  box.innerHTML = list.length ? list.slice(0, 8).map(x => `<button type="button" data-say="${esc(x)}" title="상담창에 넣기">${esc(x)}</button>`).join('') + (list.length > 3 ? '<button type="button" class="qmore" aria-expanded="false">＋ 더 보기</button>' : '') : '<p class="hint">자주 쓰는 지시가 쌓이면 여기에 단추로 나옵니다.</p>';
+  const qm = box.querySelector('.qmore'); if (qm) qm.addEventListener('click', () => { const on = box.classList.toggle('all'); qm.textContent = on ? '－ 접기' : '＋ 더 보기'; qm.setAttribute('aria-expanded', on ? 'true' : 'false'); });   // 휴대폰은 3개 + 더 보기
 }
+/* 11-04 개선안 13: 넓은 상담창 아래 최근 대화 두 줄 — 누르면 상담창에서 그 대화를 이어 연다 */
+async function renderRecent() {
+  const r = await api('/api/ai/dock/threads');
+  if (!onHome()) return;
+  const items = (r.ok && Array.isArray(r.items)) ? r.items.slice(0, 2) : [];
+  $('#recent').hidden = !items.length;
+  $('#recentList').innerHTML = items.map(t => `<li><button type="button" data-thread="${esc(t.id)}"><span aria-hidden="true">🕘</span><span class="t">${esc(t.first || t.title || '(제목 없음)')}</span><span class="dt">${esc(fmtTime(t.updated_at))}</span><span aria-hidden="true">이어서 ›</span></button></li>`).join('');
+}
+$('#recentList').addEventListener('click', e => { const b = e.target.closest('button[data-thread]'); if (b && window.skai && window.skai.openThread) window.skai.openThread(b.dataset.thread); });
 async function renderNotices() {
   const r = await api('/api/notices?limit=20');
   if (!onHome()) return;
@@ -942,14 +1015,14 @@ async function renderNotices() {
 }
 function renderHome() {
   renderTfBanner();
-  renderDash(); renderQuick(); renderNotices();
+  renderDash(); renderQuick(); renderNotices(); renderRecent();
   loadTools().then(() => { if (onHome() && Array.isArray(prefs.side) && prefs.side.length) renderSideHome(); });  // 도구 id 가 든 사이드바는 대장이 온 뒤 다시
 }
 
 /* ── ⑦ 2단계 인증 */
 let tf = null;                        // {enabled, required, methods, email_masked}
 async function loadTwofa() { const r = await api('/api/auth/2fa/status'); tf = r.ok ? r : null; renderTfBanner(); return tf; }
-function renderTfBanner() { const b = $('#tfBanner'); if (b) b.hidden = !(tf && tf.required && !tf.enabled); }
+function renderTfBanner() { const b = $('#tfBanner'); if (b) b.hidden = !(tf && tf.required && !tf.enabled); const t = $('#acctTf'); if (t) { t.textContent = tf ? (tf.enabled ? '켜짐' : '꺼짐') : ''; t.classList.toggle('off', !!(tf && !tf.enabled)); } }
 function openTf() {
   $('#tfModal').classList.add('on'); tfView('loading');
   loadTwofa().then(t => tfView(t ? (t.enabled ? 'on' : 'off') : 'err'));
@@ -1306,11 +1379,10 @@ function applyFont() {
   let v = 100; try { v = +localStorage.getItem('sk_font') || 100; } catch (_) {}
   if (!FS_LV.includes(v)) v = 100;
   document.documentElement.style.fontSize = (15 * v / 100) + 'px'; document.documentElement.dataset.fs = v;
-  $('#fsDown').disabled = v === FS_LV[0]; $('#fsUp').disabled = v === FS_LV[FS_LV.length - 1];
+  document.querySelectorAll('[data-fs]').forEach(b => { b.disabled = +b.dataset.fs < 0 ? v === FS_LV[0] : v === FS_LV[FS_LV.length - 1]; });   // 머리띠·계정 메뉴 두 벌
 }
 function stepFont(d) { const v = +document.documentElement.dataset.fs || 100; const i = Math.max(0, Math.min(FS_LV.length - 1, FS_LV.indexOf(v) + d)); try { localStorage.setItem('sk_font', String(FS_LV[i])); } catch (_) {} applyFont(); }
-$('#fsUp').addEventListener('click', () => stepFont(1));
-$('#fsDown').addEventListener('click', () => stepFont(-1));
+document.querySelectorAll('[data-fs]').forEach(b => b.addEventListener('click', () => stepFont(+b.dataset.fs)));
 
 async function boot() {
   applyFont();
@@ -1343,7 +1415,56 @@ $('#tabSignup').addEventListener('click', () => authTab('signup'));
 $('#suTier').addEventListener('change', () => { $('#suContactReq').textContent = $('#suTier').value === 'general' ? '(일반이용자는 선택)' : '(필수)'; });
 window.addEventListener('hashchange', route);
 $('#lockClose').addEventListener('click', () => $('#lockModal').classList.remove('on'));
-$('#sideTog').addEventListener('click', () => { const on = document.body.classList.toggle('sideOpen'); $('#sideTog').setAttribute('aria-expanded', on ? 'true' : 'false'); });
+/* ── 11-04 개선안 M5: ☰ 내 메뉴 서랍 — 휴대폰은 왼쪽에서 덮고(닫기·가림막·Esc·링크), 포커스는 서랍 안에서만 */
+const MQ_SMALL = window.matchMedia ? window.matchMedia('(max-width:760px)') : { matches: false };
+const INERT_SEL = 'header.top, #topnav, #pv, #tree, #homeMain, #vFiles, #vCustom, #vMap, footer, .install-bar';
+function openSide() {
+  document.body.classList.add('sideOpen'); document.documentElement.classList.add('drawer-open'); $('#sideTog').setAttribute('aria-expanded', 'true');
+  if (!MQ_SMALL.matches) return;
+  const w = $('#sideWrap'); w.setAttribute('role', 'dialog'); w.setAttribute('aria-modal', 'true'); w.setAttribute('aria-labelledby', 'drawerT'); w.removeAttribute('aria-label');
+  $('#sideScrim').hidden = false;
+  document.querySelectorAll(INERT_SEL).forEach(el => { el.inert = true; });
+  setTimeout(() => $('#sideClose').focus(), 30);
+}
+function closeSide(back) {
+  const was = document.body.classList.contains('sideOpen');
+  document.body.classList.remove('sideOpen'); document.documentElement.classList.remove('drawer-open'); $('#sideTog').setAttribute('aria-expanded', 'false');
+  const w = $('#sideWrap'); w.removeAttribute('role'); w.removeAttribute('aria-modal'); w.removeAttribute('aria-labelledby'); w.setAttribute('aria-label', '내 메뉴');
+  $('#sideScrim').hidden = true;
+  document.querySelectorAll(INERT_SEL).forEach(el => { el.inert = false; });
+  if (was && back !== false) $('#sideTog').focus();
+}
+$('#sideTog').addEventListener('click', () => { if (document.body.classList.contains('sideOpen')) closeSide(); else openSide(); });
+$('#sideClose').addEventListener('click', () => closeSide());
+$('#sideScrim').addEventListener('click', () => closeSide());
+$('#sideWrap').addEventListener('click', e => { if (MQ_SMALL.matches && e.target.closest('#side a[href]:not([href="#locked"])')) closeSide(false); });
+$('#sideWrap').addEventListener('keydown', e => {
+  if (!document.body.classList.contains('sideOpen') || !MQ_SMALL.matches) return;
+  if (e.key === 'Escape') { e.preventDefault(); closeSide(); return; }
+  if (e.key !== 'Tab') return;
+  const f = Array.from($('#sideWrap').querySelectorAll('a[href],button:not([disabled]),input,[tabindex]:not([tabindex="-1"])')).filter(x => x.offsetParent !== null);
+  if (!f.length) return; const i = f.indexOf(document.activeElement);
+  if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); } else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); }
+});
+if (MQ_SMALL.addEventListener) MQ_SMALL.addEventListener('change', () => closeSide(false));
+/* ── 11-04 개선안 M4: 계정 메뉴 */
+function openAcct() { $('#acctMenu').hidden = false; $('#acctBtn').setAttribute('aria-expanded', 'true'); const f = Array.from($('#acctMenu').querySelectorAll('button:not([disabled]),a[href]')).find(x => x.offsetParent !== null); if (f) f.focus(); }
+function closeAcct(back) { const was = !$('#acctMenu').hidden; $('#acctMenu').hidden = true; $('#acctBtn').setAttribute('aria-expanded', 'false'); if (was && back !== false) $('#acctBtn').focus(); }
+$('#acctBtn').addEventListener('click', () => { if ($('#acctMenu').hidden) openAcct(); else closeAcct(); });
+$('#acct').addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#acctMenu').hidden) { e.preventDefault(); closeAcct(); } });
+$('#acctMenu').addEventListener('click', e => { if (e.target.closest('button:not([data-fs]),a')) closeAcct(false); });
+document.addEventListener('click', e => { if (!$('#acctMenu').hidden && !e.target.closest('#acct')) closeAcct(false); });
+/* ── 11-04 개선안 13·M6: 상담창 자리 — 내 페이지면 대시보드 위 넓은 상담창(inline), 그 밖은 ai-dock 이 폭 따라 위 띠/「상담」 단추 */
+let chatIO = null;
+function skaiPlace(home) {
+  window.__skaiMode = home ? { m: 'inline', el: $('#chatHost') } : { m: 'auto', el: null };
+  if (window.skai && window.skai.mode) { window.skai.mode(window.__skaiMode.m, window.__skaiMode.el); $('#chatWait').hidden = true; }
+  else if (home) setTimeout(() => { if (!(window.skai && window.skai.mode)) $('#chatWait').textContent = '상담창을 불러오지 못했습니다. 새로고침해 주세요.'; else skaiPlace(currentRoute() === 'home' && !!me); }, 2500);
+  if (home && !chatIO && 'IntersectionObserver' in window) {
+    chatIO = new IntersectionObserver(es => es.forEach(x => { if (window.skai && window.skai.fabShow) window.skai.fabShow(!x.isIntersecting && currentRoute() === 'home'); }), { threshold: 0 });
+    chatIO.observe($('#chatSpot'));
+  }
+}
 document.addEventListener('click', e => {
   const l = e.target.closest('a[href="#locked"]'); if (l) { e.preventDefault(); openLock(l); return; }
   const a = e.target.closest('a[href="#login"]'); if (a) { e.preventDefault(); openAuth('login'); return; }
