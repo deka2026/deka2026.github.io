@@ -159,7 +159,7 @@
   /* 내 폴더 */
   .fbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:8px 0}.crumb{font-size:0.9rem}.crumb a{padding:2px 4px;border-radius:6px}.crumb a:hover{background:var(--g0)}.crumb .sep{color:var(--mute);margin:0 2px}
   .ftabs{display:flex;gap:6px;margin:4px 0}.ftabs button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 12px;cursor:pointer;font-family:inherit;font-size:0.8667rem}.ftabs button.on{background:var(--g7);color:#fff;border-color:var(--g7)}
-  .flist{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}.flist th,.flist td{padding:7px 10px;text-align:left;border-top:1px solid var(--g1);font-size:0.9rem;vertical-align:middle}.flist th{background:var(--g0);font-weight:600;border-top:none;font-size:0.8333rem}.flist td.n{white-space:nowrap;color:var(--mute);font-size:0.8333rem}.flist .act{display:flex;gap:4px;flex-wrap:wrap}.flist .nm a{cursor:pointer}
+  .flist{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}.flist th,.flist td{padding:7px 10px;text-align:left;border-top:1px solid var(--g1);font-size:0.9rem;vertical-align:middle}.flist th{background:var(--g0);font-weight:600;border-top:none;font-size:0.8333rem}.flist td.n{white-space:nowrap;color:var(--mute);font-size:0.8333rem}.flist .act{display:flex;gap:4px;flex-wrap:wrap}.flist .nm a{cursor:pointer}.flist .d{display:block;font-size:0.7667rem;color:var(--mute);font-weight:400}
   .quota{display:flex;gap:8px;align-items:center;font-size:0.8333rem;color:var(--mute)}.qbar{height:8px;background:var(--g1);border-radius:4px;overflow:hidden;flex:1;max-width:240px}.qbar i{display:block;height:100%;background:var(--g6)}
   .ro{background:var(--gold1);border:1px solid #e6cf8a;border-radius:10px;padding:6px 12px;margin:6px 0;font-size:0.8667rem;color:#6b4a06}.flist .rotag{font-size:0.7333rem;color:var(--gold);background:var(--gold1);border-radius:8px;padding:0 6px;margin-left:4px}
   /* 내 자료 연결하기(6단계) */
@@ -284,7 +284,7 @@
         <div class="quota" id="fQuota"></div>
         <div class="msg" id="fMsg" aria-live="polite"></div>
         <div class="ro" id="fRo" hidden role="note">📥 PC 에서 자동으로 올라온 자료(읽기 전용)입니다. 여기서는 올리거나 지울 수 없고, 고치려면 PC 쪽 폴더에서 바꾸면 됩니다.</div>
-        <table class="flist" aria-label="파일 목록"><thead><tr><th>이름</th><th>크기</th><th>수정</th><th>동작</th></tr></thead><tbody id="fList"></tbody></table>
+        <table class="flist" aria-label="파일 목록"><thead><tr><th>이름</th><th>크기</th><th id="fThTime">수정</th><th>동작</th></tr></thead><tbody id="fList"></tbody></table>
 
         <!-- ⑥단계 내 자료 연결하기(기획안 4.2 갈래 2·3·4) -->
         <section class="links" id="fLinks" aria-labelledby="flT">
@@ -356,7 +356,7 @@
 
 <footer>
   <b>사회혁신교육원 사회적협동조합</b> · 본사 대전광역시 서구 관저중로80번길 8, 3층 · 사업자등록번호 397-82-00424 · 교육·컨설팅·IT · 활동 지역 전남광주통합특별시·전북특별자치도<br>
-  <a href="admin.html" rel="nofollow">🔐 통합 관리자</a> · <a href="data.html" rel="nofollow">▦ 데이터 저장소</a> · <a href="account-privacy.html">개인정보처리방침</a> · <a href="https://wiki.poomasi.org/" target="_blank" rel="noopener">연대지능 위키 ↗</a> · <a href="sakyowon-wiki/">사교원 위키</a> · <a href="#/map">둘러보기</a> · <a href="#/classic">옛 첫 화면</a>
+  <span class="mgronly" hidden><a href="admin.html" rel="nofollow">🔐 통합 관리자</a> · <a href="data.html" rel="nofollow">▦ 데이터 저장소</a> · </span><a href="account-privacy.html">개인정보처리방침</a> · <a href="https://wiki.poomasi.org/" target="_blank" rel="noopener">연대지능 위키 ↗</a> · <a href="sakyowon-wiki/">사교원 위키</a> · <a href="#/map">둘러보기</a> · <a href="#/classic">옛 첫 화면</a>
 </footer>
 
 <!-- 로그인 / 회원가입 -->
@@ -584,12 +584,22 @@ function renderPublic() {
   }).join('');
   const gb = $('#gateBtn'); if (gb) gb.addEventListener('click', () => { if (allowed(TREE.find(g => g.gate).gate)) { gateOpen = true; renderPublic(); } else openAuth('login'); });
 }
+/* 잠긴 메뉴 가운데 지금 등급이 실제로 신청할 수 있는 것만 「권한 승인이 필요한 메뉴」에 둔다 (개선안 14, 11-04)
+   — 통합관리자 전용은 누구도 신청하지 않고, 체크권한은 매니저만 받는다(매니저 아닌 회원은 「정책지원관」 하나), 직원용(매니저 등급) 메뉴는 매니저 이상에게만 */
+const PERMS_FOR_NONSTAFF = ['정책지원관'];
+function requestable(need) {
+  if (!me || !need || need === 'admin') return false;
+  const staff = (RANK[me.role] || 0) >= RANK.staff;
+  if (need.startsWith('perm:')) return staff || PERMS_FOR_NONSTAFF.includes(need.slice(5));
+  if (need === 'role:staff') return staff;
+  return true;
+}
 /* ② (옛 화면) 로그인 뒤 — 내 순서대로 열리는 메뉴, 맨 끝에 잠긴 메뉴 */
 function splitMine() {
   const open = [], locked = [];
   myOrder().forEach(k => {
     const sc = SECTIONS.find(x => x.key === k);
-    const ok = sc.items.filter(it => allowed(it.need)), no = sc.items.filter(it => !allowed(it.need));
+    const ok = sc.items.filter(it => allowed(it.need)), no = sc.items.filter(it => !allowed(it.need) && requestable(it.need));
     if (ok.length) open.push({ sc, items: ok });
     if (no.length) locked.push({ sc, items: no });
   });
@@ -805,6 +815,8 @@ function route() {
   const r = currentRoute();
   document.body.classList.toggle('in', !!me);
   document.body.dataset.route = r;
+  document.querySelectorAll('.mgronly').forEach(e => { e.hidden = !(me && (RANK[me.role] || 0) >= RANK.staff); });   // 개선안 23: 관리 링크는 매니저 이상
+
   const needLogin = (r === 'custom' || r === 'files') && !me;
   const gate = (r === 'home' && !me) || needLogin;
   const shell = r === 'classic' || (!!me && (r === 'home' || r === 'files' || r === 'custom'));
@@ -1067,6 +1079,7 @@ async function fsLoad() {
   else if (FS.tab !== 'trash') $('#fQuota').innerHTML = '';
   if (!r.ok) { fsMsg(r.status === 401 ? ERR.unauthorized : (r.status === 404 || r.error === 'network' ? '내 폴더 서버가 아직 열리지 않았습니다.' : reasonText(r))); }
   /* PC 동기화(읽기 전용) 가상 폴더 안: 새 폴더·올리기·지우기 숨기고 안내만(6단계) */
+  $('#fThTime').textContent = FS.tab === 'trash' ? '지운 시각' : '수정';
   const ro = FS.tab !== 'trash' && r.ok && r.readonly === true;
   FS.ro = ro; $('#fRo').hidden = !ro; $('#fMk').hidden = ro; $('label[for="fUp"]').hidden = ro;
   const rows = (FS.tab !== 'trash' && FS.path) ? [`<tr><td class="nm" colspan="4"><a href="#/files" data-fp="${esc(FS.path.split('/').slice(0, -1).join('/'))}">⬆️ 위 폴더로</a></td></tr>`] : [];
@@ -1074,7 +1087,11 @@ async function fsLoad() {
     const name = it.name || it.path || '';
     const p = it.path || fsJoin(name);
     const itRo = ro || it.readonly === true;
-    if (FS.tab === 'trash') rows.push(`<tr><td class="nm">${it.dir ? '📁' : '📄'} ${esc(name)}</td><td class="n">${it.dir ? '' : fmtSize(it.size)}</td><td class="n">${esc(fmtTime(it.mtime || it.deleted_at))}</td><td class="act"><button class="btn sm" type="button" data-fa="restore" data-p="${esc(p)}">♻️ 복원</button></td></tr>`);
+    if (FS.tab === 'trash') {   // 개선안 11: 저장 이름(숫자__경로) 대신 원래 이름·자리, 지운 시각, 영구 삭제까지 남은 날
+      const orig = it.orig || name, at = orig.lastIndexOf('/'), dir = at > 0 ? orig.slice(0, at) : '';
+      const left = typeof it.days_left === 'number' ? (it.days_left > 0 ? `${it.days_left}일 뒤 영구 삭제` : '오늘 영구 삭제') : '';
+      rows.push(`<tr><td class="nm">${it.dir ? '📁' : '📄'} ${esc(orig.slice(at + 1))}${dir ? `<span class="d">원래 자리: 📁 ${esc(dir)}</span>` : ''}</td><td class="n">${it.dir ? '' : fmtSize(it.size)}</td><td class="n">${esc(it.deleted || fmtTime(it.mtime || it.deleted_at))}${left ? `<span class="d">${left}</span>` : ''}</td><td class="act"><button class="btn sm" type="button" data-fa="restore" data-p="${esc(name)}" title="원래 자리로 되돌립니다">♻️ 복원</button></td></tr>`);
+    }
     else rows.push(`<tr><td class="nm">${it.dir ? `📁 <a href="#/files" data-fp="${esc(p)}">${esc(name)}</a>` : `📄 ${esc(name)}`}${it.readonly === true ? '<span class="rotag">읽기 전용</span>' : ''}</td><td class="n">${it.dir ? '' : fmtSize(it.size)}</td><td class="n">${esc(fmtTime(it.mtime))}</td><td class="act">${it.dir ? '' : `<a class="btn sm" href="/api/my/files/download?path=${encodeURIComponent(p)}" download>⬇️ 내려받기</a>`}${itRo ? '' : `<button class="btn sm" type="button" data-fa="delete" data-p="${esc(p)}" data-n="${esc(name)}">🗑️ 지우기</button>`}</td></tr>`);
   });
   $('#fList').innerHTML = rows.length ? rows.join('') : `<tr><td colspan="4" class="n">${FS.tab === 'trash' ? '휴지통이 비어 있습니다' : (r.ok ? '비어 있습니다 — 「올리기」로 파일을 넣거나 「새 폴더」를 만들어 보세요' : '목록을 불러오지 못했습니다')}</td></tr>`;
