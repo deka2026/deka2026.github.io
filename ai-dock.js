@@ -77,7 +77,7 @@
     '.draft{border:1px solid #d9d2c0;border-radius:8px;padding:10px 14px;background:#fffdf7;margin-top:8px;line-height:1.6}' +
     '.list{display:flex;flex-direction:column;gap:4px}.li{display:flex;gap:8px;align-items:center;padding:6px 8px;border:1px solid #eee;border-radius:8px;cursor:pointer;font-size:13px}.li:hover{background:#faf6ec}.li .t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
     '.card .ans{margin:6px 0;line-height:1.6}.card table{border-collapse:collapse;margin:6px 0;font-size:13px}.card th,.card td{border:1px solid #e6e1d3;padding:3px 7px;text-align:left;vertical-align:top}' +
-    '.card{align-self:flex-start;max-width:92%;border:1px solid #c9b86b;background:#fffbe8;border-radius:12px;padding:10px 14px;line-height:1.55}.card.r-send,.card.r-perm,.card.r-delete{border-color:#c0392b;background:#fff3f0}.card h4{margin:0 0 6px;font-size:14px}.card .pv{font-size:13px;background:#fff;border:1px solid #e6e1d3;border-radius:8px;padding:6px 10px;margin:6px 0;white-space:pre-wrap}.card .btns{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}.card .opt{border:1px solid #2c5842;background:#fff;color:#2c5842;border-radius:16px;padding:4px 12px;cursor:pointer;font-size:13px}.card .opt:hover{background:#edf2e5}.card input[type=password]{border:1px solid #d9d2c0;border-radius:8px;padding:6px 8px;font-size:14px}.card a{color:#2c5842}' +
+    '.card{align-self:flex-start;max-width:92%;border:1px solid #c9b86b;background:#fffbe8;border-radius:12px;padding:10px 14px;line-height:1.55}.card.r-send,.card.r-perm,.card.r-delete{border-color:#c0392b;background:#fff3f0}.card h4{margin:0 0 6px;font-size:14px}.card .pv{font-size:13px;background:#fff;border:1px solid #e6e1d3;border-radius:8px;padding:6px 10px;margin:6px 0;white-space:pre-wrap}.card .btns{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}.card .opt{border:1px solid #2c5842;background:#fff;color:#2c5842;border-radius:16px;padding:4px 12px;cursor:pointer;font-size:13px}.card .opt:hover{background:#edf2e5}.card input[type=password]{border:1px solid #d9d2c0;border-radius:8px;padding:6px 8px;font-size:14px}.card .edl{display:block;font-size:12px;color:#6b6450;margin:6px 0 2px}.card .edt{box-sizing:border-box;width:100%;border:1px solid #d9d2c0;border-radius:8px;padding:6px 8px;font-size:14px;font-family:inherit;line-height:1.5}.card a{color:#2c5842}' +
     '@media(max-width:640px){.logo span{display:none}.who{display:none}.b.lbl{display:none}}' +
     '</style>' +
     '<div class="bar">' +
@@ -181,13 +181,15 @@
     }
     LBL = r.labels || {};
     var c = card('r-read', '<h4>' + (r.ok === false ? '⚠️ ' : '✅ ') + esc(r.name || '') + '</h4><div>' + esc(r.text || '') + screenLink(r) + '</div>' + tableOf(r.data) +
-      (r.undo ? '<div class="btns"><button class="opt" data-undo="' + r.log_id + '">되돌리기</button></div>' : ''));
+      (r.undo ? '<div class="btns"><button class="opt" data-undo="' + r.log_id + '">' + (r.tool === 'routine.create' ? '이 루틴 지우기' : '되돌리기') + '</button></div>' : ''));
     var b = c.querySelector('[data-undo]');
     if (b) b.addEventListener('click', function () { b.disabled = true; api('/api/ai/exec/undo/' + b.getAttribute('data-undo'), { method: 'POST' }).then(function (u) { addMsg(u.ok ? 'ai' : 'err', esc(u.text || '')); }); });
   }
   function runPlan(r, c) {
     var btns = c.querySelector('.btns'); btns.innerHTML = '<span class="note">실행 중…</span>';
-    api('/api/ai/exec/run', { method: 'POST', body: { plan_id: r.plan_id } }).then(function (x) {
+    var edits = {};   // 11-04 개선안 6·17: 카드 안에서 고친 제목·본문
+    Array.prototype.forEach.call(c.querySelectorAll('[data-edit]'), function (e) { edits[e.getAttribute('data-edit')] = e.value; });
+    api('/api/ai/exec/run', { method: 'POST', body: { plan_id: r.plan_id, edits: edits } }).then(function (x) {
       if (x.error === 'reauth_required') { btns.innerHTML = '<span class="note">재인증이 필요합니다.</span>'; showConfirm(Object.assign({}, r, { need_reauth: true }), c); return; }
       if (!x.name && !x.kind) { c.remove(); addMsg('err', esc(x.text || '실행하지 못했습니다. 다시 말씀해 주세요.')); return; }   // 🟠4: 카드 만료·이미 실행 등은 문장으로
       c.remove(); showResult(x);
@@ -195,7 +197,15 @@
     });
   }
   function showConfirm(r, old) {
-    var html = '<h4>' + esc(r.risk_ko) + ' · ' + esc(r.name) + '</h4><div class="pv">' + esc(r.preview) + '</div>' + (r.note ? '<div class="note"' + (r.irreversible ? ' style="color:#a8321f;font-weight:600"' : '') + '>' + esc(r.note) + '</div>' : '') +
+    var ed = (r.edit || []).filter(function (f) { return f && f.name; });
+    var body = ed.length ? '<div class="pv">' + esc(r.fixed || '') + '</div>' + ed.map(function (f) {
+        var id = 'ed_' + esc(r.plan_id) + '_' + esc(f.name);
+        return '<label class="edl" for="' + id + '">' + esc(f.label || f.name) + '</label>' + (f.multi
+          ? '<textarea class="edt" id="' + id + '" data-edit="' + esc(f.name) + '" rows="6">' + esc(f.value || '') + '</textarea>'
+          : '<input class="edt" id="' + id + '" data-edit="' + esc(f.name) + '" value="' + esc(f.value || '') + '">');
+      }).join('') + (r.drafted ? '<div class="note">✍️ 본문은 AI 초안입니다. 읽어 보고 고친 뒤 보내세요.</div>' : '')
+      : '<div class="pv">' + esc(r.preview) + '</div>';
+    var html = '<h4>' + esc(r.risk_ko) + ' · ' + esc(r.name) + '</h4>' + body + (r.note ? '<div class="note"' + (r.irreversible ? ' style="color:#a8321f;font-weight:600"' : '') + '>' + esc(r.note) + '</div>' : '') +
       (r.need_reauth ? '<div style="margin-top:6px"><span class="note">본인 확인(비밀번호) — 이 칸은 대화 기록에 남지 않습니다</span><br><input type="password" id="pw_' + esc(r.plan_id) + '" autocomplete="current-password"></div>' : '') +
       '<div class="btns"><button class="pb" data-run="1">' + (r.risk === 'send' ? '보내기' : '실행') + '</button><button class="pb ghost" data-cancel="1">취소</button>' + screenLink(r) + '</div>';
     var c = old || card('r-' + r.risk, '');
@@ -211,8 +221,10 @@
       runPlan(r, c);
     });
   }
-  function plan(q, wait, toolHint) {
-    return api('/api/ai/exec/plan', { method: 'POST', body: { thread_id: state.thread, message: q, tool: toolHint || null } }).then(function (r) {
+  function plan(q, wait, toolHint, given) {
+    var pb = { thread_id: state.thread, message: q, tool: toolHint || null }; if (given) pb.fields = given;
+    return api('/api/ai/exec/plan', { method: 'POST', body: pb }).then(function (r) {
+      if (r.thread_id) setThread(r.thread_id);   // 11-04 개선안 18: 실행 지시도 「내 대화」에 남는다
       if (r.error === 'ax_locked' && !state.lockNoted && state.me && state.me.user) {     // 개선안 27: 개편 잠금 중 로그인 회원에게 한 번 알리고 보통 대화로(비회원 안내 대화는 그대로)
         state.lockNoted = true;
         addMsg('ai', '🔒 ' + esc(r.message || '사이트 개편 작업 중이라 지시 실행(출근 찍기·파일·발송 등)은 잠시 쉬고 있습니다.') + ' 지금은 보통 질문으로 답합니다.');
@@ -221,6 +233,27 @@
       wait.remove(); state.pending = null;
       if (r.kind === 'result') { showResult(r); return true; }
       if (r.kind === 'confirm') { showConfirm(r); return true; }
+      if (r.kind === 'choose') {   // 11-04 개선안 15·17: 빠진 것을 단추로 고른다
+        var cc = card('r-read', '<div>' + esc(r.text) + '</div><div class="btns">' + (r.options || []).map(function (o, i) { return '<button class="opt" data-i="' + i + '">' + esc(o.label) + '</button>'; }).join('') + '<button class="opt" data-x="1">취소</button></div>');
+        Array.prototype.forEach.call(cc.querySelectorAll('[data-i]'), function (b) { b.addEventListener('click', function () {
+          var o = r.options[+b.getAttribute('data-i')]; cc.remove(); addMsg('user', esc(o.label));
+          var g = Object.assign({}, r.fields || {}); g[r.field] = o.value;
+          var w = addMsg('ai', '확인 중…'); plan(q, w, r.tool, g).then(function (ok) { if (!ok) { w.className = 'm err'; w.textContent = '이어서 처리하지 못했습니다. 다시 말씀해 주세요.'; } });
+        }); });
+        cc.querySelector('[data-x]').addEventListener('click', function () { cc.remove(); addMsg('ai', '취소했습니다.'); });
+        return true;
+      }
+      if (r.kind === 'geo') {   // 11-04 개선안 7: 휴대폰이면 위치를 붙이고, PC 면 근태 화면으로
+        var phone = window.matchMedia && window.matchMedia('(pointer: coarse)').matches && navigator.geolocation;
+        var pcCard = function (why) { card('r-read', '<div>📍 ' + esc(why) + '</div><div class="btns"><a class="opt" href="' + esc(r.screen || 'https://work.sakyowon.co.kr/') + '" target="_blank">근태 화면 열기 ↗</a></div>'); };
+        if (!phone) { pcCard('PC에서는 위치를 알 수 없어 상담창으로 찍을 수 없습니다. 휴대폰 상담창이나 근태 화면에서 찍어 주세요.'); return true; }
+        var gw = addMsg('ai', '📍 휴대폰 위치를 확인하고 있습니다… (위치 허용을 눌러 주세요)');
+        navigator.geolocation.getCurrentPosition(function (pos) {
+          var g = Object.assign({}, r.fields || {}, { lat: pos.coords.latitude, lon: pos.coords.longitude, acc: Math.round(pos.coords.accuracy || 0) });
+          plan(q, gw, r.tool, g).then(function (ok) { if (!ok) { gw.className = 'm err'; gw.textContent = '처리하지 못했습니다. 근태 화면에서 찍어 주세요.'; } });
+        }, function () { gw.remove(); pcCard('위치를 받지 못했습니다(위치 허용이 꺼져 있거나 신호가 약합니다). 근태 화면에서 찍어 주세요.'); }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
+        return true;
+      }
       if (r.kind === 'need') { state.pending = { tool: r.tool, prev: q }; addMsg('ai', esc(r.text)); return true; }
       if (r.kind === 'locked') {
         var lc = card('r-read', '<div>🔒 ' + esc(r.text) + '</div><div class="btns"><a class="opt" href="' + API + '/#/map">둘러보기에서 보기</a>' + (r.can_request ? '<button class="opt" data-req="1">권한 요청 보내기</button>' : '') + '</div>');
