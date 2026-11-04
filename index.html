@@ -159,7 +159,7 @@
   /* 내 폴더 */
   .fbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:8px 0}.crumb{font-size:0.9rem}.crumb a{padding:2px 4px;border-radius:6px}.crumb a:hover{background:var(--g0)}.crumb .sep{color:var(--mute);margin:0 2px}
   .ftabs{display:flex;gap:6px;margin:4px 0}.ftabs button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 12px;cursor:pointer;font-family:inherit;font-size:0.8667rem}.ftabs button.on{background:var(--g7);color:#fff;border-color:var(--g7)}
-  .flist{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}.flist th,.flist td{padding:7px 10px;text-align:left;border-top:1px solid var(--g1);font-size:0.9rem;vertical-align:middle}.flist th{background:var(--g0);font-weight:600;border-top:none;font-size:0.8333rem}.flist td.n{white-space:nowrap;color:var(--mute);font-size:0.8333rem}.flist .act{display:flex;gap:4px;flex-wrap:wrap}.flist .nm a{cursor:pointer}.flist .d{display:block;font-size:0.7667rem;color:var(--mute);font-weight:400}
+  .flist{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}.flist th,.flist td{padding:7px 10px;text-align:left;border-top:1px solid var(--g1);font-size:0.9rem;vertical-align:middle}.flist th{background:var(--g0);font-weight:600;border-top:none;font-size:0.8333rem}.flist td.n{white-space:nowrap;color:var(--mute);font-size:0.8333rem}.flist .act{display:flex;gap:4px;flex-wrap:wrap}.flist .nm a{cursor:pointer}.flist .d{display:block;font-size:0.7667rem;color:var(--mute);font-weight:400}.flist td.n.tt{white-space:normal}
   .quota{display:flex;gap:8px;align-items:center;font-size:0.8333rem;color:var(--mute)}.qbar{height:8px;background:var(--g1);border-radius:4px;overflow:hidden;flex:1;max-width:240px}.qbar i{display:block;height:100%;background:var(--g6)}
   .ro{background:var(--gold1);border:1px solid #e6cf8a;border-radius:10px;padding:6px 12px;margin:6px 0;font-size:0.8667rem;color:#6b4a06}.flist .rotag{font-size:0.7333rem;color:var(--gold);background:var(--gold1);border-radius:8px;padding:0 6px;margin-left:4px}
   /* 내 자료 연결하기(6단계) */
@@ -1089,8 +1089,8 @@ async function fsLoad() {
     const itRo = ro || it.readonly === true;
     if (FS.tab === 'trash') {   // 개선안 11: 저장 이름(숫자__경로) 대신 원래 이름·자리, 지운 시각, 영구 삭제까지 남은 날
       const orig = it.orig || name, at = orig.lastIndexOf('/'), dir = at > 0 ? orig.slice(0, at) : '';
-      const left = typeof it.days_left === 'number' ? (it.days_left > 0 ? `${it.days_left}일 뒤 영구 삭제` : '오늘 영구 삭제') : '';
-      rows.push(`<tr><td class="nm">${it.dir ? '📁' : '📄'} ${esc(orig.slice(at + 1))}${dir ? `<span class="d">원래 자리: 📁 ${esc(dir)}</span>` : ''}</td><td class="n">${it.dir ? '' : fmtSize(it.size)}</td><td class="n">${esc(it.deleted || fmtTime(it.mtime || it.deleted_at))}${left ? `<span class="d">${left}</span>` : ''}</td><td class="act"><button class="btn sm" type="button" data-fa="restore" data-p="${esc(name)}" title="원래 자리로 되돌립니다">♻️ 복원</button></td></tr>`);
+      const left = it.purge_after ? `${it.purge_after} 지나면 영구 삭제` : '';   // 11-04 알파언니 🟠2: 남은 날 대신 삭제 시각
+      rows.push(`<tr><td class="nm">${it.dir ? '📁' : '📄'} ${esc(orig.slice(at + 1))}${dir ? `<span class="d">원래 자리: 📁 ${esc(dir)}</span>` : ''}</td><td class="n">${it.dir ? '' : fmtSize(it.size)}</td><td class="n tt">${esc((it.deleted || '').slice(5) || fmtTime(it.mtime || it.deleted_at))}${left ? `<span class="d">${left}</span>` : ''}</td><td class="act"><button class="btn sm" type="button" data-fa="restore" data-p="${esc(name)}" title="원래 자리로 되돌립니다">♻️ 복원</button></td></tr>`);
     }
     else rows.push(`<tr><td class="nm">${it.dir ? `📁 <a href="#/files" data-fp="${esc(p)}">${esc(name)}</a>` : `📄 ${esc(name)}`}${it.readonly === true ? '<span class="rotag">읽기 전용</span>' : ''}</td><td class="n">${it.dir ? '' : fmtSize(it.size)}</td><td class="n">${esc(fmtTime(it.mtime))}</td><td class="act">${it.dir ? '' : `<a class="btn sm" href="/api/my/files/download?path=${encodeURIComponent(p)}" download>⬇️ 내려받기</a>`}${itRo ? '' : `<button class="btn sm" type="button" data-fa="delete" data-p="${esc(p)}" data-n="${esc(name)}">🗑️ 지우기</button>`}</td></tr>`);
   });
@@ -1118,7 +1118,7 @@ $('#vFiles').addEventListener('click', async e => {
     fsMsg(r.ok ? '휴지통으로 옮겼습니다.' : reasonText(r), r.ok); fsLoad();
   } else if (b.dataset.fa === 'restore') {
     const r = await api('/api/my/files/restore', { method: 'POST', body: { path: b.dataset.p } });
-    fsMsg(r.ok ? '복원했습니다.' : reasonText(r), r.ok); fsLoad();
+    fsMsg(r.ok ? `복원했습니다 — 📄 ${r.path || ''}` : reasonText(r), r.ok); fsLoad();   // 11-04: 이름이 겹치면 「(복원 2)」로 돌아가니 실제 이름을 보인다
   }
 });
 function fsTabs() { $('#vFiles').querySelectorAll('button[data-ft]').forEach(b => { const on = b.dataset.ft === FS.tab; b.classList.toggle('on', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); }); }
