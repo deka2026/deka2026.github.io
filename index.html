@@ -886,14 +886,19 @@ function currentRoute() {
 let AXLOCK = false;   // 26-10-30 이사장 지시: 개편이 끝날 때까지 새 화면은 통합관리자만(/api/ax/lock)
 function route() {
   const h = location.hash || '';
-  if (AXLOCK && !(realMe && realMe.role === 'admin') && !(typeof GT !== 'undefined' && GT.pending) && currentRoute() !== 'classic' && !['#login', '#/login', '#signup', '#/signup'].includes(h)) {   // 2단계 코드 기다리는 세션은 관문에 남긴다(알파언니 N3)
+  if (AXLOCK && !(realMe && realMe.role === 'admin') && !(typeof GT !== 'undefined' && GT.pending) && currentRoute() !== 'classic' && !['#login', '#/login', '#signup', '#/signup', '#pw'].includes(h)) {   // 2단계 코드 기다리는 세션은 관문에 남긴다(알파언니 N3)
     location.replace('#/classic'); return;
   }
   const ab = $('#axLockBar'); if (ab) ab.hidden = !AXLOCK;
   $('#topnav').hidden = !!(AXLOCK && !(realMe && realMe.role === 'admin'));   // 11-04 알파언니 🟠4: 잠금 중 비관리자에겐 갈 곳이 옛 화면뿐
   closeSide(false); closeAcct(false);
   if (h === '#pw') { if (!BOOTED) return; history.replaceState(null, '', location.pathname); if (me) { openPw(); } else openAuth('login'); }   // 11-05: 회원 정보를 받기 전 첫 route() 에서는 기다린다(로그인 창으로 새던 것)   // 11-01: 상담창 「비밀번호 바꿀래」
-  if ((h === '#login' || h === '#/login') && me && backUrl()) { location.href = backUrl(); return; }   // 이미 로그인돼 있으면 바로 돌려보낸다
+  if ((h === '#login' || h === '#/login') && me && BACK && BOOTED) {   // 이미 로그인돼 있으면 돌려보낸다 — 이메일 미등록·임시 비밀번호면 그 창부터(알파언니 11-05 🟠A)
+    $('#authModal').classList.remove('on');
+    if (me.email_missing && !skipEmail) $('#emailModal').classList.add('on');
+    else goBackIfReady().then(ok => { if (!ok) checkTempPassword(); });
+    history.replaceState(null, '', location.pathname + location.search); return route();
+  }
   if (h === '#login' || h === '#/login') openAuth('login');
   if (h === '#signup' || h === '#/signup') openAuth('signup');
   const r = currentRoute();
@@ -932,7 +937,7 @@ function renderGate(needLogin) {
 /* 11-05 개선안 24: 비밀번호 규칙을 칸 아래 미리 보이고, 맞으면 초록 ✓ (서버 규칙은 8자 이상) */
 function pwRulesCheck() {
   const o = $('#pwOld').value, n = $('#pwNew').value, n2 = $('#pwNew2').value;
-  const ok = { len: n.length >= 8, same: !!n && n === n2, diff: !!n && n !== o };
+  const ok = { len: n.length >= 8, same: !!n && n === n2, diff: !!n && !!o && n !== o };
   document.querySelectorAll('#pwRules li').forEach(li => li.classList.toggle('ok', !!ok[li.dataset.r]));
 }
 ['#pwOld', '#pwNew', '#pwNew2'].forEach(id => { const el = $(id); if (el) el.addEventListener('input', pwRulesCheck); });
@@ -962,10 +967,18 @@ async function doLogin(ui) {
 }
 /* 11-05 개선안 19: 하위 앱(근태·그룹웨어…)이 「?back=주소#login」으로 보내면 로그인 뒤 그 앱으로 돌아간다.
    사교원 주소(https://*.sakyowon.co.kr)만 — 다른 곳으로 보내는 열린 리다이렉트를 막는다. */
-function backUrl() {
+const BACK = (() => {                            // 처음 열 때 한 번만 읽는다 — closeAuth()·replaceState 가 주소의 ?back= 을 지운다(알파언니 11-05 🔴1)
   let b = '';
   try { b = new URLSearchParams(location.search).get('back') || ''; } catch (e) { return ''; }
   return /^https:\/\/([a-z0-9-]+\.)*sakyowon\.co\.kr(\/[^\s\\@]*)?$/i.test(b) ? b : '';
+})();
+function backUrl() { return BACK; }
+let skipEmail = false;                           // 이메일 등록 창에서 「나중에」를 눌렀다
+async function goBackIfReady() {                 // 임시 비밀번호·이메일 미등록이면 그 창부터(🟡6), 아니면 원래 앱으로
+  if (!BACK || !me || (me.email_missing && !skipEmail)) return false;
+  const st = await api('/api/auth/password-status');
+  if (st.ok && st.temp) return false;
+  location.href = BACK; return true;
 }
 async function loggedIn(user) {
   me = realMe = user; preview = null; GT.pending = LG.pending = false;
@@ -973,11 +986,7 @@ async function loggedIn(user) {
   closeAuth(); await loadPrefs(); setWho();
   if (me.email_missing) { $('#emailModal').classList.add('on'); }
   else {
-    const back = backUrl();
-    if (back) {                                    // 임시 비밀번호면 먼저 바꾸게 하고(창이 뜬다), 아니면 바로 원래 앱으로
-      const st = await api('/api/auth/password-status');
-      if (!(st.ok && st.temp)) { location.href = back; return; }
-    }
+    if (await goBackIfReady()) return;            // 임시 비밀번호면 먼저 바꾸게 하고(창이 뜬다), 아니면 바로 원래 앱으로
     checkTempPassword();
   }
   loadTwofa();
@@ -1558,7 +1567,7 @@ $('#btnPw').addEventListener('click', () => openPw(false));
 $('#btnTwofa').addEventListener('click', openTf);
 $('#tfBannerBtn').addEventListener('click', openTf);
 $('#tfClose').addEventListener('click', () => $('#tfModal').classList.remove('on'));
-$('#pwLater').addEventListener('click', () => $('#pwModal').classList.remove('on'));
+$('#pwLater').addEventListener('click', () => { $('#pwModal').classList.remove('on'); backAfterModal(); });
 $('#pwBtn').addEventListener('click', async () => {
   const m = $('#pwMsg'); m.className = 'msg'; m.textContent = '';
   const o = $('#pwOld').value, n = $('#pwNew').value, n2 = $('#pwNew2').value;
@@ -1570,11 +1579,13 @@ $('#pwBtn').addEventListener('click', async () => {
   b.disabled = false;
   if (!r.ok) { m.className = 'msg err'; m.textContent = r.error === 'invalid_credentials' ? '현재 비밀번호가 맞지 않습니다.' : errText(r); return; }
   m.className = 'msg ok'; m.textContent = '바꿨습니다.'; setTimeout(() => $('#pwModal').classList.remove('on'), 900);
+  backAfterModal();
 });
-$('#emLater').addEventListener('click', () => $('#emailModal').classList.remove('on'));
+$('#emLater').addEventListener('click', () => { $('#emailModal').classList.remove('on'); skipEmail = true; if (BACK) goBackIfReady().then(ok => { if (!ok) checkTempPassword(); }); });   // 「나중에」도 임시 비밀번호 확인은 거친다
+function backAfterModal() { if (BACK && me) setTimeout(() => { location.href = BACK; }, 900); }   // 하위 앱에서 왔으면 창을 닫은 뒤 그 앱으로(11-05)
 $('#emBtn').addEventListener('click', async () => {
   const r = await api('/api/auth/set-email', { method: 'POST', body: { email: $('#emEmail').value.trim().toLowerCase(), password: $('#emPw').value } });
-  const m = $('#emMsg'); if (r.ok) { m.className = 'msg ok'; m.textContent = '등록했습니다.'; if (me) { me.email = r.email; me.email_missing = false; } setWho(); setTimeout(() => $('#emailModal').classList.remove('on'), 900); }
+  const m = $('#emMsg'); if (r.ok) { m.className = 'msg ok'; m.textContent = '등록했습니다.'; if (me) { me.email = r.email; me.email_missing = false; } setWho(); setTimeout(() => $('#emailModal').classList.remove('on'), 900); if (BACK) setTimeout(goBackIfReady, 950); }
   else { m.className = 'msg err'; m.textContent = errText(r); }
 });
 /* 옛 첫 화면 질문 → 상단 AI 도우미로 */
