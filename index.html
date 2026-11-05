@@ -231,6 +231,10 @@
   .bk{display:grid;grid-template-columns:1fr 1fr;gap:4px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:0.9333rem;background:var(--g0);padding:8px;border-radius:8px;margin:6px 0}
   .tfqr{text-align:center;margin:8px 0}.tfqr svg{width:180px;height:180px}.tfsec{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:0.8667rem;background:var(--g0);padding:6px 8px;border-radius:6px;word-break:break-all}
   @media(max-width:760px){.gate2,.cgrid{grid-template-columns:1fr}.btn.big{font-size:1.0667rem}}
+.pwrules{list-style:none;margin:2px 0 8px;padding:0;display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;color:var(--mute,#6b6b6b)}
+.pwrules li::before{content:"○ "}
+.pwrules li.ok{color:#1f7a3f}
+.pwrules li.ok::before{content:"✓ "}
 </style>
 <script src="/ai-dock.js?v=20261104c" defer></script><!-- 11-04 알파언니 🟠1: 판 표시 — 캐시된 옛 상담창(4시간)이 새 첫 화면에 붙지 않게, 고칠 때마다 올린다 -->
 </head>
@@ -472,6 +476,7 @@
     <div class="f"><label for="pwOld">현재(또는 임시) 비밀번호</label><input id="pwOld" type="password" autocomplete="current-password"></div>
     <div class="f"><label for="pwNew">새 비밀번호</label><input id="pwNew" type="password" autocomplete="new-password"></div>
     <div class="f"><label for="pwNew2">새 비밀번호 확인</label><input id="pwNew2" type="password" autocomplete="new-password"></div>
+    <ul class="pwrules" id="pwRules" aria-live="polite"><li data-r="len">8자 이상</li><li data-r="same">두 칸이 같음</li><li data-r="diff">지금 비밀번호와 다름</li></ul>
     <div class="msg" id="pwMsg" aria-live="polite"></div>
     <button class="mbtn" id="pwBtn">바꾸기</button><button class="ghost" id="pwLater">나중에</button>
   </div>
@@ -835,7 +840,7 @@ function renderPv() {
 /* ── 비밀번호 변경 (임시 비밀번호로 들어오면 바로 띄운다) */
 function openPw(tempNote) {
   $('#pwNote').textContent = (tempNote ? '지금 임시 비밀번호로 로그인하셨습니다. 본인만 아는 비밀번호(8자 이상)로 바꿔 주세요. ' : '') + '바꾸면 그룹웨어·인사기록·근태·의정소통에도 같이 적용되고, 다른 기기의 로그인은 모두 끊깁니다.';
-  $('#pwMsg').className = 'msg'; $('#pwMsg').textContent = ''; $('#pwOld').value = ''; $('#pwNew').value = ''; $('#pwNew2').value = '';
+  $('#pwMsg').className = 'msg'; $('#pwMsg').textContent = ''; $('#pwOld').value = ''; $('#pwNew').value = ''; $('#pwNew2').value = ''; pwRulesCheck();
   $('#pwModal').classList.add('on'); $('#pwOld').focus();
 }
 async function checkTempPassword() {
@@ -887,7 +892,8 @@ function route() {
   const ab = $('#axLockBar'); if (ab) ab.hidden = !AXLOCK;
   $('#topnav').hidden = !!(AXLOCK && !(realMe && realMe.role === 'admin'));   // 11-04 알파언니 🟠4: 잠금 중 비관리자에겐 갈 곳이 옛 화면뿐
   closeSide(false); closeAcct(false);
-  if (h === '#pw') { history.replaceState(null, '', location.pathname); if (me) { openPw(); } else openAuth('login'); }   // 11-01: 상담창 「비밀번호 바꿀래」
+  if (h === '#pw') { if (!BOOTED) return; history.replaceState(null, '', location.pathname); if (me) { openPw(); } else openAuth('login'); }   // 11-05: 회원 정보를 받기 전 첫 route() 에서는 기다린다(로그인 창으로 새던 것)   // 11-01: 상담창 「비밀번호 바꿀래」
+  if ((h === '#login' || h === '#/login') && me && backUrl()) { location.href = backUrl(); return; }   // 이미 로그인돼 있으면 바로 돌려보낸다
   if (h === '#login' || h === '#/login') openAuth('login');
   if (h === '#signup' || h === '#/signup') openAuth('signup');
   const r = currentRoute();
@@ -923,6 +929,13 @@ function renderGate(needLogin) {
   else if (needLogin && !m.textContent) { m.className = 'msg'; m.textContent = '이 화면은 로그인한 뒤에 쓸 수 있습니다.'; }
 }
 /* 로그인 흐름(관문 카드·창 공용) — 응답 twofa:"pending" 이면 코드 칸을 열고 /api/auth/2fa/verify 로 */
+/* 11-05 개선안 24: 비밀번호 규칙을 칸 아래 미리 보이고, 맞으면 초록 ✓ (서버 규칙은 8자 이상) */
+function pwRulesCheck() {
+  const o = $('#pwOld').value, n = $('#pwNew').value, n2 = $('#pwNew2').value;
+  const ok = { len: n.length >= 8, same: !!n && n === n2, diff: !!n && n !== o };
+  document.querySelectorAll('#pwRules li').forEach(li => li.classList.toggle('ok', !!ok[li.dataset.r]));
+}
+['#pwOld', '#pwNew', '#pwNew2'].forEach(id => { const el = $(id); if (el) el.addEventListener('input', pwRulesCheck); });
 async function doLogin(ui) {
   const m = $(ui.msg), b = $(ui.btn); m.className = 'msg'; m.textContent = ''; b.disabled = true;
   let r;
@@ -947,12 +960,26 @@ async function doLogin(ui) {
   ui.pending = false; $(ui.box).hidden = true; b.textContent = '로그인';
   await loggedIn(u);
 }
+/* 11-05 개선안 19: 하위 앱(근태·그룹웨어…)이 「?back=주소#login」으로 보내면 로그인 뒤 그 앱으로 돌아간다.
+   사교원 주소(https://*.sakyowon.co.kr)만 — 다른 곳으로 보내는 열린 리다이렉트를 막는다. */
+function backUrl() {
+  let b = '';
+  try { b = new URLSearchParams(location.search).get('back') || ''; } catch (e) { return ''; }
+  return /^https:\/\/([a-z0-9-]+\.)*sakyowon\.co\.kr(\/[^\s\\@]*)?$/i.test(b) ? b : '';
+}
 async function loggedIn(user) {
   me = realMe = user; preview = null; GT.pending = LG.pending = false;
   $('#lgPw').value = ''; $('#gtPw').value = ''; $('#gtMsg').textContent = '';
   closeAuth(); await loadPrefs(); setWho();
   if (me.email_missing) { $('#emailModal').classList.add('on'); }
-  else checkTempPassword();
+  else {
+    const back = backUrl();
+    if (back) {                                    // 임시 비밀번호면 먼저 바꾸게 하고(창이 뜬다), 아니면 바로 원래 앱으로
+      const st = await api('/api/auth/password-status');
+      if (!(st.ok && st.temp)) { location.href = back; return; }
+    }
+    checkTempPassword();
+  }
   loadTwofa();
   if (window.skAiDock) location.reload();
 }
@@ -1411,6 +1438,7 @@ function applyFont() {
 function stepFont(d) { const v = +document.documentElement.dataset.fs || 100; const i = Math.max(0, Math.min(FS_LV.length - 1, FS_LV.indexOf(v) + d)); try { localStorage.setItem('sk_font', String(FS_LV[i])); } catch (_) {} applyFont(); }
 document.querySelectorAll('[data-fs]').forEach(b => b.addEventListener('click', () => stepFont(+b.dataset.fs)));
 
+let BOOTED = false;   // boot() 가 회원 정보를 받은 뒤 true
 async function boot() {
   applyFont();
   const lk = await api('/api/ax/lock');
@@ -1419,6 +1447,7 @@ async function boot() {
   me = realMe = (r.ok && r.user) ? r.user : null;
   if (!me && r.error === 'twofa_required') GT.pending = true;   // 비밀번호는 통과, 코드만 남은 세션
   if (me) await loadPrefs();
+  BOOTED = true;
   setWho();
   if (me) { checkTempPassword(); loadTwofa(); }
 }
