@@ -161,6 +161,7 @@ input,select,textarea{font-family:inherit;font-size:14px;}
 .btn-ghost:hover{background:var(--paper-soft);color:var(--ink);}
 .btn-danger{background:var(--danger);color:#fff;}
 .btn-sm{padding:5px 12px;font-size:13px;}
+.btn:disabled,.btn[disabled]{opacity:.45;cursor:not-allowed;}   /* 2026-11-05 잠긴 단추가 눌리는 단추처럼 보이던 것 */
 .btn-lg{padding:12px 24px;font-size:15px;}
 .badge{
   display:inline-block;padding:2px 8px;border-radius:999px;
@@ -13183,7 +13184,7 @@ function vidStep5(){
         <table class="table" style="width:100%;font-size:13px;"><tbody>
           <tr><td style="text-align:center;">제목</td><td>${escapeHtml(d.제목)}</td></tr>
           <tr><td style="text-align:center;">장면</td><td>${d.장면.length}개 · ${합}초</td></tr>
-          <tr><td style="text-align:center;">등장인물 사진</td><td>${사진수}장 ${사진수 ? '' : '<span class="badge badge-danger">한 장 이상 필요</span>'}</td></tr>
+          <tr><td style="text-align:center;">등장인물 사진</td><td>${사진수}장 ${사진수 ? '' : '<span class="badge badge-gold">사진 없음 — 색 바탕에 제목·자막으로 만듭니다</span> <button class="btn btn-sm btn-ghost" style="padding:2px 8px;" onclick="vidGo(2)">② 사진 올리기</button>'}</td></tr>
           <tr><td style="text-align:center;">자막</td><td>${d.자막.켬 !== false ? '영상에 넣음' : '파일만'}</td></tr>
           <tr><td style="text-align:center;">음악</td><td>${d.음악.있음 ? escapeHtml(d.음악.제목 || '있음') : '없음'}</td></tr>
         </tbody></table>
@@ -13192,7 +13193,7 @@ function vidStep5(){
         <label class="text-small" style="display:flex;gap:6px;align-items:center;margin-top:8px;"><input type="checkbox" id="vidEndOn" ${d.끝화면.켬 ? 'checked' : ''}> 마지막 장면 위에 조합 이름 넣기</label>
         <input class="input" id="vidEnd" maxlength="30" value="${escapeHtml(d.끝화면.글 || '')}" placeholder="예: 햇빛마을 협동조합" style="margin-top:4px;">
         <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;">
-          <button class="btn btn-primary" id="vidRenderBtn" onclick="vidRenderGo()" ${진행 || !사진수 ? 'disabled' : ''}>🎬 ${p.status === 'done' ? '다시 만들기' : '영상 만들기'}</button>
+          <button class="btn btn-primary" id="vidRenderBtn" onclick="vidRenderGo()" ${진행 ? 'disabled' : ''}>🎬 ${p.status === 'done' ? '다시 만들기' : '영상 만들기'}</button>
         </div>
         <p class="text-small text-mute" style="margin-top:6px;">오늘 ${L.used}/${L.max}번 사용 · 30초 영상은 보통 1분 안에 나옵니다.</p>
       </div>
@@ -13215,7 +13216,10 @@ function vidStep5(){
     </div>`;
 }
 async function vidRenderGo(){
-  if(!await vidSave(5, true)) return;
+  if(VID.p && !VID.p.data.인물.some(x => x.사진) &&
+     !confirm('등장인물 사진이 없습니다. 사진 대신 색 바탕에 제목·자막만 넣어 만들까요?\n(사진을 넣으려면 취소 후 ② 스토리보드·인물에서 올려 주세요)')) return;
+  const b = document.getElementById('vidRenderBtn'); if(b){ b.disabled = true; b.textContent = '보내는 중…'; }
+  if(!await vidSave(5, true)){ if(b){ b.disabled = false; b.textContent = '🎬 영상 만들기'; } return; }
   try{ await vidApi('/projects/' + encodeURIComponent(VID.pid) + '/render', {method:'POST'});
     VID.st = await vidApi('/status'); await vidOpen(VID.pid, 5); }catch(e){ toast(e.message); }
 }
