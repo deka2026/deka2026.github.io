@@ -286,7 +286,7 @@
       </div>
     </div>
     <p class="intro">사회혁신교육원 사회적협동조합(사교원)은 연대지능활동가 교육, 햇빛소득마을·어촌신활력 사업, 정책 연구를 하는 사회적협동조합입니다.
-      <span class="lk"><a class="btn" href="/academy-site/#edu-apply">🎓 교육 신청</a><a class="btn" href="https://home.sakyowon.co.kr/#/about">사교원 소개</a></span>
+      <span class="lk"><a class="btn" href="/academy-site/#edu-apply">🎓 연대지능활동가 교육 신청</a><a class="btn" href="/academy-site/#tl-apply">🏘 주민자치·지역문제해결 교육 신청</a><a class="btn" href="https://home.sakyowon.co.kr/#/about">사교원 소개</a></span>
     </p>
     <p class="gnote">비회원 상담은 <span class="dk">화면 맨 위 <b>사교원 AI</b> 띠에서</span><span class="mb">오른쪽 아래 <b>💬 상담</b> 단추로</span> 바로 할 수 있습니다(하루 10회).</p>
   </section>
@@ -547,23 +547,23 @@ const TREE = [
       { id: 'disclosure', t: '경영공시', d: '정관·규약 · 재무제표 · 조합원 현황', h: HOME + 'disclosure' },
     ]},
     { ic: '🏗️', name: '사교원 현장사업', items: [
-      { id: 'mangnam', t: '망남어촌신활력 (전남광주 완도)', d: '사업 안내 · 소식 · 기획안/보고서 · KPI · 예산 집행실적', h: 'https://vitality.sakyowon.co.kr/' },
+      { id: 'mangnam', t: '망남어촌신활력 (전남광주 완도)', d: '사업 안내 · 소식 · 기획안/보고서 · KPI · 예산 집행실적', h: 'https://vitality.sakyowon.co.kr/', al: '망남|망남 사업|어촌신활력|망남생활권' },
       { id: 'mangnam-coop', t: '망남마을협동조합', d: '마을사업 · 마을학교 · 플로깅 · 물멍 예약 · 경영공시', h: '/mangnam-coop/', sub: true },
-      { id: 'yangyang', t: '양양어촌신활력 (강원 양양)', d: '망남과 같은 구성으로 채우는 중', h: 'https://vitality.sakyowon.co.kr/', soon: true },
+      { id: 'yangyang', t: '양양어촌신활력 (강원 양양)', d: '망남과 같은 구성으로 채우는 중', h: 'https://vitality.sakyowon.co.kr/', soon: true, al: '양양|양양 사업' },
     ]},
     { ic: '🌐', name: '플랫폼 사업', items: [
-      { id: 'center', t: '시민자산육성지원센터', d: '센터 업무·참여 조합 업무자동화 포털(시험판) — 별도 로그인', h: 'https://center.sakyowon.co.kr/', ext: true },
-      { id: 'hatsoja', t: '햇빛소득마을 (햇소자)', d: '신청·진단 → 조합 설립 → 정산·배당 — 조합·연합회 회원', h: '/hatsoja/' },
+      { id: 'center', t: '시민자산육성지원센터', d: '센터 업무·참여 조합 업무자동화 포털(시험판) — 별도 로그인', h: 'https://center.sakyowon.co.kr/', ext: true, al: '시민자산지원센터|시민자산센터|센터 포털' },
+      { id: 'hatsoja', t: '햇빛소득마을 (햇소자)', d: '신청·진단 → 조합 설립 → 정산·배당 — 조합·연합회 회원', h: '/hatsoja/', al: '햇소자|햇빛소득마을' },
       { id: 'bid-board', t: '입찰정보', d: '나라장터·에너지공단 공고(발전사업자·사교원) · 텔레그램 알림 · 제안서·구비서류', h: '/bids/', sub: true },
-      { id: 'policy', t: '지자체 의정지원시스템', d: '공약·조례·문서작성·브리핑 — 체크권한', h: HOME + 'policy', need: 'perm:정책지원관' },
+      { id: 'policy', t: '지자체 의정지원시스템', d: '공약·조례·문서작성·브리핑 — 체크권한', h: HOME + 'policy', need: 'perm:정책지원관', al: '의정지원시스템|정책지원관 지원시스템|정책지원관 시스템|의정지원' },
     ]},
   ]},
   { ic: '🎓', name: '교육 · 연구 · 쇼핑', secs: [
     { ic: '🎓', name: '교육', items: [
       { id: 'academy', t: '연대지능활동가 아카데미', d: '실습 15단계 · 학습 7단계 · 지식 검증 게임 · 교육 신청', h: '/academy-site/' },
-      { id: 'edu-ai', t: '연대지능활동가 교육 신청', d: '필요 진단 · 예상 비용 · 신청', h: '/academy-site/#edu-apply', sub: true },
-      { id: 'teamlearning', t: '사회혁신팀러닝', d: '팀러닝 자문·컨설팅 · 주민자치·지역문제해결 교육 신청', h: '/academy-site/#tl-home' },
-      { id: 'tl-apply', t: '주민자치·지역문제해결 교육 신청', d: '필요 진단 · 예상 비용 · 신청', h: '/academy-site/#tl-apply', sub: true },
+      { id: 'edu-ai', t: '연대지능활동가 교육 신청', d: '필요 진단 · 예상 비용 · 신청', h: '/academy-site/#edu-apply', sub: true, al: '교육 신청|교육신청|교육프로그램 신청|교육프로그램|연대지능 교육 신청' },
+      { id: 'teamlearning', t: '사회혁신팀러닝', d: '팀러닝 자문·컨설팅 · 주민자치·지역문제해결 교육 신청', h: '/academy-site/#tl-home', al: '팀러닝' },
+      { id: 'tl-apply', t: '주민자치·지역문제해결 교육 신청', d: '필요 진단 · 예상 비용 · 신청', h: '/academy-site/#tl-apply', sub: true, al: '주민자치 교육 신청|지역문제해결 교육 신청|팀러닝 신청|팀러닝 교육 신청' },
     ]},
     { ic: '🔬', name: '연구', items: [
       { id: 'research', t: '연구자료', d: '보고서 31건 검색·열람', h: HOME + 'research' },
@@ -637,8 +637,17 @@ const SECTIONS = []; TREE.forEach((g, gi) => g.secs.forEach(sc => SECTIONS.push(
 const DEFAULT_ORDER = SECTIONS.map(sc => sc.key);
 /* 메뉴 항목을 한 줄로 — 꾸미기·새 사이드바(prefs.side)의 단위 */
 const ALL_ITEMS = []; SECTIONS.forEach(sc => sc.items.forEach(it => ALL_ITEMS.push(Object.assign({ sec: sc.key, secIc: sc.ic }, it))));
+/* 11-06 메뉴 개편 전 저장된 순서를 새 이름으로 옮겨 적는다(알파언니 🔴2: 이사장님 저장값이 옛 이름이라 새 묶음이 맨 뒤로 갔다) */
+const ORDER_RENAME = { '연구실': ['연구'], '사업': ['사교원 현장사업', '플랫폼 사업'], '참여': [] };
+const OLD_PUB = ['소개', '연구실', '참여', '교육', '사업', '쇼핑'];
+const NEW_PUB = ['소개', '사교원 현장사업', '플랫폼 사업', '교육', '연구', '쇼핑'];
 function myOrder() {
-  const saved = Array.isArray(prefs.menu_order) ? prefs.menu_order.filter(k => DEFAULT_ORDER.includes(k)) : [];
+  let raw = Array.isArray(prefs.menu_order) ? prefs.menu_order.slice() : [];
+  if (raw.some(k => k in ORDER_RENAME)) {
+    if (raw.filter(k => OLD_PUB.includes(k)).join() === OLD_PUB.join()) raw = NEW_PUB.concat(raw.filter(k => !OLD_PUB.includes(k)));   // 옛 기본 순서 그대로 둔 저장값 → 새 기본 순서(지시 6)
+    else raw = raw.flatMap(k => ORDER_RENAME[k] || [k]);                                                                               // 직접 바꾼 순서 → 그 자리에서 이름만
+  }
+  const saved = [...new Set(raw)].filter(k => DEFAULT_ORDER.includes(k));
   return saved.concat(DEFAULT_ORDER.filter(k => !saved.includes(k)));
 }
 function itemLi(it, ok) {

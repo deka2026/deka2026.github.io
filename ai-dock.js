@@ -479,7 +479,7 @@
       '.f a,.f button{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 18px;border-radius:22px;border:1px solid #2c5842;background:#fff;color:#2c5842;font-size:15px;font-family:inherit;text-decoration:none;cursor:pointer}' +
       '@media(max-width:760px){.f{padding-bottom:calc(var(--skai-bottom,16px) + 80px)}}' +   /* 휴대폰: 오른쪽 아래 「💬 상담」 단추(56px)가 가리지 않게 그 위로 */
       '.f a:hover,.f button:hover{background:#edf2e5}.f a:focus-visible,.f button:focus-visible,.d button:focus-visible,.d textarea:focus-visible,.d input:focus-visible{outline:3px solid #b47d14;outline-offset:2px}' +
-      '.bk{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:2147482000;align-items:center;justify-content:center;padding:16px}.bk.on{display:flex}' +
+      '.bk{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:2147483600;align-items:center;justify-content:center;padding:16px}.bk.on{display:flex}' +
       '.d{background:#fff;border-radius:14px;max-width:480px;width:100%;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.25);color:#1c2621}' +
       '.d h2{margin:0 0 6px;font-size:18px;color:#0d3b2c}.d p{margin:0 0 10px;font-size:13px;color:#6b7280;line-height:1.5}' +
       '.d label{display:block;font-size:13px;margin:8px 0 4px}.d textarea,.d input{box-sizing:border-box;width:100%;border:1px solid #d9d2c0;border-radius:8px;padding:9px;font-size:15px;font-family:inherit}.d textarea{min-height:120px}' +
@@ -498,12 +498,20 @@
     g('fS').addEventListener('click', function () { show(true); });
     g('fX').addEventListener('click', function () { show(false); });
     g('fBk').addEventListener('click', function (e) { if (e.target === g('fBk')) show(false); });
-    fr.addEventListener('keydown', function (e) { if (e.key === 'Escape' && g('fBk').classList.contains('on')) { e.preventDefault(); show(false); } });
+    fr.addEventListener('keydown', function (e) {   // 알파언니 🟡: 창이 열려 있으면 Esc 로 닫고, Tab 은 창 안에서만 돈다
+      if (!g('fBk').classList.contains('on')) return;
+      if (e.key === 'Escape') { e.preventDefault(); show(false); return; }
+      if (e.key !== 'Tab') return;
+      var f = Array.prototype.filter.call(g('fBk').querySelectorAll('button,textarea,input'), function (x) { return !x.disabled; });
+      var a = fr.activeElement, i = f.indexOf(a);
+      if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); } else if (!e.shiftKey && (i === f.length - 1 || i < 0)) { e.preventDefault(); f[0].focus(); }
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && g('fBk').classList.contains('on')) { e.preventDefault(); show(false); } });
     g('fGo').addEventListener('click', function () {
       var m = g('fM').value.trim();
       if (m.length < 5) { g('fR').className = 'msg err'; g('fR').textContent = '제안 내용을 5자 이상 적어 주세요.'; return; }
       g('fGo').disabled = true; g('fR').className = 'msg'; g('fR').textContent = '보내는 중…';
-      api('/api/ai/dock/suggest', { method: 'POST', body: { message: m, contact: g('fC').value.trim(), page: location.href.slice(0, 500) } }).then(function (r) {
+      api('/api/ai/dock/suggest', { method: 'POST', body: { message: m, contact: g('fC').value.trim(), page: (location.origin + location.pathname + (location.hash || '').slice(0, 80)).slice(0, 500) } }).then(function (r) {
         g('fGo').disabled = false;
         if (r && r.ok) { g('fM').value = ''; g('fC').value = ''; g('fR').className = 'msg ok'; g('fR').textContent = '고맙습니다. 제안이 접수됐습니다.'; }
         else { g('fR').className = 'msg err'; g('fR').textContent = (r && r.text) || '보내지 못했습니다. 잠시 뒤 다시 해 주세요.'; }

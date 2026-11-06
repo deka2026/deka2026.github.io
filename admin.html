@@ -309,7 +309,7 @@ table.members tr:last-child td{border-bottom:none;}
       <input id="member-q" placeholder="이름·이메일·연락처·소속 검색" style="margin-left:auto;min-width:220px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px">
     </div>
     <div class="site-note" style="border:1px solid var(--line-soft);border-radius:var(--radius-sm);margin-bottom:12px">
-      등급은 <strong>통합관리자 › 매니저 › 연합회 › 조합 › 일반이용자</strong> 순입니다. 매니저의 그룹웨어·관리 기능과 「정책지원관 지원시스템」은 등급이 아니라 <strong>체크권한</strong>으로 엽니다 — 각 줄의 「권한」을 눌러 체크하세요. 등급 변경·매니저 승인·비밀번호 초기화·삭제는 통합관리자만 할 수 있습니다.
+      등급은 <strong>통합관리자 › 매니저 › 연합회 › 조합 › 일반이용자</strong> 순입니다. 매니저의 그룹웨어·관리 기능과 「지자체 의정지원시스템」(체크권한 이름은 「정책지원관」)은 등급이 아니라 <strong>체크권한</strong>으로 엽니다 — 각 줄의 「권한」을 눌러 체크하세요. 등급 변경·매니저 승인·비밀번호 초기화·삭제는 통합관리자만 할 수 있습니다.
     </div>
     <div class="panel">
       <div id="members-body" class="loading">불러오는 중…</div>
@@ -609,7 +609,7 @@ const SITES = [
     url: 'https://sakyowon.co.kr/bjj/', repo: '' },
   { name: '망남마을협동조합', desc: '마을 협동조합 홍보 사이트',
     url: 'https://sakyowon.co.kr/mangnam-coop/', repo: 'deka2026/mangnam-coop' },
-  { name: '어촌신활력증진사업 (망남·양양)', desc: '안내·소식·기획안·KPI·예산 집행실적·주민 관계도·문자 — 양양 카테고리는 개편 4-2단계에서 채움',
+  { name: '사교원 현장사업 — 망남·양양 어촌신활력', desc: '안내·소식·기획안·KPI·예산 집행실적·주민 관계도·문자 — 양양 카테고리는 개편 4-2단계에서 채움',
     url: 'https://vitality.sakyowon.co.kr/', repo: 'deka2026/mangnam-vitality',
     adminUrl: 'https://vitality.sakyowon.co.kr/admin' },
   { name: '햇소자', desc: '햇빛소득마을 통합 운영 플랫폼 — 신청·진단, 설립·정산·배당, 통합 계정(SSO) 연동',
@@ -805,7 +805,7 @@ async function renderPermPanel(id, role) {
   allowed.forEach(p => { (groups[p.group] = groups[p.group] || []).push(p); });
   const cell = row.querySelector('td');
   cell.innerHTML = `<div style="padding:10px 6px">
-    <div style="font-size:13px;color:var(--ink-soft);margin-bottom:8px">${role === 'staff' ? '매니저 체크권한 — 체크한 것만 열립니다.' : '이 등급에는 「정책지원관 지원시스템」 체크권한만 줄 수 있습니다.'}</div>
+    <div style="font-size:13px;color:var(--ink-soft);margin-bottom:8px">${role === 'staff' ? '매니저 체크권한 — 체크한 것만 열립니다.' : '이 등급에는 「지자체 의정지원시스템」(정책지원관) 체크권한만 줄 수 있습니다.'}</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px">
     ${Object.entries(groups).map(([g, ps]) => `<div style="background:#fff;border:1px solid var(--line-soft);border-radius:8px;padding:8px 10px">
       <div style="font-weight:600;font-size:13px;margin-bottom:4px">${esc(g)}</div>
