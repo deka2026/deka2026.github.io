@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>사교원 — 사회혁신교육원 사회적협동조합 통합사이트</title>
-<meta name="description" content="사회혁신교육원 사회적협동조합(사교원) 통합사이트 — 소개·연구실·참여, 교육·사업·쇼핑을 한 화면에서. 상단 AI 도우미에게 바로 물어보세요.">
+<meta name="description" content="사회혁신교육원 사회적협동조합(사교원) 통합사이트 — 소개·사업, 교육·연구·쇼핑을 한 화면에서. 상단 AI 도우미에게 바로 물어보세요.">
 <link rel="canonical" href="https://sakyowon.co.kr/">
 <meta property="og:title" content="사교원 통합사이트 — 사회혁신교육원 사회적협동조합">
-<meta property="og:description" content="소개·연구실·참여 · 교육·사업·쇼핑 — 사교원의 모든 메뉴를 한눈에, AI 도우미와 함께">
+<meta property="og:description" content="소개·사업 · 교육·연구·쇼핑 — 사교원의 모든 메뉴를 한눈에, AI 도우미와 함께">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://sakyowon.co.kr/">
 <meta property="og:image" content="https://sakyowon.co.kr/icon-512.png">
@@ -85,7 +85,7 @@
   .sideTog{display:none}
   /* 새 사이드바(개인페이지) — 고정 메뉴·고른 메뉴·바닥 */
   .side .fix{list-style:none;margin:0 0 6px;padding:0}.side .fix li a{display:block;font-size:0.9333rem;font-weight:600;padding:5px 6px;border-radius:8px;color:var(--g9)}.side .fix li a:hover,.side .fix li a.cur{background:var(--g0)}
-  .side .pick{list-style:none;margin:0;padding:0}.side .pick li{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:8px;user-select:none}.side .pick li:hover{background:var(--g0)}.side .pick li .hd{color:var(--mute);cursor:grab}.side .pick li a{flex:1;font-size:0.9rem;color:var(--ink)}.side .pick li a:hover{color:var(--g7)}
+  .side .pick{list-style:none;margin:0;padding:0}.side .pick li{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:8px;user-select:none}.side .pick li:hover{background:var(--g0)}.side .pick li .hd{color:var(--mute);cursor:grab}.side .pick li a{flex:1;font-size:0.9rem;color:var(--ink)}.side .pick li a:hover{color:var(--g7)}.side .pick li.pgh{display:block;font-size:0.7333rem;color:var(--mute);padding:10px 6px 2px;cursor:default}.side .pick li.pgh:first-child{padding-top:2px}.side .pick li.pgh:hover{background:none}
   .side .sfoot{margin-top:10px;padding-top:8px;border-top:1px solid var(--line);font-size:0.9rem;font-weight:600}.side .sfoot a{display:block;padding:4px 6px;border-radius:8px}.side .sfoot a:hover{background:var(--g0)}
   /* 관리자 전용 등급 미리보기 띠(임시) */
   .pv{display:none;align-items:center;gap:6px;flex-wrap:wrap;background:var(--gold1);border:1px solid #e6cf8a;border-radius:10px;padding:8px 12px;margin:0 0 10px;font-size:0.8667rem;color:#6b4a06}
@@ -236,13 +236,13 @@
 .pwrules li.ok{color:#1f7a3f}
 .pwrules li.ok::before{content:"✓ "}
 </style>
-<script src="/ai-dock.js?v=20261104c" defer></script><!-- 11-04 알파언니 🟠1: 판 표시 — 캐시된 옛 상담창(4시간)이 새 첫 화면에 붙지 않게, 고칠 때마다 올린다 -->
+<script src="/ai-dock.js?v=20261106a" defer></script><!-- 11-04 알파언니 🟠1: 판 표시 — 캐시된 옛 상담창(4시간)이 새 첫 화면에 붙지 않게, 고칠 때마다 올린다 -->
 </head>
 <body>
 <div class="wrap">
   <header class="top">
     <button class="btn sideTog" id="sideTog" type="button" aria-controls="sideWrap" aria-expanded="false" hidden>☰ 메뉴</button>
-    <div class="brand"><div class="mark">L&amp;L</div><div><h1>사교원<span class="hm"> 통합사이트</span></h1><div class="sub">사회혁신교육원 사회적협동조합 · 소개·연구실·참여 · 교육·사업·쇼핑</div></div></div>
+    <div class="brand"><div class="mark">L&amp;L</div><div><h1>사교원<span class="hm"> 통합사이트</span></h1><div class="sub">사회혁신교육원 사회적협동조합 · 소개·사업 · 교육·연구·쇼핑</div></div></div>
     <div class="sp"></div>
     <span class="fs" role="group" aria-label="글자 크기"><button type="button" id="fsDown" data-fs="-1" aria-label="글자 작게">가−</button><button type="button" id="fsUp" data-fs="1" aria-label="글자 크게">가+</button></span>
     <button class="btn p" id="btnLogin">로그인 · 회원가입</button>
@@ -286,7 +286,7 @@
       </div>
     </div>
     <p class="intro">사회혁신교육원 사회적협동조합(사교원)은 연대지능활동가 교육, 햇빛소득마을·어촌신활력 사업, 정책 연구를 하는 사회적협동조합입니다.
-      <span class="lk"><a class="btn" href="https://home.sakyowon.co.kr/#/shop/edu">🎓 교육 신청</a><a class="btn" href="https://home.sakyowon.co.kr/#/contact">💬 문의</a><a class="btn" href="https://home.sakyowon.co.kr/#/about">사교원 소개</a></span>
+      <span class="lk"><a class="btn" href="/academy-site/#edu-apply">🎓 교육 신청</a><a class="btn" href="https://home.sakyowon.co.kr/#/about">사교원 소개</a></span>
     </p>
     <p class="gnote">비회원 상담은 <span class="dk">화면 맨 위 <b>사교원 AI</b> 띠에서</span><span class="mb">오른쪽 아래 <b>💬 상담</b> 단추로</span> 바로 할 수 있습니다(하루 10회).</p>
   </section>
@@ -536,42 +536,40 @@ const reasonText = r => r.status === 429 ? ERR.rate_limited : (ERR[r.error] || r
 /* 상담창(ai-dock)에 말 넣기 — ai-dock 이 window.skai.say 를 노출한다. 없으면 조용히 무시 */
 function say(t) { if (window.skai && typeof window.skai.say === 'function') { try { window.skai.say(t); } catch (_) {} } }
 
-/* ── 메뉴 트리 — 4묶음(이사장 지시 10-18): ①소개·연구실·참여 ②교육·사업·쇼핑 ③그룹웨어·관리(매니저·통합관리자만, 첫 화면엔 단추만) · 가족 메신저는 첫 화면에서 빼고 관리 안 통합관리자 전용
+/* ── 메뉴 트리 — 11-06 이사장 지시: ①소개·사업(현장사업·플랫폼 사업) ②교육·연구·쇼핑 순서, 참여 메뉴는 빼고 모든 페이지 하단 「문의하기·이용자 제안」 단추(ai-dock.js) · 10-18 4묶음: ③그룹웨어·관리(매니저·통합관리자만, 첫 화면엔 단추만) · 가족 메신저는 첫 화면에서 빼고 관리 안 통합관리자 전용
    need: 'login' 로그인 | 'perm:정책지원관' 체크권한 | 'role:staff' 매니저 이상 | 'role:coop' 조합 이상 | 'role:federation' 연합회 이상 | 'admin'
    id: 2단계 꾸미기·사이드바(prefs.side)가 쓰는 고정 키 — 바꾸면 저장된 설정이 버려진다 */
 const HOME = 'https://home.sakyowon.co.kr/#/';
 const TREE = [
-  { ic: '🏛️', name: '소개 · 연구실 · 참여', secs: [
+  { ic: '🏛️', name: '소개 · 사업', secs: [
     { ic: '🏛️', name: '소개', items: [
       { id: 'about', t: '사교원 소개', d: '지향·활동·걸어온 길·특장점', h: HOME + 'about' },
       { id: 'disclosure', t: '경영공시', d: '정관·규약 · 재무제표 · 조합원 현황', h: HOME + 'disclosure' },
     ]},
-    { ic: '🔬', name: '연구실', items: [
+    { ic: '🏗️', name: '사교원 현장사업', items: [
+      { id: 'mangnam', t: '망남어촌신활력 (전남광주 완도)', d: '사업 안내 · 소식 · 기획안/보고서 · KPI · 예산 집행실적', h: 'https://vitality.sakyowon.co.kr/' },
+      { id: 'mangnam-coop', t: '망남마을협동조합', d: '마을사업 · 마을학교 · 플로깅 · 물멍 예약 · 경영공시', h: '/mangnam-coop/', sub: true },
+      { id: 'yangyang', t: '양양어촌신활력 (강원 양양)', d: '망남과 같은 구성으로 채우는 중', h: 'https://vitality.sakyowon.co.kr/', soon: true },
+    ]},
+    { ic: '🌐', name: '플랫폼 사업', items: [
+      { id: 'center', t: '시민자산육성지원센터', d: '센터 업무·참여 조합 업무자동화 포털(시험판) — 별도 로그인', h: 'https://center.sakyowon.co.kr/', ext: true },
+      { id: 'hatsoja', t: '햇빛소득마을 (햇소자)', d: '신청·진단 → 조합 설립 → 정산·배당 — 조합·연합회 회원', h: '/hatsoja/' },
+      { id: 'bid-board', t: '입찰정보', d: '나라장터·에너지공단 공고(발전사업자·사교원) · 텔레그램 알림 · 제안서·구비서류', h: '/bids/', sub: true },
+      { id: 'policy', t: '지자체 의정지원시스템', d: '공약·조례·문서작성·브리핑 — 체크권한', h: HOME + 'policy', need: 'perm:정책지원관' },
+    ]},
+  ]},
+  { ic: '🎓', name: '교육 · 연구 · 쇼핑', secs: [
+    { ic: '🎓', name: '교육', items: [
+      { id: 'academy', t: '연대지능활동가 아카데미', d: '실습 15단계 · 학습 7단계 · 지식 검증 게임 · 교육 신청', h: '/academy-site/' },
+      { id: 'edu-ai', t: '연대지능활동가 교육 신청', d: '필요 진단 · 예상 비용 · 신청', h: '/academy-site/#edu-apply', sub: true },
+      { id: 'teamlearning', t: '사회혁신팀러닝', d: '팀러닝 자문·컨설팅 · 주민자치·지역문제해결 교육 신청', h: '/academy-site/#tl-home' },
+      { id: 'tl-apply', t: '주민자치·지역문제해결 교육 신청', d: '필요 진단 · 예상 비용 · 신청', h: '/academy-site/#tl-apply', sub: true },
+    ]},
+    { ic: '🔬', name: '연구', items: [
       { id: 'research', t: '연구자료', d: '보고서 31건 검색·열람', h: HOME + 'research' },
-      { id: 'policy', t: '정책지원관 지원시스템', d: '공약·조례·문서작성·브리핑 — 체크권한', h: HOME + 'policy', need: 'perm:정책지원관' },
       { id: 'cre', t: '시민재생에너지 AI', d: '고성능컴퓨팅 과제 소개', h: '/cre/' },
       { id: 'wiki', t: '사교원 위키', d: '공개 지식 431쪽 (별도 운영)', h: '/sakyowon-wiki/', ext: true },
       { id: 'poomasi-wiki', t: '연대지능 위키', d: '품앗이 공동 지식베이스', h: 'https://wiki.poomasi.org/', ext: true },
-    ]},
-    { ic: '💬', name: '참여', items: [
-      { id: 'contact', t: '문의', d: '교육·사업·제휴 문의', h: HOME + 'contact' },
-      { id: 'feedback', t: '활동가 의견', d: '아카데미 의견 게시판', h: '/academy-site/#feedback' },
-      { id: 'site-feedback', t: '사이트 개선 의견', d: 'AI 도우미에게 바로 말해도 됩니다', h: HOME + 'contact' },
-    ]},
-  ]},
-  { ic: '🎓', name: '교육 · 사업 · 쇼핑', secs: [
-    { ic: '🎓', name: '교육', items: [
-      { id: 'academy', t: '연대지능활동가 아카데미', d: '실습 15단계 · 학습 7단계 · 자격증 · 지식 검증 게임', h: '/academy-site/' },
-      { id: 'edu', t: '교육프로그램 신청', d: '주민자치 · 연대지능 활동가 · 문제해결 팀러닝 — 필요 진단과 견적', h: HOME + 'shop/edu' },
-      { id: 'teamlearning', t: '사회혁신팀러닝', d: '자문·컨설팅 (통합 개편 중)', h: '/teamlearning-site/', soon: true },
-    ]},
-    { ic: '☀️', name: '사업', items: [
-      { id: 'hatsoja', t: '햇빛소득마을 (햇소자)', d: '신청·진단 → 조합 설립 → 정산·배당 — 조합·연합회 회원', h: '/hatsoja/' },
-      { id: 'bid-board', t: '입찰정보', d: '나라장터·에너지공단 공고(발전사업자·사교원) · 텔레그램 알림 · 제안서·구비서류', h: '/bids/' },
-      { id: 'vitality', t: '어촌신활력증진사업', d: '사업 안내 · 소식 · 기획안/보고서 · KPI · 예산 집행실적', h: 'https://vitality.sakyowon.co.kr/' },
-      { id: 'mangnam', t: '망남 (완도 망남생활권)', d: '', h: 'https://vitality.sakyowon.co.kr/', sub: true },
-      { id: 'yangyang', t: '양양 (강원 양양)', d: '망남과 같은 구성으로 채우는 중', h: 'https://vitality.sakyowon.co.kr/', sub: true, soon: true },
-      { id: 'mangnam-coop', t: '망남마을협동조합', d: '마을사업 · 마을학교 · 플로깅 · 물멍 예약 · 경영공시', h: '/mangnam-coop/' },
     ]},
     { ic: '🛒', name: '쇼핑', items: [
       { id: 'shop', t: '상품', d: '도서·굿즈·지역특산', h: HOME + 'shop' },
@@ -778,13 +776,19 @@ function sideFlat() {
   });
   return out.length ? out : null;
 }
+/* 11-06 🟡: 꾸미기로 순서를 저장하면 묶음 제목이 사라져 사이드바가 평평해졌다 — 고른 순서는 그대로 두고, 묶음이 바뀌는 자리마다 작은 제목 줄 */
+function sideHead(flat, i) {
+  const k = x => x.tool ? '🤖 상담창 도구' : (x.secIc ? x.secIc + ' ' : '') + (x.sec || '');
+  if (i > 0 && k(flat[i - 1]) === k(flat[i])) return '';
+  return `<li class="pgh" aria-hidden="true">${esc(k(flat[i]))}</li>`;
+}
 function renderSideHome() {
   if (!me) return;
   const r = currentRoute();
   const { open, locked } = splitMine();
   const flat = sideFlat();
   const mid = flat
-    ? `<ul class="pick" id="pick" aria-label="내가 고른 메뉴">${flat.map((it, i) => `<li class="ss" draggable="true" data-id="${esc(it.id)}"><span class="hd" aria-hidden="true">⠿</span><a href="${esc(it.h)}"${it.ext ? ' target="_blank" rel="noopener"' : ''}>${it.tool ? '🤖 ' : ''}${esc(it.t)}</a><button class="mv" data-pm="-1" data-id="${esc(it.id)}" aria-label="${esc(it.t)} 위로"${i === 0 ? ' disabled' : ''}>▲</button><button class="mv" data-pm="1" data-id="${esc(it.id)}" aria-label="${esc(it.t)} 아래로"${i === flat.length - 1 ? ' disabled' : ''}>▼</button></li>`).join('')}</ul>`
+    ? `<ul class="pick" id="pick" aria-label="내가 고른 메뉴">${flat.map((it, i) => sideHead(flat, i) + `<li class="ss" draggable="true" data-id="${esc(it.id)}"><span class="hd" aria-hidden="true">⠿</span><a href="${esc(it.h)}"${it.ext ? ' target="_blank" rel="noopener"' : ''}>${it.tool ? '🤖 ' : ''}${esc(it.t)}</a><button class="mv" data-pm="-1" data-id="${esc(it.id)}" aria-label="${esc(it.t)} 위로"${i === 0 ? ' disabled' : ''}>▲</button><button class="mv" data-pm="1" data-id="${esc(it.id)}" aria-label="${esc(it.t)} 아래로"${i === flat.length - 1 ? ' disabled' : ''}>▼</button></li>`).join('')}</ul>`
     : secBlocks(open);
   $('#side').innerHTML = `<div class="me"><b>${esc(me.name || me.email || me.username)}</b> · ${esc(me.role_ko || ROLE_KO[me.role] || '')}</div>` + (preview ? `<div class="pvnote">🧪 미리보기 — 순서를 바꿔도 저장되지 않습니다</div>` : '') +
     `<nav aria-label="내 페이지"><ul class="fix"><li><a href="#/"${r === 'home' ? ' class="cur" aria-current="page"' : ''}>🏠 내 페이지</a></li><li><a href="#/files"${r === 'files' ? ' class="cur" aria-current="page"' : ''}>📁 내 폴더</a></li></ul></nav>

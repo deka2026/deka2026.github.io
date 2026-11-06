@@ -467,5 +467,48 @@
   Array.prototype.forEach.call(root.querySelectorAll('.tab[data-t]'), function (b) { b.addEventListener('click', function () { tab(b.getAttribute('data-t')); }); });
   document.addEventListener('dragover', function (e) { if (e.dataTransfer && e.dataTransfer.types && Array.prototype.indexOf.call(e.dataTransfer.types, 'Files') >= 0) e.preventDefault(); });
   document.addEventListener('drop', function (e) { if (e.defaultPrevented) return; if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) { e.preventDefault(); upload(e.dataTransfer.files); } });
+  // ── 11-06 이사장 지시: 「참여」 메뉴를 빼고, 모든 페이지 하단에 「문의하기」·「이용자 제안」 단추만 ──
+  function footInit() {
+    if (document.getElementById('skFoot') || !document.body) return;
+    try { if (window.self !== window.top) return; } catch (e) { return; }   // 끼움 화면(iframe) 안에선 그리지 않는다 — 바깥 페이지 하단에 한 번만
+    var fh = document.createElement('div'); fh.id = 'skFoot';
+    var fr = fh.attachShadow({ mode: 'open' });
+    fr.innerHTML = '<style>' +
+      ':host{all:initial;display:block;font-family:"Pretendard","Noto Sans KR",system-ui,sans-serif}' +
+      '.f{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;padding:14px 16px calc(14px + var(--skai-bottom,0px));border-top:1px solid #e6e1d3;background:#faf6ec}' +
+      '.f a,.f button{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 18px;border-radius:22px;border:1px solid #2c5842;background:#fff;color:#2c5842;font-size:15px;font-family:inherit;text-decoration:none;cursor:pointer}' +
+      '.f a:hover,.f button:hover{background:#edf2e5}.f a:focus-visible,.f button:focus-visible,.d button:focus-visible,.d textarea:focus-visible,.d input:focus-visible{outline:3px solid #b47d14;outline-offset:2px}' +
+      '.bk{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:2147482000;align-items:center;justify-content:center;padding:16px}.bk.on{display:flex}' +
+      '.d{background:#fff;border-radius:14px;max-width:480px;width:100%;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.25);color:#1c2621}' +
+      '.d h2{margin:0 0 6px;font-size:18px;color:#0d3b2c}.d p{margin:0 0 10px;font-size:13px;color:#6b7280;line-height:1.5}' +
+      '.d label{display:block;font-size:13px;margin:8px 0 4px}.d textarea,.d input{box-sizing:border-box;width:100%;border:1px solid #d9d2c0;border-radius:8px;padding:9px;font-size:15px;font-family:inherit}.d textarea{min-height:120px}' +
+      '.d .r{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}.d .r button{min-height:44px;padding:0 18px;border-radius:10px;border:1px solid #2c5842;background:#fff;color:#2c5842;font-size:15px;cursor:pointer;font-family:inherit}' +
+      '.d .r .go{background:#2c5842;color:#fff}.d .r .go:disabled{opacity:.5}.d .msg{font-size:13px;margin-top:8px;min-height:1em}.d .msg.err{color:#8a2a2a}.d .msg.ok{color:#2c5842}' +
+      '</style>' +
+      '<nav class="f" aria-label="문의와 제안"><a id="fQ" href="https://home.sakyowon.co.kr/#/contact" target="_blank" rel="noopener">✉️ 문의하기</a><button type="button" id="fS">💡 이용자 제안</button></nav>' +
+      '<div class="bk" id="fBk"><div class="d" role="dialog" aria-modal="true" aria-labelledby="fT">' +
+      '<h2 id="fT">이용자 제안</h2><p>사이트·서비스를 쓰면서 불편했던 점이나 바랐던 점을 적어 주세요. 사교원 운영진이 읽고 개선합니다. 지금 보고 있는 화면 주소가 함께 전달됩니다.</p>' +
+      '<label for="fM">제안 내용</label><textarea id="fM" maxlength="3000" placeholder="예: 휴대폰에서 입찰정보 글씨가 작아요"></textarea>' +
+      '<label for="fC">답을 받을 연락처(선택)</label><input id="fC" maxlength="200" placeholder="이메일 또는 전화">' +
+      '<div class="msg" id="fR" role="status"></div><div class="r"><button type="button" id="fX">닫기</button><button type="button" class="go" id="fGo">보내기</button></div></div></div>';
+    document.body.appendChild(fh);
+    var g = function (id) { return fr.getElementById(id); }, last = null;
+    function show(v) { g('fBk').classList.toggle('on', v); if (v) { last = document.activeElement; g('fR').textContent = ''; g('fR').className = 'msg'; setTimeout(function () { g('fM').focus(); }, 30); } else if (last && last.focus) { g('fS').focus(); } }
+    g('fS').addEventListener('click', function () { show(true); });
+    g('fX').addEventListener('click', function () { show(false); });
+    g('fBk').addEventListener('click', function (e) { if (e.target === g('fBk')) show(false); });
+    fr.addEventListener('keydown', function (e) { if (e.key === 'Escape' && g('fBk').classList.contains('on')) { e.preventDefault(); show(false); } });
+    g('fGo').addEventListener('click', function () {
+      var m = g('fM').value.trim();
+      if (m.length < 5) { g('fR').className = 'msg err'; g('fR').textContent = '제안 내용을 5자 이상 적어 주세요.'; return; }
+      g('fGo').disabled = true; g('fR').className = 'msg'; g('fR').textContent = '보내는 중…';
+      api('/api/ai/dock/suggest', { method: 'POST', body: { message: m, contact: g('fC').value.trim(), page: location.href.slice(0, 500) } }).then(function (r) {
+        g('fGo').disabled = false;
+        if (r && r.ok) { g('fM').value = ''; g('fC').value = ''; g('fR').className = 'msg ok'; g('fR').textContent = '고맙습니다. 제안이 접수됐습니다.'; }
+        else { g('fR').className = 'msg err'; g('fR').textContent = (r && r.text) || '보내지 못했습니다. 잠시 뒤 다시 해 주세요.'; }
+      });
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', footInit); else footInit();
   window.skAiDock = { open: function () { open(true); $('q').focus(); }, ask: function (q) { $('q').value = q; send(); } };
 })();
