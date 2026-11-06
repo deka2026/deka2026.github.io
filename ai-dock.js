@@ -477,6 +477,7 @@
       ':host{all:initial;display:block;font-family:"Pretendard","Noto Sans KR",system-ui,sans-serif}' +
       '.f{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;padding:14px 16px calc(14px + var(--skai-bottom,0px));border-top:1px solid #e6e1d3;background:#faf6ec}' +
       '.f a,.f button{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 18px;border-radius:22px;border:1px solid #2c5842;background:#fff;color:#2c5842;font-size:15px;font-family:inherit;text-decoration:none;cursor:pointer}' +
+      '@media(max-width:760px){.f{padding-bottom:calc(var(--skai-bottom,16px) + 80px)}}' +   /* 휴대폰: 오른쪽 아래 「💬 상담」 단추(56px)가 가리지 않게 그 위로 */
       '.f a:hover,.f button:hover{background:#edf2e5}.f a:focus-visible,.f button:focus-visible,.d button:focus-visible,.d textarea:focus-visible,.d input:focus-visible{outline:3px solid #b47d14;outline-offset:2px}' +
       '.bk{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:2147482000;align-items:center;justify-content:center;padding:16px}.bk.on{display:flex}' +
       '.d{background:#fff;border-radius:14px;max-width:480px;width:100%;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.25);color:#1c2621}' +
