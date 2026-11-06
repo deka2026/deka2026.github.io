@@ -133,7 +133,7 @@ main{max-width:1080px;margin:0 auto;padding:16px}
     <ol class="steps">
       <li><b style="font-weight:600">텔레그램 설치</b> — 휴대폰 앱스토어·플레이스토어에서 「Telegram」을 설치하고 전화번호로 가입합니다. PC는 <a href="https://desktop.telegram.org/" target="_blank" rel="noopener">desktop.telegram.org</a>.</li>
       <li><b style="font-weight:600">조건 고르기</b> — 아래에서 분야·지역·참여 길·낱말을 고르고 「알림 설정 저장」을 누릅니다(로그인 필요).</li>
-      <li><b style="font-weight:600">데카봇 연결</b> — 저장한 설정의 「나에게 연결」(1:1)이나 「단체방에 연결」을 누르면 텔레그램이 열립니다. <b style="font-weight:600">시작(START)</b>을 누르면 연결됩니다. 단체방은 방을 고른 뒤 봇 추가를 허락하면 됩니다.</li>
+      <li><b style="font-weight:600">데카봇 연결</b> — 저장한 설정에 나오는 <b style="font-weight:600">연결 코드</b>(bid로 시작)를 텔레그램 데카봇(@deka2026_bot) 대화창에 보내면 연결됩니다. 「나에게 연결」 단추로 열어 시작(START)을 눌러도 됩니다. 단체방은 「단체방에 연결」로 봇을 넣으면 됩니다.</li>
       <li><b style="font-weight:600">확인</b> — 「지금 시험 발송」을 누르면 조건에 맞는 열린 공고가 바로 옵니다. 그 뒤로는 매일 아침(또는 고른 주기) 새 공고만 옵니다.</li>
     </ol>
   </div>
@@ -407,7 +407,9 @@ async function loadAlerts() {
         <div>마감 여유·주기</div><div>${s.min_days}일 이상 · ${s.period_days === 1 ? '매일' : s.period_days + '일마다'}</div>
         <div>마지막 발송</div><div>${esc((s.last_sent || '-').replace('T', ' '))}</div>
       </div>
-      ${s.linked ? '' : `<div class="msg">아래 단추를 누르면 텔레그램이 열립니다. <b style="font-weight:600">시작(START)</b>을 누르면 연결됩니다. 단체방은 방을 고르고 봇 추가를 허락하세요. 단추가 안 되면 데카봇(@${esc(r.bot)})에게 이 글을 그대로 보내세요: <code>${esc(s.start_text)}</code></div>`}
+      ${s.linked ? '' : `<div class="msg"><b style="font-weight:600">가장 쉬운 방법:</b> 텔레그램에서 데카봇(@${esc(r.bot)}) 대화창을 열고 이 연결 코드를 그대로 보내세요 — <code style="font-size:15px;user-select:all">${esc(s.code)}</code>
+  데카봇이 「연결했습니다」라고 답하면 끝입니다. 아래 「나에게 연결」 단추로 열어도 됩니다(처음 쓰는 분은 시작(START)을 누르세요).
+  단체방은 「단체방에 연결」로 방을 고르고 봇 추가를 허락하거나, 방에 <code>${esc(s.start_text)}</code> 를 보내세요.</div>`}
       <div class="btns">
         ${s.linked ? `<button class="btn p" data-test="${s.id}">지금 시험 발송</button><button class="btn s" data-unlink="${s.id}">연결 끊기</button>` :
           `<a class="btn p" href="${esc(s.link_private)}" target="_blank" rel="noopener">나에게 연결(1:1)</a><a class="btn s" href="${esc(s.link_group)}" target="_blank" rel="noopener">단체방에 연결</a><button class="btn s" data-reload>연결 확인</button>`}
