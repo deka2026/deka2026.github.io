@@ -536,7 +536,7 @@ const reasonText = r => r.status === 429 ? ERR.rate_limited : (ERR[r.error] || r
 /* 상담창(ai-dock)에 말 넣기 — ai-dock 이 window.skai.say 를 노출한다. 없으면 조용히 무시 */
 function say(t) { if (window.skai && typeof window.skai.say === 'function') { try { window.skai.say(t); } catch (_) {} } }
 
-/* ── 메뉴 트리 — 11-06 이사장 지시: ①소개·사업(현장사업·플랫폼 사업) ②교육·연구·쇼핑 순서, 참여 메뉴는 빼고 모든 페이지 하단 「문의하기·이용자 제안」 단추(ai-dock.js) · 10-18 4묶음: ③그룹웨어·관리(매니저·통합관리자만, 첫 화면엔 단추만) · 가족 메신저는 첫 화면에서 빼고 관리 안 통합관리자 전용
+/* ── 메뉴 트리 — 11-06 이사장 지시: ①소개·사업(현장사업·플랫폼 사업, 입찰정보는 11-06 오후 그룹웨어로) ②교육·연구·쇼핑 순서, 참여 메뉴는 빼고 모든 페이지 하단 「문의하기·이용자 제안」 단추(ai-dock.js) · 10-18 4묶음: ③그룹웨어·관리(매니저·통합관리자만, 첫 화면엔 단추만) · 가족 메신저는 첫 화면에서 빼고 관리 안 통합관리자 전용
    need: 'login' 로그인 | 'perm:정책지원관' 체크권한 | 'role:staff' 매니저 이상 | 'role:coop' 조합 이상 | 'role:federation' 연합회 이상 | 'admin'
    id: 2단계 꾸미기·사이드바(prefs.side)가 쓰는 고정 키 — 바꾸면 저장된 설정이 버려진다 */
 const HOME = 'https://home.sakyowon.co.kr/#/';
@@ -554,7 +554,6 @@ const TREE = [
     { ic: '🌐', name: '플랫폼 사업', items: [
       { id: 'center', t: '시민자산육성지원센터', d: '센터 업무·참여 조합 업무자동화 포털(시험판) — 별도 로그인', h: 'https://center.sakyowon.co.kr/', ext: true, al: '시민자산지원센터|시민자산센터|센터 포털' },
       { id: 'hatsoja', t: '햇빛소득마을 (햇소자)', d: '신청·진단 → 조합 설립 → 정산·배당 — 조합·연합회 회원', h: '/hatsoja/', al: '햇소자|햇빛소득마을' },
-      { id: 'bid-board', t: '입찰정보', d: '나라장터·에너지공단 공고(발전사업자·사교원) · 텔레그램 알림 · 제안서·구비서류', h: '/bids/', sub: true },
       { id: 'policy', t: '지자체 의정지원시스템', d: '공약·조례·문서작성·브리핑 — 체크권한', h: HOME + 'policy', need: 'perm:정책지원관', al: '의정지원시스템|정책지원관 지원시스템|정책지원관 시스템|의정지원' },
     ]},
   ]},
@@ -581,6 +580,7 @@ const TREE = [
       { id: 'gw-staff', t: '직원전용 질문', d: '사내 자료 근거 답변(고성능컴퓨팅)', h: 'https://gw.sakyowon.co.kr/#staff', need: 'role:staff' },
       { id: 'gw-docs', t: '보고서·기획안 작성', d: '개요 → 절별 작성 → 한글', h: 'https://gw.sakyowon.co.kr/#docs', need: 'role:staff' },
       { id: 'gw-home', t: '메일 · 결재 · 월간보고', d: '체크권한별', h: 'https://gw.sakyowon.co.kr/#home', need: 'role:staff' },
+      { id: 'bid-board', t: '입찰정보', d: '나라장터·에너지공단 공고(발전사업자·사교원) · 텔레그램 알림 · 제안서·구비서류', h: '/bids/', need: 'role:staff', al: '입찰 공고|입찰게시판|입찰 게시판' },
       { id: 'gw-bid', t: '입찰 제안서 · 협동조합 설립 지원', d: '체크권한별', h: 'https://gw.sakyowon.co.kr/#bid', need: 'role:staff' },
       { id: 'work', t: '근태 (출퇴근·휴가)', d: 'GPS 출퇴근 · 휴가 결재', h: 'https://work.sakyowon.co.kr/', need: 'role:staff' },
       { id: 'hr', t: '인사기록', d: '체크권한 「인사열람」', h: 'https://hr.sakyowon.co.kr/', need: 'perm:인사열람' },
