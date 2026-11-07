@@ -698,7 +698,7 @@ const PERMS_FOR_NONSTAFF = ['정책지원관'];
 function requestable(need) {
   if (!me || !need || need === 'admin') return false;
   const staff = (RANK[me.role] || 0) >= RANK.staff;
-  if (need.startsWith('perm:')) return staff || PERMS_FOR_NONSTAFF.includes(need.slice(5));
+  if (need.startsWith('perm:')) { if (Array.isArray(me.requestable_perms)) return me.requestable_perms.includes(need.slice(5)); return staff || PERMS_FOR_NONSTAFF.includes(need.slice(5)); }   // 11-07 C3-⑤: 서버가 주는 신청 가능 목록(/api/auth/me requestable_perms)이 정본, 없으면(미리보기) 화면 상수
   if (need === 'role:staff') return staff;
   return true;
 }
@@ -1321,7 +1321,7 @@ async function fsLoad() {
     if (FS.tab === 'trash') {   // 개선안 11: 저장 이름(숫자__경로) 대신 원래 이름·자리, 지운 시각, 영구 삭제까지 남은 날
       const orig = it.orig || name, at = orig.lastIndexOf('/'), dir = at > 0 ? orig.slice(0, at) : '';
       const left = it.purge_after ? `${it.purge_after} 지나면 영구 삭제` : '';   // 11-04 알파언니 🟠2: 남은 날 대신 삭제 시각
-      rows.push(`<tr><td class="nm">${it.dir ? '📁' : '📄'} ${esc(orig.slice(at + 1))}${dir ? `<span class="d">원래 자리: 📁 ${esc(dir)}</span>` : ''}</td><td class="n">${it.dir ? '' : fmtSize(it.size)}</td><td class="n tt">${esc((it.deleted || '').slice(5) || fmtTime(it.mtime || it.deleted_at))}${left ? `<span class="d">${left}</span>` : ''}</td><td class="act"><button class="btn sm" type="button" data-fa="restore" data-p="${esc(name)}" title="원래 자리로 되돌립니다">♻️ 복원</button></td></tr>`);
+      rows.push(`<tr><td class="nm">${it.dir ? '📁' : '📄'} ${esc(orig.slice(at + 1))}${it.dup && it.nth ? ` <span class="rotag" title="같은 이름이 여럿 — 최근 것이 1번째">${esc(it.nth)}번째</span>` : ''}${dir ? `<span class="d">원래 자리: 📁 ${esc(dir)}</span>` : ''}</td><td class="n">${it.dir ? '' : fmtSize(it.size)}</td><td class="n tt">${esc((it.deleted || '').slice(5) || fmtTime(it.mtime || it.deleted_at))}${left ? `<span class="d">${left}</span>` : ''}</td><td class="act"><button class="btn sm" type="button" data-fa="restore" data-p="${esc(name)}" title="원래 자리로 되돌립니다">♻️ 복원</button></td></tr>`);
     }
     else rows.push(`<tr><td class="nm">${itRo ? '' : `<input type="checkbox" data-sel="${esc(p)}" aria-label="${esc(name)} 고르기"${FS.sel.has(p) ? ' checked' : ''}>`}${it.dir ? `📁 <a href="#/files" data-fp="${esc(p)}">${esc(name)}</a>` : `📄 ${esc(name)}`}${it.readonly === true ? '<span class="rotag">읽기 전용</span>' : ''}</td><td class="n">${it.dir ? '' : fmtSize(it.size)}</td><td class="n">${esc(fmtTime(it.mtime))}</td><td class="act">${it.dir ? '' : `<a class="btn sm" href="/api/my/files/download?path=${encodeURIComponent(p)}" download>⬇️ 내려받기</a>`}${itRo ? '' : `<button class="btn sm" type="button" data-fa="rename" data-p="${esc(p)}" data-n="${esc(name)}">✏️ 이름 바꾸기</button><button class="btn sm" type="button" data-fa="delete" data-p="${esc(p)}" data-n="${esc(name)}">🗑️ 지우기</button>`}</td></tr>`);
   });
