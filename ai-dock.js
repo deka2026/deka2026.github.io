@@ -105,6 +105,10 @@
     // 휴대폰 한 줄: [올리기][말하기·준비 중] … [보내기] — 390px 에서 꺾이지 않게 단추 안쪽 여백·글자를 줄인다
     '@media(max-width:760px){:host([data-mode=inline]) .b,:host([data-mode=fab]) .b{padding:0 11px;font-size:14px}:host([data-mode=inline]) #send,:host([data-mode=fab]) #send{padding:0 18px}:host([data-mode=inline]) .mic,:host([data-mode=fab]) .mic{font-size:12.5px;padding:0 9px}}' +
     '@media(prefers-reduced-motion:no-preference){:host([data-mode=fab][data-open]) .wrap{animation:up .22s ease-out}@keyframes up{from{transform:translateY(40px);opacity:.6}to{transform:none;opacity:1}}}' +
+    '.b.dk,.tab.dk{background:#24453a;color:#fff;border-color:#24453a;font-weight:600}.tab.dk.on{background:#183229;color:#fff}' +
+    '#vDeka .dkn{font-size:12.5px;color:#5b5f66;margin:2px 0 8px;line-height:1.5}#vDeka .dkn a{color:#24453a}' +
+    '#vDeka iframe{display:block;width:100%;height:calc(70vh - 80px);min-height:420px;border:1px solid #d9d2c0;border-radius:10px;background:#fff}' +
+    ':host([data-deka]) .panel{max-height:none}:host([data-mode=inline]) #vDeka iframe{height:620px}:host([data-mode=fab]) #vDeka iframe{height:calc(88dvh - 200px);min-height:300px}' +
     '</style>' +
     '<button class="fabbtn" id="fab" type="button" aria-haspopup="dialog" aria-controls="wrap">💬 상담</button>' +
     '<div class="scrim" id="scrim"></div>' +
@@ -116,18 +120,20 @@
     '<button class="b" id="send" title="보내기">보내기</button>' +
     '<button class="b lbl" id="bUp" title="파일·이미지 올리기">📎 <span class="ul">업로드</span></button>' +
     '<button class="b lbl" id="bDoc" title="문서 작성">📝 문서</button>' +
+    '<button class="b dk" id="bDeka" type="button" hidden title="데카(서버 작업대)에게 직접 지시 — 통합관리자 전용">🛠️ 데카</button>' +
     '<button class="b" id="bTog" title="열기/닫기">▾</button>' +
     '<span class="who" id="who"></span>' +
     '<input type="file" id="file" style="display:none" multiple>' +
     '<button class="b mic" id="bMic" type="button" aria-disabled="true" title="음성 입력은 준비 중입니다">🎤 말하기 · 준비 중</button>' +
     '</div>' +
     '<div class="panel" id="panel"><div class="inner">' +
-    '<div class="tabs"><button class="tab on" data-t="chat">대화</button><button class="tab" data-t="doc">문서 작성</button><button class="tab" data-t="list">내 대화</button><span class="sp"></span><span class="note" id="note"></span><button class="tab" id="bNew">새 대화</button></div>' +
+    '<div class="tabs"><button class="tab dk" data-t="deka" id="tDeka" hidden>🛠️ 데카 · 서버</button><button class="tab on" data-t="chat">대화</button><button class="tab" data-t="doc">문서 작성</button><button class="tab" data-t="list">내 대화</button><span class="sp"></span><span class="note" id="note"></span><button class="tab" id="bNew">새 대화</button></div>' +
     '<div id="vChat"><div class="files" id="files"></div><div class="msgs" id="msgs"></div></div>' +
     '<div id="vDoc" style="display:none"><div class="note">어떤 문서를 만들지 적어 주세요. 올린 파일과 지금까지의 대화를 근거로 마크다운 초안을 쓰고, 한글(hwpx)로 내려받을 수 있습니다. 서식은 사교원 집 규칙(첫 줄 들여쓰기·굵게는 제목만·쪽번호)으로 맞춥니다.</div>' +
     '<div class="row"><textarea class="ta" id="ask" placeholder="예: 올린 공고문을 바탕으로 사업 신청서 초안을 써 줘 (목적·내용·추진일정·예산 절 포함)"></textarea><button class="pb" id="bDraft">초안 쓰기</button></div>' +
     '<div id="draftBox"></div></div>' +
     '<div id="vList" style="display:none"><div class="list" id="list"></div></div>' +
+    '<div id="vDeka" style="display:none"><div class="dkn">🛠️ <b>데카 — 서버 작업대(통합관리자 전용)</b>. 데스크탑앱에서처럼 서버 권한으로 바로 일합니다. 사이트 개선 지시를 여기서 내리세요. <a href="https://deka.sakyowon.co.kr/" target="_blank" rel="noopener">새 창으로 크게 ↗</a></div><div id="dkHost"></div></div>' +
     '</div></div></div>';
   document.documentElement.appendChild(host);
   var $ = function (id) { return root.getElementById(id); };
@@ -186,13 +192,25 @@
     if (m.user) $('who').innerHTML = esc(m.user.name || m.user.email || m.user.username) + ' · ' + esc(m.user.role_ko || '') + ' · ' + (m.used || 0) + '/' + m.limit;
     else $('who').innerHTML = '<a href="' + API + '/#login">로그인</a>하면 업로드·문서작성 · 안내 ' + (m.used || 0) + '/' + (m.limit || 10);
   }
-  api('/api/ai/dock/me').then(function (r) { state.me = r.ok ? r : {}; setWho(); });
+  api('/api/ai/dock/me').then(function (r) { state.me = r.ok ? r : {}; setWho(); dekaShow(); });
+  // ── 11-07 이사장 지시: 통합관리자에게만 모든 화면 위 띠에 「🛠️ 데카」(서버 작업대 deka.sakyowon.co.kr 를 끼워 보임).
+  //    여기서는 단추만 보인다 — 실제 문지기는 데카 서버(허브 통합관리자 세션을 요청마다 확인). 다른 화면이 데카 창에 글을 넣는 길은 만들지 않는다.
+  var DEKA = 'https://deka.sakyowon.co.kr/?embed=1';
+  function isAdmin() { var m = state.me || {}; return !!(m.user && (m.role === 'admin' || m.user.role === 'admin')); }
+  function dekaShow() { var on = isAdmin(); $('bDeka').hidden = !on; $('tDeka').hidden = !on; }
+  function dekaFrame() {
+    if (!isAdmin() || $('dkHost').firstChild) return;
+    var f = document.createElement('iframe'); f.src = DEKA; f.title = '데카 — 서버 작업대'; f.setAttribute('allow', 'clipboard-write');
+    $('dkHost').appendChild(f);
+  }
+  $('bDeka').addEventListener('click', function () { if (state.open && state.tab === 'deka') { open(false); return; } tab('deka'); });
 
   function open(v) { state.open = v; $('panel').classList.toggle('open', v); $('bTog').textContent = v ? '▴' : '▾'; if (host.getAttribute('data-mode') === 'fab') setSheet(v); }
   function tab(t) {
     state.tab = t;
     Array.prototype.forEach.call(root.querySelectorAll('.tab[data-t]'), function (b) { b.classList.toggle('on', b.getAttribute('data-t') === t); });
     $('vChat').style.display = t === 'chat' ? '' : 'none'; $('vDoc').style.display = t === 'doc' ? '' : 'none'; $('vList').style.display = t === 'list' ? '' : 'none';
+    $('vDeka').style.display = t === 'deka' ? '' : 'none'; if (t === 'deka') { host.setAttribute('data-deka', ''); dekaFrame(); } else host.removeAttribute('data-deka');
     if (t === 'list') loadList();
     open(true);
   }
