@@ -133,7 +133,7 @@
     '<div class="row"><textarea class="ta" id="ask" placeholder="예: 올린 공고문을 바탕으로 사업 신청서 초안을 써 줘 (목적·내용·추진일정·예산 절 포함)"></textarea><button class="pb" id="bDraft">초안 쓰기</button></div>' +
     '<div id="draftBox"></div></div>' +
     '<div id="vList" style="display:none"><div class="list" id="list"></div></div>' +
-    '<div id="vDeka" style="display:none"><div class="dkn">🛠️ <b>데카 — 서버 작업대(통합관리자 전용)</b>. 데스크탑앱에서처럼 서버 권한으로 바로 일합니다. 사이트 개선 지시를 여기서 내리세요. <a href="https://deka.sakyowon.co.kr/" target="_blank" rel="noopener">새 창으로 크게 ↗</a></div><div id="dkHost"></div></div>' +
+    '<div id="vDeka" style="display:none"><div class="dkn">🛠️ <b>데카 — 서버 작업대(이사장님 계정 전용)</b>. 사이트 개선 지시를 여기서 내리세요. 다른 화면으로 옮겨도 하던 일은 끝까지 하고, 결과는 왼쪽 「지난 대화」에서 봅니다. 데스크탑 웹 방과 대화를 같이 씁니다. sudo 가 필요한 일(시스템 서비스 재시작·설치)은 데스크탑앱에서. <a href="https://deka.sakyowon.co.kr/" target="_blank" rel="noopener">새 창으로 크게 ↗</a></div><div id="dkHost"></div></div>' +
     '</div></div></div>';
   document.documentElement.appendChild(host);
   var $ = function (id) { return root.getElementById(id); };
@@ -196,7 +196,7 @@
   // ── 11-07 이사장 지시: 통합관리자에게만 모든 화면 위 띠에 「🛠️ 데카」(서버 작업대 deka.sakyowon.co.kr 를 끼워 보임).
   //    여기서는 단추만 보인다 — 실제 문지기는 데카 서버(허브 통합관리자 세션을 요청마다 확인). 다른 화면이 데카 창에 글을 넣는 길은 만들지 않는다.
   var DEKA = 'https://deka.sakyowon.co.kr/?embed=1';
-  function isAdmin() { var m = state.me || {}; return !!(m.user && (m.role === 'admin' || m.user.role === 'admin')); }
+  function isAdmin() { var m = state.me || {}; return !!(m.user && (m.role === 'admin' || m.user.role === 'admin') && String(m.user.id) === '2'); }   // 데카 서버 DEKA_HUB_USERS 와 같은 기준
   function dekaShow() { var on = isAdmin(); $('bDeka').hidden = !on; $('tDeka').hidden = !on; }
   function dekaFrame() {
     if (!isAdmin() || $('dkHost').firstChild) return;
