@@ -552,7 +552,7 @@ const TREE = [
       { id: 'yangyang', t: '양양어촌신활력 (강원 양양)', d: '망남과 같은 구성으로 채우는 중', h: 'https://vitality.sakyowon.co.kr/', soon: true, al: '양양|양양 사업' },
     ]},
     { ic: '🌐', name: '플랫폼 사업', items: [
-      { id: 'center', t: '시민자산육성지원센터', d: '센터 업무·참여 조합 업무자동화 포털(시험판) — 별도 로그인', h: 'https://center.sakyowon.co.kr/', ext: true, al: '시민자산지원센터|시민자산센터|센터 포털' },
+      { id: 'center', t: '시민자산육성지원센터', d: '센터 업무·참여 조합 업무자동화 포털(시험판) — 별도 로그인', h: 'https://center.sakyowon.co.kr/', ext: true, al: '시민자산지원센터|시민자산센터|센터 포털|센터' },
       { id: 'hatsoja', t: '햇빛소득마을 (햇소자)', d: '신청·진단 → 조합 설립 → 정산·배당 — 조합·연합회 회원', h: '/hatsoja/', al: '햇소자|햇빛소득마을' },
       { id: 'policy', t: '지자체 의정지원시스템', d: '공약·조례·문서작성·브리핑 — 체크권한', h: HOME + 'policy', need: 'perm:정책지원관', al: '의정지원시스템|정책지원관 지원시스템|정책지원관 시스템|의정지원' },
     ]},
@@ -1525,6 +1525,7 @@ $('#sideWrap').addEventListener('keydown', e => {
   if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); } else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); }
 });
 if (MQ_SMALL.addEventListener) MQ_SMALL.addEventListener('change', () => closeSide(false));
+if (MQ_SMALL.addEventListener) MQ_SMALL.addEventListener('change', () => { if (currentRoute() === 'map' && $('#mapBody')) mapFind(); });   // 11-07: 폭이 760px 경계를 넘으면 둘러보기 접기(M8)를 다시 적용(누른 것은 그대로)
 /* ── 11-04 개선안 M4: 계정 메뉴 */
 function openAcct() { if (MQ_SMALL.matches) $('#acctMenu').style.top = Math.round(document.querySelector('header.top').getBoundingClientRect().bottom + 6) + 'px'; else $('#acctMenu').style.top = ''; $('#acctMenu').hidden = false; $('#acctBtn').setAttribute('aria-expanded', 'true'); const f = Array.from($('#acctMenu').querySelectorAll('button:not([disabled]),a[href]')).find(x => x.offsetParent !== null); if (f) f.focus(); }
 function closeAcct(back) { const was = !$('#acctMenu').hidden; $('#acctMenu').hidden = true; $('#acctBtn').setAttribute('aria-expanded', 'false'); if (was && back !== false) $('#acctBtn').focus(); }
