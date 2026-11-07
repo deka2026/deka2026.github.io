@@ -236,7 +236,8 @@
 .pwrules li.ok{color:#1f7a3f}
 .pwrules li.ok::before{content:"✓ "}
 /* ── 11-07 첫 화면 개편(이사장 지시): 1단 배치·사이드바(비로그인도)·메뉴 순서·시험용 표시 빨강 */
-.tmp{color:var(--danger);font-weight:600}.grp li a .tmp,.side .tmp,.mcard .tmp{font-size:0.7667rem}
+.tmp{color:var(--danger);font-weight:600}
+#topnav[hidden],#topnav a[hidden],.view[hidden]{display:none!important}   /* 11-07: hidden 속성이 display:flex 에 덮여 비로그인 휴대폰 아래 탭에 내 페이지·내 폴더·꾸미기가 보였다 */.grp li a .tmp,.side .tmp,.mcard .tmp{font-size:0.7667rem}
 body[data-route="start"] .app{grid-template-columns:270px minmax(0,1fr)}
 body[data-route="start"] .side{display:block}
 body[data-route="start"] .tree{grid-template-columns:1fr}
