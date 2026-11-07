@@ -1046,7 +1046,7 @@ footer{
           <div class="tl-head">관리자 승인</div>
           <div class="tl-body">
             신청 내역을 확인하고 <strong>영업일 기준 1~2일 내</strong>에 승인합니다. (주말 제외)
-            승인 완료되면 접속 가능하다는 문자메세지를 신청서에 기록한 휴대전화번호로 발송합니다.
+            승인 완료되면 접속 가능하다는 문자메시지를 신청서에 기록한 휴대전화번호로 발송합니다.
           </div>
         </div>
         <div class="tl-step">
@@ -3362,7 +3362,7 @@ const SUCCESS = [
     no:'1', icon:'🗳', name:'주민 결정권 유지',
     why:'주민이 협동조합을 구성하면 완성되는 것이 아닙니다. 사업자 선정·대출 승인·수익 사용·설비 교체 같은 중요한 결정이 가동 후에도 20년간 계속됩니다. 핵심 기준은 <b>주민이 얼마를 출자했느냐가 아니라, 사업 내용을 얼마나 이해하고 의사결정에 참여했느냐</b>입니다.',
     items:[
-      ['총회와 이사회의 권한을 정관에 명확히 구분', '차입 한도, 일정 금액 이상의 계약, 수익 배분 원칙 변경, 설비 교체는 총회 의결사항으로 못박습니다. 위임 범위가 모호하면 나중에 "누가 정했나"로 다툽니다.'],
+      ['총회와 이사회의 권한을 정관에 명확히 구분', '차입 한도, 일정 금액 이상의 계약, 수익 배분 원칙 변경, 설비 교체는 총회 의결사항으로 못 박습니다. 위임 범위가 모호하면 나중에 "누가 정했나"로 다툽니다.'],
       ['중요 결정 전 주민설명회를 의무 절차로', '총회 3일 전까지 쉬운 말로 만든 자료를 배포하고 설명회를 엽니다. 숫자는 매출이 아니라 "마을에 남는 돈" 기준으로 제시합니다.'],
       ['의사결정 기록을 상시 공개', '총회·이사회 의사록과 주요 계약서 요약을 마을회관·조합 게시판에 비치해 누구나 열람하게 합니다.'],
       ['대리 결정 금지 — 동의·의결은 본인이 직접', '고령 주민은 서면 동의서와 대면 확인을 병행합니다. 대리 입력은 뒤에 동의 무효 시비로 돌아옵니다.'],
@@ -3803,7 +3803,7 @@ function venScore(){
     <div style="background:var(--paper-soft);border-radius:8px;padding:12px 14px;margin-top:10px;">
       <b>${top.label}가 1위 (${top.total.toFixed(1)}점, 2위와 ${gap.toFixed(1)}점 차)</b>
       <p class="text-mute" style="font-size:13px;margin:4px 0 0;">${gap < 5
-        ? '점수 차가 5점 미만으로 접합니다. 사례지 현장 확인과 발표평가회 질의응답으로 다시 비교한 뒤 결정하세요.'
+        ? '점수 차가 5점 미만으로 근접합니다. 사례지 현장 확인과 발표평가회 질의응답으로 다시 비교한 뒤 결정하세요.'
         : '점수 차가 뚜렷합니다. 다만 최종 선정 전에 계약서의 해지조건·운영권·성능보증을 반드시 확인하고 총회 의결로 확정하세요.'}
       점수는 <b>주민 판단을 돕는 참고 자료</b>이며, 선정 권한은 총회에 있습니다.</p>
     </div>`;
@@ -4034,7 +4034,7 @@ const PW_STRAT = [
   {name:'균형 성장형', tag:'2차 사업 대비',
    desc:'다섯 용도를 고르게 배분하면서 재투자 기금을 두껍게 쌓아, 설비 증설이나 마을식당·민박 같은 파생사업의 자기자본으로 씁니다.',
    fit:'상환 여력이 있고 마을비즈니스로 확장을 계획하는 마을',
-   risk:'모든 용도에 조금씩 배분되어 어느 하나도 체감이 크지 않을 수 있습니다. 재투자 기금의 사용 목적을 미리 못박아야 합니다.',
+   risk:'모든 용도에 조금씩 배분되어 어느 하나도 체감이 크지 않을 수 있습니다. 재투자 기금의 사용 목적을 미리 못 박아야 합니다.',
    mix:{재투자:25, 공동사업:30, 조합원배당:20, 마을연금:20, 조기상환:5}},
 ];
 
@@ -9128,7 +9128,7 @@ const HSJ_GONGGO = `[1페이지]
 ㅇ (조합의 정의) 상기 조합원 범위에 해당하는 자 10인 이상이 조합원
 으로 참여하여 설립된 「협동조합 기본법」상 협동조합 또는 사회적협동조합
 ㅇ (발기인의 범위) 조합원 자격을 갖추고 협동조합 설립 의사를 가진 
-최소 5인 이상로 구성되며, 한 가구에서 1명 초과 인원은 불인정
+최소 5인 이상으로 구성되며, 한 가구에서 1명 초과 인원은 불인정
  태양광 발전사업을 추진 가능하여야 함
 ㅇ (발전사업 추진) 「전기사업법」에 따른 태양광 발전사업이 가능토록 
 주민 수용성, 자금, 부지와 계통* 등을 확보할 수 있어야 함
@@ -9450,7 +9450,7 @@ ESS 설치비용의 최대 90% 지원(정부 50%, 지방정부 40%)
 
 [18페이지]
 - 18 -
-나. 펑가 기준
+나. 평가 기준
 구분 평가지표 세부내용 및 평가기준 배점
 계량
 평가
@@ -9652,7 +9652,7 @@ ESS 설치비용의 최대 90% 지원(정부 50%, 지방정부 40%)
 추진하여야 함
 ① 선정일로부터 6개월 이내에 태양광 발전사업허가를 득하여야 함
 ② 발전사업 허가일로부터 12개월 이내에 고정가격계약 경쟁입찰에 
-선정되어야하거나, 전력거래계약(PPA)을 체결하여야 함
+선정되어야 하거나, 전력거래계약(PPA)을 체결하여야 함
 ③ 발전사업 허가일로부터 12개월 이내에 사용전검사를 목표로 함
 □ (계통 연계) 사업계획서 작성, 마을선정 및 발전사업 허가단계에서 여유
 용량이 있더라도 한전 전력거래계약 신청 후 연계가능여부 변동 가능
@@ -9718,7 +9718,7 @@ ESS 설치비용의 최대 90% 지원(정부 50%, 지방정부 40%)
 □ 예 □ 아니오
 8
 (교육의 참여) 햇빛소득마을 사업 구조, 위험성 , 유의사항 등을 파악하기 위해 정부 또는 지방정부
-에서 추진하는 교육을 참여하였는지?
+에서 추진하는 교육에 참여하였는지?
 □ 예 □ 아니오
 9
 (공고문의 확인) 햇빛소득마을 신청을 위한 참여
@@ -9747,7 +9747,7 @@ ESS 설치비용의 최대 90% 지원(정부 50%, 지방정부 40%)
 현황
 마을 소재지
 마을 
-총 주민수 명 사업참여 주 민 수 명 주 민동의율 %
+총 주민수 명 사업참여 주민 수 명 주민동의율 %
 담당자
 현황
 ➀협동조합명 담당자 전화
@@ -14539,6 +14539,40 @@ document.addEventListener('keydown', e => {
     closeLogin(); closeDyn();
   }
 });
+</script>
+<script>
+/* 11-07 이사장 지시: 아이디 기억하기 — 체크하면 이 기기(브라우저)에 마지막 로그인 아이디만 남긴다(비밀번호는 남기지 않음). 체크를 풀고 로그인하면 지운다. [remid v2] */
+(function(){
+  var K='sk_last_id', U='#lg-email', P='#lg-pw', B='#lgBtn';
+  function get(){ try{ return localStorage.getItem(K)||''; }catch(e){ return ''; } }
+  function shown(el){ return !!(el && el.offsetParent !== null && el.getClientRects().length); }
+  var st={ wasShown:false };
+  function hook(){
+    var u=document.querySelector(U), p=document.querySelector(P);
+    if(!u||!p) return;
+    if(!u.getAttribute('data-remid')){
+      u.setAttribute('data-remid','1');
+      var l=document.createElement('label'); l.className='sk-remid'; l.title='공용 PC(마을회관·교육장)에서는 체크하지 마세요. 다음 사람에게 아이디가 보입니다.';
+      l.style.cssText='display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px;margin:4px 0 10px;font-size:13px;font-weight:400;cursor:pointer;width:auto';
+      var c=document.createElement('input'); c.type='checkbox';
+      c.style.cssText='width:16px;height:16px;margin:0;padding:0;flex:none';
+      var t=document.createElement('span'); t.textContent='아이디 기억하기'; t.style.whiteSpace='nowrap';
+      var n=document.createElement('span'); n.textContent='(공용 PC에서는 끄세요)'; n.style.cssText='white-space:nowrap;opacity:.65;font-size:12px';
+      l.appendChild(c); l.appendChild(t); l.appendChild(n);
+      var v=get(); c.checked=!!v; if(v && !u.value) u.value=v;
+      var at=p.closest('label,.field,.form-row,.f')||p; at.parentNode.insertBefore(l, at.nextSibling);
+      var save=function(){ try{ var id=(u.value||'').trim(); if(c.checked&&id) localStorage.setItem(K,id); else localStorage.removeItem(K); }catch(e){} };
+      if(p.form) p.form.addEventListener('submit',save,true);
+      p.addEventListener('keydown',function(e){ if(e.key==='Enter') save(); },true);
+      document.addEventListener('click',function(e){ if(B && e.target && e.target.closest && e.target.closest(B)) save(); },true);
+    }
+    /* 로그인 칸이 화면에 새로 나타날 때(창 열기·로그인 화면 그리기) 아이디가 차 있으면 비밀번호 칸으로 커서 */
+    var now=shown(p);
+    if(now && !st.wasShown && u.value && !p.value) setTimeout(function(){ try{ if(shown(p)) p.focus(); }catch(e){} },60);
+    st.wasShown=now;
+  }
+  hook(); try{ new MutationObserver(hook).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style','hidden']}); }catch(e){}
+})();
 </script>
 </body>
 </html>

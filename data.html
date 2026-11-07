@@ -698,5 +698,39 @@ document.querySelector('[data-tab=guide]').addEventListener('click', renderGuide
 
 boot();
 </script>
+<script>
+/* 11-07 이사장 지시: 아이디 기억하기 — 체크하면 이 기기(브라우저)에 마지막 로그인 아이디만 남긴다(비밀번호는 남기지 않음). 체크를 풀고 로그인하면 지운다. [remid v2] */
+(function(){
+  var K='sk_last_id', U='#login-username', P='#login-password', B=null;
+  function get(){ try{ return localStorage.getItem(K)||''; }catch(e){ return ''; } }
+  function shown(el){ return !!(el && el.offsetParent !== null && el.getClientRects().length); }
+  var st={ wasShown:false };
+  function hook(){
+    var u=document.querySelector(U), p=document.querySelector(P);
+    if(!u||!p) return;
+    if(!u.getAttribute('data-remid')){
+      u.setAttribute('data-remid','1');
+      var l=document.createElement('label'); l.className='sk-remid'; l.title='공용 PC(마을회관·교육장)에서는 체크하지 마세요. 다음 사람에게 아이디가 보입니다.';
+      l.style.cssText='display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px;margin:4px 0 10px;font-size:13px;font-weight:400;cursor:pointer;width:auto';
+      var c=document.createElement('input'); c.type='checkbox';
+      c.style.cssText='width:16px;height:16px;margin:0;padding:0;flex:none';
+      var t=document.createElement('span'); t.textContent='아이디 기억하기'; t.style.whiteSpace='nowrap';
+      var n=document.createElement('span'); n.textContent='(공용 PC에서는 끄세요)'; n.style.cssText='white-space:nowrap;opacity:.65;font-size:12px';
+      l.appendChild(c); l.appendChild(t); l.appendChild(n);
+      var v=get(); c.checked=!!v; if(v && !u.value) u.value=v;
+      var at=p.closest('label,.field,.form-row,.f')||p; at.parentNode.insertBefore(l, at.nextSibling);
+      var save=function(){ try{ var id=(u.value||'').trim(); if(c.checked&&id) localStorage.setItem(K,id); else localStorage.removeItem(K); }catch(e){} };
+      if(p.form) p.form.addEventListener('submit',save,true);
+      p.addEventListener('keydown',function(e){ if(e.key==='Enter') save(); },true);
+      document.addEventListener('click',function(e){ if(B && e.target && e.target.closest && e.target.closest(B)) save(); },true);
+    }
+    /* 로그인 칸이 화면에 새로 나타날 때(창 열기·로그인 화면 그리기) 아이디가 차 있으면 비밀번호 칸으로 커서 */
+    var now=shown(p);
+    if(now && !st.wasShown && u.value && !p.value) setTimeout(function(){ try{ if(shown(p)) p.focus(); }catch(e){} },60);
+    st.wasShown=now;
+  }
+  hook(); try{ new MutationObserver(hook).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style','hidden']}); }catch(e){}
+})();
+</script>
 </body>
 </html>

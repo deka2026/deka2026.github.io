@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>사교원 — 사회혁신교육원 사회적협동조합 통합사이트</title>
-<meta name="description" content="사회혁신교육원 사회적협동조합(사교원) 통합사이트 — 소개·사업, 교육·연구·쇼핑을 한 화면에서. 상단 AI 도우미에게 바로 물어보세요.">
+<meta name="description" content="사회혁신교육원 사회적협동조합(사교원) 통합사이트 — 플랫폼 사업·현장사업·교육·연구·소개를 한 화면에서. 상단 AI 도우미에게 바로 물어보세요.">
 <link rel="canonical" href="https://sakyowon.co.kr/">
 <meta property="og:title" content="사교원 통합사이트 — 사회혁신교육원 사회적협동조합">
-<meta property="og:description" content="소개·사업 · 교육·연구·쇼핑 — 사교원의 모든 메뉴를 한눈에, AI 도우미와 함께">
+<meta property="og:description" content="플랫폼 사업 · 현장사업 · 교육·연구 · 소개 — 사교원의 모든 메뉴를 한눈에, AI 도우미와 함께">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://sakyowon.co.kr/">
 <meta property="og:image" content="https://sakyowon.co.kr/icon-512.png">
@@ -171,6 +171,7 @@
   .tabs{display:flex;gap:6px;margin-bottom:12px}.tabs button{flex:1;border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px;cursor:pointer;font-family:inherit}.tabs button.on{background:var(--g7);color:#fff;border-color:var(--g7)}
   .f{margin-bottom:10px}.f label{display:block;font-size:0.8667rem;color:var(--ink2);margin-bottom:4px}.f input,.f select{width:100%;height:38px;border:1px solid var(--line);border-radius:8px;padding:0 10px;font-size:0.9333rem;font-family:inherit;background:#fff}
   .f .two{display:flex;gap:6px}.f .two select{flex:1}
+  .remid{display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px;margin:-2px 0 10px;font-size:0.8667rem;color:var(--ink2);cursor:pointer}.remid input{width:16px;height:16px;margin:0}.remid b{font-weight:400;white-space:nowrap}.remid span{color:var(--mute);font-size:0.8rem;white-space:nowrap}
   .msg{font-size:0.8667rem;min-height:18px;margin:4px 0 8px}.msg.err{color:var(--danger)}.msg.ok{color:#2e8b57}
   .mbtn{width:100%;height:40px;border:none;background:var(--g7);color:#fff;border-radius:8px;font-size:0.9333rem;cursor:pointer;font-family:inherit}.mbtn:disabled{opacity:.5}
   .ghost{width:100%;height:36px;border:1px solid var(--line);background:#fff;border-radius:8px;font-size:0.8667rem;cursor:pointer;margin-top:6px;font-family:inherit}
@@ -261,7 +262,7 @@ body[data-route="start"] .tree{grid-template-columns:1fr}
 <div class="wrap">
   <header class="top">
     <button class="btn sideTog" id="sideTog" type="button" aria-controls="sideWrap" aria-expanded="false" hidden>☰ 메뉴</button>
-    <div class="brand"><div class="mark">L&amp;L</div><div><h1>사교원<span class="hm"> 통합사이트</span></h1><div class="sub">사회혁신교육원 사회적협동조합 · 소개·사업 · 교육·연구·쇼핑</div></div></div>
+    <div class="brand"><div class="mark">L&amp;L</div><div><h1>사교원<span class="hm"> 통합사이트</span></h1><div class="sub">사회혁신교육원 사회적협동조합 · 플랫폼 사업 · 현장사업 · 교육·연구 · 소개</div></div></div>
     <div class="sp"></div>
     <span class="fs" role="group" aria-label="글자 크기"><button type="button" id="fsDown" data-fs="-1" aria-label="글자 작게">가−</button><button type="button" id="fsUp" data-fs="1" aria-label="글자 크게">가+</button></span>
     <button class="btn p" id="btnLogin">로그인 · 회원가입</button>
@@ -313,6 +314,7 @@ body[data-route="start"] .tree{grid-template-columns:1fr}
             <h2 id="gtTitle">로그인</h2><p class="sub">사교원 통합 계정 하나로 모든 사이트에 들어갑니다. 로그인하면 내 페이지(상담창·대시보드·내 폴더)로 갑니다.</p>
             <div class="f"><label for="gtEmail">이메일 <span style="color:var(--mute);font-weight:400">(옛 아이디도 됩니다)</span></label><input id="gtEmail" inputmode="email" autocomplete="username" placeholder="name@example.com"></div>
             <div class="f"><label for="gtPw">비밀번호</label><input id="gtPw" type="password" autocomplete="current-password"></div>
+            <label class="remid"><input type="checkbox" id="gtRem"> <b>아이디 기억하기</b> <span>(공용 PC에서는 끄세요)</span></label>
             <div class="f" id="gtCodeBox" hidden><label for="gtCode">2단계 인증 코드</label><input id="gtCode" inputmode="numeric" autocomplete="one-time-code" placeholder="인증 앱 6자리 · 이메일 코드 · 백업 코드"></div>
             <div class="msg" id="gtMsg" aria-live="polite"></div>
             <button class="mbtn" id="gtBtn" type="submit">로그인</button>
@@ -332,12 +334,12 @@ body[data-route="start"] .tree{grid-template-columns:1fr}
             <h2>회원 등급</h2>
             <div class="tiers">
               <b>통합관리자</b> › <b>매니저회원</b>(사교원 직원, 체크권한으로 그룹웨어·관리 기능) › <b>연합회회원</b>(햇빛소득마을 연합회) › <b>조합회원</b>(회원협동조합) › <b>일반이용자</b>(교육·쇼핑·문의·AI 질문) › 비로그인(둘러보기·안내 질문)<br>
-              가입은 이메일 하나로, 로그인은 이메일+비밀번호. 조합·연합회·매니저는 승인 뒤 열립니다. 로그인하면 내 페이지의 사이드바에 내 등급으로 열리는 메뉴만 모이고, 아직 못 여는 메뉴는 맨 아래 「권한 승인이 필요한 메뉴」에 따로 보입니다.
+              가입은 이메일 하나로, 로그인은 이메일+비밀번호. 조합·연합회·매니저는 승인 뒤 열립니다. 로그인하면 내 페이지의 사이드바에 내 등급으로 열리는 메뉴만 보이고, 아직 못 여는 메뉴는 맨 아래 「권한 승인이 필요한 메뉴」에 따로 보입니다.
             </div>
             <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn sm" id="btnSignup">회원가입</button><a class="btn sm" href="account-privacy.html">개인정보처리방침</a></div>
           </div>
         </div>
-        <div class="secT"><h2>전체 메뉴</h2><p class="sub">교육·연구 → 플랫폼 사업 → 사교원 소개·현장사업 → 그룹웨어 순서입니다. 🔒 는 어떤 회원이 쓰는지 적혀 있습니다.</p></div>
+        <div class="secT"><h2>전체 메뉴</h2><p class="sub">플랫폼 사업 → 사교원 현장사업 → 교육·연구 → 사교원 소개 순서이고, 그룹웨어·관리는 직원 전용입니다. 🔒 는 어떤 회원이 쓰는지 적혀 있습니다.</p></div>
         <div class="tree view" id="tree"></div>
       </main>
 
@@ -461,6 +463,7 @@ body[data-route="start"] .tree{grid-template-columns:1fr}
       <h2 id="lgTitle">로그인</h2><p class="sub">사교원 통합 계정 하나로 모든 사이트에 들어갑니다.</p>
       <div class="f"><label for="lgEmail">이메일 <span style="color:var(--mute);font-weight:400">(옛 아이디도 당분간 됩니다)</span></label><input id="lgEmail" inputmode="email" autocomplete="username" placeholder="name@example.com"></div>
       <div class="f"><label for="lgPw">비밀번호</label><input id="lgPw" type="password" autocomplete="current-password"></div>
+      <label class="remid"><input type="checkbox" id="lgRem"> <b>아이디 기억하기</b> <span>(공용 PC에서는 끄세요)</span></label>
       <div class="f" id="lgCodeBox" hidden><label for="lgCode">2단계 인증 코드</label><input id="lgCode" inputmode="numeric" autocomplete="one-time-code" placeholder="인증 앱 6자리 · 이메일 코드 · 백업 코드"></div>
       <div class="msg" id="lgMsg" aria-live="polite"></div>
       <button class="mbtn" id="lgBtn">로그인</button>
@@ -551,13 +554,27 @@ const reasonText = r => r.status === 429 ? ERR.rate_limited : (ERR[r.error] || r
 /* 상담창(ai-dock)에 말 넣기 — ai-dock 이 window.skai.say 를 노출한다. 없으면 조용히 무시 */
 function say(t) { if (window.skai && typeof window.skai.say === 'function') { try { window.skai.say(t); } catch (_) {} } }
 
-/* ── 메뉴 트리 — 11-07 이사장 지시: 순서 ①교육·연구 ②플랫폼 사업 ③사교원 소개·현장사업 ④그룹웨어, 교육 신청 두 개는 아카데미·팀러닝 안으로, 센터는 햇소자 안으로(hide: 메뉴·둘러보기·꾸미기엔 안 보이고 상담창 별칭·주소만 남긴다), tmp: 오픈 전 제거·확인할 시험용 표시(빨강)
+/* ── 메뉴 트리 — 11-07 저녁 이사장 지시: 순서 ①플랫폼 사업 ②사교원 현장사업 ③교육·연구 ④사교원 소개(쇼핑 포함, 장바구니 숨김) ⑤그룹웨어·관리, 교육 신청 두 개는 아카데미·팀러닝 안으로, 센터는 햇소자 안으로(hide: 메뉴·둘러보기·꾸미기엔 안 보이고 상담창 별칭·주소만 남긴다), tmp: 오픈 전 제거·확인할 시험용 표시(빨강)
    11-06: 입찰정보는 그룹웨어로, 참여 메뉴는 빼고 모든 페이지 하단 「문의하기·이용자 제안」 단추(ai-dock.js) · 10-18 4묶음: ③그룹웨어·관리(매니저·통합관리자만, 첫 화면엔 단추만) · 가족 메신저는 첫 화면에서 빼고 관리 안 통합관리자 전용
    need: 'login' 로그인 | 'perm:정책지원관' 체크권한 | 'role:staff' 매니저 이상 | 'role:coop' 조합 이상 | 'role:federation' 연합회 이상 | 'admin'
    id: 2단계 꾸미기·사이드바(prefs.side)가 쓰는 고정 키 — 바꾸면 저장된 설정이 버려진다 */
 const HOME = 'https://home.sakyowon.co.kr/#/';
-const TREE = [
-  { ic: '🎓', name: '교육 · 연구 · 쇼핑', secs: [
+const TREE = [   // 11-07 이사장 지시: 큰 묶음 순서 = 플랫폼 사업 → 사교원 현장사업 → 교육·연구 → 사교원 소개(쇼핑 포함) → 그룹웨어·관리
+  { ic: '🌐', name: '플랫폼 사업', secs: [
+    { ic: '🌐', name: '플랫폼 사업', items: [
+      { id: 'hatsoja', t: '햇빛소득마을 (햇소자)', d: '신청·진단 → 조합 설립 → 정산·배당 — 조합·연합회 회원 · 시민자산육성지원센터(햇소자 안)', h: '/hatsoja/', al: '햇소자|햇빛소득마을' },
+      { id: 'center', t: '시민자산육성지원센터', d: '센터 업무·참여 조합 업무자동화 포털(시험판) — 별도 로그인', h: 'https://center.sakyowon.co.kr/', ext: true, sub: true, hide: true, tmp: '시험판', al: '시민자산지원센터|시민자산센터|센터 포털|센터' },
+      { id: 'policy', t: '지자체 의정지원시스템', d: '공약·조례·문서작성·브리핑 — 체크권한', h: HOME + 'policy', need: 'perm:정책지원관', al: '의정지원시스템|정책지원관 지원시스템|정책지원관 시스템|의정지원' },
+    ]},
+  ]},
+  { ic: '🏗️', name: '사교원 현장사업', secs: [
+    { ic: '🏗️', name: '사교원 현장사업', items: [
+      { id: 'mangnam', t: '망남어촌신활력 (전남광주 완도)', d: '사업 안내 · 소식 · 기획안/보고서 · KPI · 예산 집행실적', h: 'https://vitality.sakyowon.co.kr/', al: '망남|망남 사업|어촌신활력|망남생활권' },
+      { id: 'mangnam-coop', t: '망남마을협동조합', d: '마을사업 · 마을학교 · 플로깅 · 물멍 예약 · 경영공시', h: '/mangnam-coop/', sub: true },
+      { id: 'yangyang', t: '양양어촌신활력 (강원 양양)', d: '망남과 같은 구성으로 채우는 중', h: 'https://vitality.sakyowon.co.kr/', soon: true, al: '양양|양양 사업' },
+    ]},
+  ]},
+  { ic: '🎓', name: '교육 · 연구', secs: [
     { ic: '🎓', name: '교육', items: [
       { id: 'academy', t: '연대지능활동가 아카데미', d: '실습 15단계 · 학습 7단계 · 지식 검증 게임 · 연대지능활동가 교육 신청(아카데미 안)', h: '/academy-site/' },
       { id: 'edu-ai', t: '연대지능활동가 교육 신청', d: '필요 진단 · 예상 비용 · 신청', h: '/academy-site/#edu-apply', sub: true, hide: true, al: '교육 신청|교육신청|교육프로그램 신청|교육프로그램|연대지능 교육 신청' },
@@ -570,27 +587,13 @@ const TREE = [
       { id: 'wiki', t: '사교원 위키', d: '공개 지식 431쪽 (별도 운영)', h: '/sakyowon-wiki/', ext: true },
       { id: 'poomasi-wiki', t: '연대지능 위키', d: '품앗이 공동 지식베이스', h: 'https://wiki.poomasi.org/', ext: true },
     ]},
-    { ic: '🛒', name: '쇼핑', items: [
-      { id: 'shop', t: '상품', d: '도서·굿즈·지역특산', h: HOME + 'shop' },
-      { id: 'cart', t: '장바구니', d: '', h: HOME + 'cart' },
-    ]},
   ]},
-  { ic: '🌐', name: '플랫폼 사업', secs: [
-    { ic: '🌐', name: '플랫폼 사업', items: [
-      { id: 'hatsoja', t: '햇빛소득마을 (햇소자)', d: '신청·진단 → 조합 설립 → 정산·배당 — 조합·연합회 회원 · 시민자산육성지원센터(햇소자 안)', h: '/hatsoja/', al: '햇소자|햇빛소득마을' },
-      { id: 'center', t: '시민자산육성지원센터', d: '센터 업무·참여 조합 업무자동화 포털(시험판) — 별도 로그인', h: 'https://center.sakyowon.co.kr/', ext: true, sub: true, hide: true, tmp: '시험판', al: '시민자산지원센터|시민자산센터|센터 포털|센터' },
-      { id: 'policy', t: '지자체 의정지원시스템', d: '공약·조례·문서작성·브리핑 — 체크권한', h: HOME + 'policy', need: 'perm:정책지원관', al: '의정지원시스템|정책지원관 지원시스템|정책지원관 시스템|의정지원' },
-    ]},
-  ]},
-  { ic: '🏛️', name: '사교원 소개 · 현장사업', secs: [
+  { ic: '🏛️', name: '사교원 소개', secs: [
     { ic: '🏛️', name: '소개', items: [
       { id: 'about', t: '사교원 소개', d: '지향·활동·걸어온 길·특장점', h: HOME + 'about' },
       { id: 'disclosure', t: '경영공시', d: '정관·규약 · 재무제표 · 조합원 현황', h: HOME + 'disclosure' },
-    ]},
-    { ic: '🏗️', name: '사교원 현장사업', items: [
-      { id: 'mangnam', t: '망남어촌신활력 (전남광주 완도)', d: '사업 안내 · 소식 · 기획안/보고서 · KPI · 예산 집행실적', h: 'https://vitality.sakyowon.co.kr/', al: '망남|망남 사업|어촌신활력|망남생활권' },
-      { id: 'mangnam-coop', t: '망남마을협동조합', d: '마을사업 · 마을학교 · 플로깅 · 물멍 예약 · 경영공시', h: '/mangnam-coop/', sub: true },
-      { id: 'yangyang', t: '양양어촌신활력 (강원 양양)', d: '망남과 같은 구성으로 채우는 중', h: 'https://vitality.sakyowon.co.kr/', soon: true, al: '양양|양양 사업' },
+      { id: 'shop', t: '쇼핑', d: '도서·굿즈·지역특산', h: HOME + 'shop', al: '상품|쇼핑몰|굿즈' },
+      { id: 'cart', t: '장바구니', d: '', h: HOME + 'cart', hide: true },   // 11-07 이사장 지시: 장바구니는 메뉴에 안 보이게(쇼핑 화면 안에서 쓴다)
     ]},
   ]},
   { ic: '🗂️', name: '그룹웨어 · 관리', gate: 'role:staff', lock: '매니저회원 · 통합관리자', secs: [
@@ -661,13 +664,16 @@ const ALL_ITEMS = []; SECTIONS.forEach(sc => sc.items.filter(vis).forEach(it => 
 const ORDER_RENAME = { '연구실': ['연구'], '사업': ['사교원 현장사업', '플랫폼 사업'], '참여': [] };
 const OLD_PUB = ['소개', '연구실', '참여', '교육', '사업', '쇼핑'];
 const NEW_PUB = ['소개', '사교원 현장사업', '플랫폼 사업', '교육', '연구', '쇼핑'];
+const PUB_1107 = ['교육', '연구', '쇼핑', '플랫폼 사업', '소개', '사교원 현장사업'];   // 11-07 오후 기본 순서(쇼핑 칸은 11-07 저녁 소개 안으로 들어가 없어졌다)
 function myOrder() {
   let raw = Array.isArray(prefs.menu_order) ? prefs.menu_order.slice() : [];
   if (raw.some(k => k in ORDER_RENAME)) {
     if (raw.filter(k => OLD_PUB.includes(k)).join() === OLD_PUB.join()) raw = NEW_PUB.concat(raw.filter(k => !OLD_PUB.includes(k)));   // 옛 기본 순서 그대로 둔 저장값 → 새 기본 순서(지시 6)
     else raw = raw.flatMap(k => ORDER_RENAME[k] || [k]);                                                                               // 직접 바꾼 순서 → 그 자리에서 이름만
   }
-  if (raw.filter(k => NEW_PUB.includes(k)).join() === NEW_PUB.join()) raw = DEFAULT_ORDER.filter(k => NEW_PUB.includes(k)).concat(raw.filter(k => !NEW_PUB.includes(k)));   // 11-07: 11-06 기본 순서 그대로 둔 저장값 → 새 기본 순서(교육·연구·쇼핑·플랫폼·소개·현장사업)
+  for (const OLD of [NEW_PUB, PUB_1107]) {        // 지난 기본 순서(11-06·11-07 오후)를 그대로 둔 저장값 → 새 기본 순서(11-07 저녁: 플랫폼·현장사업·교육·연구·소개)
+    if (raw.filter(k => OLD.includes(k)).join() === OLD.join()) { raw = DEFAULT_ORDER.filter(k => OLD.includes(k)).concat(raw.filter(k => !OLD.includes(k))); break; }
+  }
   const saved = [...new Set(raw)].filter(k => DEFAULT_ORDER.includes(k));
   return saved.concat(DEFAULT_ORDER.filter(k => !saved.includes(k)));
 }
@@ -681,7 +687,7 @@ function itemLi(it, ok) {
 function renderItems(items) { return items.filter(vis).map(it => itemLi(it, allowed(it.need))).join(''); }
 function renderGroup(g) {
   return `<div class="grp"><h3><span class="ic">${g.ic}</span>${esc(g.name)}${g.lock ? `<span class="lock">🔒 ${esc(g.lock)}</span>` : ''}</h3><div class="secs">${g.secs.map(sc =>
-    `<div class="sec">${(g.secs.length === 1 && sc.name === g.name) ? '' : `<h4><span class="ic">${sc.ic}</span>${esc(sc.name)}</h4>`}<ul>${renderItems(sc.items)}</ul></div>`).join('')}</div></div>`;   // 11-07 🟡6: 「플랫폼 사업」처럼 묶음=소분류 하나면 제목 겹침 생략
+    `<div class="sec">${(g.secs.length === 1) ? '' : `<h4><span class="ic">${sc.ic}</span>${esc(sc.name)}</h4>`}<ul>${renderItems(sc.items)}</ul></div>`).join('')}</div></div>`;   // 11-07 🟡6: 「플랫폼 사업」처럼 묶음=소분류 하나면 제목 겹침 생략
 }
 /* ① (옛 화면) 비로그인 — 묶음 전부(그룹웨어·관리는 단추만) */
 function renderPublic() {
@@ -959,8 +965,19 @@ function route() {
 }
 
 /* ── ① 로그인 관문 */
-const GT = { email: '#gtEmail', pw: '#gtPw', code: '#gtCode', box: '#gtCodeBox', msg: '#gtMsg', btn: '#gtBtn', pending: false };
-const LG = { email: '#lgEmail', pw: '#lgPw', code: '#lgCode', box: '#lgCodeBox', msg: '#lgMsg', btn: '#lgBtn', pending: false };
+const GT = { email: '#gtEmail', pw: '#gtPw', code: '#gtCode', box: '#gtCodeBox', msg: '#gtMsg', btn: '#gtBtn', rem: '#gtRem', pending: false };
+const LG = { email: '#lgEmail', pw: '#lgPw', code: '#lgCode', box: '#lgCodeBox', msg: '#lgMsg', btn: '#lgBtn', rem: '#lgRem', pending: false };
+/* 11-07 이사장 지시: 아이디 기억하기 — 체크하고 로그인에 성공하면 이 기기(브라우저)에 마지막 아이디만 남긴다. 비밀번호는 절대 남기지 않는다.
+   체크를 풀고 로그인하면 지운다. 다음에 열면 아이디를 채우고 비밀번호 칸에 커서를 둔다. */
+const REM_KEY = 'sk_last_id';
+function remGet() { try { return localStorage.getItem(REM_KEY) || ''; } catch (_) { return ''; } }
+function remSet(ui, id) { try { if ($(ui.rem) && $(ui.rem).checked && id) localStorage.setItem(REM_KEY, id); else localStorage.removeItem(REM_KEY); } catch (_) {} }
+function remFill() {                              // 두 로그인 칸(첫 화면·창)에 기억한 아이디를 채운다 — 이미 무언가 쳐 둔 칸은 건드리지 않는다
+  const id = remGet();
+  [GT, LG].forEach(ui => { const e = $(ui.email), c = $(ui.rem); if (!e || !c) return; c.checked = !!id; if (id && !e.value) e.value = id; });
+  return id;
+}
+remFill();
 /* 11-07 첫 화면: 로그인 칸(비로그인) 또는 내 페이지 단추(로그인), 전체 메뉴(#tree), 왼쪽 사이드바에 메뉴 전부 */
 function renderStart(needLogin) {
   $('#gtForm').hidden = !!me; $('#stMine').hidden = !me;
@@ -970,7 +987,7 @@ function renderStart(needLogin) {
   renderSideStart();
 }
 function renderSideStart() {
-  const who = me ? `<div class="me"><b>${esc(me.name || me.email || me.username)}</b> · ${esc(me.role_ko || ROLE_KO[me.role] || '')}</div>` : `<div class="me"><b>사교원 메뉴</b> · 로그인하면 내 등급으로 열리는 메뉴만 모입니다</div>`;
+  const who = me ? `<div class="me"><b>${esc(me.name || me.email || me.username)}</b> · ${esc(me.role_ko || ROLE_KO[me.role] || '')}</div>` : `<div class="me"><b>사교원 메뉴</b> · 로그인하면 내 등급으로 열리는 메뉴만 보입니다</div>`;
   const fix = `<nav aria-label="바로가기"><ul class="fix">` + (me ? `<li><a href="#/">🏠 내 페이지</a></li><li><a href="#/files">📁 내 폴더</a></li>` : `<li><a href="#login">🔑 로그인 · 회원가입</a></li>`) + `<li><a href="#/map">🗺️ 둘러보기(사이트맵)</a></li></ul></nav>`;
   const secs = SECTIONS.map(sc => {
     const g = TREE[sc.gi];
@@ -1002,6 +1019,7 @@ async function doLogin(ui) {
   } else {
     const id = $(ui.email).value.trim();
     r = await api('/api/auth/login', { method: 'POST', body: { email: id, username: id, password: $(ui.pw).value } });
+    if (r.ok) remSet(ui, id);                      // 비밀번호가 맞았을 때만(2단계 인증 대기 포함) 아이디를 기억·삭제
   }
   b.disabled = false;
   if (!r.ok) { m.className = 'msg err'; m.textContent = errText(r); return; }
@@ -1183,7 +1201,7 @@ function tfView(v, data) {
   }
 }
 
-/* ── ② 둘러보기(#/map) — TREE 3묶음을 카드로, 도구 대장이 있으면 「상담창에 이렇게 말해 보세요」 예시를 붙인다 */
+/* ── ② 둘러보기(#/map) — TREE 묶음을 카드로, 도구 대장이 있으면 「상담창에 이렇게 말해 보세요」 예시를 붙인다 */
 function mapCard(it) {
   const ok = allowed(it.need);
   const tool = toolFor(it);
@@ -1197,7 +1215,7 @@ function mapCard(it) {
 function renderMap() {
   const draw = () => { if (currentRoute() !== 'map') return;
     $('#mapChips').innerHTML = TREE.map((g, gi) => g.secs.map((sc, si) => `<a href="#/map" data-jump="map-${gi}-${si}">${sc.ic} ${esc(sc.name)}</a>`).join('')).join('');
-    $('#mapBody').innerHTML = TREE.map((g, gi) => `<section class="grp mapgrp" aria-label="${esc(g.name)}"><h3><span class="ic">${g.ic}</span>${esc(g.name)}${g.lock ? `<span class="lock">🔒 ${esc(g.lock)}</span>` : ''}</h3>${g.secs.map((sc, si) => { const k = `map-${gi}-${si}`, fold = mapFolded(k, gi + si === 0); return `<div class="mapsec" id="${k}"><h4 class="sec"><button type="button" class="msh" data-ms="${k}" aria-expanded="${!fold}" aria-controls="${k}-c">${sc.ic} ${esc(sc.name)} <span class="mn">${sc.items.length}</span></button></h4><div class="mcards" id="${k}-c"${fold ? ' hidden' : ''}>${sc.items.filter(vis).map(mapCard).join('')}</div></div>`; }).join('')}</section>`).join('');
+    $('#mapBody').innerHTML = TREE.map((g, gi) => `<section class="grp mapgrp" aria-label="${esc(g.name)}"><h3><span class="ic">${g.ic}</span>${esc(g.name)}${g.lock ? `<span class="lock">🔒 ${esc(g.lock)}</span>` : ''}</h3>${g.secs.map((sc, si) => { const k = `map-${gi}-${si}`, fold = mapFolded(k, gi + si === 0); return `<div class="mapsec" id="${k}"><h4 class="sec"><button type="button" class="msh" data-ms="${k}" aria-expanded="${!fold}" aria-controls="${k}-c">${sc.ic} ${esc(sc.name)} <span class="mn">${sc.items.filter(vis).length}</span></button></h4><div class="mcards" id="${k}-c"${fold ? ' hidden' : ''}>${sc.items.filter(vis).map(mapCard).join('')}</div></div>`; }).join('')}</section>`).join('');
     mapFind(); };
   draw();                              // 대장이 없어도 TREE 만으로 먼저 그린다
   loadTools().then(() => { if (TOOLS.items.length) draw(); });
@@ -1514,7 +1532,7 @@ async function boot() {
   if (me) { checkTempPassword(); loadTwofa(); }
 }
 /* 로그인·가입 창 */
-function openAuth(tab) { $('#authModal').classList.add('on'); authTab(tab || 'login'); fillRegions(); setTimeout(() => { const f = $(tab === 'signup' ? '#suEmail' : '#lgEmail'); if (f) f.focus(); }, 0); }
+function openAuth(tab) { $('#authModal').classList.add('on'); authTab(tab || 'login'); fillRegions(); const rid = remFill(); setTimeout(() => { const f = $(tab === 'signup' ? '#suEmail' : (rid && $('#lgEmail').value ? '#lgPw' : '#lgEmail')); if (f) f.focus(); }, 0); }
 function closeAuth() { $('#authModal').classList.remove('on'); if (['#login', '#signup', '#/login', '#/signup'].includes(location.hash)) { history.replaceState(null, '', location.pathname); route(); } }
 function authTab(t) { $('#vLogin').style.display = t === 'login' ? '' : 'none'; $('#vSignup').style.display = t === 'signup' ? '' : 'none'; $('#tabLogin').classList.toggle('on', t === 'login'); $('#tabSignup').classList.toggle('on', t === 'signup'); }
 let REG = null;
