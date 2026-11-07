@@ -108,7 +108,7 @@
   .chatspot{padding:16px 18px}.chatspot .secT{margin-bottom:10px}.qrow{display:flex;gap:8px;align-items:flex-start;margin-top:12px}.qrow .ql{font-size:0.8333rem;color:var(--mute);padding-top:9px;white-space:nowrap}.qrow .quick{margin:0}
   .quick button{min-height:38px}
   .recent{border-top:1px dashed var(--line);margin-top:12px;padding-top:8px}.recent .rh{font-size:0.8rem;color:var(--mute);margin-bottom:4px}.recent ul{list-style:none;margin:0;padding:0}.recent li button{display:flex;gap:8px;width:100%;align-items:center;border:none;background:none;padding:8px 4px;min-height:var(--tap);cursor:pointer;font-family:inherit;text-align:left;color:var(--ink);border-radius:8px}.recent li button:hover{background:var(--g0)}.recent li .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}.recent li .dt{font-size:0.8rem;color:var(--mute);white-space:nowrap}
-  .gnote .mb,#vClassic .mb{display:none}
+  .gnote .mb{display:none}
   @media(max-width:760px){
     :root{--tabH:4rem;--skai-bottom:calc(var(--tabH) + 12px)}
     body.in .app{grid-template-columns:1fr}
@@ -131,7 +131,7 @@
     .btn.sm,.tabs button,.pv button,.quick button{min-height:var(--tap)}
     .qrow{flex-direction:column;gap:4px}.qrow .ql{padding-top:0}
     .chatspot{padding:14px}
-    .gnote .dk,#vClassic .dk{display:none}.gnote .mb,#vClassic .mb{display:inline}
+    .gnote .dk{display:none}.gnote .mb{display:inline}
     .pv .pvsub{display:none}.pv summary{min-height:var(--tap)}
     .chatspot .secT .sub{display:none}.chatspot .secT{margin-bottom:6px}
     .quick:not(.all) button[data-say]:nth-of-type(n+4){display:none}.quick button.qmore{display:inline-flex}
@@ -681,7 +681,7 @@ function itemLi(it, ok) {
 function renderItems(items) { return items.filter(vis).map(it => itemLi(it, allowed(it.need))).join(''); }
 function renderGroup(g) {
   return `<div class="grp"><h3><span class="ic">${g.ic}</span>${esc(g.name)}${g.lock ? `<span class="lock">🔒 ${esc(g.lock)}</span>` : ''}</h3><div class="secs">${g.secs.map(sc =>
-    `<div class="sec"><h4><span class="ic">${sc.ic}</span>${esc(sc.name)}</h4><ul>${renderItems(sc.items)}</ul></div>`).join('')}</div></div>`;
+    `<div class="sec">${(g.secs.length === 1 && sc.name === g.name) ? '' : `<h4><span class="ic">${sc.ic}</span>${esc(sc.name)}</h4>`}<ul>${renderItems(sc.items)}</ul></div>`).join('')}</div></div>`;   // 11-07 🟡6: 「플랫폼 사업」처럼 묶음=소분류 하나면 제목 겹침 생략
 }
 /* ① (옛 화면) 비로그인 — 묶음 전부(그룹웨어·관리는 단추만) */
 function renderPublic() {
