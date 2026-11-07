@@ -563,6 +563,10 @@ footer{
   background:var(--primary);color:#fff;font-size:22px;box-shadow:var(--shadow-md);
 }
 .chat-fab.on{display:block;}
+/* 11-07 (C2) 공용 상담창(ai-dock)이 휴대폰 「💬 상담」 단추(fab 모드)로 떠 있으면 햇소자 자체 💬 단추는 숨긴다 — 단추 두 개 금지 */
+:root:has(#sk-ai-dock[data-mode="fab"]) .chat-fab.on{display:none;}
+/* 11-07 이사장 지시: 오픈 전 시험·실험용으로 넣어 둔 것은 빨간 글씨로 표시(지우지 않고 표시만, title="오픈 전 제거·확인") */
+.tmp{color:#b03a3a;font-weight:600;}
 /* 11-04 사교원 공통 상담창(ai-dock) 휴대폰 「상담」 단추를 햇소자 AI 상담 단추 위로 올린다 */
 :root{--skai-bottom:84px;}
 
@@ -630,6 +634,7 @@ footer{
       <a href="#/pub/cases">사례</a>
       <a href="#/pub/faq">FAQ</a>
       <a href="#/pub/contact">상담신청</a>
+      <a href="https://center.sakyowon.co.kr/" target="_blank" rel="noopener" title="시민자산육성지원센터 업무포털 — 별도 로그인 · 새 창">시민자산육성지원센터 <span class="tmp" title="오픈 전 제거·확인">🧪 시험판</span></a>
       <a href="manual.html">이용안내</a>
     </div>
 
@@ -926,7 +931,7 @@ footer{
     </div>
 
     <div class="card" style="margin-bottom:18px;">
-      <div class="card-title"><h3 class="serif">③ 주민동의 전자수합 <span class="badge badge-mute">데모</span></h3></div>
+      <div class="card-title"><h3 class="serif">③ 주민동의 전자수합 <span class="badge badge-mute tmp" title="오픈 전 제거·확인">데모</span></h3></div>
       <p class="text-mute" style="margin-top:0;">가구별 동의 링크를 문자·카카오톡으로 보내고 수합률을 실시간 집계합니다.
       공모 요건은 <b>주민 70% 이상 동의</b>이며, 마을 자치규약에 따른 <b>총회 의결서</b>가 함께 필요합니다.
       <b>동의는 반드시 본인이 직접</b> 하며, 고령층은 서면 동의서 스캔과 대면 확인을 병행합니다(대리입력은 하지 않습니다).</p>
@@ -1384,7 +1389,7 @@ footer{
     </div>
 
     <!-- 등급별 데모 계정 — 버튼 하나로 해당 등급의 화면·기능을 바로 점검 -->
-    <p class="text-small" style="margin:14px 0 6px;font-weight:600;">등급별 데모 로그인 (계정 없이 기능 점검)</p>
+    <p class="text-small tmp" title="오픈 전 제거·확인" style="margin:14px 0 6px;font-weight:600;">등급별 데모 로그인 (계정 없이 기능 점검)</p>
     <div class="demo-buttons" style="flex-wrap:wrap;">
       <button class="btn btn-outline btn-sm" style="flex:1 1 46%;" onclick="demoLogin('admin')">🔐 관리자</button>
       <button class="btn btn-outline btn-sm" style="flex:1 1 46%;" onclick="demoLogin('federation')">🤝 연합회</button>
@@ -1395,7 +1400,7 @@ footer{
       ⓘ <strong>사교원 통합 계정 하나로 로그인</strong>합니다.
       다른 사교원 사이트에 이미 로그인돼 있으면 자동으로 이어집니다(SSO).
       계정이 없으면 <a href="#" onclick="toggleSignup(true);return false;">가입 신청</a>하세요.
-      위 등급 버튼을 누르면 계정 없이 그 등급의 화면과 기능을 바로 점검할 수 있습니다.
+      <span class="tmp" title="오픈 전 제거·확인">위 등급 버튼을 누르면 계정 없이 그 등급의 화면과 기능을 바로 점검할 수 있습니다.</span>
     </p>
 
     <!-- 통합 계정 가입 신청 (승인제) -->
@@ -1535,6 +1540,10 @@ const ROLES = {
   coop:       {label:'회원협동조합', emoji:'🏘', home:'#/mem/dashboard', desc:'우리 마을 조합의 설립·건설·운영 업무'},
   guest:      {label:'손님',         emoji:'👋', home:'#/pub/home',      desc:'사업 소개 · 자가진단 · 상담 신청 (승인 전)'},
 };
+/* 2026-11-07 이사장 지시 「햇소자 안으로 시민자산육성지원센터 메뉴」 — 별도 로그인·새 창. scope 'ext' = 바깥 주소(page 자리에 URL).
+   모든 등급(손님 포함)에 보인다. 🧪 시험판 표시는 오픈 전 제거·확인(.tmp). 렌더러는 menuOnclick()/menuTitle() 로 ext 를 가른다. */
+const CENTER_URL = 'https://center.sakyowon.co.kr/';
+const CENTER_MENU = ['ext', CENTER_URL, '🏛', '시민자산육성지원센터 <span class="tmp" title="오픈 전 제거·확인">🧪 시험판</span>'];
 const ROLE_MENUS = {
   admin: [
     ['플랫폼 관리', [
@@ -1545,6 +1554,7 @@ const ROLE_MENUS = {
       ['adm','taxkpi','📈','세무 파일럿 KPI'],
       ['adm','consult','🧾','컨설팅 보고서·회원 재무'],
       ['adm','videojobs','🎬','영상 작업 현황'],
+      CENTER_MENU,
     ]],
     ['소통·콘텐츠', [
       ['adm','inquiries','📮','문의 처리'],
@@ -1558,8 +1568,8 @@ const ROLE_MENUS = {
       ['mem','video','🎬','활동 영상 만들기'],
     ]],
     /* 2026-10-22 상담 체인(분류→도구→RAG→HPC→출처·기준일)은 관리자가 먼저 써 보는 실험실 뒤에 둔다. 라이브 /api/ai/chat 은 그대로. */
-    ['실험실', [
-      ['adm','lab','🧪','상담 체인 실험실'],
+    ['<span class="tmp" title="오픈 전 제거·확인">실험실</span>', [
+      ['adm','lab','🧪','<span class="tmp" title="오픈 전 제거·확인">상담 체인 실험실</span>'],
     ]],
   ],
   /* 연합회 메뉴는 두 갈래로 나눈다 (2026-09-29).
@@ -1577,6 +1587,7 @@ const ROLE_MENUS = {
       ['mem','docs','📝','문서 작성 지원'],
       ['adm','taxkpi','📈','세무 파일럿 KPI'],
       ['mem','library','📚','공지·자료 배포'],
+      CENTER_MENU,
     ]],
     ['② 연합회 자체 사무', [
       ['mem','fedoffice','🏢','사무국 운영(총회·이사회)'],
@@ -1633,6 +1644,7 @@ const ROLE_MENUS = {
       ['mem','library','📚','공지·자료실'],
       ['mem','video','🎬','활동 영상 만들기'],
       ['mem','chat','💬','AI 상담'],
+      CENTER_MENU,
     ]],
   ],
   guest: [
@@ -1646,14 +1658,18 @@ const ROLE_MENUS = {
       ['pub','diagnose','🧭','신청·진단'],
       ['pub','join','📝','가입절차'],
       ['pub','contact','📞','상담신청'],
+      CENTER_MENU,
     ]],
   ],
 };
-/* 서버·구버전 저장값의 role 문자열을 4등급으로 정규화. status가 승인 전이면 손님. */
-function normalizeRole(r, status){
+/* 서버·구버전 저장값의 role 문자열을 4등급으로 정규화. status가 승인 전이면 손님.
+   2026-11-07 (C8-①) 매니저회원(staff·manager)은 햇소자 회원이 아니다 — 허브 /api/auth/me 의 perms 에 「햇소자관리」가 있을 때만 관리자,
+   없으면 손님(일반 회원 등급). 10-13 회원정책. 그 전엔 staff 가 무조건 admin 으로 승격됐다(10-27 현황조사 「열려 있는 것 1」). */
+function normalizeRole(r, status, perms){
   if(status === 'pending' || status === 'rejected' || status === '승인대기' || status === '정지') return 'guest';
   switch(String(r || '').toLowerCase()){
-    case 'admin': case 'staff': case 'manager':                       return 'admin';
+    case 'admin':                                                     return 'admin';
+    case 'staff': case 'manager':  return (Array.isArray(perms) && perms.includes('햇소자관리')) ? 'admin' : 'guest';
     case 'federation': case 'union': case 'fed': case '연합회':        return 'federation';
     case 'coop': case 'member': case 'village': case '회원협동조합': case '회원': return 'coop';
     case 'guest': case 'visitor': case 'pending': case '손님':         return 'guest';
@@ -1793,7 +1809,8 @@ function updateConvenienceUI(scope, page){
     if(sw && demo) sw.innerHTML = Object.entries(ROLES).map(([k, r]) =>
       `<button class="${k === role ? 'on' : ''}" onclick="demoLogin('${k}')" title="${escapeHtml(r.desc)}">${r.emoji} ${r.label}</button>`).join('');
   }
-  if(fab) fab.classList.toggle('on', !!u && role !== 'guest' && scope !== 'pub' && page !== 'chat' && page !== 'ask');
+  const dockFab = !!document.querySelector('#sk-ai-dock[data-mode="fab"]');   // 11-07 (C2) 공용 상담창이 휴대폰 단추로 떠 있으면 햇소자 💬 는 숨김(CSS :has 와 이중)
+  if(fab) fab.classList.toggle('on', !dockFab && !!u && role !== 'guest' && scope !== 'pub' && page !== 'chat' && page !== 'ask');
   const descKey = (scope === 'adm' && page === 'dashboard') ? 'admDashboard' : page;
   _screenName = (scope === 'mem' || scope === 'adm') ? (MENU_DESC[descKey] ? MENU_DESC[descKey][0] : page) : '';
 }
@@ -1877,13 +1894,10 @@ function showGlossary(){
 }
 
 function applyUnifiedUser(user, {redirect = true, silent = false} = {}){
-  let role = normalizeRole(user.role, user.status);
-  // 2026-10-13 통합 개편: 매니저(staff)는 햇소자 회원이 아니다 → 「햇소자관리」 체크권한이 있을 때만 관리자, 없으면 손님.
-  const perms = user.perms || [];
-  if(String(user.role).toLowerCase() === 'staff' || String(user.role).toLowerCase() === 'manager'){
-    role = perms.includes('햇소자관리') ? 'admin' : 'guest';
-  }
-  setUser({email: user.username, name: user.name || user.username, role,
+  // 2026-10-13 통합 개편 · 11-07 normalizeRole 로 일원화: 매니저(staff)는 「햇소자관리」 체크권한이 있을 때만 관리자, 없으면 손님.
+  const perms = Array.isArray(user.perms) ? user.perms : [];
+  const role = normalizeRole(user.role, user.status, perms);
+  setUser({email: user.username, name: user.name || user.username, role, hubRole: String(user.role || ''), perms,
            village: '', loginAt: new Date().toISOString(), unified: true});
   if(redirect) location.hash = roleHome(role);
   if(!silent) toast(`${user.name || user.username}님, 사교원 통합 계정(${roleLabel(role)})으로 로그인했습니다.`);
@@ -2203,6 +2217,13 @@ function renderTopActions(){
   renderRoleNav();
 }
 
+/* 11-07 메뉴 항목의 onclick·툴팁 — scope 'ext'(바깥 주소, 예: 시민자산육성지원센터)는 새 창으로 연다 */
+function menuOnclick(s, p){ return s === 'ext' ? `window.open('${p}','_blank','noopener')` : `location.hash='#/${s}/${p}'`; }
+function menuTitle(s, p){
+  if(s === 'ext') return '별도 로그인 · 새 창으로 열립니다';
+  const dk = (s === 'adm' && p === 'dashboard') ? 'admDashboard' : p;
+  return MENU_DESC[dk] ? escapeHtml(MENU_DESC[dk][1]) : '';
+}
 /* 등급별 상단 메뉴바 — ROLE_MENUS의 묶음을 버튼(단일)·드롭다운(복수)으로 그린다 */
 function renderRoleNav(){
   const el = document.getElementById('roleNav');
@@ -2217,14 +2238,14 @@ function renderRoleNav(){
     const isOn = items.some(([s, p]) => s + '/' + p === cur);
     if(items.length === 1){
       const [s, p, e, n] = items[0];
-      return `<div class="role-group"><button class="role-btn ${isOn ? 'on' : ''}" onclick="location.hash='#/${s}/${p}'">${e} ${n}</button></div>`;
+      return `<div class="role-group"><button class="role-btn ${isOn ? 'on' : ''}" onclick="${menuOnclick(s, p)}">${e} ${n}</button></div>`;
     }
     return `
       <div class="role-group">
         <button class="role-btn ${isOn ? 'on' : ''}" onclick="toggleRoleGroup(${gi})" aria-haspopup="true">${label} <span class="caret">▾</span></button>
         <div class="role-dd">
-          ${items.map(([s, p, e, n]) => `<button class="${s + '/' + p === cur ? 'on' : ''}" onclick="location.hash='#/${s}/${p}'"
-              title="${MENU_DESC[(s === 'adm' && p === 'dashboard') ? 'admDashboard' : p] ? escapeHtml(MENU_DESC[(s === 'adm' && p === 'dashboard') ? 'admDashboard' : p][1]) : ''}">${e} ${n}</button>`).join('')}
+          ${items.map(([s, p, e, n]) => `<button class="${s + '/' + p === cur ? 'on' : ''}" onclick="${menuOnclick(s, p)}"
+              title="${menuTitle(s, p)}">${e} ${n}</button>`).join('')}
         </div>
       </div>`;
   }).join('');
@@ -2330,8 +2351,9 @@ function renderPubSidebar(active){
   if(!box) return;
   const u = currentUser();
   const item = (p, e, n) => `<button class="side-item ${p===active?'on':''}" onclick="location.hash='#/pub/${p}'" title="${PUB_DESC[p]||''}"><span class="side-emoji">${e}</span>${n}</button>`;
+  const ext  = (p, e, n) => `<button class="side-item" onclick="${menuOnclick('ext', p)}" title="${menuTitle('ext', p)}"><span class="side-emoji">${e}</span>${n}</button>`;
   const groups = (ROLE_MENUS.guest || []).map(([label, items]) => `
-    <div class="side-group"><div class="side-label">${label}</div>${items.map(([,p,e,n]) => item(p, e, n)).join('')}</div>`).join('');
+    <div class="side-group"><div class="side-label">${label}</div>${items.map(([s,p,e,n]) => s === 'ext' ? ext(p, e, n) : item(p, e, n)).join('')}</div>`).join('');
   const guide = `<div class="side-group"><div class="side-label">안내</div>
     <button class="side-item" onclick="location.href='manual.html'" title="사용 설명서 (웹)"><span class="side-emoji">📖</span>이용안내</button>
     ${item('privacy','🔒','개인정보 처리방침')}
@@ -2354,10 +2376,9 @@ function renderRoleSidebar(role, scope, active){
     <div class="side-group">
       <div class="side-label">${label}</div>
       ${items.map(([s,p,e,n]) => {
-        const dk = (s === 'adm' && p === 'dashboard') ? 'admDashboard' : p;
         return `
-        <button class="side-item ${s+'/'+p===cur?'on':''}" onclick="location.hash='#/${s}/${p}'"
-          title="${MENU_DESC[dk] ? escapeHtml(MENU_DESC[dk][1]) : ''}">
+        <button class="side-item ${s+'/'+p===cur?'on':''}" onclick="${menuOnclick(s, p)}"
+          title="${menuTitle(s, p)}">
           <span class="side-emoji">${e}</span>${n}
         </button>`; }).join('')}
     </div>
@@ -4133,7 +4154,7 @@ function memBiz(){
     </div>
 
     <div class="card">
-      <div class="card-title"><h3 class="serif">창업 타당성 간이 진단 <span class="badge badge-mute">데모</span></h3></div>
+      <div class="card-title"><h3 class="serif">창업 타당성 간이 진단 <span class="badge badge-mute tmp" title="오픈 전 제거·확인">데모</span></h3></div>
       <p class="text-mute" style="margin-top:0;">"안 될 사업은 시작 전에 걸러주는" 것이 본부의 역할입니다.</p>
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
         <label style="display:flex;align-items:center;gap:6px;">마을 인구
@@ -4159,7 +4180,7 @@ function svBizCheck(){
     <p class="text-mute" style="font-size:12.5px;margin-top:8px;">
     ${ok ? '고정비(인건비·임차·재료)를 반영한 정식 타당성 진단과 사업계획서 작성으로 넘어갈 수 있습니다.'
          : '현재 인구·방문객 규모로는 고정비를 감당하기 어렵습니다. 관광 연계·배송형(반찬공방) 업종을 먼저 검토하세요.'}
-    ※ 주민 월 2회 이용 8천 원, 방문객 1.2만 원 가정의 간이 계산입니다. (데모)</p>`;
+    ※ 주민 월 2회 이용 8천 원, 방문객 1.2만 원 가정의 간이 계산입니다. <span class="tmp" title="오픈 전 제거·확인">(데모)</span></p>`;
 }
 
 /* ─── 연합체·커뮤니티 ─── */
@@ -8864,7 +8885,7 @@ function svConsentDemo(){
       <td><span style="position:relative;display:inline-block;width:120px;height:10px;background:var(--paper-soft);border-radius:5px;overflow:hidden;vertical-align:middle;"><span style="display:block;height:100%;width:${Math.round(p)}%;background:${p >= 70 ? 'var(--primary)' : '#c9a227'};"></span><span style="position:absolute;left:70%;top:-2px;width:2px;height:14px;background:var(--ink-soft);"></span></span>
       <span style="margin-left:6px;color:${p >= 70 ? 'inherit' : '#9c6a00'};">${p.toFixed(0)}%</span></td></tr>`;
     }).join('')}</tbody></table>
-    <p class="text-mute" style="font-size:12.5px;">※ 데모 화면입니다. 실제 서비스에서는 주민별 링크 발송·본인 인증·서면 스캔 보관이 함께 동작합니다.
+    <p class="text-mute" style="font-size:12.5px;"><span class="tmp" title="오픈 전 제거·확인">※ 데모 화면입니다.</span> 실제 서비스에서는 주민별 링크 발송·본인 인증·서면 스캔 보관이 함께 동작합니다.
     동의율은 <b>2026.3.31 기준 주민등록 주민</b>을 분모로 계산하며, 동의서 외에 <b>마을 자치규약에 따른 총회 의결서</b>를 함께 제출해야 합니다.
     숫자를 채우는 것보다 <b>주민이 사업 내용(비용·위험·수익 사용처)을 이해한 상태에서 동의했는지</b>가 사업의 성패를 가릅니다.</p>`;
 }
@@ -11176,7 +11197,7 @@ function viewReview(name){
       <h4 style="color:var(--info);">💡 개선 제안</h4>
       • 회의록에는 참석 조합원의 성명·서명 목록을 부록으로 첨부하는 것이 좋습니다.<br>
       • 사업계획서의 수지예산이 매출 근거(단가·시간·이용률)를 명시하면 심사 통과율이 높아집니다.<br><br>
-      <em>* 이 검토 결과는 데모입니다. 실제 서비스에서는 업로드하신 문서를 AI가 분석하여 항목별 상세 지적을 제공합니다.</em>
+      <em class="tmp" title="오픈 전 제거·확인">* 이 검토 결과는 데모입니다. 실제 서비스에서는 업로드하신 문서를 AI가 분석하여 항목별 상세 지적을 제공합니다.</em>
     </div>`,
     foot: `<button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
            <button class="btn btn-primary" onclick="downloadReviewReport('${escapeJs(name)}')">📄 보고서 다운로드</button>`,
@@ -12389,7 +12410,7 @@ function admContest(){
     </div>
 
     <div class="card">
-      <div class="card-title"><h3 class="serif">심사 집계 (심사위원 평가 자동 합산 · 데모)</h3></div>
+      <div class="card-title"><h3 class="serif">심사 집계 (심사위원 평가 자동 합산 · <span class="tmp" title="오픈 전 제거·확인">데모</span>)</h3></div>
       <table class="tbl">
         <thead><tr><th>마을</th><th>심사위원 A</th><th>심사위원 B</th><th>심사위원 C</th><th>평균</th></tr></thead>
         <tbody>
@@ -13427,7 +13448,7 @@ function admLab(){
   setTimeout(labLoadHealth, 0);
   return `
     <div class="sec-head">
-      <h1>🧪 상담 체인 실험실</h1>
+      <h1 class="tmp" title="오픈 전 제거·확인">🧪 상담 체인 실험실</h1>
       <p class="sec-desc">질문 → 가리기 → 분류(규칙·HPC 한 단어) → 도구/법령/서류/RAG 가지 → HPC 답 → 출력 파서 → 출처·기준일.
         근거가 없으면 지어내지 않고 「없음」으로 답합니다. 관리자만 보이며 라이브 AI 상담에는 아직 영향이 없습니다.</p>
     </div>
