@@ -2,6 +2,9 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
+<script>/* 11-07 저녁: 로그인 뒤 첫 화면이 잠깐 비치던 깜빡임 — 이 기기에서 로그인해 있었으면(sk_in) 회원 정보를 받을 때까지 본문을 가린다. 3초 넘으면 그냥 보인다 */
+try{var _h=location.hash||'';if(localStorage.getItem('sk_in')==='1'&&!/^#\/(map|start|classic)/.test(_h)){document.documentElement.classList.add('booting');setTimeout(function(){document.documentElement.classList.remove('booting')},3000);}}catch(e){}</script>
+<style>html.booting #shell,html.booting #vMap,html.booting footer{visibility:hidden}html.booting body::after{content:'불러오는 중…';position:fixed;left:0;right:0;top:42%;text-align:center;color:#8a8f98;font-size:14px}</style>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>사교원 — 사회혁신교육원 사회적협동조합 통합사이트</title>
 <meta name="description" content="사회혁신교육원 사회적협동조합(사교원) 통합사이트 — 플랫폼 사업·현장사업·교육·연구·소개를 한 화면에서. 상단 AI 도우미에게 바로 물어보세요.">
@@ -1051,6 +1054,7 @@ async function goBackIfReady() {                 // 임시 비밀번호·이메�
 }
 async function loggedIn(user) {
   me = realMe = user; preview = null; GT.pending = LG.pending = false;
+  try { localStorage.setItem('sk_in', '1'); } catch (_) {}
   $('#lgPw').value = ''; $('#gtPw').value = ''; $('#gtMsg').textContent = '';
   closeAuth(); await loadPrefs();
   if (!BACK && currentRoute() !== 'home') history.replaceState(null, '', location.pathname + '#/');   // 11-07 이사장 지시: 로그인하면 먼저 내 페이지로(하위 앱에서 온 ?back= 은 그쪽으로)
@@ -1061,7 +1065,7 @@ async function loggedIn(user) {
     checkTempPassword();
   }
   loadTwofa();
-  if (window.skAiDock) location.reload();
+  if (window.skAiDock) { document.documentElement.classList.add('booting'); location.reload(); }   // 상담창을 로그인 판으로 다시 붙이려 새로 읽는다 — 그 사이 옛 첫 화면은 가린다
 }
 async function forgot(emailEl, msgEl) {
   const email = ($(emailEl).value || '').trim() || prompt('가입한 이메일을 입력하세요:') || '';
@@ -1528,7 +1532,9 @@ async function boot() {
   if (!me && r.error === 'twofa_required') GT.pending = true;   // 비밀번호는 통과, 코드만 남은 세션
   if (me) await loadPrefs();
   BOOTED = true;
+  try { if (me) localStorage.setItem('sk_in', '1'); else localStorage.removeItem('sk_in'); } catch (_) {}
   setWho();
+  document.documentElement.classList.remove('booting');   // 회원 정보로 화면을 그린 뒤에 보인다(깜빡임 방지)
   if (me) { checkTempPassword(); loadTwofa(); }
 }
 /* 로그인·가입 창 */
@@ -1634,7 +1640,7 @@ $('#suBtn').addEventListener('click', async () => {
   m.className = 'msg ok'; m.textContent = r.status === 'approved' ? '가입되었습니다. 로그인해 주세요.' : '가입 신청이 접수되었습니다. 승인되면 로그인할 수 있습니다.';
   if (r.status === 'approved') { $('#lgEmail').value = body.email; setTimeout(() => authTab('login'), 900); }
 });
-$('#btnLogout').addEventListener('click', async () => { await api('/api/auth/logout', { method: 'POST' }); me = realMe = null; preview = null; tf = null; setWho(); location.reload(); });
+$('#btnLogout').addEventListener('click', async () => { try { localStorage.removeItem('sk_in'); } catch (_) {} await api('/api/auth/logout', { method: 'POST' }); me = realMe = null; preview = null; tf = null; setWho(); location.reload(); });
 $('#btnPw').addEventListener('click', () => openPw(false));
 $('#btnTwofa').addEventListener('click', openTf);
 $('#tfBannerBtn').addEventListener('click', openTf);
