@@ -2148,7 +2148,8 @@ async function doSignup(){
 
 /* SSO 자동 로그인: 통합 관리자 등에서 이미 로그인돼 있으면 그 세션을 그대로 인식 */
 async function ssoBoot(){
-  if(!REAL_API || currentUser()) return;
+  const cu = currentUser();
+  if(!REAL_API || (cu && (cu.hubRole || Array.isArray(cu.perms) || !cu.unified))) return;   // 11-07 알파언니 🟠2: 11-07 전 저장값(hubRole·perms 없음)은 허브에 다시 물어 등급 재판정(C8-① 이 옛 저장값에도 먹게)
   try{
     const res = await fetch('/api/auth/me', {credentials:'same-origin'});
     const d = await res.json().catch(() => ({}));
