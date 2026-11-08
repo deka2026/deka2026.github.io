@@ -192,12 +192,32 @@
     if (m.user) $('who').innerHTML = esc(m.user.name || m.user.email || m.user.username) + ' · ' + esc(m.user.role_ko || '') + ' · ' + (m.used || 0) + '/' + m.limit;
     else $('who').innerHTML = '<a href="' + API + '/#login">로그인</a>하면 업로드·문서작성 · 안내 ' + (m.used || 0) + '/' + (m.limit || 10);
   }
-  api('/api/ai/dock/me').then(function (r) { state.me = r.ok ? r : {}; setWho(); dekaShow(); });
+  function loadMe() { return api('/api/ai/dock/me').then(function (r) { state.me = r.ok ? r : {}; setWho(); dekaShow(); }); }
+  loadMe();
+  // 11-08: 「누구인지」를 페이지 처음 열 때만 보면, 그 자리에서 로그인하는 화면(햇소자·그룹웨어·인사…)에선 로그인 뒤에도 손님으로 남는다.
+  //   로그인·로그아웃·2단계 요청이 끝난 뒤, 주소(#) 바뀔 때, 창으로 돌아올 때 다시 확인한다(2초에 한 번까지).
+  var meAt = 0, meTimer = null;
+  function reMe(delay) { clearTimeout(meTimer); meTimer = setTimeout(function () { if (Date.now() - meAt < 2000) return; meAt = Date.now(); loadMe(); }, delay || 300); }
+  try {
+    var _f = window.fetch;
+    if (_f && !window.__skaiFetchWrap) {
+      window.__skaiFetchWrap = true;
+      window.fetch = function (u, o) {
+        var url = (typeof u === 'string') ? u : (u && u.url) || '';
+        var p = _f.apply(this, arguments);
+        if (/\/(login|logout|2fa)\b|\/auth\/(login|logout|2fa|verify)/.test(url)) p.then(function () { meAt = 0; reMe(400); }, function () {});
+        return p;
+      };
+    }
+  } catch (e) {}
+  window.addEventListener('hashchange', function () { reMe(500); });
+  window.addEventListener('focus', function () { reMe(300); });
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') reMe(300); });
   // ── 11-07 이사장 지시: 통합관리자에게만 모든 화면 위 띠에 「🛠️ 데카」(서버 작업대 deka.sakyowon.co.kr 를 끼워 보임).
   //    여기서는 단추만 보인다 — 실제 문지기는 데카 서버(허브 통합관리자 세션을 요청마다 확인). 다른 화면이 데카 창에 글을 넣는 길은 만들지 않는다.
   var DEKA = 'https://deka.sakyowon.co.kr/?embed=1';
   function isAdmin() { var m = state.me || {}; return !!(m.user && (m.role === 'admin' || m.user.role === 'admin') && String(m.user.id) === '2'); }   // 데카 서버 DEKA_HUB_USERS 와 같은 기준
-  function dekaShow() { var on = isAdmin(); $('bDeka').hidden = !on; $('tDeka').hidden = !on; }
+  function dekaShow() { var on = isAdmin(); $('bDeka').hidden = !on; $('tDeka').hidden = !on; if (!on) { $('dkHost').innerHTML = ''; if (state.tab === 'deka') { tab('chat'); open(false); } } }
   function dekaFrame() {
     if (!isAdmin() || $('dkHost').firstChild) return;
     var f = document.createElement('iframe'); f.src = DEKA; f.title = '데카 — 서버 작업대'; f.setAttribute('allow', 'clipboard-write');
