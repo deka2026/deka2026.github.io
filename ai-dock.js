@@ -140,7 +140,7 @@
 
   // 본문을 44px 내리고, 맨 위에 고정된 머리띠는 그만큼 밀어 준다
   function pushPage() {
-    var b = document.body; if (!b || host.getAttribute('data-mode') !== 'bar') return;   // 11-04: 위 띠일 때만
+    var b = document.body; if (!b || (host.getAttribute('data-mode') !== 'bar' && !stripOn)) return;   // 11-04: 위 띠일 때만(11-08: 또는 데카 띠)
     var mt = parseFloat(getComputedStyle(b).marginTop) || 0;
     if (!b.getAttribute('data-skai-pushed')) { b.setAttribute('data-skai-mt0', b.style.marginTop || ''); b.style.marginTop = (mt + H) + 'px'; b.setAttribute('data-skai-pushed', '1'); }
     Array.prototype.forEach.call(document.querySelectorAll('header, nav, [role=banner], .topbar, .top-bar, .navbar, .site-header'), function (el) {
@@ -169,7 +169,8 @@
     host.setAttribute('data-mode', m);
     if (m !== 'fab') setSheet(false, true);
     if (m !== 'inline') host.removeAttribute('data-fabshow');
-    if (m === 'bar') pushPage(); else unpushPage();
+    if (m === 'bar' || stripOn) pushPage(); else unpushPage();
+    dekaStripSync();
     $('q').placeholder = m === 'bar' ? PH.bar : (m === 'inline' && !(MQ && MQ.matches) ? PH.wide : PH.small);
   }
   function setSheet(v, quiet) {   // 휴대폰 아래 판 열고 닫기(대화상자 — 포커스는 판 안에서만, 닫으면 「상담」 단추로)
@@ -217,7 +218,44 @@
   //    여기서는 단추만 보인다 — 실제 문지기는 데카 서버(허브 통합관리자 세션을 요청마다 확인). 다른 화면이 데카 창에 글을 넣는 길은 만들지 않는다.
   var DEKA = 'https://deka.sakyowon.co.kr/?embed=1';
   function isAdmin() { var m = state.me || {}; return !!(m.user && (m.role === 'admin' || m.user.role === 'admin') && String(m.user.id) === '2'); }   // 데카 서버 DEKA_HUB_USERS 와 같은 기준
-  function dekaShow() { var on = isAdmin(); $('bDeka').hidden = !on; $('tDeka').hidden = !on; if (!on) { $('dkHost').innerHTML = ''; if (state.tab === 'deka') { tab('chat'); open(false); } } }
+  // 11-08 이사장 지시: 데카는 언제나 화면 맨 위에서 연다. 위 띠(bar)가 있으면 그 띠의 단추, 없으면(내 페이지 상담창·휴대폰) 데카 전용 띠를 맨 위에 따로 붙인다.
+  function inBar() { return host.getAttribute('data-mode') === 'bar'; }
+  function dekaShow() {
+    var on = isAdmin(), bar = inBar();
+    $('bDeka').hidden = !(on && bar); $('tDeka').hidden = !(on && bar);
+    if (!(on && bar)) { $('dkHost').innerHTML = ''; if (state.tab === 'deka') { tab('chat'); open(false); } }
+    dekaStripSync();
+  }
+  var stripOn = false, strip = null, sroot = null;
+  function dekaStripSync() {
+    if (typeof DEKA === 'undefined' || !DEKA) return;
+    var want = isAdmin() && !inBar();
+    if (want && !strip) {
+      strip = document.createElement('div'); strip.id = 'sk-deka-strip';
+      sroot = strip.attachShadow({ mode: 'open' });
+      sroot.innerHTML = '<style>' +
+        ':host{all:initial}.bar{position:fixed;top:0;left:0;right:0;height:44px;z-index:2147482500;background:#14352b;color:#fff;display:flex;align-items:center;gap:10px;padding:0 12px;box-shadow:0 2px 8px rgba(0,0,0,.18);font:14px/1.3 Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}' +
+        '.bar b{color:#f2c94c;white-space:nowrap}.bar .t{opacity:.8;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}' +
+        'button{font:inherit;cursor:pointer;border-radius:999px;border:1px solid rgba(255,255,255,.35);background:#24453a;color:#fff;padding:6px 14px;font-weight:600;white-space:nowrap}button:focus-visible{outline:2px solid #f2c94c;outline-offset:2px}' +
+        '.pan{display:none;position:fixed;top:44px;left:0;right:0;z-index:2147482400;background:#fff;font:14px/1.4 Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;box-shadow:0 10px 28px rgba(0,0,0,.25);padding:8px 12px 12px}.pan.on{display:block}' +
+        '.pan .n{font-size:12.5px;color:#5b5f66;margin:2px 0 8px;line-height:1.5}.pan .n a{color:#24453a}' +
+        'iframe{display:block;width:100%;height:min(75vh,760px);border:1px solid #d9d2c0;border-radius:10px;background:#15130f}' +
+        '@media(max-width:760px){.bar .t{display:none}.pan{padding:6px 6px 8px}iframe{height:calc(100dvh - 128px)}}' +
+        '</style>' +
+        '<div class="bar" role="region" aria-label="데카 서버 작업대"><b>🛠️ 데카</b><span class="t">서버 작업대 — 사이트 개선 지시(이사장님 계정 전용)</span><button type="button" id="sOpen" aria-expanded="false" aria-controls="sPan">데카 창 열기 ▾</button></div>' +
+        '<div class="pan" id="sPan"><div class="n">다른 화면으로 옮겨도 하던 일은 끝까지 하고, 결과는 왼쪽 「지난 대화」에서 봅니다. 데스크탑 웹 방과 대화를 같이 씁니다. sudo 가 필요한 일은 데스크탑앱에서. <a href="https://deka.sakyowon.co.kr/" target="_blank" rel="noopener">새 창으로 크게 ↗</a></div><div id="sHost"></div></div>';
+      document.documentElement.appendChild(strip);
+      sroot.getElementById('sOpen').addEventListener('click', function () {
+        var pan = sroot.getElementById('sPan'), on = !pan.classList.contains('on');
+        pan.classList.toggle('on', on); this.textContent = on ? '데카 창 닫기 ▴' : '데카 창 열기 ▾'; this.setAttribute('aria-expanded', on ? 'true' : 'false');
+        if (on && !sroot.getElementById('sHost').firstChild) { var f = document.createElement('iframe'); f.src = DEKA; f.title = '데카 — 서버 작업대'; f.setAttribute('allow', 'clipboard-write'); sroot.getElementById('sHost').appendChild(f); }
+      });
+      sroot.addEventListener('keydown', function (e) { if (e.key === 'Escape') { var pan = sroot.getElementById('sPan'); if (pan.classList.contains('on')) sroot.getElementById('sOpen').click(); } });
+    }
+    if (strip) strip.style.display = want ? '' : 'none';
+    if (want !== stripOn) { stripOn = want; unpushPage(); if (inBar() || stripOn) pushPage(); }
+    if (!want && strip) { var pan = sroot.getElementById('sPan'); if (pan.classList.contains('on')) sroot.getElementById('sOpen').click(); sroot.getElementById('sHost').innerHTML = ''; }
+  }
   function dekaFrame() {
     if (!isAdmin() || $('dkHost').firstChild) return;
     var f = document.createElement('iframe'); f.src = DEKA; f.title = '데카 — 서버 작업대'; f.setAttribute('allow', 'clipboard-write');
