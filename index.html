@@ -348,7 +348,7 @@ body[data-route="start"] .tree{grid-template-columns:1fr}
 
       <!-- ③ 개인페이지 (로그인 #/) -->
       <main id="homeMain" class="view" aria-label="내 페이지">
-        <div class="startbar"><a class="btn p" href="#/start">🏛️ 사교원 첫 화면으로</a><p class="sub">전체 메뉴·소개·교육 신청은 첫 화면에 있습니다. 여기는 내 상담창·대시보드·내 폴더입니다.</p></div>
+        <div class="startbar"><a class="btn p" href="#/start">🏛️ 사교원 첫 화면으로</a><p class="sub" id="startNote">전체 메뉴·소개·교육 신청은 첫 화면에 있습니다. 여기는 내 상담창·대시보드·내 폴더입니다.</p></div>
         <div class="tfband" id="tfBanner" hidden>🔐 발송·결재·권한 기능을 쓰려면 2단계 인증을 켜 주세요. <button class="btn sm" type="button" id="tfBannerBtn">지금 켜기</button></div>
         <section class="chatspot" id="chatSpot" aria-labelledby="chatT">
           <div class="secT"><h2 id="chatT">상담창</h2><p class="sub">메뉴를 몰라도 말로 하시면 됩니다. 쓰기·보내기는 확인을 받고 합니다.</p></div>
@@ -958,6 +958,7 @@ function route() {
   show('#homeMain', !!me && r === 'home'); show('#vFiles', !!me && r === 'files'); show('#vCustom', !!me && r === 'custom'); show('#vMap', r === 'map');
   $('#topnav').querySelectorAll('a').forEach(a => { a.classList.toggle('cur', a.dataset.r === r); if (a.dataset.r === r) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); a.hidden = a.classList.contains('needin') && !me; });
   $('#sideTog').hidden = !shell;
+  const dk = dekaAdmin(); $('#chatSpot').hidden = dk; $('#startNote').textContent = dk ? '전체 메뉴·소개·교육 신청은 첫 화면에 있습니다. 여기는 대시보드·내 폴더입니다. 지시는 맨 위 「🛠️ 데카」 띠에서 합니다.' : '전체 메뉴·소개·교육 신청은 첫 화면에 있습니다. 여기는 내 상담창·대시보드·내 폴더입니다.';
   skaiPlace(!!me && r === 'home');
   if (r === 'start') renderStart(needLogin);
   if (me && r === 'home') { renderSideHome(); renderHome(); }
@@ -1600,12 +1601,14 @@ $('#acctMenu').addEventListener('click', e => { if (e.target.closest('button:not
 document.addEventListener('click', e => { if (!$('#acctMenu').hidden && !e.target.closest('#acct')) closeAcct(false); });
 /* ── 11-04 개선안 13·M6: 상담창 자리 — 내 페이지면 대시보드 위 넓은 상담창(inline), 그 밖은 ai-dock 이 폭 따라 위 띠/「상담」 단추 */
 let chatIO = null;
+/* 11-09 이사장 지시: 이사장 계정(데카 창 주인, 허브 id 2)의 내 페이지는 맨 위 데카 띠가 있으니 상담창 칸을 없앤다. 등급 미리보기 중엔 그 등급 화면대로 */
+function dekaAdmin() { return !!(realMe && realMe.role === 'admin' && String(realMe.id) === '2' && !preview); }
 function skaiPlace(home) {
   window.__skaiMode = home ? { m: 'inline', el: $('#chatHost') } : { m: 'auto', el: null };
   if (window.skai && window.skai.mode) { window.skai.mode(window.__skaiMode.m, window.__skaiMode.el); $('#chatWait').hidden = true; }
   else if (home) setTimeout(() => { if (!(window.skai && window.skai.mode)) $('#chatWait').textContent = '상담창을 불러오지 못했습니다. 새로고침해 주세요.'; else skaiPlace(currentRoute() === 'home' && !!me); }, 2500);
   if (home && !chatIO && 'IntersectionObserver' in window) {
-    chatIO = new IntersectionObserver(es => es.forEach(x => { if (window.skai && window.skai.fabShow) window.skai.fabShow(!x.isIntersecting && currentRoute() === 'home'); }), { threshold: 0 });
+    chatIO = new IntersectionObserver(es => es.forEach(x => { if (window.skai && window.skai.fabShow) window.skai.fabShow(!x.isIntersecting && currentRoute() === 'home' && !dekaAdmin()); }), { threshold: 0 });
     chatIO.observe($('#chatSpot'));
   }
 }
