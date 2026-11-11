@@ -1820,7 +1820,7 @@ function updateConvenienceUI(scope, page){
 
 /* 사이드바 메뉴 한 줄 설명 (개선안 4-3) — [메뉴명, 설명]. AI 상담 맥락 전달에도 재사용 */
 const MENU_DESC = {
-  stat:['전남 발전 현황','전남 태양광의 전국 순위·월별 흐름·월 이용률·추세를 공개 통계 실측으로 봅니다(시군 단위는 2단계)'],
+  stat:['전남 발전 현황','전남 태양광의 전국 순위·월별 흐름·월 이용률·추세와 22개 시군 설비·발전량을 공개 통계로 봅니다'],
   dashboard:['대시보드','우리 마을 현황과 이번 주 할 일을 한눈에 봅니다'],
   admDashboard:['통계 대시보드','플랫폼 전체 현황과 처리 대기 항목을 확인합니다'],
   contest:['공모·심사','공모 접수 현황과 심사 진행을 관리합니다'],
@@ -3893,7 +3893,7 @@ function memStat(){
     <div class="sec-head">
       <h1>🗺 전남 발전 현황</h1>
       <p class="sec-desc">전국 시도 가운데 전남 태양광의 위치, 월별 흐름, 월 이용률(<b>전남광주 합산</b>), 2005~2023 추세를 <b>공개 통계 실측값</b>으로 봅니다.
-        시군 단위 현황은 자료 공급처가 정해지면 2단계로 더합니다. 우리 마을 실적과의 비교는 <a href="#/mem/power">발전·정산·배당</a>에서 봅니다.</p>
+        아래 <b>전남 22개 시군</b> 카드는 에너지공단 화면 조회 스냅샷(자동 갱신 아님)입니다. 우리 마을 실적과의 비교는 <a href="#/mem/power">발전·정산·배당</a>에서 봅니다.</p>
     </div>
     <div id="stat-body"><div class="card"><p class="text-mute" style="margin:0;">불러오는 중…</p></div></div>`;
 }
@@ -3916,7 +3916,7 @@ function statSrc(o){
     기준일 ${escapeHtml(o.기준일 || '')} · 출처: ${escapeHtml(o.출처 || '')}</p>`;
 }
 function statHtml(d){
-  const 순 = d.순위, 월 = d.전남월별, cf = d.이용률, 추 = d.추세;
+  const 순 = d.순위, 월 = d.전남월별, cf = d.이용률, 추 = d.추세, 군 = d.시군;
   const maxR = Math.max(...순.목록.map(x => x.거래량_GWh));
   const rank = 순.목록.map(x => `
     <div style="display:flex;align-items:center;gap:8px;margin:3px 0;font-size:13px;">
@@ -3972,6 +3972,28 @@ function statHtml(d){
       ${statSrc(추)}
     </div>`;
   }
+  let sigunCard = '';
+  if(군 && 군.목록 && 군.목록.length){
+    const maxS = Math.max(...군.목록.map(x => x.설비_MW));
+    const sRows = 군.목록.map(x => `
+      <div style="display:flex;align-items:center;gap:8px;margin:3px 0;font-size:13px;">
+        <span style="width:44px;text-align:right;">${escapeHtml(x.시군)}</span>
+        <span style="flex:1;min-width:40px;height:14px;background:var(--paper-soft);border-radius:4px;overflow:hidden;">
+          <span style="display:block;height:100%;width:${Math.max(1, Number(x.설비_MW) / maxS * 100)}%;background:var(--primary);opacity:.8;"></span></span>
+        <span style="width:150px;font-size:12px;white-space:nowrap;">${statFmt(x.설비_MW, 0)} MW · ${statFmt(x.개소, 0)}개소</span>
+      </div>`).join('');
+    const sTable = 군.목록.map(x => escapeHtml(x.시군) + ' ' + statFmt(x.발전량_2025_MWh, 0)).join(' · ');
+    sigunCard = `
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title"><h3 class="serif">전남 22개 시군 태양광 — 설비용량 순 (설비 ${statFmt(군.전남합계.설비_MW, 0)} MW · ${statFmt(군.전남합계.개소, 0)}개소)</h3>
+        <span class="badge badge-mute">스냅샷 ${escapeHtml(군.조회일 || '')}</span></div>
+      ${sRows}
+      <p class="text-mute" style="font-size:12.5px;margin:8px 0 0;"><b>2025년 발전량(MWh, 설비용량 순):</b> ${sTable}</p>
+      <p class="text-mute" style="font-size:12.5px;margin:6px 0 0;">${escapeHtml(군.검산 || '')}</p>
+      <p class="text-mute" style="font-size:12.5px;margin:6px 0 0;">${escapeHtml(군.주의 || '')}</p>
+      ${statSrc(군)}
+    </div>`;
+  }
   return `
     <div class="card" style="margin-bottom:16px;border-left:4px solid var(--primary);">
       <div class="card-title"><h3 class="serif">시도 태양광 전력거래량 — 전남 ${Number(전남.순위)}위(${statFmt(전남.거래량_GWh)} GWh, 시도 17곳 거래량의 ${Number(전남.비중_pct)}%)</h3></div>
@@ -3984,6 +4006,7 @@ function statHtml(d){
       <p class="text-mute" style="font-size:12.5px;margin:8px 0 0;">막대 아래: 월(위)과 GWh(아래). 시도 17곳 거래량 합 대비 전남 비중 — ${mShare}</p>
       ${statSrc(월)}
     </div>
+    ${sigunCard}
     ${cfCard}
     ${trendCard}
     <div class="card" style="margin-bottom:16px;background:var(--paper-soft);box-shadow:none;">
