@@ -1563,6 +1563,7 @@ const ROLE_MENUS = {
     ]],
     ['연합회 업무', [
       ['mem','union','🤝','연합회 현황판'],
+      ['mem','stat','🗺','전남 발전 현황'],
       ['mem','library','📚','공지·자료실'],
       ['mem','chat','💬','AI 상담'],
       ['mem','video','🎬','활동 영상 만들기'],
@@ -1597,6 +1598,7 @@ const ROLE_MENUS = {
       ['mem','fedfinstat','📊','재무제표·컨설팅'],
     ]],
     ['소통', [
+      ['mem','stat','🗺','전남 발전 현황'],
       ['mem','chat','💬','AI 상담'],
       ['mem','video','🎬','활동 영상 만들기'],
       ['mem','mypage','👤','마이페이지'],
@@ -1626,6 +1628,7 @@ const ROLE_MENUS = {
     ]],
     ['깊이 보기 · 운영관리', [
       ['mem','power','⚡','발전·정산·배당'],
+      ['mem','stat','🗺','전남 발전 현황'],
       ['mem','revenue','💰','수익 시뮬레이션'],
       ['mem','accounting','🧾','회계·세무 자료이관'],
       ['mem','taxpay','💸','지급·원천징수'],
@@ -1817,6 +1820,7 @@ function updateConvenienceUI(scope, page){
 
 /* 사이드바 메뉴 한 줄 설명 (개선안 4-3) — [메뉴명, 설명]. AI 상담 맥락 전달에도 재사용 */
 const MENU_DESC = {
+  stat:['전남 발전 현황','전남 태양광의 전국 순위·월별 흐름·월 이용률·추세를 공개 통계 실측으로 봅니다(시군 단위는 2단계)'],
   dashboard:['대시보드','우리 마을 현황과 이번 주 할 일을 한눈에 봅니다'],
   admDashboard:['통계 대시보드','플랫폼 전체 현황과 처리 대기 항목을 확인합니다'],
   contest:['공모·심사','공모 접수 현황과 심사 진행을 관리합니다'],
@@ -2417,6 +2421,7 @@ function renderMemberPage(page){
     case 'vendor':    return memVendor();
     case 'success':   return memSuccess();
     case 'power':     return memPower();
+    case 'stat':      return memStat();
     case 'biz':       return memBiz();
     case 'union':     return memUnion();
     case 'fedsupport':return fedSupportBoard();
@@ -3877,6 +3882,112 @@ function cfCompareCard(real, capKw){
           ${낮은달.length ? `<b style="color:var(--danger);">${낮은달.join('·')}</b>은 전남의 80% 아래입니다 — 점검을 권합니다.` : '모든 달이 전남의 80% 이상입니다.'}`
           : (capKw > 0 ? '자료함에 월별 발전량을 올리면 우리 마을 막대가 함께 그려집니다.' : '조합 현황에 설비용량(kW)을 넣고 월별 발전량을 올리면 우리 마을과 비교됩니다.')}
         <br>※ 전남 값: 한국에너지공단 재생에너지 클라우드플랫폼 RPS 태양광 발전량÷설비용량(전남광주, 기준일 ${cf.기준일}, 연간 ${cf.연간}%). 날씨가 해마다 달라 같은 달끼리의 참고 비교입니다.</p>
+    </div>`;
+}
+
+/* ─── 2026-11-11 전남 발전 현황(1단계: 시도·광역 실측) — 수업 14회차 반영(합성 시연이 아니라 공개 통계 실데이터)
+   서버 /api/hatsoja/dashboard (hatsoja_dashboard.py). 시군 단위는 자료 공급처 확정 뒤 2단계. 모든 카드에 기준일·출처를 적는다. */
+function memStat(){
+  setTimeout(statLoad, 0);
+  return `
+    <div class="sec-head">
+      <h1>🗺 전남 발전 현황</h1>
+      <p class="sec-desc">전국 시도 가운데 전남 태양광의 위치, 월별 흐름, 월 이용률, 2005~2023 추세를 <b>공개 통계 실측값</b>으로 봅니다.
+        시군 단위 현황은 자료 공급처가 정해지면 2단계로 더합니다. 우리 마을 실적과의 비교는 <a href="#/mem/power">발전·정산·배당</a>에서 봅니다.</p>
+    </div>
+    <div id="stat-body"><div class="card"><p class="text-mute" style="margin:0;">불러오는 중…</p></div></div>`;
+}
+async function statLoad(){
+  const box = document.getElementById('stat-body');
+  if(!box) return;
+  try{
+    const r = await fetch('/api/hatsoja/dashboard');
+    const d = await r.json();
+    if(!r.ok || !d || !d.ok) throw new Error('no-data');
+    box.innerHTML = statHtml(d);
+  }catch(e){
+    box.innerHTML = '<div class="card"><p style="margin:0;">현황 자료를 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.</p></div>';
+  }
+}
+function statFmt(n, dig){ return Number(n).toLocaleString('ko-KR', {maximumFractionDigits: dig == null ? 1 : dig}); }
+function statSrc(o){
+  if(!o) return '';
+  return `<p class="text-mute" style="font-size:12px;margin:10px 0 0;"><span class="badge badge-success">${escapeHtml(o.자료종류 || '실측')}</span>
+    기준일 ${escapeHtml(o.기준일 || '')} · 출처: ${escapeHtml(o.출처 || '')}</p>`;
+}
+function statHtml(d){
+  const 순 = d.순위, 월 = d.전남월별, cf = d.이용률, 추 = d.추세;
+  const maxR = Math.max(...순.목록.map(x => x.거래량_GWh));
+  const rank = 순.목록.map(x => `
+    <div style="display:flex;align-items:center;gap:8px;margin:3px 0;font-size:13px;">
+      <span style="width:34px;text-align:right;${x.지역 === '전남' ? 'font-weight:700;color:var(--primary);' : ''}">${escapeHtml(x.지역)}</span>
+      <span style="flex:1;height:14px;background:var(--paper-soft);border-radius:4px;overflow:hidden;">
+        <span style="display:block;height:100%;width:${Math.max(1, x.거래량_GWh / maxR * 100)}%;background:${x.지역 === '전남' ? 'var(--primary)' : 'var(--ink-soft)'};opacity:${x.지역 === '전남' ? 1 : .45};"></span></span>
+      <span style="width:118px;font-size:12px;">${statFmt(x.거래량_GWh)} GWh · ${x.비중_pct}%</span>
+    </div>`).join('');
+  const 전남 = 순.목록.find(x => x.지역 === '전남');
+  const mKeys = Object.keys(월.월별).map(Number).sort((a, b) => a - b);
+  const maxM = Math.max(...mKeys.map(k => 월.월별[k]));
+  const mBars = mKeys.map(k => `
+    <div style="flex:1;text-align:center;min-width:0;">
+      <div style="display:flex;align-items:flex-end;justify-content:center;height:110px;">
+        <div title="${k}월 ${statFmt(월.월별[k])} GWh" style="width:62%;background:var(--primary);border-radius:3px 3px 0 0;height:${Math.round(월.월별[k] / maxM * 105)}px;"></div></div>
+      <div style="font-size:11.5px;margin-top:4px;">${k}월</div>
+      <div style="font-size:11px;color:var(--ink-soft);">${statFmt(월.월별[k], 0)}</div>
+      <div style="font-size:10.5px;color:var(--ink-soft);">${월.전국대비_비중_pct[k]}%</div>
+    </div>`).join('');
+  let cfCard = '';
+  if(cf && cf.월별이용률_pct){
+    const ck = Object.keys(cf.월별이용률_pct).map(Number).sort((a, b) => a - b);
+    const maxC = Math.max(22, ...ck.map(k => cf.월별이용률_pct[k]));
+    const cBars = ck.map(k => `
+      <div style="flex:1;text-align:center;min-width:0;">
+        <div style="display:flex;align-items:flex-end;justify-content:center;height:100px;">
+          <div title="${k}월 ${cf.월별이용률_pct[k]}%" style="width:62%;background:var(--ink-soft);opacity:.55;border-radius:3px 3px 0 0;height:${Math.round(cf.월별이용률_pct[k] / maxC * 95)}px;"></div></div>
+        <div style="font-size:11.5px;margin-top:4px;">${k}월</div>
+        <div style="font-size:11px;color:var(--ink-soft);">${cf.월별이용률_pct[k]}</div>
+      </div>`).join('');
+    cfCard = `
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title"><h3 class="serif">${escapeHtml(cf.지역 || '전남광주')} 월 이용률(%) — 연간 ${cf.연간이용률_pct}%</h3></div>
+      <div style="display:flex;gap:6px;align-items:flex-end;padding:0 4px;">${cBars}</div>
+      <p class="text-mute" style="font-size:12.5px;margin:8px 0 0;">발전량 ÷ (설비용량 × 시간). 우리 마을 월 이용률과 겹쳐 보려면 <a href="#/mem/power">발전·정산·배당</a>의 「전남 평균 대비 우리 마을」을 보세요. ${escapeHtml(cf.주의 || '')}</p>
+      ${statSrc(cf)}
+    </div>`;
+  }
+  let trendCard = '';
+  if(추 && 추.연도 && 추.연도.length){
+    const maxT = Math.max(...추.생산량_toe);
+    const tBars = 추.연도.map((y, i) => `
+      <div title="${y}년 ${statFmt(추.생산량_toe[i], 0)} toe" style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;">
+        <div style="width:70%;background:var(--primary);border-radius:2px 2px 0 0;height:${Math.max(1, Math.round(추.생산량_toe[i] / maxT * 90))}px;"></div>
+        <div style="font-size:9.5px;margin-top:3px;color:var(--ink-soft);">${i % 3 === 0 || i === 추.연도.length - 1 ? String(y).slice(2) : ''}</div>
+      </div>`).join('');
+    trendCard = `
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title"><h3 class="serif">전남 태양광 생산량 추세 ${추.연도[0]}~${추.연도[추.연도.length - 1]}${추.최신_시도순위 ? ' · 최신 시도 ' + 추.최신_시도순위 + '위' : ''}</h3></div>
+      <div style="display:flex;gap:3px;align-items:flex-end;height:112px;padding:0 4px;">${tBars}</div>
+      <p class="text-mute" style="font-size:12.5px;margin:8px 0 0;">${escapeHtml(추.연도[추.연도.length - 1])}년 ${statFmt(추.생산량_toe[추.생산량_toe.length - 1], 0)} toe. 단위 ${escapeHtml(추.단위)}.</p>
+      ${statSrc(추)}
+    </div>`;
+  }
+  return `
+    <div class="card" style="margin-bottom:16px;border-left:4px solid var(--primary);">
+      <div class="card-title"><h3 class="serif">전국 시도 태양광 전력거래량 — 전남 ${전남.순위}위(${statFmt(전남.거래량_GWh)} GWh, 전국의 ${전남.비중_pct}%)</h3></div>
+      ${rank}
+      ${statSrc(순)}
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title"><h3 class="serif">전남 월별 태양광 거래량(GWh) — 연간 ${statFmt(월.연간_GWh)} GWh</h3></div>
+      <div style="display:flex;gap:6px;align-items:flex-end;padding:0 4px;">${mBars}</div>
+      <p class="text-mute" style="font-size:12.5px;margin:8px 0 0;">막대 아래 숫자: GWh, 그 아래: 전국 대비 비중(%).</p>
+      ${statSrc(월)}
+    </div>
+    ${cfCard}
+    ${trendCard}
+    <div class="card" style="margin-bottom:16px;background:var(--paper-soft);box-shadow:none;">
+      <h3 class="serif" style="margin-top:0;">읽을 때 알아 두세요</h3>
+      <ul style="margin:0;padding-left:18px;font-size:13.5px;line-height:1.7;">${(d.한계 || []).map(t => '<li>' + escapeHtml(t) + '</li>').join('')}</ul>
     </div>`;
 }
 
