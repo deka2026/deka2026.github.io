@@ -3892,7 +3892,7 @@ function memStat(){
   return `
     <div class="sec-head">
       <h1>🗺 전남 발전 현황</h1>
-      <p class="sec-desc">전국 시도 가운데 전남 태양광의 위치, 월별 흐름, 월 이용률, 2005~2023 추세를 <b>공개 통계 실측값</b>으로 봅니다.
+      <p class="sec-desc">전국 시도 가운데 전남 태양광의 위치, 월별 흐름, 월 이용률(<b>전남광주 합산</b>), 2005~2023 추세를 <b>공개 통계 실측값</b>으로 봅니다.
         시군 단위 현황은 자료 공급처가 정해지면 2단계로 더합니다. 우리 마을 실적과의 비교는 <a href="#/mem/power">발전·정산·배당</a>에서 봅니다.</p>
     </div>
     <div id="stat-body"><div class="card"><p class="text-mute" style="margin:0;">불러오는 중…</p></div></div>`;
@@ -3923,7 +3923,7 @@ function statHtml(d){
       <span style="width:34px;text-align:right;${x.지역 === '전남' ? 'font-weight:700;color:var(--primary);' : ''}">${escapeHtml(x.지역)}</span>
       <span style="flex:1;height:14px;background:var(--paper-soft);border-radius:4px;overflow:hidden;">
         <span style="display:block;height:100%;width:${Math.max(1, x.거래량_GWh / maxR * 100)}%;background:${x.지역 === '전남' ? 'var(--primary)' : 'var(--ink-soft)'};opacity:${x.지역 === '전남' ? 1 : .45};"></span></span>
-      <span style="width:118px;font-size:12px;">${statFmt(x.거래량_GWh)} GWh · ${x.비중_pct}%</span>
+      <span style="width:118px;font-size:12px;">${statFmt(x.거래량_GWh)} GWh · ${Number(x.비중_pct)}%</span>
     </div>`).join('');
   const 전남 = 순.목록.find(x => x.지역 === '전남');
   const mKeys = Object.keys(월.월별).map(Number).sort((a, b) => a - b);
@@ -3932,10 +3932,10 @@ function statHtml(d){
     <div style="flex:1;text-align:center;min-width:0;">
       <div style="display:flex;align-items:flex-end;justify-content:center;height:110px;">
         <div title="${k}월 ${statFmt(월.월별[k])} GWh" style="width:62%;background:var(--primary);border-radius:3px 3px 0 0;height:${Math.round(월.월별[k] / maxM * 105)}px;"></div></div>
-      <div style="font-size:11.5px;margin-top:4px;">${k}월</div>
-      <div style="font-size:11px;color:var(--ink-soft);">${statFmt(월.월별[k], 0)}</div>
-      <div style="font-size:10.5px;color:var(--ink-soft);">${월.전국대비_비중_pct[k]}%</div>
+      <div style="font-size:11px;margin-top:4px;">${k}</div>
+      <div style="font-size:10px;color:var(--ink-soft);white-space:nowrap;">${statFmt(월.월별[k], 0)}</div>
     </div>`).join('');
+  const mShare = mKeys.map(k => k + '월 ' + Number(월.전국대비_비중_pct[k]) + '%').join(' · ');
   let cfCard = '';
   if(cf && cf.월별이용률_pct){
     const ck = Object.keys(cf.월별이용률_pct).map(Number).sort((a, b) => a - b);
@@ -3944,14 +3944,15 @@ function statHtml(d){
       <div style="flex:1;text-align:center;min-width:0;">
         <div style="display:flex;align-items:flex-end;justify-content:center;height:100px;">
           <div title="${k}월 ${cf.월별이용률_pct[k]}%" style="width:62%;background:var(--ink-soft);opacity:.55;border-radius:3px 3px 0 0;height:${Math.round(cf.월별이용률_pct[k] / maxC * 95)}px;"></div></div>
-        <div style="font-size:11.5px;margin-top:4px;">${k}월</div>
-        <div style="font-size:11px;color:var(--ink-soft);">${cf.월별이용률_pct[k]}</div>
+        <div style="font-size:11px;margin-top:4px;">${k}</div>
+        <div style="font-size:10px;color:var(--ink-soft);white-space:nowrap;">${Math.round(Number(cf.월별이용률_pct[k]))}</div>
       </div>`).join('');
+    const cList = ck.map(k => k + '월 ' + Number(cf.월별이용률_pct[k])).join(' · ');
     cfCard = `
     <div class="card" style="margin-bottom:16px;">
-      <div class="card-title"><h3 class="serif">${escapeHtml(cf.지역 || '전남광주')} 월 이용률(%) — 연간 ${cf.연간이용률_pct}%</h3></div>
+      <div class="card-title"><h3 class="serif">${escapeHtml(cf.지역 || '전남광주')} 월 이용률(%) — 연간 ${Number(cf.연간이용률_pct)}%</h3></div>
       <div style="display:flex;gap:6px;align-items:flex-end;padding:0 4px;">${cBars}</div>
-      <p class="text-mute" style="font-size:12.5px;margin:8px 0 0;">발전량 ÷ (설비용량 × 시간). 우리 마을 월 이용률과 겹쳐 보려면 <a href="#/mem/power">발전·정산·배당</a>의 「전남 평균 대비 우리 마을」을 보세요. ${escapeHtml(cf.주의 || '')}</p>
+      <p class="text-mute" style="font-size:12.5px;margin:8px 0 0;">막대 아래 숫자는 반올림한 %입니다 — ${cList}. 발전량 ÷ (설비용량 × 시간). 우리 마을 월 이용률과 겹쳐 보려면 <a href="#/mem/power">발전·정산·배당</a>의 「전남 평균 대비 우리 마을」을 보세요. ${escapeHtml(cf.주의 || '')}</p>
       ${statSrc(cf)}
     </div>`;
   }
@@ -3965,7 +3966,7 @@ function statHtml(d){
       </div>`).join('');
     trendCard = `
     <div class="card" style="margin-bottom:16px;">
-      <div class="card-title"><h3 class="serif">전남 태양광 생산량 추세 ${추.연도[0]}~${추.연도[추.연도.length - 1]}${추.최신_시도순위 ? ' · 최신 시도 ' + 추.최신_시도순위 + '위' : ''}</h3></div>
+      <div class="card-title"><h3 class="serif">전남 태양광 생산량 추세 ${추.연도[0]}~${추.연도[추.연도.length - 1]}${추.최신_시도순위 ? ' · 최신 시도 ' + Number(추.최신_시도순위) + '위' : ''}</h3></div>
       <div style="display:flex;gap:3px;align-items:flex-end;height:112px;padding:0 4px;">${tBars}</div>
       <p class="text-mute" style="font-size:12.5px;margin:8px 0 0;">${escapeHtml(추.연도[추.연도.length - 1])}년 ${statFmt(추.생산량_toe[추.생산량_toe.length - 1], 0)} toe. 단위 ${escapeHtml(추.단위)}.</p>
       ${statSrc(추)}
@@ -3973,14 +3974,14 @@ function statHtml(d){
   }
   return `
     <div class="card" style="margin-bottom:16px;border-left:4px solid var(--primary);">
-      <div class="card-title"><h3 class="serif">전국 시도 태양광 전력거래량 — 전남 ${전남.순위}위(${statFmt(전남.거래량_GWh)} GWh, 전국의 ${전남.비중_pct}%)</h3></div>
+      <div class="card-title"><h3 class="serif">시도 태양광 전력거래량 — 전남 ${Number(전남.순위)}위(${statFmt(전남.거래량_GWh)} GWh, 시도 17곳 거래량의 ${Number(전남.비중_pct)}%)</h3></div>
       ${rank}
       ${statSrc(순)}
     </div>
     <div class="card" style="margin-bottom:16px;">
       <div class="card-title"><h3 class="serif">전남 월별 태양광 거래량(GWh) — 연간 ${statFmt(월.연간_GWh)} GWh</h3></div>
       <div style="display:flex;gap:6px;align-items:flex-end;padding:0 4px;">${mBars}</div>
-      <p class="text-mute" style="font-size:12.5px;margin:8px 0 0;">막대 아래 숫자: GWh, 그 아래: 전국 대비 비중(%).</p>
+      <p class="text-mute" style="font-size:12.5px;margin:8px 0 0;">막대 아래: 월(위)과 GWh(아래). 시도 17곳 거래량 합 대비 전남 비중 — ${mShare}</p>
       ${statSrc(월)}
     </div>
     ${cfCard}
