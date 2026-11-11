@@ -2799,7 +2799,7 @@ function finCalc(){
       <b style="color:#9c6a00;">상환능력 배수(DSCR)가 1.2에 못 미칩니다</b>
       <p class="text-mute" style="font-size:13px;margin:4px 0 0;">금융기관은 통상 발전수익이 원리금의 1.2배 이상일 때 안정적으로 봅니다.
       마을 자체 조달을 늘리거나 상환기간을 늘리는 방향으로 조정해 상담하세요.</p></div>` : ''}
-    <p class="text-mute" style="font-size:12.5px;">※ 이용률 15.4%(전남 2025 실측 15.35% — 에너지공단 RPS 태양광 발전량÷설비용량, 전력거래소 월별 분포 교차검증), 한전 매입 165원/kWh, 운영비 매출의 14%
+    <p class="text-mute" style="font-size:12.5px;">※ 이용률 15.4%(전남광주 2025 실측 15.35% — 에너지공단 RPS 태양광 발전량÷설비용량, 전력거래소 월별 분포 교차검증), 한전 매입 165원/kWh, 운영비 매출의 14%
     (유지관리 6 + 보험 2 + 시설교체 적립 4 + 시스템비용 적립 2) 가정의 <b>추산</b>입니다.
     신협 금리·기간은 <b>예시 기본값</b>이며 실제 조건은 신협 심사로 결정됩니다. 토지 임대료가 있으면 남는 돈은 그만큼 줄어듭니다.
     <b>자부담까지 융자로 채우면 설치비 전액이 차입이 되어 20년 부담이 커진다는 점</b>을 총회에서 충분히 설명하세요.</p>`;
@@ -3865,7 +3865,7 @@ function cfCompareCard(real, capKw){
     <div style="flex:1;text-align:center;min-width:0;">
       <div style="display:flex;align-items:flex-end;justify-content:center;gap:2px;height:110px;">
         ${r.우리 != null ? `<div title="우리 마을 ${r.우리.toFixed(1)}%" style="width:40%;background:var(--primary);border-radius:3px 3px 0 0;height:${Math.round(r.우리/max*105)}px;"></div>` : ''}
-        <div title="전남 ${r.전남}%" style="width:${r.우리 != null ? 40 : 60}%;background:var(--ink-soft);opacity:.45;border-radius:3px 3px 0 0;height:${Math.round((r.전남 || 0)/max*105)}px;"></div>
+        <div title="전남광주 ${r.전남}%" style="width:${r.우리 != null ? 40 : 60}%;background:var(--ink-soft);opacity:.45;border-radius:3px 3px 0 0;height:${Math.round((r.전남 || 0)/max*105)}px;"></div>
       </div>
       <div style="font-size:11.5px;margin-top:4px;">${r.label}</div>
       ${r.우리 != null ? `<div style="font-size:11px;color:${r.우리 < r.전남 * 0.8 ? 'var(--danger)' : 'var(--ink-soft)'};">${r.우리.toFixed(1)}/${r.전남}</div>` : `<div style="font-size:11px;color:var(--ink-soft);">${r.전남}</div>`}
@@ -3873,15 +3873,15 @@ function cfCompareCard(real, capKw){
   const 낮은달 = 비교 ? rows.filter(r => r.우리 < r.전남 * 0.8).map(r => r.label) : [];
   return `
     <div class="card" style="margin-bottom:16px;">
-      <div class="card-title"><h3 class="serif">전남 평균 대비 우리 마을 — 월 이용률(%)</h3>
-        ${비교 ? '<span class="badge badge-success">우리 마을 실측</span>' : '<span class="badge badge-mute">전남 실측만</span>'}</div>
+      <div class="card-title"><h3 class="serif">전남광주 평균 대비 우리 마을 — 월 이용률(%)</h3>
+        ${비교 ? '<span class="badge badge-success">우리 마을 실측</span>' : '<span class="badge badge-mute">전남광주 실측만</span>'}</div>
       <div style="display:flex;gap:6px;align-items:flex-end;padding:0 4px;">${bars}</div>
       <p class="text-mute" style="font-size:12.5px;margin-top:8px;">
         ${비교 ? `<span style="display:inline-block;width:10px;height:10px;background:var(--primary);border-radius:2px;"></span> 우리 마을
-          &nbsp;<span style="display:inline-block;width:10px;height:10px;background:var(--ink-soft);opacity:.45;border-radius:2px;"></span> 전남 같은 달(${cf.연도} 실측).
-          ${낮은달.length ? `<b style="color:var(--danger);">${낮은달.join('·')}</b>은 전남의 80% 아래입니다 — 점검을 권합니다.` : '모든 달이 전남의 80% 이상입니다.'}`
+          &nbsp;<span style="display:inline-block;width:10px;height:10px;background:var(--ink-soft);opacity:.45;border-radius:2px;"></span> 전남광주 같은 달(${cf.연도} 실측).
+          ${낮은달.length ? `<b style="color:var(--danger);">${낮은달.join('·')}</b>은 전남광주의 80% 아래입니다 — 점검을 권합니다.` : '모든 달이 전남광주의 80% 이상입니다.'}`
           : (capKw > 0 ? '자료함에 월별 발전량을 올리면 우리 마을 막대가 함께 그려집니다.' : '조합 현황에 설비용량(kW)을 넣고 월별 발전량을 올리면 우리 마을과 비교됩니다.')}
-        <br>※ 전남 값: 한국에너지공단 재생에너지 클라우드플랫폼 RPS 태양광 발전량÷설비용량(전남광주, 기준일 ${cf.기준일}, 연간 ${cf.연간}%). 날씨가 해마다 달라 같은 달끼리의 참고 비교입니다.</p>
+        <br>※ 전남광주 값: 한국에너지공단 재생에너지 클라우드플랫폼 RPS 태양광 발전량÷설비용량(전남광주, 기준일 ${cf.기준일}, 연간 ${cf.연간}%). 날씨가 해마다 달라 같은 달끼리의 참고 비교입니다.</p>
     </div>`;
 }
 
@@ -3893,7 +3893,8 @@ function memStat(){
     <div class="sec-head">
       <h1>🗺 전남 발전 현황</h1>
       <p class="sec-desc">전국 시도 가운데 전남 태양광의 위치, 월별 흐름, 월 이용률(<b>전남광주 합산</b>), 2005~2023 추세를 <b>공개 통계 실측값</b>으로 봅니다.
-        아래 <b>전남 22개 시군</b> 카드는 에너지공단 화면 조회 스냅샷(자동 갱신 아님)입니다. 우리 마을 실적과의 비교는 <a href="#/mem/power">발전·정산·배당</a>에서 봅니다.</p>
+        아래 <b>전남 22개 시군</b> 카드는 에너지공단 화면 조회 스냅샷(자동 갱신 아님)입니다. 우리 마을 실적과의 비교는 <a href="#/mem/power">발전·정산·배당</a>에서 봅니다.
+        <br><span class="text-mute" style="font-size:12.5px;">※ 여기서 「전남」은 전남광주통합특별시 출범(2026-07-01) 전 통계의 집계 단위(옛 전라남도, 광주 제외)입니다. 공개 통계가 아직 옛 시도 구분으로 나와 그대로 적습니다.</span></p>
     </div>
     <div id="stat-body"><div class="card"><p class="text-mute" style="margin:0;">불러오는 중…</p></div></div>`;
 }
@@ -3952,7 +3953,7 @@ function statHtml(d){
     <div class="card" style="margin-bottom:16px;">
       <div class="card-title"><h3 class="serif">${escapeHtml(cf.지역 || '전남광주')} 월 이용률(%) — 연간 ${Number(cf.연간이용률_pct)}%</h3></div>
       <div style="display:flex;gap:6px;align-items:flex-end;padding:0 4px;">${cBars}</div>
-      <p class="text-mute" style="font-size:12.5px;margin:8px 0 0;">막대 아래 숫자는 반올림한 %입니다 — ${cList}. 발전량 ÷ (설비용량 × 시간). 우리 마을 월 이용률과 겹쳐 보려면 <a href="#/mem/power">발전·정산·배당</a>의 「전남 평균 대비 우리 마을」을 보세요. ${escapeHtml(cf.주의 || '')}</p>
+      <p class="text-mute" style="font-size:12.5px;margin:8px 0 0;">막대 아래 숫자는 반올림한 %입니다 — ${cList}. 발전량 ÷ (설비용량 × 시간). 우리 마을 월 이용률과 겹쳐 보려면 <a href="#/mem/power">발전·정산·배당</a>의 「전남광주 평균 대비 우리 마을」을 보세요. ${escapeHtml(cf.주의 || '')}</p>
       ${statSrc(cf)}
     </div>`;
   }
@@ -8980,7 +8981,7 @@ function svCalc(){
       <p class="text-mute" style="font-size:13px;margin:4px 0 0;">설치비·금리·임대료를 낮추거나 자부담을 늘려 융자 규모를 줄여야 합니다.
       <b>"사업비 조달이 가능한가"와 "20년간 사업을 유지할 수 있는가"는 별개의 문제입니다.</b>
       업체가 제시한 설치비와 예상 수익을 이 표에 넣어 직접 확인하고, 여러 업체 견적을 비교하세요.</p></div>` : ''}
-    <p class="text-mute" style="font-size:12.5px;">※ 이용률 15.4%(전남 2025 실측 15.35%, 에너지공단 RPS 태양광 기준·기준일 2025-12-31), 1MW 설치비 약 16억 원, 정책융자 최대 85%(자부담 15%) 기준의 <b>추산</b>입니다.
+    <p class="text-mute" style="font-size:12.5px;">※ 이용률 15.4%(전남광주 2025 실측 15.35%, 에너지공단 RPS 태양광 기준·기준일 2025-12-31), 1MW 설치비 약 16억 원, 정책융자 최대 85%(자부담 15%) 기준의 <b>추산</b>입니다.
     단가·금리·상환조건·임대료가 마을마다 달라 실제 순수익은 변동되므로, 업체와 신협이 제시한 실제 숫자를 넣어 다시 계산하세요.
     부지 매입비와 ESS 설치비는 설치비·자부담 15% 산정에서 별도이며 위 계산에도 포함되지 않았습니다.
     업체가 말하는 <b>&quot;1MW 15억&quot;에는 토목비와 계통비가 빠져 있는 경우가 많습니다</b> — 계약 전에 포함 여부를 확인하세요.
@@ -10222,7 +10223,7 @@ ${HSJ_GONGGO}
 - 「신에너지 및 재생에너지 개발·이용·보급 촉진법」(약칭 「신재생에너지법」)은 2026.9.18.부로 제명이 「재생에너지 개발·이용·보급 촉진법」(약칭 「재생에너지법」)으로 바뀌었고 소관이 산업통상자원부 → 기후에너지환경부로 이관됨. 이격거리 조항은 같은 법 제27조의3이며 조문 번호는 그대로임
 - RPS 고시 제명도 「재생에너지 공급의무화제도 및 연료 혼합의무화제도 관리·운영지침」으로 바뀜(기후에너지환경부, 2026.9.18. 시행)
 - 태양광·풍력 발전사업 허가권자: 전남·광주는 2만kW 이하까지 전남광주통합특별시장(「전남광주통합특별시 설치를 위한 특별법」 제229조, 2026.7.1. 통합시 출범). 통합특별시 밖은 3천kW 이하 시·도지사, 초과는 기후에너지환경부장관
-- 1MW 이하 재생에너지의 배전망 우선접속 근거는 「분산에너지 활성화 특별법」 제16조제3항제2호(2026.9.15. 공포, 2026.12.16. 시행). 나목 = 성장촉진지역에서 협동조합기본법상 협동조합이 추진하는 사업. 전남 성장촉진지역 14곳 = 곡성·구례·고흥·보성·화순·장흥·강진·해남·함평·영광·장성·완도·진도·신안(국토교통부고시 제2024-594호). 담양·영암·무안과 5개 시는 미해당
+- 1MW 이하 재생에너지의 배전망 우선접속 근거는 「분산에너지 활성화 특별법」 제16조제3항제2호(2026.9.15. 공포, 2026.12.16. 시행). 나목 = 성장촉진지역에서 협동조합기본법상 협동조합이 추진하는 사업. 전남광주 성장촉진지역 14곳 = 곡성·구례·고흥·보성·화순·장흥·강진·해남·함평·영광·장성·완도·진도·신안(국토교통부고시 제2024-594호). 담양·영암·무안과 5개 시는 미해당
 - 조세특례제한법 제72조 당기순이익과세(9%)는 협동조합기본법상 협동조합에 적용되지 않음. 일반 법인세율로 안내할 것`;
 
 // /api/ai 스트리밍 호출. 서버가 키 미설정 등으로 JSON을 돌려주면 ok:false.
@@ -13639,7 +13640,7 @@ async function labLoadHealth(){
     el.innerHTML = `엔진 ${d.engine ? '연결' : '미설정'} · 라이브 적용 ${d.live ? '켜짐' : '꺼짐(실험실만)'} ·
       RAG 조각 ${rag.chunks || 0}개 (${escapeHtml(rag.mode || '-')}${rag.model ? ', ' + escapeHtml(rag.model) : ''}, 색인 ${escapeHtml(rag.built_at || '-')}) ·
       도구 ${(d.tools || []).length}개: ${escapeHtml((d.tools || []).join(', '))}`
-      + (d.이용률 && d.이용률.연간_pct != null ? ` · 전남 실측 이용률 ${escapeHtml(String(d.이용률.연간_pct))}% (기준일 ${escapeHtml(d.이용률.기준일 || '-')})` : '')
+      + (d.이용률 && d.이용률.연간_pct != null ? ` · 전남광주 실측 이용률 ${escapeHtml(String(d.이용률.연간_pct))}% (기준일 ${escapeHtml(d.이용률.기준일 || '-')})` : '')
       + (d.저발전모델 && d.저발전모델.MAE_검증_kWh != null ? ` · 저발전 회귀 학습 ${escapeHtml(d.저발전모델.학습기간 || '-')} / 검증 ${escapeHtml(d.저발전모델.검증기간 || '-')}, MAE ${escapeHtml(String(d.저발전모델.MAE_검증_kWh))} kWh, ${escapeHtml(d.저발전모델.재학습 || '')}` : '')
       + (d.구성대안 ? ` · 갈아 끼울 수 있는 부품: ${escapeHtml(Object.entries(d.구성대안).map(([k,v]) => k + '(' + v.join('/') + ')').join(', '))}` : '');
   }catch(e){ el.textContent = '상태 확인 실패: ' + e; }
