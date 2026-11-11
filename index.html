@@ -99,7 +99,8 @@ try{var _h=location.hash||'';if(localStorage.getItem('sk_in')==='1'&&!/^#\/(map|
   :root{--tap:44px;--tabH:0px;--skai-bottom:24px}
   .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   :focus-visible{outline:3px solid var(--gold);outline-offset:2px}
-  .acct{position:relative}.acctBtn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 12px 4px 4px;min-height:40px;cursor:pointer;font-family:inherit;color:var(--ink)}
+  .lockDrop{position:relative;margin:6px 0 8px;padding:12px 34px 12px 14px;border:1px solid #e0c070;background:#fff8e6;border-radius:10px;font-size:0.9333rem;color:var(--ink);box-shadow:0 4px 14px rgba(0,0,0,.08);white-space:normal}.lockDrop .lh{font-weight:700;margin-bottom:4px}.lockDrop .lw{font-size:0.8667rem;color:var(--ink2);margin-bottom:6px}.lockDrop p{margin:0 0 8px}.lockDrop .la{display:flex;gap:6px;flex-wrap:wrap}.lockDrop .lx{position:absolute;top:6px;right:6px;border:none;background:none;font-size:1rem;cursor:pointer;min-width:28px;min-height:28px}
+  .acct{position:relative}#btnLogout{white-space:nowrap}@media(max-width:420px){.acctBtn .who{display:none}}.acctBtn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 12px 4px 4px;min-height:40px;cursor:pointer;font-family:inherit;color:var(--ink)}
   .acctBtn .av{width:32px;height:32px;border-radius:50%;background:var(--g1);color:var(--g9);display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8667rem;flex:0 0 auto}
   .acctMenu{position:absolute;right:0;top:calc(100% + 6px);z-index:2100;min-width:240px;background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:0 8px 24px rgba(0,0,0,.14);padding:8px;display:flex;flex-direction:column;gap:4px}
   .acctMenu[hidden]{display:none}.acctMenu .btn{justify-content:flex-start;width:100%;min-height:var(--tap);border:none;background:none;text-align:left}.acctMenu .btn:hover{background:var(--g0)}
@@ -278,9 +279,9 @@ body[data-route="start"] .tree{grid-template-columns:1fr}
         <button class="btn" id="btnPw" type="button" style="display:none">🔑 비밀번호 변경</button>
         <button class="btn" id="btnTwofa" type="button" style="display:none">🔐 2단계 인증 <span class="tfs" id="acctTf"></span></button>
         <a class="btn" href="#/start">🏛️ 첫 화면</a>
-        <button class="btn" id="btnLogout" type="button" style="display:none">로그아웃</button>
       </div>
     </div>
+    <button class="btn" id="btnLogout" type="button" style="display:none">로그아웃</button><!-- 11-11 이사장 지시: 로그인·로그아웃은 모든 이용자 우측 상단 -->
   </header>
   <nav class="topnav" aria-label="화면 이동" id="topnav">
     <a href="#/start" data-r="start"><span class="ti" aria-hidden="true">🏛️</span> 첫 화면</a><a href="#/" data-r="home" class="needin"><span class="ti" aria-hidden="true">🏠</span> 내 페이지</a><a href="#/map" data-r="map"><span class="ti" aria-hidden="true">🗺️</span> 둘러보기</a><a href="#/files" data-r="files" class="needin"><span class="ti" aria-hidden="true">📁</span> 내 폴더</a><a href="#/custom" data-r="custom" class="needin"><span class="ti" aria-hidden="true">🎨</span> 꾸미기</a>
@@ -304,7 +305,7 @@ body[data-route="start"] .tree{grid-template-columns:1fr}
       <div class="scrim" id="sideScrim" hidden></div>
       <!-- 첫 화면 (#/start · 비로그인 #/) — 11-07 이사장 지시: 1단 배치, 왼쪽 사이드바에 전체 메뉴 -->
       <main id="vStart" class="view" aria-label="첫 화면">
-        <div id="axLockBar" role="status" hidden class="tmp" style="margin:0 0 14px;padding:10px 14px;border:1px solid #e0c070;background:#fff7e0;border-radius:10px;font-size:14px">🧪 (개편 중 임시 안내 · 오픈 전 제거) 🛠️ 사교원 사이트를 새 모습으로 고치는 중입니다. 작업이 끝날 때까지 첫 화면과 업무 화면(근태·그룹웨어 등)은 그대로 쓰실 수 있습니다.</div>
+        <div id="axLockBar" role="status" hidden class="tmp" style="margin:0 0 14px;padding:10px 14px;border:1px solid #e0c070;background:#fff7e0;border-radius:10px;font-size:14px">🧪 (개편 중 임시 안내 · 오픈 전 제거) 🛠️ 사교원 사이트를 새 모습으로 고치는 중입니다. 내 페이지·내 폴더·둘러보기와 업무 화면(근태·그룹웨어 등)은 그대로 쓰실 수 있고, 상담창의 실행(보내기·바꾸기)·발송·정기 루틴만 개편이 끝날 때까지 쉬고 있습니다.</div>
         <div class="hero">
           <div class="card">
             <h2>무엇이든 AI 도우미에게 물어보세요</h2>
@@ -567,6 +568,7 @@ const TREE = [   // 11-07 이사장 지시: 큰 묶음 순서 = 플랫폼 사업
     { ic: '🌐', name: '플랫폼 사업', items: [
       { id: 'hatsoja', t: '햇빛소득마을 (햇소자)', d: '신청·진단 → 조합 설립 → 정산·배당 — 조합·연합회 회원 · 시민자산육성지원센터(햇소자 안)', h: '/hatsoja/', al: '햇소자|햇빛소득마을' },
       { id: 'center', t: '시민자산육성지원센터', d: '센터 업무·참여 조합 업무자동화 포털(시험판) — 별도 로그인', h: 'https://center.sakyowon.co.kr/', ext: true, sub: true, hide: true, tmp: '시험판', al: '시민자산지원센터|시민자산센터|센터 포털|센터' },
+      { id: 'ax-build', t: 'AI업무자동화 사이트 구축 의뢰', d: '사교원이 운영하는 그룹웨어(메일·결재·근태·인사·회계·문서작성·입찰) 소개 · 우리 기관용 사이트 구축 의뢰', h: '/ax-build/', al: '구축 의뢰|사이트 구축|업무자동화|그룹웨어 구축|AI 업무자동화' },
       { id: 'policy', t: '지자체 의정지원시스템', d: '공약·조례·문서작성·브리핑 — 체크권한', h: HOME + 'policy', need: 'perm:정책지원관', al: '의정지원시스템|정책지원관 지원시스템|정책지원관 시스템|의정지원' },
     ]},
   ]},
@@ -627,6 +629,7 @@ let realMe = null;                    // 실제 로그인 계정
 let preview = null;                   // 통합관리자 등급별 미리보기(임시) — 'none' | role 키
 let gateOpen = false;
 let prefs = {};                       // 계정별 설정(/api/auth/prefs) — menu_order · dash · side · quick
+const grpHide = g => !!(g.gate && !allowed(g.gate));   // 11-11 이사장 지시: 그룹웨어·관리 묶음은 매니저·통합관리자에게만 보인다(잠금 표시도 없이)
 function allowed(need) {
   if (!need) return true;
   if (!me) return false;
@@ -696,6 +699,7 @@ function renderGroup(g) {
 function renderPublic() {
   $('#tree').innerHTML = TREE.map(g => {
     if (!g.gate) return renderGroup(g);
+    if (grpHide(g)) return '';
     if (allowed(g.gate) && gateOpen) return renderGroup(g);
     return `<div class="grp gate"><button class="btn p" id="gateBtn">${g.ic} ${esc(g.name)} 열기</button><span class="hint">🔒 ${esc(g.lock)} — ${allowed(g.gate) ? '단추를 누르면 메뉴가 펼쳐집니다' : '로그인하면 열립니다'}</span></div>`;
   }).join('');
@@ -716,6 +720,7 @@ function splitMine() {
   const open = [], locked = [];
   myOrder().forEach(k => {
     const sc = SECTIONS.find(x => x.key === k);
+    if (!sc || grpHide(TREE[sc.gi])) return;
     const ok = sc.items.filter(it => vis(it) && allowed(it.need)), no = sc.items.filter(it => vis(it) && !allowed(it.need) && requestable(it.need));
     if (ok.length) open.push({ sc, items: ok });
     if (no.length) locked.push({ sc, items: no });
@@ -897,17 +902,36 @@ function renderTree() {
   renderSide(); renderMain();
 }
 /* 잠긴 메뉴를 누르면 — 무엇이 필요한지 안내 */
-function openLock(a) {
-  const need = a.dataset.need || '', t = a.dataset.t || '';
-  $('#lockTitle').textContent = t;
-  let how;
-  if (need === 'admin') how = '통합관리자만 쓰는 메뉴입니다.';
-  else if (need.startsWith('perm:')) how = `통합관리자가 회원·권한 화면에서 체크권한 「${need.slice(5)}」을 켜 주어야 열립니다. 필요하면 <a href="${HOME}contact">문의</a>로 요청해 주세요.`;
-  else if (need.startsWith('role:')) how = `${ROLE_KO[need.slice(5)] || ''} 등급 승인이 필요합니다. 회원가입 때 해당 등급을 신청했거나, 지금 등급을 올리려면 <a href="${HOME}contact">문의</a>로 요청해 주세요.`;
-  else how = '로그인이 필요합니다.';
-  $('#lockBody').innerHTML = `지금 등급: <b>${esc(me ? (me.role_ko || ROLE_KO[me.role] || '') : '비로그인')}</b> · 필요한 것: <b>${esc(needText(need))}</b><br>${how}`;
-  $('#lockModal').classList.add('on'); $('#lockClose').focus();
+/* 11-11 이사장 지시: 권한 밖 단추를 누르면 그 단추 바로 아래로 「이용 권한 갖추는 법」이 펼쳐진다(창 대신 드롭) */
+const JOIN_POLICY = 'https://talk.sakyowon.co.kr/system?go=join';   // 의정지원 세션 회신: 로그인 상태면 정회원 등록 창이 바로 열린다
+function lockHow(need) {
+  const C = { label: '✉️ 사교원에 요청하기', href: HOME + 'contact', ext: true };
+  if (need === 'admin') return { txt: '통합관리자만 쓰는 메뉴입니다. 따로 신청할 수 없습니다.', act: [] };
+  if (need === 'perm:정책지원관') return { txt: '지자체 의정지원시스템은 구독 서비스입니다. 구독을 신청하면 이용 권한이 열립니다. 신청 전에도 둘러보기로 화면을 살펴볼 수 있습니다.', act: [{ label: '📝 의정지원 구독 신청', href: JOIN_POLICY, ext: true }, { label: '👀 둘러보기', href: 'https://talk.sakyowon.co.kr/system', ext: true }] };
+  if (need === 'role:staff') return { txt: '사교원 직원(매니저회원) 전용 메뉴입니다. 직원이시면 통합관리자에게 매니저회원 승인을 요청해 주세요.', act: [C] };
+  if (need === 'role:coop' || need === 'role:federation') return { txt: `햇빛소득마을 ${need === 'role:coop' ? '조합' : '연합회'} 회원용 메뉴입니다. 햇소자에서 조합·연합회 회원 가입을 신청하면 승인 뒤 열립니다.`, act: [{ label: '☀️ 햇소자 회원 신청', href: '/hatsoja/' }, C] };
+  if (need.startsWith('perm:')) return { txt: `체크권한 「${need.slice(5)}」이 필요한 메뉴입니다. 매니저회원에게 통합관리자가 켜 주는 권한이라, 필요하면 요청해 주세요.`, act: [C] };
+  return { txt: '로그인하면 열리는 메뉴입니다.', act: [{ label: '🔑 로그인', href: '#login' }] };
 }
+function closeLockDrop() { document.querySelectorAll('.lockDrop').forEach(d => d.remove()); document.querySelectorAll('[data-lockopen]').forEach(x => { x.removeAttribute('data-lockopen'); x.setAttribute('aria-expanded', 'false'); }); }
+function openLock(a) {
+  const was = a.hasAttribute('data-lockopen');
+  closeLockDrop();
+  if (was) return;                                     // 같은 단추를 다시 누르면 접는다
+  const need = a.dataset.need || '', t = a.dataset.t || '', h = lockHow(need);
+  const d = document.createElement('div');
+  d.className = 'lockDrop'; d.setAttribute('role', 'region'); d.setAttribute('aria-label', '이용 권한 신청 안내');
+  d.innerHTML = `<div class="lh">🔒 ${esc(t)}</div><div class="lw">지금 등급: <b>${esc(me ? (me.role_ko || ROLE_KO[me.role] || '') : '비로그인')}</b> · 필요한 것: <b>${esc(needText(need))}</b></div><p>${esc(h.txt)}</p>` +
+    (h.act.length ? `<div class="la">${h.act.map(x => `<a class="btn sm${x === h.act[0] ? ' p' : ''}" href="${esc(x.href)}"${x.ext ? ' target="_blank" rel="noopener"' : ''}>${esc(x.label)}</a>`).join('')}</div>` : '') +
+    `<button type="button" class="lx" aria-label="안내 닫기">✕</button>`;
+  a.setAttribute('data-lockopen', '1'); a.setAttribute('aria-expanded', 'true');
+  (a.closest('li') || a).insertAdjacentElement(a.closest('li') ? 'beforeend' : 'afterend', d);
+  d.querySelector('.lx').addEventListener('click', e => { e.stopPropagation(); closeLockDrop(); a.focus(); });
+  const f = d.querySelector('.la a'); if (f) f.focus({ preventScroll: true });
+  d.scrollIntoView({ block: 'nearest' });
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.querySelector('.lockDrop')) closeLockDrop(); });
+document.addEventListener('click', e => { if (!e.target.closest('.lockDrop') && !e.target.closest('a[href="#locked"]')) closeLockDrop(); });
 function setWho() {
   const u = realMe;
   const nm = u ? String(u.name || u.email || u.username) : '';
@@ -929,11 +953,9 @@ function currentRoute() {
 let AXLOCK = false;   // 26-10-30 이사장 지시: 개편이 끝날 때까지 새 화면은 통합관리자만(/api/ax/lock)
 function route() {
   const h = location.hash || '';
-  if (AXLOCK && !(realMe && realMe.role === 'admin') && !(typeof GT !== 'undefined' && GT.pending) && currentRoute() !== 'start' && !['#login', '#/login', '#signup', '#/signup', '#pw'].includes(h)) {   // 2단계 코드 기다리는 세션은 첫 화면에 남긴다(알파언니 N3)
-    location.replace('#/start'); return;
-  }
+  // 11-11 이사장 지시: 일반이용자 내 페이지·내 폴더·둘러보기가 먹통 — 잠금 중에도 화면 이동은 막지 않는다(서버가 상담 실행·발송·루틴만 잠근다)
   const ab = $('#axLockBar'); if (ab) ab.hidden = !AXLOCK;
-  $('#topnav').hidden = !!(AXLOCK && !(realMe && realMe.role === 'admin'));   // 11-04 알파언니 🟠4: 잠금 중 비관리자에겐 갈 곳이 옛 화면뿐
+  $('#topnav').hidden = false;
   closeSide(false); closeAcct(false);
   if (h === '#pw') { if (!BOOTED) return; history.replaceState(null, '', location.pathname); if (me) { openPw(); } else openAuth('login'); }   // 11-05: 회원 정보를 받기 전 첫 route() 에서는 기다린다(로그인 창으로 새던 것)   // 11-01: 상담창 「비밀번호 바꿀래」
   if ((h === '#login' || h === '#/login') && me && BACK && BOOTED) {   // 이미 로그인돼 있으면 돌려보낸다 — 이메일 미등록·임시 비밀번호면 그 창부터(알파언니 11-05 🟠A)
@@ -995,7 +1017,7 @@ function renderSideStart() {
   const fix = `<nav aria-label="바로가기"><ul class="fix">` + (me ? `<li><a href="#/">🏠 내 페이지</a></li><li><a href="#/files">📁 내 폴더</a></li>` : `<li><a href="#login">🔑 로그인 · 회원가입</a></li>`) + `<li><a href="#/map">🗺️ 둘러보기(사이트맵)</a></li></ul></nav>`;
   const secs = SECTIONS.map(sc => {
     const g = TREE[sc.gi];
-    if (g.gate && !allowed(g.gate)) return `<li><span class="sn">${g.ic} ${esc(sc.name)} <span class="rq">🔒 ${esc(g.lock)}</span></span></li>`;
+    if (grpHide(g)) return '';
     return `<li><span class="sn">${sc.ic} ${esc(sc.name)}</span><ul>${sc.items.filter(vis).map(it => { const ok = allowed(it.need); return `<li class="${ok ? '' : 'locked'}"><a href="${esc(ok ? it.h : (me ? '#locked' : '#login'))}" data-need="${esc(it.need || '')}" data-t="${esc(it.t)}"${(ok && it.ext) ? ' target="_blank" rel="noopener"' : ''}>${ok ? '' : '🔒 '}${esc(it.t)}${tmpTag(it)}</a></li>`; }).join('')}</ul></li>`;
   }).join('');
   $('#side').innerHTML = who + fix + `<ul class="pub" aria-label="전체 메뉴">${secs}</ul>`;
@@ -1219,8 +1241,8 @@ function mapCard(it) {
 }
 function renderMap() {
   const draw = () => { if (currentRoute() !== 'map') return;
-    $('#mapChips').innerHTML = TREE.map((g, gi) => g.secs.map((sc, si) => `<a href="#/map" data-jump="map-${gi}-${si}">${sc.ic} ${esc(sc.name)}</a>`).join('')).join('');
-    $('#mapBody').innerHTML = TREE.map((g, gi) => `<section class="grp mapgrp" aria-label="${esc(g.name)}"><h3><span class="ic">${g.ic}</span>${esc(g.name)}${g.lock ? `<span class="lock">🔒 ${esc(g.lock)}</span>` : ''}</h3>${g.secs.map((sc, si) => { const k = `map-${gi}-${si}`, fold = mapFolded(k, gi + si === 0); return `<div class="mapsec" id="${k}"><h4 class="sec"><button type="button" class="msh" data-ms="${k}" aria-expanded="${!fold}" aria-controls="${k}-c">${sc.ic} ${esc(sc.name)} <span class="mn">${sc.items.filter(vis).length}</span></button></h4><div class="mcards" id="${k}-c"${fold ? ' hidden' : ''}>${sc.items.filter(vis).map(mapCard).join('')}</div></div>`; }).join('')}</section>`).join('');
+    $('#mapChips').innerHTML = TREE.map((g, gi) => grpHide(g) ? '' : g.secs.map((sc, si) => `<a href="#/map" data-jump="map-${gi}-${si}">${sc.ic} ${esc(sc.name)}</a>`).join('')).join('');
+    $('#mapBody').innerHTML = TREE.map((g, gi) => grpHide(g) ? '' : `<section class="grp mapgrp" aria-label="${esc(g.name)}"><h3><span class="ic">${g.ic}</span>${esc(g.name)}${g.lock ? `<span class="lock">🔒 ${esc(g.lock)}</span>` : ''}</h3>${g.secs.map((sc, si) => { const k = `map-${gi}-${si}`, fold = mapFolded(k, gi + si === 0); return `<div class="mapsec" id="${k}"><h4 class="sec"><button type="button" class="msh" data-ms="${k}" aria-expanded="${!fold}" aria-controls="${k}-c">${sc.ic} ${esc(sc.name)} <span class="mn">${sc.items.filter(vis).length}</span></button></h4><div class="mcards" id="${k}-c"${fold ? ' hidden' : ''}>${sc.items.filter(vis).map(mapCard).join('')}</div></div>`; }).join('')}</section>`).join('');
     mapFind(); };
   draw();                              // 대장이 없어도 TREE 만으로 먼저 그린다
   loadTools().then(() => { if (TOOLS.items.length) draw(); });
