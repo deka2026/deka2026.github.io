@@ -100,7 +100,7 @@ try{var _h=location.hash||'';if(localStorage.getItem('sk_in')==='1'&&!/^#\/(map|
   .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   :focus-visible{outline:3px solid var(--gold);outline-offset:2px}
   .lockDrop{position:relative;margin:6px 0 8px;padding:12px 34px 12px 14px;border:1px solid #e0c070;background:#fff8e6;border-radius:10px;font-size:0.9333rem;color:var(--ink);box-shadow:0 4px 14px rgba(0,0,0,.08);white-space:normal}.lockDrop .lh{font-weight:700;margin-bottom:4px}.lockDrop .lw{font-size:0.8667rem;color:var(--ink2);margin-bottom:6px}.lockDrop p{margin:0 0 8px}.lockDrop .la{display:flex;gap:6px;flex-wrap:wrap}.lockDrop .lx{position:absolute;top:6px;right:6px;border:none;background:none;font-size:1rem;cursor:pointer;min-width:28px;min-height:28px}
-  .acct{position:relative}#btnLogout{white-space:nowrap}@media(max-width:420px){.acctBtn .who{display:none}}.acctBtn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 12px 4px 4px;min-height:40px;cursor:pointer;font-family:inherit;color:var(--ink)}
+  .acct{position:relative}#btnLogout{white-space:nowrap}@media(max-width:420px){.acctBtn .who{display:none}}@media(max-width:380px){header.top{gap:4px!important}header.top #btnLogout{padding-left:10px;padding-right:10px}body.in .sideTog:not([hidden]){font-size:0;gap:0;padding-left:10px;padding-right:10px}body.in .sideTog:not([hidden])::before{content:"☰";font-size:1.2rem}}.acctBtn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 12px 4px 4px;min-height:40px;cursor:pointer;font-family:inherit;color:var(--ink)}
   .acctBtn .av{width:32px;height:32px;border-radius:50%;background:var(--g1);color:var(--g9);display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8667rem;flex:0 0 auto}
   .acctMenu{position:absolute;right:0;top:calc(100% + 6px);z-index:2100;min-width:240px;background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:0 8px 24px rgba(0,0,0,.14);padding:8px;display:flex;flex-direction:column;gap:4px}
   .acctMenu[hidden]{display:none}.acctMenu .btn{justify-content:flex-start;width:100%;min-height:var(--tap);border:none;background:none;text-align:left}.acctMenu .btn:hover{background:var(--g0)}
@@ -305,7 +305,7 @@ body[data-route="start"] .tree{grid-template-columns:1fr}
       <div class="scrim" id="sideScrim" hidden></div>
       <!-- 첫 화면 (#/start · 비로그인 #/) — 11-07 이사장 지시: 1단 배치, 왼쪽 사이드바에 전체 메뉴 -->
       <main id="vStart" class="view" aria-label="첫 화면">
-        <div id="axLockBar" role="status" hidden class="tmp" style="margin:0 0 14px;padding:10px 14px;border:1px solid #e0c070;background:#fff7e0;border-radius:10px;font-size:14px">🧪 (개편 중 임시 안내 · 오픈 전 제거) 🛠️ 사교원 사이트를 새 모습으로 고치는 중입니다. 내 페이지·내 폴더·둘러보기와 업무 화면(근태·그룹웨어 등)은 그대로 쓰실 수 있고, 상담창의 실행(보내기·바꾸기)·발송·정기 루틴만 개편이 끝날 때까지 쉬고 있습니다.</div>
+        <div id="axLockBar" role="status" hidden class="tmp" style="margin:0 0 14px;padding:10px 14px;border:1px solid #e0c070;background:#fff7e0;border-radius:10px;font-size:14px">🧪 (개편 중 임시 안내 · 오픈 전 제거) 🛠️ 사교원 사이트를 새 모습으로 고치는 중입니다. 내 페이지·내 폴더·둘러보기는 그대로 쓰실 수 있고, 상담창의 실행(보내기·바꾸기)·발송·정기 루틴만 개편이 끝날 때까지 쉬고 있습니다.</div>
         <div class="hero">
           <div class="card">
             <h2>무엇이든 AI 도우미에게 물어보세요</h2>
@@ -491,7 +491,6 @@ body[data-route="start"] .tree{grid-template-columns:1fr}
 </div>
 
 <!-- 잠긴 메뉴 안내 -->
-<div class="modal-back" id="lockModal"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="lockH"><h2 id="lockH">🔒 권한 승인이 필요한 메뉴</h2><p class="sub" id="lockTitle"></p><div class="tiers" id="lockBody"></div><button class="ghost" id="lockClose">닫기</button></div></div>
 <div class="modal-back" id="pwModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pwH">
     <h2 id="pwH">비밀번호 변경</h2><p class="sub" id="pwNote">8자 이상. 바꾸면 그룹웨어·인사기록·근태·의정소통에도 같이 적용되고, 다른 기기의 로그인은 모두 끊깁니다.</p>
@@ -913,24 +912,30 @@ function lockHow(need) {
   if (need.startsWith('perm:')) return { txt: `체크권한 「${need.slice(5)}」이 필요한 메뉴입니다. 매니저회원에게 통합관리자가 켜 주는 권한이라, 필요하면 요청해 주세요.`, act: [C] };
   return { txt: '로그인하면 열리는 메뉴입니다.', act: [{ label: '🔑 로그인', href: '#login' }] };
 }
-function closeLockDrop() { document.querySelectorAll('.lockDrop').forEach(d => d.remove()); document.querySelectorAll('[data-lockopen]').forEach(x => { x.removeAttribute('data-lockopen'); x.setAttribute('aria-expanded', 'false'); }); }
+function closeLockDrop(back) {
+  const op = document.querySelector('[data-lockopen]');
+  document.querySelectorAll('.lockDrop').forEach(d => d.remove());
+  document.querySelectorAll('[data-lockopen]').forEach(x => { x.removeAttribute('data-lockopen'); x.setAttribute('aria-expanded', 'false'); x.removeAttribute('aria-controls'); });
+  if (back && op) op.focus();                          // 알파언니 🟡8: 닫으면 누른 단추로 초점을 돌려준다
+}
 function openLock(a) {
   const was = a.hasAttribute('data-lockopen');
   closeLockDrop();
   if (was) return;                                     // 같은 단추를 다시 누르면 접는다
   const need = a.dataset.need || '', t = a.dataset.t || '', h = lockHow(need);
   const d = document.createElement('div');
-  d.className = 'lockDrop'; d.setAttribute('role', 'region'); d.setAttribute('aria-label', '이용 권한 신청 안내');
+  d.className = 'lockDrop'; d.id = 'lockDrop'; d.tabIndex = -1; d.setAttribute('role', 'region'); d.setAttribute('aria-label', '이용 권한 신청 안내');
   d.innerHTML = `<div class="lh">🔒 ${esc(t)}</div><div class="lw">지금 등급: <b>${esc(me ? (me.role_ko || ROLE_KO[me.role] || '') : '비로그인')}</b> · 필요한 것: <b>${esc(needText(need))}</b></div><p>${esc(h.txt)}</p>` +
     (h.act.length ? `<div class="la">${h.act.map(x => `<a class="btn sm${x === h.act[0] ? ' p' : ''}" href="${esc(x.href)}"${x.ext ? ' target="_blank" rel="noopener"' : ''}>${esc(x.label)}</a>`).join('')}</div>` : '') +
     `<button type="button" class="lx" aria-label="안내 닫기">✕</button>`;
-  a.setAttribute('data-lockopen', '1'); a.setAttribute('aria-expanded', 'true');
+  a.setAttribute('data-lockopen', '1'); a.setAttribute('aria-expanded', 'true'); a.setAttribute('aria-controls', 'lockDrop');
   (a.closest('li') || a).insertAdjacentElement(a.closest('li') ? 'beforeend' : 'afterend', d);
-  d.querySelector('.lx').addEventListener('click', e => { e.stopPropagation(); closeLockDrop(); a.focus(); });
-  const f = d.querySelector('.la a'); if (f) f.focus({ preventScroll: true });
+  d.querySelector('.lx').addEventListener('click', e => { e.stopPropagation(); closeLockDrop(true); });
+  d.focus({ preventScroll: true });                    // 화면낭독기가 설명부터 읽게 드롭 자체로
+
   d.scrollIntoView({ block: 'nearest' });
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.querySelector('.lockDrop')) closeLockDrop(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.querySelector('.lockDrop')) closeLockDrop(true); });
 document.addEventListener('click', e => { if (!e.target.closest('.lockDrop') && !e.target.closest('a[href="#locked"]')) closeLockDrop(); });
 function setWho() {
   const u = realMe;
@@ -1135,9 +1140,10 @@ async function renderQuick() {
   // 11-01 알파언니 🟡8: 최근 실행은 읽기 도구만, 4칸까지(나머지는 확인된 기본 지시)
   recent.forEach(e => { const t = tools.items.find(x => x.id === e.tool); if (t && t.risk === 'read' && list.length < 4) add((t.examples || [])[0]); });
   const has = id => tools.items.some(x => x.id === id);
-  const SAFE = [['myfiles.list', '내 폴더 보여 줘'], ['menu.mine', '내가 쓸 수 있는 메뉴 알려 줘'], ['nav.open', '근태 화면 열어 줘'],
-    ['exec.log', '내 실행 기록 보여 줘'], ['routine.cards', '오늘 루틴 뭐 있어'], ['gw.approvals_list', '결재함 보여 줘'],
-    ['prefs.dash_edit', '대시보드에 근태 넣어 줘']];
+  const staff = !!me && (RANK[me.role] || 0) >= RANK.staff;   // 11-11 알파언니 🟡9: 그룹웨어가 안 보이는 등급엔 근태·결재 지시를 권하지 않는다
+  const SAFE = [['myfiles.list', '내 폴더 보여 줘'], ['menu.mine', '내가 쓸 수 있는 메뉴 알려 줘'], ['nav.open', staff ? '근태 화면 열어 줘' : '둘러보기 열어 줘'],
+    ['exec.log', '내 실행 기록 보여 줘'], ['routine.cards', '오늘 루틴 뭐 있어']].concat(staff ? [['gw.approvals_list', '결재함 보여 줘'],
+    ['prefs.dash_edit', '대시보드에 근태 넣어 줘']] : []);
   SAFE.forEach(([id, x]) => { if (has(id)) add(x); });
   if (!list.length) { const seen = {}; tools.items.forEach(t => { const ex = (t.examples || [])[0]; if (!ex || t.risk !== 'read' || seen[t.area]) return; seen[t.area] = 1; add(ex); }); }   // 대장이 달라도 읽기 예시로
   box.innerHTML = list.length ? list.slice(0, 8).map(x => `<button type="button" data-say="${esc(x)}" title="상담창에 넣기">${esc(x)}</button>`).join('') + (list.length > 3 ? '<button type="button" class="qmore" aria-expanded="false">＋ 더 보기</button>' : '') : '<p class="hint">자주 쓰는 지시가 쌓이면 여기에 단추로 나옵니다.</p>';
@@ -1579,7 +1585,6 @@ $('#tabLogin').addEventListener('click', () => authTab('login'));
 $('#tabSignup').addEventListener('click', () => authTab('signup'));
 $('#suTier').addEventListener('change', () => { $('#suContactReq').textContent = $('#suTier').value === 'general' ? '(일반이용자는 선택)' : '(필수)'; });
 window.addEventListener('hashchange', route);
-$('#lockClose').addEventListener('click', () => $('#lockModal').classList.remove('on'));
 /* ── 11-04 개선안 M5: ☰ 내 메뉴 서랍 — 휴대폰은 왼쪽에서 덮고(닫기·가림막·Esc·링크), 포커스는 서랍 안에서만 */
 const MQ_SMALL = window.matchMedia ? window.matchMedia('(max-width:760px)') : { matches: false };
 const INERT_SEL = 'header.top, #topnav, #pv, #vStart, #homeMain, #vFiles, #vCustom, #vMap, footer, .install-bar';
@@ -1605,7 +1610,7 @@ $('#sideScrim').addEventListener('click', () => closeSide());
 $('#sideWrap').addEventListener('click', e => { if (MQ_SMALL.matches && e.target.closest('#side a[href]:not([href="#locked"])')) closeSide(false); });
 $('#sideWrap').addEventListener('keydown', e => {
   if (!document.body.classList.contains('sideOpen') || !MQ_SMALL.matches) return;
-  if (e.key === 'Escape') { e.preventDefault(); closeSide(); return; }
+  if (e.key === 'Escape') { e.preventDefault(); if (document.querySelector('.lockDrop')) { e.stopPropagation(); closeLockDrop(true); return; } closeSide(); return; }   // 드롭이 열려 있으면 드롭만 닫는다
   if (e.key !== 'Tab') return;
   const f = Array.from($('#sideWrap').querySelectorAll('a[href],button:not([disabled]),input,[tabindex]:not([tabindex="-1"])')).filter(x => x.offsetParent !== null);
   if (!f.length) return; const i = f.indexOf(document.activeElement);

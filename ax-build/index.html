@@ -8,7 +8,7 @@
 <style>
   /* 11-11 이사장 지시: 그룹웨어·관리 메뉴를 숨기는 대신, 사교원 그룹웨어 기능을 소개하고 구축을 의뢰받는 화면 */
   :root{--bg:#f5f1e6;--card:#fff;--ink:#1e2b1c;--ink2:#3d5238;--mute:#6e8469;--g9:#0d3b2c;--g7:#2c5842;--g1:#dbe4d0;--g0:#edf2e5;--gold:#b47d14;--gold1:#f6eac9;--line:rgba(60,80,50,.2);--danger:#b03a3a;--r:14px;--font:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
-  html{font-size:15px}*{box-sizing:border-box}
+  html{font-size:15px}*{box-sizing:border-box}[hidden]{display:none!important}   /* 알파언니 🟠2: .btn 의 display 가 hidden 을 덮었다 */
   body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.6}
   a{color:var(--g7)}
   .wrap{max-width:1040px;margin:0 auto;padding:0 16px 80px}
@@ -47,10 +47,11 @@
   .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .chips{display:flex;flex-wrap:wrap;gap:6px}
   .chips label{font-weight:400;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:6px 12px;background:#fff;margin:0;cursor:pointer}
-  .agree{font-weight:400;font-size:0.8667rem;color:var(--ink2);display:flex;gap:8px;align-items:flex-start}
+  .agree{font-weight:400;font-size:0.8667rem;color:var(--ink2);background:var(--g0);border-radius:10px;padding:10px 12px}
   .msg{font-size:0.9333rem;margin:0}.msg.ok{color:var(--g7)}.msg.err{color:var(--danger)}
   .note{font-size:0.8667rem;color:var(--mute)}
-  @media(max-width:640px){.two{grid-template-columns:1fr}header.top .brand b{font-size:1rem}.who{display:none}}
+  @media(max-width:640px){.two{grid-template-columns:1fr}header.top .brand b{font-size:1rem;white-space:nowrap}.who{display:none}}
+  @media(max-width:420px){header.top{gap:6px}header.top .btn{padding:8px 10px}.hm{display:none}}
 </style>
 </head>
 <body>
@@ -59,8 +60,8 @@
     <a class="brand" href="/#/start"><span class="mark">L&amp;L</span><b>사교원</b></a>
     <div class="sp"></div>
     <span class="who" id="who"></span>
-    <a class="btn" href="/#/start">🏛️ 첫 화면</a>
-    <a class="btn p" id="btnLogin" href="/#login">로그인 · 회원가입</a>
+    <a class="btn" href="/#/start" aria-label="첫 화면">🏛️<span class="hm"> 첫 화면</span></a>
+    <a class="btn p" id="btnLogin" href="/?back=https%3A%2F%2Fsakyowon.co.kr%2Fax-build%2F#login">로그인<span class="hm"> · 회원가입</span></a>
     <button class="btn" id="btnLogout" type="button" hidden>로그아웃</button>
   </header>
 
@@ -70,7 +71,7 @@
     <div class="cta"><a class="btn p" href="#ask">📝 구축 의뢰하기</a><a class="btn" href="#features">🧩 기능 살펴보기</a></div>
     <div class="facts">
       <div class="fact"><b>한 계정</b><span>통합 로그인 하나로 모든 업무 화면에 들어갑니다</span></div>
-      <div class="fact"><b>자체 서버</b><span>기관 자료를 외부 클라우드에 맡기지 않는 구성이 가능합니다</span></div>
+      <div class="fact"><b>자체 서버</b><span>사이트와 기관 자료를 기관이 정한 서버에 둘 수 있습니다(AI 기능이 쓰는 연산 경로는 상담 때 함께 정합니다)</span></div>
       <div class="fact"><b>한글 문서</b><span>보고서·기획안·공문을 한글(.hwpx)로 바로 뽑습니다</span></div>
       <div class="fact"><b>권한 관리</b><span>등급·체크권한으로 사람마다 열리는 메뉴가 다릅니다</span></div>
     </div>
@@ -132,7 +133,17 @@
     </div>
     <div><label for="fSize">직원 수(대략)</label><input type="text" id="fSize" maxlength="30" placeholder="예: 8명"></div>
     <div><label for="fBody">하고 싶은 일 · 지금 불편한 점 <span class="req">*</span></label><textarea id="fBody" maxlength="2000" required placeholder="예: 보조금 사업 월간보고와 근태 관리에 시간이 많이 듭니다."></textarea></div>
-    <label class="agree"><input type="checkbox" id="fAgree"> <span>구축 상담 연락을 위해 기관명·이름·연락처·이메일을 수집하며, 그 밖의 목적으로는 쓰지 않습니다. 동의합니다. <span class="req">*</span> (<a href="/privacy.html" target="_blank" rel="noopener">개인정보 처리방침</a>)</span></label>
+    <div class="agree" role="group" aria-labelledby="agT">
+      <div><b id="agT">개인정보 수집·이용 동의</b> <span class="req">*</span>
+        <ul style="margin:4px 0 6px;padding-left:18px">
+          <li>수집 항목: 기관명, 담당자 이름, 연락처(전화), 이메일(선택), 직원 수(선택), 의뢰 내용</li>
+          <li>이용 목적: 사이트 구축 상담 연락과 견적 안내</li>
+          <li>보유 기간: 접수일로부터 1년 — 지나면 자동으로 지웁니다</li>
+          <li>동의하지 않으실 수 있습니다. 다만 동의하지 않으면 이 양식으로 의뢰를 접수할 수 없습니다(첫 화면 하단 「문의하기」를 이용해 주세요).</li>
+        </ul>
+        자세한 내용은 <a href="/account-privacy.html" target="_blank" rel="noopener">개인정보 처리방침</a>을 보세요.</div>
+      <label style="font-weight:600;display:flex;gap:8px;align-items:center;margin:6px 0 0"><input type="checkbox" id="fAgree"> 위 내용에 동의합니다</label>
+    </div>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn p" type="submit" id="fGo">의뢰 보내기</button><p class="msg" id="fMsg" role="status"></p></div>
     <p class="note">급한 상담은 첫 화면 하단 「문의하기」로도 보내실 수 있습니다.</p>
   </form>
@@ -174,7 +185,7 @@
       '필요한 기능: ' + (feats.join(', ') || '-'), '내용: ' + v('#fBody')].join('\n');
     const contact = [v('#fName'), v('#fTel'), v('#fMail')].filter(Boolean).join(' / ');
     $('#fGo').disabled = true; m.className = 'msg'; m.textContent = '보내는 중…';
-    const r = await api('/api/ai/dock/suggest', { method: 'POST', body: { message: msg, contact: contact, page: location.origin + location.pathname } });
+    const r = await api('/api/ai/dock/suggest', { method: 'POST', body: { kind: '구축 의뢰', message: msg, contact: contact, page: location.origin + location.pathname } });
     $('#fGo').disabled = false;
     if (r && r.ok) { $('#askForm').reset(); m.className = 'msg ok'; m.textContent = '의뢰가 접수됐습니다. 담당자가 연락드리겠습니다.'; }
     else bad((r && r.text) || '보내지 못했습니다. 잠시 뒤 다시 해 주세요.');
