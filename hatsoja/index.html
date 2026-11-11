@@ -3985,7 +3985,7 @@ function statHtml(d){
     const sTable = 군.목록.map(x => escapeHtml(x.시군) + ' ' + statFmt(x.발전량_2025_MWh, 0)).join(' · ');
     sigunCard = `
     <div class="card" style="margin-bottom:16px;">
-      <div class="card-title"><h3 class="serif">전남 22개 시군 태양광 — 설비용량 순 (설비 ${statFmt(군.전남합계.설비_MW, 0)} MW · ${statFmt(군.전남합계.개소, 0)}개소)</h3>
+      <div class="card-title"><h3 class="serif">전남 22개 시군(광주 제외) 태양광 — 설비용량 순 (설비 ${statFmt(군.전남합계.설비_MW, 0)} MW · ${statFmt(군.전남합계.개소, 0)}개소)</h3>
         <span class="badge badge-mute">스냅샷 ${escapeHtml(군.조회일 || '')}</span></div>
       ${sRows}
       <p class="text-mute" style="font-size:12.5px;margin:8px 0 0;"><b>2025년 발전량(MWh, 설비용량 순):</b> ${sTable}</p>
