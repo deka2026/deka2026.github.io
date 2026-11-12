@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>AI업무자동화 사이트 구축 의뢰 · 사교원</title>
+<meta name="description" content="사회혁신교육원 사회적협동조합이 직접 운영하는 AI 그룹웨어(메일·결재·근태·인사·회계·문서작성·입찰)를 우리 기관에 맞게 구축해 드립니다.">
+<style>
+  /* 11-11 이사장 지시: 그룹웨어·관리 메뉴를 숨기는 대신, 사교원 그룹웨어 기능을 소개하고 구축을 의뢰받는 화면 */
+  :root{--bg:#f5f1e6;--card:#fff;--ink:#1e2b1c;--ink2:#3d5238;--mute:#6e8469;--g9:#0d3b2c;--g7:#2c5842;--g1:#dbe4d0;--g0:#edf2e5;--gold:#b47d14;--gold1:#f6eac9;--line:rgba(60,80,50,.2);--danger:#b03a3a;--r:14px;--font:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+  html{font-size:15px}*{box-sizing:border-box}[hidden]{display:none!important}   /* 알파언니 🟠2: .btn 의 display 가 hidden 을 덮었다 */
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.6}
+  a{color:var(--g7)}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 16px 80px}
+  header.top{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:10}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink)}
+  .mark{width:38px;height:38px;border-radius:10px;background:var(--g9);color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px}
+  .brand b{font-size:1.1rem}
+  .sp{flex:1}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:8px 16px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink);font:inherit;font-size:0.9333rem;text-decoration:none;cursor:pointer;white-space:nowrap}
+  .btn.p{background:var(--g9);color:#fff;border-color:var(--g9)}
+  .btn:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+  .who{font-size:0.8667rem;color:var(--ink2);max-width:9em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .hero{padding:36px 0 20px}
+  .hero h1{font-size:clamp(1.6rem,4vw,2.3rem);line-height:1.3;margin:0 0 10px;color:var(--g9)}
+  .hero p{font-size:1.0667rem;color:var(--ink2);max-width:46em;margin:0 0 18px}
+  .hero .cta{display:flex;gap:8px;flex-wrap:wrap}
+  .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:22px 0 8px}
+  .fact{background:var(--g0);border-radius:var(--r);padding:14px 16px}
+  .fact b{display:block;font-size:1.25rem;color:var(--g9)}.fact span{font-size:0.8667rem;color:var(--ink2)}
+  h2{font-size:1.35rem;margin:40px 0 6px;color:var(--g9)}
+  .lead{color:var(--ink2);margin:0 0 16px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px}
+  .card h3{margin:0 0 6px;font-size:1.0667rem}
+  .card p{margin:0;font-size:0.9333rem;color:var(--ink2)}
+  .card ul{margin:8px 0 0;padding-left:18px;font-size:0.9rem;color:var(--ink2)}
+  .steps{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:10px}
+  .steps li{counter-increment:s;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px 14px 56px;position:relative}
+  .steps li::before{content:counter(s);position:absolute;left:16px;top:14px;width:28px;height:28px;border-radius:50%;background:var(--g9);color:#fff;display:grid;place-items:center;font-weight:700;font-size:0.9rem}
+  .steps b{display:block}
+  form.card{display:grid;gap:12px;max-width:720px}
+  label{font-weight:600;font-size:0.9333rem;display:block;margin-bottom:4px}
+  .req{color:var(--danger)}
+  input[type=text],input[type=tel],input[type=email],textarea{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+  textarea{min-height:120px;resize:vertical}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chips label{font-weight:400;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:6px 12px;background:#fff;margin:0;cursor:pointer}
+  .agree{font-weight:400;font-size:0.8667rem;color:var(--ink2);background:var(--g0);border-radius:10px;padding:10px 12px}
+  .msg{font-size:0.9333rem;margin:0}.msg.ok{color:var(--g7)}.msg.err{color:var(--danger)}
+  .note{font-size:0.8667rem;color:var(--mute)}
+  @media(max-width:640px){.two{grid-template-columns:1fr}header.top .brand b{font-size:1rem;white-space:nowrap}.who{display:none}}
+  @media(max-width:420px){header.top{gap:6px}header.top .btn{padding:8px 10px}.hm{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/#/start"><span class="mark">L&amp;L</span><b>사교원</b></a>
+    <div class="sp"></div>
+    <span class="who" id="who"></span>
+    <a class="btn" href="/#/start" aria-label="첫 화면">🏛️<span class="hm"> 첫 화면</span></a>
+    <a class="btn p" id="btnLogin" href="/?back=https%3A%2F%2Fsakyowon.co.kr%2Fax-build%2F#login">로그인<span class="hm"> · 회원가입</span></a>
+    <button class="btn" id="btnLogout" type="button" hidden>로그아웃</button>
+  </header>
+
+  <section class="hero">
+    <h1>AI업무자동화 사이트,<br>우리 기관에 맞게 지어 드립니다</h1>
+    <p>사회혁신교육원 사회적협동조합(사교원)은 메일·결재·근태·인사·회계·문서작성·입찰 업무를 AI와 함께 처리하는 그룹웨어를 직접 만들어 매일 쓰고 있습니다. 같은 방식으로 협동조합·사회적경제 조직·지역 기관의 업무 사이트를 구축해 드립니다.</p>
+    <div class="cta"><a class="btn p" href="#ask">📝 구축 의뢰하기</a><a class="btn" href="#features">🧩 기능 살펴보기</a></div>
+    <div class="facts">
+      <div class="fact"><b>한 계정</b><span>통합 로그인 하나로 모든 업무 화면에 들어갑니다</span></div>
+      <div class="fact"><b>자체 서버</b><span>사이트와 기관 자료를 기관이 정한 서버에 둘 수 있습니다(AI 기능이 쓰는 연산 경로는 상담 때 함께 정합니다)</span></div>
+      <div class="fact"><b>한글 문서</b><span>보고서·기획안·공문을 한글(.hwpx)로 바로 뽑습니다</span></div>
+      <div class="fact"><b>권한 관리</b><span>등급·체크권한으로 사람마다 열리는 메뉴가 다릅니다</span></div>
+    </div>
+  </section>
+
+  <h2 id="features">사교원 그룹웨어가 하는 일</h2>
+  <p class="lead">아래는 사교원이 실제로 운영하는 기능입니다. 기관에 필요한 것만 골라 구성합니다.</p>
+  <div class="grid">
+    <article class="card"><h3>✉️ 메일 · AI 답장 초안</h3><p>기관 대표 메일함을 한 화면에서 보고, 받은 메일에 맞는 답장 초안을 AI가 먼저 써 둡니다. 보내기는 사람이 확인한 뒤에 합니다.</p></article>
+    <article class="card"><h3>🗳️ 전자결재</h3><p>기안·검토·승인 흐름을 화면 하나로 처리합니다. 결재 대기·완료 문서를 사람별로 모아 봅니다.</p></article>
+    <article class="card"><h3>📍 근태 · 휴가</h3><p>근무지 위치(GPS)로 출퇴근을 기록하고, 연가·대체휴가를 결재로 신청합니다. 기간별 근무 기록을 엑셀로 내려받습니다.</p></article>
+    <article class="card"><h3>👥 인사기록 · 급여</h3><p>직원·임원의 인사 정보, 선임·퇴임, 급여·퇴직금 이력을 관리합니다. 주민번호 같은 민감 정보는 권한자만 봅니다.</p></article>
+    <article class="card"><h3>📒 회계 · 세무 · 자산</h3><p>결산 재무제표·통장 기장·세무 신고·비품 대장을 표로 모아, 필요한 숫자를 바로 찾습니다.</p></article>
+    <article class="card"><h3>📝 보고서 · 기획안 작성</h3><p>개요를 잡고 절별로 AI와 함께 쓴 뒤, 한글 문서(.hwpx)로 내려받습니다. 기관의 서식 규칙을 자동으로 맞춥니다.</p></article>
+    <article class="card"><h3>📅 월간보고 자동 생성</h3><p>보조사업 월간 실적·주간 업무일지를 정해진 서식에 맞춰 한 번에 만듭니다.</p></article>
+    <article class="card"><h3>📢 입찰정보 · 제안서</h3><p>나라장터·공공기관 공고를 골라 알림으로 받고, 공고를 분석해 제안서·입찰 서류 초안을 만듭니다.</p></article>
+    <article class="card"><h3>🏗️ 협동조합 설립 지원</h3><p>설립 신고·공증·등기·사업자등록에 필요한 서류 일체를 빈칸만 채우면 만들어 줍니다.</p></article>
+    <article class="card"><h3>💬 직원전용 질문</h3><p>기관 내부 자료를 근거로 답하는 질문창입니다. 개인정보는 걸러 내고, 근거 문서를 함께 보여 줍니다.</p></article>
+    <article class="card"><h3>📁 내 폴더 · 자료 연결</h3><p>사람마다 서버에 자료 폴더를 두고, 윈도우 탐색기에 드라이브로 붙여 바로 열고 저장합니다.</p></article>
+    <article class="card"><h3>🤖 AI 상담창</h3><p>「휴가 신청해 줘」, 「이번 달 결재 보여 줘」처럼 말로 지시하면, 권한 안에서 해당 화면과 기능을 실행합니다.</p></article>
+  </div>
+
+  <h2>구축은 이렇게 진행합니다</h2>
+  <p class="lead">처음부터 다 만들지 않고, 지금 가장 손이 많이 가는 업무부터 시작합니다.</p>
+  <ol class="steps">
+    <li><b>업무 진단</b>기관의 업무 흐름과 지금 쓰는 도구·서식을 함께 살펴봅니다.</li>
+    <li><b>기능 고르기</b>위 기능 가운데 필요한 것을 고르고, 기관만의 업무를 더합니다.</li>
+    <li><b>시험판 구축</b>실제 자료 일부로 시험판을 만들어 담당자가 직접 써 봅니다.</li>
+    <li><b>정식 운영 · 교육</b>권한·계정을 정리해 정식으로 열고, 직원 교육과 운영 지원을 이어 갑니다.</li>
+  </ol>
+
+  <h2 id="ask">구축 의뢰하기</h2>
+  <p class="lead">아래를 남겨 주시면 사교원 담당자가 연락드립니다. 비용은 기능 범위와 서버 구성(자체 서버·임대)에 따라 상담 뒤 안내합니다.</p>
+  <form class="card" id="askForm" novalidate>
+    <div class="two">
+      <div><label for="fOrg">기관명 <span class="req">*</span></label><input type="text" id="fOrg" maxlength="80" autocomplete="organization" required></div>
+      <div><label for="fName">담당자 이름 <span class="req">*</span></label><input type="text" id="fName" maxlength="40" autocomplete="name" required></div>
+    </div>
+    <div class="two">
+      <div><label for="fTel">연락처(전화) <span class="req">*</span></label><input type="tel" id="fTel" maxlength="20" autocomplete="tel" placeholder="010-0000-0000" required></div>
+      <div><label for="fMail">이메일</label><input type="email" id="fMail" maxlength="120" autocomplete="email"></div>
+    </div>
+    <div>
+      <label>필요한 기능 (여러 개 고를 수 있습니다)</label>
+      <div class="chips" id="fFeat">
+        <label><input type="checkbox" value="메일·AI 답장">메일·AI 답장</label>
+        <label><input type="checkbox" value="전자결재">전자결재</label>
+        <label><input type="checkbox" value="근태·휴가">근태·휴가</label>
+        <label><input type="checkbox" value="인사·급여">인사·급여</label>
+        <label><input type="checkbox" value="회계·세무·자산">회계·세무·자산</label>
+        <label><input type="checkbox" value="보고서·기획안">보고서·기획안</label>
+        <label><input type="checkbox" value="월간보고">월간보고</label>
+        <label><input type="checkbox" value="입찰·제안서">입찰·제안서</label>
+        <label><input type="checkbox" value="협동조합 설립">협동조합 설립</label>
+        <label><input type="checkbox" value="직원전용 질문">직원전용 질문</label>
+        <label><input type="checkbox" value="내 폴더">내 폴더</label>
+        <label><input type="checkbox" value="AI 상담창">AI 상담창</label>
+      </div>
+    </div>
+    <div><label for="fSize">직원 수(대략)</label><input type="text" id="fSize" maxlength="30" placeholder="예: 8명"></div>
+    <div><label for="fBody">하고 싶은 일 · 지금 불편한 점 <span class="req">*</span></label><textarea id="fBody" maxlength="2000" required placeholder="예: 보조금 사업 월간보고와 근태 관리에 시간이 많이 듭니다."></textarea></div>
+    <div class="agree" role="group" aria-labelledby="agT">
+      <div><b id="agT">개인정보 수집·이용 동의</b> <span class="req">*</span>
+        <ul style="margin:4px 0 6px;padding-left:18px">
+          <li>수집 항목: 기관명, 담당자 이름, 연락처(전화), 이메일(선택), 직원 수(선택), 의뢰 내용</li>
+          <li>이용 목적: 사이트 구축 상담 연락과 견적 안내</li>
+          <li>보유 기간: 접수일로부터 1년 — 지나면 자동으로 지웁니다</li>
+          <li>동의하지 않으실 수 있습니다. 다만 동의하지 않으면 이 양식으로 의뢰를 접수할 수 없습니다(첫 화면 하단 「문의하기」를 이용해 주세요).</li>
+        </ul>
+        자세한 내용은 <a href="/account-privacy.html" target="_blank" rel="noopener">개인정보 처리방침</a>을 보세요.</div>
+      <label style="font-weight:600;display:flex;gap:8px;align-items:center;margin:6px 0 0"><input type="checkbox" id="fAgree"> 위 내용에 동의합니다</label>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn p" type="submit" id="fGo">의뢰 보내기</button><p class="msg" id="fMsg" role="status"></p></div>
+    <p class="note">급한 상담은 첫 화면 하단 「문의하기」로도 보내실 수 있습니다.</p>
+  </form>
+</div>
+<script>
+(function () {
+  const $ = s => document.querySelector(s);
+  async function api(path, opts) {
+    opts = opts || {};
+    try {
+      const res = await fetch(path, { credentials: 'same-origin', method: opts.method || 'GET', headers: opts.body ? { 'Content-Type': 'application/json' } : {}, body: opts.body ? JSON.stringify(opts.body) : undefined });
+      let d = {}; try { d = await res.json(); } catch (_) {}
+      return Object.assign({ status: res.status }, d);
+    } catch (_) { return { status: 0, ok: false }; }
+  }
+  // 로그인·로그아웃은 우측 상단(11-11 이사장 지시: 모든 화면 같은 자리)
+  api('/api/auth/me').then(r => {
+    const u = r && r.ok && r.user;
+    if (!u) return;
+    $('#who').textContent = (u.name || u.email || u.username || '') + ' 님';
+    $('#btnLogin').hidden = true; $('#btnLogout').hidden = false;
+    if (!$('#fName').value && u.name) $('#fName').value = u.name;
+    if (!$('#fMail').value && u.email) $('#fMail').value = u.email;
+  });
+  $('#btnLogout').addEventListener('click', async () => { try { localStorage.removeItem('sk_in'); } catch (_) {} await api('/api/auth/logout', { method: 'POST' }); location.reload(); });
+
+  $('#askForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const m = $('#fMsg'), v = s => $(s).value.trim();
+    const bad = (t, el) => { m.className = 'msg err'; m.textContent = t; if (el) $(el).focus(); };
+    if (!v('#fOrg')) return bad('기관명을 적어 주세요.', '#fOrg');
+    if (!v('#fName')) return bad('담당자 이름을 적어 주세요.', '#fName');
+    if (!/^[0-9+\-() ]{8,20}$/.test(v('#fTel'))) return bad('연락받을 전화번호를 적어 주세요.', '#fTel');
+    if (v('#fMail') && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v('#fMail'))) return bad('이메일 형식을 확인해 주세요.', '#fMail');
+    if (v('#fBody').length < 5) return bad('하고 싶은 일을 5자 이상 적어 주세요.', '#fBody');
+    if (!$('#fAgree').checked) return bad('개인정보 수집에 동의해 주셔야 보낼 수 있습니다.', '#fAgree');
+    const feats = [...document.querySelectorAll('#fFeat input:checked')].map(x => x.value);
+    const msg = ['[AI업무자동화 사이트 구축 의뢰]', '기관: ' + v('#fOrg'), '직원 수: ' + (v('#fSize') || '-'),
+      '필요한 기능: ' + (feats.join(', ') || '-'), '내용: ' + v('#fBody')].join('\n');
+    const contact = [v('#fName'), v('#fTel'), v('#fMail')].filter(Boolean).join(' / ');
+    $('#fGo').disabled = true; m.className = 'msg'; m.textContent = '보내는 중…';
+    const r = await api('/api/ai/dock/suggest', { method: 'POST', body: { kind: '구축 의뢰', message: msg, contact: contact, page: location.origin + location.pathname } });
+    $('#fGo').disabled = false;
+    if (r && r.ok) { $('#askForm').reset(); m.className = 'msg ok'; m.textContent = '의뢰가 접수됐습니다. 담당자가 연락드리겠습니다.'; }
+    else bad((r && r.text) || '보내지 못했습니다. 잠시 뒤 다시 해 주세요.');
+  });
+})();
+</script>
+</body>
+</html>
