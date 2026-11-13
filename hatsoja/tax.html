@@ -67,7 +67,7 @@ dialog::backdrop{background:rgba(0,0,0,.35)}
 <body>
 <div class="wrap">
   <h1 id="title">세금·4대보험 신고</h1>
-  <p class="lead" id="lead">원천세·부가세·법인세와 인사변동 4대보험 신고를 기한 순서로 챙깁니다. 값을 승인하면 숫자가 고정되고, 홈택스·위택스·4대보험 정보연계센터에는 로그인한 사람이 직접 넣고 냅니다.</p>
+  <p class="lead" id="lead">원천세·부가세·법인세와 인사변동 4대보험 신고를 기한 순서로 챙기는 계산·기록 도구입니다. 값을 승인하면 숫자가 고정되고, 홈택스·위택스·4대보험 정보연계센터에는 사업장 담당자가 직접 로그인해 넣고 제출합니다.</p>
   <div id="err" class="err"></div>
 
   <div id="setup" class="card hidden">
@@ -133,11 +133,13 @@ dialog::backdrop{background:rgba(0,0,0,.35)}
         <h3>급여 밖 지급 기록(강사료·자문료·배당)</h3>
         <p class="mute">지급할 때 적으면 원천징수할 세액을 바로 알려 주고, 그 달 원천세·간이지급명세서에 자동으로 들어갑니다.</p>
         <div class="grid2">
-          <label>소득 구분<select id="p-income"><option value="기타">기타소득(일시 강연·자문, 필요경비 60%)</option><option value="사업">사업소득(계속·반복 강사 3%)</option><option value="배당">배당소득(조합원 배당 14%, 사회적협동조합은 배당 금지)</option><option value="이자">이자소득(14%)</option></select></label>
+          <label>소득 구분<select id="p-income"><option value="기타">기타소득(일시 강연·자문, 필요경비 60%)</option><option value="사업">사업소득(계속·반복 강사 3%)</option><option value="배당">배당소득(조합원 배당 14%, 사회적협동조합은 배당 금지)</option><option value="이자">이자소득(14%)</option><option value="일용">일용근로(근무일수 필요)</option><option value="퇴직">퇴직소득(퇴직소득세는 홈택스 계산값)</option></select></label>
           <label>받는 사람<input type="text" id="p-payee"></label>
           <label>지급 성격<input type="text" id="p-nature" placeholder="예: 11월 교육 강사료"></label>
           <label>세전 지급액(원)<input type="number" id="p-gross"></label>
           <label>지급일<input type="date" id="p-date"></label>
+          <label>일용 근무일수 / 기타소득 필요경비율(0.6)<input type="text" id="p-extra" placeholder="일용이면 날수, 기타면 0~1"></label>
+          <label>퇴직소득세(퇴직일 때만)<input type="number" id="p-ret"></label>
         </div>
         <p><button class="btn" onclick="addPay()">기록</button> <span id="p-msg"></span></p>
       </div>
@@ -198,7 +200,7 @@ document.querySelectorAll("#tabs button").forEach(b => b.onclick = () => {
 });
 
 async function boot() {
-  if (COOP) $("lead").textContent = "우리 조합의 원천세·부가세·법인세와 직원 4대보험 신고를 기한 순서로 챙깁니다. 홈택스·위택스에는 조합이 직접 로그인해 제출하고, 이 화면은 넣을 값과 순서를 알려 주고 기록을 남깁니다.";
+  if (COOP) $("lead").textContent = "우리 조합의 원천세·부가세·법인세와 직원 4대보험 신고를 기한 순서로 챙기는 계산·기록 도구입니다. 신고서 작성과 제출은 조합 담당자가 홈택스·위택스에 직접 로그인해 합니다. 이 화면은 기한·계산값·입력 순서를 보여 주고 기록을 남깁니다.";
   else document.querySelectorAll(".coop-only").forEach(x => x.classList.add("hidden"));
   const y = new Date().getFullYear();
   $("year").innerHTML = [y - 1, y, y + 1].map(v => `<option ${v === y ? "selected" : ""}>${v}</option>`).join("");
@@ -234,10 +236,10 @@ async function loadCal() {
   try {
     const j = await api(`/entities/${eid}/calendar?year=${$("year").value}`);
     S.ent = j.entity; S.items = j.items;
-    $("me").textContent = `${j.entity.me.who || ""} · ${j.entity.me.approver ? "승인자" : (j.entity.me.preparer ? "작성자" : "보기만")}` +
+    $("me").textContent = `${esc(j.entity.me.who || "")} · ${j.entity.me.approver ? "승인자" : (j.entity.me.preparer ? "작성자" : "보기만")}` +
       (j.entity.approval === "triple" ? " · 값·제출·납부 3단 승인" : " · 조합 대표 값 승인");
     const y = Number($("year").value);
-    $("hol").textContent = j.holidays.years.indexOf(y) < 0 || j.holidays.years.indexOf(y + 1) < 0 ? `⚠ ${y}·${y + 1}년 공휴일표 일부 없음 — 기한이 주말·공휴일이면 다음 날로 미뤄지는지 직접 확인` : `공휴일표 ${j.holidays.status}`;
+    $("hol").textContent = j.holidays.years.indexOf(y) < 0 || j.holidays.years.indexOf(y + 1) < 0 ? `⚠ ${y}·${y + 1}년 공휴일표 일부 없음 — 기한이 주말·공휴일이면 다음 날로 미뤄지는지 직접 확인` : `공휴일표 ${esc(j.holidays.status)}`;
     renderCal(); renderEvents();
   } catch (e) { showErr(e); }
 }
@@ -254,17 +256,17 @@ function renderCal() {
     <div class="kpi"><b>${S.items.filter(x => x.state === "완료").length}</b><span>끝난 일(올해)</span></div>`;
   const view = S.ent && !S.ent.me.amounts;
   $("cal").innerHTML = rows.map(x => `<tr class="${view ? "" : "row"}" ${view ? "" : `onclick="openOb(${x.id})"`}>
-      <td class="${open(x) && x.due < t ? "late" : ""}">${x.due.slice(5).replace("-", "/")}${x.due !== x.legal_due ? `<div class="mute">법정 ${x.legal_due.slice(5).replace("-", "/")}</div>` : ""}</td>
+      <td class="${open(x) && x.due < t ? "late" : ""}">${esc(x.due.slice(5).replace("-", "/"))}${x.due !== x.legal_due ? `<div class="mute">법정 ${esc(x.legal_due.slice(5).replace("-", "/"))}</div>` : ""}</td>
       <td><b>${esc(x.short)}</b> <span class="mute">${esc(x.label)}</span></td>
       <td class="hide-m">${esc(x.cycle)}</td><td class="hide-m">${esc(x.where)}</td>
-      <td><span class="badge s-${x.state}">${x.state}</span></td><td class="n">${x.pay_total == null ? "—" : won(x.pay_total)}</td></tr>`).join("")
+      <td><span class="badge s-${esc(x.state)}">${esc(x.state)}</span></td><td class="n">${x.pay_total == null ? "—" : won(x.pay_total)}</td></tr>`).join("")
     || `<tr><td colspan="6" class="mute">해당하는 일이 없습니다.</td></tr>`;
 }
 function addDays(d, k) { const x = new Date(d + "T00:00:00"); x.setDate(x.getDate() + k); return x.toISOString().slice(0, 10); }
 
 function renderEvents() {
   const ev = S.items.filter(x => x.cycle === "인사변동");
-  $("evlist").innerHTML = ev.map(x => `<tr class="row" onclick="openOb(${x.id})"><td>${x.due}</td><td><b>${esc(x.short)}</b> ${esc(x.label)}</td><td><span class="badge s-${x.state}">${x.state}</span></td></tr>`).join("")
+  $("evlist").innerHTML = ev.map(x => `<tr class="row" onclick="openOb(${x.id})"><td>${esc(x.due)}</td><td><b>${esc(x.short)}</b> ${esc(x.label)}</td><td><span class="badge s-${esc(x.state)}">${esc(x.state)}</span></td></tr>`).join("")
     || `<tr><td colspan="3" class="mute">등록된 인사변동이 없습니다.</td></tr>`;
 }
 
@@ -294,13 +296,14 @@ async function addEvent() {
 async function loadPays() {
   try {
     const j = await api(`/entities/${$("ent").value}/payments`);
-    $("paylist").innerHTML = j.items.map(p => `<tr><td>${p.paid_on}</td><td>${esc(p.payee)} <span class="mute">${esc(p.nature)}</span></td><td>${p.income}</td><td class="n">${won(p.gross)}</td><td class="n">${won(p.income_tax)}</td><td class="n">${won(p.local_tax)}</td></tr>`).join("")
+    $("paylist").innerHTML = j.items.map(p => `<tr><td>${esc(p.paid_on)}</td><td>${esc(p.payee)} <span class="mute">${esc(p.nature)}</span></td><td>${esc(p.income)}</td><td class="n">${won(p.gross)}</td><td class="n">${won(p.income_tax)}</td><td class="n">${won(p.local_tax)}</td></tr>`).join("")
       || `<tr><td colspan="6" class="mute">기록이 없습니다.</td></tr>`;
   } catch (e) { showErr(e); }
 }
 async function addPay() {
   try {
-    const j = await api(`/entities/${$("ent").value}/payments`, {income: $("p-income").value, payee: $("p-payee").value, nature: $("p-nature").value, gross: $("p-gross").value, paid_on: $("p-date").value});
+    const j = await api(`/entities/${$("ent").value}/payments`, {income: $("p-income").value, payee: $("p-payee").value, nature: $("p-nature").value, gross: $("p-gross").value, paid_on: $("p-date").value,
+      days: $("p-income").value === "일용" ? $("p-extra").value : "", expense_rate: $("p-income").value === "기타" ? $("p-extra").value : "", income_tax: $("p-ret").value});
     $("p-msg").innerHTML = `원천징수 소득세 <b>${won(j.income_tax)}</b> · 지방소득세 <b>${won(j.local_tax)}</b> · 실지급 <b>${won(j.net)}</b>`;
     loadPays(); loadCal();
   } catch (e) { $("p-msg").innerHTML = `<span class="err">${esc(e.message)}</span>`; }
@@ -338,7 +341,7 @@ async function prClose() {
 }
 
 // ── 설정 ──
-const SET_FIELDS = [["has_staff","급여 받는 직원이 있다"],["pays_other","사업·기타소득을 준다"],["pays_dividend","배당을 준다"],["nonprofit","비영리법인"],["wh_half","원천세 반기별 납부"],["vat_prenotice","부가세 예정고지 대상"]];
+const SET_FIELDS = [["pays_daily","일용근로자에게 지급한다"],["sme","중소기업(이월결손금 100% 공제)"],["has_staff","급여 받는 직원이 있다"],["pays_other","사업·기타소득을 준다"],["pays_dividend","배당을 준다"],["nonprofit","비영리법인"],["wh_half","원천세 반기별 납부"],["vat_prenotice","부가세 예정고지 대상"]];
 function renderSettings() {
   const e = S.ent; if (!e) return;
   $("set-form").innerHTML = `<label>부가세<select id="st-vat">${["일반","겸영","면세","간이","없음"].map(v => `<option ${e.settings.vat === v ? "selected" : ""}>${v}</option>`).join("")}</select></label>` +
@@ -363,7 +366,7 @@ const FORMS = {
         ["common_settle","확정 때 공통매입 정산(가감)"],["credit","(18) 경감·공제세액"],["pre_unrefunded","(20) 예정신고 미환급세액"],["pre_notice","(21) 예정고지세액"],["penalty","(25) 가산세"]],
   vat_notice: [["notice_amount","예정고지 세액(고지서 금액)"]],
   corp: [["profit","결산 수익사업 당기순손익"],["add","익금산입·손금불산입 합계"],["sub","손금산입·익금불산입 합계"],["interest_div","이자·배당 수익(준비금 100% 대상)"],["reserve","고유목적사업준비금 설정액"],
-         ["reserve_rate","준비금 한도율(기본 0.5)"],["loss_cf","이월결손금 잔액"],["nontax_deduct","비과세·소득공제"],["credits","공제·감면세액"],["penalty","가산세"],["prepaid","중간예납·원천납부 세액"]],
+         ["reserve_rate","준비금 한도율(기본 0.5)"],["special_donation","특례기부금(준비금 한도에서 뺌)"],["exemptions","비과세·감면(세액공제 제외)"],["split","분납(1이면 분납)"],["loss_cf","이월결손금 잔액"],["nontax_deduct","비과세·소득공제"],["credits","공제·감면세액"],["penalty","가산세"],["prepaid","중간예납·원천납부 세액"]],
   corp_local: [["base","과세표준(비우면 법인세 승인값)"],["credits","공제·감면"],["prepaid","특별징수 등 기납부"],["penalty","가산세"]],
   corp_prepay: [["method","방식(prev=직전 기준 / interim=가결산)","text"],["prev_tax","직전 산출세액"],["prev_credits","직전 공제감면"],["prev_withheld","직전 원천징수"],["half_income","(가결산) 상반기 과세표준"],["half_credits","(가결산) 공제감면"],["half_withheld","(가결산) 원천징수"]]
 };
@@ -377,7 +380,7 @@ function drawOb() {
   const idx = flow.indexOf(o.state);
   const form = FORMS[j.item.calc] || [];
   const editable = ["준비","값승인","제출승인"].indexOf(o.state) >= 0 && me.preparer;
-  let h = `<div class="dlg-h"><h3 style="margin:0">${esc(j.item.name)}<br><span class="mute">${esc(o.label)} · 기한 ${o.due}${o.due !== o.legal_due ? ` (법정 ${o.legal_due})` : ""} · ${esc(j.item.where)}</span></h3><button class="btn ghost sm" onclick="$('dlg').close();loadCal()">닫기</button></div>`;
+  let h = `<div class="dlg-h"><h3 style="margin:0">${esc(j.item.name)}<br><span class="mute">${esc(o.label)} · 기한 ${esc(o.due)}${o.due !== o.legal_due ? ` (법정 ${esc(o.legal_due)})` : ""} · ${esc(j.item.where)}</span></h3><button class="btn ghost sm" onclick="$('dlg').close();loadCal()">닫기</button></div>`;
   h += `<div class="steps">${o.state === "해당없음" ? `<span class="on">해당없음 — ${esc(o.memo)}</span>` : flow.map((s, i) => `<span class="${i < idx ? "done" : i === idx ? "on" : ""}">${s}</span>`).join("")}</div>`;
   if ((res.warnings || []).length) h += `<div class="warnbox"><ul style="margin:0;padding-left:18px">${res.warnings.map(w => `<li>${esc(w)}</li>`).join("")}</ul></div>`;
   if (form.length && editable) {
@@ -397,9 +400,9 @@ function drawOb() {
   if ((res.pay || []).length) h += `<p><b>낼 돈</b> ${res.pay.map(p => `${esc(p.기관)} ${esc(p.세목)} <b>${won(p.금액)}</b>원`).join(" · ")}</p>`;
   if (j.item.steps.length) h += `<details><summary><b>신고 순서</b></summary><ol class="how">${j.item.steps.map(s => `<li>${esc(s)}</li>`).join("")}</ol></details>`;
   if (o.receipt_no || o.epay.length) h += `<p class="mute">접수번호 ${esc(o.receipt_no || "—")} · ${o.epay.map(e => `${esc(e.기관)} 전자납부번호 ${esc(e.번호 || "")} ${won(e.금액)}`).join(" · ")}</p>`;
-  if (o.paid.length) h += `<p class="mute">납부: ${o.paid.map(p => `${esc(p.기관)} ${won(p.금액)}원(${p.날짜})`).join(" · ")}</p>`;
+  if (o.paid.length) h += `<p class="mute">납부: ${o.paid.map(p => `${esc(p.기관)} ${won(p.금액)}원(${esc(p.날짜)})`).join(" · ")}</p>`;
   h += `<div class="bar" style="margin-top:12px" id="acts">${actions(o, me, tri, res)}</div><div id="ob-msg" class="err"></div>`;
-  h += `<details style="margin-top:10px"><summary class="mute">기록 ${j.audit.length}건</summary><table>${j.audit.map(a => `<tr><td class="mute">${a.at.replace("T", " ").slice(0, 16)}</td><td>${esc(a.who)}</td><td>${esc(a.action)}</td><td class="mute">${esc(a.detail)}</td></tr>`).join("")}</table></details>`;
+  h += `<details style="margin-top:10px"><summary class="mute">기록 ${j.audit.length}건</summary><table>${j.audit.map(a => `<tr><td class="mute">${esc(a.at.replace("T", " ").slice(0, 16))}</td><td>${esc(a.who)}</td><td>${esc(a.action)}</td><td class="mute">${esc(a.detail)}</td></tr>`).join("")}</table></details>`;
   $("dlg-body").innerHTML = h;
 }
 function actions(o, me, tri, res) {
@@ -409,7 +412,7 @@ function actions(o, me, tri, res) {
     else a.push(`<span class="mute">승인자(${esc(S.ent.approvers.join(", "))})가 값을 승인해야 다음으로 갑니다.</span>`);
     if (me.preparer) a.push(`<button class="btn ghost" onclick="na()">해당없음으로 닫기</button>`);
   }
-  if (o.state === "값승인" && tri) a.push(me.approver ? `<button class="btn" onclick="act('approve-submit')">제출 승인(데카가 홈택스에 넣고 제출)</button>` : `<span class="mute">승인자의 제출 승인을 기다립니다.</span>`);
+  if (o.state === "값승인" && tri) a.push(me.approver ? `<button class="btn" onclick="act('approve-submit')">제출 승인</button>` : `<span class="mute">승인자의 제출 승인을 기다립니다.</span>`);
   if ((o.state === "제출승인" && tri) || (o.state === "값승인" && !tri)) {
     const pays = (o.values_json.pay || []).filter(p => p.금액 > 0);
     a.push(`<div style="width:100%"><b>제출했으면 기록</b><div class="grid2" style="margin-top:6px"><label>접수번호<input type="text" id="sb-no"></label>` +
