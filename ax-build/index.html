@@ -122,7 +122,7 @@
   <form class="card" id="askForm" novalidate>
     <div class="two">
       <div><label for="fOrg">기관명 <span class="req">*</span></label><input type="text" id="fOrg" maxlength="80" autocomplete="organization" required></div>
-      <div><label for="fName">담당자 이름 <span class="req">*</span></label><input type="text" id="fName" maxlength="40" autocomplete="name" required></div>
+      <div><label for="fName">담당자 이름 <span class="req">*</span></label><input type="text" id="fName" maxlength="40" autocomplete="name" placeholder="예: 홍길동" required></div>
     </div>
     <div class="two">
       <div><label for="fTel">연락처(전화) <span class="req">*</span></label><input type="tel" id="fTel" maxlength="20" autocomplete="tel" placeholder="010-0000-0000" required></div>
@@ -188,7 +188,6 @@
     if (!u) return;
     $('#who').textContent = (u.name || u.email || u.username || '') + ' 님';
     $('#btnLogin').hidden = true; $('#btnLogout').hidden = false;
-    if (!$('#fName').value && u.name) $('#fName').value = u.name;
     if (!$('#fMail').value && u.email) $('#fMail').value = u.email;
   });
   $('#btnLogout').addEventListener('click', async () => { try { localStorage.removeItem('sk_in'); } catch (_) {} await api('/api/auth/logout', { method: 'POST' }); location.reload(); });
