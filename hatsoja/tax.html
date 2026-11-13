@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>세금·4대보험 신고</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<!-- 원본: /opt/sakyowon/taxops/static/tax.html 한 벌. 그룹웨어는 이 파일을 그대로 서빙하고, 햇소자는 배포_햇소자.sh 로 hatsoja/tax.html 에 복사한다.
+     세금·급여 화면이라 AI 대화창(ai-dock)을 넣지 않는다. -->
+<style>
+:root{--green:#4a6741;--green-l:#e6ede3;--ink:#1f2933;--ink-soft:#52606d;--ink-faint:#8a94a0;--paper:#f6f5f0;--card:#fff;--line:#e3e1d8;
+--bad:#b23a3a;--bad-l:#fbeaea;--warn:#a86b00;--warn-l:#fdf3df;--ok:#2f7a4b;--ok-l:#e3f2e8;--info:#2c5d8f;--info-l:#e5eef8;--r:12px}
+*{box-sizing:border-box}
+body{margin:0;font-family:Pretendard,-apple-system,"Noto Sans KR",sans-serif;background:var(--paper);color:var(--ink);font-size:14.5px;line-height:1.55}
+button,select,input,textarea{font:inherit}
+.wrap{padding:16px;max-width:1100px;margin:0 auto}
+h1{font-family:Georgia,"Noto Serif KR",serif;font-size:21px;margin:0 0 2px}
+h3{font-size:15px;margin:0 0 10px}
+.lead{color:var(--ink-soft);margin:0 0 14px;font-size:13px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+select,input[type=text],input[type=number],input[type=date],textarea{padding:7px 9px;border:1px solid var(--line);border-radius:9px;background:#fff;max-width:100%}
+.btn{border:1px solid var(--green);background:var(--green);color:#fff;border-radius:9px;padding:7px 13px;cursor:pointer}
+.btn.ghost{background:#fff;color:var(--green)}
+.btn.warn{background:var(--warn);border-color:var(--warn)}
+.btn.sm{padding:3px 9px;font-size:12.5px}
+.btn:disabled{opacity:.5;cursor:default}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px;border-bottom:1px solid var(--line)}
+.tabs button{border:0;background:none;padding:8px 12px;cursor:pointer;color:var(--ink-soft);border-bottom:2px solid transparent}
+.tabs button.on{color:var(--green);border-color:var(--green);font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin-bottom:12px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.kpi b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+.kpi span{color:var(--ink-soft);font-size:12.5px}
+.kpi.bad b{color:var(--bad)} .kpi.warn b{color:var(--warn)}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:#f1efe8;font-weight:500;color:var(--ink-soft);font-size:12.5px}
+td.n{text-align:right;white-space:nowrap}
+.scroll{overflow-x:auto}
+.badge{display:inline-block;border-radius:20px;padding:1px 9px;font-size:12px;font-weight:600;white-space:nowrap}
+.s-준비{background:var(--info-l);color:var(--info)} .s-값승인,.s-제출승인{background:var(--warn-l);color:var(--warn)}
+.s-제출,.s-납부{background:var(--green-l);color:var(--green)} .s-완료{background:var(--ok-l);color:var(--ok)} .s-해당없음{background:#eee;color:#777}
+.late{color:var(--bad);font-weight:600}
+.row{cursor:pointer} .row:hover td{background:#faf9f4}
+.mute{color:var(--ink-faint);font-size:12.5px}
+.err{color:var(--bad);font-size:13px}
+.warnbox{background:var(--warn-l);color:#6b4500;border-radius:9px;padding:8px 12px;margin:8px 0;font-size:13px}
+.warnbox li{margin:2px 0}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px 14px}
+.grid2 label{display:flex;flex-direction:column;font-size:12.5px;color:var(--ink-soft);gap:3px}
+.steps{display:flex;gap:4px;flex-wrap:wrap;margin:6px 0 10px}
+.steps span{font-size:12px;padding:2px 9px;border-radius:20px;background:#eee;color:#888}
+.steps span.on{background:var(--green);color:#fff}
+.steps span.done{background:var(--green-l);color:var(--green)}
+ol.how{margin:4px 0 0 18px;padding:0;font-size:13px;color:var(--ink-soft)}
+dialog{border:0;border-radius:14px;padding:0;width:min(920px,96vw);max-height:92vh}
+dialog::backdrop{background:rgba(0,0,0,.35)}
+.dlg{padding:16px 18px;overflow:auto;max-height:92vh}
+.dlg-h{display:flex;gap:10px;align-items:center;justify-content:space-between}
+.copy{border:1px solid var(--line);background:#fff;border-radius:6px;font-size:11.5px;padding:0 6px;cursor:pointer;margin-left:6px}
+.hidden{display:none!important}
+@media (max-width:640px){.wrap{padding:12px} .hide-m{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 id="title">세금·4대보험 신고</h1>
+  <p class="lead" id="lead">원천세·부가세·법인세와 인사변동 4대보험 신고를 기한 순서로 챙기는 계산·기록 도구입니다. 값을 승인하면 숫자가 고정되고, 홈택스·위택스·4대보험 정보연계센터에는 사업장 담당자가 직접 로그인해 넣고 제출합니다.</p>
+  <div id="err" class="err"></div>
+
+  <div id="setup" class="card hidden">
+    <h3>우리 조합 세무를 시작합니다</h3>
+    <p class="mute">처음 한 번만 합니다. 만든 사람이 승인자가 되고, 설정에서 조합 대표로 바꿀 수 있습니다. 다른 조합은 이 자료를 볼 수 없습니다.</p>
+    <div class="grid2">
+      <label>조합 이름<input type="text" id="su-name"></label>
+      <label>사업자등록번호<input type="text" id="su-biz" placeholder="000-00-00000"></label>
+      <label>법인/개인<select id="su-kind"><option>법인</option><option>개인</option></select></label>
+      <label>부가세<select id="su-vat"><option value="일반">일반과세(전기 판매 등)</option><option value="겸영">과세·면세 겸영</option><option value="면세">면세만</option><option value="간이">간이과세</option><option value="없음">해당 없음</option></select></label>
+      <label><span><input type="checkbox" id="su-staff"> 급여 받는 직원이 있다</span></label>
+      <label><span><input type="checkbox" id="su-other"> 강사료·자문료 등 사업·기타소득을 준다</span></label>
+      <label><span><input type="checkbox" id="su-div"> 조합원 배당·햇빛소득을 준다</span></label>
+      <label><span><input type="checkbox" id="su-np"> 비영리법인(사회적협동조합)</span></label>
+      <label><span><input type="checkbox" id="su-half"> 원천세 반기별 납부 승인을 받았다</span></label>
+      <label>이 날 이후 기한부터 직접 신고(그 전은 세무사가 낸 것)<input type="date" id="su-start"></label>
+      <label><span><input type="checkbox" id="su-pre"> 부가세 예정고지 대상(직전 반기 공급가액 1억 5천만 원 미만 법인)</span></label>
+    </div>
+    <p><button class="btn" onclick="doSetup()">시작하기</button></p>
+  </div>
+
+  <div id="main" class="hidden">
+    <div class="bar">
+      <select id="ent" onchange="loadCal()"></select>
+      <select id="year" onchange="loadCal()"></select>
+      <span id="me" class="mute"></span>
+    </div>
+    <div class="tabs" id="tabs">
+      <button data-v="cal" class="on">할 일·기한</button>
+      <button data-v="events">인사변동·4대보험</button>
+      <button data-v="pay">급여 밖 지급</button>
+      <button data-v="payroll" class="coop-only">급여대장 마감</button>
+      <button data-v="settings">설정</button>
+    </div>
+
+    <section id="v-cal">
+      <div class="kpis" id="kpis"></div>
+      <div class="bar">
+        <select id="f-cycle" onchange="renderCal()"><option value="">전체 주기</option><option>월별</option><option>분기별</option><option>반기별</option><option>반기·월별</option><option>연별</option><option>인사변동</option></select>
+        <select id="f-state" onchange="renderCal()"><option value="open">남은 일만</option><option value="">전부</option><option value="done">끝난 일</option></select>
+        <span class="mute" id="hol"></span>
+      </div>
+      <div class="card scroll"><table><thead><tr><th>기한</th><th>할 일</th><th class="hide-m">주기</th><th class="hide-m">어디서</th><th>상태</th><th class="n">낼 돈</th></tr></thead><tbody id="cal"></tbody></table></div>
+    </section>
+
+    <section id="v-events" class="hidden">
+      <div class="card">
+        <h3>인사변동 등록 → 4대보험 신고 할 일</h3>
+        <p class="mute">입사·퇴사·보수변경·휴직·복직·정보정정을 적으면 신고할 일과 기한이 생기고 서식 값이 미리 채워집니다. 주민등록번호는 적지 않습니다(신고 화면 가입자 목록에서 고릅니다).</p>
+        <div class="grid2">
+          <label>무슨 변동<select id="ev-kind" onchange="evFields()"></select></label>
+          <label>사람 이름<input type="text" id="ev-person"></label>
+          <label><span id="ev-date-lb">날짜</span><input type="date" id="ev-date"></label>
+        </div>
+        <div class="grid2" id="ev-extra" style="margin-top:8px"></div>
+        <p><button class="btn" onclick="addEvent()">등록</button> <span id="ev-msg" class="mute"></span></p>
+      </div>
+      <div class="card scroll"><table><thead><tr><th>기한</th><th>신고</th><th>상태</th></tr></thead><tbody id="evlist"></tbody></table></div>
+    </section>
+
+    <section id="v-pay" class="hidden">
+      <div class="card">
+        <h3>급여 밖 지급 기록(강사료·자문료·배당)</h3>
+        <p class="mute">지급할 때 적으면 원천징수할 세액을 바로 알려 주고, 그 달 원천세·간이지급명세서에 자동으로 들어갑니다.</p>
+        <div class="grid2">
+          <label>소득 구분<select id="p-income"><option value="기타">기타소득(일시 강연·자문, 필요경비 60%)</option><option value="사업">사업소득(계속·반복 강사 3%)</option><option value="배당">배당소득(조합원 배당 14%, 사회적협동조합은 배당 금지)</option><option value="이자">이자소득(14%)</option><option value="일용">일용근로(근무일수 필요)</option><option value="퇴직">퇴직소득(퇴직소득세는 홈택스 계산값)</option></select></label>
+          <label>받는 사람<input type="text" id="p-payee"></label>
+          <label>지급 성격<input type="text" id="p-nature" placeholder="예: 11월 교육 강사료"></label>
+          <label>세전 지급액(원)<input type="number" id="p-gross"></label>
+          <label>지급일<input type="date" id="p-date"></label>
+          <label>일용 근무일수 / 기타소득 필요경비율(0.6)<input type="text" id="p-extra" placeholder="일용이면 날수, 기타면 0~1"></label>
+          <label>퇴직소득세(퇴직일 때만)<input type="number" id="p-ret"></label>
+        </div>
+        <p><button class="btn" onclick="addPay()">기록</button> <span id="p-msg"></span></p>
+      </div>
+      <div class="card scroll"><table><thead><tr><th>지급일</th><th>받는 사람</th><th>구분</th><th class="n">세전</th><th class="n">소득세</th><th class="n">지방세</th></tr></thead><tbody id="paylist"></tbody></table></div>
+    </section>
+
+    <section id="v-payroll" class="hidden">
+      <div class="card">
+        <h3>급여대장 마감</h3>
+        <p class="mute">직원별 기본급·수당·식대를 넣고 마감하면 4대보험·소득세를 2026 요율과 간이세액표로 계산해 그 달 원천세 신고에 넣습니다. 매달 5일까지 마감하세요.</p>
+        <div class="bar"><input type="month" id="pr-ym"><button class="btn ghost sm" onclick="prAdd()">직원 줄 더하기</button><button class="btn ghost sm" onclick="prPrev()">지난달 그대로 불러오기</button></div>
+        <div class="scroll"><table><thead><tr><th>이름</th><th>기본급</th><th>과세 수당</th><th>상여</th><th>식대(비과세)</th><th>공제대상 가족</th><th>8~20세 자녀</th><th>4대보험</th><th></th></tr></thead><tbody id="pr-rows"></tbody></table></div>
+        <p><button class="btn" onclick="prClose()">계산하고 마감</button> <span id="pr-msg" class="mute"></span></p>
+        <div id="pr-out"></div>
+      </div>
+    </section>
+
+    <section id="v-settings" class="hidden">
+      <div class="card">
+        <h3>사업장 설정</h3>
+        <div class="grid2" id="set-form"></div>
+        <p><button class="btn" onclick="saveSettings()">저장</button> <span id="set-msg" class="mute"></span></p>
+        <p class="mute">설정과 승인자는 승인자만 바꿀 수 있습니다. 설정을 바꾸면 아직 시작하지 않은 일 목록이 다시 만들어집니다.</p>
+      </div>
+    </section>
+  </div>
+</div>
+
+<dialog id="dlg"><div class="dlg" id="dlg-body"></div></dialog>
+
+<script>
+"use strict";
+const COOP = location.pathname.indexOf("/hatsoja/") >= 0;
+const API = COOP ? "/api/hatsoja/tax" : "/api/tax";
+const STATES = ["준비","값승인","제출승인","제출","납부","완료"];
+let S = {ents: [], ent: null, items: [], rules: null, cur: null};
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const won = v => v == null || v === "" ? "—" : Number(v).toLocaleString("ko-KR");
+const today = () => new Date().toISOString().slice(0, 10);
+
+async function api(path, body) {
+  const opt = {credentials: "same-origin"};
+  if (body !== undefined) { opt.method = "POST"; opt.headers = {"Content-Type": "application/json"}; opt.body = JSON.stringify(body); }
+  const r = await fetch(API + path, opt);
+  let j = {}; try { j = await r.json(); } catch (e) {}
+  if (!r.ok) throw new Error(j.detail || ("오류 " + r.status));
+  return j;
+}
+function showErr(e) { $("err").textContent = e ? (e.message || String(e)) : ""; }
+
+document.querySelectorAll("#tabs button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("#tabs button").forEach(x => x.classList.toggle("on", x === b));
+  ["cal","events","pay","payroll","settings"].forEach(v => $("v-" + v).classList.toggle("hidden", v !== b.dataset.v));
+  if (b.dataset.v === "pay") loadPays();
+  if (b.dataset.v === "settings") renderSettings();
+  if (b.dataset.v === "payroll") prInit();
+});
+
+async function boot() {
+  if (COOP) $("lead").textContent = "우리 조합의 원천세·부가세·법인세와 직원 4대보험 신고를 기한 순서로 챙기는 계산·기록 도구입니다. 신고서 작성과 제출은 조합 담당자가 홈택스·위택스에 직접 로그인해 합니다. 이 화면은 기한·계산값·입력 순서를 보여 주고 기록을 남깁니다.";
+  else document.querySelectorAll(".coop-only").forEach(x => x.classList.add("hidden"));
+  const y = new Date().getFullYear();
+  $("year").innerHTML = [y - 1, y, y + 1].map(v => `<option ${v === y ? "selected" : ""}>${v}</option>`).join("");
+  try {
+    S.rules = await api("/rules");
+    const e = await api("/entities");
+    S.ents = e.entities;
+    if (!S.ents.length) {
+      if (e.can_setup) { $("setup").classList.remove("hidden"); return; }
+      showErr(COOP ? "조합 계정(마을에 연결된 계정)으로 로그인해야 쓸 수 있습니다." : "「세무」 권한이 있는 계정만 볼 수 있습니다."); return;
+    }
+    $("ent").innerHTML = S.ents.map(x => `<option value="${x.id}">${esc(x.name)}${x.me.amounts ? "" : " (상태만)"}</option>`).join("");
+    if (S.ents.length < 2) $("ent").classList.add("hidden");
+    $("ev-kind").innerHTML = Object.keys(S.rules.events).map(k => `<option>${k}</option>`).join("");
+    evFields();
+    $("main").classList.remove("hidden");
+    await loadCal();
+  } catch (err) { showErr(err); }
+}
+
+async function doSetup() {
+  try {
+    await api("/setup", {name: $("su-name").value, biz_no: $("su-biz").value, kind: $("su-kind").value, vat: $("su-vat").value,
+      has_staff: $("su-staff").checked, pays_other: $("su-other").checked, pays_dividend: $("su-div").checked,
+      nonprofit: $("su-np").checked, start_from: $("su-start").value, wh_half: $("su-half").checked, vat_prenotice: $("su-pre").checked});
+    $("setup").classList.add("hidden"); boot();
+  } catch (e) { showErr(e); }
+}
+
+async function loadCal() {
+  showErr();
+  const eid = $("ent").value;
+  try {
+    const j = await api(`/entities/${eid}/calendar?year=${$("year").value}`);
+    S.ent = j.entity; S.items = j.items;
+    $("me").textContent = `${esc(j.entity.me.who || "")} · ${j.entity.me.approver ? "승인자" : (j.entity.me.preparer ? "작성자" : "보기만")}` +
+      (j.entity.approval === "triple" ? " · 값·제출·납부 3단 승인" : " · 조합 대표 값 승인");
+    const y = Number($("year").value);
+    $("hol").textContent = j.holidays.years.indexOf(y) < 0 || j.holidays.years.indexOf(y + 1) < 0 ? `⚠ ${y}·${y + 1}년 공휴일표 일부 없음 — 기한이 주말·공휴일이면 다음 날로 미뤄지는지 직접 확인` : `공휴일표 ${esc(j.holidays.status)}`;
+    renderCal(); renderEvents();
+  } catch (e) { showErr(e); }
+}
+
+function renderCal() {
+  const cyc = $("f-cycle").value, st = $("f-state").value, t = today();
+  const open = x => ["완료","해당없음"].indexOf(x.state) < 0;
+  let rows = S.items.filter(x => (!cyc || x.cycle === cyc) && (st === "" || (st === "open" ? open(x) : !open(x))));
+  const late = S.items.filter(x => open(x) && x.due < t), soon = S.items.filter(x => open(x) && x.due >= t && x.due <= addDays(t, 14));
+  const wait = S.items.filter(x => x.state === "값승인" || x.state === "제출승인" || x.state === "제출");
+  $("kpis").innerHTML = `<div class="kpi ${late.length ? "bad" : ""}"><b>${late.length}</b><span>기한 지남</span></div>
+    <div class="kpi ${soon.length ? "warn" : ""}"><b>${soon.length}</b><span>2주 안에 기한</span></div>
+    <div class="kpi"><b>${wait.length}</b><span>승인·제출·납부 진행 중</span></div>
+    <div class="kpi"><b>${S.items.filter(x => x.state === "완료").length}</b><span>끝난 일(올해)</span></div>`;
+  const view = S.ent && !S.ent.me.amounts;
+  $("cal").innerHTML = rows.map(x => `<tr class="${view ? "" : "row"}" ${view ? "" : `onclick="openOb(${x.id})"`}>
+      <td class="${open(x) && x.due < t ? "late" : ""}">${esc(x.due.slice(5).replace("-", "/"))}${x.due !== x.legal_due ? `<div class="mute">법정 ${esc(x.legal_due.slice(5).replace("-", "/"))}</div>` : ""}</td>
+      <td><b>${esc(x.short)}</b> <span class="mute">${esc(x.label)}</span></td>
+      <td class="hide-m">${esc(x.cycle)}</td><td class="hide-m">${esc(x.where)}</td>
+      <td><span class="badge s-${esc(x.state)}">${esc(x.state)}</span></td><td class="n">${x.pay_total == null ? "—" : won(x.pay_total)}</td></tr>`).join("")
+    || `<tr><td colspan="6" class="mute">해당하는 일이 없습니다.</td></tr>`;
+}
+function addDays(d, k) { const x = new Date(d + "T00:00:00"); x.setDate(x.getDate() + k); return x.toISOString().slice(0, 10); }
+
+function renderEvents() {
+  const ev = S.items.filter(x => x.cycle === "인사변동");
+  $("evlist").innerHTML = ev.map(x => `<tr class="row" onclick="openOb(${x.id})"><td>${esc(x.due)}</td><td><b>${esc(x.short)}</b> ${esc(x.label)}</td><td><span class="badge s-${esc(x.state)}">${esc(x.state)}</span></td></tr>`).join("")
+    || `<tr><td colspan="3" class="mute">등록된 인사변동이 없습니다.</td></tr>`;
+}
+
+const EV_EXTRA = {
+  "입사": [["job","직종"],["monthly_taxable","월 보수(비과세 제외, 비우면 급여대장에서)","number"],["hours","주 소정근로시간"],["contract","계약기간(정함 없음/~날짜)"]],
+  "퇴사": [["reason","상실 사유 코드","reason"],["year_taxable","올해 보수총액(비우면 급여대장에서)","number"],["months","올해 근무 개월 수","number"]],
+  "보수변경": [["old_taxable","이전 월 보수","number"],["new_taxable","바뀐 월 보수","number"]],
+  "휴직": [["until","휴직 끝 예정일","date"],["reason","휴직 사유(육아·질병·무급 등)"],["paid","휴직 중 보수 지급(없음/일부/전액)"]],
+  "복직": [["monthly_taxable","복직 뒤 월 보수","number"]],
+  "정보정정": [["field","고칠 항목"],["value","고친 값"],["why","사유"]]};
+function evFields() {
+  const k = $("ev-kind").value, info = (S.rules && S.rules.events[k]) || {};
+  $("ev-date-lb").textContent = {"입사": "입사일(자격취득일)", "퇴사": "마지막 근무일(상실일은 다음 날로 자동)", "보수변경": "보수가 바뀐 날", "휴직": "휴직 시작일", "복직": "복직일", "정보정정": "바뀐 날"}[k] || "날짜";
+  $("ev-extra").innerHTML = (EV_EXTRA[k] || []).map(([id, lb, tp]) => tp === "reason"
+    ? `<label>${lb}<select data-k="${id}"><option value="">고르세요</option>${Object.entries(S.rules.loss_reasons).map(([c, t]) => `<option value="${c}">${c} ${esc(t)}</option>`).join("")}</select></label>`
+    : `<label>${lb}<input data-k="${id}" type="${tp || "text"}"></label>`).join("") +
+    `<div class="mute" style="grid-column:1/-1">기관별 기한: ${Object.entries(info.agency || {}).map(([a, b]) => `${esc(a)} ${esc(b)}`).join(" · ")}</div>`;
+}
+async function addEvent() {
+  const data = {}; $("ev-extra").querySelectorAll("[data-k]").forEach(i => { if (i.value) data[i.dataset.k] = i.value; });
+  try {
+    const j = await api(`/entities/${$("ent").value}/events`, {kind: $("ev-kind").value, person: $("ev-person").value, on_date: $("ev-date").value, data});
+    $("ev-msg").textContent = `${j.ob.label} — 기한 ${j.ob.due}`; await loadCal(); openOb(j.ob.id);
+  } catch (e) { $("ev-msg").textContent = e.message; }
+}
+
+async function loadPays() {
+  try {
+    const j = await api(`/entities/${$("ent").value}/payments`);
+    $("paylist").innerHTML = j.items.map(p => `<tr><td>${esc(p.paid_on)}</td><td>${esc(p.payee)} <span class="mute">${esc(p.nature)}</span></td><td>${esc(p.income)}</td><td class="n">${won(p.gross)}</td><td class="n">${won(p.income_tax)}</td><td class="n">${won(p.local_tax)}</td></tr>`).join("")
+      || `<tr><td colspan="6" class="mute">기록이 없습니다.</td></tr>`;
+  } catch (e) { showErr(e); }
+}
+async function addPay() {
+  try {
+    const j = await api(`/entities/${$("ent").value}/payments`, {income: $("p-income").value, payee: $("p-payee").value, nature: $("p-nature").value, gross: $("p-gross").value, paid_on: $("p-date").value,
+      days: $("p-income").value === "일용" ? $("p-extra").value : "", expense_rate: $("p-income").value === "기타" ? $("p-extra").value : "", income_tax: $("p-ret").value});
+    $("p-msg").innerHTML = `원천징수 소득세 <b>${won(j.income_tax)}</b> · 지방소득세 <b>${won(j.local_tax)}</b> · 실지급 <b>${won(j.net)}</b>`;
+    loadPays(); loadCal();
+  } catch (e) { $("p-msg").innerHTML = `<span class="err">${esc(e.message)}</span>`; }
+}
+
+// ── 급여대장(햇소자 조합) ──
+function prInit() { if (!$("pr-ym").value) { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - 1); $("pr-ym").value = d.toISOString().slice(0, 7); } if (!$("pr-rows").children.length) prAdd(); }
+function prAdd(v) {
+  v = v || {};
+  const tr = document.createElement("tr");
+  tr.innerHTML = `<td><input type="text" data-k="name" value="${esc(v.name || "")}" style="width:90px"></td>` +
+    ["base","allowance","bonus","meal"].map(k => `<td><input type="number" data-k="${k}" value="${v[k] || ""}" style="width:110px"></td>`).join("") +
+    `<td><input type="number" data-k="dependents" value="${v.dependents || 1}" style="width:60px"></td><td><input type="number" data-k="children" value="${v.children || 0}" style="width:60px"></td>` +
+    `<td><select data-k="insured"><option value="1">가입</option><option value="0">미가입</option></select></td><td><button class="btn ghost sm" onclick="this.closest('tr').remove()">빼기</button></td>`;
+  $("pr-rows").appendChild(tr);
+}
+async function prPrev() {
+  const [y, m] = $("pr-ym").value.split("-").map(Number); const d = new Date(y, m - 2, 1);
+  const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  try {
+    const j = await api(`/entities/${$("ent").value}/payroll?ym=${ym}`);
+    if (!j.rows.length) { $("pr-msg").textContent = `${ym} 마감 자료가 없습니다.`; return; }
+    $("pr-rows").innerHTML = ""; j.rows.forEach(r => prAdd({name: r.name, base: r.t, meal: r.nt}));
+    $("pr-msg").textContent = `${ym} 과세·비과세 합계를 불러왔습니다 — 수당·상여는 다시 나눠 넣으세요.`;
+  } catch (e) { $("pr-msg").textContent = e.message; }
+}
+async function prClose() {
+  const rows = [...$("pr-rows").children].map(tr => { const o = {}; tr.querySelectorAll("[data-k]").forEach(i => o[i.dataset.k] = i.value); o.insured = o.insured === "1"; return o; }).filter(o => o.name);
+  try {
+    const j = await api(`/entities/${$("ent").value}/payroll`, {ym: $("pr-ym").value, rows});
+    $("pr-out").innerHTML = `<div class="scroll"><table><thead><tr><th>이름</th><th class="n">지급총액</th><th class="n">국민연금</th><th class="n">건강</th><th class="n">장기요양</th><th class="n">고용</th><th class="n">소득세</th><th class="n">지방세</th><th class="n">실지급</th></tr></thead><tbody>` +
+      j.rows.map(r => `<tr><td>${esc(r.name)}${r.why.length ? `<div class="mute">${r.why.map(esc).join(" · ")}</div>` : ""}</td>` + ["gross","pension","health","ltc","employment","income_tax","local_tax","net"].map(k => `<td class="n">${won(r[k])}</td>`).join("") + `</tr>`).join("") + `</tbody></table></div>`;
+    $("pr-msg").textContent = `${j.ym} ${j.rows.length}명 마감 — 원천세 할 일에 반영됩니다.`; loadCal();
+  } catch (e) { $("pr-msg").textContent = e.message; }
+}
+
+// ── 설정 ──
+const SET_FIELDS = [["pays_daily","일용근로자에게 지급한다"],["sme","중소기업(이월결손금 100% 공제)"],["has_staff","급여 받는 직원이 있다"],["pays_other","사업·기타소득을 준다"],["pays_dividend","배당을 준다"],["nonprofit","비영리법인"],["wh_half","원천세 반기별 납부"],["vat_prenotice","부가세 예정고지 대상"]];
+function renderSettings() {
+  const e = S.ent; if (!e) return;
+  $("set-form").innerHTML = `<label>부가세<select id="st-vat">${["일반","겸영","면세","간이","없음"].map(v => `<option ${e.settings.vat === v ? "selected" : ""}>${v}</option>`).join("")}</select></label>` +
+    `<label>이 날 이후 기한부터 직접 신고<input type="date" id="st-start" value="${esc(e.settings.start_from || "")}"></label>` +
+    SET_FIELDS.map(([k, t]) => `<label><span><input type="checkbox" data-s="${k}" ${e.settings[k] ? "checked" : ""}> ${t}</span></label>`).join("") +
+    `<label>승인자 아이디(쉼표로)<input type="text" id="st-ap" value="${esc(e.approvers.join(", "))}"></label>` +
+    (COOP ? `<label><span><input type="checkbox" id="st-share" ${e.share_amounts ? "checked" : ""}> 연합회가 금액까지 보게 허용</span></label>` : "");
+}
+async function saveSettings() {
+  const b = {vat: $("st-vat").value, start_from: $("st-start").value, approvers: $("st-ap").value.split(",").map(s => s.trim()).filter(Boolean)};
+  document.querySelectorAll("[data-s]").forEach(i => b[i.dataset.s] = i.checked);
+  if (COOP) b.share_amounts = $("st-share").checked;
+  try { await api(`/entities/${$("ent").value}/settings`, b); $("set-msg").textContent = "저장했습니다."; await loadCal(); } catch (e) { $("set-msg").textContent = e.message; }
+}
+
+// ── 일 하나 ──
+const FORMS = {
+  wh: [["source","급여 출처(대장/신고)","text"],["prev_refund","전월 미환급 세액","number"]],
+  vat: [["s1_amt","(1) 과세 세금계산서 발급 공급가액"],["s1_tax","(1) 세액(합계표 값, 비우면 10%)"],["s3_amt","(3) 카드·현금영수증 매출 공급가액"],["s4_amt","(4) 기타 매출 공급가액"],
+        ["zero_amt","(5)(6) 영세율 공급가액"],["exempt_amt","면세 수입금액(계산서·기타)"],["exempt_subsidy","면세사업 관련 국고보조금(안분용)"],["bad_debt_tax","(8) 대손세액 가감"],["p10_tax","(10) 세금계산서 일반매입 세액"],["p11_tax","(11) 세금계산서 고정자산 세액"],
+        ["p14_tax","(14) 카드 등 그 밖의 공제 매입세액"],["n16_tax","(16) 불공제 매입세액(직접)"],["common_tax","공통매입세액(과세·면세 같이 쓰는 매입, (10)에 포함된 것)"],["exempt_ratio","면세비율(비우면 자동)"],
+        ["common_settle","확정 때 공통매입 정산(가감)"],["credit","(18) 경감·공제세액"],["pre_unrefunded","(20) 예정신고 미환급세액"],["pre_notice","(21) 예정고지세액"],["penalty","(25) 가산세"]],
+  vat_notice: [["notice_amount","예정고지 세액(고지서 금액)"]],
+  corp: [["profit","결산 수익사업 당기순손익"],["add","익금산입·손금불산입 합계"],["sub","손금산입·익금불산입 합계"],["interest_div","이자·배당 수익(준비금 100% 대상)"],["reserve","고유목적사업준비금 설정액"],
+         ["reserve_rate","준비금 한도율(기본 0.5)"],["special_donation","특례기부금(준비금 한도에서 뺌)"],["exemptions","비과세·감면(세액공제 제외)"],["split","분납(1이면 분납)"],["loss_cf","이월결손금 잔액"],["nontax_deduct","비과세·소득공제"],["credits","공제·감면세액"],["penalty","가산세"],["prepaid","중간예납·원천납부 세액"]],
+  corp_local: [["base","과세표준(비우면 법인세 승인값)"],["credits","공제·감면"],["prepaid","특별징수 등 기납부"],["penalty","가산세"]],
+  corp_prepay: [["method","방식(prev=직전 기준 / interim=가결산)","text"],["prev_tax","직전 산출세액"],["prev_credits","직전 공제감면"],["prev_withheld","직전 원천징수"],["half_income","(가결산) 상반기 과세표준"],["half_credits","(가결산) 공제감면"],["half_withheld","(가결산) 원천징수"]]
+};
+async function openOb(id) {
+  try { const j = await api(`/entities/${$("ent").value}/obligations/${id}`); S.cur = j; drawOb(); $("dlg").showModal(); } catch (e) { showErr(e); }
+}
+function drawOb() {
+  const j = S.cur, o = j.ob, me = j.me, tri = j.approval === "triple";
+  const res = (o.state === "준비" ? o.result : (Object.keys(o.values_json || {}).length ? o.values_json : o.result)) || {};
+  const flow = tri ? STATES : STATES.filter(s => s !== "제출승인");
+  const idx = flow.indexOf(o.state);
+  const form = FORMS[j.item.calc] || [];
+  const editable = ["준비","값승인","제출승인"].indexOf(o.state) >= 0 && me.preparer;
+  let h = `<div class="dlg-h"><h3 style="margin:0">${esc(j.item.name)}<br><span class="mute">${esc(o.label)} · 기한 ${esc(o.due)}${o.due !== o.legal_due ? ` (법정 ${esc(o.legal_due)})` : ""} · ${esc(j.item.where)}</span></h3><button class="btn ghost sm" onclick="$('dlg').close();loadCal()">닫기</button></div>`;
+  h += `<div class="steps">${o.state === "해당없음" ? `<span class="on">해당없음 — ${esc(o.memo)}</span>` : flow.map((s, i) => `<span class="${i < idx ? "done" : i === idx ? "on" : ""}">${s}</span>`).join("")}</div>`;
+  if ((res.warnings || []).length) h += `<div class="warnbox"><ul style="margin:0;padding-left:18px">${res.warnings.map(w => `<li>${esc(w)}</li>`).join("")}</ul></div>`;
+  if (form.length && editable) {
+    h += `<details ${o.state === "준비" ? "open" : ""}><summary><b>넣을 값</b> <span class="mute">(바꾸면 다시 계산하고, 승인했던 값과 달라지면 승인이 풀립니다)</span></summary><div class="grid2" id="ob-form" style="margin:8px 0">` +
+      form.map(([k, lb, tp]) => `<label>${esc(lb)}<input data-k="${k}" type="${tp || "number"}" value="${esc(o.inputs[k] == null ? "" : o.inputs[k])}"></label>`).join("") +
+      `</div><button class="btn ghost" onclick="saveInputs()">계산</button></details>`;
+  }
+  const lines = res.lines || [];
+  if (lines.length && !lines.some(l => l["이름"])) {   // 인사변동 서식: 칸 이름 + 값 두 줄
+    h += `<h3 style="margin-top:14px">신고 화면에 옮길 값</h3><table>` + lines.map(l => `<tr><td style="width:38%">${esc(l["칸"])}</td><td>${esc(l["값"] == null ? "" : (typeof l["값"] === "number" ? won(l["값"]) : l["값"]))}${l["값"] != null && l["값"] !== "" ? `<button class="copy" data-v="${esc(String(l["값"]))}" onclick="cp(this.dataset.v)">복사</button>` : ""}</td></tr>`).join("") + `</table>`;
+  } else if (lines.length) {
+    const cols = [...new Set(lines.flatMap(l => Object.keys(l)))].filter(k => ["칸","이름","풀이"].indexOf(k) < 0);
+    h += `<h3 style="margin-top:14px">신고 화면에 옮길 값</h3><div class="scroll"><table><thead><tr><th>칸</th><th>이름</th>${cols.map(c => `<th class="n">${esc(c)}</th>`).join("")}</tr></thead><tbody>` +
+      lines.map(l => `<tr><td>${esc(l["칸"])}</td><td>${esc(l["이름"] || "")}${l["풀이"] ? `<div class="mute">${esc(l["풀이"])}</div>` : ""}</td>` +
+        cols.map(c => { const v = l[c]; const num = typeof v === "number"; return `<td class="n">${v == null ? "" : num ? won(v) : esc(v)}${v != null && v !== "" ? `<button class="copy" data-v="${esc(String(v))}" onclick="cp(this.dataset.v)">복사</button>` : ""}</td>`; }).join("") + `</tr>`).join("") + `</tbody></table></div>`;
+  }
+  if ((res.pay || []).length) h += `<p><b>낼 돈</b> ${res.pay.map(p => `${esc(p.기관)} ${esc(p.세목)} <b>${won(p.금액)}</b>원`).join(" · ")}</p>`;
+  if (j.item.steps.length) h += `<details><summary><b>신고 순서</b></summary><ol class="how">${j.item.steps.map(s => `<li>${esc(s)}</li>`).join("")}</ol></details>`;
+  if (o.receipt_no || o.epay.length) h += `<p class="mute">접수번호 ${esc(o.receipt_no || "—")} · ${o.epay.map(e => `${esc(e.기관)} 전자납부번호 ${esc(e.번호 || "")} ${won(e.금액)}`).join(" · ")}</p>`;
+  if (o.paid.length) h += `<p class="mute">납부: ${o.paid.map(p => `${esc(p.기관)} ${won(p.금액)}원(${esc(p.날짜)})`).join(" · ")}</p>`;
+  h += `<div class="bar" style="margin-top:12px" id="acts">${actions(o, me, tri, res)}</div><div id="ob-msg" class="err"></div>`;
+  h += `<details style="margin-top:10px"><summary class="mute">기록 ${j.audit.length}건</summary><table>${j.audit.map(a => `<tr><td class="mute">${esc(a.at.replace("T", " ").slice(0, 16))}</td><td>${esc(a.who)}</td><td>${esc(a.action)}</td><td class="mute">${esc(a.detail)}</td></tr>`).join("")}</table></details>`;
+  $("dlg-body").innerHTML = h;
+}
+function actions(o, me, tri, res) {
+  const a = [];
+  if (o.state === "준비") {
+    if (me.approver) a.push(`<input type="text" id="ap-note" placeholder="경고를 확인한 내용(경고가 있으면 필수)" style="flex:1;min-width:220px"><button class="btn" onclick="act('approve',{note:$('ap-note').value})">값 승인</button>`);
+    else a.push(`<span class="mute">승인자(${esc(S.ent.approvers.join(", "))})가 값을 승인해야 다음으로 갑니다.</span>`);
+    if (me.preparer) a.push(`<button class="btn ghost" onclick="na()">해당없음으로 닫기</button>`);
+  }
+  if (o.state === "값승인" && tri) a.push(me.approver ? `<button class="btn" onclick="act('approve-submit')">제출 승인</button>` : `<span class="mute">승인자의 제출 승인을 기다립니다.</span>`);
+  if ((o.state === "제출승인" && tri) || (o.state === "값승인" && !tri)) {
+    const pays = (o.values_json.pay || []).filter(p => p.금액 > 0);
+    a.push(`<div style="width:100%"><b>제출했으면 기록</b><div class="grid2" style="margin-top:6px"><label>접수번호<input type="text" id="sb-no"></label>` +
+      pays.map((p, i) => `<label>${esc(p.기관)} ${esc(p.세목)} 전자납부번호<input type="text" data-ep="${i}"></label>`).join("") +
+      `</div><label style="display:block;margin:8px 0"><input type="checkbox" id="sb-ok"> 신고 화면에 들어간 합계가 위 승인값과 같은 것을 확인했습니다</label><button class="btn" onclick="submitted()">제출 기록</button></div>`);
+  }
+  if (o.state === "제출") {
+    if (!tri || me.approver) a.push(`<div style="width:100%"><b>납부(이체)했으면 기록</b><div class="grid2" style="margin-top:6px">` +
+      (o.values_json.pay || []).filter(p => p.금액 > 0).map((p, i) => `<label>${esc(p.기관)} ${esc(p.세목)} 낸 금액<input type="number" data-pd="${i}" data-g="${esc(p.기관)}" value="${p.금액}"></label>`).join("") +
+      `<label>납부일<input type="date" id="pd-date" value="${today()}"></label></div><p><button class="btn" onclick="paid()">납부 기록</button></p></div>`);
+    else a.push(`<span class="mute">승인자가 이체를 승인하고 납부를 기록합니다.</span>`);
+  }
+  if (o.state === "납부") a.push(`<button class="btn" onclick="act('done')">통장 출금 확인 — 완료</button>`);
+  if (me.approver && ["해당없음","값승인","제출승인"].indexOf(o.state) >= 0) a.push(`<button class="btn ghost" onclick="act('reopen')">준비로 되돌리기</button>`);
+  return a.join("");
+}
+async function act(path, body) {
+  try { const j = await api(`/entities/${$("ent").value}/obligations/${S.cur.ob.id}/${path}`, body || {}); S.cur.ob = j.ob; await openOb(j.ob.id); }
+  catch (e) { $("ob-msg").textContent = e.message; }
+}
+async function saveInputs() {
+  const inputs = {}; document.querySelectorAll("#ob-form [data-k]").forEach(i => inputs[i.dataset.k] = i.value);
+  act("inputs", {inputs});
+}
+function na() { const r = prompt("해당없음 사유(예: 이 달 지급 없음)"); if (r) act("na", {reason: r}); }
+function submitted() {
+  const pays = (S.cur.ob.values_json.pay || []).filter(p => p.금액 > 0);
+  const epay = pays.map((p, i) => ({기관: p.기관, 번호: (document.querySelector(`[data-ep="${i}"]`) || {}).value || "", 금액: p.금액}));
+  act("submitted", {receipt_no: $("sb-no").value, epay, confirm: $("sb-ok").checked});
+}
+function paid() {
+  const items = [...document.querySelectorAll("[data-pd]")].map(i => ({기관: i.dataset.g, 금액: i.value, 날짜: $("pd-date").value, 방법: "계좌이체"}));
+  act("paid", {paid: items});
+}
+function cp(v) { const t = String(v).replace(/,/g, ""); (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).catch(() => prompt("복사하세요", t)); }
+
+boot();
+</script>
+</body>
+</html>
