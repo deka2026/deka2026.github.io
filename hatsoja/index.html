@@ -3894,7 +3894,7 @@ function memStat(){
       <h1>🗺 전남 발전 현황</h1>
       <p class="sec-desc">전국 시도 가운데 전남 태양광의 위치, 월별 흐름, 월 이용률(<b>전남광주 합산</b>), 2005~2023 추세를 <b>공개 통계 실측값</b>으로 봅니다.
         아래 <b>전남 22개 시군</b> 카드는 에너지공단 화면 조회 스냅샷(자동 갱신 아님)입니다. 우리 마을 실적과의 비교는 <a href="#/mem/power">발전·정산·배당</a>에서 봅니다.
-        <br><span class="text-mute" style="font-size:12.5px;">※ 여기서 「전남」은 전남광주통합특별시 출범(2026-07-01) 전 통계의 집계 단위(옛 전라남도, 광주 제외)입니다. 공개 통계가 아직 옛 시도 구분으로 나와 그대로 적습니다.</span></p>
+        <br><span class="text-mute" style="font-size:12.5px;">※ 여기서 「전남」은 전남광주통합특별시 출범(2026-07-01) 전 통계의 집계 단위(옛 전라남도, 광주 제외)입니다. 대부분의 공개 통계가 아직 옛 시도 구분으로 나와 그대로 적습니다(아래 「가장 최근 공개일」 카드의 통합특별시 칸은 예외).</span></p>
     </div>
     <div id="stat-body"><div class="card"><p class="text-mute" style="margin:0;">불러오는 중…</p></div></div>`;
 }
@@ -3995,6 +3995,32 @@ function statHtml(d){
       ${statSrc(군)}
     </div>`;
   }
+  /* 2026-11-13 수업 15회차: 전력거래소 시간별 태양광 API 의 가장 최근 공개일(실시간 아님 — 기준일·지연 일수를 늘 보인다) */
+  let hourCard = '';
+  const 시 = d.시간별;
+  if(시 && 시.전남_시간별_MWh && 시.전남_시간별_MWh.length === 24){
+    const hs = 시.전남_시간별_MWh.map(Number);
+    const maxH = Math.max(1, ...hs);
+    const hBars = hs.map((v, i) => `
+      <div title="${i}~${i + 1}시 ${statFmt(v)} MWh" style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;">
+        <div style="width:72%;background:var(--primary);opacity:.85;border-radius:2px 2px 0 0;height:${Math.max(v > 0 ? 1 : 0, Math.round(v / maxH * 90))}px;"></div>
+        <div style="font-size:9.5px;margin-top:3px;color:var(--ink-soft);">${i % 3 === 0 ? i : ''}</div>
+      </div>`).join('');
+    const top = (시.시도 || []).slice(0, 5).map(x => escapeHtml(x.지역) + ' ' + statFmt(x.발전량_MWh, 0)).join(' · ');
+    const 늦음 = Number(시.지연_일);
+    hourCard = `
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title"><h3 class="serif">가장 최근 공개일 ${escapeHtml(시.기준일)} — 전남 하루 ${statFmt(시.전남_MWh, 0)} MWh, 시간대별</h3>
+        <span class="badge badge-gold">실시간 아님 · ${늦음}일 전 자료</span></div>
+      <div style="display:flex;gap:2px;align-items:flex-end;height:104px;padding:0 4px;">${hBars}</div>
+      <p class="text-mute" style="font-size:12.5px;margin:8px 0 0;">막대 아래 숫자는 시각(0~23시). 같은 날 시도별(MWh): ${top}.
+        전남광주권 합계 ${statFmt(시.권역_MWh, 0)} MWh(전라남도 + 광주 + 「전남광주통합특별시」 칸 ${statFmt(시.통합특별시_MWh)} MWh). 통합특별시 칸은 전남 막대에 넣지 않았습니다.
+        통합특별시 출범(2026-07-01) 뒤 8월 중순부터 일부 발전기가 새 이름으로 따로 집계되는 것으로 보이며, 전라남도 칸과 겹치지 않는 것으로 보입니다(전력거래소 확인 전).</p>
+      <p class="text-mute" style="font-size:12.5px;margin:6px 0 0;">저녁(17~21시) 막대에는 태양광 연계 저장장치(ESS) 방전이 섞였을 수 있습니다(확인 전). 이 카드는 「발전량」, 위 2025 카드는 「거래량」이라 범위가 달라 서로 맞비교하지 않습니다.</p>
+      <p class="text-mute" style="font-size:12.5px;margin:6px 0 0;">이 자료는 공개가 약 ${늦음}일 늦습니다. 하루 한 번 새로 나온 날이 있는지 확인합니다(마지막 확인 ${escapeHtml(시.마지막확인 || '')}).</p>
+      ${statSrc({자료종류: '실측', 기준일: 시.기준일, 출처: 시.출처})}
+    </div>`;
+  }
   return `
     <div class="card" style="margin-bottom:16px;border-left:4px solid var(--primary);">
       <div class="card-title"><h3 class="serif">시도 태양광 전력거래량 — 전남 ${Number(전남.순위)}위(${statFmt(전남.거래량_GWh)} GWh, 시도 17곳 거래량의 ${Number(전남.비중_pct)}%)</h3></div>
@@ -4007,6 +4033,7 @@ function statHtml(d){
       <p class="text-mute" style="font-size:12.5px;margin:8px 0 0;">막대 아래: 월(위)과 GWh(아래). 시도 17곳 거래량 합 대비 전남 비중 — ${mShare}</p>
       ${statSrc(월)}
     </div>
+    ${hourCard}
     ${sigunCard}
     ${cfCard}
     ${trendCard}
