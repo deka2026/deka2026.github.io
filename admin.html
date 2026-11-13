@@ -159,6 +159,15 @@ table.members tr:last-child td{border-bottom:none;}
 .fb-meta{font-size:12.5px;color:var(--ink-faint);}
 .fb-msg{font-size:14.5px;white-space:pre-wrap;word-break:break-word;}
 .fb-orig{margin-top:6px;font-size:13px;color:var(--ink-faint);white-space:pre-wrap;word-break:break-word;border-left:3px solid var(--line);padding-left:10px;}
+.fb-est{margin-top:10px;border:1px solid var(--line);border-radius:var(--radius-sm);padding:10px 12px;background:#fafaf5;font-size:13.5px;}
+.fb-est b.t{display:block;margin-bottom:6px;}
+.fb-est table{border-collapse:collapse;width:100%;max-width:560px;}
+.fb-est th,.fb-est td{border-bottom:1px solid var(--line-soft);padding:4px 8px;text-align:left;}
+.fb-est th:first-child,.fb-est td:first-child{text-align:center;}
+.fb-est td.n{text-align:right;font-variant-numeric:tabular-nums;}
+.fb-est tr.off td{color:var(--ink-faint);text-decoration:line-through;}
+.fb-est tr.sum td{font-weight:700;border-bottom:none;}
+.fb-est .nt{margin-top:6px;font-size:12.5px;color:var(--ink-faint);}
 .fb-controls{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:flex-start;}
 .fb-controls select{padding:7px 10px;border:1px solid var(--line);border-radius:var(--radius-sm);background:#fff;}
 .fb-controls textarea{flex:1;min-width:220px;min-height:40px;padding:8px 10px;border:1px solid var(--line);border-radius:var(--radius-sm);resize:vertical;}
@@ -897,6 +906,36 @@ $('#edit-form').addEventListener('submit', async e => {
 /* ── 개선의견 탭 ── */
 const FB_STATUSES = ['미확인', '검토중', '반영', '보류'];
 
+/* 11-13 이사장 지시: 구축 의뢰(/ax-build/)는 고른 서비스로 비용을 자동 산정해 보여 준다.
+   풀코스 200만원(5일간 10시간 출장) = 경영진단 20% · 서버설치 20% · 직원교육 30% · 클리닉 20% · 연대지능 시스템 지원 10%.
+   연대지능 시스템 지원은 늘 들어간다. 고른 서비스가 없거나 옛 의뢰(서비스 칸 없음)면 풀코스로 본다. 출장 시간은 같은 비율로 나눈 참고값. */
+const BUILD_FULL = 2000000, BUILD_HOURS = 10, BUILD_DAYS = 5;
+const BUILD_ITEMS = [
+  { k: '경영진단', pct: 20, m: '경영진단·온톨로지 분석' },
+  { k: '서버설치', pct: 20, m: '기관별 전용 서버 설치' },
+  { k: '직원교육', pct: 30, m: '구성원 AI 활용 교육' },
+  { k: '클리닉', pct: 20, m: '구축 후 사용 클리닉' },
+  { k: '연대지능 시스템 지원', pct: 10, m: null },
+];
+function buildEstimate(text) {
+  if (!/^\[AI업무자동화 사이트 구축 의뢰\]/.test(text || '')) return '';
+  const line = (text.match(/^함께 받을 서비스:\s*(.*)$/m) || [])[1];
+  const picked = line && line.trim() !== '-' ? line.split(',').map(x => x.trim()) : [];
+  const full = !picked.length;
+  const won = n => n.toLocaleString('ko-KR') + '원';
+  let sum = 0, hrs = 0;
+  const rows = BUILD_ITEMS.map(it => {
+    const on = full || !it.m || picked.includes(it.m);
+    const amt = BUILD_FULL * it.pct / 100, h = BUILD_HOURS * it.pct / 100;
+    if (on) { sum += amt; hrs += h; }
+    return `<tr${on ? '' : ' class="off"'}><td>${esc(it.k)}</td><td class="n">${it.pct}%</td><td class="n">${won(amt)}</td><td class="n">${h}시간</td></tr>`;
+  }).join('');
+  return `<div class="fb-est"><b class="t">💰 자동 산정 비용 — ${full ? '풀코스(고른 서비스 없음)' : '고른 서비스 기준'}</b>
+    <table><thead><tr><th>항목</th><th style="text-align:right">비율</th><th style="text-align:right">금액</th><th style="text-align:right">출장(참고)</th></tr></thead>
+    <tbody>${rows}<tr class="sum"><td>합계</td><td class="n"></td><td class="n">${won(sum)}</td><td class="n">${hrs}시간</td></tr></tbody></table>
+    <div class="nt">기준: 풀코스 ${won(BUILD_FULL)}(${BUILD_DAYS}일간 ${BUILD_HOURS}시간 출장). 연대지능 시스템 지원은 늘 포함. 출장 시간은 비율대로 나눈 참고값입니다.</div></div>`;
+}
+
 async function loadFeedback() {
   const box = $('#feedback-body');
   box.className = 'loading'; box.textContent = '불러오는 중…';
@@ -926,6 +965,7 @@ async function loadFeedback() {
         <span class="fb-meta">${meta}</span>
       </div>
       <div class="fb-msg">${esc(f.msg_ko || f.msg)}</div>
+      ${buildEstimate(f.msg_ko || f.msg)}
       ${showOrig ? `<div class="fb-orig">원문: ${esc(f.msg)}</div>` : ''}
       ${f.reply ? `<div class="fb-reply-saved">답변: ${esc(f.reply)}</div>` : ''}
       <div class="fb-controls">
