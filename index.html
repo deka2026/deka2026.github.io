@@ -243,8 +243,8 @@ try{var _h=location.hash||'';if(localStorage.getItem('sk_in')==='1'&&!/^#\/(map|
 /* ── 11-07 첫 화면 개편(이사장 지시): 1단 배치·사이드바(비로그인도)·메뉴 순서·시험용 표시 빨강 */
 .tmp{color:var(--danger);font-weight:600}
 #topnav[hidden],#topnav a[hidden],.view[hidden]{display:none!important}   /* 11-07: hidden 속성이 display:flex 에 덮여 비로그인 휴대폰 아래 탭에 내 페이지·내 폴더·꾸미기가 보였다 */.grp li a .tmp,.side .tmp,.mcard .tmp{font-size:0.7667rem}
-body[data-route="start"] .app{grid-template-columns:270px minmax(0,1fr)}
-body[data-route="start"] .side{display:block}
+body[data-route="start"] .app,body[data-route="map"] .app{grid-template-columns:270px minmax(0,1fr)}
+body[data-route="start"] .side,body[data-route="map"] .side{display:block}
 body[data-route="start"] .tree{grid-template-columns:1fr}
 #vStart .secs{grid-template-columns:1fr}
 #vStart .hero{grid-template-columns:1fr;margin:0 0 14px}
@@ -258,7 +258,7 @@ body[data-route="start"] .tree{grid-template-columns:1fr}
 .side .pub{list-style:none;margin:0;padding:0}.side .pub>li{margin-bottom:6px}.side .pub .sn{display:block;font-weight:600;font-size:0.9rem;color:var(--g9);padding:4px 6px}
 .side .pub ul{list-style:none;margin:0;padding:0 0 0 10px}.side .pub li a{display:block;font-size:0.8667rem;padding:3px 6px;border-radius:6px;color:var(--ink)}.side .pub li a:hover{background:var(--g0)}.side .pub li.locked a{color:var(--mute)}
 .side .pub .sn .rq{font-size:0.7333rem;color:var(--gold);background:var(--gold1);border-radius:8px;padding:0 6px;font-weight:400}
-@media(max-width:760px){body[data-route="start"] .app{grid-template-columns:1fr}body[data-route="start"] .sideTog:not([hidden]){display:inline-flex}body[data-route="start"] .side{display:block}.side .pub li a{min-height:var(--tap);display:flex;align-items:center}}
+@media(max-width:760px){body[data-route="start"] .app,body[data-route="map"] .app{grid-template-columns:1fr}body[data-route="start"] .sideTog:not([hidden]),body[data-route="map"] .sideTog:not([hidden]){display:inline-flex}body[data-route="start"] .side,body[data-route="map"] .side{display:block}.side .pub li a{min-height:var(--tap);display:flex;align-items:center}}
 </style>
 <script src="/ai-dock.js?v=20261108b" defer></script><!-- 11-04 알파언니 🟠1: 판 표시 — 캐시된 옛 상담창(4시간)이 새 첫 화면에 붙지 않게, 고칠 때마다 올린다 -->
 </head>
@@ -290,19 +290,19 @@ body[data-route="start"] .tree{grid-template-columns:1fr}
   <!-- 통합관리자 등급별 미리보기 띠 — 관문·둘러보기에서도 보여야 「원래대로」로 돌아온다 -->
   <details class="pv" id="pv"><summary><b>🧪 등급 미리보기</b> <span class="pvsub tmp" title="오픈 전 제거">(시험용 · 통합관리자만 · 오픈 전 제거)</span><span class="now" id="pvNow"></span></summary><div class="pvb" id="pvBtns" role="group" aria-label="미리볼 등급"></div></details>
 
-  <!-- ② 둘러보기 (#/map, 공개) -->
-  <main id="vMap" class="view" aria-label="둘러보기 — 사이트맵">
-    <div class="secT"><h2>둘러보기 — 말로 쓰는 사이트맵</h2><p class="sub">화면으로 바로 가거나, 예시를 눌러 상담창에 그 말을 넣어 보세요. 🔒 는 어떤 회원이 쓰는지 적혀 있습니다.</p></div>
-    <div class="mapbar"><input id="mapFind" type="search" placeholder="찾기 (예: 근태, 입찰, 공지)" aria-label="둘러보기에서 찾기"><nav class="mapchips" id="mapChips" aria-label="묶음 바로가기"></nav></div>
-    <p class="msg" id="mapNone" hidden>찾는 말이 든 기능이 없습니다. 상담창에 그대로 물어보셔도 됩니다.</p>
-    <div id="mapBody"></div>
-  </main>
-
   <!-- 공통 틀 — 사이드바 + 본문(옛 트리 / 개인페이지 / 내 폴더 / 꾸미기) -->
   <div id="shell" class="view">
     <div class="app" id="app">
       <aside class="side" id="sideWrap" aria-label="내 메뉴"><div class="drawerHead"><h2 id="drawerT">내 메뉴</h2><button class="btn" id="sideClose" type="button">✕ 닫기</button></div><div id="side"></div></aside>
       <div class="scrim" id="sideScrim" hidden></div>
+      <!-- ② 둘러보기 (#/map, 공개) -->
+      <main id="vMap" class="view" aria-label="둘러보기 — 사이트맵">
+    <div class="secT"><h2>둘러보기 — 말로 쓰는 사이트맵</h2><p class="sub">화면으로 바로 가거나, 예시를 눌러 상담창에 그 말을 넣어 보세요. 🔒 는 어떤 회원이 쓰는지 적혀 있습니다.</p></div>
+    <div class="mapbar"><input id="mapFind" type="search" placeholder="찾기 (예: 근태, 입찰, 공지)" aria-label="둘러보기에서 찾기"><nav class="mapchips" id="mapChips" aria-label="묶음 바로가기"></nav></div>
+    <p class="msg" id="mapNone" hidden>찾는 말이 든 기능이 없습니다. 상담창에 그대로 물어보셔도 됩니다.</p>
+    <div id="mapBody"></div>
+      </main>
+
       <!-- 첫 화면 (#/start · 비로그인 #/) — 11-07 이사장 지시: 1단 배치, 왼쪽 사이드바에 전체 메뉴 -->
       <main id="vStart" class="view" aria-label="첫 화면">
         <div id="axLockBar" role="status" hidden class="tmp" style="margin:0 0 14px;padding:10px 14px;border:1px solid #e0c070;background:#fff7e0;border-radius:10px;font-size:14px">🧪 (개편 중 임시 안내 · 오픈 전 제거) 🛠️ 사교원 사이트를 새 모습으로 고치는 중입니다. 내 페이지·내 폴더·둘러보기는 그대로 쓰실 수 있고, 상담창의 실행(보내기·바꾸기)·발송·정기 루틴만 개편이 끝날 때까지 쉬고 있습니다.</div>
@@ -979,7 +979,7 @@ function route() {
   { const hd = document.querySelector('header.top'); if (hd) document.documentElement.style.setProperty('--hdrH', Math.round(hd.getBoundingClientRect().height) + 'px'); }
   document.querySelectorAll('.mgronly').forEach(e => { e.hidden = !(me && (RANK[me.role] || 0) >= RANK.staff); });   // 개선안 23: 관리 링크는 매니저 이상
 
-  const shell = r === 'start' || (!!me && (r === 'home' || r === 'files' || r === 'custom'));
+  const shell = r === 'start' || r === 'map' || (!!me && (r === 'home' || r === 'files' || r === 'custom'));   // 11-13 이사장 지시: 둘러보기에도 사이드바
   const show = (id, on) => $(id).classList.toggle('on', !!on);
   show('#shell', shell); show('#vStart', r === 'start'); show('#tree', r === 'start');
   show('#homeMain', !!me && r === 'home'); show('#vFiles', !!me && r === 'files'); show('#vCustom', !!me && r === 'custom'); show('#vMap', r === 'map');
@@ -991,7 +991,7 @@ function route() {
   if (me && r === 'home') { renderSideHome(); renderHome(); }
   if (me && r === 'files') { renderSideHome(); renderFiles(); }
   if (me && r === 'custom') { renderSideHome(); renderCustom(); }
-  if (r === 'map') renderMap();
+  if (r === 'map') { renderSideStart(); renderMap(); }   // 둘러보기 사이드바 = 첫 화면과 같은 전체 메뉴
   if (!shell) document.body.classList.remove('sideOpen');
 }
 
