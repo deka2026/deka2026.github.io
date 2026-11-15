@@ -2428,7 +2428,7 @@ const PRICING = {
   fed: {
     이름: '연합회 회원',
     기본: {값: 30000, 한도: '사용자 5명 · 회원조합 20곳까지(넘으면 1곳당 월 1,000원) · 저장 10GB', 메뉴: [
-      '회원 지원업무 — 회원조합 지원 현황판 · 지원요청 처리 · 조합·마을 현황 · 공모·심사 지원 · 회원조합 신고 현황 · 공지·자료 배포',
+      '회원 지원업무 — 회원조합 지원 현황판 · 지원요청 처리 · 조합·마을 현황 · 공모·심사 지원 · 세무 파일럿 KPI · 회원조합 신고 현황 · 공지·자료 배포',
       '연합회 자체 사무 — 사무국 운영(총회·이사회) · 회비 부과·수납 · 공동사업 · 연합회 회계·결산 · 재무제표',
       '소통 — 전남 발전 현황 · 마이페이지']},
     선택: [
@@ -2439,12 +2439,14 @@ const PRICING = {
     ],
     올인원: 50000,
     추가: ['AI 상담 100회 5,000원', '문서·검토 30건 5,000원', '활동 영상 5편 3,000원', '저장 10GB 3,000원'],
-    별도: ['회원조합 수가 20곳을 넘으면 1곳당 월 1,000원'],
+    별도: ['회원조합 수가 20곳을 넘으면 1곳당 월 1,000원(위 계산에 회원조합 수를 넣으면 더해집니다)'],
+    포함조합: 20, 초과값: 1000,
   },
 };
-const PRC_FREE = ['손님 화면 전부 — 사업소개 · 사례 · FAQ · 신청·진단 · 간이 수익 계산 · 상담 신청', '상업발전 전 조합·연합회의 모든 메뉴'];
+const PRC_FREE = ['손님 화면 전부 — 사업소개 · 사례 · FAQ · 신청·진단 · 간이 수익 계산 · 상담 신청', '상업발전 전 협동조합의 모든 메뉴', '회원조합 가운데 상업운전을 시작한 곳이 없는 동안 연합회의 모든 메뉴'];
 let _prcKind = 'coop';
 const _prcPick = {coop: {}, fed: {}};
+let _prcFedN = 20;   // 연합회 회원조합 수(계산기)
 const prcWon = n => Number(n).toLocaleString('ko-KR') + '원';
 function pricingRender(){
   const box = document.getElementById('prcBody'); if(!box) return;
@@ -2465,7 +2467,9 @@ function pricingRender(){
         <div><div class="nm">${escapeHtml(o.이름)}</div><div class="ds">${escapeHtml(o.메뉴)} · ${escapeHtml(o.한도)}</div></div>
         <div class="pr">+${prcWon(o.값)}</div></label>`).join('')}
       <div style="margin-top:8px;"><button type="button" class="btn btn-outline btn-sm" id="prcAll">전부 고르기(올인원)</button>
-        <button type="button" class="btn btn-ghost btn-sm" id="prcNone">고른 것 지우기</button></div></div>
+        <button type="button" class="btn btn-ghost btn-sm" id="prcNone">고른 것 지우기</button></div>
+      ${P.포함조합 ? `<label class="prc-opt" style="grid-template-columns:1fr auto;"><div><div class="nm">👥 회원조합 수</div><div class="ds">${P.포함조합}곳까지 기본 이용료에 들어 있고, 넘는 1곳마다 월 ${prcWon(P.초과값)}</div></div>
+        <input type="number" id="prcFedN" min="1" max="999" step="1" value="${_prcFedN}" inputmode="numeric" style="width:84px;height:36px;margin:0;padding:4px 8px;border:1px solid var(--line);border-radius:var(--radius-sm);"></label>` : ''}</div>
     <div class="card prc-sum" id="prcSum" aria-live="polite"></div>
     <div class="card"><h3 class="serif">올인원</h3>
       <p>기본 이용료와 선택 메뉴 전부를 <strong>월 ${prcWon(P.올인원)}</strong>에 씁니다(따로 사면 ${prcWon(단품합)}). 1년치를 한 번에 내시면 <strong>${prcWon(P.올인원 * 10)}</strong>입니다.</p></div>
@@ -2474,22 +2478,26 @@ function pricingRender(){
       <div class="card"><h3 class="serif">무료로 쓰는 것</h3><ul class="prc-list">${PRC_FREE.map(m => `<li>${escapeHtml(m)}</li>`).join('')}</ul>
         <h3 class="serif" style="margin-top:14px;">따로 정하는 것</h3><ul class="prc-list">${P.별도.map(m => `<li>${escapeHtml(m)}</li>`).join('')}</ul></div>
     </div>`;
-  box.querySelectorAll('.prc-opt input').forEach(c => c.onchange = () => { pick[c.dataset.k] = c.checked; prcSum(); });
+  box.querySelectorAll('.prc-opt input[type=checkbox]').forEach(c => c.onchange = () => { pick[c.dataset.k] = c.checked; prcCalc(); });
+  const fn = document.getElementById('prcFedN');
+  if(fn) fn.oninput = () => { const v = parseInt(fn.value, 10); _prcFedN = (v > 0 && v < 1000) ? v : 20; prcCalc(); };
   document.getElementById('prcAll').onclick = () => { P.선택.forEach(o => pick[o.k] = true); pricingRender(); };
   document.getElementById('prcNone').onclick = () => { P.선택.forEach(o => pick[o.k] = false); pricingRender(); };
-  prcSum();
+  prcCalc();
 }
-function prcSum(){
+function prcCalc(){
   const el = document.getElementById('prcSum'); if(!el) return;
   const P = PRICING[_prcKind], pick = _prcPick[_prcKind];
   const 고른 = P.선택.filter(o => pick[o.k]);
   const 단품 = P.기본.값 + 고른.reduce((a, o) => a + o.값, 0);
   const 전부 = 고른.length === P.선택.length;
-  const 월 = 전부 ? P.올인원 : Math.min(단품, P.올인원);
+  const 초과 = P.포함조합 ? Math.max(0, _prcFedN - P.포함조합) * P.초과값 : 0;   // 연합회 20곳 초과분은 올인원에도 따로 더한다
+  const 월 = (전부 ? P.올인원 : Math.min(단품, P.올인원)) + 초과;
   const 올인원이싸다 = !전부 && 단품 > P.올인원;
   el.innerHTML = `<div class="row"><span>기본 이용료</span><span>${prcWon(P.기본.값)}</span></div>
     ${고른.map(o => `<div class="row"><span>${escapeHtml(o.이름)}</span><span>+${prcWon(o.값)}</span></div>`).join('')}
     ${(전부 || 올인원이싸다) ? `<div class="row"><span>올인원 할인</span><span>−${prcWon(단품 - P.올인원)}</span></div>` : ''}
+    ${초과 ? `<div class="row"><span>회원조합 ${P.포함조합}곳 초과 ${_prcFedN - P.포함조합}곳</span><span>+${prcWon(초과)}</span></div>` : ''}
     <div class="row" style="border-top:1px solid var(--primary-100);padding-top:8px;margin-top:8px;"><span>한 달 요금 <span class="text-small text-mute">(부가세 별도)</span></span><span class="tot">${prcWon(월)}</span></div>
     <div class="row text-small text-mute"><span>부가세 포함</span><span>${prcWon(Math.round(월 * 1.1))}</span></div>
     <div class="row text-small text-mute"><span>1년 한 번에(10개월 값, 부가세 별도)</span><span>${prcWon(월 * 10)}</span></div>
