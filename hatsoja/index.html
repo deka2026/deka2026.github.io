@@ -6999,22 +6999,22 @@ function plantCard(){
   const ed = _PLANT_EDIT ? P.filter(function(p){ return p.id === _PLANT_EDIT; })[0] : null;
   const v = function(k){ return ed && ed[k] !== null && ed[k] !== undefined ? escapeHtml(String(ed[k])) : ''; };
   const 알림 = A.length ? '<div style="margin:0 0 12px;">' + A.map(function(a){
-      const cls = a.level === '지남' ? 'badge-danger' : (a.level === '임박' ? 'badge-success' : 'badge-mute');
+      const cls = a.level === '지남' ? 'badge-danger' : (a.level === '임박' ? 'badge-danger' : 'badge-mute');
       return '<div style="font-size:13px;margin:3px 0;"><span class="badge ' + cls + '">' + escapeHtml(a.level) + '</span> ' + escapeHtml(a.text) + '</div>';
     }).join('') + '</div>' : '';
   const 표 = P.length ? '<div style="overflow-x:auto;"><table class="tbl"><thead><tr><th>발전소</th><th class="num">준공 용량(kW)</th><th class="num">인버터(kW)</th>'
-      + '<th>방위·경사</th><th>상업운전</th><th>다음 정기검사</th><th>사용허가 만료</th><th>모니터링</th><th>월 실적</th><th></th></tr></thead><tbody>'
+      + '<th>방위·경사</th><th>상업운전</th><th>다음 정기검사</th><th>사용허가 만료</th><th>하자보증 만료</th><th>모니터링</th><th>월 실적</th><th></th></tr></thead><tbody>'
       + P.map(function(p){
           return '<tr><td><b>' + escapeHtml(p.name) + '</b>' + (p.location ? '<br><span class="text-mute" style="font-size:12px;">' + escapeHtml(p.location) + '</span>' : '') + '</td>'
             + '<td class="num">' + _plantNum(p.capacity_kw) + (p.source ? '' : ' <span class="badge badge-mute" title="용량의 근거 서류가 적혀 있지 않습니다">근거 없음</span>') + '</td>'
             + '<td class="num">' + _plantNum(p.inverter_kw) + '</td>'
             + '<td>' + (p.azimuth !== null && p.azimuth !== undefined ? _plantNum(p.azimuth, 1) + '°' : '-') + ' · ' + (p.tilt !== null && p.tilt !== undefined ? _plantNum(p.tilt, 1) + '°' : '-') + '</td>'
-            + '<td>' + escapeHtml(p.cod || '-') + '</td><td>' + escapeHtml(p.next_inspection || '-') + '</td><td>' + escapeHtml(p.permit_end || '-') + '</td>'
+            + '<td>' + escapeHtml(p.cod || '-') + '</td><td>' + escapeHtml(p.next_inspection || '-') + '</td><td>' + escapeHtml(p.permit_end || '-') + '</td><td>' + escapeHtml(p.warranty_end || '-') + '</td>'
             + '<td>' + escapeHtml(p.monitoring || '-') + '</td>'
             + '<td>' + (p.in_monthly ? '<span class="badge badge-success">포함</span>' : '<span class="badge badge-mute">제외</span>') + '</td>'
             + '<td class="tbl-actions"><button class="btn btn-outline btn-sm" onclick="plantEdit(' + p.id + ')">고치기</button> '
             + '<button class="btn btn-outline btn-sm" onclick="plantDelete(' + p.id + ')">지우기</button></td></tr>'
-            + (p.note || p.modules || p.inverter ? '<tr><td colspan="10" class="text-mute" style="font-size:12px;padding-top:0;border-top:0;">'
+            + (p.note || p.modules || p.inverter ? '<tr><td colspan="11" class="text-mute" style="font-size:12px;padding-top:0;border-top:0;">'
                 + escapeHtml([p.modules, p.inverter, p.note].filter(Boolean).join(' · ')) + '</td></tr>' : '');
         }).join('')
       + '</tbody></table></div>'
@@ -7074,7 +7074,7 @@ async function _plantCall(method, url, body){
     if(!j.ok){
       const 말 = {bad_name:'발전소 이름을 적어 주세요.', bad_capacity_kw:'준공 용량 숫자를 확인해 주세요.', bad_inverter_kw:'인버터 용량 숫자를 확인해 주세요.',
         bad_azimuth:'방위는 0~360 사이 숫자입니다.', bad_tilt:'경사 숫자를 확인해 주세요.', bad_date:'날짜를 확인해 주세요(끝난 날이 시작일보다 앞설 수 없습니다).',
-        bad_kind:'종류를 골라 주세요.', no_village:'이 계정에 연결된 조합이 없습니다.', forbidden:'이 계정으로는 고칠 수 없습니다.', not_found:'그 항목을 찾지 못했습니다.'};
+        bad_kind:'종류를 골라 주세요.', bad_id:'항목을 다시 골라 주세요.', bad_cod:'상업운전 개시일을 확인해 주세요.', bad_next_inspection:'다음 정기검사일을 확인해 주세요.', bad_permit_end:'사용허가 만료일을 확인해 주세요.', bad_warranty_end:'하자보증 만료일을 확인해 주세요.', no_village:'이 계정에 연결된 조합이 없습니다.', forbidden:'이 계정으로는 고칠 수 없습니다.', not_found:'그 항목을 찾지 못했습니다.'};
       toast(말[j.error] || ('저장하지 못했습니다: ' + (j.error || res.status))); return null;
     }
     const kinds = _MY_PLANTS && _MY_PLANTS.kinds;
