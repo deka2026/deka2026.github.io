@@ -6639,7 +6639,21 @@ function powerAnomalies(){
   if(d.length < 2) return [];
   const capKw = Number(ledgerGet('설비용량kW')) || 0;
   const out = [];
+  const _일 = function(s){ return Date.parse(String(s).slice(0,10) + 'T00:00:00Z') / 86400000; };
   d.forEach(function(row, i){
+    // 2026-11-15 pveyes 실자료 시사점: 모니터링 통신이 끊기면 그날 기록이 아예 없다(0 kWh 줄도 없다).
+    // 반짝반짝 2호기는 다섯 달 기록이 비었다가 통신이 돌아온 날 하루에 60,762 kWh(설비 99kW 의 76일치)가 몰려 들어왔다.
+    // 모니터링 업체의 장애 기록에는 둘 다 남지 않았다 — 그래서 여기서 잡는다.
+    if(i > 0){
+      const 빈날 = _일(row.date) - _일(d[i-1].date) - 1;
+      if(빈날 >= 1) out.push({date: d[i-1].date, 유형:'자료 빠짐', 값: 빈날 + '일',
+        말: d[i-1].date + ' 다음 ' + 빈날 + '일 동안 기록이 없습니다. 모니터링 통신을 확인하세요. 통신이 돌아오면 밀린 값이 하루에 몰려 들어올 수 있습니다.'});
+    }
+    if(capKw > 0 && row.kwh > capKw * 12){
+      out.push({date: row.date, 유형:'몰아 들어옴', 값: Math.round(row.kwh).toLocaleString() + ' kWh',
+        말:'설비 ' + capKw.toLocaleString() + 'kW 가 하루에 낼 수 있는 양(설비×12시간)을 넘습니다. 끊겼던 기록이 한꺼번에 들어온 값으로 보입니다 — 이날은 실제보다 많고, 기록이 빠졌던 날들은 그만큼 적게 잡혔습니다.'});
+      return;
+    }
     if(row.kwh === 0){ out.push({date: row.date, 유형:'무발전', 값:'0 kWh', 말:'하루 종일 발전이 없습니다. 인버터·계통을 점검하세요.'}); return; }
     const 앞 = d.slice(Math.max(0, i - 7), i).filter(function(x){ return x.kwh > 0; });
     if(앞.length >= 3){
@@ -6806,6 +6820,27 @@ async function powerLoadMine(){
   }
 }
 
+// 2026-11-15: 월 실적과 함께 그 달의 자료 상태를 보낸다 — 서버 저발전 진단(lowgen)이 이 표시로 「자료 빠짐」·「자료 이상」을 가른다.
+function powerMonthFlags(ym, 일수){
+  const an = powerAnomalies();
+  const 빠짐 = an.filter(function(a){ return a.유형 === '자료 빠짐' && String(a.date).slice(0,7) <= ym; });
+  // 빈 날을 그 달 몫만 센다(앞 기록 다음날부터 빈 날 수만큼)
+  let 빈날 = 0;
+  빠짐.forEach(function(a){
+    const n = parseInt(a.값, 10) || 0;
+    for(let k = 1; k <= n; k++){
+      const t = new Date(Date.parse(String(a.date).slice(0,10) + 'T00:00:00Z') + k * 86400000).toISOString().slice(0,7);
+      if(t === ym) 빈날++;
+    }
+  });
+  const 몰림 = an.filter(function(a){ return a.유형 === '몰아 들어옴' && String(a.date).slice(0,7) === ym; })
+                .map(function(a){ return a.date + ' ' + a.값; });
+  const out = {발전일수: 일수};
+  if(빈날) out.자료빠짐_일수 = 빈날;
+  if(몰림.length) out.몰아들어옴 = 몰림;
+  return out;
+}
+
 async function powerSubmitMonth(ym, 조용히){
   if(!REAL_API){ toast('체험 모드에서는 제출되지 않습니다. 실계정으로 로그인하면 연합회에 올라갑니다.'); return false; }
   const m = powerLocalMonths().filter(function(x){ return x.month === ym; })[0];
@@ -6818,7 +6853,7 @@ async function powerSubmitMonth(ym, 조용히){
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({month:ym, kwh:m.kwh, smp:m.smp, rec:m.rec, revenue:m.revenue,
         expense:m.expense, debt:m.debt, balance:m.balance, dist:배분, status:'마감',
-        detail:{발전일수:m.일수}})});
+        detail:powerMonthFlags(ym, m.일수)})});
     const j = await res.json();
     if(!j.ok){ toast('제출하지 못했습니다: ' + (j.error || res.status)); return false; }
     if(!조용히){ toast(ym + ' 실적을 제출했습니다.'); await powerLoadMine(); }
@@ -6997,9 +7032,9 @@ const DOC_KINDS = [
   { id:'kepco',     이름:'한전 전력거래 명세', ext:['csv','xls','xlsx','pdf'], kw:['한전','전력거래','전력대금','정산금','판매대금','smp','rec'],
     필드:['정산월','발전량kWh','SMP','REC','정산금액'],
     작업:['발전대장 기입','수익 실적','배분 기준액','대시보드'], 파싱:'client' },
-  { id:'rems',      이름:'REMS 발전량',      ext:['csv','xls','xlsx'], kw:['rems','발전량','시간별','일별발전'],
+  { id:'rems',      이름:'발전량(REMS·모니터링)', ext:['csv','xls','xlsx'], kw:['rems','발전량','시간별','일별발전','pveyes','모니터링','통계분석'],
     필드:['일자','발전량kWh','이용률'],
-    작업:['발전일별 누적','이상감지(무발전·급락·이용률)','알림'], 파싱:'client' },
+    작업:['발전일별 누적','이상감지(무발전·급락·이용률·자료 빠짐·몰아 들어옴)','알림'], 파싱:'client' },
   { id:'permit',    이름:'발전사업 허가증',   ext:['pdf','jpg','jpeg','png','hwp','hwpx'], kw:['허가증','발전사업허가','허가서'],
     필드:['허가일','허가번호','설비용량','허가권자'],
     작업:['허가일 확정','허가+12개월 기한 3종 자동계산','일정 반영'], 파싱:'server' },
