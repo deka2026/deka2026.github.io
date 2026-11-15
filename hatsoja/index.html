@@ -1199,7 +1199,7 @@ footer{
         <summary>플랫폼 이용료가 있나요?</summary>
         <div class="faq-body">
           <strong>2026년 12월까지는 모든 회원이 무료 시범</strong>이고, 요금은 2027년 1월부터 받습니다. 그 뒤에도 <strong>상업발전 전에는 무료</strong>이고, 상업운전을 시작한 다음 달부터 기본 이용료(협동조합 월 10,000원, 연합회 월 30,000원, 부가세 별도)가 붙고,
-          AI 상담·문서 생성·서류 검토 같은 메뉴는 필요한 것만 골라 더합니다. 자세한 값과 계산은 <a href="#/pub/pricing">요금 안내</a>를 보세요.
+          AI 상담·문서 생성·서류 검토 같은 메뉴는 필요한 것만 골라 더합니다. 2026년 안에 가입한 조합·연합회는 2027년 한 해 반값(창립 회원)이고, 연합회가 회원조합 5곳 이상의 이용료를 한꺼번에 내면 20% 할인됩니다. 자세한 값과 계산은 <a href="#/pub/pricing">요금 안내</a>를 보세요.
         </div>
       </details>
       <details>
@@ -1258,6 +1258,7 @@ footer{
       <ul>
         <li><strong>요금은 2027년 1월부터 받습니다.</strong> 2026년 12월까지는 모든 회원이 무료 시범으로 씁니다.</li>
         <li><strong>상업발전 전에는 모든 메뉴가 무료</strong>입니다. 2027년 1월 이후에도 요금은 상업운전을 시작한 다음 달부터 붙습니다.</li>
+        <li><strong>창립 회원 반값</strong> — 2026년 안에 가입한 협동조합·연합회는 2027년 한 해 요금을 반값으로 냅니다(추가 묶음 제외).</li>
         <li>요금은 모두 <strong>부가세 별도, 월 단위</strong>입니다. 1년치를 한 번에 내시면 10개월 값으로 12개월을 씁니다.</li>
         <li>한 달 한도를 넘으면 추가 묶음을 사서 이어 쓰고, 다음 달 1일에 한도가 다시 채워집니다.</li>
       </ul>
@@ -1557,7 +1558,7 @@ const MOCK = {
       {id:'n04', title:'완도군 시범사업 설명회 자료', date:'2026-07-01', tag:'자료', body:'설명회에서 배포된 슬라이드 및 Q&A.'},
     ],
     faq: [
-      {id:'q01', q:'플랫폼 이용료가 있나요?', a:'2026년 12월까지는 모든 회원이 무료 시범이고 요금은 2027년 1월부터 받습니다. 그 뒤에도 상업발전 전에는 무료이고, 상업운전을 시작한 다음 달부터 기본 이용료(협동조합 월 10,000원, 연합회 월 30,000원, 부가세 별도)에 필요한 메뉴만 골라 더합니다. 자세한 값은 요금 안내 화면을 보세요.'},
+      {id:'q01', q:'플랫폼 이용료가 있나요?', a:'2026년 12월까지는 모든 회원이 무료 시범이고 요금은 2027년 1월부터 받습니다. 그 뒤에도 상업발전 전에는 무료이고, 상업운전을 시작한 다음 달부터 기본 이용료(협동조합 월 10,000원, 연합회 월 30,000원, 부가세 별도)에 필요한 메뉴만 골라 더합니다. 2026년 안에 가입한 조합·연합회는 2027년 한 해 반값(창립 회원), 연합회가 회원조합 5곳 이상 이용료를 한꺼번에 내면 20% 할인입니다. 자세한 값은 요금 안내 화면을 보세요.'},
       {id:'q02', q:'우리 마을은 아직 협동조합이 없는데 이용 가능한가요?', a:'예비 조합원 자격으로 가입 가능합니다.'},
     ],
     files: [
@@ -2441,10 +2442,12 @@ const PRICING = {
     ],
     올인원: 50000,
     추가: ['AI 상담 100회 5,000원', '문서·검토 30건 5,000원', '활동 영상 5편 3,000원', '저장 10GB 3,000원'],
-    별도: ['회원조합 수가 20곳을 넘으면 1곳당 월 1,000원(위 계산에 회원조합 수를 넣으면 더해집니다)'],
+    별도: ['회원조합 수가 20곳을 넘으면 1곳당 월 1,000원(위 계산에 회원조합 수를 넣으면 더해집니다)', '회원조합 이용료 일괄 납부 — 5곳 이상이면 회원조합 요금 20% 할인'],
     포함조합: 20, 초과값: 1000,
   },
 };
+const PRC_DISC = {창립해: 2027, 창립율: 0.5, 일괄최소: 5, 일괄율: 0.2};   // 11-15 이사장 결정: 창립 회원 첫해 반값, 연합회 일괄 납부 5곳 이상 20%
+let _prcFounder = false, _prcBulkN = 0;
 const PRC_FREE = ['2026년 12월까지 모든 회원의 모든 메뉴(무료 시범)', '손님 화면 전부 — 사업소개 · 사례 · FAQ · 신청·진단 · 간이 수익 계산 · 상담 신청', '상업발전 전 협동조합의 모든 메뉴', '회원조합 가운데 상업운전을 시작한 곳이 없는 동안 연합회의 모든 메뉴'];
 let _prcKind = 'coop';
 const _prcPick = {coop: {}, fed: {}};
@@ -2471,8 +2474,14 @@ function pricingRender(){
       <div style="margin-top:8px;"><button type="button" class="btn btn-outline btn-sm" id="prcAll">전부 고르기(올인원)</button>
         <button type="button" class="btn btn-ghost btn-sm" id="prcNone">고른 것 지우기</button></div>
       ${P.포함조합 ? `<label class="prc-opt" style="grid-template-columns:1fr auto;"><div><div class="nm">👥 회원조합 수</div><div class="ds">${P.포함조합}곳까지 기본 이용료에 들어 있고, 넘는 1곳마다 월 ${prcWon(P.초과값)}</div></div>
-        <input type="number" id="prcFedN" min="1" max="999" step="1" value="${_prcFedN}" inputmode="numeric" style="width:84px;height:36px;margin:0;padding:4px 8px;border:1px solid var(--line);border-radius:var(--radius-sm);"></label>` : ''}</div>
+        <input type="number" id="prcFedN" min="1" max="999" step="1" value="${_prcFedN}" inputmode="numeric" style="width:84px;height:36px;margin:0;padding:4px 8px;border:1px solid var(--line);border-radius:var(--radius-sm);"></label>` : ''}
+      <label class="prc-opt"><input type="checkbox" id="prcFounder"${_prcFounder ? ' checked' : ''}><div><div class="nm">🌱 창립 회원(2026년 안에 가입)</div><div class="ds">${PRC_DISC.창립해}년 한 해 위 요금의 반값으로 계산합니다</div></div><div class="pr">−50%</div></label></div>
     <div class="card prc-sum" id="prcSum" aria-live="polite"></div>
+    ${_prcKind === 'fed' ? `<div class="card"><h3 class="serif">회원조합 이용료 일괄 납부</h3>
+      <p>연합회가 회원조합들의 이용료를 한꺼번에 내면, <strong>${PRC_DISC.일괄최소}곳 이상일 때 회원조합 요금을 ${Math.round(PRC_DISC.일괄율 * 100)}% 할인</strong>합니다.</p>
+      <label class="prc-opt" style="grid-template-columns:1fr auto;"><div><div class="nm">일괄 납부할 회원조합 수(조합 올인원 기준)</div><div class="ds">조합 올인원 월 ${prcWon(PRICING.coop.올인원)} × 곳 수</div></div>
+        <input type="number" id="prcBulkN" min="0" max="999" step="1" value="${_prcBulkN}" inputmode="numeric" style="width:84px;height:36px;margin:0;padding:4px 8px;border:1px solid var(--line);border-radius:var(--radius-sm);"></label>
+      <div id="prcBulkOut" class="text-small" style="margin-top:6px;"></div></div>` : ''}
     <div class="card"><h3 class="serif">올인원</h3>
       <p>기본 이용료와 선택 메뉴 전부를 <strong>월 ${prcWon(P.올인원)}</strong>에 씁니다(따로 사면 ${prcWon(단품합)}). 1년치를 한 번에 내시면 <strong>${prcWon(P.올인원 * 10)}</strong>입니다.</p></div>
     <div class="grid grid-2">
@@ -2481,6 +2490,8 @@ function pricingRender(){
         <h3 class="serif" style="margin-top:14px;">따로 정하는 것</h3><ul class="prc-list">${P.별도.map(m => `<li>${escapeHtml(m)}</li>`).join('')}</ul></div>
     </div>`;
   box.querySelectorAll('.prc-opt input[type=checkbox]').forEach(c => c.onchange = () => { pick[c.dataset.k] = c.checked; prcCalc(); });
+  const fd = document.getElementById('prcFounder'); if(fd) fd.onchange = () => { _prcFounder = fd.checked; prcCalc(); };
+  const bn = document.getElementById('prcBulkN'); if(bn) bn.oninput = () => { const v = parseInt(bn.value, 10); _prcBulkN = (v >= 0 && v < 1000) ? v : 0; prcCalc(); };
   const fn = document.getElementById('prcFedN');
   if(fn) fn.oninput = () => { const v = parseInt(fn.value, 10); _prcFedN = (v > 0 && v < 1000) ? v : 20; prcCalc(); };
   document.getElementById('prcAll').onclick = () => { P.선택.forEach(o => pick[o.k] = true); pricingRender(); };
@@ -2494,12 +2505,17 @@ function prcCalc(){
   const 단품 = P.기본.값 + 고른.reduce((a, o) => a + o.값, 0);
   const 전부 = 고른.length === P.선택.length;
   const 초과 = P.포함조합 ? Math.max(0, _prcFedN - P.포함조합) * P.초과값 : 0;   // 연합회 20곳 초과분은 올인원에도 따로 더한다
-  const 월 = (전부 ? P.올인원 : Math.min(단품, P.올인원)) + 초과;
+  const 정월 = (전부 ? P.올인원 : Math.min(단품, P.올인원)) + 초과;
+  const 월 = _prcFounder ? Math.round(정월 * (1 - PRC_DISC.창립율)) : 정월;
+  const bo = document.getElementById('prcBulkOut');
+  if(bo){ const n = _prcBulkN, 정 = n * PRICING.coop.올인원, 할 = n >= PRC_DISC.일괄최소 ? Math.round(정 * (1 - PRC_DISC.일괄율)) : 정;
+    bo.textContent = n ? (n >= PRC_DISC.일괄최소 ? `회원조합 ${n}곳 일괄 납부: 월 ${prcWon(정)} → ${prcWon(할)}(${Math.round(PRC_DISC.일괄율 * 100)}% 할인, 부가세 별도)` : `회원조합 ${n}곳: 월 ${prcWon(정)} — ${PRC_DISC.일괄최소}곳 이상부터 할인됩니다`) : ''; }
   const 올인원이싸다 = !전부 && 단품 > P.올인원;
   el.innerHTML = `<div class="row"><span>기본 이용료</span><span>${prcWon(P.기본.값)}</span></div>
     ${고른.map(o => `<div class="row"><span>${escapeHtml(o.이름)}</span><span>+${prcWon(o.값)}</span></div>`).join('')}
     ${(전부 || 올인원이싸다) ? `<div class="row"><span>올인원 할인</span><span>−${prcWon(단품 - P.올인원)}</span></div>` : ''}
     ${초과 ? `<div class="row"><span>회원조합 ${P.포함조합}곳 초과 ${_prcFedN - P.포함조합}곳</span><span>+${prcWon(초과)}</span></div>` : ''}
+    ${_prcFounder ? `<div class="row"><span>창립 회원 ${PRC_DISC.창립해}년 반값</span><span>−${prcWon(정월 - 월)}</span></div>` : ''}
     <div class="row" style="border-top:1px solid var(--primary-100);padding-top:8px;margin-top:8px;"><span>한 달 요금 <span class="text-small text-mute">(부가세 별도)</span></span><span class="tot">${prcWon(월)}</span></div>
     <div class="row text-small text-mute"><span>부가세 포함</span><span>${prcWon(Math.round(월 * 1.1))}</span></div>
     <div class="row text-small text-mute"><span>1년 한 번에(10개월 값, 부가세 별도)</span><span>${prcWon(월 * 10)}</span></div>
