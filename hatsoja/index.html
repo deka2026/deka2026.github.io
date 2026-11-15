@@ -7186,10 +7186,15 @@ function docsCard(){
       const 넣은 = {}; (x.applied || []).forEach(function(a){ 넣은[a.key + '|' + a.value] = 1; });
       const 제안 = (x.suggest || []).length ? '<div style="background:var(--paper-soft);border-radius:8px;padding:8px 10px;margin-top:6px;">'
           + '<div style="font-size:12.5px;font-weight:600;margin-bottom:4px;">이 서류에서 찾은 값 — 맞는 것만 골라 대장에 넣으세요</div>'
+          + '<div class="text-mute" style="font-size:12px;margin-bottom:4px;">같은 칸에 값이 둘이면 서류끼리 다르게 적힌 것입니다. 근거 쪽을 열어 보고 하나만 고르세요. 스캔에서 읽은 숫자는 틀릴 수 있습니다.</div>'
           + x.suggest.map(function(s){ const k = s.key + '|' + s.value;
+              const 지금발전소 = P.filter(function(p){ return p.id === x.plant_id; })[0];
+              const 지금 = 지금발전소 ? 지금발전소[s.field] : undefined;
+              const 지금글 = !지금발전소 ? '' : (지금 === null || 지금 === undefined || 지금 === '' ? ' <span class="badge badge-info">지금 대장: 비어 있음</span>'
+                : (String(지금) === String(s.value) ? ' <span class="badge badge-mute">지금 대장과 같음</span>' : ' <span class="badge badge-danger">지금 대장: ' + escapeHtml(String(지금)) + ' → 바뀜</span>'));
               return '<label style="display:block;font-size:12.5px;margin:2px 0;"><input type="checkbox" class="doc-sg-' + x.id + '" value="' + escapeHtml(k) + '"> <b>' + escapeHtml(s.label) + '</b> '
                 + escapeHtml(String(s.value)) + ' <span class="text-mute">(' + escapeHtml(s.doc) + ' ' + s.page + '쪽: ' + escapeHtml(s.evidence) + ')</span>'
-                + (넣은[k] ? ' <span class="badge badge-success">넣음</span>' : '') + '</label>'; }).join('')
+                + 지금글 + (넣은[k] ? ' <span class="badge badge-success">넣음</span>' : '') + '</label>'; }).join('')
           + '<div style="margin-top:6px;">' + 발전소고르기('doc-sgp-' + x.id, x.plant_id) + ' <button class="btn btn-primary btn-sm" onclick="docsApply(' + x.id + ')">고른 값을 대장에 넣기</button></div></div>' : '';
       return '<div style="border-top:1px solid var(--line, #e5e5e5);padding:8px 0;">'
         + '<div><b>' + escapeHtml(x.filename) + '</b> <span class="badge badge-mute">' + escapeHtml(x.kind) + '</span>'
@@ -7230,7 +7235,7 @@ async function docsApply(id){
   try{
     const res = await fetch('/api/my/docs/' + id + '/apply', {method:'POST', credentials:'same-origin', headers:{'Content-Type':'application/json'}, body: JSON.stringify({plant_id:Number(pl), keys:keys})});
     const j = await res.json();
-    if(!j.ok){ toast(j.error === 'conflict' ? '같은 칸에 넣을 값은 하나만 골라 주세요.' : '넣지 못했습니다: ' + (j.error || res.status)); return; }
+    if(!j.ok){ toast(j.error === 'conflict' ? '같은 칸에 넣을 값은 하나만 골라 주세요.' : (j.error === 'bad_value' ? '서류에서 읽은 값이 범위를 벗어나 넣지 않았습니다. 대장에 직접 적어 주세요.' : '넣지 못했습니다: ' + (j.error || res.status))); return; }
     if(j.plants && _MY_PLANTS){ const kinds = _MY_PLANTS.kinds; _MY_PLANTS = Object.assign({ok:true, kinds:kinds}, j.plants); plantRedraw(); }
     toast('대장에 ' + j.applied.length + '개 값을 넣었습니다.'); await docsLoad();
   }catch(e){ toast('서버에 닿지 못했습니다.'); }
@@ -7265,18 +7270,19 @@ function linksCard(){
       + '<td><select class="input" id="lk-m-' + s.service + '">' + (d.methods || []).map(function(m){ return '<option' + (m === s.method ? ' selected' : '') + '>' + escapeHtml(m) + '</option>'; }).join('') + '</select></td>'
       + '<td><input class="input" id="lk-i-' + s.service + '" value="' + escapeHtml(s.ident) + '" maxlength="60" style="width:150px;" placeholder="고객번호·계정 이름"></td>'
       + '<td><span class="badge ' + cls + '">' + escapeHtml(s.state) + '</span>' + (s.last_at ? '<br><span style="font-size:12px;">' + escapeHtml(s.last_at) + ' ' + escapeHtml(s.last_result) + '</span>' : '')
+      + (s.hint ? '<br><span style="font-size:12px;color:var(--danger);">' + escapeHtml(s.hint) + '</span>' : '')
       + (s.derived ? '<br><span class="text-mute" style="font-size:12px;">' + escapeHtml(s.derived) + '</span>' : '') + '</td>'
       + '<td class="tbl-actions"><button class="btn btn-outline btn-sm" onclick="linksSave(\'' + s.service + '\', false)">저장</button> '
       + '<button class="btn btn-outline btn-sm" onclick="linksSave(\'' + s.service + '\', true)">오늘 받음</button></td></tr>'; }).join('');
   return '<div class="card" id="linksCardBox" style="border:2px solid #2f6f4f;margin-bottom:18px;">' + 머리 + 경고
-    + '<p class="text-mute" style="font-size:12.5px;margin-top:0;">자료가 어디서 어떤 방식으로 들어오는지 적어 둡니다. <b>비밀번호는 적지 않습니다.</b> 계정 이름이나 고객번호처럼 발전소를 찾는 데 쓰는 번호만 적습니다. 달마다 받는 자료가 40일 넘게 안 들어오면 「끊김 의심」으로 표시합니다.</p>'
+    + '<p class="text-mute" style="font-size:12.5px;margin-top:0;">자료가 어디서 어떤 방식으로 들어오는지 적어 둡니다. <b>비밀번호는 적지 않습니다.</b> 계정 이름이나 고객번호처럼 발전소를 찾는 데 쓰는 번호만 적습니다. 달마다 받는 자료가 45일 넘게 안 들어오면 「끊김 의심」으로 표시합니다. 「오늘 받음」은 조합이 직접 누른 표시입니다.</p>'
     + '<div style="overflow-x:auto;"><table class="tbl"><thead><tr><th>서비스</th><th>들어오는 방식</th><th>계정 이름·번호</th><th>상태·마지막으로 받은 날</th><th></th></tr></thead><tbody>' + 줄 + '</tbody></table></div></div>';
 }
 async function linksSave(service, 받음){
   const body = {service:service, method:(document.getElementById('lk-m-' + service) || {}).value, ident:((document.getElementById('lk-i-' + service) || {}).value || '').trim()};
   if(받음){ if(body.method === '미연결'){ toast('먼저 들어오는 방식을 골라 주세요.'); return; } body.received = {result:'받음(직접 표시)'}; }
   try{ const res = await fetch('/api/my/links', {method:'POST', credentials:'same-origin', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)}); const j = await res.json();
-    if(!j.ok){ toast(j.error === 'forbidden' ? '이 계정으로는 고칠 수 없습니다.' : '저장하지 못했습니다: ' + (j.error || res.status)); return; }
+    if(!j.ok){ toast(j.error === 'forbidden' ? '이 계정으로는 고칠 수 없습니다.' : (j.error === 'looks_like_password' ? '비밀번호처럼 보이는 글은 적을 수 없습니다. 계정 이름이나 고객번호만 적어 주세요.' : '저장하지 못했습니다: ' + (j.error || res.status))); return; }
     _MY_LINKS = j; toast(받음 ? '오늘 받은 것으로 적었습니다.' : '저장했습니다.'); linksRedraw();
   }catch(e){ toast('서버에 닿지 못했습니다.'); }
 }
