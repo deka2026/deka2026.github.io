@@ -2381,6 +2381,7 @@ function navigate(){
     if(scope === 'adm' && page === 'consult') admFinLoad();
     if(scope === 'mem' && page === 'dist') distLoad();
     if(scope === 'mem' && page === 'power' && _MY_MONTHLY === null) powerLoadMine();
+    if(scope === 'mem' && page === 'power' && _MY_PLANTS === null) plantLoad();
   }
   updateConvenienceUI(scope, page || 'dashboard');
   renderRoleNav();   // 상단 등급 메뉴의 현재 위치 표시 갱신
@@ -4247,6 +4248,7 @@ function memPower(){
   const fund = Math.round(settle * 0.1);
   return `
     ${powerRealCard()}
+    ${plantCard()}
     ${powerSubmitCard()}
     <div class="sec-head">
       <h1>⚡ 발전·정산·배당</h1>
@@ -6962,6 +6964,156 @@ function powerSubmitCard(){
           + (제출됨 ? '다시 제출' : '제출') + '</button></td></tr>';
       }).join('')
     + '</tbody></table></div>';
+}
+
+/* ─── 발전소 대장·날짜 알림·고장 장부 (2026-11-15) ───
+   조합 한 곳에 발전소가 여럿이다. 모니터링 화면의 용량(인버터 용량·등록 오류)을 준공 용량으로 믿어 진단이 틀린 일이 있었다.
+   발전소마다 준공 용량과 근거 서류, 검사일·사용허가 만료일을 적어 두면 날짜가 다가올 때 알리고, 고장·수리 기록을 발전 자료와 함께 본다.
+   서버 /api/my/plants · /api/my/plant-events (자기 조합만). 사람 이름·전화는 적지 않는다. */
+let _MY_PLANTS = null;       // {plants, events, alerts, total_kw, monthly_kw, kinds}
+let _PLANT_EDIT = null;      // 고치는 중인 발전소 id (null 이면 새로 넣기)
+
+async function plantLoad(){
+  if(!REAL_API){ _MY_PLANTS = {plants:[], events:[], alerts:[], total_kw:0, monthly_kw:0, kinds:[], 체험:true}; plantRedraw(); return; }
+  try{
+    const j = await fetch('/api/my/plants', {credentials:'same-origin'}).then(function(r){ return r.json(); });
+    _MY_PLANTS = j.ok ? j : {plants:[], events:[], alerts:[], total_kw:0, monthly_kw:0, kinds:[], 막힘:true};
+  }catch(e){ _MY_PLANTS = {plants:[], events:[], alerts:[], total_kw:0, monthly_kw:0, kinds:[], 막힘:true}; }
+  plantRedraw();
+}
+
+function plantRedraw(){
+  if(currentRoute() !== 'mem/power') return;
+  const box = document.getElementById('plantCardBox');
+  if(box) box.outerHTML = plantCard();
+}
+
+function _plantNum(v, 자리){ return (v === null || v === undefined || v === '') ? '-' : Number(v).toLocaleString('ko-KR', {maximumFractionDigits: 자리 === undefined ? 3 : 자리}); }
+
+function plantCard(){
+  const d = _MY_PLANTS;
+  if(!d) return '<div class="card" id="plantCardBox" style="margin-bottom:18px;"><div class="card-title"><h3 class="serif">🏭 발전소 대장</h3></div><p class="text-mute">불러오는 중입니다.</p></div>';
+  if(d.체험) return '<div class="card" id="plantCardBox" style="margin-bottom:18px;"><div class="card-title"><h3 class="serif">🏭 발전소 대장·날짜 알림·고장 장부</h3></div>'
+    + '<p class="text-mute" style="margin:0;">실계정으로 로그인하면 발전소마다 준공 용량·검사일·사용허가 만료일을 적어 두고, 날짜가 다가오면 알림을 받습니다.</p></div>';
+  const P = d.plants || [], E = d.events || [], A = d.alerts || [];
+  const ed = _PLANT_EDIT ? P.filter(function(p){ return p.id === _PLANT_EDIT; })[0] : null;
+  const v = function(k){ return ed && ed[k] !== null && ed[k] !== undefined ? escapeHtml(String(ed[k])) : ''; };
+  const 알림 = A.length ? '<div style="margin:0 0 12px;">' + A.map(function(a){
+      const cls = a.level === '지남' ? 'badge-danger' : (a.level === '임박' ? 'badge-success' : 'badge-mute');
+      return '<div style="font-size:13px;margin:3px 0;"><span class="badge ' + cls + '">' + escapeHtml(a.level) + '</span> ' + escapeHtml(a.text) + '</div>';
+    }).join('') + '</div>' : '';
+  const 표 = P.length ? '<div style="overflow-x:auto;"><table class="tbl"><thead><tr><th>발전소</th><th class="num">준공 용량(kW)</th><th class="num">인버터(kW)</th>'
+      + '<th>방위·경사</th><th>상업운전</th><th>다음 정기검사</th><th>사용허가 만료</th><th>모니터링</th><th>월 실적</th><th></th></tr></thead><tbody>'
+      + P.map(function(p){
+          return '<tr><td><b>' + escapeHtml(p.name) + '</b>' + (p.location ? '<br><span class="text-mute" style="font-size:12px;">' + escapeHtml(p.location) + '</span>' : '') + '</td>'
+            + '<td class="num">' + _plantNum(p.capacity_kw) + (p.source ? '' : ' <span class="badge badge-mute" title="용량의 근거 서류가 적혀 있지 않습니다">근거 없음</span>') + '</td>'
+            + '<td class="num">' + _plantNum(p.inverter_kw) + '</td>'
+            + '<td>' + (p.azimuth !== null && p.azimuth !== undefined ? _plantNum(p.azimuth, 1) + '°' : '-') + ' · ' + (p.tilt !== null && p.tilt !== undefined ? _plantNum(p.tilt, 1) + '°' : '-') + '</td>'
+            + '<td>' + escapeHtml(p.cod || '-') + '</td><td>' + escapeHtml(p.next_inspection || '-') + '</td><td>' + escapeHtml(p.permit_end || '-') + '</td>'
+            + '<td>' + escapeHtml(p.monitoring || '-') + '</td>'
+            + '<td>' + (p.in_monthly ? '<span class="badge badge-success">포함</span>' : '<span class="badge badge-mute">제외</span>') + '</td>'
+            + '<td class="tbl-actions"><button class="btn btn-outline btn-sm" onclick="plantEdit(' + p.id + ')">고치기</button> '
+            + '<button class="btn btn-outline btn-sm" onclick="plantDelete(' + p.id + ')">지우기</button></td></tr>'
+            + (p.note || p.modules || p.inverter ? '<tr><td colspan="10" class="text-mute" style="font-size:12px;padding-top:0;border-top:0;">'
+                + escapeHtml([p.modules, p.inverter, p.note].filter(Boolean).join(' · ')) + '</td></tr>' : '');
+        }).join('')
+      + '</tbody></table></div>'
+      + '<p class="text-mute" style="font-size:12.5px;">준공 용량 합계 <b>' + _plantNum(d.total_kw) + ' kW</b> · 월 실적에 들어가는 발전소 <b>' + _plantNum(d.monthly_kw) + ' kW</b>'
+      + ' — 이용률과 저발전 진단은 「월 실적에 들어가는 발전소」 용량으로 셈합니다.</p>'
+    : '<p class="text-mute">아직 적은 발전소가 없습니다. 아래에서 발전소를 하나씩 넣어 주세요. 용량은 <b>사용전검사 확인증·상업운전개시확인서</b>의 숫자로 적습니다(모니터링 화면의 용량은 인버터 용량일 수 있습니다).</p>';
+  const 칸 = function(라벨, id, 값, 속성){ return '<label style="display:inline-block;margin:4px 10px 4px 0;font-size:12.5px;">' + 라벨 + '<br><input class="input" id="' + id + '" value="' + 값 + '" ' + (속성 || '') + '></label>'; };
+  const 양식 = '<details id="plantFormBox" ' + (ed ? 'open' : '') + ' style="margin-top:8px;"><summary style="cursor:pointer;font-weight:600;">' + (ed ? '「' + escapeHtml(ed.name) + '」 고치기' : '＋ 발전소 넣기') + '</summary>'
+    + '<div style="margin-top:8px;">'
+    + 칸('발전소 이름', 'pl-name', v('name'), 'style="width:150px;" maxlength="60"')
+    + 칸('준공 용량(kW)', 'pl-capacity_kw', v('capacity_kw'), 'type="number" step="0.001" min="0" style="width:110px;"')
+    + 칸('용량 근거 서류', 'pl-source', v('source'), 'style="width:190px;" maxlength="120" placeholder="예: 사용전검사 확인증"')
+    + 칸('인버터 용량(kW)', 'pl-inverter_kw', v('inverter_kw'), 'type="number" step="0.001" min="0" style="width:110px;"')
+    + 칸('방위(도, 남=180)', 'pl-azimuth', v('azimuth'), 'type="number" step="0.1" min="0" max="360" style="width:110px;"')
+    + 칸('경사(도)', 'pl-tilt', v('tilt'), 'type="number" step="0.1" min="0" max="90" style="width:80px;"')
+    + 칸('자리', 'pl-location', v('location'), 'style="width:230px;" maxlength="120"')
+    + 칸('모듈', 'pl-modules', v('modules'), 'style="width:200px;" maxlength="120" placeholder="예: 505W×195장"')
+    + 칸('인버터', 'pl-inverter', v('inverter'), 'style="width:200px;" maxlength="120" placeholder="예: 125kW×1대"')
+    + 칸('모니터링', 'pl-monitoring', v('monitoring'), 'style="width:150px;" maxlength="80"')
+    + 칸('상업운전 개시일', 'pl-cod', v('cod'), 'type="date"')
+    + 칸('다음 정기검사일', 'pl-next_inspection', v('next_inspection'), 'type="date"')
+    + 칸('부지 사용허가 만료일', 'pl-permit_end', v('permit_end'), 'type="date"')
+    + 칸('하자보증 만료일', 'pl-warranty_end', v('warranty_end'), 'type="date"')
+    + 칸('메모(사람 이름·전화는 적지 마세요)', 'pl-note', v('note'), 'style="width:340px;" maxlength="400"')
+    + '<label style="display:inline-block;margin:4px 10px 4px 0;font-size:12.5px;"><input type="checkbox" id="pl-in_monthly" ' + (!ed || ed.in_monthly ? 'checked' : '') + '> 월 실적에 이 발전소 발전량이 들어간다</label>'
+    + '<div style="margin-top:6px;"><button class="btn btn-primary btn-sm" onclick="plantSave()">' + (ed ? '고친 내용 저장' : '넣기') + '</button> '
+    + (ed ? '<button class="btn btn-outline btn-sm" onclick="plantEdit(null)">그만두기</button>' : '') + '</div></div></details>';
+  const 종류 = (d.kinds && d.kinds.length ? d.kinds : ['고장','수리','점검','청소','통신 끊김','기타']);
+  const 장부 = '<h4 class="serif" style="margin:18px 0 6px;">🛠 고장·수리 장부</h4>'
+    + (E.length ? '<table class="tbl"><thead><tr><th>기간</th><th>발전소</th><th>종류</th><th>내용</th><th></th></tr></thead><tbody>'
+        + E.map(function(e){
+            return '<tr><td>' + escapeHtml(e.date_from) + (e.date_to ? ' ~ ' + escapeHtml(e.date_to) : '') + '</td><td>' + escapeHtml(e.plant || '전체') + '</td>'
+              + '<td>' + escapeHtml(e.kind) + '</td><td>' + escapeHtml(e.note || '') + '</td>'
+              + '<td class="tbl-actions"><button class="btn btn-outline btn-sm" onclick="plantEventDelete(' + e.id + ')">지우기</button></td></tr>';
+          }).join('') + '</tbody></table>'
+        : '<p class="text-mute" style="font-size:13px;">적힌 기록이 없습니다. 고장·수리·점검·청소를 날짜와 함께 적어 두면, 발전량이 줄어든 달이 설비 탓인지 날씨 탓인지 가를 수 있습니다.</p>')
+    + '<div style="margin-top:6px;">'
+    + '<label style="display:inline-block;margin:4px 10px 4px 0;font-size:12.5px;">발전소<br><select class="input" id="pe-plant"><option value="">전체</option>'
+    + P.map(function(p){ return '<option value="' + p.id + '">' + escapeHtml(p.name) + '</option>'; }).join('') + '</select></label>'
+    + '<label style="display:inline-block;margin:4px 10px 4px 0;font-size:12.5px;">종류<br><select class="input" id="pe-kind">'
+    + 종류.map(function(k){ return '<option>' + escapeHtml(k) + '</option>'; }).join('') + '</select></label>'
+    + 칸('시작일', 'pe-from', '', 'type="date"') + 칸('끝난 날(없으면 비움)', 'pe-to', '', 'type="date"')
+    + 칸('내용', 'pe-note', '', 'style="width:300px;" maxlength="400" placeholder="예: 인버터 3번 정지, 부품 교체"')
+    + '<button class="btn btn-outline btn-sm" onclick="plantEventSave()">장부에 적기</button></div>';
+  return '<div class="card" id="plantCardBox" style="border:2px solid #2f6f4f;margin-bottom:18px;">'
+    + '<div class="card-title"><h3 class="serif">🏭 발전소 대장·날짜 알림·고장 장부</h3></div>'
+    + (d.막힘 ? '<p class="text-mute">대장을 불러오지 못했습니다. 조합 계정으로 로그인했는지 확인해 주세요.</p>' : 알림 + 표 + 양식 + 장부)
+    + '</div>';
+}
+
+function plantEdit(id){ _PLANT_EDIT = id; plantRedraw(); const b = document.getElementById('plantFormBox'); if(b && id) b.scrollIntoView({block:'center'}); }
+
+async function _plantCall(method, url, body){
+  try{
+    const res = await fetch(url, {method:method, credentials:'same-origin', headers:{'Content-Type':'application/json'}, body: body ? JSON.stringify(body) : undefined});
+    const j = await res.json();
+    if(!j.ok){
+      const 말 = {bad_name:'발전소 이름을 적어 주세요.', bad_capacity_kw:'준공 용량 숫자를 확인해 주세요.', bad_inverter_kw:'인버터 용량 숫자를 확인해 주세요.',
+        bad_azimuth:'방위는 0~360 사이 숫자입니다.', bad_tilt:'경사 숫자를 확인해 주세요.', bad_date:'날짜를 확인해 주세요(끝난 날이 시작일보다 앞설 수 없습니다).',
+        bad_kind:'종류를 골라 주세요.', no_village:'이 계정에 연결된 조합이 없습니다.', forbidden:'이 계정으로는 고칠 수 없습니다.', not_found:'그 항목을 찾지 못했습니다.'};
+      toast(말[j.error] || ('저장하지 못했습니다: ' + (j.error || res.status))); return null;
+    }
+    const kinds = _MY_PLANTS && _MY_PLANTS.kinds;
+    _MY_PLANTS = j; if(!j.kinds) _MY_PLANTS.kinds = kinds || [];
+    return j;
+  }catch(e){ toast('서버에 닿지 못했습니다.'); return null; }
+}
+
+async function plantSave(){
+  const g = function(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  const body = {};
+  ['name','source','location','modules','inverter','monitoring','note','capacity_kw','inverter_kw','azimuth','tilt','cod','next_inspection','permit_end','warranty_end']
+    .forEach(function(k){ body[k] = g('pl-' + k); });
+  body.in_monthly = !!(document.getElementById('pl-in_monthly') || {}).checked;
+  if(_PLANT_EDIT) body.id = _PLANT_EDIT;
+  if(!body.name){ toast('발전소 이름을 적어 주세요.'); return; }
+  const j = await _plantCall('POST', '/api/my/plants', body);
+  if(j){ _PLANT_EDIT = null; toast('발전소 대장에 저장했습니다.'); plantRedraw(); }
+}
+
+async function plantDelete(id){
+  const p = ((_MY_PLANTS && _MY_PLANTS.plants) || []).filter(function(x){ return x.id === id; })[0];
+  if(!p || !confirm('「' + p.name + '」을 대장에서 지울까요? 고장·수리 장부의 기록은 남습니다.')) return;
+  const j = await _plantCall('DELETE', '/api/my/plants/' + id);
+  if(j){ if(_PLANT_EDIT === id) _PLANT_EDIT = null; toast('지웠습니다.'); plantRedraw(); }
+}
+
+async function plantEventSave(){
+  const g = function(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  if(!g('pe-from')){ toast('시작일을 넣어 주세요.'); return; }
+  const j = await _plantCall('POST', '/api/my/plant-events',
+    {plant_id: g('pe-plant') ? Number(g('pe-plant')) : null, kind: g('pe-kind'), date_from: g('pe-from'), date_to: g('pe-to'), note: g('pe-note')});
+  if(j){ toast('장부에 적었습니다.'); plantRedraw(); }
+}
+
+async function plantEventDelete(id){
+  if(!confirm('이 기록을 지울까요?')) return;
+  const j = await _plantCall('DELETE', '/api/my/plant-events/' + id);
+  if(j){ toast('지웠습니다.'); plantRedraw(); }
 }
 
 async function powerLoadMine(){
