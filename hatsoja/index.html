@@ -2383,6 +2383,8 @@ function navigate(){
     if(scope === 'mem' && page === 'dist') distLoad();
     if(scope === 'mem' && page === 'power' && _MY_MONTHLY === null) powerLoadMine();
     if(scope === 'mem' && page === 'power' && _MY_PLANTS === null) plantLoad();
+    if(scope === 'mem' && page === 'power' && _MY_DOCS === null) docsLoad();
+    if(scope === 'mem' && page === 'power' && _MY_LINKS === null) linksLoad();
   }
   updateConvenienceUI(scope, page || 'dashboard');
   renderRoleNav();   // 상단 등급 메뉴의 현재 위치 표시 갱신
@@ -2506,7 +2508,7 @@ function prcCalc(){
   const 전부 = 고른.length === P.선택.length;
   const 초과 = P.포함조합 ? Math.max(0, _prcFedN - P.포함조합) * P.초과값 : 0;   // 연합회 20곳 초과분은 올인원에도 따로 더한다
   const 정월 = (전부 ? P.올인원 : Math.min(단품, P.올인원)) + 초과;
-  const 월 = _prcFounder ? Math.round(정월 * (1 - PRC_DISC.창립율)) : 정월;
+  const 월 = _prcFounder ? Math.round((정월 - 초과) * (1 - PRC_DISC.창립율)) + 초과 : 정월;   // 20곳 초과분은 창립 반값에서 뺀다(정책 문서: 기본·선택·올인원만)
   const bo = document.getElementById('prcBulkOut');
   if(bo){ const n = _prcBulkN, 정 = n * PRICING.coop.올인원, 할 = n >= PRC_DISC.일괄최소 ? Math.round(정 * (1 - PRC_DISC.일괄율)) : 정;
     bo.textContent = n ? (n >= PRC_DISC.일괄최소 ? `회원조합 ${n}곳 일괄 납부: 월 ${prcWon(정)} → ${prcWon(할)}(${Math.round(PRC_DISC.일괄율 * 100)}% 할인, 부가세 별도)` : `회원조합 ${n}곳: 월 ${prcWon(정)} — ${PRC_DISC.일괄최소}곳 이상부터 할인됩니다`) : ''; }
@@ -4265,6 +4267,8 @@ function memPower(){
   return `
     ${powerRealCard()}
     ${plantCard()}
+    ${docsCard()}
+    ${linksCard()}
     ${powerSubmitCard()}
     <div class="sec-head">
       <h1>⚡ 발전·정산·배당</h1>
@@ -7130,6 +7134,149 @@ async function plantEventDelete(id){
   if(!confirm('이 기록을 지울까요?')) return;
   const j = await _plantCall('DELETE', '/api/my/plant-events/' + id);
   if(j){ toast('지웠습니다.'); plantRedraw(); }
+}
+
+/* ─── 서류 보관함·글자 검색·대장 값 제안 / 연결 상태판 (2026-11-16) ───
+   서류는 서버에 조합별로 쌓인다(/api/my/docs). 올리면 서류 속 글자를 뽑아 찾을 수 있게 하고, 사용전검사 확인증·상업운전개시확인서·
+   하자보증보험증권·사용허가서에서 용량과 날짜를 찾아 「대장에 넣을까요」로 보여 준다. 넣는 값은 서버가 서류에서 뽑은 것만 쓴다.
+   연결 상태판(/api/my/links)은 자료가 어느 서비스에서 어떤 방식으로 들어오고 마지막으로 언제 받았는지 보여 준다. 비밀번호는 적지 않는다. */
+let _MY_DOCS = null;         // {items, kinds, used, quota, max_file}
+let _MY_LINKS = null;        // {services, methods, warn}
+let _DOCS_Q = '';
+let _DOCS_BUSY = '';
+
+async function docsLoad(q){
+  if(q !== undefined) _DOCS_Q = q;
+  if(!REAL_API){ _MY_DOCS = {items:[], kinds:[], 체험:true}; docsRedraw(); return; }
+  try{
+    const j = await fetch('/api/my/docs' + (_DOCS_Q ? '?q=' + encodeURIComponent(_DOCS_Q) : ''), {credentials:'same-origin'}).then(function(r){ return r.json(); });
+    _MY_DOCS = j.ok ? j : {items:[], kinds:[], 막힘:true};
+  }catch(e){ _MY_DOCS = {items:[], kinds:[], 막힘:true}; }
+  docsRedraw();
+}
+function docsRedraw(){
+  if(currentRoute() !== 'mem/power') return;
+  const box = document.getElementById('docsCardBox');
+  if(box) box.outerHTML = docsCard();
+}
+function _docSize(n){ return n >= 1048576 ? (n / 1048576).toFixed(1) + 'MB' : Math.max(1, Math.round(n / 1024)) + 'KB'; }
+
+function docsCard(){
+  const d = _MY_DOCS, 머리 = '<div class="card-title"><h3 class="serif">📂 서류 보관함</h3></div>';
+  if(!d) return '<div class="card" id="docsCardBox" style="margin-bottom:18px;">' + 머리 + '<p class="text-mute">불러오는 중입니다.</p></div>';
+  if(d.체험) return '<div class="card" id="docsCardBox" style="margin-bottom:18px;">' + 머리
+    + '<p class="text-mute" style="margin:0;">실계정으로 로그인하면 준공도서·확인증·계약서를 올려 두고 서류 속 글자로 찾습니다. 올린 서류에서 용량과 날짜를 찾아 발전소 대장에 넣을 값도 알려 줍니다.</p></div>';
+  if(d.막힘) return '<div class="card" id="docsCardBox" style="margin-bottom:18px;">' + 머리 + '<p class="text-mute">서류 보관함은 조합 계정에서 씁니다.</p></div>';
+  const P = (_MY_PLANTS && _MY_PLANTS.plants) || [];
+  const 발전소고르기 = function(id, 고른){ return '<select class="input" id="' + id + '"><option value="">발전소 안 정함</option>'
+    + P.map(function(p){ return '<option value="' + p.id + '"' + (고른 === p.id ? ' selected' : '') + '>' + escapeHtml(p.name) + '</option>'; }).join('') + '</select>'; };
+  const 올리기 = '<div style="margin:6px 0 10px;">'
+    + '<input type="file" id="doc-file" accept=".pdf,.jpg,.jpeg,.png,.txt,.csv,.xlsx,.xls,.hwp,.hwpx,.docx" style="max-width:260px;"> '
+    + 발전소고르기('doc-plant') + ' <select class="input" id="doc-kind"><option value="">종류 자동</option>'
+    + (d.kinds || []).map(function(k){ return '<option>' + escapeHtml(k) + '</option>'; }).join('') + '</select> '
+    + '<button class="btn btn-primary btn-sm" onclick="docsUpload()"' + (_DOCS_BUSY ? ' disabled' : '') + '>' + (_DOCS_BUSY ? escapeHtml(_DOCS_BUSY) : '올리기') + '</button>'
+    + '<div class="text-mute" style="font-size:12px;margin-top:4px;">한 파일 ' + _docSize(d.max_file || 0) + '까지. 쓴 자리 ' + _docSize(d.used || 0) + ' / ' + _docSize(d.quota || 0)
+    + '. 스캔된 쪽은 올린 뒤 1~2분 사이에 글자를 읽습니다. 서류는 우리 조합과 사교원 통합관리자만 봅니다.</div></div>';
+  const 찾기 = '<div style="margin:0 0 10px;"><input class="input" id="doc-q" value="' + escapeHtml(_DOCS_Q) + '" placeholder="서류 속 글자로 찾기 — 예: 사용전검사 2호, 하자보증, 931mm" style="width:320px;max-width:70%;" onkeydown="if(event.key===\'Enter\')docsLoad(this.value.trim())"> '
+    + '<button class="btn btn-outline btn-sm" onclick="docsLoad(document.getElementById(\'doc-q\').value.trim())">찾기</button>'
+    + (_DOCS_Q ? ' <button class="btn btn-outline btn-sm" onclick="docsLoad(\'\')">전체 보기</button>' : '') + '</div>';
+  const 목록 = (d.items || []).length ? d.items.map(function(x){
+      const 넣은 = {}; (x.applied || []).forEach(function(a){ 넣은[a.key + '|' + a.value] = 1; });
+      const 제안 = (x.suggest || []).length ? '<div style="background:var(--paper-soft);border-radius:8px;padding:8px 10px;margin-top:6px;">'
+          + '<div style="font-size:12.5px;font-weight:600;margin-bottom:4px;">이 서류에서 찾은 값 — 맞는 것만 골라 대장에 넣으세요</div>'
+          + x.suggest.map(function(s){ const k = s.key + '|' + s.value;
+              return '<label style="display:block;font-size:12.5px;margin:2px 0;"><input type="checkbox" class="doc-sg-' + x.id + '" value="' + escapeHtml(k) + '"> <b>' + escapeHtml(s.label) + '</b> '
+                + escapeHtml(String(s.value)) + ' <span class="text-mute">(' + escapeHtml(s.doc) + ' ' + s.page + '쪽: ' + escapeHtml(s.evidence) + ')</span>'
+                + (넣은[k] ? ' <span class="badge badge-success">넣음</span>' : '') + '</label>'; }).join('')
+          + '<div style="margin-top:6px;">' + 발전소고르기('doc-sgp-' + x.id, x.plant_id) + ' <button class="btn btn-primary btn-sm" onclick="docsApply(' + x.id + ')">고른 값을 대장에 넣기</button></div></div>' : '';
+      return '<div style="border-top:1px solid var(--line, #e5e5e5);padding:8px 0;">'
+        + '<div><b>' + escapeHtml(x.filename) + '</b> <span class="badge badge-mute">' + escapeHtml(x.kind) + '</span>'
+        + (x.plant ? ' <span class="badge badge-info">' + escapeHtml(x.plant) + '</span>' : '')
+        + ' <span class="text-mute" style="font-size:12px;">' + (x.pages || 1) + '쪽 · ' + _docSize(x.size) + ' · ' + escapeHtml(String(x.uploaded_at || '').slice(0, 10))
+        + (x.ocr_state && x.ocr_state !== '없음' ? ' · 스캔 읽기 ' + escapeHtml(x.ocr_state) : '') + '</span> '
+        + '<a class="btn btn-outline btn-sm" href="/api/my/docs/' + x.id + '/file">내려받기</a> '
+        + '<button class="btn btn-outline btn-sm" onclick="docsDelete(' + x.id + ')">지우기</button></div>'
+        + (x.hit ? '<div class="text-mute" style="font-size:12.5px;margin-top:3px;">' + x.hit.page + '쪽: …' + escapeHtml(x.hit.snippet) + '…</div>' : '')
+        + 제안 + '</div>'; }).join('')
+    : '<p class="text-mute" style="font-size:13px;">' + (_DOCS_Q ? '「' + escapeHtml(_DOCS_Q) + '」가 든 서류가 없습니다.' : '올린 서류가 없습니다. 준공도서나 사용전검사 확인증부터 올려 보세요. 용량과 검사일을 찾아 대장에 넣을 값을 알려 줍니다.') + '</p>';
+  return '<div class="card" id="docsCardBox" style="border:2px solid #2f6f4f;margin-bottom:18px;">' + 머리 + 올리기 + 찾기 + 목록 + '</div>';
+}
+
+async function docsUpload(){
+  const f = (document.getElementById('doc-file') || {}).files; if(!f || !f.length){ toast('올릴 파일을 골라 주세요.'); return; }
+  if(_MY_DOCS && _MY_DOCS.max_file && f[0].size > _MY_DOCS.max_file){ toast('한 파일은 ' + _docSize(_MY_DOCS.max_file) + '까지입니다. 준공도서가 크면 확인증·계약서 쪽만 따로 올려 주세요.'); return; }
+  const fd = new FormData(); fd.append('file', f[0]);
+  const pl = document.getElementById('doc-plant').value, kd = document.getElementById('doc-kind').value;
+  if(pl) fd.append('plant_id', pl); if(kd) fd.append('kind', kd);
+  _DOCS_BUSY = '올리는 중…'; docsRedraw();
+  try{
+    const res = await fetch('/api/my/docs', {method:'POST', credentials:'same-origin', body:fd}); const j = await res.json();
+    _DOCS_BUSY = '';
+    if(!j.ok){ const 말 = {too_big:'파일이 너무 크거나 보관함이 찼습니다.', duplicate:'같은 파일이 이미 올라와 있습니다.', bad_type:'올릴 수 없는 파일 종류입니다.', empty:'빈 파일입니다.', unreadable:'파일을 읽지 못했습니다.', no_village:'이 계정에 연결된 조합이 없습니다.'};
+      toast(말[j.error] || ('올리지 못했습니다: ' + (j.error || res.status))); docsRedraw(); return; }
+    const n = (j.item.suggest || []).length;
+    toast(n ? '올렸습니다. 대장에 넣을 값 ' + n + '개를 찾았습니다.' : '올렸습니다.' + (j.item.ocr_state === '대기' ? ' 스캔된 쪽은 곧 읽습니다.' : ''));
+    await docsLoad(); if(_MY_LINKS) linksLoad();
+    if(j.item.ocr_state === '대기') setTimeout(function(){ if(currentRoute() === 'mem/power') docsLoad(); }, 90000);
+  }catch(e){ _DOCS_BUSY = ''; toast('서버에 닿지 못했습니다.'); docsRedraw(); }
+}
+async function docsApply(id){
+  const keys = Array.from(document.querySelectorAll('.doc-sg-' + id)).filter(function(c){ return c.checked; }).map(function(c){ return c.value; });
+  const pl = (document.getElementById('doc-sgp-' + id) || {}).value;
+  if(!keys.length){ toast('넣을 값을 골라 주세요.'); return; }
+  if(!pl){ toast('어느 발전소 대장에 넣을지 골라 주세요.'); return; }
+  try{
+    const res = await fetch('/api/my/docs/' + id + '/apply', {method:'POST', credentials:'same-origin', headers:{'Content-Type':'application/json'}, body: JSON.stringify({plant_id:Number(pl), keys:keys})});
+    const j = await res.json();
+    if(!j.ok){ toast(j.error === 'conflict' ? '같은 칸에 넣을 값은 하나만 골라 주세요.' : '넣지 못했습니다: ' + (j.error || res.status)); return; }
+    if(j.plants && _MY_PLANTS){ const kinds = _MY_PLANTS.kinds; _MY_PLANTS = Object.assign({ok:true, kinds:kinds}, j.plants); plantRedraw(); }
+    toast('대장에 ' + j.applied.length + '개 값을 넣었습니다.'); await docsLoad();
+  }catch(e){ toast('서버에 닿지 못했습니다.'); }
+}
+async function docsDelete(id){
+  if(!confirm('이 서류를 보관함에서 지울까요? 대장에 이미 넣은 값은 그대로 남습니다.')) return;
+  try{ const j = await fetch('/api/my/docs/' + id, {method:'DELETE', credentials:'same-origin'}).then(function(r){ return r.json(); });
+    if(j.ok){ toast('지웠습니다.'); await docsLoad(); } else toast('지우지 못했습니다.'); }catch(e){ toast('서버에 닿지 못했습니다.'); }
+}
+
+async function linksLoad(){
+  if(!REAL_API){ _MY_LINKS = {services:[], methods:[], warn:[], 체험:true}; linksRedraw(); return; }
+  try{ const j = await fetch('/api/my/links', {credentials:'same-origin'}).then(function(r){ return r.json(); });
+    _MY_LINKS = j.ok ? j : {services:[], methods:[], warn:[], 막힘:true}; }catch(e){ _MY_LINKS = {services:[], methods:[], warn:[], 막힘:true}; }
+  linksRedraw();
+}
+function linksRedraw(){
+  if(currentRoute() !== 'mem/power') return;
+  const box = document.getElementById('linksCardBox');
+  if(box) box.outerHTML = linksCard();
+}
+function linksCard(){
+  const d = _MY_LINKS, 머리 = '<div class="card-title"><h3 class="serif">🔌 자료 연결 상태판</h3></div>';
+  if(!d) return '<div class="card" id="linksCardBox" style="margin-bottom:18px;">' + 머리 + '<p class="text-mute">불러오는 중입니다.</p></div>';
+  if(d.체험) return '<div class="card" id="linksCardBox" style="margin-bottom:18px;">' + 머리
+    + '<p class="text-mute" style="margin:0;">실계정으로 로그인하면 발전 모니터링·한전·은행·홈택스 자료가 어떤 방식으로 들어오고 마지막으로 언제 받았는지 한 화면에서 봅니다.</p></div>';
+  if(d.막힘 || !(d.services || []).length) return '<div class="card" id="linksCardBox" style="margin-bottom:18px;">' + 머리 + '<p class="text-mute">연결 상태판은 조합 계정에서 씁니다.</p></div>';
+  const 경고 = (d.warn || []).length ? '<div style="margin:0 0 10px;">' + d.warn.map(function(w){ return '<div style="font-size:13px;margin:3px 0;"><span class="badge badge-danger">끊김 의심</span> ' + escapeHtml(w) + '</div>'; }).join('') + '</div>' : '';
+  const 줄 = d.services.map(function(s){
+    const cls = s.state === '끊김 의심' ? 'badge-danger' : (s.state === '연결' ? 'badge-success' : 'badge-mute');
+    return '<tr><td><b>' + escapeHtml(s.name) + '</b><br><span class="text-mute" style="font-size:12px;">' + escapeHtml(s.data) + ' · ' + escapeHtml(s.cycle) + '</span></td>'
+      + '<td><select class="input" id="lk-m-' + s.service + '">' + (d.methods || []).map(function(m){ return '<option' + (m === s.method ? ' selected' : '') + '>' + escapeHtml(m) + '</option>'; }).join('') + '</select></td>'
+      + '<td><input class="input" id="lk-i-' + s.service + '" value="' + escapeHtml(s.ident) + '" maxlength="60" style="width:150px;" placeholder="고객번호·계정 이름"></td>'
+      + '<td><span class="badge ' + cls + '">' + escapeHtml(s.state) + '</span>' + (s.last_at ? '<br><span style="font-size:12px;">' + escapeHtml(s.last_at) + ' ' + escapeHtml(s.last_result) + '</span>' : '')
+      + (s.derived ? '<br><span class="text-mute" style="font-size:12px;">' + escapeHtml(s.derived) + '</span>' : '') + '</td>'
+      + '<td class="tbl-actions"><button class="btn btn-outline btn-sm" onclick="linksSave(\'' + s.service + '\', false)">저장</button> '
+      + '<button class="btn btn-outline btn-sm" onclick="linksSave(\'' + s.service + '\', true)">오늘 받음</button></td></tr>'; }).join('');
+  return '<div class="card" id="linksCardBox" style="border:2px solid #2f6f4f;margin-bottom:18px;">' + 머리 + 경고
+    + '<p class="text-mute" style="font-size:12.5px;margin-top:0;">자료가 어디서 어떤 방식으로 들어오는지 적어 둡니다. <b>비밀번호는 적지 않습니다.</b> 계정 이름이나 고객번호처럼 발전소를 찾는 데 쓰는 번호만 적습니다. 달마다 받는 자료가 40일 넘게 안 들어오면 「끊김 의심」으로 표시합니다.</p>'
+    + '<div style="overflow-x:auto;"><table class="tbl"><thead><tr><th>서비스</th><th>들어오는 방식</th><th>계정 이름·번호</th><th>상태·마지막으로 받은 날</th><th></th></tr></thead><tbody>' + 줄 + '</tbody></table></div></div>';
+}
+async function linksSave(service, 받음){
+  const body = {service:service, method:(document.getElementById('lk-m-' + service) || {}).value, ident:((document.getElementById('lk-i-' + service) || {}).value || '').trim()};
+  if(받음){ if(body.method === '미연결'){ toast('먼저 들어오는 방식을 골라 주세요.'); return; } body.received = {result:'받음(직접 표시)'}; }
+  try{ const res = await fetch('/api/my/links', {method:'POST', credentials:'same-origin', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)}); const j = await res.json();
+    if(!j.ok){ toast(j.error === 'forbidden' ? '이 계정으로는 고칠 수 없습니다.' : '저장하지 못했습니다: ' + (j.error || res.status)); return; }
+    _MY_LINKS = j; toast(받음 ? '오늘 받은 것으로 적었습니다.' : '저장했습니다.'); linksRedraw();
+  }catch(e){ toast('서버에 닿지 못했습니다.'); }
 }
 
 async function powerLoadMine(){
