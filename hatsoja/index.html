@@ -2386,6 +2386,7 @@ function navigate(){
     if(scope === 'mem' && page === 'power' && _MY_PLANTS === null) plantLoad();
     if(scope === 'mem' && page === 'power' && _MY_DOCS === null) docsLoad();
     if(scope === 'mem' && page === 'power' && _MY_LINKS === null) linksLoad();
+    if(scope === 'mem' && page === 'power' && _MY_QUEUE === null) opsLoadAll();
   }
   updateConvenienceUI(scope, page || 'dashboard');
   renderRoleNav();   // 상단 등급 메뉴의 현재 위치 표시 갱신
@@ -4269,9 +4270,13 @@ function memPower(){
   const fund = Math.round(settle * 0.1);
   return `
     ${powerRealCard()}
+    ${queueCard()}
     ${plantCard()}
+    ${plantOneCard()}
     ${docsCard()}
     ${linksCard()}
+    ${monthendCard()}
+    ${readyCard()}
     ${powerSubmitCard()}
     <div class="sec-head">
       <h1>⚡ 발전·정산·배당</h1>
@@ -7035,7 +7040,8 @@ function plantCard(){
             + '<td>' + escapeHtml(p.cod || '-') + '</td><td>' + escapeHtml(p.next_inspection || '-') + '</td><td>' + escapeHtml(p.permit_end || '-') + '</td><td>' + escapeHtml(p.warranty_end || '-') + '</td>'
             + '<td>' + escapeHtml(p.monitoring || '-') + '</td>'
             + '<td>' + (p.in_monthly ? '<span class="badge badge-success">포함</span>' : '<span class="badge badge-mute">제외</span>') + '</td>'
-            + '<td class="tbl-actions"><button class="btn btn-outline btn-sm" onclick="plantEdit(' + p.id + ')">고치기</button> '
+            + '<td class="tbl-actions"><button class="btn btn-outline btn-sm" onclick="plantOne(' + p.id + ')">자세히</button> '
+            + '<button class="btn btn-outline btn-sm" onclick="plantEdit(' + p.id + ')">고치기</button> '
             + '<button class="btn btn-outline btn-sm" onclick="plantDelete(' + p.id + ')">지우기</button></td></tr>'
             + (p.note || p.modules || p.inverter ? '<tr><td colspan="11" class="text-mute" style="font-size:12px;padding-top:0;border-top:0;">'
                 + escapeHtml([p.modules, p.inverter, p.note].filter(Boolean).join(' · ')) + '</td></tr>' : '');
@@ -7287,6 +7293,126 @@ async function linksSave(service, 받음){
     _MY_LINKS = j; toast(받음 ? '오늘 받은 것으로 적었습니다.' : '저장했습니다.'); linksRedraw();
   }catch(e){ toast('서버에 닿지 못했습니다.'); }
 }
+
+/* ─── 확인 대기함·발전소 한 곳·월말 점검·자료 갖춤 정도 (2026-11-16, 개선 제안 4·5·6·9번) ───
+   서버 /api/my/queue · /api/my/plant/{id}/overview · /api/my/monthend · /api/my/meter · /api/my/readiness (hatsoja_ops.py).
+   대기함의 「한 번에 넣기」는 대장 칸이 비어 있고 서류 안 후보가 하나뿐인 값만 넣는다. 값은 서버가 서류에서 뽑은 것만 쓴다. */
+let _MY_QUEUE = null, _MY_ONE = null, _MY_MONTHEND = null, _MY_READY = null;
+
+async function _opsGet(url){ try{ const j = await fetch(url, {credentials:'same-origin'}).then(function(r){ return r.json(); }); return j.ok ? j : {막힘:true}; }catch(e){ return {막힘:true}; } }
+async function _opsSend(method, url, body){
+  try{ const res = await fetch(url, {method:method, credentials:'same-origin', headers:{'Content-Type':'application/json'}, body: body ? JSON.stringify(body) : undefined});
+    const j = await res.json(); if(!j.ok){ toast(j.error === 'forbidden' ? '이 계정으로는 고칠 수 없습니다.' : (j.error === 'bad_request' ? '입력한 값을 확인해 주세요.' : '처리하지 못했습니다: ' + (j.error || res.status))); return null; } return j;
+  }catch(e){ toast('서버에 닿지 못했습니다.'); return null; }
+}
+function _opsDraw(id, html){ if(currentRoute() !== 'mem/power') return; const b = document.getElementById(id); if(b) b.outerHTML = html; }
+async function opsLoadAll(){
+  if(!REAL_API){ _MY_QUEUE = {체험:true}; _MY_MONTHEND = {체험:true}; _MY_READY = {체험:true}; queueRedraw(); monthendRedraw(); readyRedraw(); return; }
+  _MY_QUEUE = await _opsGet('/api/my/queue'); queueRedraw();
+  _MY_MONTHEND = await _opsGet('/api/my/monthend'); monthendRedraw();
+  _MY_READY = await _opsGet('/api/my/readiness'); readyRedraw();
+}
+function queueRedraw(){ _opsDraw('queueCardBox', queueCard()); }
+function monthendRedraw(){ _opsDraw('monthendCardBox', monthendCard()); }
+function readyRedraw(){ _opsDraw('readyCardBox', readyCard()); }
+function _opsEmpty(id, 제목, 글){ return '<div class="card" id="' + id + '" style="margin-bottom:18px;"><div class="card-title"><h3 class="serif">' + 제목 + '</h3></div><p class="text-mute" style="margin:0;">' + 글 + '</p></div>'; }
+function _lvBadge(lv){ return '<span class="badge ' + (lv === '지남' || lv === '끊김 의심' || lv === '임박' || lv === '주의' ? 'badge-danger' : (lv === '넣기' ? 'badge-success' : 'badge-mute')) + '">' + escapeHtml(lv) + '</span>'; }
+
+function queueCard(){
+  const d = _MY_QUEUE, 제목 = '📋 확인 대기함';
+  if(!d) return _opsEmpty('queueCardBox', 제목, '불러오는 중입니다.');
+  if(d.체험) return _opsEmpty('queueCardBox', 제목, '실계정으로 로그인하면 서류에서 찾은 값, 다가오는 검사일·만료일, 자료가 끊긴 곳을 한 줄씩 모아 보여 줍니다.');
+  if(d.막힘) return _opsEmpty('queueCardBox', 제목, '확인 대기함은 조합 계정에서 씁니다.');
+  const it = d.items || [];
+  if(!it.length) return _opsEmpty('queueCardBox', 제목, '지금 확인할 일이 없습니다.');
+  return '<div class="card" id="queueCardBox" style="border:2px solid #b58900;margin-bottom:18px;"><div class="card-title"><h3 class="serif">' + 제목 + ' <span class="badge badge-mute">' + it.length + '건</span></h3>'
+    + (d.auto_n ? '<button class="btn btn-primary btn-sm" onclick="queueApplyAll()">서류에서 찾은 값 ' + d.auto_n + '개 한 번에 넣기</button>' : '') + '</div>'
+    + '<p class="text-mute" style="font-size:12.5px;margin-top:0;">「넣기」는 대장 칸이 비어 있고 서류 안에 값이 하나뿐인 것입니다. 「고르기」는 서류끼리 값이 다르거나 대장과 달라 아래 서류 보관함에서 직접 골라야 합니다.</p>'
+    + it.slice(0, 30).map(function(x){ return '<div style="font-size:13px;margin:4px 0;">' + _lvBadge(x.level) + ' <span class="text-mute">' + escapeHtml(x.type) + '</span> ' + escapeHtml(x.text) + '</div>'; }).join('')
+    + (it.length > 30 ? '<div class="text-mute" style="font-size:12px;">그 밖에 ' + (it.length - 30) + '건</div>' : '') + '</div>';
+}
+async function queueApplyAll(){
+  if(!confirm('대장 칸이 비어 있고 서류 안에 값이 하나뿐인 것만 넣습니다. 넣을까요?')) return;
+  const j = await _opsSend('POST', '/api/my/queue/apply-all'); if(!j) return;
+  _MY_QUEUE = j; if(j.plants && _MY_PLANTS){ const k = _MY_PLANTS.kinds; _MY_PLANTS = Object.assign({ok:true, kinds:k}, j.plants); plantRedraw(); }
+  toast('대장에 ' + (j.applied || []).length + '개 값을 넣었습니다.'); queueRedraw(); if(_MY_DOCS) docsLoad(); _MY_READY = await _opsGet('/api/my/readiness'); readyRedraw();
+}
+
+async function plantOne(id){
+  _MY_ONE = {불러오는중:true}; _opsDraw('plantOneBox', plantOneCard());
+  _MY_ONE = await _opsGet('/api/my/plant/' + id + '/overview'); _opsDraw('plantOneBox', plantOneCard());
+  const b = document.getElementById('plantOneBox'); if(b && b.scrollIntoView) b.scrollIntoView({block:'start'});
+}
+function plantOneCard(){
+  const d = _MY_ONE;
+  if(!d || d.막힘 || d.닫음) return '<div id="plantOneBox"></div>';
+  if(d.불러오는중) return _opsEmpty('plantOneBox', '🔎 발전소 한 곳', '불러오는 중입니다.');
+  const p = d.plant, M = (d.months || []).filter(function(m){ return m.kwh !== null && m.kwh !== undefined; });
+  const 줄 = function(a, b){ return '<div style="display:inline-block;min-width:150px;margin:2px 14px 2px 0;font-size:13px;"><span class="text-mute">' + a + '</span> <b>' + escapeHtml(b === null || b === undefined || b === '' ? '-' : String(b)) + '</b></div>'; };
+  const 표 = M.length ? '<div style="overflow-x:auto;"><table class="tbl"><thead><tr><th>월</th><th class="num">발전량(kWh)</th><th class="num">kW당(kWh)</th><th class="num">이용률(%)</th><th class="num">조합 평균 kW당</th><th class="num">평균 대비(%)</th></tr></thead><tbody>'
+      + M.slice(-14).map(function(m){ const 낮 = m.ratio_pct !== null && m.ratio_pct < 90;
+          return '<tr><td>' + escapeHtml(m.month) + '</td><td class="num">' + _fmtN(Math.round(m.kwh)) + '</td><td class="num">' + (m.kwh_per_kw || '-') + '</td><td class="num">' + (m.cf_pct || '-') + '</td><td class="num">' + (m.coop_kwh_per_kw || '-') + '</td>'
+            + '<td class="num">' + (m.ratio_pct === null ? '-' : (낮 ? '<span class="badge badge-danger">' + m.ratio_pct + '</span>' : m.ratio_pct)) + '</td></tr>'; }).join('') + '</tbody></table></div>'
+    : '<p class="text-mute" style="font-size:13px;">' + escapeHtml(d.note || '이 발전소의 월별 발전량이 아직 없습니다.') + '</p>';
+  return '<div class="card" id="plantOneBox" style="border:2px solid #2f6f4f;margin-bottom:18px;"><div class="card-title"><h3 class="serif">🔎 ' + escapeHtml(p.name) + ' 한눈에</h3>'
+    + '<button class="btn btn-outline btn-sm" onclick="_MY_ONE={닫음:true};_opsDraw(\'plantOneBox\', plantOneCard())">닫기</button></div>'
+    + (d.alerts || []).map(function(a){ return '<div style="font-size:13px;margin:3px 0;">' + _lvBadge(a.level) + ' ' + escapeHtml(a.text) + '</div>'; }).join('')
+    + '<div style="margin:6px 0 10px;">' + 줄('준공 용량', p.capacity_kw ? p.capacity_kw + ' kW' : '') + 줄('인버터', p.inverter || (p.inverter_kw ? p.inverter_kw + ' kW' : '')) + 줄('모듈', p.modules) + 줄('방위·경사', (p.azimuth === null || p.azimuth === undefined ? '-' : p.azimuth + '°') + ' · ' + (p.tilt === null || p.tilt === undefined ? '-' : p.tilt + '°'))
+    + 줄('상업운전', p.cod) + 줄('다음 정기검사', p.next_inspection) + 줄('사용허가 만료', p.permit_end) + 줄('하자보증 만료', p.warranty_end) + 줄('모니터링', p.monitoring) + 줄('용량 근거', p.source) + '</div>'
+    + (d.note && M.length ? '<p class="text-mute" style="font-size:12.5px;">' + escapeHtml(d.note) + '</p>' : '') + 표
+    + '<p class="text-mute" style="font-size:12px;">「평균 대비」는 이 발전소의 kW당 발전량을 조합 전체 평균과 견준 값입니다. 90% 아래면 붉게 표시합니다. 방위·그늘 때문일 수 있으니 여러 달 이어지는지 보세요.</p>'
+    + '<div style="font-size:13px;margin-top:6px;"><b>서류</b> ' + ((d.docs || []).length ? d.docs.map(function(x){ return '<a href="/api/my/docs/' + x.id + '/file">' + escapeHtml(x.filename) + '</a> <span class="text-mute">(' + escapeHtml(x.kind) + ')</span>'; }).join(' · ') : '<span class="text-mute">올린 서류 없음</span>') + '</div>'
+    + '<div style="font-size:13px;margin-top:4px;"><b>고장·수리</b> ' + ((d.events || []).length ? d.events.map(function(e){ return escapeHtml(e.date_from + (e.date_to ? '~' + e.date_to : '') + ' ' + e.kind + ' ' + (e.note || '')); }).join(' / ') : '<span class="text-mute">기록 없음</span>') + '</div>'
+    + '<div style="font-size:13px;margin-top:4px;"><b>한전 검침</b> ' + ((d.meter || []).length ? d.meter.slice(0, 6).map(function(g){ return escapeHtml(g.month) + ' ' + _fmtN(Math.round(g.kwh_sold)) + 'kWh'; }).join(' · ') : '<span class="text-mute">적은 값 없음</span>') + '</div></div>';
+}
+
+function monthendCard(){
+  const d = _MY_MONTHEND, 제목 = '🧾 월말 점검 — 모니터링·한전 검침 맞대기';
+  if(!d) return _opsEmpty('monthendCardBox', 제목, '불러오는 중입니다.');
+  if(d.체험) return _opsEmpty('monthendCardBox', 제목, '실계정으로 로그인하면 달마다 모니터링 발전량과 한전 검침값을 맞대어 어긋난 곳만 보여 줍니다.');
+  if(d.막힘 || !d.month) return _opsEmpty('monthendCardBox', 제목, '월 실적이 올라오면 한전 검침값과 맞대 볼 수 있습니다.');
+  const 달 = '<select class="input" id="me-month" onchange="monthendLoad(this.value)">' + (d.months || []).map(function(m){ return '<option' + (m === d.month ? ' selected' : '') + '>' + escapeHtml(m) + '</option>'; }).join('') + '</select>';
+  const 표 = (d.rows || []).length ? '<div style="overflow-x:auto;"><table class="tbl"><thead><tr><th>발전소</th><th class="num">모니터링(kWh)</th><th class="num">한전 검침(kWh)</th><th class="num">차이(%)</th><th>판정</th></tr></thead><tbody>'
+      + d.rows.map(function(r){ const 나쁨 = r.verdict.indexOf('정상') !== 0 && r.diff_pct !== null;
+          return '<tr><td>' + escapeHtml((r.plants || []).join('·') || r.group) + '</td><td class="num">' + (r.monitor_kwh ? _fmtN(Math.round(r.monitor_kwh)) : '-') + '</td><td class="num">' + (r.meter_kwh ? _fmtN(Math.round(r.meter_kwh)) : '-') + '</td>'
+            + '<td class="num">' + (r.diff_pct === null ? '-' : r.diff_pct) + '</td><td>' + (나쁨 ? '<span class="badge badge-danger">' + escapeHtml(r.verdict) + '</span>' : escapeHtml(r.verdict)) + '</td></tr>'; }).join('') + '</tbody></table></div>' : '';
+  const 검침 = (d.meter || []).length ? '<div style="font-size:12.5px;margin:6px 0;">적은 검침값: ' + d.meter.map(function(g){ return escapeHtml(g.plant || '') + ' ' + _fmtN(Math.round(g.kwh_sold)) + 'kWh' + (g.amount ? ' · ' + _fmtN(Math.round(g.amount)) + '원' : '')
+      + ' <a href="#" onclick="meterDelete(' + g.id + ');return false;">지우기</a>'; }).join(' / ') + '</div>' : '';
+  return '<div class="card" id="monthendCardBox" style="border:2px solid #2f6f4f;margin-bottom:18px;"><div class="card-title"><h3 class="serif">' + 제목 + '</h3>' + 달 + '</div>'
+    + '<p style="font-size:13.5px;margin-top:0;">' + escapeHtml(d.summary || '') + '</p>'
+    + (d.flags || []).map(function(f){ return '<div style="font-size:13px;margin:3px 0;">' + _lvBadge(f.level) + ' ' + escapeHtml(f.text) + '</div>'; }).join('') + 표 + 검침
+    + '<div style="margin-top:8px;"><select class="input" id="me-plant"><option value="">조합 전체</option>' + (d.plants || []).map(function(p){ return '<option value="' + p.id + '">' + escapeHtml(p.name) + '</option>'; }).join('') + '</select> '
+    + '<input class="input" id="me-kwh" type="number" min="0" step="0.1" placeholder="한전 검침 판매량(kWh)" style="width:190px;"> '
+    + '<input class="input" id="me-amount" type="number" min="0" step="1" placeholder="정산 금액(원, 없으면 비움)" style="width:190px;"> '
+    + '<button class="btn btn-outline btn-sm" onclick="meterSave()">검침값 적기</button></div>'
+    + '<p class="text-mute" style="font-size:12px;">모니터링은 인버터 쪽 값이라 한전 검침이 0~4% 적은 것은 변압기·선로 손실로 봅니다. 그보다 많이 적으면 계량·정산을, 검침이 더 많으면 모니터링 자료 빠짐을 확인합니다.</p></div>';
+}
+async function monthendLoad(m){ _MY_MONTHEND = await _opsGet('/api/my/monthend?month=' + encodeURIComponent(m)); monthendRedraw(); }
+async function meterSave(){
+  const g = function(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  if(!g('me-kwh')){ toast('한전 검침 판매량을 적어 주세요.'); return; }
+  const j = await _opsSend('POST', '/api/my/meter', {month:_MY_MONTHEND.month, plant_id: g('me-plant') ? Number(g('me-plant')) : null, kwh_sold:g('me-kwh'), amount:g('me-amount')}); if(!j) return;
+  _MY_MONTHEND = Object.assign({}, _MY_MONTHEND, j); toast('검침값을 적었습니다.'); monthendRedraw(); if(_MY_LINKS) linksLoad();
+}
+async function meterDelete(id){ if(!confirm('이 검침값을 지울까요?')) return; const j = await _opsSend('DELETE', '/api/my/meter/' + id); if(j){ _MY_MONTHEND = Object.assign({}, _MY_MONTHEND, j); monthendRedraw(); } }
+
+function readyCard(){
+  const d = _MY_READY, 제목 = '✅ 자료 갖춤 정도';
+  if(!d) return _opsEmpty('readyCardBox', 제목, '불러오는 중입니다.');
+  if(d.체험) return _opsEmpty('readyCardBox', 제목, '실계정으로 로그인하면 햇소자를 넓게 쓰는 데 필요한 자료 32종 가운데 무엇을 갖췄고 무엇이 빠졌는지 보여 줍니다.');
+  if(d.막힘 || !(d.items || []).length) return _opsEmpty('readyCardBox', 제목, '자료 갖춤 정도는 조합 계정에서 봅니다.');
+  const 단계이름 = {'가':'가. 발전소와 발전량', '나':'나. 돈과 사람', '다':'다. 설립·증설·홍보'};
+  const 묶음 = ['가','나','다'].map(function(t){
+    const 줄 = d.items.filter(function(x){ return x.tier === t; }).map(function(x){
+      const cls = x.state === '갖춤' ? 'badge-success' : (x.state === '일부' ? 'badge-info' : (x.state === '해당 없음' ? 'badge-mute' : 'badge-danger'));
+      return '<tr><td>' + x.no + '</td><td>' + escapeHtml(x.name) + '</td><td><span class="badge ' + cls + '">' + escapeHtml(x.state === '모름' ? '표시 안 함' : x.state) + '</span> <span class="text-mute" style="font-size:12px;">' + escapeHtml(x.detail || '') + '</span></td>'
+        + '<td><select class="input" style="font-size:12px;" onchange="readySet(' + x.no + ', this.value)"><option value="">' + (x.how === '자동' ? '자동 판정' : '직접 표시') + '</option>'
+        + (d.states || []).map(function(s){ return '<option>' + escapeHtml(s) + '</option>'; }).join('') + (x.how === '직접' && x.state !== '모름' ? '<option value="자동">표시 지우기</option>' : '') + '</select></td></tr>'; }).join('');
+    return '<details' + (t === '가' ? ' open' : '') + ' style="margin-top:6px;"><summary style="cursor:pointer;font-weight:600;">' + 단계이름[t] + '</summary><table class="tbl"><tbody>' + 줄 + '</tbody></table></details>'; }).join('');
+  return '<div class="card" id="readyCardBox" style="border:2px solid #2f6f4f;margin-bottom:18px;"><div class="card-title"><h3 class="serif">' + 제목 + ' <span class="badge badge-mute">' + d.have + ' / ' + d.total + '종 (' + d.pct + '%)</span></h3></div>'
+    + '<p class="text-mute" style="font-size:12.5px;margin-top:0;">대장·서류·월 실적에서 알 수 있는 것은 자동으로 판정합니다. 나머지는 조합이 「있음·없음·해당 없음」으로 표시해 주세요. 가 단계만 갖춰도 발전량 진단과 날짜 알림이 돕니다.</p>' + 묶음 + '</div>';
+}
+async function readySet(no, 상태){ if(!상태) return; const j = await _opsSend('POST', '/api/my/readiness', {no:no, state:상태}); if(j){ _MY_READY = j; readyRedraw(); } }
 
 async function powerLoadMine(){
   if(!REAL_API) return;
