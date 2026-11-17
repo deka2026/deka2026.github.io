@@ -682,7 +682,7 @@ footer{
 
 <!-- 관리자 미리보기 / 데모 체험 안내 띠 -->
 <div class="mode-bar preview" id="previewBar">
-  👀 <strong id="previewBarRole">회원 화면 미리보기 모드</strong>입니다. 실제 해당 등급 회원에게 보이는 화면 그대로예요.
+  👀 <strong id="previewBarRole">회원 화면 미리보기 모드</strong><span id="previewBarNote">입니다. 실제 해당 등급 회원에게 보이는 화면 그대로예요.</span>
   <button class="btn btn-primary btn-sm" onclick="endPreview()">관리자로 돌아가기</button>
 </div>
 <div class="mode-bar demo" id="demoBar">
@@ -1829,15 +1829,64 @@ function startPreview(role){
   if(location.hash === home) navigate(); else location.hash = home;
   toast(`${roleLabel(role)} 화면 미리보기를 시작합니다.`);
 }
-function endPreview(){
+async function endPreview(){
+  const cur = currentUser();
+  const viewing = !!(cur && cur.viewVillage);
   let admin = null;
   try{ admin = JSON.parse(sessionStorage.getItem('sv_preview_admin') || 'null'); }catch(e){}
   try{ sessionStorage.removeItem('sv_preview_admin'); }catch(e){}
+  if(viewing){
+    await viewCoopClear();
+    if(!admin){   // 다른 탭에서 연 경우 — 이 탭엔 관리자 정보가 없으니 허브 세션으로 되찾는다
+      try{
+        const d = await fetch('/api/auth/me', {credentials:'same-origin'}).then(r => r.json());
+        if(d.ok && d.user){ applyUnifiedUser(d.user, {redirect:false, silent:true}); admin = currentUser(); }
+      }catch(e){}
+    }
+  }
   if(!admin){ logout(); return; }
   setUser(admin);
   location.hash = '#/adm/dashboard';
   navigate();   // 같은 해시여도 즉시 복귀되도록
+  if(viewing) loadRealData();   // 「우리 마을」을 관리자 기준으로 되돌린다
   toast('관리자 화면으로 돌아왔습니다.');
+}
+
+/* 통합관리자 → 조합을 골라 그 조합 화면으로 들어가기 (2026-11-17 이사장 지시)
+   서버(hatsoja_viewas.py)가 관리자 전용 쿠키로 「보는 조합」을 기억하고, 햇소자 화면의 요청을 그 조합 계정처럼 답한다.
+   그래서 여기서는 고르기·풀기만 부르고, 조합 화면의 호출은 하나도 바꾸지 않는다. */
+async function viewCoopClear(){
+  try{
+    await fetch('/api/admin/view-village', {method:'POST', credentials:'same-origin',
+      headers:{'Content-Type':'application/json'}, body: JSON.stringify({village_id:null})});
+  }catch(e){}
+}
+async function viewCoop(vid){
+  const u = currentUser();
+  if(!REAL_API || !u || !u.unified || u.hubRole !== 'admin' || u.preview){ toast('통합관리자만 조합 화면으로 들어갈 수 있습니다.'); return; }
+  let d = null;
+  try{
+    d = await fetch('/api/admin/view-village', {method:'POST', credentials:'same-origin',
+      headers:{'Content-Type':'application/json'}, body: JSON.stringify({village_id:+vid})}).then(r => r.json());
+  }catch(e){}
+  if(!d || !d.ok || !d.village){ toast(d && d.error === 'forbidden' ? '통합관리자만 조합 화면으로 들어갈 수 있습니다.' : '조합 화면을 열지 못했습니다. 잠시 후 다시 시도해 주세요.'); return; }
+  try{ sessionStorage.setItem('sv_preview_admin', JSON.stringify(u)); }catch(e){}
+  setUser({email:u.email, name:u.name, role:'coop', hubRole:'coop', perms:[], village:d.village.name,
+    loginAt:new Date().toISOString(), unified:true, preview:true, viewVillage:{id:d.village.id, name:d.village.name}});
+  await loadRealData();
+  const home = roleHome('coop');
+  if(location.hash === home) navigate(); else location.hash = home;
+  toast(`「${d.village.name}」 조합 화면으로 들어왔습니다. 위쪽 띠의 단추로 돌아갑니다.`);
+}
+/* 새로 열었을 때 서버의 「보는 조합」이 이미 풀렸으면(4시간·다른 탭에서 풂) 화면도 관리자로 되돌린다 */
+async function viewCoopCheck(){
+  const u = currentUser();
+  if(!REAL_API || !u || !u.viewVillage) return;
+  try{
+    const d = await fetch('/api/admin/view-village', {credentials:'same-origin'}).then(r => r.json());
+    if(d.ok && d.village && d.village.id === u.viewVillage.id) return;
+  }catch(e){ return; }
+  endPreview();
 }
 
 /* 데모 체험 → 가입 전환 (개선안 2-6) */
@@ -1862,7 +1911,9 @@ function updateConvenienceUI(scope, page){
   if(pv){
     pv.classList.toggle('on', preview);
     const t = document.getElementById('previewBarRole');
-    if(t) t.textContent = `${roleLabel(role)} 화면 미리보기 모드`;
+    if(t) t.textContent = (u && u.viewVillage) ? `「${u.viewVillage.name}」 조합 화면(실제 자료)` : `${roleLabel(role)} 화면 미리보기 모드`;
+    const tn = document.getElementById('previewBarNote');
+    if(tn) tn.textContent = (u && u.viewVillage) ? '을 관리자 계정으로 보고 있습니다. 여기서 고치면 그 조합의 자료가 바뀝니다.' : '입니다. 실제 해당 등급 회원에게 보이는 화면 그대로예요.';
   }
   if(db){
     db.classList.toggle('on', demo);
@@ -2239,6 +2290,7 @@ function demoLogin(role){
 }
 function logout(){
   const u = currentUser();
+  if(u && u.viewVillage && REAL_API) viewCoopClear();   // 조합 보기 중 로그아웃 — 서버의 「보는 조합」도 푼다
   if(u && u.unified && REAL_API){
     fetch('/api/auth/logout', {method:'POST', credentials:'same-origin'}).catch(() => {});
   }
@@ -13234,6 +13286,8 @@ function admContest(){
 
 function admVillages(){
   const canEdit = isAdminUser();   // 연합회는 열람 전용
+  const _cu = currentUser();
+  const canViewCoop = !!(REAL_API && _realMode && _cu && _cu.unified && _cu.hubRole === 'admin' && !_cu.preview);   // 조합 화면으로 들어가기는 통합관리자만
   return `
     <div class="sec-head">
       <h1>${canEdit ? '조합·마을 관리' : '조합·마을 현황'}</h1>
@@ -13263,6 +13317,7 @@ function admVillages(){
               <td><span class="badge badge-info">${v.phase}</span></td>
               <td class="tbl-actions" style="white-space:nowrap;">
                 <button class="btn btn-ghost btn-sm" onclick="viewVillage('${escapeJs(v.name)}')">상세</button>
+                ${canViewCoop && v._srv ? `<button class="btn btn-outline btn-sm" onclick="viewCoop(${+v.id})" title="이 조합의 계정으로 로그인한 것처럼 조합 화면(발전·정산, 서류 보관함, AI 상담)을 봅니다. 위쪽 띠의 단추로 돌아옵니다.">🚪 조합 화면</button>` : ''}
                 <button class="btn btn-outline btn-sm" onclick="admVillageDocs('${escapeJs(v.id)}')">📂 자료</button>
                 <button class="btn btn-primary btn-sm" onclick="genVillageReport('${escapeJs(v.id)}')">📊 리포트 생성</button>
               </td>
@@ -13271,7 +13326,7 @@ function admVillages(){
         </tbody>
       </table>
       <p class="form-hint" style="margin-top:10px;">
-        📂 자료: 각 마을에서 생성된 문서를 내용별(정관·회의록·사업계획서·결산서 등)로 확인하고 내려받습니다. ·
+        ${canViewCoop ? '🚪 조합 화면: 그 조합 계정으로 로그인한 것처럼 조합이 보는 화면을 그대로 봅니다(통합관리자 전용). · ' : ''}📂 자료: 각 마을에서 생성된 문서를 내용별(정관·회의록·사업계획서·결산서 등)로 확인하고 내려받습니다. ·
         📊 리포트 생성: 마을의 주요 결과수치(조합원·설비·진행률·자료 현황)를 투명하게 정리한 리포트를 자동 생성합니다.
       </p>
     </div>
@@ -15342,6 +15397,7 @@ loadClosings();
 loadTax();
 renderTopActions();
 ssoBoot();   // 통합 계정 세션이 있으면 자동 로그인 (sakyowon.co.kr 서빙 시)
+viewCoopCheck();   // 조합 보기 중이었는데 서버에서 이미 풀렸으면 관리자로 되돌린다
 navigate();
 
 // 모달 배경 클릭 시 닫기
