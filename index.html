@@ -619,6 +619,7 @@ svg.ic.s{width:17px;height:17px}
 .u2 .msg{margin:8px 0 0}
 .app>main{min-width:0}
 .flist td[colspan].n{white-space:normal}   /* 빈 목록 안내 글이 줄을 안 바꿔 휴대폰에서 표가 669px 로 늘던 것 */
+#fClosed{display:none}#vFiles.closed>:not(#fClosed){display:none!important}#vFiles.closed>#fClosed{display:block}
 #myBox{margin:0 0 16px}#myGreet{margin:0 0 4px}
 #vMap .mapbar{background:var(--bg)}
 @media(min-width:761px){#vCustom .cgrid{grid-template-columns:1fr 230px}}
@@ -710,7 +711,7 @@ svg.ic.s{width:17px;height:17px}
       <!-- ③ 내 페이지 (로그인 #/) — 인사 카드 → AI 대화창 → 내 정보·이용료 → 대시보드 칸 → 공지 -->
       <main id="homeMain" class="view" aria-label="내 페이지">
         <div class="tfband" id="tfBanner" hidden>🔐 발송·결재·권한 기능을 쓰려면 2단계 인증을 켜 주세요. <button class="btn sm" type="button" id="tfBannerBtn">지금 켜기</button></div>
-        <div class="tfband" id="joinResume" hidden>📝 가입할 때 고른 서비스 신청이 아직 끝나지 않았습니다. <a class="btn sm p" href="#/join">신청 이어가기</a><button class="btn sm" type="button" id="joinResumeX">지우기</button></div>
+        <div class="tfband" id="joinResume" hidden>📝 가입할 때 고른 서비스 신청이 아직 끝나지 않았습니다. <span id="joinResumeWhen"></span><a class="btn sm p" href="#/join">신청 이어가기</a><button class="btn sm" type="button" id="joinResumeX">지우기</button></div>
         <section class="u2" id="myGreet" aria-label="인사"></section>
         <section class="chatspot" id="chatSpot" aria-labelledby="chatT">
           <div class="secT"><h2 id="chatT">AI 대화창</h2><p class="sub">메뉴를 몰라도 말로 하시면 됩니다. 쓰기·보내기는 확인을 받고 합니다.</p></div>
@@ -730,6 +731,7 @@ svg.ic.s{width:17px;height:17px}
       </main>
       <!-- ④ 내 폴더 (#/files) -->
       <main id="vFiles" class="view" aria-label="내 폴더">
+        <section class="u2" id="fClosed" aria-labelledby="fClosedT"><div class="card" style="text-align:center;padding:34px 22px"><h2 id="fClosedT" style="font-family:var(--serif);color:var(--g9);font-size:1.3rem;margin-bottom:8px">내 폴더는 유료 회원 서비스입니다</h2><p style="color:var(--ink2);margin-bottom:16px">무료이용회원은 내 폴더를 쓸 수 없습니다. 서비스를 고르면 내 폴더가 함께 열립니다.</p><a class="btn p" href="#/join">서비스 더 고르기</a> <a class="btn" href="#/">내 페이지로</a></div></section>
         <div class="secT"><h2>내 폴더</h2><p class="sub">서버에 두는 내 자료. 상담창이 이 폴더의 파일을 바로 읽고 씁니다.</p></div>
         <div class="ftabs" role="tablist"><button type="button" role="tab" data-ft="files" class="on" aria-selected="true">내 파일</button><button type="button" role="tab" data-ft="trash" aria-selected="false">🗑️ 휴지통 (7일 보관)</button></div>
         <div class="fbar">
@@ -978,6 +980,10 @@ function tierOf(u) {
   if (['admin', 'staff', 'federation', 'coop'].includes(u.role)) return u.role;
   return (u.perms || []).includes('정책지원관') ? 'policy' : 'free';
 }
+/* 11-18 이사장 결정: 무료이용회원(tier free)은 내 폴더를 쓰지 않는다 — 서버가 /api/my/files* 를 403 folder_closed 로 막는다.
+   tier 칸이 없는 응답(이용권 모듈이 없는 서버)에서는 지금처럼 보인다. 서버가 folder_closed 를 주면 그때부터 닫힌 것으로 본다 */
+let FOLDER_403 = false;
+const noFolder = u => { u = u === undefined ? me : u; return !!u && (u.tier === 'free' || (FOLDER_403 && u === me)); };
 const tierKo = u => u ? (u.tier_ko || TIER_KO[tierOf(u)] || '') : '';
 let me = null;                        // 화면을 그리는 기준(미리보기 중엔 가짜 등급)
 let realMe = null;                    // 실제 로그인 계정
@@ -1136,7 +1142,7 @@ function renderSideHome() {
   const r = currentRoute(), cur = x => r === x ? ' aria-current="page"' : '';
   const keys = myServiceKeys(), staff = (RANK[me.role] || 0) >= RANK.staff;
   let h = `<div class="me"><b>${esc(me.name || me.email || me.username)}</b> 님<br>${esc(tierKo(me))}</div>` + (preview ? `<div class="pvnote">🧪 미리보기 — 화면만 바뀌고 저장되지 않습니다</div>` : '') +
-    `<nav aria-label="내 메뉴"><ul class="sfix"><li><a href="#/"${cur('home')}>${ic('home', 's')}내 페이지</a></li><li><a href="#/files"${cur('files')}>${ic('folder', 's')}내 폴더</a></li></ul>`;
+    `<nav aria-label="내 메뉴"><ul class="sfix"><li><a href="#/"${cur('home')}>${ic('home', 's')}내 페이지</a></li>${noFolder() ? '' : `<li><a href="#/files"${cur('files')}>${ic('folder', 's')}내 폴더</a></li>`}</ul>`;
   if (keys.length) h += `<div class="cap" id="capSvc">내가 고른 서비스</div><div id="sgSvc">` + keys.map((k, i) => sgHTML(k, SVC[k].n, SVC[k], svcItems(k).map(sgLi).join(''), i === 0)).join('') + `</div>`;
   if (!staff) h += sgHTML('look', keys.length ? '무료로 둘러보기' : '무료로 써 보기', { c: 'c-rs', icn: 'map' }, lookItems(keys).map(sgLi).join(''), !keys.length);
   if (staff) {   // 그룹웨어 밖의 직원·관리 화면(근태·인사·입찰·관리자 화면…) — 그룹웨어 자체는 머리 단추로
@@ -1292,7 +1298,7 @@ function route() {
   show('#shell', true); show('#vStart', r === 'start'); show('#vMap', r === 'map'); show('#vJoin', r === 'join'); show('#vAsk', r === 'ask');
   show('#homeMain', !!me && r === 'home'); show('#vFiles', !!me && r === 'files'); show('#vCustom', !!me && r === 'custom');
   $('#topnav').hidden = false;
-  $('#topnav').querySelectorAll('a').forEach(a => { a.classList.toggle('cur', a.dataset.r === r); if (a.dataset.r === r) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); a.hidden = (a.classList.contains('needin') && !me) || (a.classList.contains('needout') && !!me); });
+  $('#topnav').querySelectorAll('a').forEach(a => { a.classList.toggle('cur', a.dataset.r === r); if (a.dataset.r === r) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); a.hidden = (a.classList.contains('needin') && !me) || (a.classList.contains('needout') && !!me) || (a.dataset.r === 'files' && noFolder()); });
   { const t = $('#hTour'); if (r === 'map') t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current'); }
   $('#brandLink').setAttribute('href', me ? '#/' : '#/start');
   $('#sideTog').hidden = !side;
@@ -1303,7 +1309,7 @@ function route() {
   if (r === 'join') renderJoin(lastRoute !== 'join');
   if (r === 'ask') renderAsk(lastRoute !== 'ask');
   if (me && r === 'home') { renderSideHome(); renderHome(); }
-  if (me && r === 'files') { renderSideHome(); renderFiles(); }
+  if (me && r === 'files') { renderSideHome(); $('#vFiles').classList.toggle('closed', noFolder()); if (!noFolder()) renderFiles(); }
   if (me && r === 'custom') { renderSideHome(); renderCustom(); }
   if (!side) document.body.classList.remove('sideOpen');
   if (lastRoute && lastRoute !== r) { try { window.scrollTo(0, 0); } catch (_) {} }
@@ -1403,7 +1409,7 @@ function defaultDash(u) {
   if (r === 'admin') c.push('members', 'org', 'hpc');   // 26-10-30 HPC 사업 실적 칸
   return c;
 }
-function myDash() { const d = Array.isArray(prefs.dash) ? prefs.dash.filter(x => CARD_DEFS[x]) : []; return d.length ? d : defaultDash(me); }
+function myDash() { const ok = x => CARD_DEFS[x] && !(x === 'files' && noFolder()); const d = Array.isArray(prefs.dash) ? prefs.dash.filter(ok) : []; return d.length ? d : defaultDash(me).filter(ok); }   // 무료이용회원은 「내 폴더」 칸 없음
 const onHome = () => !!me && currentRoute() === 'home';
 async function renderDash() {
   const ids = myDash(), box = $('#dash');
@@ -1435,7 +1441,7 @@ async function renderQuick() {
   const SAFE = [['myfiles.list', '내 폴더 보여 줘'], ['menu.mine', '내가 쓸 수 있는 메뉴 알려 줘'], ['nav.open', staff ? '근태 화면 열어 줘' : '둘러보기 열어 줘'],
     ['exec.log', '내 실행 기록 보여 줘'], ['routine.cards', '오늘 루틴 뭐 있어']].concat(staff ? [['gw.approvals_list', '결재함 보여 줘'],
     ['prefs.dash_edit', '대시보드에 근태 넣어 줘']] : []);
-  SAFE.forEach(([id, x]) => { if (has(id)) add(x); });
+  SAFE.forEach(([id, x]) => { if (has(id) && !(id === 'myfiles.list' && noFolder())) add(x); });
   if (!list.length) { const seen = {}; tools.items.forEach(t => { const ex = (t.examples || [])[0]; if (!ex || t.risk !== 'read' || seen[t.area]) return; seen[t.area] = 1; add(ex); }); }   // 대장이 달라도 읽기 예시로
   box.innerHTML = list.length ? list.slice(0, 8).map(x => `<button type="button" data-say="${esc(x)}" title="상담창에 넣기">${esc(x)}</button>`).join('') + (list.length > 3 ? '<button type="button" class="qmore" aria-expanded="false">＋ 더 보기</button>' : '') : '<p class="hint">자주 쓰는 지시가 쌓이면 여기에 단추로 나옵니다.</p>';
   const qm = box.querySelector('.qmore'); if (qm) qm.addEventListener('click', () => { const on = box.classList.toggle('all'); qm.textContent = on ? '－ 접기' : '＋ 더 보기'; qm.setAttribute('aria-expanded', on ? 'true' : 'false'); });   // 휴대폰은 3개 + 더 보기
@@ -1488,7 +1494,7 @@ function svcCards() {
   }).join('') + '</div>';
 }
 const MX_HEAD = ['통합관리자', '매니저', '연합회원', '협동조합회원', '정책회원', '개인회원', '무료이용회원'];
-const MX = [['사이트 소개·문의·공개 자료', '●', '●', '●', '●', '●', '●', '●'], ['AI 대화창', '●', '●', '●', '●', '●', '●', '하루 한도'], ['내 폴더', '●', '●', '●', '●', '●', '●', '작은 용량'],
+const MX = [['사이트 소개·문의·공개 자료', '●', '●', '●', '●', '●', '●', '●'], ['AI 대화창', '●', '●', '●', '●', '●', '●', '하루 한도'], ['내 폴더', '●', '●', '●', '●', '●', '●', '—'],
   ['아카데미(실습·학습·팀러닝·화상회의)', '●', '●', '선택', '선택', '선택', '●', '맛보기'], ['햇소자 조합 메뉴', '●', '체크권한', '—', '●', '—', '—', '—'], ['햇소자 연합회 메뉴', '●', '체크권한', '●', '—', '—', '—', '—'],
   ['의정지원시스템', '●', '체크권한', '선택', '선택', '●', '선택', '둘러보기'], ['그룹웨어(머리 단추)', '●', '●', '—', '—', '—', '—', '—'], ['관리(회원·납부·발송)', '●', '체크권한', '—', '—', '—', '—', '—']];
 function pcard(c, i, n, sub, price, tag, lines, extra) {
@@ -1525,7 +1531,7 @@ function priceHTML() {
   });
   PLANS.products.filter(p => !seen[p.product]).forEach(p => { cards += prod(p); });
   (PLANS.external || []).filter(x => !seen[x.product]).forEach(x => { cards += ext(x); });
-  return (tl && b ? `<div class="notice" id="trialNote"><b>${tl}</b> — 이용료는 ${b.y}년 ${b.m}월부터 받습니다.</div>` : '') + `<div class="pgrid" id="pgrid">${cards}${staffCard}</div>` +
+  return ((PLANS.open === false) ? `<div class="notice" id="openNote"><b>유료 서비스 신청은 ${openWhen()}.</b> 지금은 무료이용회원으로 가입할 수 있고, 가입할 때 고른 서비스는 신청이 열리면 이어서 할 수 있습니다.</div>` : '') + (tl && b ? `<div class="notice" id="trialNote"><b>${tl}</b> — 이용료는 ${b.y}년 ${b.m}월부터 받습니다.</div>` : '') + `<div class="pgrid" id="pgrid">${cards}${staffCard}</div>` +
     `<p class="note" style="margin-top:10px">교육 서비스는 면세, 그 밖의 서비스는 부가세를 포함한 값입니다. 이용료는 이체 또는 자동이체로 냅니다.</p>`;
 }
 function startHTML() {
@@ -1678,7 +1684,7 @@ $('#myBox').addEventListener('click', async e => {
   if (r.ok && Array.isArray(r.subs)) { setMB(r); await refreshMe(); renderGreet(); renderMyBox(); renderSideHome(); const m = $('#myMsg'); if (m) { m.className = 'msg ok'; m.textContent = '그만두기를 받았습니다.'; } }
   else { b.disabled = false; const m = $('#myMsg'); if (m) { m.className = 'msg err'; m.textContent = (r.status === 403 && r.error === 'not_open') ? '지금은 여기서 그만두기를 받을 수 없습니다. 문의하기로 알려 주세요.' : mbText(r); } }
 });
-function renderResume() { const b = $('#joinResume'); if (b) b.hidden = !(stashGet() && !preview); }
+function renderResume() { const b = $('#joinResume'); if (!b) return; b.hidden = !(stashGet() && !preview); const w = $('#joinResumeWhen'); if (w) w.textContent = (PLANS && PLANS.ok && PLANS.open === false && !(me && me.role === 'admin')) ? `유료 서비스 신청은 ${openWhen()}. ` : ''; if (!PLANS) loadPlans().then(() => { if (onHome()) renderResume(); }); }
 $('#joinResumeX').addEventListener('click', () => { stashSet(null); renderResume(); });
 function renderHome() {
   renderTfBanner(); renderResume(); renderGreet(); renderMyBox();
@@ -1694,6 +1700,8 @@ function stashSet(picks) { try { if (picks && picks.length) localStorage.setItem
 let J = null, REG = null;
 /* 신청·문의 창구가 닫혀 있나 — plans 응답의 open 이 거짓이거나 서버에 모듈이 없을 때(404·실패). 통합관리자는 닫혀 있어도 서버가 받는다.
    닫혀 있으면 납부 정보(입금자명·현금영수증 번호)나 문의 글을 아예 받지 않는다 — 닫힌 서버로 개인정보가 한 글자도 나가지 않게(11-18 알파언니) */
+/* 닫혀 있을 때 「언제 열리나」 — plans 응답의 open_from(YYYY-MM-DD)이 있으면 그 날짜로, 없으면 「곧」. 날짜를 화면에 박지 않는다 */
+function openWhen() { const m = (PLANS && PLANS.ok && PLANS.open === false) ? /^(\d{4})-(\d{2})-(\d{2})$/.exec(PLANS.open_from || '') : null; return m ? `${+m[2]}월 ${+m[3]}일부터 열립니다` : '곧 열립니다'; }
 function mbClosed() { return !!PLANS && (!PLANS.ok || PLANS.open === false) && !(me && me.role === 'admin' && PLANS.ok && !preview); }
 function joinNew() { return { step: me ? 2 : 1, sel: {}, held: {}, f: {}, pay: { method: 'transfer', auto_day: 5, cycle: 'month', depositor: '', receipt_kind: 'income', receipt_no: '', invoice: false, biz_no: '' }, payMode: 'new', payOnly: false, err: '', busy: false, done: null, created: false, seeded: false }; }
 const jProd = k => (PLANS && PLANS.ok) ? PLANS.products.find(p => p.product === k) : null;
@@ -1776,7 +1784,7 @@ function sumHTML() {
 function sbpvHTML() {
   const picks = joinPicks(); const keys = me ? myServiceKeys() : [];
   picks.forEach(x => { const k = PROD_SVC[x.product]; if (k && !keys.includes(k)) keys.push(k); });
-  let h = '<div class="card sbpv" id="sbpvBox" aria-live="polite"><h3>로그인하면 보일 사이드바</h3><div class="mini"><div class="fx">내 페이지 · AI 대화창</div><div class="fx">내 폴더</div>';
+  let h = '<div class="card sbpv" id="sbpvBox" aria-live="polite"><h3>로그인하면 보일 사이드바</h3><div class="mini"><div class="fx">내 페이지 · AI 대화창</div>' + ((picks.length || (me && !noFolder())) ? '<div class="fx">내 폴더</div>' : '');
   keys.forEach(k => { const sel = J.sel[k]; const opt = SVC_OPT[k]; const items = SVC[k].items.concat(opt ? Object.keys(opt).filter(o => !sel || !sel.on || sel.opts.includes(o)).map(o => opt[o]) : []); h += `<div class="g"><span class="cchip ${SVC[k].c}">${esc(SVC[k].n)}</span></div>` + items.map(i => `<div class="i">${esc(i[0])}</div>`).join(''); });
   if (!keys.length) h += `<div class="g"><span class="cchip c-rs">무료로 써 보기</span></div>` + lookItems([]).map(i => `<div class="i">${esc(i[0])}</div>`).join('');
   return h + '<div class="fx" style="color:var(--g7)">+ 서비스 더 고르기</div></div></div>';
@@ -1807,7 +1815,7 @@ function doneHTML() {
   const goMy = `<div class="cta" style="margin-top:14px"><a class="btn p" href="#/" id="toMy">내 페이지로</a><a class="btn" href="#/start">첫 화면으로</a></div>`;
   if (D.kind === 'free') h += `<h2>가입되었습니다</h2><p class="lead" style="margin:6px 0 0">${nm} 님, 고맙습니다.</p><div class="box"><b>${TIER_KO.free}</b>으로 바로 쓸 수 있습니다. 나중에 「서비스 더 고르기」에서 서비스를 더할 수 있습니다.</div>` + goMy;
   else if (D.kind === 'pay') h += `<h2>납부 정보를 저장했습니다</h2><div class="box"><ul class="plain kv">${payinfoRows(MB && MB.payinfo)}</ul></div>` + goMy;
-  else if (D.kind === 'closed') h += `<h2>${D.wasNew ? '계정은 만들어졌습니다' : '유료 서비스 신청은 곧 열립니다'}</h2><p class="lead" style="margin:6px 0 0">${nm} 님, 고맙습니다.</p><div class="box" id="closedBox"><b>유료 서비스 신청은 곧 열립니다.${D.wasNew ? ' 계정은 만들어졌습니다.' : ''}</b><br>고르신 서비스는 이 기기에 적어 두었습니다. 신청이 열리면 내 페이지의 「신청 이어가기」에서 이어서 하실 수 있고, 그때까지 ${TIER_KO.free}으로 쓰실 수 있습니다.</div>` + goMy;
+  else if (D.kind === 'closed') h += `<h2>${D.wasNew ? '계정은 만들어졌습니다' : '유료 서비스 신청은 ' + openWhen()}</h2><p class="lead" style="margin:6px 0 0">${nm} 님, 고맙습니다.</p><div class="box" id="closedBox"><b>유료 서비스 신청은 ${openWhen()}.${D.wasNew ? ' 계정은 만들어졌습니다.' : ''}</b><br>고르신 서비스는 이 기기에 적어 두었습니다. 신청이 열리면 내 페이지의 「신청 이어가기」에서 이어서 하실 수 있고, 그때까지 ${TIER_KO.free}으로 쓰실 수 있습니다.</div>` + goMy;
   else if (D.kind === 'needlogin') h += `<h2>계정이 만들어졌습니다</h2><div class="box">${D.picks ? '로그인한 뒤 내 페이지의 <b>「신청 이어가기」</b>를 누르면 고르신 서비스 신청을 이어서 합니다.' : '로그인하면 바로 쓸 수 있습니다.'}</div><div class="cta" style="margin-top:14px"><a class="btn p" href="#login">로그인</a></div>`;
   else if (D.kind === 'pending') h += `<h2>가입 신청이 접수되었습니다</h2><div class="box">승인되면 로그인할 수 있습니다. 고르신 서비스는 로그인한 뒤 내 페이지의 「신청 이어가기」에서 이어서 신청합니다.</div><div class="cta" style="margin-top:14px"><a class="btn" href="#/start">첫 화면으로</a></div>`;
   else {   // applied — 서버 응답(MB)대로
@@ -1844,7 +1852,7 @@ function joinDraw(noSave) {
     const closed = !!(PLANS && PLANS.ok) && mbClosed();
     const label = !me ? (free || closed ? '가입 마치기' : '다음 — 납부 정보') : (free ? '내 페이지로' : closed ? '고른 서비스 적어 두기' : '다음 — 납부 정보');
     h += (me && !J.created ? `<div class="dognote"><img class="dogr s" src="${IMG}dog5.jpg" alt=""><span><b>필요한 서비스를 더 골라 보세요.</b><br>유료 서비스는 입금이 확인되면(협동조합·연합회는 승인도 거쳐) 열립니다.</span></div>` : '') +
-      (closed ? `<div class="notice" id="closedNote"><b>유료 서비스 신청은 곧 열립니다.</b> 지금 고르면 ${me ? '' : '계정을 먼저 만들고, '}신청이 열릴 때 내 페이지에서 이어서 할 수 있습니다. 납부 정보는 그때 받습니다.</div>` : '') +
+      (closed ? `<div class="notice" id="closedNote"><b>유료 서비스 신청은 ${openWhen()}.</b> 지금 고르면 ${me ? '' : '계정을 먼저 만들고, '}신청이 열릴 때 내 페이지에서 이어서 할 수 있습니다. 납부 정보는 그때 받습니다.</div>` : '') +
       `<div class="two"><div>${pickerHTML()}<div id="e2">${J.err ? `<div class="err" role="alert">${esc(J.err)}</div>` : ''}</div><div class="acts">${me ? '<a class="btn" href="#/">내 페이지로</a>' : '<button type="button" class="btn" data-jact="back1">이전</button>'}<span class="r"><button type="button" class="btn p" data-jact="next2" id="next2"${J.busy || !PLANS ? ' disabled' : ''}>${J.busy ? '처리하는 중…' : label}</button></span></div></div><aside class="sticky" id="sideBox">${sumHTML()}${sbpvHTML()}</aside></div>`;
   } else if (J.payOnly && mbClosed()) {
     h += `<div class="notice" id="payClosed"><b>지금은 납부 정보를 고칠 수 없습니다.</b> 유료 서비스 신청이 열리면 여기서 고칠 수 있습니다.</div><div class="acts"><a class="btn" href="#/">내 페이지로</a></div>`;
@@ -1986,7 +1994,7 @@ function askDraw() {
   let h = `<div class="sech"><h2>문의하기</h2><p>먼저 문의 분류를 골라 주세요. 분류에 따라 묻는 칸이 달라집니다.</p></div>`;
   if (!PLANS) { root.innerHTML = h + `<div class="pwait" id="askWait">문의 창구를 확인하는 중…</div>`; return; }
   if (mbClosed() && !A.done) {                   // 닫혀 있으면 폼을 쓰게 하지 않고 처음부터 홈페이지 문의 창구를 안내한다
-    root.innerHTML = `<div class="sech"><h2>문의하기</h2><p>팀학습 컨설팅 · AI교육 · 업무자동화 시스템 구축 의뢰 · 기타 문의</p></div><div class="card" id="askClosed"><div class="notice" style="margin:0 0 12px"><b>이 화면의 온라인 문의 접수는 준비 중입니다.</b> 지금은 사교원 홈페이지 문의 창구로 보내 주세요.</div><a class="btn p" href="${esc(CONTACT_URL)}" target="_blank" rel="noopener">사교원 홈페이지 문의하기 ↗</a> <a class="btn" href="${me ? '#/' : '#/start'}">${me ? '내 페이지로' : '첫 화면으로'}</a></div>`; return; }
+    root.innerHTML = `<div class="sech"><h2>문의하기</h2><p>팀학습 컨설팅 · AI교육 · 업무자동화 시스템 구축 의뢰 · 기타 문의</p></div><div class="card" id="askClosed"><div class="notice" style="margin:0 0 12px"><b>이 화면의 온라인 문의 접수는 ${openWhen() === '곧 열립니다' ? '준비 중입니다' : openWhen()}.</b> 지금은 사교원 홈페이지 문의 창구로 보내 주세요.</div><a class="btn p" href="${esc(CONTACT_URL)}" target="_blank" rel="noopener">사교원 홈페이지 문의하기 ↗</a> <a class="btn" href="${me ? '#/' : '#/start'}">${me ? '내 페이지로' : '첫 화면으로'}</a></div>`; return; }
   if (A.done) { root.innerHTML = h + `<div class="card done" id="askDone"><div class="dogw"><img class="dogr" src="${IMG}dog3.jpg" alt=""><span class="okb" aria-hidden="true">${ic('check', 's')}</span></div><h2>문의를 받았습니다</h2><p class="lead" style="margin:6px 0 0">분류: ${esc(A.done)} · 담당자가 확인하고 연락드립니다.</p><div class="cta" style="margin-top:14px"><button type="button" class="btn" data-aact="again">다른 문의 쓰기</button><a class="btn p" href="${me ? '#/' : '#/start'}">${me ? '내 페이지로' : '첫 화면으로'}</a></div></div>`; return; }
   h += `<div class="cats" id="askCats" role="group" aria-label="문의 분류">` + Object.keys(K).map(k => { const m = ASK_META[k] || ASK_META.etc; return `<button type="button" class="cat ${m.c}" data-cat="${esc(k)}" aria-pressed="${A.cat === k}"><span class="bub">${ic(m.i)}</span><b>${esc(K[k])}</b><span>${esc(m.d)}</span></button>`; }).join('') + `</div>`;
   if (!A.cat) { root.innerHTML = h + `<p class="note">위 네 가지 가운데 하나를 누르면 아래에 문의 칸이 나옵니다.</p>`; return; }
@@ -2028,7 +2036,7 @@ const CUST = { defs: [], dash: [] };
 async function renderCustom() {
   const r = await api('/api/me/dashboard/cards');
   if (!me || currentRoute() !== 'custom') return;
-  const defs = (r.ok && Array.isArray(r.cards) && r.cards.length) ? r.cards.filter(c => c && c.id) : Object.keys(CARD_DEFS).map(id => ({ id, title: CARD_DEFS[id] }));
+  const defs = ((r.ok && Array.isArray(r.cards) && r.cards.length) ? r.cards.filter(c => c && c.id) : Object.keys(CARD_DEFS).map(id => ({ id, title: CARD_DEFS[id] }))).filter(c => !(c.id === 'files' && noFolder()));
   CUST.defs = defs;
   const chosen = myDash().filter(id => defs.find(d => d.id === id));
   CUST.dash = chosen.map(id => ({ id, on: true })).concat(defs.filter(d => !chosen.includes(d.id)).map(d => ({ id: d.id, on: false })));
@@ -2148,6 +2156,7 @@ async function fsLoad() {
   FS.items = items;
   if (r.ok && r.quota) { const pct = Math.min(100, Math.round(((+r.used || 0) / (+r.quota || 1)) * 100)); $('#fQuota').innerHTML = `<span>사용량</span><div class="qbar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" aria-label="사용량 ${pct}%"><i style="width:${pct}%"></i></div><span>${fmtSize(r.used)} / ${fmtSize(r.quota)} (${pct}%)</span>`; }
   else if (FS.tab !== 'trash') $('#fQuota').innerHTML = '';
+  if (r.status === 403 && r.error === 'folder_closed') { FOLDER_403 = true; return route(); }   // 서버가 닫았다 — 오류 글 대신 안내 화면으로
   if (!r.ok) { fsMsg(r.status === 401 ? ERR.unauthorized : (r.status === 404 || r.error === 'network' ? '내 폴더 서버가 아직 열리지 않았습니다.' : reasonText(r))); }
   /* PC 동기화(읽기 전용) 가상 폴더 안: 새 폴더·올리기·지우기 숨기고 안내만(6단계) */
   $('#fThTime').textContent = FS.tab === 'trash' ? '지운 시각' : '수정';
@@ -2438,7 +2447,7 @@ $('#lgPw').addEventListener('keydown', e => { if (e.key === 'Enter') $('#lgBtn')
 $('#lgCode').addEventListener('keydown', e => { if (e.key === 'Enter') $('#lgBtn').click(); });
 $('#lgBtn').addEventListener('click', () => doLogin(LG));
 $('#lgForgot').addEventListener('click', e => { e.preventDefault(); forgot('#lgEmail', '#lgMsg'); });
-$('#btnLogout').addEventListener('click', async () => { try { localStorage.removeItem('sk_in'); } catch (_) {} MB = null; MB_STATE = ''; await api('/api/auth/logout', { method: 'POST' }); me = realMe = null; preview = null; tf = null; setWho(); location.reload(); });
+$('#btnLogout').addEventListener('click', async () => { try { localStorage.removeItem('sk_in'); } catch (_) {} MB = null; MB_STATE = ''; await api('/api/auth/logout', { method: 'POST' }); FOLDER_403 = false; me = realMe = null; preview = null; tf = null; setWho(); location.reload(); });
 $('#btnPw').addEventListener('click', () => openPw(false));
 $('#btnTwofa').addEventListener('click', openTf);
 $('#tfBannerBtn').addEventListener('click', openTf);
