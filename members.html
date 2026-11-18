@@ -160,8 +160,8 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const won = n => Number(n || 0).toLocaleString('ko-KR') + '원';
 const view = $('#view'), layer = $('#layer');
 
-/* 서버 membership.py 의 SEND_MAX 와 같은 값 — 응답에 실려 오지 않아 화면에 둔다(넘으면 서버도 too_many 로 거절한다). */
-const SEND_MAX = 100;
+/* 한 번에 보낼 수 있는 인원 — 회원 목록 응답의 send_max 를 쓴다(응답에 없으면 100). 넘으면 서버도 too_many 로 거절한다. */
+let SEND_MAX = 100;
 const SMS_WAIT = '문자 발송은 아직 준비 중입니다(발송 대행 서비스 가입 뒤 열립니다)';
 const TIER_COLOR = {admin:'#0d3b2c', staff:'#4a6741', federation:'#e8892b', coop:'#f6b52e', policy:'#1f3a6e', personal:'#2e7d4f', free:'#b9c4b3'};
 const PAY_CLASS = {'완료':'ok', '미납':'no', '확인 대기':'wait', '승인 대기':'wait', '무료 시범':'tr'};
@@ -171,7 +171,7 @@ const ERR_KO = {unauthorized:'로그인이 풀렸습니다. 다시 로그인해 
   bad_action:'할 수 없는 동작입니다.', bad_status:'볼 수 없는 목록입니다.'};
 
 const S = {me:null, data:null, tab:'mem', picked:{}, f:{q:'', tier:'', svc:'', pay:''},
-  rc:{status:'wait', full:false, rows:null, err:''}, bank:{busy:false, out:null, err:''}, log:{rows:null, job:null, err:''}, payDate:{}};
+  rc:{status:'wait', full:false, rows:null, err:''}, inq:{rows:null, err:''}, bank:{busy:false, out:null, err:''}, log:{rows:null, job:null, err:''}, payDate:{}};
 let C = null;      // 발송 작성 창 상태
 let logTimer = 0;
 
@@ -211,6 +211,7 @@ async function load(first) {
   if (r.status === 401 || r.status === 403) return boot();
   if (!r.ok) { if (first || !S.data) gate('회원 목록을 불러오지 못했습니다', why(r), '<button type="button" class="btn p" id="retry">다시 시도</button>'); else toast(why(r)); return; }
   S.data = r.data;
+  if (Number(r.data.send_max) > 0) SEND_MAX = Number(r.data.send_max);
   const have = {}; r.data.members.forEach(m => { have[m.id] = 1; });
   Object.keys(S.picked).forEach(id => { if (!have[id]) delete S.picked[id]; });      // 그 사이 사라진 회원은 고른 목록에서 뺀다
   render();
@@ -255,9 +256,9 @@ function render() {
     '<div class="pays"><div class="tile" style="--pc:#2e7d4f"><div class="k">이번 달 납부 완료</div><div class="v" id="sumPaid">' + won(sum.paid_month) + '</div></div>' +
     '<div class="tile" style="--pc:#a83232"><div class="k">미납</div><div class="v" id="sumUnpaid" style="color:var(--danger)">' + won(sum.unpaid) + '</div></div>' +
     '<div class="tile" style="--pc:#d99a1c"><div class="k">입금 확인 대기</div><div class="v" id="sumWait">' + won(sum.waiting) + '</div></div></div>' +
-    '<div class="tabs" role="tablist" id="tabs">' + [['mem', '회원·발송', ap], ['pay', '납부·입금 확인', oi], ['rc', '현금영수증', sum.receipt_wait], ['log', '발송 기록', 0]].map(x =>
+    '<div class="tabs" role="tablist" id="tabs">' + [['mem', '회원·발송', ap], ['pay', '납부·입금 확인', oi], ['rc', '현금영수증', sum.receipt_wait], ['log', '발송 기록', 0], ['inq', '문의', 0]].map(x =>
       '<button type="button" role="tab" aria-selected="' + (S.tab === x[0]) + '" data-tab="' + x[0] + '">' + x[1] + (x[2] ? '<b>' + x[2] + '</b>' : '') + '</button>').join('') + '</div>' +
-    '<div id="pane" role="tabpanel">' + (S.tab === 'mem' ? paneMem() : S.tab === 'pay' ? panePay() : S.tab === 'rc' ? paneRc() : paneLog()) + '</div></section></div>';
+    '<div id="pane" role="tabpanel">' + (S.tab === 'mem' ? paneMem() : S.tab === 'pay' ? panePay() : S.tab === 'rc' ? paneRc() : S.tab === 'inq' ? paneInq() : paneLog()) + '</div></section></div>';
   view.innerHTML = h;
   if (S.tab === 'mem') memRows();
   selbar();
@@ -314,7 +315,7 @@ function panePay() {
     '<div class="card"><h2>열린 청구서 ' + L.length + '건</h2>' +
     (L.length ? '<div class="scroll rt"><table><thead><tr><th scope="col">청구번호</th><th scope="col">회원</th><th scope="col">내역</th><th scope="col" class="r">달 수</th><th scope="col" class="r">금액</th><th scope="col">청구일</th><th scope="col">납부 상태</th><th scope="col">입금일</th><th scope="col"><span class="note">확인</span></th></tr></thead><tbody>' + L.map(o => {
       const i = o.inv, c = String(i.created_at || '').slice(0, 10), v = S.payDate[i.id] || t;
-      return '<tr><th scope="row">#' + i.id + '</th><td data-l="회원">' + esc(o.m.name) + (o.m.method ? '<small>' + esc(o.m.method) + '</small>' : '') + '</td>' +
+      return '<tr><th scope="row">#' + i.id + '</th><td data-l="회원">' + esc(o.m.name) + (o.m.method ? '<small>' + esc(o.m.method) + '</small>' : '') + (i.depositor ? '<small class="dep">입금자명 ' + esc(i.depositor) + '</small>' : '') + '</td>' +
         '<td data-l="내역">' + i.items.map(x => esc(x.name) + ' ' + won(x.amount)).join('<br>') + '</td><td class="r" data-l="달 수">' + i.months + '달</td>' +
         '<td class="r" data-l="금액"><b>' + won(i.amount) + '</b>' + (i.vat_amount ? '<small>부가세 ' + won(i.vat_amount) + ' 포함</small>' : '') + (i.exempt_amount ? '<small>면세 ' + won(i.exempt_amount) + '</small>' : '') + '</td>' +
         '<td class="nw" data-l="청구일">' + esc(c) + '</td><td class="nw" data-l="납부 상태">' + (o.m.pay_status === '완료' ? '<span class="st free">다음 기간분</span>' : '<span class="st ' + (PAY_CLASS[o.m.pay_status] || 'free') + '">' + esc(o.m.pay_status) + '</span>') + '</td>' +
@@ -334,10 +335,30 @@ function bankResult() {
   if (o.lines.length) h += '<div class="scroll rt"><table><thead><tr><th scope="col">입금일</th><th scope="col">입금자명</th><th scope="col" class="r">입금액</th><th scope="col">대조 결과</th><th scope="col">까닭·청구서</th></tr></thead><tbody>' + o.lines.map(x =>
     '<tr><th scope="row">' + esc(x.date || '날짜 없음') + (x.time ? ' ' + esc(x.time) : '') + '</th><td data-l="입금자명">' + esc((x.names || []).join(', ')) + '</td><td class="r" data-l="입금액">' + won(x.amount) + '</td>' +
     '<td data-l="대조 결과"><span class="st ' + (x.result === '확정' ? 'ok' : x.result === '확인 필요' ? 'wait' : 'free') + '">' + esc(x.result) + '</span></td>' +
-    '<td data-l="까닭·청구서">' + esc(x.why || '') + (x.invoice ? ' 청구 #' + esc(x.invoice) : '') + (x.candidates && x.candidates.length ? ' (후보 청구 ' + x.candidates.map(c => '#' + esc(c)).join(', ') + ')' : '') + '</td></tr>').join('') + '</tbody></table></div>';
+    '<td data-l="까닭·청구서">' + esc(x.why || '') + (x.invoice ? ' 청구 #' + esc(x.invoice) : '') + (x.candidates && x.candidates.length ? ' (후보 청구 ' + x.candidates.map((c, k) => '#' + esc(c) + ((x.candidate_names || [])[k] ? ' ' + esc(x.candidate_names[k]) : '')).join(', ') + ')' : '') + '</td></tr>').join('') + '</tbody></table></div>';
   else h += '<p class="note">회원 입금자명과 맞는 줄이 없습니다.</p>';
   if (need) h += '<p class="note" style="margin-top:8px">「확인 필요」 줄은 통장과 맞대 본 뒤 위 목록의 「입금 확인」 단추로 확정해 주세요.</p>';
   return h + '</div>';
+}
+
+/* 문의 접수함 — 통합사이트 문의(#/ask)와 옛 문의 폼이 쌓이는 표(GET /api/inquiries, 통합관리자 세션). 서버 글은 전부 esc 로 넣는다 */
+function paneInq() {
+  const Q = S.inq;
+  if (Q.err) return '<div class="err" id="inqErr" role="alert">' + esc(Q.err) + '</div><div class="tools" style="margin-top:10px"><button type="button" class="btn sm" id="inqReload">다시 읽기</button></div>';
+  if (!Q.rows) return '<div class="ph">불러오는 중입니다…</div>';
+  const head = '<div class="tools"><p class="note" style="flex:1;min-width:0">최근 문의부터 ' + Q.rows.length + '건. 이름·연락처는 답변에만 써 주세요.</p><button type="button" class="btn sm" id="inqReload">다시 읽기</button></div>';
+  if (!Q.rows.length) return head + '<div class="ph" id="inqEmpty">아직 들어온 문의가 없습니다.</div>';
+  return head + '<div class="scroll rt"><table id="inqTable"><thead><tr><th scope="col">받은 때</th><th scope="col">분류</th><th scope="col">이름·소속</th><th scope="col">연락처</th><th scope="col">내용</th></tr></thead><tbody>' + Q.rows.map(x =>
+    '<tr><th scope="row" class="nw">' + esc(String(x.created_at || '').replace('T', ' ').slice(0, 16)) + '</th><td data-l="분류">' + esc(x.category || '-') + (x.source ? '<small>' + esc(x.source) + '</small>' : '') + '</td>' +
+    '<td data-l="이름·소속">' + esc(x.name || '') + (x.org ? '<small>' + esc(x.org) + '</small>' : '') + '</td><td data-l="연락처">' + esc(x.contact || '') + '</td>' +
+    '<td data-l="내용" style="white-space:pre-wrap;overflow-wrap:anywhere;min-width:220px">' + esc(x.message || '') + '</td></tr>').join('') + '</tbody></table></div>';
+}
+async function loadInq() {
+  const Q = S.inq; Q.err = ''; Q.rows = null; if (S.tab === 'inq') render();
+  const r = await api('/api/inquiries');
+  if (r.ok && Array.isArray(r.data.rows)) Q.rows = r.data.rows;
+  else { Q.rows = []; Q.err = r.status === 0 ? '서버에 닿지 못했습니다. 연결을 확인하고 다시 해 주세요.' : (r.status === 401 || r.status === 403) ? '문의 접수함은 통합관리자만 볼 수 있습니다. 다시 로그인해 주세요.' : '문의 목록을 불러오지 못했습니다(' + r.status + ').'; }
+  if (S.tab === 'inq') render();
 }
 
 /* 현금영수증 */
@@ -424,7 +445,7 @@ function composeRender() {
       '<div class="acts"><span class="note">다음 걸음에서 받는 사람·제목·내용을 한 번 더 확인합니다.</span><button type="button" class="btn p" id="cPrev"' + (C.busy ? ' disabled' : '') + '>' + (C.busy ? '확인하는 중…' : '다음: 확인하기') + '</button></div>';
   } else {      // 확인 걸음
     const P = C.pv, nt = P.to.length;
-    h += '<div id="cConfirm"><p class="lead" style="margin-bottom:8px">아래대로 <b id="cToN">받는 사람 ' + nt + '명</b>에게 ' + (mail ? '이메일' : '문자') + '를 보냅니다. 보낸 뒤에는 되돌릴 수 없습니다.</p>' +
+    h += '<div id="cConfirm"><p class="lead" style="margin-bottom:8px">아래대로 <b id="cToN">받는 사람 ' + nt + '명</b>에게 ' + (mail ? '이메일을' : '문자를') + ' 보냅니다. 보낸 뒤에는 되돌릴 수 없습니다.</p>' +
       '<div class="f"><span class="lb">받는 사람 ' + nt + '명</span><div class="rcp" id="cTo">' + (nt ? P.to.map(x => '<span class="chip">' + esc(x.name) + '</span>').join('') : '<span class="note">보낼 수 있는 연락처가 없습니다.</span>') + '</div></div>' +
       (P.skipped.length ? '<div class="f"><span class="lb">빠지는 사람 ' + P.skipped.length + '명 <span class="note">(' + (mail ? '이메일' : '휴대폰 번호') + '가 없거나 꼴이 맞지 않음 · 승인 전 계정)</span></span><div class="rcp" id="cSkip">' + P.skipped.map(x => '<span class="chip x">' + esc(x.name) + '</span>').join('') + '</div></div>' : '') +
       (n - nt - P.skipped.length > 0 ? '<p class="note" style="margin-bottom:8px">고른 ' + n + '명 가운데 ' + (n - nt - P.skipped.length) + '명은 승인된 회원이 아니어서 빠집니다.</p>' : '') +
@@ -528,6 +549,7 @@ function setTab(t) {
   if (t !== 'rc' && S.rc.full) { S.rc.full = false; S.rc.rows = null; }      // 다른 탭으로 가면 전체 번호는 화면에 남기지 않는다
   render(); window.scrollTo(0, 0);
   if (t === 'rc' && !S.rc.rows) loadRc();
+  if (t === 'inq') loadInq();
   if (t === 'log') loadLog(S.log.job && S.log.job.state !== 'done' ? S.log.job.id : 0);
 }
 
@@ -535,6 +557,7 @@ document.addEventListener('click', ev => {
   const t = ev.target.closest('button,a,[data-close]'); if (!t) { if (ev.target.classList && ev.target.classList.contains('modal')) closeLayer(); return; }
   const d = t.dataset;
   if (t.id === 'retry') return boot();
+  if (t.id === 'inqReload') return loadInq();
   if (d.close !== undefined) return closeLayer();
   if (d.tab) return setTab(d.tab);
   if (t.id === 'reload') return load().then(() => toast('새로 읽었습니다'));

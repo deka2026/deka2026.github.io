@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <script>/* 11-07 저녁: 로그인 뒤 첫 화면이 잠깐 비치던 깜빡임 — 이 기기에서 로그인해 있었으면(sk_in) 회원 정보를 받을 때까지 본문을 가린다. 3초 넘으면 그냥 보인다 */
-try{var _h=location.hash||'';if(localStorage.getItem('sk_in')==='1'&&!/^#\/(map|start|classic|join|ask|signup)/.test(_h)){document.documentElement.classList.add('booting');setTimeout(function(){document.documentElement.classList.remove('booting')},3000);}}catch(e){}</script>
+try{var _h=location.hash||'';if(localStorage.getItem('sk_in')==='1'&&!/^#\/(map|start|classic|join|ask|signup|contact)/.test(_h)){document.documentElement.classList.add('booting');setTimeout(function(){document.documentElement.classList.remove('booting')},3000);}}catch(e){}</script>
 <style>html.booting #shell,html.booting #vMap,html.booting footer{visibility:hidden}html.booting body::after{content:'불러오는 중…';position:fixed;left:0;right:0;top:42%;text-align:center;color:#8a8f98;font-size:14px}</style>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>사교원 통합사이트 — 로컬리스트 플랫폼 · 사회혁신교육원사회적협동조합</title>
@@ -642,6 +642,7 @@ svg.ic.s{width:17px;height:17px}
   .u2 .acts{flex-direction:column-reverse}.u2 .acts .btn,.u2 .acts .r{width:100%}.u2 .acts .r .btn{flex:1}
   header.top #btnLogin,header.top #btnJoin{padding-left:12px;padding-right:12px}
 }
+@media(max-width:760px){.u2 .tcard .lk2,.u2 .publinks a,.u2 .tourend a{display:inline-flex;align-items:center;min-height:44px;padding:0 4px}}
 @media(max-width:380px){header.top .brand .mark{display:none}}
 .u2 .publinks a{color:var(--mute);text-decoration:underline;text-underline-offset:3px}
 </style>
@@ -1095,15 +1096,17 @@ const SVC_OPT = {
 const PROD_SVC = { academy: 'acad', coop: 'coop', fed: 'fed', policy: 'policy' };
 let MB = null, MB_STATE = '';         // /api/membership/me 응답 · '' 아직 | 'ok' | 'none'(서버에 모듈 없음) | 'err'
 /* 내가 쓰는 서비스 = 서버의 services(고른 이용권) + 등급으로 물러서기(아무도 쓰던 메뉴를 잃지 않게):
-   통합관리자·매니저는 전 서비스, 연합회·조합 등급은 햇소자, 정책회원(체크권한 「정책지원관」)은 의정지원 */
+   통합관리자는 전 서비스, 매니저는 아카데미 + 체크권한으로 열린 것(「햇소자관리」→ 햇소자·연합회, 「정책지원관」→ 의정지원 — 실제로 열리는 것만 보인다),
+   연합회·조합 등급은 햇소자, 정책회원(체크권한 「정책지원관」)은 의정지원 */
 function myServiceKeys(u) {
   u = u || me; if (!u) return [];
   const sv = Array.isArray(u.services) ? u.services : [], out = [];
-  const staff = u.role === 'admin' || u.role === 'staff';
+  const adm = u.role === 'admin', staff = adm || u.role === 'staff', pm = u.perms || [];
+  const hs = adm || (u.role === 'staff' && pm.includes('햇소자관리'));
   if (staff || sv.includes('academy')) out.push('acad');
-  if (staff || tierOf(u) === 'policy' || (u.perms || []).includes('정책지원관')) out.push('policy');
-  if (staff || sv.includes('coop') || u.role === 'coop') out.push('coop');
-  if (staff || sv.includes('fed') || u.role === 'federation') out.push('fed');
+  if (adm || tierOf(u) === 'policy' || pm.includes('정책지원관')) out.push('policy');
+  if (hs || sv.includes('coop') || u.role === 'coop') out.push('coop');
+  if (hs || sv.includes('fed') || u.role === 'federation') out.push('fed');
   return out;
 }
 function svcItems(k) {
@@ -1164,7 +1167,7 @@ const PREVIEWS = [
   { k: 'coop', t: '협동조합회원', mk: () => pvUser('coop', 'coop', ['coop']) },
   { k: 'federation', t: '연합회원', mk: () => pvUser('federation', 'federation', ['fed']) },
   { k: 'staff0', t: '매니저(체크권한 없음)', mk: () => pvUser('staff', 'staff') },
-  { k: 'staff1', t: '매니저(체크권한 전부)', mk: () => pvUser('staff', 'staff', [], MENU_PERMS.slice()) },
+  { k: 'staff1', t: '매니저(체크권한 전부)', mk: () => pvUser('staff', 'staff', [], MENU_PERMS.concat(['햇소자관리', '정책지원관'])) },
 ];
 let savedPrefs = null;
 function setPreview(k) {
@@ -1197,7 +1200,7 @@ async function checkTempPassword() {
 /* 11-11 이사장 지시: 권한 밖 단추를 누르면 그 단추 바로 아래로 「이용 권한 갖추는 법」이 펼쳐진다(창 대신 드롭) */
 const JOIN_POLICY = 'https://talk.sakyowon.co.kr/system?go=join';   // 의정지원 세션 회신: 로그인 상태면 정회원 등록 창이 바로 열린다
 function lockHow(need) {
-  const C = { label: '✉️ 사교원에 요청하기', href: HOME + 'contact', ext: true };
+  const C = { label: '✉️ 사교원에 요청하기', href: '#/ask' };   // 11-18: 문의는 통합 문의 화면으로 모은다(닫혀 있으면 그 화면이 홈페이지 창구를 안내)
   if (need === 'admin') return { txt: '통합관리자만 쓰는 메뉴입니다. 따로 신청할 수 없습니다.', act: [] };
   if (need === 'perm:정책지원관') return { txt: '지자체 의정지원시스템은 구독 서비스입니다. 구독을 신청하면 이용 권한이 열립니다. 신청 전에도 둘러보기로 화면을 살펴볼 수 있습니다.', act: [{ label: '📝 의정지원 구독 신청', href: JOIN_POLICY, ext: true }, { label: '👀 둘러보기', href: 'https://talk.sakyowon.co.kr/system', ext: true }] };
   if (need === 'role:staff') return { txt: '사교원 직원(매니저회원) 전용 메뉴입니다. 직원이시면 통합관리자에게 매니저회원 승인을 요청해 주세요.', act: [C] };
@@ -1252,7 +1255,7 @@ function currentRoute() {
   const h = location.hash || '';
   if (h.startsWith('#/map')) return 'map';
   if (h.startsWith('#/join') || h.startsWith('#/signup') || h === '#signup') return 'join';
-  if (h.startsWith('#/ask')) return 'ask';
+  if (h.startsWith('#/ask') || h.startsWith('#/contact')) return 'ask';   // 옛 문의 주소 #/contact 도 문의 화면
   if (h.startsWith('#/custom')) return 'custom';
   if (h.startsWith('#/files')) return 'files';
   if (h.startsWith('#/classic') || h.startsWith('#/start')) return 'start';   // 11-07: 옛 주소 #/classic 도 첫 화면
@@ -1274,6 +1277,7 @@ function route() {
   }
   if (h === '#login' || h === '#/login') openAuth('login');
   if (h === '#signup' || h === '#/signup') { history.replaceState(null, '', location.pathname + location.search + '#/join'); }   // 옛 가입 주소 → 가입 3걸음
+  if (h.startsWith('#/contact')) { history.replaceState(null, '', location.pathname + location.search + '#/ask'); }
   let r = currentRoute();
   const needLogin = (r === 'custom' || r === 'files') && !me;
   if (needLogin) { r = 'start'; if (BOOTED) { history.replaceState(null, '', location.pathname + location.search + '#/start'); openAuth('login', '이 화면은 로그인한 뒤에 쓸 수 있습니다.'); } }   // 로그인이 필요한 화면은 첫 화면 + 로그인 창
@@ -1484,7 +1488,7 @@ function svcCards() {
   }).join('') + '</div>';
 }
 const MX_HEAD = ['통합관리자', '매니저', '연합회원', '협동조합회원', '정책회원', '개인회원', '무료이용회원'];
-const MX = [['사이트 소개·문의·공개 자료', '●', '●', '●', '●', '●', '●', '●'], ['AI 대화창', '●', '●', '●', '●', '●', '●', '하루 한도'], ['내 폴더', '●', '●', '●', '●', '●', '●', '—'],
+const MX = [['사이트 소개·문의·공개 자료', '●', '●', '●', '●', '●', '●', '●'], ['AI 대화창', '●', '●', '●', '●', '●', '●', '하루 한도'], ['내 폴더', '●', '●', '●', '●', '●', '●', '작은 용량'],
   ['아카데미(실습·학습·팀러닝·화상회의)', '●', '●', '선택', '선택', '선택', '●', '맛보기'], ['햇소자 조합 메뉴', '●', '체크권한', '—', '●', '—', '—', '—'], ['햇소자 연합회 메뉴', '●', '체크권한', '●', '—', '—', '—', '—'],
   ['의정지원시스템', '●', '체크권한', '선택', '선택', '●', '선택', '둘러보기'], ['그룹웨어(머리 단추)', '●', '●', '—', '—', '—', '—', '—'], ['관리(회원·납부·발송)', '●', '체크권한', '—', '—', '—', '—', '—']];
 function pcard(c, i, n, sub, price, tag, lines, extra) {
@@ -1497,7 +1501,7 @@ function priceHTML() {
   if (!PLANS.ok) {   // 서버에 이용권 모듈이 아직 없거나 응답 실패 — 화면은 그대로, 값만 「준비 중」
     const wait = '<div class="pp" style="font-size:1.2rem">이용료 안내 준비 중</div>';
     return `<div class="notice" id="priceNone"><b>이용료 안내 준비 중</b> — 등급별 이용료는 곧 이 자리에 안내합니다. 무료이용회원은 지금 바로 가입할 수 있습니다.</div><div class="pgrid">` + freeCard +
-      ['academy', 'policy', 'coop', 'fed'].map(k => pcard(PM[k].c, PM[k].i, TIER_KO[{ academy: 'personal', policy: 'policy', coop: 'coop', fed: 'federation' }[k]], PM[k].who, wait, '', PM[k].lines)).join('') + staffCard + '</div>';
+      ['academy', 'policy', 'coop', 'fed'].map(k => pcard(PM[k].c, PM[k].i, TIER_KO[{ academy: 'personal', policy: 'policy', coop: 'coop', fed: 'federation' }[k]], PM[k].who, wait, '', PM[k].lines, k === 'policy' ? `<a class="btn sm" href="${JOIN_POLICY}" target="_blank" rel="noopener" data-ext="policy">의정지원 사이트에서 가입 ↗</a>` : '')).join('') + staffCard + '</div>';
   }
   const b = billStart(PLANS.billing_from), tl = trialLine(PLANS);
   const prod = p => {
@@ -1606,7 +1610,7 @@ const ymd = v => String(v || '').slice(0, 10);
 function renderGreet() {
   if (!me) return;
   const keys = myServiceKeys(), staff = (RANK[me.role] || 0) >= RANK.staff;
-  const chips = staff ? '<span class="cchip c-g">전 서비스(사교원 내부)</span>' : (keys.map(k => `<span class="cchip ${SVC[k].c}">${esc(SVC[k].n)}</span>`).join('') || '<span class="cchip c-g">무료 이용</span>');
+  const chips = me.role === 'admin' ? '<span class="cchip c-g">전 서비스(사교원 내부)</span>' : ((staff ? '<span class="cchip c-g">체크권한으로 열린 서비스</span>' : '') + keys.map(k => `<span class="cchip ${SVC[k].c}">${esc(SVC[k].n)}</span>`).join('') || '<span class="cchip c-g">무료 이용</span>');
   $('#myGreet').innerHTML = `<div class="greet"><img class="bg" src="${IMG}greet.jpg" alt=""><div class="gx"><h2 id="hGreet">${esc(me.name || me.email || me.username)} 님, 반갑습니다</h2><div class="chips"><span class="cchip c-g" id="myTier">${esc(tierKo(me))}</span>${chips}</div></div><img class="dogr" src="${IMG}dog1.jpg" alt=""></div>`;
 }
 function payinfoRows(pi) {
@@ -1628,7 +1632,7 @@ function renderMyBox() {
       (s.next_amount != null ? `<span class="note" style="flex-basis:100%">다음 기간부터 월 ${won(s.next_amount)}</span>` : '') +
       (s.paid_until ? `<span class="note" style="flex-basis:100%">이용 기간 ${esc(ymd(s.paid_until))} 까지</span>` : '') +
       (['apply', 'wait_pay', 'trial', 'active'].includes(s.status) ? `<button type="button" class="btn sm" data-cancel="${esc(s.product)}" data-n="${esc(s.name || s.product)}">그만두기</button>` : '') + `</li>`).join('') + `</ul>`;
-  else t1 += `<p class="note" style="margin-top:6px">${staff ? '사교원 내부 직원은 전 서비스를 이용료 없이 씁니다.' : keys.length ? '지금 등급으로 ' + keys.map(k => SVC[k].n).join(' · ') + ' 을(를) 쓰고 있습니다.' : '고른 유료 서비스가 없습니다. 필요한 서비스를 골라 보세요.'}</p>`;
+  else t1 += `<p class="note" style="margin-top:6px">${me.role === 'admin' ? '통합관리자는 전 서비스를 이용료 없이 씁니다.' : staff ? '매니저는 이용료 없이, 체크권한으로 열린 서비스(' + keys.map(k => SVC[k].n).join(' · ') + ')를 씁니다.' : keys.length ? '지금 등급으로 쓰는 서비스: ' + keys.map(k => SVC[k].n).join(' · ') : '고른 유료 서비스가 없습니다. 필요한 서비스를 골라 보세요.'}</p>`;
   t1 += `<div class="myacts"><a class="btn sm p" href="#/join" id="myMore">${ic('plus', 's')}서비스 더 고르기</a></div><div class="msg" id="myMsg" aria-live="polite"></div></div>`;
   // ② 이용료·납부 상태
   let t2 = `<div class="tile" id="tilePay"><div class="hd">${ic('card', 's')}이용료 · 납부 상태</div>`;
@@ -1688,6 +1692,9 @@ const JOIN_KEY = 'sk_join_pending';
 function stashGet() { try { const v = JSON.parse(localStorage.getItem(JOIN_KEY) || 'null'); return (v && Array.isArray(v.picks) && v.picks.length) ? v : null; } catch (_) { return null; } }
 function stashSet(picks) { try { if (picks && picks.length) localStorage.setItem(JOIN_KEY, JSON.stringify({ picks: picks.map(p => ({ product: String(p.product), options: (p.options || []).map(String) })), at: Date.now() })); else localStorage.removeItem(JOIN_KEY); } catch (_) {} }
 let J = null, REG = null;
+/* 신청·문의 창구가 닫혀 있나 — plans 응답의 open 이 거짓이거나 서버에 모듈이 없을 때(404·실패). 통합관리자는 닫혀 있어도 서버가 받는다.
+   닫혀 있으면 납부 정보(입금자명·현금영수증 번호)나 문의 글을 아예 받지 않는다 — 닫힌 서버로 개인정보가 한 글자도 나가지 않게(11-18 알파언니) */
+function mbClosed() { return !!PLANS && (!PLANS.ok || PLANS.open === false) && !(me && me.role === 'admin' && PLANS.ok && !preview); }
 function joinNew() { return { step: me ? 2 : 1, sel: {}, held: {}, f: {}, pay: { method: 'transfer', auto_day: 5, cycle: 'month', depositor: '', receipt_kind: 'income', receipt_no: '', invoice: false, biz_no: '' }, payMode: 'new', payOnly: false, err: '', busy: false, done: null, created: false, seeded: false }; }
 const jProd = k => (PLANS && PLANS.ok) ? PLANS.products.find(p => p.product === k) : null;
 function jPrice(p, s) { const sum = (+p.base || 0) + (p.options || []).filter(o => s.opts.includes(o.key)).reduce((a, o) => a + (+o.amount || 0), 0); return p.allin ? Math.min(sum, +p.allin) : sum; }
@@ -1713,8 +1720,10 @@ async function renderJoin(fresh) {
   else if (!J.busy && !wantPay && J.payOnly) J = joinNew();
   if (me && J.step === 1) J.step = 2;
   if (!me && J.step > 1 && !J.done && !J.f.email) J.step = 1;
+  if (J.step === 3 && !J.payOnly && !J.busy && mbClosed()) J.step = 2;
   joinDraw();
   await loadPlans();
+  if (J.step === 3 && !J.payOnly && !J.busy && mbClosed()) J.step = 2;
   if (me && !preview && MB_STATE === '') await loadMB();
   if (currentRoute() !== 'join') return;
   joinSave(); joinSeed(); joinDraw(true);   // 지금 칸의 글자를 먼저 옮기고, 서버 값(이용권·납부 정보)을 채운 뒤 그린다
@@ -1828,14 +1837,17 @@ function joinDraw(noSave) {
       `<div class="f"><label for="suContact">전화번호 <span class="hint">(선택)</span></label><input type="tel" id="suContact" data-k="contact" value="${v('contact')}" inputmode="tel" placeholder="010-0000-0000" autocomplete="tel"></div>` +
       `<div class="f w"><label for="suOrg">소속 <span class="hint">(선택)</span></label><input type="text" id="suOrg" data-k="org" value="${v('org')}" placeholder="마을·조합·기관"></div>` +
       `<div class="f w"><label class="ck"><input type="checkbox" id="suConsent" data-k="consent"${f.consent ? ' checked' : ''}>(필수) 통합 계정 발급을 위한 개인정보 수집·이용에 동의합니다 <span class="req">*</span></label><span class="hint">이름·이메일·전화는 회원 관리와 이용료 안내에만 씁니다. <a href="account-privacy.html" target="_blank" rel="noopener">처리방침</a></span></div>` +
+      `<div class="f w"><span class="hint" id="staffNote">매니저(직원) 등급은 가입 뒤 통합관리자가 올려 줍니다. 협동조합·연합회는 다음 걸음에서 햇소자를 고르면 승인을 거쳐 열립니다.</span></div>` +
       `</div><div id="e1">${J.err ? `<div class="err" role="alert">${esc(J.err)}</div>` : ''}</div><div class="acts"><a class="btn" href="#login">이미 계정이 있어요 — 로그인</a><span class="r"><button type="submit" class="btn p" id="joinNext1">다음 — 서비스 고르기</button></span></div></form>`;
   } else if (J.step === 2) {
     const picks = joinPicks(), free = !picks.length;
-    const closed = PLANS && PLANS.ok && PLANS.open === false && !(me && me.role === 'admin');
-    const label = !me ? (free ? '가입 마치기' : '다음 — 납부 정보') : (free ? '내 페이지로' : '다음 — 납부 정보');
+    const closed = !!(PLANS && PLANS.ok) && mbClosed();
+    const label = !me ? (free || closed ? '가입 마치기' : '다음 — 납부 정보') : (free ? '내 페이지로' : closed ? '고른 서비스 적어 두기' : '다음 — 납부 정보');
     h += (me && !J.created ? `<div class="dognote"><img class="dogr s" src="${IMG}dog5.jpg" alt=""><span><b>필요한 서비스를 더 골라 보세요.</b><br>유료 서비스는 입금이 확인되면(협동조합·연합회는 승인도 거쳐) 열립니다.</span></div>` : '') +
-      (closed ? `<div class="notice" id="closedNote"><b>유료 서비스 신청은 곧 열립니다.</b> 지금 고르면 ${me ? '' : '계정을 먼저 만들고, '}신청이 열릴 때 내 페이지에서 이어서 할 수 있습니다.</div>` : '') +
+      (closed ? `<div class="notice" id="closedNote"><b>유료 서비스 신청은 곧 열립니다.</b> 지금 고르면 ${me ? '' : '계정을 먼저 만들고, '}신청이 열릴 때 내 페이지에서 이어서 할 수 있습니다. 납부 정보는 그때 받습니다.</div>` : '') +
       `<div class="two"><div>${pickerHTML()}<div id="e2">${J.err ? `<div class="err" role="alert">${esc(J.err)}</div>` : ''}</div><div class="acts">${me ? '<a class="btn" href="#/">내 페이지로</a>' : '<button type="button" class="btn" data-jact="back1">이전</button>'}<span class="r"><button type="button" class="btn p" data-jact="next2" id="next2"${J.busy || !PLANS ? ' disabled' : ''}>${J.busy ? '처리하는 중…' : label}</button></span></div></div><aside class="sticky" id="sideBox">${sumHTML()}${sbpvHTML()}</aside></div>`;
+  } else if (J.payOnly && mbClosed()) {
+    h += `<div class="notice" id="payClosed"><b>지금은 납부 정보를 고칠 수 없습니다.</b> 유료 서비스 신청이 열리면 여기서 고칠 수 있습니다.</div><div class="acts"><a class="btn" href="#/">내 페이지로</a></div>`;
   } else {
     h += `<div class="two">${payFormHTML()}<aside class="sticky">${J.payOnly ? '' : sumHTML()}</aside></div>`;
   }
@@ -1885,6 +1897,11 @@ async function joinFinish() {
     mbSeq++;                                   // 방금 만든 계정 — 화면이 띄운 이용권 조회는 버리고 아래 신청 응답을 쓴다
   }
   if (!picks.length && !J.payOnly) { stashSet(null); J.busy = false; J.done = { kind: 'free' }; return joinDraw(); }
+  if (mbClosed()) {                              // 닫혀 있으면 신청을 보내지 않는다 — 고른 상품 키만 이 기기에 둔다
+    J.busy = false;
+    if (J.payOnly) return joinErr('지금은 납부 정보를 저장할 수 없습니다. 신청이 열리면 다시 해 주세요.');
+    stashSet(picks); J.done = { kind: 'closed', wasNew }; return joinDraw();
+  }
   const body = { services: J.payOnly ? [] : picks };
   if (J.payOnly || !(MB && MB.payinfo) || J.payMode !== 'saved') body.pay = payBody();
   const a = await api('/api/membership/apply', { method: 'POST', body });
@@ -1931,6 +1948,7 @@ $('#joinBody').addEventListener('click', e => {
   else if (b.dataset.jact === 'next2') {
     const picks = joinPicks();
     if (!picks.length) { if (me && !J.created) { location.hash = '#/'; return; } return joinFinish(); }
+    if (mbClosed()) return joinFinish();         // 닫힘: 3걸음(납부 정보)을 건너뛰고 계정만 만든다
     J.step = 3; joinDraw(); try { window.scrollTo(0, 0); } catch (_) {}
   }
 });
@@ -1958,7 +1976,7 @@ const askKinds = () => (PLANS && PLANS.ok && PLANS.contact_kinds && Object.keys(
 function renderAsk(fresh) {
   if (fresh || !A) A = { cat: '', done: '', err: '', fail: false, busy: false, f: { name: (me && me.name) || '', email: (me && me.email) || '' }, feats: [] };
   askDraw();
-  if (!PLANS) loadPlans().then(() => { if (currentRoute() === 'ask' && A && !A.cat && !A.done) askDraw(); });
+  if (!PLANS) loadPlans().then(() => { if (currentRoute() === 'ask' && A && !A.done) askDraw(); });
 }
 function askSave() { const root = $('#askBody'); if (!root || !A) return; root.querySelectorAll('[data-a]').forEach(e => { A.f[e.dataset.a] = e.type === 'checkbox' ? e.checked : e.value; }); A.feats = Array.from(root.querySelectorAll('input[data-feat]:checked')).map(e => e.dataset.feat); }
 function askDraw() {
@@ -1966,6 +1984,9 @@ function askDraw() {
   const act = document.activeElement && root.contains(document.activeElement) ? document.activeElement.id : '';
   const K = askKinds(), v = k => esc(A.f[k] || '');
   let h = `<div class="sech"><h2>문의하기</h2><p>먼저 문의 분류를 골라 주세요. 분류에 따라 묻는 칸이 달라집니다.</p></div>`;
+  if (!PLANS) { root.innerHTML = h + `<div class="pwait" id="askWait">문의 창구를 확인하는 중…</div>`; return; }
+  if (mbClosed() && !A.done) {                   // 닫혀 있으면 폼을 쓰게 하지 않고 처음부터 홈페이지 문의 창구를 안내한다
+    root.innerHTML = `<div class="sech"><h2>문의하기</h2><p>팀학습 컨설팅 · AI교육 · 업무자동화 시스템 구축 의뢰 · 기타 문의</p></div><div class="card" id="askClosed"><div class="notice" style="margin:0 0 12px"><b>이 화면의 온라인 문의 접수는 준비 중입니다.</b> 지금은 사교원 홈페이지 문의 창구로 보내 주세요.</div><a class="btn p" href="${esc(CONTACT_URL)}" target="_blank" rel="noopener">사교원 홈페이지 문의하기 ↗</a> <a class="btn" href="${me ? '#/' : '#/start'}">${me ? '내 페이지로' : '첫 화면으로'}</a></div>`; return; }
   if (A.done) { root.innerHTML = h + `<div class="card done" id="askDone"><div class="dogw"><img class="dogr" src="${IMG}dog3.jpg" alt=""><span class="okb" aria-hidden="true">${ic('check', 's')}</span></div><h2>문의를 받았습니다</h2><p class="lead" style="margin:6px 0 0">분류: ${esc(A.done)} · 담당자가 확인하고 연락드립니다.</p><div class="cta" style="margin-top:14px"><button type="button" class="btn" data-aact="again">다른 문의 쓰기</button><a class="btn p" href="${me ? '#/' : '#/start'}">${me ? '내 페이지로' : '첫 화면으로'}</a></div></div>`; return; }
   h += `<div class="cats" id="askCats" role="group" aria-label="문의 분류">` + Object.keys(K).map(k => { const m = ASK_META[k] || ASK_META.etc; return `<button type="button" class="cat ${m.c}" data-cat="${esc(k)}" aria-pressed="${A.cat === k}"><span class="bub">${ic(m.i)}</span><b>${esc(K[k])}</b><span>${esc(m.d)}</span></button>`; }).join('') + `</div>`;
   if (!A.cat) { root.innerHTML = h + `<p class="note">위 네 가지 가운데 하나를 누르면 아래에 문의 칸이 나옵니다.</p>`; return; }
@@ -2113,7 +2134,7 @@ const fmtSize = n => { n = +n || 0; if (n < 1024) return n + ' B'; if (n < 10485
 const fmtTime = t => { if (!t) return ''; const d = typeof t === 'number' ? new Date(t * (t < 1e12 ? 1000 : 1)) : new Date(t); return isNaN(d) ? String(t) : d.toLocaleString('ko-KR', { year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }); };
 const fsJoin = name => (FS.path ? FS.path + '/' : '') + name;
 function fsMsg(txt, ok) { const m = $('#fMsg'); m.className = 'msg' + (txt ? (ok ? ' ok' : ' err') : ''); m.textContent = txt || ''; }
-function renderFiles() { fsMsg(''); fsLoad(); renderLinks(); }
+function renderFiles() { fsMsg(''); fsLoad(); renderLinks(); document.querySelectorAll('#fLinks button[data-say]').forEach(b => { b.hidden = dekaAdmin(); }); }   // 대화창 칸이 없는 계정(데카 띠를 쓰는 관리자)에겐 반응 없는 「상담창에 묻기」 단추를 숨긴다
 function fsCrumb() {
   const parts = FS.path ? FS.path.split('/').filter(Boolean) : [];
   let acc = '';
@@ -2334,7 +2355,7 @@ async function boot() {
   try { if (me) localStorage.setItem('sk_in', '1'); else localStorage.removeItem('sk_in'); } catch (_) {}
   setWho();
   document.documentElement.classList.remove('booting');   // 회원 정보로 화면을 그린 뒤에 보인다(깜빡임 방지)
-  if (twofaWait) openAuth('login');
+  if (twofaWait || (BACK && !me)) openAuth('login');   // 하위 앱이 ?back= 만 달아 보낸 비로그인도 로그인 창부터
   if (me) { checkTempPassword(); loadTwofa(); }
 }
 /* 로그인 창 — 회원가입은 #/join 화면(3걸음) */

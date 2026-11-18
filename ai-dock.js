@@ -195,7 +195,7 @@
   // ── 상태 ──
   function setWho() {
     var m = state.me || {};
-    if (m.user) $('who').innerHTML = esc(m.user.name || m.user.email || m.user.username) + ' · ' + esc(m.user.role_ko || '') + ' · ' + (m.used || 0) + '/' + m.limit;
+    if (m.user) $('who').innerHTML = esc(m.user.name || m.user.email || m.user.username) + ' · ' + esc(m.user.tier_ko || m.user.role_ko || '') + ' · ' + (m.used || 0) + '/' + m.limit;
     else $('who').innerHTML = '<a href="' + API + '/#login">로그인</a>하면 업로드·문서작성 · 안내 ' + (m.used || 0) + '/' + (m.limit || 10);
   }
   function loadMe() { return api('/api/ai/dock/me').then(function (r) { state.me = r.ok ? r : {}; setWho(); dekaShow(); }); }
