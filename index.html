@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <script>/* 11-07 저녁: 로그인 뒤 첫 화면이 잠깐 비치던 깜빡임 — 이 기기에서 로그인해 있었으면(sk_in) 회원 정보를 받을 때까지 본문을 가린다. 3초 넘으면 그냥 보인다 */
-try{var _h=location.hash||'';if(localStorage.getItem('sk_in')==='1'&&!/^#\/(map|start|classic)/.test(_h)){document.documentElement.classList.add('booting');setTimeout(function(){document.documentElement.classList.remove('booting')},3000);}}catch(e){}</script>
+try{var _h=location.hash||'';if(localStorage.getItem('sk_in')==='1'&&!/^#\/(map|start|classic|join|ask|signup)/.test(_h)){document.documentElement.classList.add('booting');setTimeout(function(){document.documentElement.classList.remove('booting')},3000);}}catch(e){}</script>
 <style>html.booting #shell,html.booting #vMap,html.booting footer{visibility:hidden}html.booting body::after{content:'불러오는 중…';position:fixed;left:0;right:0;top:42%;text-align:center;color:#8a8f98;font-size:14px}</style>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
-<title>사교원 — 사회혁신교육원 사회적협동조합 통합사이트</title>
-<meta name="description" content="사회혁신교육원 사회적협동조합(사교원) 통합사이트 — 플랫폼 사업·현장사업·교육·연구·소개를 한 화면에서. 상단 AI 도우미에게 바로 물어보세요.">
+<title>사교원 통합사이트 — 로컬리스트 플랫폼 · 사회혁신교육원사회적협동조합</title>
+<meta name="description" content="사회혁신교육원사회적협동조합(사교원) 통합사이트 — 지역의 협동조합·연합회·의원실·활동가가 한 계정으로, 내가 고른 서비스만 쓰는 로컬리스트 플랫폼. 햇소자 · 의정지원시스템 · 연대지능활동가 아카데미 · 사회혁신팀러닝.">
 <link rel="canonical" href="https://sakyowon.co.kr/">
-<meta property="og:title" content="사교원 통합사이트 — 사회혁신교육원 사회적협동조합">
-<meta property="og:description" content="플랫폼 사업 · 현장사업 · 교육·연구 · 소개 — 사교원의 모든 메뉴를 한눈에, AI 도우미와 함께">
+<meta property="og:title" content="사교원 통합사이트 — 로컬리스트 플랫폼">
+<meta property="og:description" content="한 계정으로, 내가 고른 서비스만 — 햇소자 · 의정지원시스템 · 연대지능활동가 아카데미 · 사회혁신팀러닝">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://sakyowon.co.kr/">
 <meta property="og:image" content="https://sakyowon.co.kr/icon-512.png">
@@ -19,8 +19,8 @@ try{var _h=location.hash||'';if(localStorage.getItem('sk_in')==='1'&&!/^#\/(map|
 {
   "@context": "https://schema.org",
   "@type": "Organization",
-  "name": "사회혁신교육원 사회적협동조합",
-  "alternateName": ["사교원", "사회혁신교육원", "Sakyowon"],
+  "name": "사회혁신교육원사회적협동조합",
+  "alternateName": ["사교원", "사회혁신교육원", "사회혁신교육원 사회적협동조합", "Sakyowon"],
   "url": "https://sakyowon.co.kr/",
   "logo": "https://sakyowon.co.kr/icon-512.png",
   "address": {
@@ -259,32 +259,423 @@ body[data-route="start"] .tree{grid-template-columns:1fr}
 .side .pub ul{list-style:none;margin:0;padding:0 0 0 10px}.side .pub li a{display:block;font-size:0.8667rem;padding:3px 6px;border-radius:6px;color:var(--ink)}.side .pub li a:hover{background:var(--g0)}.side .pub li.locked a{color:var(--mute)}
 .side .pub .sn .rq{font-size:0.7333rem;color:var(--gold);background:var(--gold1);border-radius:8px;padding:0 6px;font-weight:400}
 @media(max-width:760px){body[data-route="start"] .app,body[data-route="map"] .app{grid-template-columns:1fr}body[data-route="start"] .sideTog:not([hidden]),body[data-route="map"] .sideTog:not([hidden]){display:inline-flex}body[data-route="start"] .side,body[data-route="map"] .side{display:block}.side .pub li a{min-height:var(--tap);display:flex;align-items:center}}
+/* ════════ 11-18 통합사이트 개편(시안 2판) — 여기부터 새 화면. 앞의 옛 규칙을 덮으므로 이 구역 안에서도 기본 규칙 → 미디어 쿼리 순서를 지킨다 ════════ */
+:root{--bg2:#e6e1d3;--danger1:#f7e3e0;--hat:#9a4f00;--hatb:#f6b52e;--hatt:#fff3d6;--pol:#1f3a6e;--polt:#e3eaf6;--aca:#256b42;--acab:#2e7d4f;--acat:#e0f1e5;--team:#5b3492;--teamb:#6b3fa0;--teamt:#ece4f7;--fld:#0b6570;--fldb:#0f7c86;--fldt:#dcf1f2;--rs:#6a5745;--rsb:#7a6652;--rst:#efe8df}
+[hidden]{display:none!important}
+body{overflow-x:clip}
+/* 틀 — 머리·내 페이지는 가운데 1120, 첫 화면·둘러보기·가입·문의는 화면 폭 전체(구역마다 .uw 로 가운데) */
+.wrap{max-width:none;padding:18px 0 60px}
+.wrap>header.top,.wrap>#topnav,.wrap>.install-bar{max-width:1152px;margin-left:auto;margin-right:auto;padding-left:16px;padding-right:16px}
+.wrap>#pv{max-width:1120px;width:calc(100% - 32px);margin-left:auto;margin-right:auto}
+#shell{max-width:1152px;margin:0 auto;padding:0 16px}
+body[data-route="start"] #shell,body[data-route="map"] #shell,body[data-route="join"] #shell,body[data-route="ask"] #shell{max-width:none;padding:0}
+body[data-route="start"] .app,body[data-route="map"] .app,body[data-route="join"] .app,body[data-route="ask"] .app{display:block;margin-top:0}
+body[data-route="start"] .side,body[data-route="map"] .side,body[data-route="join"] .side,body[data-route="ask"] .side{display:none!important}
+body.in #vStart,body.in #vMap,body.in #vJoin,body.in #vAsk{margin-top:10px}
+.uw{max-width:1160px;margin:0 auto;padding:0 16px}
+/* 머리 */
+a.brand{color:inherit;text-decoration:none}
+.brand .mark{font-size:.72rem;letter-spacing:-.03em;white-space:nowrap;background:var(--g7)}
+.btn.gold{background:var(--gold1);border-color:#e3cd92;color:#5c3f05}
+header.top .hlink{border-color:transparent;background:none;color:var(--g7);font-weight:600;text-decoration:underline;text-underline-offset:4px}
+header.top .hlink[aria-current=page]{background:var(--g0);text-decoration:none}
+#hdrStaff{display:inline-flex;gap:8px;align-items:center}
+#hdrStaff:empty,#acctStaff:empty{display:none}
+#acctStaff{display:none;flex-direction:column;gap:4px;border-bottom:1px solid var(--line);padding-bottom:4px;margin-bottom:4px}
+header.top .fs{display:none}.amfs{display:flex}   /* 글자 크기는 계정 메뉴와 바닥글에(머리에는 로고·로그인·회원가입, 직원 단추만) */
+footer .fs{margin-left:6px}
+/* 사이드바 — 내가 고른 서비스(2단) */
+.side .me{line-height:1.5}
+.side .sfix{list-style:none;margin:0 0 6px;padding:0}
+.side .sfix a{display:flex;align-items:center;gap:8px;font-weight:600;color:var(--g9);padding:8px;border-radius:8px}
+.side .sfix a:hover{background:var(--g0)}.side .sfix a[aria-current=page]{background:var(--g1);font-weight:700}
+.side .sfix svg.ic{color:var(--g6)}
+.side .cap{font-size:.8rem;color:var(--mute);padding:10px 8px 2px}
+.side .sg{border-left:4px solid var(--cb);border-radius:6px;margin-bottom:6px;background:linear-gradient(90deg,var(--ct),#fff 70%)}
+.side .sg>button{width:100%;text-align:left;background:none;border:0;border-radius:8px;padding:8px;display:flex;align-items:center;gap:8px;font:inherit;font-weight:700;color:var(--c);cursor:pointer;min-height:44px}
+.side .sg>button:hover{background:rgba(255,255,255,.5)}
+.side .sg .gt{width:30px;height:30px;border-radius:10px;object-fit:cover;flex:none;background:var(--cb);color:var(--cf);display:inline-flex;align-items:center;justify-content:center}
+.side .sg .ar{margin-left:auto;color:var(--mute);display:inline-flex}
+.side .sg>button[aria-expanded=true] .ar{transform:rotate(90deg)}
+.side .sg ul{list-style:none;margin:0;padding:0 0 6px 14px}
+.side .sg li a{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:.93rem;padding:6px 8px;border-radius:8px;color:var(--ink)}
+.side .sg li a:hover{background:var(--ct)}
+.side .sg li.locked a{color:var(--mute)}.side .sg li a .rq{font-size:.73rem;color:var(--gold);white-space:nowrap}
+.side .sg li.ext a::after{content:"↗";font-size:.73rem;color:var(--mute)}
+.side .smore{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+.side .smore a{display:flex;justify-content:center;align-items:center;gap:6px;border:1px dashed #b9c4b3;border-radius:8px;padding:8px;color:var(--g7);font-weight:600}
+.side .smore a:hover{background:var(--g0)}
+.u2 h1,.u2 h2,.u2 h3,.u2 h4,.u2 p{margin:0}
+.u2 button,.u2 input,.u2 select,.u2 textarea{font-family:inherit;font-size:1rem;color:inherit}
+.u2 button{cursor:pointer}
+.u2 .sp{flex:1}
+.u2 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 16px;font-size:.95rem;color:var(--ink);text-decoration:none;min-height:40px}
+.u2 .btn:hover{background:var(--g0)}
+.u2 .btn.p{background:var(--g7);color:#fff;border-color:var(--g7)}
+.u2 .btn.p:hover{background:var(--g9)}
+.u2 .btn.link{border-color:transparent;background:none;color:var(--g7);font-weight:600;text-decoration:underline;text-underline-offset:4px}
+.u2 .btn.link[aria-current=page]{background:var(--g0);text-decoration:none}
+.u2 .btn.gold{background:var(--gold1);border-color:#e3cd92;color:#5c3f05}
+.u2 .btn.big{font-size:1.1rem;padding:13px 30px;min-height:52px}
+.u2 .btn.sm{padding:4px 12px;font-size:.875rem;min-height:32px}
+.u2 .btn:disabled{opacity:.45;cursor:not-allowed}
+.u2 .chip{display:inline-flex;align-items:center;gap:6px;background:var(--g0);border:1px solid var(--g1);border-radius:999px;padding:3px 11px;font-size:.875rem;white-space:nowrap}
+.u2 .chip.gold{background:var(--gold1);border-color:#e3cd92;color:#5c3f05}
+.u2 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px 22px}
+.u2 .usec{padding:34px 0}
+.u2 .usec h2{font-family:var(--serif);font-size:1.5rem;color:var(--g9);margin-bottom:6px}
+.u2 .usec .lead{color:var(--ink2);margin-bottom:18px}
+.u2 .band{background:var(--bg2)}
+.u2 .note{font-size:.875rem;color:var(--mute)}
+.u2 .notice{background:var(--gold1);border:1px solid #e3cd92;color:#5c3f05;border-radius:10px;padding:9px 14px;font-size:.95rem;margin-bottom:14px}
+.u2 .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.u2 .g2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.u2 ul.plain{list-style:none;margin:0;padding:0}
+.u2 ul.dot{margin:8px 0 0;padding-left:1.15em}
+.u2 ul.dot li{margin:3px 0}
+.u2 .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:var(--r);background:#fff}
+.u2 table{border-collapse:collapse;width:100%;font-size:.95rem}
+.u2 th,.u2 td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.u2 thead th{background:var(--g0);color:var(--g9);font-weight:700;white-space:nowrap}
+.u2 tbody tr:last-child td,.u2 tbody tr:last-child th{border-bottom:0}
+.u2 td.c,.u2 th.c{text-align:center}
+.u2 td.r,.u2 th.r{text-align:right;white-space:nowrap}
+.u2 tbody th{font-weight:700;color:var(--g9);background:#fbfaf5}
+.u2 .mxon{color:var(--g7);font-weight:700}
+.u2 .mxopt{color:var(--gold);font-weight:700;font-size:.875rem}
+.u2 .mxoff{color:#a9b3a5}
+.u2 .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.u2 .publinks{display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:center;font-size:.9rem;color:var(--mute);padding:16px 0 30px}
+.u2 .publinks span{text-decoration:underline;text-underline-offset:3px}
+.u2 .bigh{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.u2 .bigh .ord{background:var(--g7);color:#fff;border-radius:8px;padding:1px 10px;font-size:.9rem;font-weight:700;white-space:nowrap}
+.u2 .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.u2 .tcard{display:flex;flex-direction:column;gap:8px}
+.u2 .tcard h3{font-size:1.1rem;color:var(--g9)}
+.u2 .tcard .who2{display:flex;flex-wrap:wrap;gap:4px}
+.u2 .tcard .btn{margin-top:auto;align-self:flex-start}
+.u2 .sub3{font-size:1.1rem;color:var(--g9);margin:22px 0 4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.u2 .steps{display:flex;gap:6px;margin:0 0 18px;padding:0;list-style:none;flex-wrap:wrap}
+.u2 .steps li{flex:1;min-width:120px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:.9rem;color:var(--mute)}
+.u2 .steps li b{display:block;color:var(--ink2)}
+.u2 .steps li.cur{background:var(--g7);border-color:var(--g7);color:#dfe9d6}
+.u2 .steps li.cur b{color:#fff}
+.u2 .steps li.past{background:var(--g0)}
+.u2 .steps li.skip{opacity:.5;text-decoration:line-through}
+.u2 .form{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px}
+.u2 .f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.u2 .f.w{grid-column:1/-1}
+.u2 .f label,.u2 .f .lb{font-weight:600;font-size:.95rem;color:var(--ink2)}
+.u2 .f input[type=text],.u2 .f input[type=email],.u2 .f input[type=password],.u2 .f input[type=tel],.u2 .f input[type=number],.u2 .f select,.u2 .f textarea,.u2 .inp{width:100%;border:1px solid #b9c4b3;border-radius:10px;padding:10px 12px;background:#fff;min-height:44px}
+.u2 .f textarea{min-height:120px;resize:vertical}
+.u2 .f .hint{font-size:.85rem;color:var(--mute)}
+.u2 .req{color:var(--danger)}
+.u2 .err{background:var(--danger1);color:var(--danger);border-radius:8px;padding:8px 12px;font-size:.95rem;margin-top:12px}
+.u2 .checks{display:flex;flex-wrap:wrap;gap:6px 14px}
+.u2 .checks label,.u2 .ck{display:inline-flex;align-items:center;gap:6px;font-weight:400;font-size:.95rem}
+.u2 input[type=checkbox],.u2 input[type=radio]{width:18px;height:18px;accent-color:var(--g7);flex:none}
+.u2 .acts{display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap;margin-top:20px}
+.u2 .two{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px;align-items:start}
+.u2 .pick{display:grid;gap:12px}
+.u2 .svc{background:#fff;border:2px solid var(--line);border-radius:var(--r);padding:14px 16px}
+.u2 .svc.sel{border-color:var(--g7);background:#f8fbf4}
+.u2 .svc .hd{display:flex;align-items:flex-start;gap:10px}
+.u2 .svc .hd .t{flex:1;min-width:0}
+.u2 .svc .hd .t b{font-size:1.05rem;color:var(--g9)}
+.u2 .svc .hd .t small{display:block;color:var(--mute);font-size:.875rem}
+.u2 .svc .hd .pr{font-weight:700;color:var(--g7);white-space:nowrap;font-size:.95rem;text-align:right}
+.u2 .svc .sub{margin:10px 0 0 28px;padding-top:10px;border-top:1px dashed var(--line);display:grid;gap:6px}
+.u2 .svc .sub .row{display:flex;justify-content:space-between;gap:10px;font-size:.95rem}
+.u2 .svc .sub .row span.p{color:var(--mute);white-space:nowrap}
+.u2 .sticky{position:sticky;top:60px;display:grid;gap:14px}
+.u2 .sum h3,.u2 .sbpv h3{font-size:1rem;color:var(--g9);margin-bottom:8px}
+.u2 .sum .li{display:flex;justify-content:space-between;gap:10px;font-size:.92rem;padding:3px 0}
+.u2 .sum .li small{color:var(--mute)}
+.u2 .sum .tot{border-top:2px solid var(--g7);margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;align-items:baseline;font-weight:700}
+.u2 .sum .tot b{font-size:1.35rem;color:var(--g9)}
+.u2 .sbpv .mini{border:1px solid var(--line);border-radius:10px;padding:8px;background:#fbfaf5;font-size:.9rem}
+.u2 .sbpv .mini .g{font-weight:700;color:var(--g9);padding:4px 6px}
+.u2 .sbpv .mini .i{padding:1px 6px 1px 20px;color:var(--ink2)}
+.u2 .sbpv .mini .fx{padding:3px 6px;color:var(--ink2)}
+.u2 .done{text-align:center;padding:34px 22px}
+.u2 .done .ok{width:64px;height:64px;border-radius:50%;background:var(--g7);color:#fff;font-size:2rem;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+.u2 .done .box{text-align:left;max-width:560px;margin:16px auto;background:var(--g0);border:1px solid var(--g1);border-radius:10px;padding:14px 16px}
+.u2 .cats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.u2 .cat{background:#fff;border:2px solid var(--line);border-radius:var(--r);padding:16px;text-align:left}
+.u2 .cat b{display:block;color:var(--g9);font-size:1.05rem}
+.u2 .cat span{font-size:.875rem;color:var(--mute)}
+.u2 .cat[aria-pressed=true]{border-color:var(--g7);background:#f8fbf4}
+.tg{font-size:.75rem;background:var(--gold1);color:#5c3f05;border-radius:6px;padding:0 6px;font-weight:400}
+.u2 .dash h2{font-size:1.15rem;color:var(--g9);font-family:var(--serif)}
+.u2 .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+.u2 .tile{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fbfaf5;min-width:0}
+.u2 .tile .k{font-size:.85rem;color:var(--mute)}
+.u2 .tile .v{font-size:1.15rem;font-weight:700;color:var(--g9);overflow-wrap:anywhere}
+.u2 .tile .v small{font-size:.85rem;font-weight:400;color:var(--ink2)}
+.u2 .meter{height:10px;background:var(--g1);border-radius:99px;overflow:hidden;margin-top:6px}
+.u2 .meter i{display:block;height:100%;background:var(--g6)}
+.u2 .st{display:inline-block;border-radius:999px;padding:1px 10px;font-size:.85rem;font-weight:600;white-space:nowrap}
+.u2 .st.ok{background:#dcebd6;color:#1f5a2e}
+.u2 .st.no{background:var(--danger1);color:var(--danger)}
+.u2 .st.free{background:#ebebe6;color:#55604f}
+.u2 .st.wait{background:var(--gold1);color:#5c3f05}
+.u2 .ph{border:2px dashed #b9c4b3;border-radius:12px;padding:40px 16px;text-align:center;color:var(--mute);margin-top:14px;background:#fbfaf5}
+.u2 .crumb{font-size:.9rem;color:var(--mute);margin-bottom:4px}
+.u2 .an{font-size:.78rem;color:var(--mute);font-weight:400}
+.u2 .infobox{background:var(--g0);border:1px solid var(--g1);border-radius:10px;padding:12px 14px;margin-top:8px}
+.u2 .kv li{display:flex;justify-content:space-between;gap:8px;font-size:.92rem;padding:2px 0}
+.u2 .kv li>span:first-child{color:var(--mute)}
+.u2 .cat i.tg{font-style:normal;display:inline-block;margin-top:6px;font-size:.78rem}
+.u2 .ck{flex-wrap:wrap}
+.u2 .ck .note{flex-basis:100%;padding-left:24px}
+.u2 .sum .li>span:last-child{white-space:nowrap}
+.u2 button.chip{cursor:pointer;font-size:.875rem}
+@media(max-width:900px){
+  .u2 .two{grid-template-columns:1fr}
+  .u2 .sticky{position:static}
+  .u2 .cats,.u2 .g4{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:700px){
+  .u2 .g3,.u2 .g2,.u2 .g4,.u2 .tiles,.u2 .form{grid-template-columns:1fr}
+  .u2 .usec{padding:24px 0}
+  .u2 .usec h2{font-size:1.3rem}
+  .u2 .card{padding:16px}
+  .u2 .btn{padding:7px 12px}
+  .u2 .svc .sub{margin-left:0}
+  .u2 .cats{grid-template-columns:1fr}
+  .u2 .rt{border:0;background:none;overflow:visible}
+  .u2 .rt table,.u2 .rt tbody,.u2 .rt tr,.u2 .rt td,.u2 .rt th{display:block}
+  .u2 .rt thead{position:absolute;left:-9999px}
+  .u2 .rt tr{background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:10px;padding:8px 12px;position:relative}
+  .u2 .rt td,.u2 .rt tbody th{border:0;padding:3px 0;text-align:left!important;background:none;white-space:normal;overflow-wrap:anywhere}
+  .u2 .rt td[data-l]::before{content:attr(data-l) " · ";color:var(--mute);font-size:.85rem}
+  .u2 .rt td.ckc{position:absolute;right:10px;top:8px}
+  .u2 .mx table{min-width:640px}
+  .u2 .mx tbody th{position:sticky;left:0;z-index:1;max-width:120px;white-space:normal}
+}
+.c-hat{--c:var(--hat);--cb:var(--hatb);--ct:var(--hatt);--cf:#4a2a00}
+.c-pol{--c:var(--pol);--cb:var(--pol);--ct:var(--polt);--cf:#fff}
+.c-aca{--c:var(--aca);--cb:var(--acab);--ct:var(--acat);--cf:#fff}
+.c-team{--c:var(--team);--cb:var(--teamb);--ct:var(--teamt);--cf:#fff}
+.c-fld{--c:var(--fld);--cb:var(--fldb);--ct:var(--fldt);--cf:#fff}
+.c-rs{--c:var(--rs);--cb:var(--rsb);--ct:var(--rst);--cf:#fff}
+.c-g{--c:var(--g7);--cb:var(--g7);--ct:var(--g0);--cf:#fff}
+.u2 img{max-width:100%}
+svg.ic{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle}
+svg.ic.s{width:17px;height:17px}
+.bub{width:46px;height:46px;border-radius:15px;background:var(--ct);color:var(--c);display:inline-flex;align-items:center;justify-content:center;flex:none}
+.bub.f{background:var(--cb);color:var(--cf)}
+.cchip{display:inline-flex;align-items:center;gap:6px;background:var(--ct);color:var(--c);border-radius:999px;padding:2px 11px;font-size:.85rem;font-weight:600;white-space:nowrap}
+.cchip::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--cb)}
+.u2 .hero2{position:relative;min-height:470px;display:flex;align-items:center;color:#fff;overflow:hidden;background:#12372c}
+.u2 .hero2>img,.u2 .band2>img,.u2 .greet>img.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.u2 .hero2::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(6,32,26,.82),rgba(6,32,26,.45) 55%,rgba(6,32,26,.12))}
+.u2 .hero2 .uw{position:relative;z-index:1;width:100%;padding-top:52px;padding-bottom:52px}
+.u2 .hero2 .eyebrow{display:inline-block;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.4);border-radius:999px;padding:3px 14px;font-size:.9rem;margin-bottom:14px}
+.u2 .hero2 .h1{font-family:var(--serif);font-size:2.7rem;line-height:1.25;color:#fff;max-width:640px}
+.u2 .hero2 p{font-size:1.15rem;margin:12px 0 24px;max-width:520px;color:#fff}
+.u2 .hero2 .cta{justify-content:flex-start}
+.u2 .btn.w{background:#fff;color:var(--g9);border-color:#fff}
+.u2 .btn.w:hover{background:var(--g0)}
+.u2 .btn.y{background:var(--hatb);border-color:var(--hatb);color:#4a2a00;font-weight:700}
+.u2 .btn.y:hover{background:#ffc94d}
+.u2 .dots{display:flex;gap:8px;margin-top:26px;flex-wrap:wrap}
+.u2 .dots .cchip{background:rgba(255,255,255,.92)}
+.u2 .feat{text-align:center;padding:22px 18px}
+.u2 .feat h3{font-size:1.15rem;color:var(--g9);margin:0 0 4px;justify-content:center}
+.u2 .greet .dogr{object-position:50% 15%}
+.u2 .feat p{color:var(--ink2);font-size:.95rem}
+.u2 .feat .row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:6px 0 14px}
+.u2 .feat .it{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:.82rem;color:var(--ink2);width:92px;line-height:1.3;word-break:keep-all}
+.u2 .sech{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.u2 .sech h2{margin:0}
+.u2 .sech p{color:var(--ink2);margin:0}
+.u2 .tcard{padding:0;overflow:hidden;gap:0;border-top:6px solid var(--cb)}
+.u2 .tcard .th{aspect-ratio:16/10;background:var(--ct);overflow:hidden}
+.u2 .tcard .th img,.u2 .tcard .th svg,.u2 .blog .lead img,.u2 .blog .lead svg,.u2 .brow .bt img,.u2 .brow .bt svg,.u2 .icard .th img,.u2 .icard .th svg{width:100%;height:100%;object-fit:cover;display:block}
+.u2 .tcard .tb{padding:14px 16px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
+.u2 .tcard h3{color:var(--c);display:flex;align-items:center;gap:8px}
+.u2 .tcard p.one{color:var(--ink2);font-size:.95rem}
+.u2 details.more summary{cursor:pointer;color:var(--c,var(--g7));font-size:.9rem;font-weight:600;list-style:none;display:inline-flex;align-items:center;gap:4px;border-radius:6px}
+.u2 details.more summary::-webkit-details-marker{display:none}
+.u2 details.more summary::after{content:"+";font-weight:700}
+.u2 details.more[open] summary::after{content:"−"}
+.u2 details.more p{font-size:.9rem;color:var(--ink2);margin-top:6px}
+.u2 .pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.u2 .pcard{border-top:6px solid var(--cb);display:flex;flex-direction:column;gap:6px}
+.u2 .pcard .pn{display:flex;align-items:center;gap:10px}
+.u2 .pcard .pn b{font-size:1.1rem;color:var(--c)}
+.u2 .pcard .pn small{display:block;color:var(--mute);font-size:.82rem}
+.u2 .pcard .pp{font-size:1.9rem;font-weight:800;color:var(--g9);line-height:1.2;margin-top:6px}
+.u2 .pcard .pp small{font-size:.9rem;font-weight:400;color:var(--mute)}
+.u2 .pcard .p2{font-size:.95rem;color:var(--ink2)}
+.u2 .pcard .p2 b{color:var(--g9)}
+.u2 .pcard ul{list-style:none;margin:8px 0 0;padding:10px 0 0;border-top:1px dashed var(--line);display:grid;gap:5px;font-size:.93rem}
+.u2 .pcard li{display:flex;gap:7px;align-items:flex-start}
+.u2 .pcard li .ic{color:var(--c);margin-top:2px}
+.tg.tex{background:var(--acat);color:var(--aca)}
+.tg.tin{background:var(--polt);color:var(--pol)}
+.u2 details.mxd{margin-top:18px}
+.u2 details.mxd>summary{cursor:pointer;display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 18px;font-weight:600;color:var(--g7);list-style:none}
+.u2 details.mxd>summary::-webkit-details-marker{display:none}
+.u2 details.mxd[open]>summary{margin-bottom:12px;background:var(--g0)}
+.u2 .band2{position:relative;overflow:hidden;color:#fff;text-align:center;padding:54px 0;background:#3b2a1a}
+.u2 .band2::after{content:"";position:absolute;inset:0;background:rgba(30,18,6,.5)}
+.u2 .band2 .uw{position:relative;z-index:1}
+.u2 .band2 h2{font-family:var(--serif);font-size:1.7rem;color:#fff;margin-bottom:16px}
+.u2 .bigh .ord{background:var(--g7)}
+.u2 .blog{padding:0;overflow:hidden;border-top:6px solid var(--cb)}
+.u2 .blog .lead{aspect-ratio:16/9;background:var(--ct);overflow:hidden}
+.u2 .blog .bb{padding:12px 16px 14px}
+.u2 .g2 .blog .lead{aspect-ratio:auto;height:210px}
+.u2 .blog .bn{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.u2 .blog .lt{font-weight:700;color:var(--g9);font-size:1.02rem}
+.u2 .blog time,.u2 .brow time{color:var(--mute);font-size:.82rem;white-space:nowrap}
+.u2 .brow{display:flex;gap:10px;align-items:center;padding:8px 0 0;margin-top:8px;border-top:1px solid var(--line)}
+.u2 .brow .bt{width:64px;height:48px;border-radius:8px;overflow:hidden;flex:none;background:var(--ct)}
+.u2 .brow span{flex:1;min-width:0;font-size:.93rem;overflow-wrap:anywhere}
+.u2 .icard{padding:0;overflow:hidden;display:flex;border-top:6px solid var(--cb)}
+.u2 .icard .th{width:42%;flex:none;background:var(--ct);min-height:130px}
+.u2 .icard .tb{padding:16px}
+.u2 .icard h4{color:var(--c);font-size:1.05rem;margin:0 0 4px}
+.u2 .tourend{display:flex;align-items:center;justify-content:center;gap:14px;padding:26px 0 40px;flex-wrap:wrap;text-align:left}
+.dogr{width:112px;height:112px;border-radius:50%;object-fit:cover;border:4px solid #fff;box-shadow:0 2px 12px rgba(0,0,0,.2);flex:none}
+.dogr.s{width:72px;height:72px;border-width:3px}
+.u2 .dogw{position:relative;display:inline-block;margin:0 auto 10px}
+.u2 .dogw .okb{position:absolute;right:-2px;bottom:2px;width:34px;height:34px;border-radius:50%;background:var(--g7);color:#fff;display:flex;align-items:center;justify-content:center;border:3px solid #fff}
+.u2 .dognote{display:flex;align-items:center;gap:14px;background:var(--hatt);border:1px solid #f0d9a0;border-radius:var(--r);padding:12px 16px;margin-bottom:14px;color:#4a2a00}
+.u2 .ph .dogr{display:block;margin:0 auto 10px}
+.u2 .svc{border-left-width:8px;border-left-color:var(--cb,var(--line))}
+.u2 .svc:has([data-svc=free]){--cb:#b9c4b3;--c:var(--g7)}
+.u2 .svc:has([data-svc=acad]){--cb:var(--acab)}
+.u2 .svc:has([data-svc=policy]){--cb:var(--pol)}
+.u2 .svc:has([data-svc=coop]){--cb:var(--hatb)}
+.u2 .svc:has([data-svc=fed]){--cb:#e8892b}
+.u2 .svc.sel{border-color:var(--cb)}
+.u2 .cat{display:flex;flex-direction:column;align-items:flex-start;gap:4px;border-top:6px solid var(--cb)}
+.u2 .cat[aria-pressed=true]{border-color:var(--cb);background:var(--ct)}
+.u2 .cat .bub{margin-bottom:6px}
+.u2 .cat[aria-pressed=true] .bub{background:#fff}
+.u2 .steps li.cur{background:var(--g7)}
+.u2 .greet{position:relative;overflow:hidden;border-radius:12px;color:#fff;padding:18px 20px;display:flex;align-items:center;gap:16px;min-height:124px;background:#12506a}
+.u2 .greet::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(6,40,50,.78),rgba(6,40,50,.3))}
+.u2 .greet>*{position:relative;z-index:1}
+.u2 .greet>img.bg{position:absolute;z-index:0}
+.u2 .greet h2{color:#fff;font-size:1.35rem}
+.u2 .greet .gx{flex:1;min-width:0}
+.u2 .greet .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.u2 .greet .cchip{background:rgba(255,255,255,.94)}
+.u2 .tile .hd{display:flex;align-items:center;gap:8px;font-size:.88rem;color:var(--mute);margin-bottom:6px}
+.u2 .tile .hd .ic{color:var(--g6)}
+.u2 .ringrow{display:flex;align-items:center;gap:14px}
+.u2 .ring{width:76px;height:76px;flex:none}
+.u2 .ring text{font-size:15px;font-weight:700;fill:var(--g9)}
+.u2 .bars{display:grid;gap:9px}
+.u2 .bar .bl{display:flex;justify-content:space-between;font-size:.88rem}
+.u2 .bar .bl b{color:var(--g9)}
+.u2 .bar .bk{height:10px;border-radius:99px;background:#e9ece4;overflow:hidden;margin-top:3px}
+.u2 .bar .bk i{display:block;height:100%;border-radius:99px;background:var(--cb,var(--g6))}
+.u2 .notices li{display:flex;gap:7px;align-items:flex-start;font-size:.92rem;padding:2px 0}
+.u2 .notices .ic{color:var(--gold);margin-top:3px}
+@media(max-width:900px){
+  .u2 .pgrid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:700px){
+  .u2 .hero2{min-height:400px}
+  .u2 .hero2 .h1{font-size:1.8rem}
+  .u2 .hero2 p{font-size:1rem}
+  .u2 .hero2::after{background:linear-gradient(180deg,rgba(6,32,26,.7),rgba(6,32,26,.55))}
+  .u2 .pgrid{grid-template-columns:1fr}
+  .u2 .icard{flex-direction:column}
+  .u2 .icard .th{width:100%;aspect-ratio:16/8;min-height:0}
+  .u2 .greet{padding:14px}
+  .u2 .greet h2{font-size:1.15rem}
+  .u2 .greet .dogr{width:64px;height:64px}
+  .u2 .band2{padding:36px 0}
+  .u2 .band2 h2{font-size:1.35rem}
+  .u2 .dognote .dogr{width:60px;height:60px}
+}
+/* 시안 규칙 보정 — 옛 전역 규칙(.f·.msg 등)과 섞이지 않게 */
+.u2 .f{margin-bottom:0}.u2 .f label{margin-bottom:0}.u2 .f input,.u2 .f select{height:auto}
+.u2 .f .rg{display:flex;gap:6px}.u2 .f .rg select{flex:1;min-width:0}
+.u2 .hero2 .h1{font-family:var(--serif);font-size:2.7rem;line-height:1.25;color:#fff;max-width:640px;margin:0}
+.u2 .pcard .btn{margin-top:10px;align-self:flex-start}
+.u2 .pwait{border:2px dashed #b9c4b3;border-radius:12px;padding:22px 16px;text-align:center;color:var(--mute);background:#fbfaf5}
+.u2 .tcard .lk2{font-size:.875rem}
+.u2 .blog .bb p{font-size:.93rem;color:var(--ink2);margin:4px 0 10px}
+.u2 .blog .lt .rq{font-size:.75rem;color:var(--gold);background:var(--gold1);border-radius:8px;padding:0 6px;font-weight:400;margin-left:6px}
+.u2 .icard .tb .btn{margin-top:10px}
+.u2 .hide{display:none!important}
+.u2 .svc .hd .t{cursor:pointer}
+.u2 .svc.ext .hd{align-items:center}
+.u2 .acts .r{display:flex;gap:8px;flex-wrap:wrap}
+.u2 .mbl{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.u2 .mbl li{display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-top:1px dashed var(--line);padding-top:8px}
+.u2 .mbl li:first-child{border-top:0;padding-top:0}
+.u2 .mbl li .nm{font-weight:700;color:var(--g9)}.u2 .mbl li .am{margin-left:auto;white-space:nowrap}
+.u2 .tile.wide{grid-column:1/-1}
+.u2 .myacts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.u2 .dash{padding:14px}
+.u2 .msg{margin:8px 0 0}
+.app>main{min-width:0}
+.flist td[colspan].n{white-space:normal}   /* 빈 목록 안내 글이 줄을 안 바꿔 휴대폰에서 표가 669px 로 늘던 것 */
+#myBox{margin:0 0 16px}#myGreet{margin:0 0 4px}
+#vMap .mapbar{background:var(--bg)}
+@media(min-width:761px){#vCustom .cgrid{grid-template-columns:1fr 230px}}
+@media(max-width:900px){.u2 .tiles{grid-template-columns:1fr 1fr}}
+@media(max-width:1100px){header.top .brand .sub{display:none}}
+@media(min-width:761px){body:not(.in) #topnav{display:none}}
+@media(max-width:760px){
+  .wrap{padding-bottom:calc(var(--tabH) + 24px + env(safe-area-inset-bottom))}
+  .wrap>header.top{margin-left:0;margin-right:0}
+  body.in .app{grid-template-columns:minmax(0,1fr)}
+  #fLinks table.flist{display:block;overflow-x:auto;max-width:100%}   /* 내 폴더 「연결 상태」 표(7열)가 휴대폰에서 화면을 685px 로 밀던 것 — 표 안에서만 옆으로 민다 */
+  #hdrStaff,header.top .hlink{display:none}
+  #acctStaff{display:flex}
+  .side .sfix a,.side .sg li a,.side .smore a{min-height:var(--tap)}
+  .u2 .btn.sm{min-height:40px}
+  .u2 .mx table{min-width:760px}.u2 .mx tbody th{min-width:128px;max-width:150px}.u2 .mx td span{white-space:nowrap}
+  .u2 .hero2 .h1{font-size:1.8rem}
+  .u2 .tiles{grid-template-columns:1fr}
+  .u2 .greet .dogr{display:none}
+  .u2 .steps li{min-width:0;padding:6px 8px;font-size:.8rem}
+  .u2 .acts{flex-direction:column-reverse}.u2 .acts .btn,.u2 .acts .r{width:100%}.u2 .acts .r .btn{flex:1}
+  header.top #btnLogin,header.top #btnJoin{padding-left:12px;padding-right:12px}
+}
+@media(max-width:380px){header.top .brand .mark{display:none}}
+.u2 .publinks a{color:var(--mute);text-decoration:underline;text-underline-offset:3px}
 </style>
-<script src="/ai-dock.js?v=20261118a" defer></script><!-- 11-04 알파언니 🟠1: 판 표시 — 캐시된 옛 상담창(4시간)이 새 첫 화면에 붙지 않게, 고칠 때마다 올린다 -->
+<script src="/ai-dock.js?v=20261118u" defer></script><!-- 판 표시 — 캐시된 옛 대화창(4시간)이 새 화면에 붙지 않게, 고칠 때마다 올린다. 11-18: 위 상담 띠 없는 판 -->
 </head>
 <body>
 <div class="wrap">
   <header class="top">
     <button class="btn sideTog" id="sideTog" type="button" aria-controls="sideWrap" aria-expanded="false" hidden>☰ 메뉴</button>
-    <div class="brand"><div class="mark">L&amp;L</div><div><h1>사교원<span class="hm"> 통합사이트</span></h1><div class="sub">사회혁신교육원 사회적협동조합 · 플랫폼 사업 · 현장사업 · 교육·연구 · 소개</div></div></div>
+    <a class="brand" id="brandLink" href="#/start"><div class="mark" aria-hidden="true">사교원</div><div><h1>사교원<span class="hm"> 통합사이트</span></h1><div class="sub">로컬리스트 플랫폼 · 사회혁신교육원사회적협동조합</div></div></a>
     <div class="sp"></div>
+    <a class="btn hlink" id="hTour" href="#/map">둘러보기</a>
+    <!-- 11-18 이사장 지시: 그룹웨어·관리 단추는 매니저·통합관리자에게만 — 다른 등급에는 요소 자체를 그리지 않는다(renderHdrStaff) -->
+    <span id="hdrStaff"></span>
     <span class="fs" role="group" aria-label="글자 크기"><button type="button" id="fsDown" data-fs="-1" aria-label="글자 작게">가−</button><button type="button" id="fsUp" data-fs="1" aria-label="글자 크게">가+</button></span>
-    <button class="btn p" id="btnLogin">로그인 · 회원가입</button>
-    <!-- 11-04 개선안 M4: 비밀번호·2단계·로그아웃·글자 크기·옛 첫 화면을 계정 단추 하나로 -->
+    <button class="btn" id="btnLogin" type="button">로그인</button>
+    <a class="btn p" id="btnJoin" href="#/join">회원가입</a>
+    <!-- 11-04 개선안 M4: 비밀번호·2단계·로그아웃·글자 크기를 계정 단추 하나로 -->
     <div class="acct" id="acct" hidden>
       <button class="acctBtn" id="acctBtn" type="button" aria-expanded="false" aria-controls="acctMenu"><span class="av" id="acctAv" aria-hidden="true"></span><span class="who" id="who"></span><span aria-hidden="true">▾</span><span class="sr">계정 메뉴</span></button>
       <div class="acctMenu" id="acctMenu" hidden>
         <div class="amfs" role="group" aria-label="글자 크기"><span>글자 크기</span><button type="button" data-fs="-1" aria-label="글자 작게">가−</button><button type="button" data-fs="1" aria-label="글자 크게">가+</button></div>
+        <span id="acctStaff"></span>
         <span id="whoEmailBox"></span>
         <button class="btn" id="btnPw" type="button" style="display:none">🔑 비밀번호 변경</button>
         <button class="btn" id="btnTwofa" type="button" style="display:none">🔐 2단계 인증 <span class="tfs" id="acctTf"></span></button>
-        <a class="btn" href="#/start">🏛️ 첫 화면</a>
+        <a class="btn" href="#/join">➕ 서비스 더 고르기</a>
+        <a class="btn" href="#/start">🏛️ 첫 화면(소개)</a>
       </div>
     </div>
     <button class="btn" id="btnLogout" type="button" style="display:none">로그아웃</button><!-- 11-11 이사장 지시: 로그인·로그아웃은 모든 이용자 우측 상단 -->
   </header>
   <nav class="topnav" aria-label="화면 이동" id="topnav">
-    <a href="#/start" data-r="start"><span class="ti" aria-hidden="true">🏛️</span> 첫 화면</a><a href="#/" data-r="home" class="needin"><span class="ti" aria-hidden="true">🏠</span> 내 페이지</a><a href="#/map" data-r="map"><span class="ti" aria-hidden="true">🗺️</span> 둘러보기</a><a href="#/files" data-r="files" class="needin"><span class="ti" aria-hidden="true">📁</span> 내 폴더</a><a href="#/custom" data-r="custom" class="needin"><span class="ti" aria-hidden="true">🎨</span> 꾸미기</a>
+    <a href="#/start" data-r="start"><span class="ti" aria-hidden="true">🏛️</span> 첫 화면</a><a href="#/" data-r="home" class="needin"><span class="ti" aria-hidden="true">🏠</span> 내 페이지</a><a href="#/map" data-r="map"><span class="ti" aria-hidden="true">🗺️</span> 둘러보기</a><a href="#/files" data-r="files" class="needin"><span class="ti" aria-hidden="true">📁</span> 내 폴더</a><a href="#/custom" data-r="custom" class="needin"><span class="ti" aria-hidden="true">🎨</span> 꾸미기</a><a href="#/join" data-r="join" class="needout"><span class="ti" aria-hidden="true">📝</span> 회원가입</a><a href="#/ask" data-r="ask" class="needout"><span class="ti" aria-hidden="true">✉️</span> 문의</a>
   </nav>
 
   <!-- 통합관리자 등급별 미리보기 띠 — 관문·둘러보기에서도 보여야 「원래대로」로 돌아온다 -->
@@ -295,68 +686,38 @@ body[data-route="start"] .tree{grid-template-columns:1fr}
     <div class="app" id="app">
       <aside class="side" id="sideWrap" aria-label="내 메뉴"><div class="drawerHead"><h2 id="drawerT">내 메뉴</h2><button class="btn" id="sideClose" type="button">✕ 닫기</button></div><div id="side"></div></aside>
       <div class="scrim" id="sideScrim" hidden></div>
-      <!-- ② 둘러보기 (#/map, 공개) -->
-      <main id="vMap" class="view" aria-label="둘러보기 — 사이트맵">
-    <div class="secT"><h2>둘러보기 — 말로 쓰는 사이트맵</h2><p class="sub">화면으로 바로 가거나, 예시를 눌러 상담창에 그 말을 넣어 보세요. 🔒 는 어떤 회원이 쓰는지 적혀 있습니다.</p></div>
-    <div class="mapbar"><input id="mapFind" type="search" placeholder="찾기 (예: 근태, 입찰, 공지)" aria-label="둘러보기에서 찾기"><nav class="mapchips" id="mapChips" aria-label="묶음 바로가기"></nav></div>
-    <p class="msg" id="mapNone" hidden>찾는 말이 든 기능이 없습니다. 상담창에 그대로 물어보셔도 됩니다.</p>
-    <div id="mapBody"></div>
+      <!-- ② 둘러보기 (#/map, 공개) — 11-18: 큰 묶음 둘(회원서비스 → 사교원 홈페이지) -->
+      <main id="vMap" class="view u2" aria-label="둘러보기 — 사이트맵">
+        <div class="uw"><section class="usec" style="padding-bottom:6px"><div class="sech"><h2>둘러보기</h2><p>사이트 전체를 한눈에 봅니다. 앞은 회원서비스, 뒤는 누구나 보는 사교원 홈페이지입니다.</p></div>
+          <div class="mapbar"><input id="mapFind" type="search" placeholder="찾기 (예: 햇소자, 아카데미, 망남)" aria-label="둘러보기에서 찾기"><nav class="mapchips" id="mapChips" aria-label="묶음 바로가기"></nav></div>
+          <p class="msg" id="mapNone" hidden>찾는 말이 든 메뉴가 없습니다.</p></section></div>
+        <div id="mapBody"></div>
       </main>
 
-      <!-- 첫 화면 (#/start · 비로그인 #/) — 11-07 이사장 지시: 1단 배치, 왼쪽 사이드바에 전체 메뉴 -->
-      <main id="vStart" class="view" aria-label="첫 화면">
-        <div id="axLockBar" role="status" hidden class="tmp" style="margin:0 0 14px;padding:10px 14px;border:1px solid #e0c070;background:#fff7e0;border-radius:10px;font-size:14px">🧪 (개편 중 임시 안내 · 오픈 전 제거) 🛠️ 사교원 사이트를 새 모습으로 고치는 중입니다. 내 페이지·내 폴더·둘러보기는 그대로 쓰실 수 있고, 상담창의 실행(보내기·바꾸기)·발송·정기 루틴만 개편이 끝날 때까지 쉬고 있습니다.</div>
-        <div class="hero">
-          <div class="card">
-            <h2>무엇이든 AI 도우미에게 물어보세요</h2>
-            <p><span class="dk">화면 맨 위 <b>사교원 AI</b> 칸은</span><span class="mb">오른쪽 아래 <b>💬 상담</b> 단추는</span> 모든 페이지에 따라다닙니다. 지금 보는 화면을 근거로 답하고, 파일·이미지를 올려 묻고, 문서를 써서 한글(hwpx)로 내려받습니다. 연산은 과기정통부 고성능컴퓨팅(HPC) 엔진이 맡고, 개인정보는 보내기 전에 가립니다.</p>
-            <div class="ask"><input id="heroQ" placeholder="예: 사교원은 어떤 곳인가요? / 햇빛소득마을 신청 절차는?" aria-label="질문"><button id="heroAsk">물어보기</button></div>
-            <div class="ex"><button data-q="사교원은 어떤 조직이고 무슨 일을 하나요?">사교원 소개</button><button data-q="햇빛소득마을 공모에 참여하려면 어떤 서류가 필요한가요?">햇소자 서류</button><button data-q="연대지능활동가 아카데미는 무엇을 배우나요?">아카데미</button><button data-q="교육 프로그램 비용은 어떻게 계산하나요?">교육 견적</button></div>
-            <p class="gnote">비회원 상담은 <span class="dk">화면 맨 위 <b>사교원 AI</b> 띠에서</span><span class="mb">오른쪽 아래 <b>💬 상담</b> 단추로</span> 바로 할 수 있습니다(하루 10회).</p>
-          </div>
-          <form class="card" id="gtForm" aria-labelledby="gtTitle" novalidate>
-            <h2 id="gtTitle">로그인</h2><p class="sub">사교원 통합 계정 하나로 모든 사이트에 들어갑니다. 로그인하면 내 페이지(상담창·대시보드·내 폴더)로 갑니다.</p>
-            <div class="f"><label for="gtEmail">이메일 <span style="color:var(--mute);font-weight:400">(옛 아이디도 됩니다)</span></label><input id="gtEmail" inputmode="email" autocomplete="username" placeholder="name@example.com"></div>
-            <div class="f"><label for="gtPw">비밀번호</label><input id="gtPw" type="password" autocomplete="current-password"></div>
-            <label class="remid"><input type="checkbox" id="gtRem"> <b>아이디 기억하기</b> <span>(공용 PC에서는 끄세요)</span></label>
-            <div class="f" id="gtCodeBox" hidden><label for="gtCode">2단계 인증 코드</label><input id="gtCode" inputmode="numeric" autocomplete="one-time-code" placeholder="인증 앱 6자리 · 이메일 코드 · 백업 코드"></div>
-            <div class="msg" id="gtMsg" aria-live="polite"></div>
-            <button class="mbtn" id="gtBtn" type="submit">로그인</button>
-            <p class="links"><a href="#" id="gtForgot">비밀번호 찾기</a> · <a href="#/signup">회원가입</a> · <a href="#/map" id="gtMap">🗺️ 로그인 없이 둘러보기</a></p>
-          </form>
-          <div class="card" id="stMine" hidden>
-            <h2>내 페이지</h2>
-            <p><b id="stMineName"></b> 님, 로그인되어 있습니다. 상담창·대시보드·내 폴더는 내 페이지에 있습니다.</p>
-            <div class="lk"><a class="btn p" href="#/">🏠 내 페이지로</a><a class="btn" href="#/files">📁 내 폴더</a><a class="btn" href="#/custom">🎨 꾸미기</a></div>
-          </div>
-          <div class="card">
-            <h2>사교원 소개</h2>
-            <p>사회혁신교육원 사회적협동조합(사교원)은 연대지능활동가 교육, 햇빛소득마을·어촌신활력 사업, 정책 연구를 하는 사회적협동조합입니다.</p>
-            <div class="lk"><a class="btn" href="/academy-site/#edu-apply">🎓 연대지능활동가 교육 신청</a><a class="btn" href="/academy-site/#tl-apply">🏘 주민자치·지역문제해결 교육 신청</a><a class="btn" href="https://home.sakyowon.co.kr/#/about">사교원 소개 더 보기</a><a class="btn" href="#/map">🗺️ 둘러보기(사이트맵)</a></div>
-          </div>
-          <div class="card">
-            <h2>회원 등급</h2>
-            <div class="tiers">
-              <b>통합관리자</b> › <b>매니저회원</b>(사교원 직원, 체크권한으로 그룹웨어·관리 기능) › <b>연합회회원</b>(햇빛소득마을 연합회) › <b>조합회원</b>(회원협동조합) › <b>일반이용자</b>(교육·쇼핑·문의·AI 질문) › 비로그인(둘러보기·안내 질문)<br>
-              가입은 이메일 하나로, 로그인은 이메일+비밀번호. 조합·연합회·매니저는 승인 뒤 열립니다. 로그인하면 내 페이지의 사이드바에 내 등급으로 열리는 메뉴만 보이고, 아직 못 여는 메뉴는 맨 아래 「권한 승인이 필요한 메뉴」에 따로 보입니다.
-            </div>
-            <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn sm" id="btnSignup">회원가입</button><a class="btn sm" href="account-privacy.html">개인정보처리방침</a></div>
-          </div>
-        </div>
-        <div class="secT"><h2>전체 메뉴</h2><p class="sub">플랫폼 사업 → 사교원 현장사업 → 교육·연구 → 사교원 소개 순서이고, 그룹웨어·관리는 직원 전용입니다. 🔒 는 어떤 회원이 쓰는지 적혀 있습니다.</p></div>
-        <div class="tree view" id="tree"></div>
+      <!-- ① 첫 화면 (#/start · 비로그인 #/) — 11-18 이사장 지시: 플랫폼 소개 → 회원서비스 → 등급·이용료 → 회원별 메뉴 → 회원가입·문의 -->
+      <main id="vStart" class="view u2" aria-label="첫 화면">
+        <div class="uw"><div id="axLockBar" role="status" hidden class="tmp" style="margin:0 0 14px;padding:10px 14px;border:1px solid #e0c070;background:#fff7e0;border-radius:10px;font-size:14px">🧪 (개편 중 임시 안내 · 오픈 전 제거) 🛠️ 사교원 사이트를 새 모습으로 고치는 중입니다. 내 페이지·내 폴더·둘러보기는 그대로 쓰실 수 있고, 상담창의 실행(보내기·바꾸기)·발송·정기 루틴만 개편이 끝날 때까지 쉬고 있습니다.</div></div>
+        <div id="startBody"></div>
       </main>
 
-      <!-- ③ 개인페이지 (로그인 #/) -->
+      <!-- 회원가입 3걸음 (#/join · 옛 #/signup) -->
+      <main id="vJoin" class="view u2" aria-label="회원가입"><div class="uw"><section class="usec" id="joinBody"></section></div></main>
+
+      <!-- 문의 4분류 (#/ask) -->
+      <main id="vAsk" class="view u2" aria-label="문의하기"><div class="uw"><section class="usec" id="askBody"></section></div></main>
+
+      <!-- ③ 내 페이지 (로그인 #/) — 인사 카드 → AI 대화창 → 내 정보·이용료 → 대시보드 칸 → 공지 -->
       <main id="homeMain" class="view" aria-label="내 페이지">
-        <div class="startbar"><a class="btn p" href="#/start">🏛️ 사교원 첫 화면으로</a><p class="sub" id="startNote">전체 메뉴·소개·교육 신청은 첫 화면에 있습니다. 여기는 내 상담창·대시보드·내 폴더입니다.</p></div>
         <div class="tfband" id="tfBanner" hidden>🔐 발송·결재·권한 기능을 쓰려면 2단계 인증을 켜 주세요. <button class="btn sm" type="button" id="tfBannerBtn">지금 켜기</button></div>
+        <div class="tfband" id="joinResume" hidden>📝 가입할 때 고른 서비스 신청이 아직 끝나지 않았습니다. <a class="btn sm p" href="#/join">신청 이어가기</a><button class="btn sm" type="button" id="joinResumeX">지우기</button></div>
+        <section class="u2" id="myGreet" aria-label="인사"></section>
         <section class="chatspot" id="chatSpot" aria-labelledby="chatT">
-          <div class="secT"><h2 id="chatT">상담창</h2><p class="sub">메뉴를 몰라도 말로 하시면 됩니다. 쓰기·보내기는 확인을 받고 합니다.</p></div>
-          <div id="chatHost"><p class="hint" id="chatWait">상담창을 불러오는 중…</p></div>
+          <div class="secT"><h2 id="chatT">AI 대화창</h2><p class="sub">메뉴를 몰라도 말로 하시면 됩니다. 쓰기·보내기는 확인을 받고 합니다.</p></div>
+          <div id="chatHost"><p class="hint" id="chatWait">대화창을 불러오는 중…</p></div>
           <div class="qrow"><span class="ql" id="quickL">자주 쓰는 지시</span><div class="quick" id="quick" role="group" aria-labelledby="quickL"></div></div>
           <div class="recent" id="recent" hidden><div class="rh">최근 대화</div><ul id="recentList"></ul></div>
         </section>
+        <section class="u2" id="myBox" aria-label="내 정보와 이용료"></section>
         <section aria-labelledby="dashT">
           <div class="secT"><h2 id="dashT">대시보드</h2><a href="#/custom" class="btn sm">🎨 꾸미기</a></div>
           <div class="dgrid" id="dash"></div>
@@ -366,7 +727,6 @@ body[data-route="start"] .tree{grid-template-columns:1fr}
           <ul class="nlist" id="notices"></ul>
         </section>
       </main>
-
       <!-- ④ 내 폴더 (#/files) -->
       <main id="vFiles" class="view" aria-label="내 폴더">
         <div class="secT"><h2>내 폴더</h2><p class="sub">서버에 두는 내 자료. 상담창이 이 폴더의 파일을 바로 읽고 씁니다.</p></div>
@@ -433,14 +793,12 @@ body[data-route="start"] .tree{grid-template-columns:1fr}
         </section>
       </main>
 
-      <!-- ⑥ 꾸미기 (#/custom) -->
+      <!-- ⑥ 꾸미기 (#/custom) — 11-18: 사이드바는 「내가 고른 서비스」로 정해지므로 대시보드 칸만 꾸민다 -->
       <main id="vCustom" class="view" aria-label="내 페이지 꾸미기">
-        <div class="secT"><h2>내 페이지 꾸미기</h2><p class="sub">체크하면 넣고, ▲▼ 로 순서를 바꿉니다. 저장하면 어느 기기에서 로그인해도 같습니다.</p></div>
-        <div class="ctabs" role="group" aria-label="꾸미기 묶음 고르기"><button type="button" data-ct="dash" aria-pressed="true" aria-controls="cDashBox">📊 대시보드 칸</button><button type="button" data-ct="side" aria-pressed="false" aria-controls="cSideBox">📌 메뉴</button><button type="button" data-ct="prev" aria-pressed="false" aria-controls="cPrevBox">👀 미리보기</button></div>
+        <div class="secT"><h2>내 페이지 꾸미기</h2><p class="sub">대시보드 칸을 체크하면 넣고, ▲▼ 로 순서를 바꿉니다. 저장하면 어느 기기에서 로그인해도 같습니다. 사이드바는 내가 고른 서비스대로 놓입니다 — 바꾸려면 <a href="#/join">서비스 더 고르기</a>.</p></div>
+        <div class="ctabs" role="group" aria-label="꾸미기 묶음 고르기"><button type="button" data-ct="dash" aria-pressed="true" aria-controls="cDashBox">📊 대시보드 칸</button><button type="button" data-ct="prev" aria-pressed="false" aria-controls="cPrevBox">👀 미리보기</button></div>
         <div class="cgrid">
           <section class="grp" id="cDashBox" data-ct="dash" aria-labelledby="cDashT"><h3 id="cDashT">📊 대시보드 칸</h3><ul class="clist" id="cDash"></ul></section>
-          <section class="grp" id="cSideBox" data-ct="side" aria-labelledby="cSideT"><h3 id="cSideT">📌 사이드바 메뉴</h3><input class="cfind" id="cFind" type="search" placeholder="메뉴·도구 찾기 (예: 근태, 입찰)" aria-label="메뉴·도구 찾기"><ul class="clist" id="cSide"></ul>
-            <details class="ctools" id="cToolsBox"><summary>🤖 상담창 도구 <span id="cToolsN"></span> — 사이드바에도 넣고 싶은 것만 체크</summary><ul class="clist" id="cTools"></ul></details></section>
           <aside class="grp" id="cPrevBox" data-ct="prev" aria-labelledby="cPrevT"><h3 id="cPrevT">미리보기</h3><div class="mini" id="cPrev"></div></aside>
         </div>
         <div class="cbar"><button class="btn p" type="button" id="cSave">저장</button><button class="btn" type="button" id="cReset">등급 기본 구성으로</button><span class="msg" id="cMsg" aria-live="polite"></span></div>
@@ -455,16 +813,16 @@ body[data-route="start"] .tree{grid-template-columns:1fr}
 </div>
 
 <footer>
-  <b>사회혁신교육원 사회적협동조합</b> · 본사 대전광역시 서구 관저중로80번길 8, 3층 · 사업자등록번호 397-82-00424 · 교육·컨설팅·IT · 활동 지역 전남광주통합특별시·전북특별자치도<br>
-  <span class="mgronly" hidden><a href="admin.html" rel="nofollow">🔐 통합 관리자</a> · <a href="data.html" rel="nofollow">▦ 데이터 저장소</a> · </span><a href="account-privacy.html">개인정보처리방침</a> · <a href="https://wiki.poomasi.org/" target="_blank" rel="noopener">연대지능 위키 ↗</a> · <a href="sakyowon-wiki/">사교원 위키</a> · <a href="#/map">둘러보기</a> · <a href="#/start">첫 화면</a>
+  <b>사회혁신교육원사회적협동조합</b> · 본사 대전광역시 서구 관저중로80번길 8, 3층 · 사업자등록번호 397-82-00424 · 교육·컨설팅·IT · 활동 지역 전남광주통합특별시·전북특별자치도<br>
+  <span class="mgronly" hidden><a href="admin.html" rel="nofollow">🔐 통합 관리자</a> · <a href="data.html" rel="nofollow">▦ 데이터 저장소</a> · </span><a href="account-privacy.html">개인정보처리방침</a> · <a href="https://wiki.poomasi.org/" target="_blank" rel="noopener">연대지능 위키 ↗</a> · <a href="sakyowon-wiki/">사교원 위키</a> · <a href="#/map">둘러보기</a> · <a href="#/start">첫 화면</a> · <a href="#/ask">문의하기</a>
+  <span class="fs" role="group" aria-label="글자 크기"><button type="button" data-fs="-1" aria-label="글자 작게">가−</button><button type="button" data-fs="1" aria-label="글자 크게">가+</button></span>
 </footer>
 
-<!-- 로그인 / 회원가입 -->
+<!-- 로그인 (회원가입은 #/join 화면) -->
 <div class="modal-back" id="authModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="lgTitle">
-    <div class="tabs"><button id="tabLogin" class="on">로그인</button><button id="tabSignup">회원가입</button></div>
     <div id="vLogin">
-      <h2 id="lgTitle">로그인</h2><p class="sub">사교원 통합 계정 하나로 모든 사이트에 들어갑니다.</p>
+      <h2 id="lgTitle">로그인</h2><p class="sub">사교원 통합 계정 하나로 모든 사이트에 들어갑니다. 로그인하면 내 페이지로 갑니다.</p>
       <div class="f"><label for="lgEmail">이메일 <span style="color:var(--mute);font-weight:400">(옛 아이디도 당분간 됩니다)</span></label><input id="lgEmail" inputmode="email" autocomplete="username" placeholder="name@example.com"></div>
       <div class="f"><label for="lgPw">비밀번호</label><input id="lgPw" type="password" autocomplete="current-password"></div>
       <label class="remid"><input type="checkbox" id="lgRem"> <b>아이디 기억하기</b> <span>(공용 PC에서는 끄세요)</span></label>
@@ -472,19 +830,7 @@ body[data-route="start"] .tree{grid-template-columns:1fr}
       <div class="msg" id="lgMsg" aria-live="polite"></div>
       <button class="mbtn" id="lgBtn">로그인</button>
       <p class="sub" style="margin-top:10px"><a href="#" id="lgForgot">비밀번호를 잊으셨나요?</a> 가입한 이메일로 임시 비밀번호를 보내 드립니다.</p>
-    </div>
-    <div id="vSignup" style="display:none">
-      <h2>회원가입</h2><p class="sub">일반이용자는 바로, 조합·연합회·매니저는 승인 뒤 쓸 수 있습니다.</p>
-      <div class="f"><label for="suTier">회원 등급</label><select id="suTier"><option value="general">일반이용자 — 바로 가입</option><option value="coop">조합회원 — 햇빛소득마을 회원협동조합 (승인 후)</option><option value="federation">연합회회원 — 햇빛소득마을 연합회 (승인 후)</option><option value="staff">매니저회원 — 사교원 그룹웨어 (통합관리자 승인 후)</option></select></div>
-      <div class="f"><label for="suEmail">이메일 <span class="req">*</span> (로그인 아이디)</label><input id="suEmail" type="email" autocomplete="email" placeholder="name@example.com"></div>
-      <div class="f"><label for="suPw">비밀번호 <span class="req">*</span> (8자 이상)</label><input id="suPw" type="password" autocomplete="new-password"></div>
-      <div class="f"><label for="suName">이름 <span class="req">*</span></label><input id="suName" autocomplete="name"></div>
-      <div class="f"><label for="suSido">활동지역 <span class="req">*</span></label><div class="two"><select id="suSido" aria-label="광역"><option value="">광역</option></select><select id="suSigungu" aria-label="시군구"><option value="">시군구</option></select></div></div>
-      <div class="f"><label for="suContact">전화번호 <span id="suContactReq" style="color:var(--mute);font-weight:400">(일반이용자는 선택)</span></label><input id="suContact" inputmode="tel" placeholder="010-0000-0000"></div>
-      <div class="f"><label for="suOrg">소속 (선택)</label><input id="suOrg" placeholder="마을·조합·기관"></div>
-      <label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;margin:4px 0 10px;cursor:pointer"><input type="checkbox" id="suConsent" style="margin-top:3px"><span>(필수) 통합 계정 발급을 위한 개인정보 수집·이용에 동의합니다. <a href="account-privacy.html" target="_blank">처리방침</a></span></label>
-      <div class="msg" id="suMsg" aria-live="polite"></div>
-      <button class="mbtn" id="suBtn">가입 신청</button>
+      <p class="sub" style="margin-top:6px">아직 계정이 없으신가요? <a href="#/join" id="lgJoin">회원가입</a></p>
     </div>
     <button class="ghost" id="authClose">닫기</button>
   </div>
@@ -555,35 +901,38 @@ const errText = r => r.status === 429 ? ERR.rate_limited : (ERR[r.error] || '처
 /* 거절 사유를 그대로 보여야 하는 곳(내 폴더): 아는 코드는 한국어로, 모르는 글은 서버가 준 사유 그대로 */
 const reasonText = r => r.status === 429 ? ERR.rate_limited : (ERR[r.error] || r.reason || r.message || r.error || '처리하지 못했습니다.');
 /* 상담창(ai-dock)에 말 넣기 — ai-dock 이 window.skai.say 를 노출한다. 없으면 조용히 무시 */
-function say(t) { if (window.skai && typeof window.skai.say === 'function') { try { window.skai.say(t); } catch (_) {} } }
+let pendingSay = '';
+function say(t) {
+  if (!t) return;
+  if (me && !dekaAdmin() && currentRoute() !== 'home') { pendingSay = String(t); location.hash = '#/'; return; }   // 11-18: 대화창은 내 페이지 본문에만 있다 — 다른 화면에서 누르면 내 페이지로 가서 넣는다
+  if (window.skai && typeof window.skai.say === 'function') { try { window.skai.say(t); } catch (_) {} }
+}
 
-/* ── 메뉴 트리 — 11-07 저녁 이사장 지시: 순서 ①플랫폼 사업 ②사교원 현장사업 ③교육·연구 ④사교원 소개(쇼핑 포함, 장바구니 숨김) ⑤그룹웨어·관리, 교육 신청 두 개는 아카데미·팀러닝 안으로, 센터는 햇소자 안으로(hide: 메뉴·둘러보기·꾸미기엔 안 보이고 상담창 별칭·주소만 남긴다), tmp: 오픈 전 제거·확인할 시험용 표시(빨강)
-   11-06: 입찰정보는 그룹웨어로, 참여 메뉴는 빼고 모든 페이지 하단 「문의하기·이용자 제안」 단추(ai-dock.js) · 10-18 4묶음: ③그룹웨어·관리(매니저·통합관리자만, 첫 화면엔 단추만) · 가족 메신저는 첫 화면에서 빼고 관리 안 통합관리자 전용
+
+/* ── 메뉴 트리 — 11-18 통합사이트 개편(이사장 지시): 큰 묶음 둘 = ①회원서비스(햇소자·의정지원·아카데미·팀러닝) ②사교원 홈페이지(현장사업 → 연구 → 소개).
+   쇼핑은 모든 곳에서 뺐다. 그룹웨어는 머리 단추로만 가고(hide — 상담창 화면 찾기용 주소·별칭만 남긴다), 그룹웨어 밖의 직원·관리 화면은 사이드바 맨 아래 「직원 · 관리」 묶음.
+   🔴 서버(ai_exec._site_items)가 이 표를 글자 그대로 읽는다 — 한 줄에 항목 하나, 「{ id: '…', t: '…'」로 시작, 소분류 줄은 「name: '…', items:」 꼴을 지킬 것.
    need: 'login' 로그인 | 'perm:정책지원관' 체크권한 | 'role:staff' 매니저 이상 | 'role:coop' 조합 이상 | 'role:federation' 연합회 이상 | 'admin'
-   id: 2단계 꾸미기·사이드바(prefs.side)가 쓰는 고정 키 — 바꾸면 저장된 설정이 버려진다 */
+   hide: 메뉴·둘러보기·꾸미기엔 안 보이고 상담창 별칭·주소만 남긴다 · tmp: 오픈 전 제거·확인할 시험용 표시(빨강) */
 const HOME = 'https://home.sakyowon.co.kr/#/';
-const TREE = [   // 11-07 이사장 지시: 큰 묶음 순서 = 플랫폼 사업 → 사교원 현장사업 → 교육·연구 → 사교원 소개(쇼핑 포함) → 그룹웨어·관리
-  { ic: '🌐', name: '플랫폼 사업', secs: [
-    { ic: '🌐', name: '플랫폼 사업', items: [
-      { id: 'hatsoja', t: '햇빛소득마을 (햇소자)', d: '신청·진단 → 조합 설립 → 정산·배당 — 조합·연합회 회원 · 시민자산육성지원센터(햇소자 안)', h: '/hatsoja/', al: '햇소자|햇빛소득마을' },
+const TREE = [
+  { ic: '🧩', name: '회원서비스', secs: [
+    { ic: '🧩', name: '회원서비스', items: [
+      { id: 'hatsoja', t: '햇빛소득마을 (햇소자)', d: '신청·진단 → 조합 설립 → 정산·배당 — 협동조합·연합회 회원', h: '/hatsoja/', al: '햇소자|햇빛소득마을' },
       { id: 'center', t: '시민자산육성지원센터', d: '센터 업무·참여 조합 업무자동화 포털(시험판) — 별도 로그인', h: 'https://center.sakyowon.co.kr/', ext: true, sub: true, hide: true, tmp: '시험판', al: '시민자산지원센터|시민자산센터|센터 포털|센터' },
-      { id: 'ax-build', t: 'AI업무자동화 사이트 구축 의뢰', d: '사교원이 운영하는 그룹웨어(메일·결재·근태·인사·회계·문서작성·입찰) 소개 · 우리 기관용 사이트 구축 의뢰', h: '/ax-build/', al: '구축 의뢰|사이트 구축|업무자동화|그룹웨어 구축|AI 업무자동화' },
-      { id: 'policy', t: '지자체 의정지원시스템', d: '공약·조례·문서작성·브리핑 — 로그인하면 둘러보기 무료, 구독료를 입금하면 자동으로 전체 기능', h: HOME + 'policy', need: 'login', /* 11-11 이사장 지시 5: 구독 납부 = 자동 승인(의정지원 안에서), 첫 화면은 로그인만 본다 */ al: '의정지원시스템|정책지원관 지원시스템|정책지원관 시스템|의정지원' },
-    ]},
-  ]},
-  { ic: '🏗️', name: '사교원 현장사업', secs: [
-    { ic: '🏗️', name: '사교원 현장사업', items: [
-      { id: 'mangnam', t: '망남어촌신활력 (전남광주 완도)', d: '사업 안내 · 소식 · 기획안/보고서 · KPI · 예산 집행실적', h: 'https://vitality.sakyowon.co.kr/', al: '망남|망남 사업|어촌신활력|망남생활권' },
-      { id: 'mangnam-coop', t: '망남마을협동조합', d: '마을사업 · 마을학교 · 플로깅 · 물멍 예약 · 경영공시', h: '/mangnam-coop/', sub: true },
-      { id: 'yangyang', t: '양양어촌신활력 (강원 양양)', d: '망남과 같은 구성으로 채우는 중', h: 'https://vitality.sakyowon.co.kr/', soon: true, al: '양양|양양 사업' },
-    ]},
-  ]},
-  { ic: '🎓', name: '교육 · 연구', secs: [
-    { ic: '🎓', name: '교육', items: [
+      { id: 'policy', t: '지자체 의정지원시스템', d: '공약·조례·문서작성·브리핑 — 로그인하면 둘러보기 무료, 구독료를 입금하면 자동으로 전체 기능', h: HOME + 'policy', need: 'login', al: '의정지원시스템|정책지원관 지원시스템|정책지원관 시스템|의정지원' },
       { id: 'academy', t: '연대지능활동가 아카데미', d: '실습 15단계 · 학습 7단계 · 지식 검증 게임 · 연대지능활동가 교육 신청(아카데미 안)', h: '/academy-site/' },
       { id: 'edu-ai', t: '연대지능활동가 교육 신청', d: '필요 진단 · 예상 비용 · 신청', h: '/academy-site/#edu-apply', sub: true, hide: true, al: '교육 신청|교육신청|교육프로그램 신청|교육프로그램|연대지능 교육 신청' },
       { id: 'teamlearning', t: '사회혁신팀러닝', d: '팀러닝 자문·컨설팅 · 주민자치·지역문제해결 교육 신청(팀러닝 안)', h: '/academy-site/#tl-home', al: '팀러닝' },
       { id: 'tl-apply', t: '주민자치·지역문제해결 교육 신청', d: '필요 진단 · 예상 비용 · 신청', h: '/academy-site/#tl-apply', sub: true, hide: true, al: '주민자치 교육 신청|지역문제해결 교육 신청|팀러닝 신청|팀러닝 교육 신청' },
+      { id: 'ax-build', t: 'AI업무자동화 사이트 구축 의뢰', d: '우리 기관용 업무 시스템 구축 의뢰 — 문의하기(업무자동화 시스템 구축 의뢰)로 모았다', h: '/ax-build/', hide: true, al: '구축 의뢰|사이트 구축|업무자동화|그룹웨어 구축|AI 업무자동화' },
+    ]},
+  ]},
+  { ic: '🏛️', name: '사교원 홈페이지', secs: [
+    { ic: '🌊', name: '현장사업', items: [
+      { id: 'mangnam', t: '망남어촌신활력 (전남광주 완도)', d: '사업 안내 · 소식 · 기획안/보고서 · KPI · 예산 집행실적', h: 'https://vitality.sakyowon.co.kr/', al: '망남|망남 사업|어촌신활력|망남생활권' },
+      { id: 'yangyang', t: '양양어촌신활력 (강원 양양)', d: '망남과 같은 구성으로 채우는 중', h: 'https://vitality.sakyowon.co.kr/', soon: true, al: '양양|양양 사업' },
+      { id: 'mangnam-coop', t: '망남마을협동조합', d: '마을사업 · 마을학교 · 플로깅 · 물멍 예약 · 경영공시', h: '/mangnam-coop/' },
     ]},
     { ic: '🔬', name: '연구', items: [
       { id: 'research', t: '연구자료', d: '보고서 31건 검색·열람', h: HOME + 'research' },
@@ -591,28 +940,25 @@ const TREE = [   // 11-07 이사장 지시: 큰 묶음 순서 = 플랫폼 사업
       { id: 'wiki', t: '사교원 위키', d: '공개 지식 431쪽 (별도 운영)', h: '/sakyowon-wiki/', ext: true },
       { id: 'poomasi-wiki', t: '연대지능 위키', d: '품앗이 공동 지식베이스', h: 'https://wiki.poomasi.org/', ext: true },
     ]},
-  ]},
-  { ic: '🏛️', name: '사교원 소개', secs: [
     { ic: '🏛️', name: '소개', items: [
       { id: 'about', t: '사교원 소개', d: '지향·활동·걸어온 길·특장점', h: HOME + 'about' },
       { id: 'disclosure', t: '경영공시', d: '정관·규약 · 재무제표 · 조합원 현황', h: HOME + 'disclosure' },
-      { id: 'shop', t: '쇼핑', d: '도서·굿즈·지역특산', h: HOME + 'shop', al: '상품|쇼핑몰|굿즈' },
-      { id: 'cart', t: '장바구니', d: '', h: HOME + 'cart', hide: true },   // 11-07 이사장 지시: 장바구니는 메뉴에 안 보이게(쇼핑 화면 안에서 쓴다)
     ]},
   ]},
-  { ic: '🗂️', name: '그룹웨어 · 관리', gate: 'role:staff', lock: '매니저회원 · 통합관리자', secs: [
+  { ic: '🗂️', name: '직원 · 관리', gate: 'role:staff', lock: '매니저 · 통합관리자', secs: [
     { ic: '🗂️', name: '그룹웨어', items: [
-      { id: 'gw-staff', t: '직원전용 질문', d: '사내 자료 근거 답변(고성능컴퓨팅)', h: 'https://gw.sakyowon.co.kr/#staff', need: 'role:staff' },
-      { id: 'gw-docs', t: '보고서·기획안 작성', d: '개요 → 절별 작성 → 한글', h: 'https://gw.sakyowon.co.kr/#docs', need: 'role:staff' },
-      { id: 'gw-home', t: '메일 · 결재 · 월간보고', d: '체크권한별', h: 'https://gw.sakyowon.co.kr/#home', need: 'role:staff' },
+      { id: 'gw-staff', t: '직원전용 질문', d: '사내 자료 근거 답변(고성능컴퓨팅)', h: 'https://gw.sakyowon.co.kr/#staff', need: 'role:staff', hide: true },
+      { id: 'gw-docs', t: '보고서·기획안 작성', d: '개요 → 절별 작성 → 한글', h: 'https://gw.sakyowon.co.kr/#docs', need: 'role:staff', hide: true },
+      { id: 'gw-home', t: '메일 · 결재 · 월간보고', d: '체크권한별', h: 'https://gw.sakyowon.co.kr/#home', need: 'role:staff', hide: true },
+      { id: 'gw-bid', t: '입찰 제안서 · 협동조합 설립 지원', d: '체크권한별', h: 'https://gw.sakyowon.co.kr/#bid', need: 'role:staff', hide: true },
+    ]},
+    { ic: '🔐', name: '직원 · 관리', items: [
       { id: 'bid-board', t: '입찰정보', d: '나라장터·에너지공단 공고(발전사업자·사교원) · 텔레그램 알림 · 제안서·구비서류', h: '/bids/', need: 'role:staff', al: '입찰 공고|입찰게시판|입찰 게시판' },
-      { id: 'gw-bid', t: '입찰 제안서 · 협동조합 설립 지원', d: '체크권한별', h: 'https://gw.sakyowon.co.kr/#bid', need: 'role:staff' },
       { id: 'work', t: '근태 (출퇴근·휴가)', d: 'GPS 출퇴근 · 휴가 결재', h: 'https://work.sakyowon.co.kr/', need: 'role:staff' },
       { id: 'hr', t: '인사기록', d: '체크권한 「인사열람」', h: 'https://hr.sakyowon.co.kr/', need: 'perm:인사열람' },
       { id: 'accounting', t: '회계 · 세무 · 자산', d: '체크권한별', h: HOME + 'admin/accounting', need: 'perm:회계' },
-    ]},
-    { ic: '🔐', name: '관리', items: [
       { id: 'admin-members', t: '회원 · 권한', d: '승인 · 등급 · 체크권한 · 비번 초기화', h: '/admin.html', need: 'perm:회원열람' },
+      { id: 'admin-pay', t: '회원 · 납부 · 발송', d: '전 회원 납부 현황 · 입금 확인 · 이메일 발송 — 통합관리자 전용', h: '/members.html', need: 'admin' },
       { id: 'admin-site', t: '사이트 관리 · 개선의견', d: '', h: '/admin.html', need: 'role:staff' },
       { id: 'home-admin', t: '홈페이지 관리자', d: '회계·세무·인사·자산 · 콘텐츠', h: HOME + 'admin', need: 'role:staff' },
       { id: 'data', t: '데이터 저장소', d: '엑셀 → 표 → SQL', h: '/data.html', need: 'perm:데이터읽기' },
@@ -623,6 +969,15 @@ const TREE = [   // 11-07 이사장 지시: 큰 묶음 순서 = 플랫폼 사업
 ];
 const RANK = { admin: 5, staff: 4, federation: 3, coop: 2, general: 1 };
 const ROLE_KO = { admin: '통합관리자', staff: '매니저회원', federation: '연합회회원', coop: '조합회원', general: '일반이용자' };
+/* 11-18 등급 일곱: 저장값(role)은 다섯 그대로, 정책회원·개인회원·무료이용회원은 서버(membership)가 tier 로 판정해 준다. tier 칸이 없는 서버에서는 role·체크권한으로 어림한다 */
+const TIER_KO = { admin: '통합관리자', staff: '매니저', federation: '연합회원', coop: '협동조합회원', policy: '정책회원', personal: '개인회원', free: '무료이용회원' };
+function tierOf(u) {
+  if (!u) return '';
+  if (u.tier && TIER_KO[u.tier]) return u.tier;
+  if (['admin', 'staff', 'federation', 'coop'].includes(u.role)) return u.role;
+  return (u.perms || []).includes('정책지원관') ? 'policy' : 'free';
+}
+const tierKo = u => u ? (u.tier_ko || TIER_KO[tierOf(u)] || '') : '';
 let me = null;                        // 화면을 그리는 기준(미리보기 중엔 가짜 등급)
 let realMe = null;                    // 실제 로그인 계정
 let preview = null;                   // 통합관리자 등급별 미리보기(임시) — 'none' | role 키
@@ -658,144 +1013,31 @@ function whoText(need) {
   if (need.startsWith('role:')) return (ROLE_KO[need.slice(5)] || need.slice(5)) + ' 이상';
   return '승인 회원';
 }
-/* 8개 소분류를 한 줄로 — 사이드바·개인 순서의 단위 */
 const vis = it => !it.hide;        // 11-07: 하위 사이트 안으로 들어간 메뉴는 허브 화면엔 안 보인다(별칭·주소는 서버 화면 찾기가 쓴다)
 const tmpTag = it => it.tmp ? ` <span class="tmp" title="오픈 전 제거·확인">🧪 ${esc(it.tmp)}</span>` : '';
 const SECTIONS = []; TREE.forEach((g, gi) => g.secs.forEach(sc => SECTIONS.push(Object.assign({ key: sc.name, gi }, sc))));
-const DEFAULT_ORDER = SECTIONS.map(sc => sc.key);
-/* 메뉴 항목을 한 줄로 — 꾸미기·새 사이드바(prefs.side)의 단위 */
+/* 메뉴 항목을 한 줄로 — 주소 찾기·도구 대장 맞대기용 */
 const ALL_ITEMS = []; SECTIONS.forEach(sc => sc.items.filter(vis).forEach(it => ALL_ITEMS.push(Object.assign({ sec: sc.key, secIc: sc.ic }, it))));
-/* 11-06 메뉴 개편 전 저장된 순서를 새 이름으로 옮겨 적는다(알파언니 🔴2: 이사장님 저장값이 옛 이름이라 새 묶음이 맨 뒤로 갔다) */
-const ORDER_RENAME = { '연구실': ['연구'], '사업': ['사교원 현장사업', '플랫폼 사업'], '참여': [] };
-const OLD_PUB = ['소개', '연구실', '참여', '교육', '사업', '쇼핑'];
-const NEW_PUB = ['소개', '사교원 현장사업', '플랫폼 사업', '교육', '연구', '쇼핑'];
-const PUB_1107 = ['교육', '연구', '쇼핑', '플랫폼 사업', '소개', '사교원 현장사업'];   // 11-07 오후 기본 순서(쇼핑 칸은 11-07 저녁 소개 안으로 들어가 없어졌다)
-function myOrder() {
-  let raw = Array.isArray(prefs.menu_order) ? prefs.menu_order.slice() : [];
-  if (raw.some(k => k in ORDER_RENAME)) {
-    if (raw.filter(k => OLD_PUB.includes(k)).join() === OLD_PUB.join()) raw = NEW_PUB.concat(raw.filter(k => !OLD_PUB.includes(k)));   // 옛 기본 순서 그대로 둔 저장값 → 새 기본 순서(지시 6)
-    else raw = raw.flatMap(k => ORDER_RENAME[k] || [k]);                                                                               // 직접 바꾼 순서 → 그 자리에서 이름만
-  }
-  for (const OLD of [NEW_PUB, PUB_1107]) {        // 지난 기본 순서(11-06·11-07 오후)를 그대로 둔 저장값 → 새 기본 순서(11-07 저녁: 플랫폼·현장사업·교육·연구·소개)
-    if (raw.filter(k => OLD.includes(k)).join() === OLD.join()) { raw = DEFAULT_ORDER.filter(k => OLD.includes(k)).concat(raw.filter(k => !OLD.includes(k))); break; }
-  }
-  const saved = [...new Set(raw)].filter(k => DEFAULT_ORDER.includes(k));
-  return saved.concat(DEFAULT_ORDER.filter(k => !saved.includes(k)));
-}
-function itemLi(it, ok) {
-  const cls = [it.sub ? 'sub' : '', ok ? '' : 'locked', it.soon ? 'soon' : '', it.ext ? 'ext' : ''].filter(Boolean).join(' ');
-  const href = ok ? it.h : (me ? '#locked' : '#login');
-  const title = ok ? '' : ' title="' + esc(needText(it.need)) + '이 필요합니다"';
-  const rq = (ok || !me) ? '' : `<span class="rq">${esc(needText(it.need))}</span>`;
-  return `<li class="${cls}"><a href="${esc(href)}"${title} data-need="${esc(it.need || '')}" data-t="${esc(it.t)}"${(ok && it.ext) ? ' target="_blank" rel="noopener"' : ''}>${esc(it.t)}${tmpTag(it)}${it.d ? `<span class="d">${esc(it.d)}</span>` : ''}${rq}</a></li>`;
-}
-function renderItems(items) { return items.filter(vis).map(it => itemLi(it, allowed(it.need))).join(''); }
-function renderGroup(g) {
-  return `<div class="grp"><h3><span class="ic">${g.ic}</span>${esc(g.name)}${g.lock ? `<span class="lock">🔒 ${esc(g.lock)}</span>` : ''}</h3><div class="secs">${g.secs.map(sc =>
-    `<div class="sec">${(g.secs.length === 1) ? '' : `<h4><span class="ic">${sc.ic}</span>${esc(sc.name)}</h4>`}<ul>${renderItems(sc.items)}</ul></div>`).join('')}</div></div>`;   // 11-07 🟡6: 「플랫폼 사업」처럼 묶음=소분류 하나면 제목 겹침 생략
-}
-/* ① (옛 화면) 비로그인 — 묶음 전부(그룹웨어·관리는 단추만) */
-function renderPublic() {
-  $('#tree').innerHTML = TREE.map(g => {
-    if (!g.gate) return renderGroup(g);
-    if (grpHide(g)) return '';
-    if (allowed(g.gate) && gateOpen) return renderGroup(g);
-    return `<div class="grp gate"><button class="btn p" id="gateBtn">${g.ic} ${esc(g.name)} 열기</button><span class="hint">🔒 ${esc(g.lock)} — ${allowed(g.gate) ? '단추를 누르면 메뉴가 펼쳐집니다' : '로그인하면 열립니다'}</span></div>`;
-  }).join('');
-  const gb = $('#gateBtn'); if (gb) gb.addEventListener('click', () => { if (allowed(TREE.find(g => g.gate).gate)) { gateOpen = true; renderPublic(); } else openAuth('login'); });
-}
-/* 잠긴 메뉴 가운데 지금 등급이 실제로 신청할 수 있는 것만 「권한 승인이 필요한 메뉴」에 둔다 (개선안 14, 11-04)
+function itemById(id) { for (const sc of SECTIONS) { const it = sc.items.find(x => x.id === id); if (it) return it; } return { id, t: id, h: '#/map' }; }
+/* 잠긴 메뉴 가운데 지금 등급이 실제로 신청할 수 있는 것만 보인다 (개선안 14, 11-04)
    — 통합관리자 전용은 누구도 신청하지 않고, 체크권한은 매니저만 받는다(매니저 아닌 회원은 「정책지원관」 하나), 직원용(매니저 등급) 메뉴는 매니저 이상에게만 */
 const PERMS_FOR_NONSTAFF = ['정책지원관'];
 function requestable(need) {
   if (!me || !need || need === 'admin') return false;
   const staff = (RANK[me.role] || 0) >= RANK.staff;
-  if (need.startsWith('perm:')) { if (Array.isArray(me.requestable_perms)) return me.requestable_perms.includes(need.slice(5)); return staff || PERMS_FOR_NONSTAFF.includes(need.slice(5)); }   // 11-07 C3-⑤: 서버가 주는 신청 가능 목록(/api/auth/me requestable_perms)이 정본, 없으면(미리보기) 화면 상수
+  if (need.startsWith('perm:')) { if (Array.isArray(me.requestable_perms)) return me.requestable_perms.includes(need.slice(5)); return staff || PERMS_FOR_NONSTAFF.includes(need.slice(5)); }   // 11-07 C3-⑤: 서버가 주는 신청 가능 목록이 정본, 없으면(미리보기) 화면 상수
   if (need === 'role:staff') return staff;
   return true;
 }
-/* ② (옛 화면) 로그인 뒤 — 내 순서대로 열리는 메뉴, 맨 끝에 잠긴 메뉴 */
-function splitMine() {
-  const open = [], locked = [];
-  myOrder().forEach(k => {
-    const sc = SECTIONS.find(x => x.key === k);
-    if (!sc || grpHide(TREE[sc.gi])) return;
-    const ok = sc.items.filter(it => vis(it) && allowed(it.need)), no = sc.items.filter(it => vis(it) && !allowed(it.need) && requestable(it.need));
-    if (ok.length) open.push({ sc, items: ok });
-    if (no.length) locked.push({ sc, items: no });
-  });
-  return { open, locked };
-}
-function renderMain() {
-  const { open, locked } = splitMine();
-  $('#tree').innerHTML = open.map(({ sc, items }) =>
-    `<div class="grp" data-sec="${esc(sc.key)}"><h3><span class="ic">${sc.ic}</span>${esc(sc.name)}</h3><ul>${renderItems(items)}</ul></div>`).join('') +
-    (locked.length ? `<div class="grp lockgrp" data-sec="__locked"><h3><span class="ic">🔒</span>권한 승인이 필요한 메뉴</h3><div class="secs">${locked.map(({ sc, items }) =>
-      `<div class="sec"><h4><span class="ic">${sc.ic}</span>${esc(sc.name)}</h4><ul>${renderItems(items)}</ul></div>`).join('')}</div></div>` : '');
-}
-/* 소분류 블록(⠿ ▲▼) — 옛 사이드바와 새 사이드바가 같이 쓴다 */
-function secBlocks(open) {
-  const n = open.length;
-  return open.map(({ sc, items }, i) => `<div class="ss" draggable="true" data-sec="${esc(sc.key)}"><div class="sh"><span class="hd" aria-hidden="true">⠿</span><span class="ic">${sc.ic}</span><span class="nm">${esc(sc.name)}</span><button class="mv" data-mv="-1" data-sec="${esc(sc.key)}" title="위로" aria-label="${esc(sc.name)} 위로"${i === 0 ? ' disabled' : ''}>▲</button><button class="mv" data-mv="1" data-sec="${esc(sc.key)}" title="아래로" aria-label="${esc(sc.name)} 아래로"${i === n - 1 ? ' disabled' : ''}>▼</button></div><ul>${items.map(it => `<li><a href="${esc(it.h)}"${it.ext ? ' target="_blank" rel="noopener"' : ''}>${esc(it.t)}</a></li>`).join('')}</ul></div>`).join('');
-}
-function lockBox(locked) {
-  return locked.length ? `<div class="lockbox"><h4>🔒 권한 승인이 필요한 메뉴</h4>${locked.map(({ sc, items }) => `<div class="sn">${sc.ic} ${esc(sc.name)}</div><ul>${items.map(it => `<li><a href="#locked" data-need="${esc(it.need || '')}" data-t="${esc(it.t)}">${esc(it.t)}<span class="rq">${esc(needText(it.need))}</span></a></li>`).join('')}</ul>`).join('')}</div>` : '';
-}
-/* 끌어서 놓기 — root 안의 sel 요소들을 dataset[key] 로 식별, 놓으면 onPlace(끈 키, 놓은 자리 키) */
-function wireDrag(root, sel, key, onPlace) {
-  let dragKey = null;
-  root.querySelectorAll(sel).forEach(el => {
-    el.addEventListener('dragstart', e => { dragKey = el.dataset[key]; el.classList.add('drag'); e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', dragKey); } catch (_) {} });
-    el.addEventListener('dragend', () => { el.classList.remove('drag'); root.querySelectorAll(sel + '.over').forEach(x => x.classList.remove('over')); });
-    el.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; el.classList.add('over'); });
-    el.addEventListener('dragleave', () => el.classList.remove('over'));
-    el.addEventListener('drop', e => { e.preventDefault(); el.classList.remove('over'); if (dragKey && dragKey !== el.dataset[key]) onPlace(dragKey, el.dataset[key]); dragKey = null; });
-  });
-}
-function wireSecBlocks() {
-  $('#side').querySelectorAll('.mv[data-mv]').forEach(b => b.addEventListener('click', () => moveSec(b.dataset.sec, +b.dataset.mv)));
-  wireDrag($('#side'), '.ss[data-sec]', 'sec', placeSec);
-}
-/* 옛 사이드바(#/classic) */
-function renderSide() {
-  const { open, locked } = splitMine();
-  $('#side').innerHTML = `<div class="me"><b>${esc(me.name || me.email || me.username)}</b> · ${esc(me.role_ko || ROLE_KO[me.role] || '')}</div>` + (preview ? `<div class="pvnote">🧪 미리보기 — 순서를 바꿔도 저장되지 않습니다</div>` : '') + `
-    <div class="hint">⠿ 끌어서 또는 ▲▼ 로 순서를 바꾸면 본화면도 그 순서로 보입니다 · <a href="#/start">첫 화면</a></div>` + secBlocks(open) + lockBox(locked);
-  wireSecBlocks();
-}
-/* 순서 바꾸기 — 열린 소분류끼리만 움직이고, 잠긴 소분류는 원래 자리에 남긴다 */
-function moveSec(key, dir) {
-  const order = myOrder(); const openKeys = splitMine().open.map(o => o.sc.key);
-  const i = openKeys.indexOf(key), j = i + dir; if (i < 0 || j < 0 || j >= openKeys.length) return;
-  const a = order.indexOf(openKeys[i]), b = order.indexOf(openKeys[j]);
-  order[a] = openKeys[j]; order[b] = openKeys[i];
-  saveOrder(order);
-}
-function placeSec(key, beforeKey) {
-  const order = myOrder().filter(k => k !== key);
-  order.splice(order.indexOf(beforeKey), 0, key);
-  saveOrder(order);
-}
-function saveOrder(order) {
-  prefs.menu_order = order;
-  reSide();
-  if (preview) return;                // 미리보기 중엔 저장하지 않는다
-  try { localStorage.setItem('sk_menu_order_' + me.id, JSON.stringify(order)); } catch (_) {}
-  api('/api/auth/prefs', { method: 'POST', body: { menu_order: order } }).then(r => { if (r.ok && r.prefs) prefs = Object.assign({}, prefs, r.prefs); });
-}
 async function loadPrefs() {
   prefs = {};
-  try { const c = localStorage.getItem('sk_menu_order_' + me.id); if (c) prefs.menu_order = JSON.parse(c); } catch (_) {}
   const r = await api('/api/auth/prefs');
-  if (r.ok && r.prefs) { prefs = r.prefs; }
+  if (r.ok && r.prefs && typeof r.prefs === 'object') { prefs = r.prefs; }   // 옛 저장값(menu_order·side)은 읽기만 하고 쓰지 않는다 — 11-18 사이드바는 「내가 고른 서비스」
 }
-/* 사이드바·본문 다시 그리기 — 지금 라우트에 맞는 쪽으로 */
-function reSide() {
-  if (!me) return;
-  if (currentRoute() === 'start') renderStart(false); else renderSideHome();
-}
+const SIDE_ROUTES = ['home', 'files', 'custom'];
+function reSide() { if (me && SIDE_ROUTES.includes(currentRoute())) renderSideHome(); }
 
-/* ── 도구 대장(/api/ai/exec/tools) — 둘러보기 예시·사이드바 도구·자주 쓰는 지시의 원천. 실패해도 빈 목록 */
+/* ── 도구 대장(/api/ai/exec/tools) — 자주 쓰는 지시의 원천. 실패해도 빈 목록 */
 const TOOLS = { items: [], locked: [], loaded: false };
 let toolsP = null;
 function loadTools() {
@@ -803,78 +1045,135 @@ function loadTools() {
   toolsP = api('/api/ai/exec/tools').then(r => { if (r.ok) { TOOLS.items = Array.isArray(r.items) ? r.items : []; TOOLS.locked = Array.isArray(r.locked) ? r.locked : []; } TOOLS.loaded = true; return TOOLS; });
   return toolsP;
 }
-const normUrl = u => String(u || '').replace(/^https?:\/\/(www\.)?sakyowon\.co\.kr/, '').replace(/\/+$/, '') || '/';
-function toolFor(it) { return TOOLS.items.find(t => (t.screen && normUrl(t.screen) === normUrl(it.h)) || (t.name && t.name === it.t)) || null; }
 
-/* ── 새 사이드바(개인페이지·내 폴더·꾸미기) — 내 페이지 / 내 폴더 / 내가 고른 메뉴 / 🔒 / 둘러보기 */
-function sideFlat() {
-  const ids = Array.isArray(prefs.side) ? prefs.side : [];
-  if (!ids.length) return null;
-  const out = [];
-  ids.forEach(id => {
-    const it = ALL_ITEMS.find(x => x.id === id);
-    if (it) { if (allowed(it.need)) out.push(it); return; }
-    const t = TOOLS.items.find(x => x.id === id);
-    if (t) out.push({ id: t.id, t: t.name, h: t.screen || '#/', tool: true });
-  });
-  return out.length ? out : null;
+/* ── 그림(시안 2판): 선 아이콘·서비스 대표색·사진 */
+const IMG = 'img/unified/';
+const ICP = { sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>',
+  gov: '<path d="M3 10l9-6 9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/>',
+  book: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM8 7h7M8 11h5"/>',
+  users: '<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M16.5 14.3c2.6.5 4.5 2.8 4.5 5.7"/>',
+  wave: '<path d="M2 9c2.5-3 5-3 7.5 0s5 3 7.5 0 3.5-2 5-1M2 15c2.5-3 5-3 7.5 0s5 3 7.5 0 3.5-2 5-1"/>',
+  doc: '<path d="M6 3h8l4 4v14H6zM14 3v4h4M9 12h6M9 16h6"/>',
+  chat: '<path d="M4 5h16v11H10l-5 4v-4H4z"/>', folder: '<path d="M3 6h6l2 2h10v11H3z"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>',
+  home: '<path d="M4 11l8-7 8 7v9h-5v-6h-6v6H4z"/>',
+  shield: '<path d="M12 3l8 3v6c0 4.5-3.3 8-8 9-4.7-1-8-4.5-8-9V6zM9 12l2 2 4-4"/>',
+  server: '<rect x="4" y="4" width="16" height="6" rx="1.5"/><rect x="4" y="14" width="16" height="6" rx="1.5"/><path d="M8 7h.01M8 17h.01"/>',
+  key: '<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3"/>',
+  check: '<path d="M5 12l5 5 9-10"/>', chev: '<path d="M9 6l6 6-6 6"/>', plus: '<path d="M12 5v14M5 12h14"/>',
+  card: '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/>',
+  list: '<path d="M8 7h12M8 12h12M8 17h12M4 7h.01M4 12h.01M4 17h.01"/>',
+  tool: '<path d="M14 6a4 4 0 0 0-5 5l-6 6 4 4 6-6a4 4 0 0 0 5-5l-3 3-2-2z"/>',
+  help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.6 2.2c-.7.4-1.1 1-1.1 1.8M12 17h.01"/>',
+  chart: '<path d="M4 20V4M4 20h16M8 16v-4M12 16V8M16 16v-6"/>',
+  map: '<path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2zM9 4v14M15 6v14"/>',
+  grid: '<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>' };
+function ic(n, c) { return '<svg class="ic' + (c ? ' ' + c : '') + '" viewBox="0 0 24 24" aria-hidden="true">' + (ICP[n] || '') + '</svg>'; }
+function pic(src, alt) { return '<img src="' + IMG + src + '" alt="' + esc(alt || '') + '" loading="lazy">'; }
+function svgw(label, body) { return '<svg viewBox="0 0 320 200" preserveAspectRatio="xMidYMid slice" role="img" aria-label="' + label + '">' + body + '</svg>'; }
+const ILL = {
+  policy: () => svgw('의회 건물과 조례 문서 그림', '<rect width="320" height="200" fill="#e3eaf6"/><circle cx="50" cy="30" r="70" fill="#d3def2"/><rect x="30" y="164" width="184" height="12" rx="4" fill="#1f3a6e"/><rect x="42" y="152" width="160" height="12" rx="3" fill="#33559a"/><rect x="54" y="88" width="16" height="64" rx="4" fill="#fff"/><rect x="88" y="88" width="16" height="64" rx="4" fill="#fff"/><rect x="140" y="88" width="16" height="64" rx="4" fill="#fff"/><rect x="174" y="88" width="16" height="64" rx="4" fill="#fff"/><rect x="42" y="76" width="160" height="12" rx="3" fill="#1f3a6e"/><path d="M36 76l86-44 86 44z" fill="#33559a"/><circle cx="122" cy="58" r="8" fill="#f6b52e"/><rect x="112" y="112" width="20" height="40" rx="4" fill="#1f3a6e"/><g transform="rotate(7 256 110)"><rect x="216" y="56" width="80" height="108" rx="9" fill="#fff" stroke="#1f3a6e" stroke-width="3"/><path d="M230 80h52M230 96h52M230 112h36" stroke="#33559a" stroke-width="4" stroke-linecap="round"/><circle cx="272" cy="140" r="11" fill="#f6b52e"/><path d="M267 140l4 4 7-8" stroke="#1f3a6e" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>'),
+  yang: () => svgw('동해 바다와 해변, 서핑보드 그림', '<rect width="320" height="200" fill="#dcf1f2"/><circle cx="232" cy="98" r="30" fill="#ffd166"/><rect y="100" width="320" height="64" fill="#0f7c86"/><path d="M0 116q20-10 40 0t40 0 40 0 40 0 40 0 40 0 40 0 40 0" stroke="#7fd0d6" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M0 134q20-10 40 0t40 0 40 0 40 0 40 0 40 0 40 0 40 0" stroke="#3aa7b0" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M0 156q110-30 320 4v40H0z" fill="#f3e3c3"/><g transform="rotate(-16 118 120)"><ellipse cx="118" cy="116" rx="17" ry="64" fill="#fff" stroke="#0b6570" stroke-width="3"/><path d="M118 56v120" stroke="#0f7c86" stroke-width="5"/><path d="M104 96h28" stroke="#ffd166" stroke-width="6"/></g><g transform="rotate(12 176 130)"><ellipse cx="176" cy="130" rx="13" ry="48" fill="#ffd166" stroke="#0b6570" stroke-width="3"/><path d="M176 84v92" stroke="#fff" stroke-width="4"/></g>'),
+  research: v => svgw('보고서와 그래프 그림', '<rect width="320" height="200" fill="#efe8df"/><circle cx="286" cy="30" r="60" fill="#e4d9cb"/><rect x="36" y="24" width="132" height="154" rx="11" fill="#fff" stroke="#6a5745" stroke-width="3"/><path d="M54 50h70M54 68h96M54 84h96" stroke="#b9a996" stroke-width="5" stroke-linecap="round"/><path d="M54 150l24-22 22 12 40-36" stroke="' + (v ? '#2e7d4f' : '#e8892b') + '" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="140" cy="104" r="6" fill="' + (v ? '#2e7d4f' : '#e8892b') + '"/><rect x="192" y="118" width="22" height="50" rx="5" fill="#b9a996"/><rect x="222" y="92" width="22" height="76" rx="5" fill="#7a6652"/><rect x="252" y="66" width="22" height="102" rx="5" fill="' + (v ? '#2e7d4f' : '#e8892b') + '"/><path d="M184 172h100" stroke="#6a5745" stroke-width="4" stroke-linecap="round"/><circle cx="214" cy="52" r="18" fill="#fff" stroke="#6a5745" stroke-width="4"/><path d="M227 65l14 14" stroke="#6a5745" stroke-width="6" stroke-linecap="round"/>'),
+  office: () => svgw('사무실 책상과 공시 서류 그림', '<rect width="320" height="200" fill="#efe8df"/><rect x="24" y="30" width="96" height="70" rx="8" fill="#fff" stroke="#6a5745" stroke-width="3"/><path d="M24 64h96M72 30v70" stroke="#6a5745" stroke-width="3"/><rect x="150" y="40" width="120" height="78" rx="9" fill="#6a5745"/><rect x="159" y="49" width="102" height="60" rx="5" fill="#fff"/><path d="M170 96V78M186 96V66M202 96V84M218 96V60M234 96V72" stroke="#e8892b" stroke-width="8" stroke-linecap="round"/><rect x="200" y="118" width="20" height="16" fill="#6a5745"/><rect x="20" y="134" width="280" height="12" rx="5" fill="#7a6652"/><rect x="40" y="146" width="12" height="54" fill="#b9a996"/><rect x="268" y="146" width="12" height="54" fill="#b9a996"/><g transform="rotate(-8 96 120)"><rect x="66" y="96" width="60" height="40" rx="5" fill="#fff" stroke="#6a5745" stroke-width="3"/><path d="M76 110h40M76 122h26" stroke="#b9a996" stroke-width="4" stroke-linecap="round"/></g>'),
+};
+
+/* ── 사이드바 = 「내가 고른 서비스」만(11-18 이사장 지시). 서비스마다 2단으로 세부 메뉴를 편다.
+   세부 메뉴 주소는 각 사이트의 실제 화면 주소(아카데미 #쪽이름 · 햇소자 #/mem/… ). 의정지원시스템은 화면 안에서 탭을 고르는 구조라 들어가는 문만 놓는다. */
+const HS = '/hatsoja/#/', AC = '/academy-site/#';
+const SVC = {
+  acad: { n: '아카데미', c: 'c-aca', img: 's_aca.jpg', icn: 'book', items: [['아카데미 홈', '/academy-site/'], ['실습 15단계', AC + 'course-practice'], ['학습 7단계(학습개요)', AC + 'course-overview'], ['지식 검증 게임', AC + 'verify-game'], ['사회혁신팀러닝', AC + 'tl-home'], ['화상회의', AC + 'meeting']] },
+  policy: { n: '의정지원시스템', c: 'c-pol', icn: 'gov', items: [['의정지원시스템 열기', HOME + 'policy'], ['의정지원 사이트(공약·조례·문서작성·브리핑)', 'https://talk.sakyowon.co.kr/system', 1], ['의정소통(대화방)', 'https://talk.sakyowon.co.kr/chat', 1]] },
+  coop: { n: '햇소자', c: 'c-hat', img: 's_hat.jpg', icn: 'sun', items: [['조합 대시보드', HS + 'mem/dashboard'], ['자료함', HS + 'mem/inbox'], ['우리 조합 현황', HS + 'mem/state'], ['설립·건설', HS + 'mem/setup'], ['운영관리(발전·정산·배당)', HS + 'mem/power']] },
+  fed: { n: '햇소자 연합회', c: 'c-hat', img: 's_fed.jpg', icn: 'users', items: [['회원조합 지원 현황판', HS + 'mem/fedsupport'], ['지원요청 처리', HS + 'mem/fedqueue'], ['조합·마을 현황', HS + 'adm/villages'], ['공지·자료 배포', HS + 'mem/library'], ['사무국 운영', HS + 'mem/fedoffice'], ['전남 발전 현황', HS + 'mem/stat']] },
+};
+/* 햇소자 선택 기능(이용권 options 키) → 세부 메뉴. 이용권이 있으면 고른 것만, 등급으로 물러선 회원(이용권 없음)은 전부 */
+const SVC_OPT = {
+  coop: { chat: ['AI 상담', HS + 'mem/chat'], docs: ['문서 자동 생성', HS + 'mem/docs'], review: ['서류 AI 검토', HS + 'mem/review'], video: ['활동 영상 만들기', HS + 'mem/video'], tax: ['세금·4대보험 신고', HS + 'mem/taxops'] },
+  fed: { review: ['서류 검토 대행', HS + 'mem/review'], docs: ['문서 작성 지원', HS + 'mem/docs'], chat: ['AI 상담', HS + 'mem/chat'], video: ['활동 영상 만들기', HS + 'mem/video'] },
+};
+const PROD_SVC = { academy: 'acad', coop: 'coop', fed: 'fed', policy: 'policy' };
+let MB = null, MB_STATE = '';         // /api/membership/me 응답 · '' 아직 | 'ok' | 'none'(서버에 모듈 없음) | 'err'
+/* 내가 쓰는 서비스 = 서버의 services(고른 이용권) + 등급으로 물러서기(아무도 쓰던 메뉴를 잃지 않게):
+   통합관리자·매니저는 전 서비스, 연합회·조합 등급은 햇소자, 정책회원(체크권한 「정책지원관」)은 의정지원 */
+function myServiceKeys(u) {
+  u = u || me; if (!u) return [];
+  const sv = Array.isArray(u.services) ? u.services : [], out = [];
+  const staff = u.role === 'admin' || u.role === 'staff';
+  if (staff || sv.includes('academy')) out.push('acad');
+  if (staff || tierOf(u) === 'policy' || (u.perms || []).includes('정책지원관')) out.push('policy');
+  if (staff || sv.includes('coop') || u.role === 'coop') out.push('coop');
+  if (staff || sv.includes('fed') || u.role === 'federation') out.push('fed');
+  return out;
 }
-/* 11-06 🟡: 꾸미기로 순서를 저장하면 묶음 제목이 사라져 사이드바가 평평해졌다 — 고른 순서는 그대로 두고, 묶음이 바뀌는 자리마다 작은 제목 줄 */
-function sideHead(flat, i) {
-  const k = x => x.tool ? '🤖 상담창 도구' : (x.secIc ? x.secIc + ' ' : '') + (x.sec || '');
-  if (i > 0 && k(flat[i - 1]) === k(flat[i])) return '';
-  return `<li class="pgh" aria-hidden="true">${esc(k(flat[i]))}</li>`;
+function svcItems(k) {
+  const base = SVC[k].items.slice(), opt = SVC_OPT[k];
+  if (!opt) return base;
+  const sub = (MB && Array.isArray(MB.subs)) ? MB.subs.find(s => s.product === k && s.open !== false) : null;
+  const keys = sub ? (Array.isArray(sub.options) ? sub.options : []) : Object.keys(opt);
+  return base.concat(Object.keys(opt).filter(o => keys.includes(o)).map(o => opt[o]));
 }
+/* 고르지 않은 서비스의 공개 화면 — 지금까지 사이드바로 가던 길을 남긴다 */
+function lookItems(keys) {
+  const a = [];
+  if (!keys.includes('acad')) a.push(['아카데미 맛보기', '/academy-site/'], ['사회혁신팀러닝', AC + 'tl-home']);
+  if (!keys.includes('policy')) a.push(['의정지원 둘러보기', HOME + 'policy']);
+  if (!keys.includes('coop') && !keys.includes('fed')) a.push(['햇소자 둘러보기', '/hatsoja/']);
+  a.push(['연구자료', HOME + 'research']);
+  return a;
+}
+let SOPEN = {}; try { SOPEN = JSON.parse(localStorage.getItem('sk_side_open') || '{}') || {}; } catch (_) { SOPEN = {}; }
+function sgHTML(k, name, meta, lis, first) {
+  const op = (k in SOPEN) ? !!SOPEN[k] : !!first;
+  return `<div class="sg ${meta.c}" data-sg="${esc(k)}"><button type="button" data-grp="${esc(k)}" aria-expanded="${op}" aria-controls="sg-${esc(k)}">${meta.img ? `<img class="gt" src="${IMG}${meta.img}" alt="">` : `<span class="gt">${ic(meta.icn || 'list', 's')}</span>`}<span>${esc(name)}</span><span class="ar" aria-hidden="true">${ic('chev', 's')}</span></button><ul id="sg-${esc(k)}"${op ? '' : ' hidden'}>${lis}</ul></div>`;
+}
+const sgLi = x => `<li${x[2] ? ' class="ext"' : ''}><a href="${esc(x[1])}"${x[2] ? ' target="_blank" rel="noopener"' : ''}>${esc(x[0])}</a></li>`;
 function renderSideHome() {
   if (!me) return;
-  const r = currentRoute();
-  const { open, locked } = splitMine();
-  const flat = sideFlat();
-  const mid = flat
-    ? `<ul class="pick" id="pick" aria-label="내가 고른 메뉴">${flat.map((it, i) => sideHead(flat, i) + `<li class="ss" draggable="true" data-id="${esc(it.id)}"><span class="hd" aria-hidden="true">⠿</span><a href="${esc(it.h)}"${it.ext ? ' target="_blank" rel="noopener"' : ''}>${it.tool ? '🤖 ' : ''}${esc(it.t)}</a><button class="mv" data-pm="-1" data-id="${esc(it.id)}" aria-label="${esc(it.t)} 위로"${i === 0 ? ' disabled' : ''}>▲</button><button class="mv" data-pm="1" data-id="${esc(it.id)}" aria-label="${esc(it.t)} 아래로"${i === flat.length - 1 ? ' disabled' : ''}>▼</button></li>`).join('')}</ul>`
-    : secBlocks(open);
-  $('#side').innerHTML = `<div class="me"><b>${esc(me.name || me.email || me.username)}</b> · ${esc(me.role_ko || ROLE_KO[me.role] || '')}</div>` + (preview ? `<div class="pvnote">🧪 미리보기 — 순서를 바꿔도 저장되지 않습니다</div>` : '') +
-    `<nav aria-label="내 페이지"><ul class="fix"><li><a href="#/start" class="start">🏛️ 사교원 첫 화면</a></li><li><a href="#/"${r === 'home' ? ' class="cur" aria-current="page"' : ''}>🏠 내 페이지</a></li><li><a href="#/files"${r === 'files' ? ' class="cur" aria-current="page"' : ''}>📁 내 폴더</a></li></ul></nav>
-    <div class="hint">내가 고른 메뉴 — ⠿ 끌어서 또는 ▲▼ 로 순서 · <a href="#/custom">🎨 꾸미기</a></div>` + mid + lockBox(locked) +
-    `<nav class="sfoot" aria-label="사이트맵"><a href="#/map">🗺️ 둘러보기(사이트맵)</a></nav>`;
-  if (flat) {
-    $('#side').querySelectorAll('.mv[data-pm]').forEach(b => b.addEventListener('click', () => moveSideId(b.dataset.id, +b.dataset.pm)));
-    wireDrag($('#side'), '.pick .ss', 'id', placeSideId);
-  } else wireSecBlocks();
+  const r = currentRoute(), cur = x => r === x ? ' aria-current="page"' : '';
+  const keys = myServiceKeys(), staff = (RANK[me.role] || 0) >= RANK.staff;
+  let h = `<div class="me"><b>${esc(me.name || me.email || me.username)}</b> 님<br>${esc(tierKo(me))}</div>` + (preview ? `<div class="pvnote">🧪 미리보기 — 화면만 바뀌고 저장되지 않습니다</div>` : '') +
+    `<nav aria-label="내 메뉴"><ul class="sfix"><li><a href="#/"${cur('home')}>${ic('home', 's')}내 페이지</a></li><li><a href="#/files"${cur('files')}>${ic('folder', 's')}내 폴더</a></li></ul>`;
+  if (keys.length) h += `<div class="cap" id="capSvc">내가 고른 서비스</div><div id="sgSvc">` + keys.map((k, i) => sgHTML(k, SVC[k].n, SVC[k], svcItems(k).map(sgLi).join(''), i === 0)).join('') + `</div>`;
+  if (!staff) h += sgHTML('look', keys.length ? '무료로 둘러보기' : '무료로 써 보기', { c: 'c-rs', icn: 'map' }, lookItems(keys).map(sgLi).join(''), !keys.length);
+  if (staff) {   // 그룹웨어 밖의 직원·관리 화면(근태·인사·입찰·관리자 화면…) — 그룹웨어 자체는 머리 단추로
+    const sc = SECTIONS.find(x => x.key === '직원 · 관리');
+    const lis = sc.items.filter(vis).map(it => allowed(it.need)
+      ? `<li${it.ext ? ' class="ext"' : ''}><a href="${esc(it.h)}">${esc(it.t)}</a></li>`
+      : (requestable(it.need) ? `<li class="locked"><a href="#locked" data-need="${esc(it.need || '')}" data-t="${esc(it.t)}"><span>🔒 ${esc(it.t)}</span><span class="rq">${esc(needText(it.need))}</span></a></li>` : '')).join('');
+    if (lis) h += `<div class="cap">직원 · 관리</div>` + sgHTML('staff', '직원 · 관리', { c: 'c-g', icn: 'tool' }, lis, false);
+  }
+  h += `<div class="smore"><a href="#/join">${ic('plus', 's')}서비스 더 고르기</a></div><div class="sfoot"><a href="#/map">🗺️ 둘러보기(사이트맵)</a></div></nav>`;
+  $('#side').innerHTML = h;
 }
-function visibleSideIds() { return (sideFlat() || []).map(it => it.id); }
-function saveSide(visible) {
-  const rest = (Array.isArray(prefs.side) ? prefs.side : []).filter(id => !visible.includes(id));
-  prefs.side = visible.concat(rest);
-  reSide();
-  if (preview) return;
-  api('/api/auth/prefs', { method: 'POST', body: { side: prefs.side } }).then(r => { if (r.ok && r.prefs) prefs = Object.assign({}, prefs, r.prefs); });
-}
-function moveSideId(id, dir) {
-  const v = visibleSideIds(); const i = v.indexOf(id), j = i + dir; if (i < 0 || j < 0 || j >= v.length) return;
-  v[i] = v[j]; v[j] = id; saveSide(v);
-}
-function placeSideId(id, beforeId) {
-  const v = visibleSideIds().filter(x => x !== id); v.splice(v.indexOf(beforeId), 0, id); saveSide(v);
-}
+$('#side').addEventListener('click', e => {
+  const b = e.target.closest('button[data-grp]'); if (!b) return;
+  const op = b.getAttribute('aria-expanded') !== 'true', ul = document.getElementById(b.getAttribute('aria-controls'));
+  b.setAttribute('aria-expanded', String(op)); if (ul) ul.hidden = !op;
+  SOPEN[b.dataset.grp] = op; try { localStorage.setItem('sk_side_open', JSON.stringify(SOPEN)); } catch (_) {}
+});
 
-/* ── 통합관리자 등급별 미리보기(임시, 2026-10-18 이사장 지시) — 화면만 바꾼다. 서버 세션·저장은 실제 계정 그대로 */
+/* ── 통합관리자 등급별 미리보기(임시, 2026-10-18 이사장 지시) — 화면만 바꾼다. 서버 세션·저장은 실제 계정 그대로. 11-18: 일곱 등급으로 */
 const MENU_PERMS = []; SECTIONS.forEach(sc => sc.items.forEach(it => { if (it.need && it.need.startsWith('perm:') && !MENU_PERMS.includes(it.need.slice(5))) MENU_PERMS.push(it.need.slice(5)); }));
+const pvUser = (role, tier, services, perms) => ({ id: 'pv', name: TIER_KO[tier] + '(미리보기)', role, role_ko: ROLE_KO[role], tier, tier_ko: TIER_KO[tier], services: services || [], perms: perms || [] });
 const PREVIEWS = [
   { k: 'none', t: '비로그인', mk: () => null },
-  { k: 'general', t: '일반이용자', mk: () => ({ id: 'pv', name: '일반이용자(미리보기)', role: 'general', role_ko: '일반이용자', perms: [] }) },
-  { k: 'coop', t: '조합회원', mk: () => ({ id: 'pv', name: '조합회원(미리보기)', role: 'coop', role_ko: '조합회원', perms: [] }) },
-  { k: 'federation', t: '연합회회원', mk: () => ({ id: 'pv', name: '연합회회원(미리보기)', role: 'federation', role_ko: '연합회회원', perms: [] }) },
-  { k: 'staff0', t: '매니저(체크권한 없음)', mk: () => ({ id: 'pv', name: '매니저(미리보기)', role: 'staff', role_ko: '매니저회원', perms: [] }) },
-  { k: 'staff1', t: '매니저(체크권한 전부)', mk: () => ({ id: 'pv', name: '매니저(미리보기)', role: 'staff', role_ko: '매니저회원', perms: MENU_PERMS.slice() }) },
+  { k: 'free', t: '무료이용회원', mk: () => pvUser('general', 'free') },
+  { k: 'personal', t: '개인회원', mk: () => pvUser('general', 'personal', ['academy']) },
+  { k: 'policy', t: '정책회원', mk: () => pvUser('general', 'policy', [], ['정책지원관']) },
+  { k: 'coop', t: '협동조합회원', mk: () => pvUser('coop', 'coop', ['coop']) },
+  { k: 'federation', t: '연합회원', mk: () => pvUser('federation', 'federation', ['fed']) },
+  { k: 'staff0', t: '매니저(체크권한 없음)', mk: () => pvUser('staff', 'staff') },
+  { k: 'staff1', t: '매니저(체크권한 전부)', mk: () => pvUser('staff', 'staff', [], MENU_PERMS.slice()) },
 ];
 let savedPrefs = null;
 function setPreview(k) {
   if (!realMe || realMe.role !== 'admin') return;
-  if (k === null) { preview = null; me = realMe; if (savedPrefs) { prefs = savedPrefs; savedPrefs = null; } gateOpen = false; renderPv(); route(); return; }
+  MB = null; MB_STATE = '';
+  if (k === null) { preview = null; me = realMe; if (savedPrefs) { prefs = savedPrefs; savedPrefs = null; } renderPv(); route(); return; }
   const pv = PREVIEWS.find(p => p.k === k); if (!pv) return;
-  if (!preview) savedPrefs = prefs;    // 실제 순서는 지켜 두고
-  preview = k; prefs = {}; me = pv.mk(); gateOpen = false;
+  if (!preview) savedPrefs = prefs;    // 실제 설정은 지켜 두고
+  preview = k; prefs = {}; me = pv.mk();
   renderPv(); route();
 }
 function renderPv() {
@@ -894,12 +1193,6 @@ async function checkTempPassword() {
   const r = await api('/api/auth/password-status');
   if (r.ok && r.temp) openPw(true);
 }
-/* 옛 화면(#/classic) 본문 */
-function renderTree() {
-  document.body.classList.toggle('in', !!me);
-  if (!me) { $('#side').innerHTML = ''; renderPublic(); return; }
-  renderSide(); renderMain();
-}
 /* 잠긴 메뉴를 누르면 — 무엇이 필요한지 안내 */
 /* 11-11 이사장 지시: 권한 밖 단추를 누르면 그 단추 바로 아래로 「이용 권한 갖추는 법」이 펼쳐진다(창 대신 드롭) */
 const JOIN_POLICY = 'https://talk.sakyowon.co.kr/system?go=join';   // 의정지원 세션 회신: 로그인 상태면 정회원 등록 창이 바로 열린다
@@ -908,7 +1201,7 @@ function lockHow(need) {
   if (need === 'admin') return { txt: '통합관리자만 쓰는 메뉴입니다. 따로 신청할 수 없습니다.', act: [] };
   if (need === 'perm:정책지원관') return { txt: '지자체 의정지원시스템은 구독 서비스입니다. 구독을 신청하면 이용 권한이 열립니다. 신청 전에도 둘러보기로 화면을 살펴볼 수 있습니다.', act: [{ label: '📝 의정지원 구독 신청', href: JOIN_POLICY, ext: true }, { label: '👀 둘러보기', href: 'https://talk.sakyowon.co.kr/system', ext: true }] };
   if (need === 'role:staff') return { txt: '사교원 직원(매니저회원) 전용 메뉴입니다. 직원이시면 통합관리자에게 매니저회원 승인을 요청해 주세요.', act: [C] };
-  if (need === 'role:coop' || need === 'role:federation') return { txt: `햇빛소득마을 ${need === 'role:coop' ? '조합' : '연합회'} 회원용 메뉴입니다. 햇소자에서 조합·연합회 회원 가입을 신청하면 승인 뒤 열립니다.`, act: [{ label: '☀️ 햇소자 회원 신청', href: '/hatsoja/' }, C] };
+  if (need === 'role:coop' || need === 'role:federation') return { txt: `햇빛소득마을 ${need === 'role:coop' ? '협동조합' : '연합회'} 회원용 메뉴입니다. 「서비스 더 고르기」에서 햇소자를 고르면 승인 뒤 열립니다.`, act: [{ label: '➕ 서비스 더 고르기', href: '#/join' }, C] };
   if (need.startsWith('perm:')) return { txt: `체크권한 「${need.slice(5)}」이 필요한 메뉴입니다. 매니저회원에게 통합관리자가 켜 주는 권한이라, 필요하면 요청해 주세요.`, act: [C] };
   return { txt: '로그인하면 열리는 메뉴입니다.', act: [{ label: '🔑 로그인', href: '#login' }] };
 }
@@ -925,7 +1218,7 @@ function openLock(a) {
   const need = a.dataset.need || '', t = a.dataset.t || '', h = lockHow(need);
   const d = document.createElement('div');
   d.className = 'lockDrop'; d.id = 'lockDrop'; d.tabIndex = -1; d.setAttribute('role', 'region'); d.setAttribute('aria-label', '이용 권한 신청 안내');
-  d.innerHTML = `<div class="lh">🔒 ${esc(t)}</div><div class="lw">지금 등급: <b>${esc(me ? (me.role_ko || ROLE_KO[me.role] || '') : '비로그인')}</b> · 필요한 것: <b>${esc(needText(need))}</b></div><p>${esc(h.txt)}</p>` +
+  d.innerHTML = `<div class="lh">🔒 ${esc(t)}</div><div class="lw">지금 등급: <b>${esc(me ? tierKo(me) : '비로그인')}</b> · 필요한 것: <b>${esc(needText(need))}</b></div><p>${esc(h.txt)}</p>` +
     (h.act.length ? `<div class="la">${h.act.map(x => `<a class="btn sm${x === h.act[0] ? ' p' : ''}" href="${esc(x.href)}"${x.ext ? ' target="_blank" rel="noopener"' : ''}>${esc(x.label)}</a>`).join('')}</div>` : '') +
     `<button type="button" class="lx" aria-label="안내 닫기">✕</button>`;
   a.setAttribute('data-lockopen', '1'); a.setAttribute('aria-expanded', 'true'); a.setAttribute('aria-controls', 'lockDrop');
@@ -937,32 +1230,42 @@ function openLock(a) {
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.querySelector('.lockDrop')) closeLockDrop(true); });
 document.addEventListener('click', e => { if (!e.target.closest('.lockDrop') && !e.target.closest('a[href="#locked"]')) closeLockDrop(); });
+/* 11-18 이사장 지시: 머리 오른쪽 단추 — 매니저·통합관리자에게만 「그룹웨어」, 통합관리자에게만 「관리」·「회원·납부」. 다른 등급에는 요소를 아예 그리지 않는다 */
+function renderHdrStaff() {
+  const staff = !!me && (RANK[me.role] || 0) >= RANK.staff, adm = !!me && me.role === 'admin';
+  const L = staff ? [['btnGw', 'https://gw.sakyowon.co.kr', ic('grid', 's') + '그룹웨어', 'btn gold']].concat(adm ? [['btnAdm', '/admin.html', '관리', 'btn'], ['btnMembers', '/members.html', '회원·납부', 'btn']] : []) : [];
+  $('#hdrStaff').innerHTML = L.map(x => `<a class="${x[3]}" id="${x[0]}" href="${x[1]}">${x[2]}</a>`).join('');
+  $('#acctStaff').innerHTML = L.map(x => `<a class="btn" href="${x[1]}">${x[2]}</a>`).join('');   // 휴대폰은 계정 메뉴 안에(머리가 좁다)
+}
 function setWho() {
   const u = realMe;
   const nm = u ? String(u.name || u.email || u.username) : '';
-  if (u) { $('#who').innerHTML = `<b>${esc(nm)}</b><span class="r"> · ${esc(u.role_ko || '')}</span>`; $('#acctAv').textContent = nm.slice(0, 1); $('#whoEmailBox').innerHTML = u.email ? '' : '<a href="#" id="whoEmail">✉️ 이메일 등록</a>'; $('#acct').hidden = false; $('#btnLogin').style.display = 'none'; $('#btnLogout').style.display = ''; $('#btnPw').style.display = ''; $('#btnTwofa').style.display = ''; }
-  else { $('#who').textContent = ''; $('#acctAv').textContent = ''; $('#whoEmailBox').innerHTML = ''; $('#acct').hidden = true; closeAcct(false); $('#btnLogin').style.display = ''; $('#btnLogout').style.display = 'none'; $('#btnPw').style.display = 'none'; $('#btnTwofa').style.display = 'none'; }
+  if (u) { $('#who').innerHTML = `<b>${esc(nm)}</b><span class="r"> · ${esc(tierKo(u))}</span>`; $('#acctAv').textContent = nm.slice(0, 1); $('#whoEmailBox').innerHTML = u.email ? '' : '<a href="#" id="whoEmail">✉️ 이메일 등록</a>'; $('#acct').hidden = false; $('#btnLogin').style.display = 'none'; $('#btnJoin').style.display = 'none'; $('#btnLogout').style.display = ''; $('#btnPw').style.display = ''; $('#btnTwofa').style.display = ''; }
+  else { $('#who').textContent = ''; $('#acctAv').textContent = ''; $('#whoEmailBox').innerHTML = ''; $('#acct').hidden = true; closeAcct(false); $('#btnLogin').style.display = ''; $('#btnJoin').style.display = ''; $('#btnLogout').style.display = 'none'; $('#btnPw').style.display = 'none'; $('#btnTwofa').style.display = 'none'; }
   renderPv();
   route();
 }
 
-/* ── 라우터(해시): #/ 비로그인=로그인 관문·로그인=개인페이지 | #/map 둘러보기 | #/custom 꾸미기 | #/files 내 폴더 | #/classic 옛 화면 | #/login #/signup 창 */
+/* ── 라우터(해시): #/ 비로그인=첫 화면(소개)·로그인=내 페이지 | #/start 첫 화면 | #/map 둘러보기 | #/join 회원가입·서비스 고르기(옛 #/signup·#signup) | #/ask 문의
+   | #/files 내 폴더 | #/custom 꾸미기 | #/login 로그인 창 */
 function currentRoute() {
   const h = location.hash || '';
   if (h.startsWith('#/map')) return 'map';
+  if (h.startsWith('#/join') || h.startsWith('#/signup') || h === '#signup') return 'join';
+  if (h.startsWith('#/ask')) return 'ask';
   if (h.startsWith('#/custom')) return 'custom';
   if (h.startsWith('#/files')) return 'files';
   if (h.startsWith('#/classic') || h.startsWith('#/start')) return 'start';   // 11-07: 옛 주소 #/classic 도 첫 화면
   return me ? 'home' : 'start';                                                   // 비로그인 #/ = 첫 화면, 로그인 #/ = 내 페이지
 }
 let AXLOCK = false;   // 26-10-30 이사장 지시: 개편이 끝날 때까지 새 화면은 통합관리자만(/api/ax/lock)
+let lastRoute = '';
 function route() {
   const h = location.hash || '';
-  // 11-11 이사장 지시: 일반이용자 내 페이지·내 폴더·둘러보기가 먹통 — 잠금 중에도 화면 이동은 막지 않는다(서버가 상담 실행·발송·루틴만 잠근다)
+  // 11-11 이사장 지시: 잠금 중에도 화면 이동은 막지 않는다(서버가 상담 실행·발송·루틴만 잠근다)
   const ab = $('#axLockBar'); if (ab) ab.hidden = !AXLOCK;
-  $('#topnav').hidden = false;
   closeSide(false); closeAcct(false);
-  if (h === '#pw') { if (!BOOTED) return; history.replaceState(null, '', location.pathname); if (me) { openPw(); } else openAuth('login'); }   // 11-05: 회원 정보를 받기 전 첫 route() 에서는 기다린다(로그인 창으로 새던 것)   // 11-01: 상담창 「비밀번호 바꿀래」
+  if (h === '#pw') { if (!BOOTED) return; history.replaceState(null, '', location.pathname); if (me) { openPw(); } else openAuth('login'); }   // 11-05: 회원 정보를 받기 전 첫 route() 에서는 기다린다   // 11-01: 상담창 「비밀번호 바꿀래」
   if ((h === '#login' || h === '#/login') && me && BACK && BOOTED) {   // 이미 로그인돼 있으면 돌려보낸다 — 이메일 미등록·임시 비밀번호면 그 창부터(알파언니 11-05 🟠A)
     $('#authModal').classList.remove('on');
     if (me.email_missing && !skipEmail) $('#emailModal').classList.add('on');
@@ -970,68 +1273,51 @@ function route() {
     history.replaceState(null, '', location.pathname + location.search); return route();
   }
   if (h === '#login' || h === '#/login') openAuth('login');
-  if (h === '#signup' || h === '#/signup') openAuth('signup');
+  if (h === '#signup' || h === '#/signup') { history.replaceState(null, '', location.pathname + location.search + '#/join'); }   // 옛 가입 주소 → 가입 3걸음
   let r = currentRoute();
   const needLogin = (r === 'custom' || r === 'files') && !me;
-  if (needLogin) r = 'start';                                                     // 로그인이 필요한 화면은 첫 화면(로그인 칸)으로
+  if (needLogin) { r = 'start'; if (BOOTED) { history.replaceState(null, '', location.pathname + location.search + '#/start'); openAuth('login', '이 화면은 로그인한 뒤에 쓸 수 있습니다.'); } }   // 로그인이 필요한 화면은 첫 화면 + 로그인 창
   document.body.classList.toggle('in', !!me);
   document.body.dataset.route = r; document.documentElement.dataset.route = r;
+  renderHdrStaff();
   { const hd = document.querySelector('header.top'); if (hd) document.documentElement.style.setProperty('--hdrH', Math.round(hd.getBoundingClientRect().height) + 'px'); }
   document.querySelectorAll('.mgronly').forEach(e => { e.hidden = !(me && (RANK[me.role] || 0) >= RANK.staff); });   // 개선안 23: 관리 링크는 매니저 이상
 
-  const shell = r === 'start' || r === 'map' || (!!me && (r === 'home' || r === 'files' || r === 'custom'));   // 11-13 이사장 지시: 둘러보기에도 사이드바
+  const side = !!me && SIDE_ROUTES.includes(r);          // 사이드바는 로그인 뒤 내 페이지·내 폴더·꾸미기에만(11-18: 비로그인·첫 화면·둘러보기에서 뺌)
   const show = (id, on) => $(id).classList.toggle('on', !!on);
-  show('#shell', shell); show('#vStart', r === 'start'); show('#tree', r === 'start');
-  show('#homeMain', !!me && r === 'home'); show('#vFiles', !!me && r === 'files'); show('#vCustom', !!me && r === 'custom'); show('#vMap', r === 'map');
-  $('#topnav').querySelectorAll('a').forEach(a => { a.classList.toggle('cur', a.dataset.r === r); if (a.dataset.r === r) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); a.hidden = a.classList.contains('needin') && !me; });
-  $('#sideTog').hidden = !shell;
-  const dk = dekaAdmin(); $('#chatSpot').hidden = dk; $('#startNote').textContent = dk ? '전체 메뉴·소개·교육 신청은 첫 화면에 있습니다. 여기는 대시보드·내 폴더입니다. 지시는 맨 위 「🛠️ 데카」 띠에서 합니다.' : '전체 메뉴·소개·교육 신청은 첫 화면에 있습니다. 여기는 내 상담창·대시보드·내 폴더입니다.';
+  show('#shell', true); show('#vStart', r === 'start'); show('#vMap', r === 'map'); show('#vJoin', r === 'join'); show('#vAsk', r === 'ask');
+  show('#homeMain', !!me && r === 'home'); show('#vFiles', !!me && r === 'files'); show('#vCustom', !!me && r === 'custom');
+  $('#topnav').hidden = false;
+  $('#topnav').querySelectorAll('a').forEach(a => { a.classList.toggle('cur', a.dataset.r === r); if (a.dataset.r === r) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); a.hidden = (a.classList.contains('needin') && !me) || (a.classList.contains('needout') && !!me); });
+  { const t = $('#hTour'); if (r === 'map') t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current'); }
+  $('#brandLink').setAttribute('href', me ? '#/' : '#/start');
+  $('#sideTog').hidden = !side;
+  $('#chatSpot').hidden = dekaAdmin();
   skaiPlace(!!me && r === 'home');
-  if (r === 'start') renderStart(needLogin);
+  if (r === 'start') renderStart();
+  if (r === 'map') renderMap();
+  if (r === 'join') renderJoin(lastRoute !== 'join');
+  if (r === 'ask') renderAsk(lastRoute !== 'ask');
   if (me && r === 'home') { renderSideHome(); renderHome(); }
   if (me && r === 'files') { renderSideHome(); renderFiles(); }
   if (me && r === 'custom') { renderSideHome(); renderCustom(); }
-  if (r === 'map') { renderSideStart(); renderMap(); }   // 둘러보기 사이드바 = 첫 화면과 같은 전체 메뉴
-  if (!shell) document.body.classList.remove('sideOpen');
+  if (!side) document.body.classList.remove('sideOpen');
+  if (lastRoute && lastRoute !== r) { try { window.scrollTo(0, 0); } catch (_) {} }
+  lastRoute = r;
 }
-
-/* ── ① 로그인 관문 */
-const GT = { email: '#gtEmail', pw: '#gtPw', code: '#gtCode', box: '#gtCodeBox', msg: '#gtMsg', btn: '#gtBtn', rem: '#gtRem', pending: false };
+/* ── 로그인 창(머리 「로그인」 단추·#login) — 11-18: 첫 화면의 로그인 칸은 없앴다(머리에 로고·로그인·회원가입만) */
 const LG = { email: '#lgEmail', pw: '#lgPw', code: '#lgCode', box: '#lgCodeBox', msg: '#lgMsg', btn: '#lgBtn', rem: '#lgRem', pending: false };
 /* 11-07 이사장 지시: 아이디 기억하기 — 체크하고 로그인에 성공하면 이 기기(브라우저)에 마지막 아이디만 남긴다. 비밀번호는 절대 남기지 않는다.
    체크를 풀고 로그인하면 지운다. 다음에 열면 아이디를 채우고 비밀번호 칸에 커서를 둔다. */
 const REM_KEY = 'sk_last_id';
 function remGet() { try { return localStorage.getItem(REM_KEY) || ''; } catch (_) { return ''; } }
 function remSet(ui, id) { try { if ($(ui.rem) && $(ui.rem).checked && id) localStorage.setItem(REM_KEY, id); else localStorage.removeItem(REM_KEY); } catch (_) {} }
-function remFill() {                              // 두 로그인 칸(첫 화면·창)에 기억한 아이디를 채운다 — 이미 무언가 쳐 둔 칸은 건드리지 않는다
+function remFill() {                              // 로그인 창에 기억한 아이디를 채운다 — 이미 무언가 쳐 둔 칸은 건드리지 않는다
   const id = remGet();
-  [GT, LG].forEach(ui => { const e = $(ui.email), c = $(ui.rem); if (!e || !c) return; c.checked = !!id; if (id && !e.value) e.value = id; });
+  [LG].forEach(ui => { const e = $(ui.email), c = $(ui.rem); if (!e || !c) return; c.checked = !!id; if (id && !e.value) e.value = id; });
   return id;
 }
 remFill();
-/* 11-07 첫 화면: 로그인 칸(비로그인) 또는 내 페이지 단추(로그인), 전체 메뉴(#tree), 왼쪽 사이드바에 메뉴 전부 */
-function renderStart(needLogin) {
-  $('#gtForm').hidden = !!me; $('#stMine').hidden = !me;
-  if (me) $('#stMineName').textContent = me.name || me.email || me.username || '';
-  renderGate(needLogin);
-  renderPublic();
-  renderSideStart();
-}
-function renderSideStart() {
-  const who = me ? `<div class="me"><b>${esc(me.name || me.email || me.username)}</b> · ${esc(me.role_ko || ROLE_KO[me.role] || '')}</div>` : `<div class="me"><b>사교원 메뉴</b> · 로그인하면 내 등급으로 열리는 메뉴만 보입니다</div>`;
-  const fix = `<nav aria-label="바로가기"><ul class="fix">` + (me ? `<li><a href="#/">🏠 내 페이지</a></li><li><a href="#/files">📁 내 폴더</a></li>` : `<li><a href="#login">🔑 로그인 · 회원가입</a></li>`) + `<li><a href="#/map">🗺️ 둘러보기(사이트맵)</a></li></ul></nav>`;
-  const secs = SECTIONS.map(sc => {
-    const g = TREE[sc.gi];
-    if (grpHide(g)) return '';
-    return `<li><span class="sn">${sc.ic} ${esc(sc.name)}</span><ul>${sc.items.filter(vis).map(it => { const ok = allowed(it.need); return `<li class="${ok ? '' : 'locked'}"><a href="${esc(ok ? it.h : (me ? '#locked' : '#login'))}" data-need="${esc(it.need || '')}" data-t="${esc(it.t)}"${(ok && it.ext) ? ' target="_blank" rel="noopener"' : ''}>${ok ? '' : '🔒 '}${esc(it.t)}${tmpTag(it)}</a></li>`; }).join('')}</ul></li>`;
-  }).join('');
-  $('#side').innerHTML = who + fix + `<ul class="pub" aria-label="전체 메뉴">${secs}</ul>`;
-}
-function renderGate(needLogin) {
-  const m = $('#gtMsg');
-  if (GT.pending) { $('#gtCodeBox').hidden = false; $('#gtBtn').textContent = '코드 확인'; if (!m.textContent) { m.className = 'msg ok'; m.textContent = '비밀번호가 확인되었습니다. 2단계 인증 코드를 입력해 주세요.'; } }
-  else if (needLogin && !m.textContent) { m.className = 'msg'; m.textContent = '이 화면은 로그인한 뒤에 쓸 수 있습니다.'; }
-}
 /* 로그인 흐름(관문 카드·창 공용) — 응답 twofa:"pending" 이면 코드 칸을 열고 /api/auth/2fa/verify 로 */
 /* 11-05 개선안 24: 비밀번호 규칙을 칸 아래 미리 보이고, 맞으면 초록 ✓ (서버 규칙은 8자 이상) */
 function pwRulesCheck() {
@@ -1081,11 +1367,12 @@ async function goBackIfReady() {                 // 임시 비밀번호·이메�
   location.href = BACK; return true;
 }
 async function loggedIn(user) {
-  me = realMe = user; preview = null; GT.pending = LG.pending = false;
+  me = realMe = user; preview = null; LG.pending = false; MB = null; MB_STATE = '';
   try { localStorage.setItem('sk_in', '1'); } catch (_) {}
-  $('#lgPw').value = ''; $('#gtPw').value = ''; $('#gtMsg').textContent = '';
+  $('#lgPw').value = '';
   closeAuth(); await loadPrefs();
-  if (!BACK && currentRoute() !== 'home') history.replaceState(null, '', location.pathname + '#/');   // 11-07 이사장 지시: 로그인하면 먼저 내 페이지로(하위 앱에서 온 ?back= 은 그쪽으로)
+  const stay = !BACK && (currentRoute() === 'join');                              // 가입·서비스 고르기 화면에서 로그인했으면 그 화면에 머문다
+  if (!BACK && !stay && currentRoute() !== 'home') history.replaceState(null, '', location.pathname + '#/');   // 11-07 이사장 지시: 로그인하면 먼저 내 페이지로(하위 앱에서 온 ?back= 은 그쪽으로)
   setWho();
   if (me.email_missing) { $('#emailModal').classList.add('on'); }
   else {
@@ -1093,7 +1380,7 @@ async function loggedIn(user) {
     checkTempPassword();
   }
   loadTwofa();
-  if (window.skAiDock) { document.documentElement.classList.add('booting'); location.reload(); }   // 상담창을 로그인 판으로 다시 붙이려 새로 읽는다 — 그 사이 옛 첫 화면은 가린다
+  if (window.skAiDock && !stay) { document.documentElement.classList.add('booting'); location.reload(); }   // 대화창을 로그인 판으로 다시 붙이려 새로 읽는다 — 그 사이 화면은 가린다
 }
 async function forgot(emailEl, msgEl) {
   const email = ($(emailEl).value || '').trim() || prompt('가입한 이메일을 입력하세요:') || '';
@@ -1164,11 +1451,597 @@ async function renderNotices() {
   const items = (r.ok && Array.isArray(r.items)) ? r.items : [];
   $('#notices').innerHTML = items.length ? items.map(n => `<li><span class="src">${esc(n.src || '사교원')}</span>${n.href ? `<a href="${esc(n.href)}">${esc(n.title)}</a>` : `<span>${esc(n.title)}</span>`}<span class="dt">${esc(n.date || '')}</span></li>`).join('') : '<li class="empty">아직 공지가 없습니다</li>';
 }
-function renderHome() {
-  renderTfBanner();
-  renderDash(); renderQuick(); renderNotices(); renderRecent();
-  loadTools().then(() => { if (onHome() && Array.isArray(prefs.side) && prefs.side.length) renderSideHome(); });  // 도구 id 가 든 사이드바는 대장이 온 뒤 다시
+/* ══ 11-18 통합사이트 개편 — 이용권(membership) 공통. 이용료·계좌·기한은 전부 서버 응답으로만 그린다(화면에 값을 박지 않는다) ══ */
+let PLANS = null, plansP = null;      // /api/membership/plans — null 아직 | {ok:false} 서버에 없음·실패 | 응답
+function loadPlans() { if (!plansP) plansP = api('/api/membership/plans').then(r => { PLANS = (r.ok && Array.isArray(r.products)) ? r : { ok: false }; return PLANS; }); return plansP; }
+const won = n => (Number(n) || 0).toLocaleString('ko-KR') + '원';
+const mbText = r => r.status === 429 ? ERR.rate_limited : (r.message || ERR[r.error] || '처리하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+function billStart(bf) { const m = /^(\d{4})-(\d{2})$/.exec(bf || ''); if (!m) return null; const y = +m[1], mo = +m[2]; return { y, m: mo, py: mo === 1 ? y - 1 : y, pm: mo === 1 ? 12 : mo - 1 }; }
+function trialLine(src) { const b = (src && src.trial) ? billStart(src.billing_from) : null; return b ? `${b.py}년 ${b.pm}월까지 무료 시범` : ''; }
+const taxWord = t => t === 'exempt' ? '면세' : (t === 'vat' ? '부가세 포함' : '');
+const taxTag = t => t === 'exempt' ? '<span class="tg tex">면세</span>' : (t === 'vat' ? '<span class="tg tin">부가세 포함</span>' : '');
+const PM = {   // 상품별 그림·설명(값 없음 — 이름·이용료는 서버가 준다)
+  academy: { c: 'c-aca', i: 'book', who: '연대지능활동가 아카데미 회원', lines: ['아카데미 실습·학습', '팀러닝 · 화상회의', 'AI 대화창 · 내 폴더'] },
+  policy: { c: 'c-pol', i: 'gov', who: '의정지원시스템 회원', lines: ['공약 · 조례', '문서작성 · 브리핑', '행감 자료실 · 의정소통'] },
+  coop: { c: 'c-hat', i: 'sun', who: '햇빛소득마을 협동조합', lines: ['햇소자 조합 메뉴', '자료함 · 우리 조합 현황 · 설립 · 운영관리'] },
+  fed: { c: 'c-hat', i: 'users', who: '햇빛소득마을 연합회', lines: ['햇소자 연합회 메뉴', '회원조합 지원 · 공지·자료 배포'] },
+};
+const pmOf = k => PM[k] || { c: 'c-g', i: 'grid', who: '', lines: [] };
+
+/* ── ① 첫 화면(#/start · 비로그인 #/) — 플랫폼 소개 → 회원서비스 → 등급·이용료 → 회원별 이용 메뉴 → 회원가입·문의 */
+const SVC2 = [
+  { id: 'hatsoja', c: 'c-hat', n: '햇소자', img: ['c_hat.jpg', '태양광 패널을 올린 건물 지붕을 위에서 본 사진'], one: '햇빛소득마을 조합을 세우고 꾸려 갑니다.', more: '협동조합과 연합회가 설립부터 건설, 운영, 세금신고까지 걸음마다 챙깁니다. 자료함과 AI 상담도 함께 씁니다.', who: ['협동조합회원', '연합회원'] },
+  { id: 'policy', c: 'c-pol', n: '의정지원시스템', ill: 'policy', one: '지방의회 의정 활동을 AI 가 돕습니다.', more: '공약·조례·문서작성·브리핑·행감 자료실로 의원실의 하루 업무를 돕습니다.', who: ['정책회원'] },
+  { id: 'academy', c: 'c-aca', n: '연대지능활동가 아카데미', img: ['c_aca.jpg', '강의실에서 화면을 보며 수업을 듣는 뒷모습 사진'], one: '내 일을 AI 와 함께 해 보며 배웁니다.', more: '실습 15단계와 학습 7단계, 지식 검증 게임으로 이어지는 과정입니다.', who: ['개인회원'] },
+  { id: 'teamlearning', c: 'c-team', n: '사회혁신팀러닝', img: ['c_team.jpg', '책상 위에 종이와 붙임쪽지를 펼쳐 놓고 함께 적는 손 사진'], one: '팀을 만들어 함께 배우고 기록합니다.', more: '화상회의와 기록으로 팀 학습을 이어 갑니다. 아카데미 회원이면 함께 쓸 수 있습니다.', who: ['개인회원'] },
+];
+function svcCards() {
+  return '<div class="g4">' + SVC2.map(s => {
+    const it = itemById(s.id);
+    const btn = me ? `<a class="btn sm p" href="${esc(it.h)}">열기</a>`
+      : `<a class="btn sm p" href="#/join">회원가입</a>` + (it.need ? '' : ` <a class="lk2" href="${esc(it.h)}">소개 화면 보기 ›</a>`);
+    return `<article class="card tcard ${s.c}" data-mc data-svc="${esc(s.id)}"><div class="th">${s.img ? pic(s.img[0], s.img[1]) : ILL[s.ill]()}</div><div class="tb"><h3>${esc(s.n)}</h3><p class="one">${esc(s.one)}</p><div class="who2">${s.who.map(w => `<span class="cchip">${esc(w)}</span>`).join('')}</div><details class="more"><summary>자세히</summary><p>${esc(s.more)} 로그인하면 사이드바에서 세부 메뉴를 엽니다.</p></details><div>${btn}</div></div></article>`;
+  }).join('') + '</div>';
 }
+const MX_HEAD = ['통합관리자', '매니저', '연합회원', '협동조합회원', '정책회원', '개인회원', '무료이용회원'];
+const MX = [['사이트 소개·문의·공개 자료', '●', '●', '●', '●', '●', '●', '●'], ['AI 대화창', '●', '●', '●', '●', '●', '●', '하루 한도'], ['내 폴더', '●', '●', '●', '●', '●', '●', '—'],
+  ['아카데미(실습·학습·팀러닝·화상회의)', '●', '●', '선택', '선택', '선택', '●', '맛보기'], ['햇소자 조합 메뉴', '●', '체크권한', '—', '●', '—', '—', '—'], ['햇소자 연합회 메뉴', '●', '체크권한', '●', '—', '—', '—', '—'],
+  ['의정지원시스템', '●', '체크권한', '선택', '선택', '●', '선택', '둘러보기'], ['그룹웨어(머리 단추)', '●', '●', '—', '—', '—', '—', '—'], ['관리(회원·납부·발송)', '●', '체크권한', '—', '—', '—', '—', '—']];
+function pcard(c, i, n, sub, price, tag, lines, extra) {
+  return `<article class="card pcard ${c}"><div class="pn"><span class="bub">${ic(i)}</span><span><b>${esc(n)}</b><small>${esc(sub)}</small></span></div>${price}${tag ? `<div>${tag}</div>` : ''}<ul>${lines.map(l => `<li>${ic('check', 's')}<span>${l}</span></li>`).join('')}</ul>${extra || ''}</article>`;
+}
+function priceHTML() {
+  if (!PLANS) return `<div class="pwait" id="priceWait">이용료를 불러오는 중…</div>`;
+  const freeCard = pcard('c-g', 'user', TIER_KO.free, '누구나 바로', '<div class="pp">무료</div>', '', ['둘러보기 · 문의', 'AI 질문(하루 한도)', '공개 자료']);
+  const staffCard = pcard('c-rs', 'grid', '매니저 · 통합관리자', '사교원 내부 직원', '<div class="pp" style="font-size:1.4rem">이용료 없음</div>', '', ['가입 화면에서 고를 수 없습니다', '그룹웨어는 머리 단추로', '매니저는 체크권한만큼']);
+  if (!PLANS.ok) {   // 서버에 이용권 모듈이 아직 없거나 응답 실패 — 화면은 그대로, 값만 「준비 중」
+    const wait = '<div class="pp" style="font-size:1.2rem">이용료 안내 준비 중</div>';
+    return `<div class="notice" id="priceNone"><b>이용료 안내 준비 중</b> — 등급별 이용료는 곧 이 자리에 안내합니다. 무료이용회원은 지금 바로 가입할 수 있습니다.</div><div class="pgrid">` + freeCard +
+      ['academy', 'policy', 'coop', 'fed'].map(k => pcard(PM[k].c, PM[k].i, TIER_KO[{ academy: 'personal', policy: 'policy', coop: 'coop', fed: 'federation' }[k]], PM[k].who, wait, '', PM[k].lines)).join('') + staffCard + '</div>';
+  }
+  const b = billStart(PLANS.billing_from), tl = trialLine(PLANS);
+  const prod = p => {
+    const m = pmOf(p.product), opts = Array.isArray(p.options) ? p.options : [];
+    const lines = m.lines.map(esc);
+    if (opts.length) lines.push('선택 기능: ' + opts.map(o => `${esc(o.name)} ${won(o.amount)}`).join(' · '));
+    if (p.approve) lines.push('신청 뒤 사교원의 승인을 거칩니다');
+    return pcard(m.c, m.i, p.tier_ko || p.name, m.who || p.name, `<div class="pp">${won(p.base)} <small>/ 월</small></div>` + (opts.length ? `<div class="p2">기본 ${won(p.base)} + 선택 기능${p.allin ? ` · 올인원 <b>${won(p.allin)}</b>` : ''}</div>` : ''), taxTag(p.tax), lines);
+  };
+  const ext = x => {
+    const m = pmOf(x.product), ps = Array.isArray(x.prices) ? x.prices : [], lo = ps.length ? Math.min.apply(null, ps.map(q => +q.amount || 0)) : 0;
+    return pcard(m.c, m.i, TIER_KO[x.tier] || x.name, m.who || x.name, (ps.length ? `<div class="pp">${won(lo)} <small>/ 월${ps.length > 1 ? '부터' : ''}</small></div><div class="p2">${ps.map(q => `${esc(q.name)} <b>${won(q.amount)}</b>`).join(' · ')}</div>` : ''), taxTag(x.tax), m.lines.map(esc).concat(['가입·납부는 의정지원 사이트에서 합니다']),
+      x.join_url ? `<a class="btn sm" href="${esc(x.join_url)}" target="_blank" rel="noopener" data-ext="${esc(x.product)}">의정지원 사이트에서 가입 ↗</a>` : '');
+  };
+  const order = (Array.isArray(PLANS.tiers) ? PLANS.tiers.map(t => t.code) : Object.keys(TIER_KO)).slice().reverse();
+  let cards = '', seen = {};
+  order.forEach(code => {
+    if (code === 'free') cards += freeCard;
+    PLANS.products.filter(p => p.tier === code).forEach(p => { seen[p.product] = 1; cards += prod(p); });
+    (PLANS.external || []).filter(x => x.tier === code).forEach(x => { seen[x.product] = 1; cards += ext(x); });
+  });
+  PLANS.products.filter(p => !seen[p.product]).forEach(p => { cards += prod(p); });
+  (PLANS.external || []).filter(x => !seen[x.product]).forEach(x => { cards += ext(x); });
+  return (tl && b ? `<div class="notice" id="trialNote"><b>${tl}</b> — 이용료는 ${b.y}년 ${b.m}월부터 받습니다.</div>` : '') + `<div class="pgrid" id="pgrid">${cards}${staffCard}</div>` +
+    `<p class="note" style="margin-top:10px">교육 서비스는 면세, 그 밖의 서비스는 부가세를 포함한 값입니다. 이용료는 이체 또는 자동이체로 냅니다.</p>`;
+}
+function startHTML() {
+  const feat = (c, i, t) => `<span class="it ${c}"><span class="bub">${ic(i)}</span>${t}</span>`;
+  const cell = v => { const c = v === '●' ? 'mxon' : v === '—' ? 'mxoff' : 'mxopt'; return `<td class="c"><span class="${c}"${v === '●' ? ' aria-label="이용 가능"' : v === '—' ? ' aria-label="이용 안 함"' : ''}>${v}</span></td>`; };
+  const cta = me
+    ? `<a class="btn y big" href="#/">내 페이지로</a><a class="btn w big" href="#/join">서비스 더 고르기</a><a class="btn w big" href="#/ask">문의하기</a>`
+    : `<a class="btn y big" href="#/join" data-cta="join">회원가입</a><a class="btn w big" href="#/ask" data-cta="ask">문의하기</a>`;
+  return `<section class="hero2" aria-labelledby="hHero">${pic('hero.jpg', '').replace('loading="lazy"', 'loading="eager"')}<div class="uw"><span class="eyebrow">지역에서 일하는 사람들의 업무·학습 플랫폼</span>` +
+    `<h2 class="h1" id="hHero">로컬리스트 플랫폼,<br>사교원 통합사이트</h2><p>한 계정으로, 내가 고른 서비스만.</p><div class="cta">${cta}</div>` +
+    `<div class="dots"><span class="cchip c-hat">햇소자</span><span class="cchip c-pol">의정지원</span><span class="cchip c-aca">아카데미</span><span class="cchip c-team">팀러닝</span></div></div></section>` +
+    `<div class="uw"><section class="usec" aria-labelledby="hIntro"><div class="sech"><h2 id="hIntro">어떤 사이트인가요</h2></div><div class="g3">` +
+    `<div class="card feat"><div class="row">${feat('c-hat', 'sun', '협동조합·연합회')}${feat('c-pol', 'gov', '의원실')}${feat('c-aca', 'user', '활동가')}</div><h3>누가 쓰나요</h3><p>지역의 협동조합·연합회·의원실·활동가가 한 계정으로 씁니다.</p></div>` +
+    `<div class="card feat"><div class="row">${feat('c-hat', 'sun', '조합 운영')}${feat('c-pol', 'doc', '의정지원')}${feat('c-aca', 'book', '아카데미')}${feat('c-g', 'chat', 'AI 대화창')}${feat('c-rs', 'folder', '내 폴더')}</div><h3>무엇을 하나요</h3><p>업무와 배움을 한곳에서 합니다. 고른 서비스만 내 사이드바에 놓입니다.</p></div>` +
+    `<div class="card feat"><div class="row">${feat('c-g', 'key', '한 계정')}${feat('c-team', 'list', '고른 메뉴만')}${feat('c-fld', 'server', '자체 서버 보관')}${feat('c-pol', 'shield', '개인정보 가림')}</div><h3>무엇이 다른가요</h3><p>자료는 사교원 서버에, AI 는 개인정보를 가린 뒤 처리합니다.</p></div>` +
+    `</div></section></div>` +
+    `<div class="band"><div class="uw"><section class="usec" aria-labelledby="hSvc"><div class="sech"><h2 id="hSvc">회원서비스</h2><p>필요한 것만 고르세요.</p></div>${svcCards()}</section></div></div>` +
+    `<div class="uw"><section class="usec" aria-labelledby="hPrice"><div class="sech"><h2 id="hPrice">회원 등급과 이용료</h2><p>등급은 일곱 가지이고, 고른 서비스에 따라 이용료가 정해집니다.</p></div><div id="priceBox">${priceHTML()}</div></section></div>` +
+    `<div class="band"><div class="uw"><section class="usec" aria-labelledby="hMx"><div class="sech"><h2 id="hMx">회원별 이용 메뉴</h2><p>● 이용 가능 · <span class="mxopt">선택</span> 골라서 이용료를 내면 열림 · — 이용 안 함</p></div>` +
+    `<div class="scroll mx"><table id="mxTable"><thead><tr><th scope="col">메뉴</th>${MX_HEAD.map(x => `<th scope="col" class="c">${x}</th>`).join('')}</tr></thead><tbody>${MX.map(r => `<tr><th scope="row">${r[0]}</th>${r.slice(1).map(cell).join('')}</tr>`).join('')}</tbody></table></div>` +
+    `<p class="note" style="margin-top:8px">「체크권한」은 통합관리자가 매니저마다 따로 켜 주는 권한입니다. 그룹웨어·관리는 매니저·통합관리자에게만 머리 단추로 보입니다.</p></section></div></div>` +
+    `<section class="band2" aria-labelledby="hCta">${pic('cta.jpg', '')}<div class="uw"><h2 id="hCta">지금 시작해 보세요</h2><div class="cta">${cta}</div></div></section>` +
+    `<div class="uw"><div class="publinks" aria-label="공개 자료" style="padding-top:22px"><a href="${esc(itemById('about').h)}">사교원 소개</a><a href="${esc(itemById('disclosure').h)}">경영공시</a><a href="${esc(itemById('research').h)}">연구자료</a><a href="${esc(itemById('mangnam').h)}">현장사업 소식</a><a href="#/map">둘러보기</a></div></div>`;
+}
+function renderStart() {
+  $('#startBody').innerHTML = startHTML();
+  if (!PLANS) loadPlans().then(() => { if (currentRoute() === 'start') { const b = $('#priceBox'); if (b) b.innerHTML = priceHTML(); } });
+}
+
+/* ── ② 둘러보기(#/map) — 큰 묶음 둘: ①회원서비스 ②사교원 홈페이지(현장사업 → 연구 → 소개). 쇼핑·그룹웨어·관리는 넣지 않는다 */
+function mapBlog(id, c, lead, tag) {
+  const it = itemById(id);
+  return `<article class="card blog ${c}" data-mc><div class="lead">${lead}</div><div class="bb"><div class="bn"><span class="cchip">${esc(tag)}</span></div><div class="lt">${esc(it.t)}${it.soon ? '<span class="rq">준비 중</span>' : ''}</div><p>${esc(it.d || '')}</p><a class="btn sm" href="${esc(it.h)}"${it.ext ? ' target="_blank" rel="noopener"' : ''}>열기${it.ext ? ' ↗' : ''}</a></div></article>`;
+}
+function mapIcard(id, lead) {
+  const it = itemById(id);
+  return `<article class="card icard c-rs" data-mc><div class="th">${lead}</div><div class="tb"><h4>${esc(it.t)}</h4><p>${esc(it.d || '')}</p><a class="btn sm" href="${esc(it.h)}">열기</a></div></article>`;
+}
+function renderMap() {
+  $('#mapChips').innerHTML = [['map-svc', '① 회원서비스'], ['map-field', '현장사업'], ['map-research', '연구'], ['map-about', '소개']].map(x => `<a href="#/map" data-jump="${x[0]}">${x[1]}</a>`).join('');
+  $('#mapBody').innerHTML =
+    `<div class="uw"><section class="usec mapgrp" id="map-svc" style="padding-top:10px" aria-label="회원서비스"><div class="bigh"><span class="ord">1</span><h2 style="margin:0;font-size:1.3rem">회원서비스</h2></div><p class="lead">햇소자 · 의정지원시스템 · 연대지능활동가 아카데미 · 사회혁신팀러닝 — 고른 서비스만 내 사이드바에 놓이고, 세부 메뉴는 로그인한 뒤 사이드바에서 엽니다.</p>${svcCards()}</section></div>` +
+    `<div class="band" style="margin-top:24px"><div class="uw"><section class="usec mapgrp" id="map-home" aria-label="사교원 홈페이지"><div class="bigh"><span class="ord">2</span><h2 style="margin:0;font-size:1.3rem">사교원 홈페이지</h2></div><p class="lead" style="margin-bottom:0">누구나 보는 공개 페이지입니다.</p>` +
+    `<div class="mapsec" id="map-field"><h3 class="sub3"><span class="bub c-fld">${ic('wave')}</span>현장사업</h3><div class="g3">` +
+      mapBlog('mangnam', 'c-fld', pic('b_mn1.jpg', '전복을 물로 씻는 손 사진'), '현장 소식') + mapBlog('yangyang', 'c-fld', ILL.yang(), '현장 소식') + mapBlog('mangnam-coop', 'c-fld', pic('b_co1.jpg', '화분과 물건을 늘어놓은 마을 가게 사진'), '조합 소식') + `</div></div>` +
+    `<div class="mapsec" id="map-research"><h3 class="sub3"><span class="bub c-rs">${ic('chart')}</span>연구</h3><div class="g4">` +
+      mapBlog('research', 'c-rs', ILL.research(0), '보고서·발제문') + mapBlog('cre', 'c-rs', ILL.research(1), '과제 소개') + mapBlog('wiki', 'c-rs', pic('b_rs.jpg', '벽에 붙인 색색 붙임쪽지 사진'), '지식 모음') + mapBlog('poomasi-wiki', 'c-rs', pic('b_wk.jpg', '촬영 장비를 놓은 온라인 중계 방 사진'), '공동 지식') + `</div></div>` +
+    `<div class="mapsec" id="map-about"><h3 class="sub3"><span class="bub c-rs">${ic('home')}</span>소개</h3><div class="g2">` +
+      mapIcard('about', pic('intro.jpg', '언덕에서 내려다본 포구 마을 사진')) + mapIcard('disclosure', ILL.office()) + `</div></div></section></div></div>` +
+    `<div class="uw"><div class="tourend"><img class="dogr" src="${IMG}dog6.jpg" alt=""><span><b>여기까지 둘러보셨어요.</b><br>${me ? '<a href="#/">내 페이지로 돌아가기</a>' : '<a href="#/join">회원가입</a> · <a href="#/ask">문의하기</a>'}</span></div></div>`;
+  mapFind();
+}
+function mapFind() {
+  const q = ($('#mapFind').value || '').trim().toLowerCase(); let n = 0;
+  $('#mapBody').querySelectorAll('[data-mc]').forEach(c => { const hit = !q || c.textContent.toLowerCase().includes(q); c.classList.toggle('hide', !hit); if (hit) n++; });
+  $('#mapBody').querySelectorAll('.mapsec').forEach(sc => sc.classList.toggle('hide', !sc.querySelector('[data-mc]:not(.hide)')));
+  $('#mapBody').querySelectorAll('.mapgrp').forEach(g => g.classList.toggle('hide', !g.querySelector('[data-mc]:not(.hide)')));
+  $('#mapNone').hidden = !q || n > 0;
+}
+$('#mapFind').addEventListener('input', mapFind);
+$('#mapChips').addEventListener('click', e => { const a = e.target.closest('a[data-jump]'); if (!a) return; e.preventDefault(); $('#mapFind').value = ''; mapFind(); const t = document.getElementById(a.dataset.jump); if (t) { try { t.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (_) {} const h = t.querySelector('h2,h3'); if (h) { h.setAttribute('tabindex', '-1'); try { h.focus({ preventScroll: true }); } catch (_) {} } } });
+/* ── ③ 내 페이지: 인사 카드 → AI 대화창 → 내 정보·이용료(마이페이지형) → 대시보드 칸 → 공지 */
+let mbSeq = 0;                          // 신청·그만두기 응답이 온 뒤에 늦게 도착한 옛 조회가 덮어쓰지 않게
+function setMB(r) { mbSeq++; MB = r; MB_STATE = 'ok'; }
+async function loadMB() {
+  const my = ++mbSeq;
+  const r = await api('/api/membership/me');
+  if (my !== mbSeq) return MB;
+  if (r.ok && Array.isArray(r.subs)) { MB = r; MB_STATE = 'ok'; } else { MB = null; MB_STATE = r.status === 404 ? 'none' : 'err'; }
+  return MB;
+}
+async function refreshMe() {            // 이용권이 바뀐 뒤 등급·services 를 다시 받는다(화면은 부르는 쪽이 다시 그린다)
+  if (preview) return;
+  const r = await api('/api/auth/me');
+  if (r.ok && r.user) { me = realMe = r.user; $('#who').innerHTML = `<b>${esc(String(me.name || me.email || me.username))}</b><span class="r"> · ${esc(tierKo(me))}</span>`; }
+}
+const SUB_KO = { apply: '승인 대기', wait_pay: '입금 대기', trial: '무료 시범', active: '이용 중', cancel: '그만둠(낸 기간까지 이용)' };
+const SUB_ST = { apply: 'wait', wait_pay: 'wait', trial: 'free', active: 'ok', cancel: 'free' };
+const PROOF_KO = { income: '현금영수증(소득공제용)', expense: '현금영수증(지출증빙용)', invoice: '세금계산서·계산서' };
+const RCPT_KO = { wait: '발행 대기', done: '발행함', none: '-' };
+const ymd = v => String(v || '').slice(0, 10);
+function renderGreet() {
+  if (!me) return;
+  const keys = myServiceKeys(), staff = (RANK[me.role] || 0) >= RANK.staff;
+  const chips = staff ? '<span class="cchip c-g">전 서비스(사교원 내부)</span>' : (keys.map(k => `<span class="cchip ${SVC[k].c}">${esc(SVC[k].n)}</span>`).join('') || '<span class="cchip c-g">무료 이용</span>');
+  $('#myGreet').innerHTML = `<div class="greet"><img class="bg" src="${IMG}greet.jpg" alt=""><div class="gx"><h2 id="hGreet">${esc(me.name || me.email || me.username)} 님, 반갑습니다</h2><div class="chips"><span class="cchip c-g" id="myTier">${esc(tierKo(me))}</span>${chips}</div></div><img class="dogr" src="${IMG}dog1.jpg" alt=""></div>`;
+}
+function payinfoRows(pi) {
+  if (!pi) return '';
+  const how = pi.method === 'auto' ? `자동이체 · 매월 ${esc(pi.auto_day || '')}일` : '이체';
+  const proof = pi.invoice ? `세금계산서·계산서 (사업자번호 ${esc(pi.biz_no || '')})` : (pi.receipt_kind === 'income' || pi.receipt_kind === 'expense') ? `${PROOF_KO[pi.receipt_kind]} ${esc(pi.receipt_no || '')}` : '현금영수증 원치 않음';
+  return `<li><span>납부 방식</span><b>${how}</b></li><li><span>납부 주기</span><b>${pi.cycle === 'year' ? '연납' : '월납'}</b></li><li><span>입금자명</span><b>${esc(pi.depositor || '')}</b></li><li><span>증빙</span><b>${proof}</b></li>`;
+}
+function renderMyBox() {
+  const box = $('#myBox'); if (!box || !me) return;
+  const keys = myServiceKeys(), isStaff = (RANK[me.role] || 0) >= RANK.staff;
+  const staff = isStaff && !((MB && Array.isArray(MB.subs)) ? MB.subs : []).length;   // 사교원 내부(이용료 없음). 직원이 따로 고른 이용권이 있으면 회원과 같게 보인다
+  const head = `<div class="secT"><h2>내 정보 · 이용료</h2><p class="sub">내 등급과 고른 서비스, 이용료·납부 상태입니다.</p></div>`;
+  const subs = (MB && Array.isArray(MB.subs)) ? MB.subs : [];
+  const live = subs.filter(s => ['apply', 'wait_pay', 'trial', 'active'].includes(s.status));
+  // ① 등급·이용 서비스
+  let t1 = `<div class="tile" id="tileSvc"><div class="hd">${ic('user', 's')}내 등급 · 이용 서비스</div><div class="v" id="myTierV">${esc(tierKo(me))}</div>`;
+  if (subs.length) t1 += `<ul class="mbl" id="mySubs" style="margin-top:8px">` + subs.map(s => `<li data-sub="${esc(s.product)}"><span class="nm">${esc(s.name || s.product)}</span><span class="st ${SUB_ST[s.status] || 'free'}">${esc(SUB_KO[s.status] || s.status)}</span><span class="am">월 ${won(s.amount)} <small class="note">${taxWord(s.tax)}</small></span>` +
+      (s.next_amount != null ? `<span class="note" style="flex-basis:100%">다음 기간부터 월 ${won(s.next_amount)}</span>` : '') +
+      (s.paid_until ? `<span class="note" style="flex-basis:100%">이용 기간 ${esc(ymd(s.paid_until))} 까지</span>` : '') +
+      (['apply', 'wait_pay', 'trial', 'active'].includes(s.status) ? `<button type="button" class="btn sm" data-cancel="${esc(s.product)}" data-n="${esc(s.name || s.product)}">그만두기</button>` : '') + `</li>`).join('') + `</ul>`;
+  else t1 += `<p class="note" style="margin-top:6px">${staff ? '사교원 내부 직원은 전 서비스를 이용료 없이 씁니다.' : keys.length ? '지금 등급으로 ' + keys.map(k => SVC[k].n).join(' · ') + ' 을(를) 쓰고 있습니다.' : '고른 유료 서비스가 없습니다. 필요한 서비스를 골라 보세요.'}</p>`;
+  t1 += `<div class="myacts"><a class="btn sm p" href="#/join" id="myMore">${ic('plus', 's')}서비스 더 고르기</a></div><div class="msg" id="myMsg" aria-live="polite"></div></div>`;
+  // ② 이용료·납부 상태
+  let t2 = `<div class="tile" id="tilePay"><div class="hd">${ic('card', 's')}이용료 · 납부 상태</div>`;
+  if (staff) t2 += `<div class="v">이용료 없음 <small>사교원 내부</small></div>`;
+  else if (preview) t2 += `<p class="note">미리보기에서는 이용료·납부 정보를 보이지 않습니다.</p>`;
+  else if (MB_STATE === '') t2 += `<p class="note">불러오는 중…</p>`;
+  else if (MB_STATE !== 'ok') t2 += `<p class="note" id="payNone">${MB_STATE === 'none' ? '이용료·납부 안내는 준비 중입니다.' : '이용료 정보를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.'}</p>`;
+  else {
+    const fee = live.reduce((a, s) => a + (+s.amount || 0), 0);
+    const inv = (MB.invoices || []).find(i => i.status === 'wait');
+    const tl = trialLine(MB);
+    t2 += `<div class="v" id="myFee">${fee ? '월 ' + won(fee) : '낼 이용료가 없습니다'}</div>`;
+    if (inv) {
+      const due = live.map(s => s.grace_until).filter(Boolean).sort()[0];
+      t2 += `<div style="margin-top:6px"><span class="st wait">입금 대기</span></div><ul class="plain kv" id="myInv" style="margin-top:6px"><li><span>낼 금액</span><b>${won(inv.amount)}${inv.months === 12 ? ' (연납)' : ''}</b></li><li><span>입금 계좌</span><b>${esc(MB.bank || '계좌 안내 준비 중')}</b></li>${MB.payinfo ? `<li><span>입금자명</span><b>${esc(MB.payinfo.depositor || '')}</b></li>` : ''}${due ? `<li><span>입금 기한</span><b>${esc(ymd(due))}</b></li>` : ''}</ul><p class="note" style="margin-top:4px">입금이 확인되면 자동으로 열립니다.</p>`;
+    } else if (live.some(s => s.status === 'trial')) t2 += `<div style="margin-top:6px"><span class="st free">무료 시범</span></div>` + (tl ? `<p class="note" style="margin-top:4px">${tl} — 그 뒤부터 이용료를 받습니다.</p>` : '');
+    else if (live.some(s => s.status === 'active')) { const nx = live.filter(s => s.status === 'active').map(s => s.paid_until).filter(Boolean).sort()[0]; t2 += `<div style="margin-top:6px"><span class="st ok">납부 완료</span></div>` + (nx ? `<ul class="plain kv" style="margin-top:6px"><li><span>다음 납부 기한</span><b>${esc(ymd(nx))}</b></li></ul>` : ''); }
+    else if (live.some(s => s.status === 'apply')) t2 += `<div style="margin-top:6px"><span class="st wait">승인 대기</span></div><p class="note" style="margin-top:4px">사교원이 확인한 뒤 열립니다.</p>`;
+    else if (fee) t2 += `<div style="margin-top:6px"><span class="st wait">입금 대기</span></div>`;
+  }
+  t2 += `</div>`;
+  // ③ 납부 정보·현금영수증
+  let t3 = '';
+  if (!staff && !preview && MB_STATE === 'ok' && (MB.payinfo || subs.length)) {
+    t3 = `<div class="tile" id="tileInfo"><div class="hd">${ic('list', 's')}납부 정보 · 현금영수증</div>` + (MB.payinfo ? `<ul class="plain kv" id="myPayinfo">${payinfoRows(MB.payinfo)}</ul><div class="myacts"><a class="btn sm" href="#/join/pay">납부 정보 고치기</a></div>` : `<p class="note">아직 적어 둔 납부 정보가 없습니다. 유료 서비스를 고를 때 함께 적습니다.</p>`) + `</div>`;
+  }
+  // ④ 청구서·납부 내역
+  let t4 = '';
+  if (!staff && !preview && MB_STATE === 'ok' && (subs.length || (MB.invoices || []).length)) {
+    const invs = MB.invoices || [];
+    t4 = `<div class="tile wide" id="tileInv"><div class="hd">${ic('doc', 's')}청구서 · 납부 내역</div>` + (invs.length
+      ? `<div class="scroll rt"><table id="myInvoices"><thead><tr><th>번호</th><th>청구일</th><th>내용</th><th class="r">금액</th><th>상태</th><th>증빙</th></tr></thead><tbody>${invs.map(i => `<tr><td data-l="번호">${esc(i.id)}</td><td data-l="청구일">${esc(ymd(i.created_at))}</td><td data-l="내용">${(i.items || []).map(x => esc(x.name)).join(' · ')}${i.months === 12 ? ' (연납)' : ''}</td><td class="r" data-l="금액">${won(i.amount)}</td><td data-l="상태">${i.status === 'paid' ? `<span class="st ok">납부 완료</span> ${esc(ymd(i.paid_at))}` : '<span class="st wait">입금 대기</span>'}</td><td data-l="증빙">${i.proof_kind ? esc(PROOF_KO[i.proof_kind] || i.proof_kind) + ' · ' : ''}${esc(RCPT_KO[i.receipt] || i.receipt || '-')}</td></tr>`).join('')}</tbody></table></div>`
+      : `<p class="note" id="invNone">아직 청구서가 없습니다.${trialLine(MB) ? ' ' + trialLine(MB) + ' 기간에는 청구서가 나오지 않습니다.' : ''}</p>`) + `</div>`;
+  }
+  box.innerHTML = head + `<div class="tiles">${t1}${t2}${t3}${t4}</div>`;
+}
+$('#myBox').addEventListener('click', async e => {
+  const b = e.target.closest('button[data-cancel]'); if (!b) return;
+  if (preview) return;
+  if (!confirm(`「${b.dataset.n}」 이용을 그만둘까요?\n이미 낸 기간까지는 쓸 수 있고, 환불은 문의하기로 요청해 주세요.`)) return;
+  b.disabled = true;
+  const r = await api('/api/membership/cancel', { method: 'POST', body: { product: b.dataset.cancel } });
+  if (r.ok && Array.isArray(r.subs)) { setMB(r); await refreshMe(); renderGreet(); renderMyBox(); renderSideHome(); const m = $('#myMsg'); if (m) { m.className = 'msg ok'; m.textContent = '그만두기를 받았습니다.'; } }
+  else { b.disabled = false; const m = $('#myMsg'); if (m) { m.className = 'msg err'; m.textContent = (r.status === 403 && r.error === 'not_open') ? '지금은 여기서 그만두기를 받을 수 없습니다. 문의하기로 알려 주세요.' : mbText(r); } }
+});
+function renderResume() { const b = $('#joinResume'); if (b) b.hidden = !(stashGet() && !preview); }
+$('#joinResumeX').addEventListener('click', () => { stashSet(null); renderResume(); });
+function renderHome() {
+  renderTfBanner(); renderResume(); renderGreet(); renderMyBox();
+  renderDash(); renderQuick(); renderNotices(); renderRecent();
+  if (!preview) loadMB().then(() => { if (onHome()) { renderGreet(); renderMyBox(); renderSideHome(); } });
+}
+
+/* ── 회원가입 3걸음(#/join) — ①계정 정보 ②이용 서비스 고르기 ③이용료 납부 정보. 로그인한 회원은 2걸음부터(「서비스 더 고르기」), #/join/pay 는 납부 정보만 고치기
+   계정은 기존 가입 API(/api/auth/signup)로 만들고, 로그인된 상태에서 /api/membership/apply 를 부른다. 바로 로그인이 안 되면 고른 서비스(상품 키만)를 이 기기에 잠시 두었다가 내 페이지 「신청 이어가기」로 잇는다 */
+const JOIN_KEY = 'sk_join_pending';
+function stashGet() { try { const v = JSON.parse(localStorage.getItem(JOIN_KEY) || 'null'); return (v && Array.isArray(v.picks) && v.picks.length) ? v : null; } catch (_) { return null; } }
+function stashSet(picks) { try { if (picks && picks.length) localStorage.setItem(JOIN_KEY, JSON.stringify({ picks: picks.map(p => ({ product: String(p.product), options: (p.options || []).map(String) })), at: Date.now() })); else localStorage.removeItem(JOIN_KEY); } catch (_) {} }
+let J = null, REG = null;
+function joinNew() { return { step: me ? 2 : 1, sel: {}, held: {}, f: {}, pay: { method: 'transfer', auto_day: 5, cycle: 'month', depositor: '', receipt_kind: 'income', receipt_no: '', invoice: false, biz_no: '' }, payMode: 'new', payOnly: false, err: '', busy: false, done: null, created: false, seeded: false }; }
+const jProd = k => (PLANS && PLANS.ok) ? PLANS.products.find(p => p.product === k) : null;
+function jPrice(p, s) { const sum = (+p.base || 0) + (p.options || []).filter(o => s.opts.includes(o.key)).reduce((a, o) => a + (+o.amount || 0), 0); return p.allin ? Math.min(sum, +p.allin) : sum; }
+function joinPicks() { if (!J || !(PLANS && PLANS.ok)) return []; return PLANS.products.filter(p => J.sel[p.product] && J.sel[p.product].on).map(p => ({ product: p.product, options: (p.options || []).map(o => o.key).filter(k => J.sel[p.product].opts.includes(k)) })); }
+function joinTotal() { return joinPicks().reduce((a, x) => { const p = jProd(x.product); return a + (p ? jPrice(p, J.sel[x.product]) : 0); }, 0); }
+function joinSeed() {                 // 로그인한 회원: 지금 이용권을 미리 고른 것으로(뺄 수는 없다 — 그만두기는 내 페이지에서)
+  if (!J || J.seeded || !me) return;
+  if (MB && Array.isArray(MB.subs)) {
+    MB.subs.filter(s => ['apply', 'wait_pay', 'trial', 'active'].includes(s.status)).forEach(s => { J.held[s.product] = s.status; J.sel[s.product] = { on: true, opts: (s.next_options || s.options || []).slice() }; });
+    if (MB.payinfo) { J.payMode = 'saved'; const pi = MB.payinfo; J.pay.method = pi.method === 'auto' ? 'auto' : 'transfer'; J.pay.auto_day = pi.auto_day || 5; J.pay.cycle = pi.cycle === 'year' ? 'year' : 'month'; J.pay.depositor = pi.depositor || ''; J.pay.receipt_kind = ['income', 'expense', 'none'].includes(pi.receipt_kind) ? pi.receipt_kind : 'income'; J.pay.invoice = !!pi.invoice; }
+    if (J.payOnly && MB.payinfo) J.payMode = 'new';
+  }
+  if (MB_STATE !== '' || preview) J.seeded = true;
+}
+async function renderJoin(fresh) {
+  if (fresh || !J) {
+    J = joinNew();
+    const st = stashGet(); if (st) st.picks.forEach(p => { J.sel[p.product] = { on: true, opts: p.options || [] }; });
+    if (me && /^#\/join\/pay/.test(location.hash || '')) { J.payOnly = true; J.step = 3; }
+  }
+  const wantPay = !!me && /^#\/join\/pay/.test(location.hash || '');       // #/join/pay = 납부 정보만 고치기(회원 정보를 받은 뒤에 판단한다)
+  if (!J.busy && wantPay && !J.payOnly) { J.payOnly = true; J.step = 3; J.done = null; J.seeded = false; }
+  else if (!J.busy && !wantPay && J.payOnly) J = joinNew();
+  if (me && J.step === 1) J.step = 2;
+  if (!me && J.step > 1 && !J.done && !J.f.email) J.step = 1;
+  joinDraw();
+  await loadPlans();
+  if (me && !preview && MB_STATE === '') await loadMB();
+  if (currentRoute() !== 'join') return;
+  joinSave(); joinSeed(); joinDraw(true);   // 지금 칸의 글자를 먼저 옮기고, 서버 값(이용권·납부 정보)을 채운 뒤 그린다
+}
+function joinSave() {                 // 그리기 전에 지금 칸의 글자를 상태로 옮긴다
+  const root = $('#joinBody'); if (!root || !J) return;
+  root.querySelectorAll('[data-k]').forEach(e => { J.f[e.dataset.k] = e.type === 'checkbox' ? e.checked : e.value; });
+  root.querySelectorAll('[data-p]').forEach(e => { J.pay[e.dataset.p] = e.type === 'checkbox' ? e.checked : e.value; });
+}
+function stepsHTML() {
+  const st = ['계정 정보', '이용 서비스 고르기', '이용료 납부 정보', '완료'], free = !joinPicks().length, cur = J.done ? 4 : J.step;
+  return '<ol class="steps" id="joinSteps">' + st.map((x, i) => { const n = i + 1; let c = n === cur ? 'cur' : n < cur ? 'past' : ''; if (n === 3 && free && cur >= 2 && !J.payOnly) c += ' skip'; return `<li class="${c}"${n === cur ? ' aria-current="step"' : ''}>${n < 4 ? n + '걸음' : '끝'}<b>${x}</b></li>`; }).join('') + '</ol>';
+}
+function pickerHTML() {
+  if (!PLANS) return '<div class="pwait" id="pickWait">서비스 목록을 불러오는 중…</div>';
+  const picks = joinPicks(), free = !picks.length, heldAny = Object.keys(J.held).length > 0;
+  let h = '<div class="pick" id="pickBox">';
+  h += `<div class="svc c-g${free ? ' sel' : ''}"><div class="hd"><input type="checkbox" id="j-free" data-svc="free"${free ? ' checked' : ''}${heldAny ? ' disabled' : ''} aria-describedby="j-freeD"><label class="t" for="j-free"><b>무료로 시작</b><small id="j-freeD">둘러보기 · 문의 · AI 질문(하루 한도) · 공개 자료</small></label><span class="pr">무료</span></div></div>`;
+  if (!PLANS.ok) return h + `<div class="notice" id="pickNone" style="margin:0"><b>이용료 안내 준비 중</b> — 지금은 무료로 가입하실 수 있고, 유료 서비스는 열리는 대로 「서비스 더 고르기」에서 고를 수 있습니다.</div></div>`;
+  PLANS.products.forEach(p => {
+    const k = p.product, m = pmOf(k), s = J.sel[k] || { on: false, opts: [] }, held = J.held[k], opts = Array.isArray(p.options) ? p.options : [];
+    const all = opts.length > 0 && opts.every(o => s.opts.includes(o.key));
+    h += `<div class="svc ${m.c}${s.on ? ' sel' : ''}" data-prodbox="${esc(k)}"><div class="hd"><input type="checkbox" id="j-${esc(k)}" data-prod="${esc(k)}"${s.on ? ' checked' : ''}${held ? ' disabled' : ''}><label class="t" for="j-${esc(k)}"><b>${esc(p.name)}</b> <span class="chip">${esc(p.tier_ko || '')}</span><small>${m.lines.map(esc).join(' · ')}${p.approve ? ' <b>(승인 필요)</b>' : ''}${held ? ' · <b>' + esc(SUB_KO[held] || '이용 중') + '</b> — 그만두기는 내 페이지에서' : ''}</small></label><span class="pr">${opts.length ? '기본 ' : ''}월 ${won(p.base)}<br><small class="an">${taxWord(p.tax)}</small></span></div>`;
+    if (s.on && opts.length) {
+      const sum = (+p.base || 0) + opts.filter(o => s.opts.includes(o.key)).reduce((a, o) => a + (+o.amount || 0), 0);
+      h += `<div class="sub"><span class="note">선택 기능</span>` + opts.map(o => `<div class="row"><label class="ck"><input type="checkbox" id="j-${esc(k)}-${esc(o.key)}" data-opt="${esc(k)}:${esc(o.key)}"${s.opts.includes(o.key) ? ' checked' : ''}>${esc(o.name)}</label><span class="p">+${won(o.amount)}</span></div>`).join('') +
+        (p.allin ? `<div class="row"><label class="ck"><input type="checkbox" id="j-${esc(k)}-all" data-all="${esc(k)}"${all ? ' checked' : ''}><b>올인원</b>(선택 기능 전부)</label><span class="p">${won(p.allin)}</span></div>` + (sum > +p.allin ? `<span class="note" style="color:var(--gold)">고른 기능을 다 더하면 ${won(sum)}이지만 올인원 값 ${won(p.allin)}만 냅니다.</span>` : '') : '') +
+        (held && J.held[k] !== 'apply' ? `<span class="note">이미 낸 기간에는 낸 구성대로 쓰고, 바꾼 선택 기능은 다음 기간부터 적용됩니다.</span>` : '') + `</div>`;
+    }
+    h += `</div>`;
+  });
+  (PLANS.external || []).forEach(x => {
+    const m = pmOf(x.product), ps = Array.isArray(x.prices) ? x.prices : [];
+    h += `<div class="svc ext ${m.c}" data-extbox="${esc(x.product)}"><div class="hd"><span class="bub">${ic(m.i)}</span><span class="t"><b>${esc(x.name)}</b> <span class="chip">${esc(TIER_KO[x.tier] || '')}</span><small>${m.lines.map(esc).join(' · ')} — 가입·납부는 의정지원 사이트에서 합니다</small></span><span class="pr">${ps.map(q => `${esc(q.name)} ${won(q.amount)}`).join('<br>')}<br><small class="an">${taxWord(x.tax)}</small></span></div>` +
+      (x.join_url ? `<div class="sub"><a class="btn sm" href="${esc(x.join_url)}" target="_blank" rel="noopener">의정지원 사이트에서 가입 ↗</a></div>` : '') + `</div>`;
+  });
+  return h + '</div>';
+}
+function sumHTML() {
+  const picks = joinPicks(); let h = '<div class="card sum" id="sumBox" aria-live="polite"><h3>월 이용료 합계</h3>', tot = 0;
+  if (!picks.length) h += `<div class="li"><span>${TIER_KO.free}</span><span>무료</span></div>`;
+  picks.forEach(x => { const p = jProd(x.product); if (!p) return; const v = jPrice(p, J.sel[x.product]); tot += v; h += `<div class="li"><span>${esc(p.name)} <small>${taxWord(p.tax)}</small></span><span>${won(v)}</span></div>`; });
+  h += `<div class="tot"><span>한 달에 낼 금액</span><b id="sumTotal">${won(tot)}</b></div>`;
+  if (tot && J.step === 3 && J.pay.method === 'transfer' && J.pay.cycle === 'year' && PLANS && PLANS.year_months) h += `<div class="li" style="margin-top:6px"><span>연납(${esc(PLANS.year_months)}개월 값)</span><span><b id="sumYear">${won(tot * PLANS.year_months)}</b></span></div>`;
+  const order = (PLANS && Array.isArray(PLANS.tiers)) ? PLANS.tiers.map(t => t.code) : Object.keys(TIER_KO);
+  const cand = [me ? tierOf(me) : 'free'].concat(picks.map(x => (jProd(x.product) || {}).tier).filter(Boolean)).sort((a, b) => order.indexOf(a) - order.indexOf(b));
+  const tl = tot ? trialLine(PLANS) : '';
+  return h + `<p class="note" style="margin-top:8px">보일 등급: <b>${esc(TIER_KO[cand[0]] || '')}</b>${tl ? ' · ' + tl : ''}</p></div>`;
+}
+function sbpvHTML() {
+  const picks = joinPicks(); const keys = me ? myServiceKeys() : [];
+  picks.forEach(x => { const k = PROD_SVC[x.product]; if (k && !keys.includes(k)) keys.push(k); });
+  let h = '<div class="card sbpv" id="sbpvBox" aria-live="polite"><h3>로그인하면 보일 사이드바</h3><div class="mini"><div class="fx">내 페이지 · AI 대화창</div><div class="fx">내 폴더</div>';
+  keys.forEach(k => { const sel = J.sel[k]; const opt = SVC_OPT[k]; const items = SVC[k].items.concat(opt ? Object.keys(opt).filter(o => !sel || !sel.on || sel.opts.includes(o)).map(o => opt[o]) : []); h += `<div class="g"><span class="cchip ${SVC[k].c}">${esc(SVC[k].n)}</span></div>` + items.map(i => `<div class="i">${esc(i[0])}</div>`).join(''); });
+  if (!keys.length) h += `<div class="g"><span class="cchip c-rs">무료로 써 보기</span></div>` + lookItems([]).map(i => `<div class="i">${esc(i[0])}</div>`).join('');
+  return h + '<div class="fx" style="color:var(--g7)">+ 서비스 더 고르기</div></div></div>';
+}
+function payFormHTML() {
+  const P = J.pay, tot = joinTotal(), hasSaved = !!(MB && MB.payinfo), v = k => esc(P[k] || '');
+  const rd = (name, key, val, label, dis) => `<label><input type="radio" name="${name}" data-pay="${key}:${val}"${String(P[key]) === String(val) ? ' checked' : ''}${dis ? ' disabled' : ''}>${label}</label>`;
+  let h = `<form class="card" id="f3" novalidate><div class="form">`;
+  if (hasSaved && !J.payOnly) h += `<div class="f w"><span class="lb">납부 정보</span><div class="checks" role="radiogroup" aria-label="납부 정보"><label><input type="radio" name="pmode" data-paymode="saved"${J.payMode === 'saved' ? ' checked' : ''}>적어 둔 납부 정보 그대로</label><label><input type="radio" name="pmode" data-paymode="new"${J.payMode !== 'saved' ? ' checked' : ''}>새로 적기</label></div>` + (J.payMode === 'saved' ? `<div class="infobox"><ul class="plain kv">${payinfoRows(MB.payinfo)}</ul></div>` : '') + `</div>`;
+  if (!(hasSaved && !J.payOnly && J.payMode === 'saved')) {
+    h += `<div class="f w"><span class="lb">납부 방식</span><div class="checks" role="radiogroup" aria-label="납부 방식">${rd('pm', 'method', 'transfer', '이체 — 달마다 직접 보냅니다')}${rd('pm', 'method', 'auto', '자동이체 — 정한 날에 저절로 나갑니다')}</div></div>`;
+    if (P.method === 'auto') h += `<div class="f w"><span class="lb">매월 납부일</span><div class="checks" role="radiogroup" aria-label="매월 납부일">${[5, 15, 25].map(d => rd('pd', 'auto_day', d, d + '일')).join('')}</div></div>` +
+      `<div class="f w"><span class="lb">자동이체 방식</span><div class="checks" role="radiogroup" aria-label="자동이체 방식" style="flex-direction:column"><label><input type="radio" name="pa" checked>① 내 은행에서 자동이체 걸기</label><label><input type="radio" name="pa" disabled>② 출금 동의(CMS) <span class="tg">준비 중</span></label></div>` +
+      `<div class="infobox" id="autoBank"><b>내 은행 앱이나 창구에서 아래대로 자동이체를 걸어 주세요.</b><ul class="dot"><li>받는 계좌: ${esc((PLANS && PLANS.bank) || (MB && MB.bank) || '신청을 마치면 내 페이지에서 안내합니다')}</li>${tot ? `<li>금액: 월 ${won(tot)}</li>` : ''}<li>날짜: 매월 ${esc(P.auto_day)}일</li></ul></div></div>`;
+    h += `<div class="f${P.method === 'auto' ? ' w' : ''}"><label for="pDep">입금자명 <span class="req">*</span></label><input type="text" id="pDep" data-p="depositor" value="${v('depositor')}" maxlength="30" autocomplete="off"><span class="hint">통장에 찍히는 이름과 같아야 자동으로 확인됩니다.</span></div>`;
+    if (P.method === 'transfer') h += `<div class="f"><span class="lb">납부 주기</span><div class="checks" role="radiogroup" aria-label="납부 주기">${rd('cy', 'cycle', 'month', '월납')}${rd('cy', 'cycle', 'year', '연납' + (PLANS && PLANS.year_months ? ` — ${esc(PLANS.year_months)}개월 값만 냅니다` : ''))}</div></div>`;
+    h += `<div class="f w"><span class="lb">증빙 서류</span><label class="ck"><input type="checkbox" id="pInv" data-payck="invoice"${P.invoice ? ' checked' : ''}>세금계산서·계산서가 필요합니다 <span class="note">(사업자 — 현금영수증 대신 발행합니다)</span></label></div>`;
+    if (P.invoice) h += `<div class="f w"><label for="pBiz">사업자등록번호 <span class="req">*</span></label><input type="text" id="pBiz" data-p="biz_no" value="${v('biz_no')}" placeholder="000-00-00000" inputmode="numeric" autocomplete="off"></div>`;
+    else h += `<div class="f w"><span class="lb">현금영수증</span><div class="checks" role="radiogroup" aria-label="현금영수증">${rd('cr', 'receipt_kind', 'income', '소득공제용(휴대폰 번호)')}${rd('cr', 'receipt_kind', 'expense', '지출증빙용(사업자번호)')}${rd('cr', 'receipt_kind', 'none', '원치 않음')}</div>` +
+      (P.receipt_kind === 'none' ? '' : `<input type="text" class="inp" id="pRno" data-p="receipt_no" value="${v('receipt_no')}" aria-label="${P.receipt_kind === 'income' ? '현금영수증용 휴대폰 번호' : '현금영수증용 사업자번호'}" placeholder="${P.receipt_kind === 'income' ? '010-0000-0000' : '000-00-00000'}" inputmode="numeric" style="margin-top:6px" autocomplete="off">`) + `<span class="hint">주민등록번호는 받지 않습니다. 번호는 가려서 보관합니다.</span></div>`;
+  }
+  h += `</div><div id="e3">${J.err ? `<div class="err" role="alert">${esc(J.err)}</div>` : ''}</div><div class="acts">${J.payOnly ? '<a class="btn" href="#/">내 페이지로</a>' : '<button type="button" class="btn" data-jact="back2">이전</button>'}<span class="r"><button type="submit" class="btn p" id="joinGo"${J.busy ? ' disabled' : ''}>${J.busy ? '처리하는 중…' : J.payOnly ? '납부 정보 저장' : me ? '신청하기' : '가입 마치기'}</button></span></div></form>`;
+  return h;
+}
+function doneHTML() {
+  const D = J.done, nm = esc((me && (me.name || me.email)) || J.f.name || '회원');
+  let h = `<div class="card done" id="joinDone" data-kind="${esc(D.kind)}"><div class="dogw"><img class="dogr" src="${IMG}dog2.jpg" alt=""><span class="okb" aria-hidden="true">${ic('check', 's')}</span></div>`;
+  const goMy = `<div class="cta" style="margin-top:14px"><a class="btn p" href="#/" id="toMy">내 페이지로</a><a class="btn" href="#/start">첫 화면으로</a></div>`;
+  if (D.kind === 'free') h += `<h2>가입되었습니다</h2><p class="lead" style="margin:6px 0 0">${nm} 님, 고맙습니다.</p><div class="box"><b>${TIER_KO.free}</b>으로 바로 쓸 수 있습니다. 나중에 「서비스 더 고르기」에서 서비스를 더할 수 있습니다.</div>` + goMy;
+  else if (D.kind === 'pay') h += `<h2>납부 정보를 저장했습니다</h2><div class="box"><ul class="plain kv">${payinfoRows(MB && MB.payinfo)}</ul></div>` + goMy;
+  else if (D.kind === 'closed') h += `<h2>${D.wasNew ? '계정은 만들어졌습니다' : '유료 서비스 신청은 곧 열립니다'}</h2><p class="lead" style="margin:6px 0 0">${nm} 님, 고맙습니다.</p><div class="box" id="closedBox"><b>유료 서비스 신청은 곧 열립니다.${D.wasNew ? ' 계정은 만들어졌습니다.' : ''}</b><br>고르신 서비스는 이 기기에 적어 두었습니다. 신청이 열리면 내 페이지의 「신청 이어가기」에서 이어서 하실 수 있고, 그때까지 ${TIER_KO.free}으로 쓰실 수 있습니다.</div>` + goMy;
+  else if (D.kind === 'needlogin') h += `<h2>계정이 만들어졌습니다</h2><div class="box">${D.picks ? '로그인한 뒤 내 페이지의 <b>「신청 이어가기」</b>를 누르면 고르신 서비스 신청을 이어서 합니다.' : '로그인하면 바로 쓸 수 있습니다.'}</div><div class="cta" style="margin-top:14px"><a class="btn p" href="#login">로그인</a></div>`;
+  else if (D.kind === 'pending') h += `<h2>가입 신청이 접수되었습니다</h2><div class="box">승인되면 로그인할 수 있습니다. 고르신 서비스는 로그인한 뒤 내 페이지의 「신청 이어가기」에서 이어서 신청합니다.</div><div class="cta" style="margin-top:14px"><a class="btn" href="#/start">첫 화면으로</a></div>`;
+  else {   // applied — 서버 응답(MB)대로
+    const subs = (MB && MB.subs || []).filter(s => (D.products || []).includes(s.product));
+    const inv = MB && (MB.invoices || []).find(i => i.status === 'wait'), due = subs.map(s => s.grace_until).filter(Boolean).sort()[0], tl = trialLine(MB);
+    h += `<h2>${D.wasNew ? '가입 신청을 받았습니다' : '신청을 받았습니다'}</h2><p class="lead" style="margin:6px 0 0">${nm} 님, 고맙습니다.</p><div class="box"><ul class="plain" id="doneList" style="display:grid;gap:6px">` +
+      subs.map(s => `<li data-sub="${esc(s.product)}" data-status="${esc(s.status)}"><b>${esc(s.name)}</b> — ${s.status === 'apply' ? '<span style="color:var(--gold)">승인 대기</span> · 사교원이 확인한 뒤 열립니다(승인되면 알려드립니다)' : s.status === 'trial' ? '무료 시범으로 바로 열렸습니다' + (tl ? ` (${tl})` : '') : s.status === 'wait_pay' ? '입금이 확인되면 자동으로 열립니다' : esc(SUB_KO[s.status] || s.status)} · 월 ${won(s.next_amount != null ? s.next_amount : s.amount)} <small class="note">${taxWord(s.tax)}</small></li>`).join('') +
+      (inv ? `<li id="doneInv">낼 금액: <b>${won(inv.amount)}</b>${inv.months === 12 ? ' (연납)' : ''} · 청구서 ${esc(inv.id)}번</li><li>입금 계좌: <b>${esc(MB.bank || '계좌 안내 준비 중')}</b>${MB.payinfo ? ` · 입금자명 <b>${esc(MB.payinfo.depositor || '')}</b>` : ''}</li>${due ? `<li>입금 기한: <b>${esc(ymd(due))}</b></li>` : ''}` : '') +
+      (MB && MB.payinfo ? `<li class="note">납부 방식: ${MB.payinfo.method === 'auto' ? '자동이체 · 매월 ' + esc(MB.payinfo.auto_day || '') + '일' : '이체'} · ${MB.payinfo.cycle === 'year' ? '연납' : '월납'}</li>` : '') + `</ul></div>` + goMy;
+  }
+  return h + '</div>';
+}
+function joinDraw(noSave) {
+  const root = $('#joinBody'); if (!root || !J) return;
+  const act = document.activeElement && root.contains(document.activeElement) ? document.activeElement.id : '';
+  if (!noSave) joinSave();
+  const f = J.f, v = k => esc(f[k] || '');
+  let h = `<div class="sech"><h2>${J.payOnly ? '납부 정보 고치기' : me && !J.created ? '서비스 더 고르기' : '회원가입'}</h2><p>${J.payOnly ? '이용료 납부 방식과 증빙 정보를 고칩니다.' : me && !J.created ? '필요한 서비스를 더 골라 보세요. 고른 대로 사이드바와 이용료가 정해집니다.' : '세 걸음이면 끝납니다. 무료만 고르면 납부 정보는 건너뜁니다.'}</p></div>` + (J.payOnly ? '' : stepsHTML());
+  if (J.done) h += doneHTML();
+  else if (J.step === 1) {
+    h += `<form class="card" id="f1" novalidate><div class="form">` +
+      `<div class="f"><label for="suName">이름 <span class="req">*</span></label><input type="text" id="suName" data-k="name" value="${v('name')}" autocomplete="name"></div>` +
+      `<div class="f"><label for="suEmail">이메일 <span class="req">*</span></label><input type="email" id="suEmail" data-k="email" value="${v('email')}" autocomplete="email" placeholder="name@example.com"><span class="hint">로그인 아이디로 씁니다.</span></div>` +
+      `<div class="f"><label for="suPw">비밀번호 <span class="req">*</span></label><input type="password" id="suPw" data-k="pw" value="${v('pw')}" autocomplete="new-password"><span class="hint">8자 이상</span></div>` +
+      `<div class="f"><label for="suPw2">비밀번호 확인 <span class="req">*</span></label><input type="password" id="suPw2" data-k="pw2" value="${v('pw2')}" autocomplete="new-password"></div>` +
+      `<div class="f"><label for="suSido">활동지역 <span class="req">*</span></label><div class="rg"><select id="suSido" data-k="region_sido" aria-label="광역"><option value="">광역</option></select><select id="suSigungu" data-k="region_sigungu" aria-label="시군구"><option value="">시군구</option></select></div></div>` +
+      `<div class="f"><label for="suContact">전화번호 <span class="hint">(선택)</span></label><input type="tel" id="suContact" data-k="contact" value="${v('contact')}" inputmode="tel" placeholder="010-0000-0000" autocomplete="tel"></div>` +
+      `<div class="f w"><label for="suOrg">소속 <span class="hint">(선택)</span></label><input type="text" id="suOrg" data-k="org" value="${v('org')}" placeholder="마을·조합·기관"></div>` +
+      `<div class="f w"><label class="ck"><input type="checkbox" id="suConsent" data-k="consent"${f.consent ? ' checked' : ''}>(필수) 통합 계정 발급을 위한 개인정보 수집·이용에 동의합니다 <span class="req">*</span></label><span class="hint">이름·이메일·전화는 회원 관리와 이용료 안내에만 씁니다. <a href="account-privacy.html" target="_blank" rel="noopener">처리방침</a></span></div>` +
+      `</div><div id="e1">${J.err ? `<div class="err" role="alert">${esc(J.err)}</div>` : ''}</div><div class="acts"><a class="btn" href="#login">이미 계정이 있어요 — 로그인</a><span class="r"><button type="submit" class="btn p" id="joinNext1">다음 — 서비스 고르기</button></span></div></form>`;
+  } else if (J.step === 2) {
+    const picks = joinPicks(), free = !picks.length;
+    const closed = PLANS && PLANS.ok && PLANS.open === false && !(me && me.role === 'admin');
+    const label = !me ? (free ? '가입 마치기' : '다음 — 납부 정보') : (free ? '내 페이지로' : '다음 — 납부 정보');
+    h += (me && !J.created ? `<div class="dognote"><img class="dogr s" src="${IMG}dog5.jpg" alt=""><span><b>필요한 서비스를 더 골라 보세요.</b><br>유료 서비스는 입금이 확인되면(협동조합·연합회는 승인도 거쳐) 열립니다.</span></div>` : '') +
+      (closed ? `<div class="notice" id="closedNote"><b>유료 서비스 신청은 곧 열립니다.</b> 지금 고르면 ${me ? '' : '계정을 먼저 만들고, '}신청이 열릴 때 내 페이지에서 이어서 할 수 있습니다.</div>` : '') +
+      `<div class="two"><div>${pickerHTML()}<div id="e2">${J.err ? `<div class="err" role="alert">${esc(J.err)}</div>` : ''}</div><div class="acts">${me ? '<a class="btn" href="#/">내 페이지로</a>' : '<button type="button" class="btn" data-jact="back1">이전</button>'}<span class="r"><button type="button" class="btn p" data-jact="next2" id="next2"${J.busy || !PLANS ? ' disabled' : ''}>${J.busy ? '처리하는 중…' : label}</button></span></div></div><aside class="sticky" id="sideBox">${sumHTML()}${sbpvHTML()}</aside></div>`;
+  } else {
+    h += `<div class="two">${payFormHTML()}<aside class="sticky">${J.payOnly ? '' : sumHTML()}</aside></div>`;
+  }
+  root.innerHTML = h;
+  if (J.step === 1 && !J.done) fillRegions();
+  if (act) { const e = document.getElementById(act); if (e) { try { e.focus({ preventScroll: true }); } catch (_) {} } }
+}
+async function fillRegions() {
+  if (!REG) { const r = await api('/api/regions'); REG = (r.ok && r.regions) || {}; }
+  const sido = $('#suSido'), sig = $('#suSigungu'); if (!sido || !sig || !J) return;
+  const cs = J.f.region_sido || '', cg = J.f.region_sigungu || '';
+  sido.innerHTML = '<option value="">광역</option>' + Object.keys(REG).map(k => `<option value="${esc(k)}"${k === cs ? ' selected' : ''}>${esc(k)}</option>`).join('');
+  sig.innerHTML = '<option value="">시군구</option>' + (REG[cs] || []).map(k => `<option value="${esc(k)}"${k === cg ? ' selected' : ''}>${esc(k)}</option>`).join('');
+}
+function joinErr(msg) { J.err = msg || ''; J.busy = false; joinDraw(); const e = $('#joinBody .err'); if (e) { try { e.scrollIntoView({ block: 'nearest' }); } catch (_) {} } }
+function payCheck() {                 // 서버(membership._payinfo_검사)와 같은 규칙을 미리 본다 — 정본은 서버
+  const P = J.pay, dep = String(P.depositor || '').replace(/[^0-9A-Za-z가-힣]/g, ''), num = s => String(s || '').replace(/\D/g, '');
+  if (/\d{6}\s*-?\s*[1-8]\d{6}/.test([P.depositor, P.receipt_no, P.biz_no].join(' '))) return '주민등록번호는 받지 않습니다. 휴대폰 번호나 사업자등록번호를 적어 주세요.';
+  if (dep.length < 2) return '입금자 이름을 2자 이상 적어 주세요(통장에 찍히는 이름).';
+  if (P.invoice) { if (num(P.biz_no).length !== 10) return '세금계산서·계산서를 받으려면 사업자등록번호 10자리가 필요합니다.'; return ''; }
+  if (P.receipt_kind === 'income' && !/^01\d{8,9}$/.test(num(P.receipt_no))) return '현금영수증(소득공제용) 휴대폰 번호를 확인해 주세요.';
+  if (P.receipt_kind === 'expense' && num(P.receipt_no).length !== 10) return '현금영수증(지출증빙용) 사업자등록번호 10자리를 확인해 주세요.';
+  return '';
+}
+function payBody() { const P = J.pay; const b = { method: P.method, cycle: P.method === 'auto' ? 'month' : P.cycle, depositor: P.depositor, receipt_kind: P.invoice ? 'none' : P.receipt_kind, receipt_no: P.invoice ? '' : P.receipt_no, invoice: !!P.invoice, biz_no: P.invoice ? P.biz_no : '' }; if (P.method === 'auto') { b.auto_kind = 'self'; b.auto_day = +P.auto_day || 5; } return b; }
+async function joinFinish() {
+  if (J.busy) return;
+  if (preview) return joinErr('등급 미리보기 중에는 신청·저장을 하지 않습니다. 「통합관리자(원래대로)」로 돌아가서 해 주세요.');
+  const picks = joinPicks(), wasNew = !me || J.created;
+  J.err = ''; J.busy = true; joinDraw();
+  if (!me) {
+    const f = J.f, email = String(f.email || '').trim().toLowerCase();
+    if (!J.created) {
+      const r = await api('/api/auth/signup', { method: 'POST', body: { email, username: email, password: f.pw || '', name: String(f.name || '').trim(), tier: 'general', region_sido: f.region_sido || '', region_sigungu: f.region_sigungu || '', contact: String(f.contact || '').trim(), org: String(f.org || '').trim(), consent: !!f.consent } });
+      if (!r.ok) { J.step = 1; return joinErr(errText(r)); }
+      J.created = true; J.signupStatus = r.status;
+    }
+    if (J.signupStatus !== 'approved') { stashSet(picks); J.f.pw = J.f.pw2 = ''; J.busy = false; J.done = { kind: 'pending' }; return joinDraw(); }
+    const l = await api('/api/auth/login', { method: 'POST', body: { email, username: email, password: f.pw || '' } });
+    let u = (l.ok && l.twofa !== 'pending') ? l.user : null;
+    if (l.ok && l.twofa !== 'pending' && !u) { const w = await api('/api/auth/me'); u = (w.ok && w.user) || null; }
+    J.f.pw = J.f.pw2 = '';                       // 비밀번호는 더 들고 있지 않는다
+    if (!u) { stashSet(picks); J.busy = false; J.done = { kind: 'needlogin', picks: picks.length }; return joinDraw(); }
+    me = realMe = u; preview = null; MB = null; MB_STATE = '';
+    try { localStorage.setItem('sk_in', '1'); } catch (_) {}
+    await loadPrefs(); setWho(); loadTwofa();
+    mbSeq++;                                   // 방금 만든 계정 — 화면이 띄운 이용권 조회는 버리고 아래 신청 응답을 쓴다
+  }
+  if (!picks.length && !J.payOnly) { stashSet(null); J.busy = false; J.done = { kind: 'free' }; return joinDraw(); }
+  const body = { services: J.payOnly ? [] : picks };
+  if (J.payOnly || !(MB && MB.payinfo) || J.payMode !== 'saved') body.pay = payBody();
+  const a = await api('/api/membership/apply', { method: 'POST', body });
+  J.busy = false;
+  if (a.ok && Array.isArray(a.subs)) {
+    setMB(a); stashSet(null); await refreshMe();
+    J.done = J.payOnly ? { kind: 'pay' } : { kind: 'applied', products: picks.map(p => p.product), wasNew };
+    return joinDraw();
+  }
+  if ((a.status === 403 && a.error === 'not_open') || a.status === 404 || a.status === 0 || a.status >= 500) {   // 신청이 닫혀 있거나 서버에 아직 없음 — 계정은 그대로, 고른 것은 적어 둔다
+    if (J.payOnly) return joinErr('지금은 납부 정보를 저장할 수 없습니다. 잠시 후 다시 해 주세요.');
+    stashSet(picks); J.done = { kind: 'closed', wasNew }; return joinDraw();
+  }
+  if (a.error === 'bad_pay') { J.step = 3; J.payMode = 'new'; }
+  return joinErr(mbText(a));
+}
+$('#joinBody').addEventListener('input', e => { if (e.target.closest('[data-k],[data-p]')) { joinSave(); if (J && J.err) { J.err = ''; $('#joinBody').querySelectorAll('.err').forEach(x => x.remove()); } } });
+$('#joinBody').addEventListener('change', e => {
+  if (!J) return; const t = e.target, d = t.dataset || {};
+  if (t.id === 'suSido') { joinSave(); J.f.region_sigungu = ''; fillRegions(); return; }
+  if (d.svc === 'free') { Object.keys(J.sel).forEach(k => { if (!J.held[k]) J.sel[k].on = false; }); }
+  else if (d.prod) {
+    const p = jProd(d.prod); if (!p) return;
+    if (t.checked) {
+      const clash = PLANS.products.find(q => q.product !== p.product && q.group === p.group && J.held[q.product]);
+      if (clash) { J.err = `지금 쓰는 「${clash.name}」을(를) 먼저 그만둔 뒤 다른 것을 신청해 주세요. 남은 기간 처리는 문의해 주세요.`; return joinDraw(); }
+      PLANS.products.forEach(q => { if (q.product !== p.product && q.group === p.group && J.sel[q.product]) J.sel[q.product].on = false; });   // 같은 서비스는 한 가지만(협동조합·연합회)
+      J.sel[d.prod] = Object.assign({ opts: [] }, J.sel[d.prod] || {}, { on: true });
+    } else if (J.sel[d.prod]) J.sel[d.prod].on = false;
+  }
+  else if (d.opt) { const [k, o] = d.opt.split(':'), s = J.sel[k]; if (!s) return; const i = s.opts.indexOf(o); if (t.checked && i < 0) s.opts.push(o); if (!t.checked && i >= 0) s.opts.splice(i, 1); }
+  else if (d.all) { const p = jProd(d.all), s = J.sel[d.all]; if (!p || !s) return; s.opts = t.checked ? (p.options || []).map(o => o.key) : []; }
+  else if (d.pay) { joinSave(); const i = d.pay.indexOf(':'); J.pay[d.pay.slice(0, i)] = d.pay.slice(i + 1); }
+  else if (d.payck) { joinSave(); J.pay[d.payck] = t.checked; }
+  else if (d.paymode) { joinSave(); J.payMode = d.paymode; }
+  else return;
+  J.err = ''; joinDraw();
+});
+$('#joinBody').addEventListener('click', e => {
+  const b = e.target.closest('[data-jact]'); if (!b || !J) return;
+  joinSave(); J.err = '';
+  if (b.dataset.jact === 'back1') { J.step = 1; joinDraw(); }
+  else if (b.dataset.jact === 'back2') { J.step = 2; joinDraw(); }
+  else if (b.dataset.jact === 'next2') {
+    const picks = joinPicks();
+    if (!picks.length) { if (me && !J.created) { location.hash = '#/'; return; } return joinFinish(); }
+    J.step = 3; joinDraw(); try { window.scrollTo(0, 0); } catch (_) {}
+  }
+});
+$('#joinBody').addEventListener('submit', e => {
+  e.preventDefault(); if (!J) return; joinSave(); J.err = '';
+  if (e.target.id === 'f1') {
+    const f = J.f, email = String(f.email || '').trim();
+    const msg = !String(f.name || '').trim() ? ERR.name_required : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? ERR.invalid_email : String(f.pw || '').length < 8 ? ERR.weak_password : f.pw !== f.pw2 ? '비밀번호 두 칸이 서로 다릅니다.' : (!f.region_sido || !f.region_sigungu) ? ERR.region_required : !f.consent ? ERR.consent_required : '';
+    if (msg) return joinErr(msg);
+    J.step = 2; joinDraw(); try { window.scrollTo(0, 0); } catch (_) {}
+  } else if (e.target.id === 'f3') {
+    if (J.payOnly || !(MB && MB.payinfo) || J.payMode !== 'saved') { const m = payCheck(); if (m) return joinErr(m); }
+    joinFinish();
+  }
+});
+
+/* ── 문의(#/ask) — 분류 4개를 먼저 고르고 내용·연락처 → POST /api/contact. 닫혀 있거나 실패하면 사교원 홈페이지 문의 창구를 안내한다 */
+const ASK_KINDS = { team: '팀학습 컨설팅', ai_edu: 'AI교육', ax_build: '업무자동화 시스템 구축 의뢰', etc: '기타 문의' };
+const ASK_META = { team: { c: 'c-team', i: 'users', d: '조직의 팀 학습 설계와 진행' }, ai_edu: { c: 'c-aca', i: 'book', d: '주민·직원·활동가 AI 교육' }, ax_build: { c: 'c-pol', i: 'tool', d: '우리 기관에 맞춘 업무 시스템' }, etc: { c: 'c-rs', i: 'help', d: '그 밖의 궁금한 점' } };
+const ASK_EXTRA = { team: [['org', '기관(단체) 이름', ''], ['x_people', '참여 인원', '예: 12'], ['x_when', '희망 시기', '예: 2027년 3월']], ai_edu: [['x_target', '교육 대상', '예: 마을 주민, 조합 임원'], ['x_people', '인원', '예: 20'], ['x_times', '회차', '예: 4']], ax_build: [['org', '기관(단체) 이름', ''], ['x_staff', '직원 수', '예: 8']], etc: [] };
+const ASK_FEATS = ['메일', '결재', '근태', '인사', '회계', '문서작성', '입찰'];
+const CONTACT_URL = HOME + 'contact';
+let A = null;
+const askKinds = () => (PLANS && PLANS.ok && PLANS.contact_kinds && Object.keys(PLANS.contact_kinds).length) ? PLANS.contact_kinds : ASK_KINDS;
+function renderAsk(fresh) {
+  if (fresh || !A) A = { cat: '', done: '', err: '', fail: false, busy: false, f: { name: (me && me.name) || '', email: (me && me.email) || '' }, feats: [] };
+  askDraw();
+  if (!PLANS) loadPlans().then(() => { if (currentRoute() === 'ask' && A && !A.cat && !A.done) askDraw(); });
+}
+function askSave() { const root = $('#askBody'); if (!root || !A) return; root.querySelectorAll('[data-a]').forEach(e => { A.f[e.dataset.a] = e.type === 'checkbox' ? e.checked : e.value; }); A.feats = Array.from(root.querySelectorAll('input[data-feat]:checked')).map(e => e.dataset.feat); }
+function askDraw() {
+  const root = $('#askBody'); if (!root || !A) return;
+  const act = document.activeElement && root.contains(document.activeElement) ? document.activeElement.id : '';
+  const K = askKinds(), v = k => esc(A.f[k] || '');
+  let h = `<div class="sech"><h2>문의하기</h2><p>먼저 문의 분류를 골라 주세요. 분류에 따라 묻는 칸이 달라집니다.</p></div>`;
+  if (A.done) { root.innerHTML = h + `<div class="card done" id="askDone"><div class="dogw"><img class="dogr" src="${IMG}dog3.jpg" alt=""><span class="okb" aria-hidden="true">${ic('check', 's')}</span></div><h2>문의를 받았습니다</h2><p class="lead" style="margin:6px 0 0">분류: ${esc(A.done)} · 담당자가 확인하고 연락드립니다.</p><div class="cta" style="margin-top:14px"><button type="button" class="btn" data-aact="again">다른 문의 쓰기</button><a class="btn p" href="${me ? '#/' : '#/start'}">${me ? '내 페이지로' : '첫 화면으로'}</a></div></div>`; return; }
+  h += `<div class="cats" id="askCats" role="group" aria-label="문의 분류">` + Object.keys(K).map(k => { const m = ASK_META[k] || ASK_META.etc; return `<button type="button" class="cat ${m.c}" data-cat="${esc(k)}" aria-pressed="${A.cat === k}"><span class="bub">${ic(m.i)}</span><b>${esc(K[k])}</b><span>${esc(m.d)}</span></button>`; }).join('') + `</div>`;
+  if (!A.cat) { root.innerHTML = h + `<p class="note">위 네 가지 가운데 하나를 누르면 아래에 문의 칸이 나옵니다.</p>`; return; }
+  const ex = (ASK_EXTRA[A.cat] || []).map(x => `<div class="f"><label for="q-${x[0]}">${x[1]}</label><input type="text" id="q-${x[0]}" data-a="${x[0]}" value="${v(x[0])}" placeholder="${x[2]}" autocomplete="off"></div>`).join('') +
+    (A.cat === 'ax_build' ? `<div class="f w"><span class="lb">필요한 기능(여러 개 고를 수 있습니다)</span><div class="checks">${ASK_FEATS.map(x => `<label><input type="checkbox" data-feat="${x}"${A.feats.includes(x) ? ' checked' : ''}>${x}</label>`).join('')}</div></div>` : '');
+  h += `<form class="card" id="fAsk" novalidate><h3 style="color:var(--g9);margin-bottom:12px">${esc(K[A.cat] || '')}</h3><div class="form">${ex}` +
+    `<div class="f"><label for="qn">이름 <span class="req">*</span></label><input type="text" id="qn" data-a="name" value="${v('name')}" maxlength="40" autocomplete="name"></div>` +
+    `<div class="f"><label for="qt">전화번호</label><input type="tel" id="qt" data-a="phone" value="${v('phone')}" placeholder="010-0000-0000" autocomplete="tel"></div>` +
+    `<div class="f w"><label for="qe">이메일</label><input type="email" id="qe" data-a="email" value="${v('email')}" autocomplete="email"><span class="hint">전화번호와 이메일 가운데 하나는 꼭 적어 주세요.</span></div>` +
+    `<div class="f w"><label for="qc">내용 <span class="req">*</span></label><textarea id="qc" data-a="message" maxlength="4000" placeholder="${A.cat === 'etc' ? '궁금한 점을 자유롭게 적어 주세요.' : '상황과 바라는 점을 적어 주세요.'}">${v('message')}</textarea></div>` +
+    `<div class="f w"><label class="ck"><input type="checkbox" id="qa" data-a="consent"${A.f.consent ? ' checked' : ''}>개인정보 수집·이용에 동의합니다 <span class="req">*</span></label><span class="hint">이름·연락처·이메일은 문의 답변에만 씁니다. <a href="account-privacy.html" target="_blank" rel="noopener">처리방침</a></span></div>` +
+    `</div><div id="eAsk">${A.err ? `<div class="err" role="alert">${esc(A.err)}</div>` : ''}${A.fail ? `<div class="notice" id="askFail" style="margin-top:12px"><b>지금은 온라인 문의 접수가 준비 중입니다.</b> 적으신 내용은 그대로 두었습니다. 사교원 홈페이지 문의 창구로 보내 주세요 — <a href="${esc(CONTACT_URL)}" target="_blank" rel="noopener">사교원 홈페이지 문의하기 ↗</a></div>` : ''}</div>` +
+    `<div class="acts"><span></span><span class="r"><button type="submit" class="btn p" id="askGo"${A.busy ? ' disabled' : ''}>${A.busy ? '보내는 중…' : '문의 보내기'}</button></span></div></form>`;
+  root.innerHTML = h;
+  if (act) { const e = document.getElementById(act); if (e) { try { e.focus({ preventScroll: true }); } catch (_) {} } }
+}
+$('#askBody').addEventListener('input', e => { if (A && A.err && e.target.closest('[data-a]')) { A.err = ''; $('#askBody').querySelectorAll('.err').forEach(x => x.remove()); } });
+$('#askBody').addEventListener('click', e => {
+  const c = e.target.closest('button[data-cat]'); if (c) { askSave(); A.cat = c.dataset.cat; A.err = ''; A.fail = false; askDraw(); return; }
+  if (e.target.closest('[data-aact="again"]')) { A = null; renderAsk(true); }
+});
+$('#askBody').addEventListener('submit', async e => {
+  e.preventDefault(); if (!A || A.busy) return; askSave();
+  const f = A.f, num = String(f.phone || '').replace(/\D/g, ''), mailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(f.email || '').trim());
+  const msg = !String(f.name || '').trim() ? '이름을 적어 주세요.' : (num.length < 9 && !mailOk) ? '전화번호나 이메일 가운데 하나를 바르게 적어 주세요.' : String(f.message || '').trim().length < 5 ? '문의 내용을 5자 이상 적어 주세요.' : !f.consent ? '개인정보 수집·이용에 동의해 주세요.' : '';
+  if (msg) { A.err = msg; A.fail = false; return askDraw(); }
+  const extra = {}; (ASK_EXTRA[A.cat] || []).forEach(x => { if (x[0] !== 'org' && String(f[x[0]] || '').trim()) extra[x[1]] = String(f[x[0]]).trim(); });
+  if (A.cat === 'ax_build' && A.feats.length) extra['필요한 기능'] = A.feats.slice();
+  A.err = ''; A.fail = false; A.busy = true; askDraw();
+  const r = await api('/api/contact', { method: 'POST', body: { kind: A.cat, name: String(f.name).trim(), phone: String(f.phone || '').trim(), email: String(f.email || '').trim(), org: String(f.org || '').trim(), message: String(f.message).trim(), consent: true, extra } });
+  A.busy = false;
+  if (r.ok) { A.done = askKinds()[A.cat] || '문의'; askDraw(); try { window.scrollTo(0, 0); } catch (_) {} return; }
+  if ((r.status === 400 || r.status === 429) && (r.message || r.status === 429)) A.err = mbText(r); else A.fail = true;   // 닫힘(403)·없음(404)·연결 실패 → 홈페이지 문의 창구 안내
+  askDraw();
+});
+
+/* ── ⑥ 꾸미기(#/custom) — 대시보드 칸 체크·▲▼ · 미리보기 · 저장. 11-18: 사이드바는 「내가 고른 서비스」로 정해져 꾸미기에서 뺐다(옛 저장값 prefs.side 는 건드리지 않는다) */
+const CUST = { defs: [], dash: [] };
+async function renderCustom() {
+  const r = await api('/api/me/dashboard/cards');
+  if (!me || currentRoute() !== 'custom') return;
+  const defs = (r.ok && Array.isArray(r.cards) && r.cards.length) ? r.cards.filter(c => c && c.id) : Object.keys(CARD_DEFS).map(id => ({ id, title: CARD_DEFS[id] }));
+  CUST.defs = defs;
+  const chosen = myDash().filter(id => defs.find(d => d.id === id));
+  CUST.dash = chosen.map(id => ({ id, on: true })).concat(defs.filter(d => !chosen.includes(d.id)).map(d => ({ id: d.id, on: false })));
+  drawCustom();
+}
+function drawCustom() {
+  const row = (x, i, n, label, meta) => `<li><label><input type="checkbox" data-ck="dash" data-id="${esc(x.id)}"${x.on ? ' checked' : ''}> <span>${label}</span>${meta ? `<span class="meta">${meta}</span>` : ''}</label><button class="mv" type="button" data-cm="dash" data-id="${esc(x.id)}" data-mv="-1" aria-label="${esc(label)} 위로"${i === 0 ? ' disabled' : ''}>▲</button><button class="mv" type="button" data-cm="dash" data-id="${esc(x.id)}" data-mv="1" aria-label="${esc(label)} 아래로"${i === n - 1 ? ' disabled' : ''}>▼</button></li>`;
+  $('#cDash').innerHTML = CUST.dash.map((x, i) => { const d = CUST.defs.find(c => c.id === x.id) || {}; return row(x, i, CUST.dash.length, esc(d.title || CARD_DEFS[x.id] || x.id), esc([d.need ? whoText(d.need) : '', d.refresh ? '갱신 ' + d.refresh : ''].filter(Boolean).join(' · '))); }).join('');
+  const dashOn = CUST.dash.filter(x => x.on);
+  $('#cPrev').innerHTML = `<div class="h">📊 대시보드</div><ul>${dashOn.length ? dashOn.map(x => `<li>▫ ${esc((CUST.defs.find(c => c.id === x.id) || {}).title || CARD_DEFS[x.id] || x.id)}</li>`).join('') : '<li>(없음)</li>'}</ul>`;
+}
+function custMove(id, dir) { const arr = CUST.dash, i = arr.findIndex(x => x.id === id), j = i + dir; if (i < 0 || j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; drawCustom(); }
+$('#vCustom').dataset.ct = 'dash';
+$('#vCustom').querySelector('.ctabs').addEventListener('click', e => { const b = e.target.closest('button[data-ct]'); if (!b) return; $('#vCustom').dataset.ct = b.dataset.ct; $('#vCustom').querySelectorAll('.ctabs button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); });
+$('#vCustom').addEventListener('change', e => { const c = e.target.closest('input[data-ck]'); if (!c) return; const x = CUST.dash.find(y => y.id === c.dataset.id); if (x) x.on = c.checked; drawCustom(); });
+$('#vCustom').addEventListener('click', e => { const b = e.target.closest('button[data-cm]'); if (b) custMove(b.dataset.id, +b.dataset.mv); });
+$('#cSave').addEventListener('click', async () => {
+  const dash = CUST.dash.filter(x => x.on).map(x => x.id), m = $('#cMsg');
+  prefs.dash = dash;
+  if (preview) { m.className = 'msg'; m.textContent = '미리보기 중엔 저장하지 않습니다.'; return; }
+  const b = $('#cSave'); b.disabled = true; const r = await api('/api/auth/prefs', { method: 'POST', body: { dash } }); b.disabled = false;
+  if (r.ok) { if (r.prefs) prefs = Object.assign({}, prefs, r.prefs); m.className = 'msg ok'; m.textContent = '저장했습니다. 내 페이지에 반영됩니다.'; }
+  else { m.className = 'msg err'; m.textContent = '저장하지 못했습니다: ' + errText(r); }
+});
+$('#cReset').addEventListener('click', async () => {   // 11-04 개선안 10: 확인 한 번 뒤 바로 저장
+  if (!confirm('대시보드 칸을 등급 기본 구성으로 되돌릴까요? 바로 저장됩니다.')) return;
+  const m = $('#cMsg');
+  prefs.dash = [];
+  if (preview) { m.className = 'msg'; m.textContent = '미리보기 중엔 저장하지 않습니다(화면만 돌렸습니다).'; renderCustom(); return; }
+  const r = await api('/api/auth/prefs', { method: 'POST', body: { dash: [] } });
+  if (r.ok) { if (r.prefs) prefs = Object.assign({}, prefs, r.prefs); m.className = 'msg ok'; m.textContent = '등급 기본 구성으로 되돌려 저장했습니다.'; }
+  else { m.className = 'msg err'; m.textContent = '저장하지 못했습니다: ' + errText(r); }
+  renderCustom();
+});
 
 /* ── ⑦ 2단계 인증 */
 let tf = null;                        // {enabled, required, methods, email_masked}
@@ -1233,111 +2106,6 @@ function tfView(v, data) {
     });
   }
 }
-
-/* ── ② 둘러보기(#/map) — TREE 묶음을 카드로, 도구 대장이 있으면 「상담창에 이렇게 말해 보세요」 예시를 붙인다 */
-function mapCard(it) {
-  const ok = allowed(it.need);
-  const tool = toolFor(it);
-  // 11-04 개선안 21: 도구 대장 예시가 없으면 「○○ 열어 줘」(상담창의 화면 열기 도구가 받는 말)를 예시로 — 모든 카드에 예시
-  const ex = (tool && Array.isArray(tool.examples) && tool.examples[0]) || (ok && !it.ext ? `${it.t.replace(/\s*\(.*\)$/, '')} 열어 줘` : '');
-  const href = ok ? it.h : (me ? '#locked' : '#/signup');
-  const go = ok ? `<a class="btn sm" href="${esc(it.h)}"${it.ext ? ' target="_blank" rel="noopener"' : ''}>화면으로 가기${it.ext ? ' ↗' : ''}</a>` : `<a class="btn sm" href="${esc(href)}" data-need="${esc(it.need || '')}" data-t="${esc(it.t)}">${me ? '권한 안내' : '가입하고 쓰기'}</a>`;
-  return `<article class="mcard${ok ? '' : ' locked'}${it.sub ? ' sub' : ''}"><h4>${ok ? '' : '🔒 '}${esc(it.t)}${tmpTag(it)}${it.soon ? ' <span class="rq">준비 중</span>' : ''}</h4><p class="d">${esc(it.d || (tool && tool.desc) || '')}</p><div class="row">${go}${ok ? '' : `<span class="rq">${esc(whoText(it.need))}</span>`}</div>` +
-    (ex ? `<button type="button" class="exq" data-say="${esc(ex)}">상담창에 이렇게 말해 보세요: “${esc(ex)}”</button>` : '') + '</article>';
-}
-function renderMap() {
-  const draw = () => { if (currentRoute() !== 'map') return;
-    $('#mapChips').innerHTML = TREE.map((g, gi) => grpHide(g) ? '' : g.secs.map((sc, si) => `<a href="#/map" data-jump="map-${gi}-${si}">${sc.ic} ${esc(sc.name)}</a>`).join('')).join('');
-    $('#mapBody').innerHTML = TREE.map((g, gi) => grpHide(g) ? '' : `<section class="grp mapgrp" aria-label="${esc(g.name)}"><h3><span class="ic">${g.ic}</span>${esc(g.name)}${g.lock ? `<span class="lock">🔒 ${esc(g.lock)}</span>` : ''}</h3>${g.secs.map((sc, si) => { const k = `map-${gi}-${si}`, fold = mapFolded(k, gi + si === 0); return `<div class="mapsec" id="${k}"><h4 class="sec"><button type="button" class="msh" data-ms="${k}" aria-expanded="${!fold}" aria-controls="${k}-c">${sc.ic} ${esc(sc.name)} <span class="mn">${sc.items.filter(vis).length}</span></button></h4><div class="mcards" id="${k}-c"${fold ? ' hidden' : ''}>${sc.items.filter(vis).map(mapCard).join('')}</div></div>`; }).join('')}</section>`).join('');
-    mapFind(); };
-  draw();                              // 대장이 없어도 TREE 만으로 먼저 그린다
-  loadTools().then(() => { if (TOOLS.items.length) draw(); });
-}
-/* 11-04 개선안 M8: 휴대폰은 소분류를 접어 제목만(첫 소분류만 펼침), 데스크탑은 다 펼침. 누른 것은 기억 */
-const mapFold = {};
-function mapFolded(k, first) { return k in mapFold ? mapFold[k] : (MQ_SMALL.matches && !first); }
-function mapSetFold(k, fold) { mapFold[k] = fold; const c = document.getElementById(k + '-c'), b = document.querySelector(`button[data-ms="${k}"]`); if (c) c.hidden = fold; if (b) b.setAttribute('aria-expanded', String(!fold)); }
-$('#mapBody').addEventListener('click', e => { const b = e.target.closest('button[data-ms]'); if (!b) return; if (($('#mapFind').value || '').trim()) return; mapSetFold(b.dataset.ms, b.getAttribute('aria-expanded') === 'true'); });   // 찾는 동안은 다 펼친 채로
-function mapFind() {
-  const q = ($('#mapFind').value || '').trim().toLowerCase(); let n = 0;
-  $('#mapBody').querySelectorAll('.mapsec').forEach(sc => { const c = sc.querySelector('.mcards'), k = sc.id; if (c) c.hidden = q ? false : mapFolded(k, k === 'map-0-0'); const b = sc.querySelector('.msh'); if (b) b.setAttribute('aria-expanded', String(c ? !c.hidden : true)); });   // 찾는 동안은 다 펼친다
-  $('#mapBody').querySelectorAll('.mcard').forEach(c => { const hit = !q || c.textContent.toLowerCase().includes(q); c.classList.toggle('hide', !hit); if (hit) n++; });
-  $('#mapBody').querySelectorAll('.mapsec').forEach(sc => sc.classList.toggle('hide', !sc.querySelector('.mcard:not(.hide)')));
-  $('#mapBody').querySelectorAll('.mapgrp').forEach(g => g.classList.toggle('hide', !g.querySelector('.mapsec:not(.hide)')));
-  $('#mapNone').hidden = !q || n > 0;
-}
-$('#mapFind').addEventListener('input', mapFind);
-$('#mapChips').addEventListener('click', e => { const a = e.target.closest('a[data-jump]'); if (!a) return; e.preventDefault(); $('#mapFind').value = ''; mapFind(); mapSetFold(a.dataset.jump, false); const t = document.getElementById(a.dataset.jump); if (t) { t.scrollIntoView({ behavior: 'smooth', block: 'start' }); const h = t.querySelector('h4'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); } } });
-
-/* ── ⑥ 꾸미기(#/custom) — 대시보드 칸 · 사이드바 메뉴 체크·▲▼ · 미리보기 · 저장 */
-const CUST = { defs: [], dash: [], side: [], avail: [] };
-function sectionOrderedIds(avail) { const out = []; myOrder().forEach(k => avail.filter(i => i.sec === k).forEach(i => out.push(i.id))); avail.filter(i => !i.sec).forEach(i => out.push(i.id)); return out; }
-async function renderCustom() {
-  const [r] = await Promise.all([api('/api/me/dashboard/cards'), loadTools()]);
-  if (!me || currentRoute() !== 'custom') return;
-  const defs = (r.ok && Array.isArray(r.cards) && r.cards.length) ? r.cards.filter(c => c && c.id) : Object.keys(CARD_DEFS).map(id => ({ id, title: CARD_DEFS[id] }));
-  CUST.defs = defs;
-  const chosen = myDash().filter(id => defs.find(d => d.id === id));
-  CUST.dash = chosen.map(id => ({ id, on: true })).concat(defs.filter(d => !chosen.includes(d.id)).map(d => ({ id: d.id, on: false })));
-  const avail = ALL_ITEMS.filter(it => allowed(it.need)).slice();
-  TOOLS.items.forEach(t => { if (!ALL_ITEMS.find(it => toolFor(it) === t)) avail.push({ id: t.id, t: t.name, h: t.screen || '#/', tool: true, area: t.area }); });
-  CUST.avail = avail;
-  const saved = Array.isArray(prefs.side) ? prefs.side.filter(id => avail.find(i => i.id === id)) : [];
-  const cur = saved.length ? saved : sectionOrderedIds(avail.filter(i => !i.tool));
-  CUST.side = cur.map(id => ({ id, on: true })).concat(avail.filter(i => !cur.includes(i.id)).map(i => ({ id: i.id, on: false })));
-  drawCustom();
-}
-function drawCustom() {
-  const row = (kind, x, i, n, label, meta) => `<li><label><input type="checkbox" data-ck="${kind}" data-id="${esc(x.id)}"${x.on ? ' checked' : ''}> <span>${label}</span>${meta ? `<span class="meta">${meta}</span>` : ''}</label><button class="mv" type="button" data-cm="${kind}" data-id="${esc(x.id)}" data-mv="-1" aria-label="${esc(label)} 위로"${i === 0 ? ' disabled' : ''}>▲</button><button class="mv" type="button" data-cm="${kind}" data-id="${esc(x.id)}" data-mv="1" aria-label="${esc(label)} 아래로"${i === n - 1 ? ' disabled' : ''}>▼</button></li>`;
-  // 11-04 개선안 10: 칸 옆 코드(login·role:coop·perm:회계) 대신 한국어, 상담창 도구는 접힌 묶음으로 따로
-  $('#cDash').innerHTML = CUST.dash.map((x, i) => { const d = CUST.defs.find(c => c.id === x.id) || {}; return row('dash', x, i, CUST.dash.length, esc(d.title || CARD_DEFS[x.id] || x.id), esc([d.need ? whoText(d.need) : '', d.refresh ? '갱신 ' + d.refresh : ''].filter(Boolean).join(' · '))); }).join('');
-  const isTool = x => !!(CUST.avail.find(a => a.id === x.id) || {}).tool;
-  const menus = CUST.side.filter(x => !isTool(x)), tools = CUST.side.filter(isTool);
-  const sideRow = (x, i, n) => { const it = CUST.avail.find(a => a.id === x.id) || {}; return row('side', x, i, n, (it.tool ? '🤖 ' : '') + esc(it.t || x.id), esc(it.tool ? (it.area || '') : (it.sec || ''))); };
-  $('#cSide').innerHTML = menus.map((x, i) => sideRow(x, i, menus.length)).join('');
-  $('#cTools').innerHTML = tools.map((x, i) => sideRow(x, i, tools.length)).join('');
-  $('#cToolsN').textContent = `(${tools.length}개 중 ${tools.filter(x => x.on).length}개 넣음)`;
-  if (tools.some(x => x.on)) $('#cToolsBox').open = true;
-  custFind();
-  const dashOn = CUST.dash.filter(x => x.on), sideOn = CUST.side.filter(x => x.on);
-  $('#cPrev').innerHTML = `<div class="h">📊 대시보드</div><ul>${dashOn.length ? dashOn.map(x => `<li>▫ ${esc((CUST.defs.find(c => c.id === x.id) || {}).title || CARD_DEFS[x.id] || x.id)}</li>`).join('') : '<li>(없음)</li>'}</ul>
-    <div class="h">🏠 내 페이지</div><div class="h">📁 내 폴더</div><div class="h">📌 내가 고른 메뉴</div><ul>${sideOn.length ? sideOn.map(x => `<li>· ${esc((CUST.avail.find(a => a.id === x.id) || {}).t || x.id)}</li>`).join('') : '<li>(없음 — 소분류 순서대로 보입니다)</li>'}</ul><div class="h">🗺️ 둘러보기</div>`;
-}
-function custMove(kind, id, dir) {
-  const arr = CUST[kind]; const i = arr.findIndex(x => x.id === id); if (i < 0) return;
-  // 사이드바는 메뉴끼리·도구끼리만 움직인다(보이지 않는 다른 묶음 항목과 자리를 바꾸지 않게)
-  const same = x => kind !== 'side' || !!(CUST.avail.find(a => a.id === x.id) || {}).tool === !!(CUST.avail.find(a => a.id === id) || {}).tool;
-  let j = i + dir; while (j >= 0 && j < arr.length && !same(arr[j])) j += dir;
-  if (j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; drawCustom();
-}
-function custFind() {
-  const q = ($('#cFind').value || '').trim().toLowerCase();
-  ['#cSide', '#cTools'].forEach(sel => $(sel).querySelectorAll('li').forEach(li => li.classList.toggle('hide', !!q && !li.textContent.toLowerCase().includes(q))));
-  if (q && Array.from($('#cTools').querySelectorAll('li')).some(li => !li.classList.contains('hide'))) $('#cToolsBox').open = true;
-}
-$('#cFind').addEventListener('input', custFind);
-$('#vCustom').dataset.ct = 'dash';
-$('#vCustom').querySelector('.ctabs').addEventListener('click', e => { const b = e.target.closest('button[data-ct]'); if (!b) return; $('#vCustom').dataset.ct = b.dataset.ct; $('#vCustom').querySelectorAll('.ctabs button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); });
-$('#vCustom').addEventListener('change', e => { const c = e.target.closest('input[data-ck]'); if (!c) return; const x = CUST[c.dataset.ck].find(y => y.id === c.dataset.id); if (x) x.on = c.checked; drawCustom(); });
-$('#vCustom').addEventListener('click', e => { const b = e.target.closest('button[data-cm]'); if (b) custMove(b.dataset.cm, b.dataset.id, +b.dataset.mv); });
-$('#cSave').addEventListener('click', async () => {
-  const dash = CUST.dash.filter(x => x.on).map(x => x.id), side = CUST.side.filter(x => x.on).map(x => x.id), m = $('#cMsg');
-  prefs.dash = dash; prefs.side = side;
-  if (preview) { m.className = 'msg'; m.textContent = '미리보기 중엔 저장하지 않습니다.'; return; }
-  const b = $('#cSave'); b.disabled = true; const r = await api('/api/auth/prefs', { method: 'POST', body: { dash, side } }); b.disabled = false;
-  if (r.ok) { if (r.prefs) prefs = Object.assign({}, prefs, r.prefs); m.className = 'msg ok'; m.textContent = '저장했습니다. 내 페이지에 반영됩니다.'; renderSideHome(); }
-  else { m.className = 'msg err'; m.textContent = '저장하지 못했습니다: ' + errText(r); }
-});
-$('#cReset').addEventListener('click', async () => {   // 11-04 개선안 10: 확인 한 번 뒤 바로 저장(그 전엔 「저장」을 또 눌러야 남았다)
-  if (!confirm('대시보드 칸과 사이드바 메뉴를 등급 기본 구성으로 되돌릴까요? 바로 저장됩니다.')) return;
-  const m = $('#cMsg');
-  prefs.dash = []; prefs.side = [];
-  if (preview) { m.className = 'msg'; m.textContent = '미리보기 중엔 저장하지 않습니다(화면만 돌렸습니다).'; renderCustom(); return; }
-  const r = await api('/api/auth/prefs', { method: 'POST', body: { dash: [], side: [] } });
-  if (r.ok) { if (r.prefs) prefs = Object.assign({}, prefs, r.prefs); m.className = 'msg ok'; m.textContent = '등급 기본 구성으로 되돌려 저장했습니다.'; renderSideHome(); }
-  else { m.className = 'msg err'; m.textContent = '저장하지 못했습니다: ' + errText(r); }
-  renderCustom();
-});
 
 /* ── ④ 내 폴더(#/files) */
 const FS = { path: '', tab: 'files', items: [], sel: new Set() };   // sel: 11-04 여러 개 고르기
@@ -1554,40 +2322,38 @@ document.querySelectorAll('[data-fs]').forEach(b => b.addEventListener('click', 
 let BOOTED = false;   // boot() 가 회원 정보를 받은 뒤 true
 async function boot() {
   applyFont();
+  loadPlans();                          // 이용료(공개) — 첫 화면·가입 화면이 쓴다. 실패해도 화면은 「준비 중」으로 선다
   const lk = await api('/api/ax/lock');
   AXLOCK = !!(lk && lk.ok && lk.locked);
   const r = await api('/api/auth/me');
   me = realMe = (r.ok && r.user) ? r.user : null;
-  if (!me && r.error === 'twofa_required') GT.pending = true;   // 비밀번호는 통과, 코드만 남은 세션
+  const twofaWait = !me && r.error === 'twofa_required';   // 비밀번호는 통과, 코드만 남은 세션
+  if (twofaWait) LG.pending = true;
   if (me) await loadPrefs();
   BOOTED = true;
   try { if (me) localStorage.setItem('sk_in', '1'); else localStorage.removeItem('sk_in'); } catch (_) {}
   setWho();
   document.documentElement.classList.remove('booting');   // 회원 정보로 화면을 그린 뒤에 보인다(깜빡임 방지)
+  if (twofaWait) openAuth('login');
   if (me) { checkTempPassword(); loadTwofa(); }
 }
-/* 로그인·가입 창 */
-function openAuth(tab) { $('#authModal').classList.add('on'); authTab(tab || 'login'); fillRegions(); const rid = remFill(); setTimeout(() => { const f = $(tab === 'signup' ? '#suEmail' : (rid && $('#lgEmail').value ? '#lgPw' : '#lgEmail')); if (f) f.focus(); }, 0); }
-function closeAuth() { $('#authModal').classList.remove('on'); if (['#login', '#signup', '#/login', '#/signup'].includes(location.hash)) { history.replaceState(null, '', location.pathname); route(); } }
-function authTab(t) { $('#vLogin').style.display = t === 'login' ? '' : 'none'; $('#vSignup').style.display = t === 'signup' ? '' : 'none'; $('#tabLogin').classList.toggle('on', t === 'login'); $('#tabSignup').classList.toggle('on', t === 'signup'); }
-let REG = null;
-async function fillRegions() {
-  const sido = $('#suSido'), sig = $('#suSigungu'); if (sido.dataset.ready) return;
-  if (!REG) { const r = await api('/api/regions'); REG = (r.ok && r.regions) || {}; }
-  sido.innerHTML = '<option value="">광역</option>' + Object.keys(REG).map(k => `<option value="${esc(k)}">${esc(k)}</option>`).join('');
-  sido.onchange = () => { sig.innerHTML = '<option value="">시군구</option>' + (REG[sido.value] || []).map(k => `<option value="${esc(k)}">${esc(k)}</option>`).join(''); };
-  sido.dataset.ready = '1';
+/* 로그인 창 — 회원가입은 #/join 화면(3걸음) */
+function openAuth(tab, note) {
+  if (tab === 'signup') { $('#authModal').classList.remove('on'); location.hash = '#/join'; return; }
+  $('#authModal').classList.add('on');
+  const rid = remFill(), m = $('#lgMsg');
+  if (LG.pending) { $('#lgCodeBox').hidden = false; $('#lgBtn').textContent = '코드 확인'; if (!m.textContent) { m.className = 'msg ok'; m.textContent = '비밀번호가 확인되었습니다. 2단계 인증 코드를 입력해 주세요.'; } }
+  else if (note && !m.textContent) { m.className = 'msg'; m.textContent = note; }
+  setTimeout(() => { const f = $(LG.pending ? '#lgCode' : (rid && $('#lgEmail').value ? '#lgPw' : '#lgEmail')); if (f) f.focus(); }, 0);
 }
+function closeAuth() { $('#authModal').classList.remove('on'); if (['#login', '#signup', '#/login', '#/signup'].includes(location.hash)) { history.replaceState(null, '', location.pathname); route(); } }
 $('#btnLogin').addEventListener('click', () => openAuth('login'));
-$('#btnSignup').addEventListener('click', () => openAuth('signup'));
 $('#authClose').addEventListener('click', closeAuth);
-$('#tabLogin').addEventListener('click', () => authTab('login'));
-$('#tabSignup').addEventListener('click', () => authTab('signup'));
-$('#suTier').addEventListener('change', () => { $('#suContactReq').textContent = $('#suTier').value === 'general' ? '(일반이용자는 선택)' : '(필수)'; });
+$('#lgJoin').addEventListener('click', () => { $('#authModal').classList.remove('on'); });
 window.addEventListener('hashchange', route);
 /* ── 11-04 개선안 M5: ☰ 내 메뉴 서랍 — 휴대폰은 왼쪽에서 덮고(닫기·가림막·Esc·링크), 포커스는 서랍 안에서만 */
 const MQ_SMALL = window.matchMedia ? window.matchMedia('(max-width:760px)') : { matches: false };
-const INERT_SEL = 'header.top, #topnav, #pv, #vStart, #homeMain, #vFiles, #vCustom, #vMap, footer, .install-bar';
+const INERT_SEL = 'header.top, #topnav, #pv, #vStart, #vJoin, #vAsk, #homeMain, #vFiles, #vCustom, #vMap, footer, .install-bar';
 function openSide() {
   document.body.classList.add('sideOpen'); document.documentElement.classList.add('drawer-open'); $('#sideTog').setAttribute('aria-expanded', 'true');
   if (!MQ_SMALL.matches) return;
@@ -1626,14 +2392,14 @@ $('#acct').addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#acc
 $('#acct').addEventListener('focusout', e => { if (!$('#acctMenu').hidden && e.relatedTarget && !$('#acct').contains(e.relatedTarget)) closeAcct(false); });   // 🟡7: Tab 으로 밖에 나가면 닫는다
 $('#acctMenu').addEventListener('click', e => { if (e.target.closest('button:not([data-fs]),a')) closeAcct(false); });
 document.addEventListener('click', e => { if (!$('#acctMenu').hidden && !e.target.closest('#acct')) closeAcct(false); });
-/* ── 11-04 개선안 13·M6: 상담창 자리 — 내 페이지면 대시보드 위 넓은 상담창(inline), 그 밖은 ai-dock 이 폭 따라 위 띠/「상담」 단추 */
+/* ── 대화창 자리 — 내 페이지면 본문의 넓은 대화창(inline). 11-18: 그 밖의 화면에는 대화창이 없다(위 띠·「상담」 단추 없앰 — ai-dock mode off) */
 let chatIO = null;
 /* 11-09 이사장 지시: 이사장 계정(데카 창 주인, 허브 id 2)의 내 페이지는 맨 위 데카 띠가 있으니 상담창 칸을 없앤다. 등급 미리보기 중엔 그 등급 화면대로 */
 function dekaAdmin() { return !!(realMe && realMe.role === 'admin' && ['2', '50'].includes(String(realMe.id)) && !preview); }
 function skaiPlace(home) {
   window.__skaiMode = home ? { m: 'inline', el: $('#chatHost') } : { m: 'auto', el: null };
-  if (window.skai && window.skai.mode) { window.skai.mode(window.__skaiMode.m, window.__skaiMode.el); $('#chatWait').hidden = true; }
-  else if (home) setTimeout(() => { if (!(window.skai && window.skai.mode)) $('#chatWait').textContent = '상담창을 불러오지 못했습니다. 새로고침해 주세요.'; else skaiPlace(currentRoute() === 'home' && !!me); }, 2500);
+  if (window.skai && window.skai.mode) { window.skai.mode(window.__skaiMode.m, window.__skaiMode.el); $('#chatWait').hidden = true; if (home && pendingSay) { const t = pendingSay; pendingSay = ''; setTimeout(() => say(t), 80); } }
+  else if (home) setTimeout(() => { if (!(window.skai && window.skai.mode)) $('#chatWait').textContent = '대화창을 불러오지 못했습니다. 새로고침해 주세요.'; else skaiPlace(currentRoute() === 'home' && !!me); }, 2500);
   if (home && !chatIO && 'IntersectionObserver' in window) {
     chatIO = new IntersectionObserver(es => es.forEach(x => { if (window.skai && window.skai.fabShow) window.skai.fabShow(!x.isIntersecting && currentRoute() === 'home' && !dekaAdmin()); }), { threshold: 0 });
     chatIO.observe($('#chatSpot'));
@@ -1650,27 +2416,8 @@ document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; cons
 $('#lgPw').addEventListener('keydown', e => { if (e.key === 'Enter') $('#lgBtn').click(); });
 $('#lgCode').addEventListener('keydown', e => { if (e.key === 'Enter') $('#lgBtn').click(); });
 $('#lgBtn').addEventListener('click', () => doLogin(LG));
-$('#gtForm').addEventListener('submit', e => { e.preventDefault(); doLogin(GT); });
 $('#lgForgot').addEventListener('click', e => { e.preventDefault(); forgot('#lgEmail', '#lgMsg'); });
-$('#gtForgot').addEventListener('click', e => { e.preventDefault(); forgot('#gtEmail', '#gtMsg'); });
-$('#suBtn').addEventListener('click', async () => {
-  const v = id => $(id).value.trim();
-  const body = { email: v('#suEmail').toLowerCase(), username: v('#suEmail').toLowerCase(), password: $('#suPw').value, name: v('#suName'), tier: $('#suTier').value, region_sido: $('#suSido').value, region_sigungu: $('#suSigungu').value, contact: v('#suContact'), org: v('#suOrg'), consent: $('#suConsent').checked };
-  const m = $('#suMsg'); m.className = 'msg'; m.textContent = '';
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)) { m.className = 'msg err'; m.textContent = ERR.invalid_email; return; }
-  if (body.password.length < 8) { m.className = 'msg err'; m.textContent = ERR.weak_password; return; }
-  if (!body.name) { m.className = 'msg err'; m.textContent = ERR.name_required; return; }
-  if (!body.region_sido || !body.region_sigungu) { m.className = 'msg err'; m.textContent = ERR.region_required; return; }
-  if (body.tier !== 'general' && !body.contact) { m.className = 'msg err'; m.textContent = ERR.contact_required; return; }
-  if (!body.consent) { m.className = 'msg err'; m.textContent = ERR.consent_required; return; }
-  const b = $('#suBtn'); b.disabled = true;
-  const r = await api('/api/auth/signup', { method: 'POST', body });
-  b.disabled = false;
-  if (!r.ok) { m.className = 'msg err'; m.textContent = errText(r); return; }
-  m.className = 'msg ok'; m.textContent = r.status === 'approved' ? '가입되었습니다. 로그인해 주세요.' : '가입 신청이 접수되었습니다. 승인되면 로그인할 수 있습니다.';
-  if (r.status === 'approved') { $('#lgEmail').value = body.email; setTimeout(() => authTab('login'), 900); }
-});
-$('#btnLogout').addEventListener('click', async () => { try { localStorage.removeItem('sk_in'); } catch (_) {} await api('/api/auth/logout', { method: 'POST' }); me = realMe = null; preview = null; tf = null; setWho(); location.reload(); });
+$('#btnLogout').addEventListener('click', async () => { try { localStorage.removeItem('sk_in'); } catch (_) {} MB = null; MB_STATE = ''; await api('/api/auth/logout', { method: 'POST' }); me = realMe = null; preview = null; tf = null; setWho(); location.reload(); });
 $('#btnPw').addEventListener('click', () => openPw(false));
 $('#btnTwofa').addEventListener('click', openTf);
 $('#tfBannerBtn').addEventListener('click', openTf);
@@ -1696,11 +2443,6 @@ $('#emBtn').addEventListener('click', async () => {
   const m = $('#emMsg'); if (r.ok) { m.className = 'msg ok'; m.textContent = '등록했습니다.'; if (me) { me.email = r.email; me.email_missing = false; } setWho(); setTimeout(() => $('#emailModal').classList.remove('on'), 900); if (BACK) setTimeout(goBackIfReady, 950); }
   else { m.className = 'msg err'; m.textContent = errText(r); }
 });
-/* 옛 첫 화면 질문 → 상단 AI 도우미로 */
-function heroAsk() { const q = $('#heroQ').value.trim(); if (!q) return; $('#heroQ').value = ''; if (window.skAiDock) window.skAiDock.ask(q); else setTimeout(heroAsk, 300); }
-$('#heroAsk').addEventListener('click', heroAsk);
-$('#heroQ').addEventListener('keydown', e => { if (e.key === 'Enter') heroAsk(); });
-document.querySelectorAll('.ex button').forEach(b => b.addEventListener('click', () => { if (window.skAiDock) window.skAiDock.ask(b.dataset.q); }));
 route();
 boot();
 

@@ -1,4 +1,7 @@
-/* 사교원 AI 대화창(ai-dock) — 모든 화면 상단에 붙는 공통 위젯. 2026-10-13 통합사이트 개편 2단계.
+/* 사교원 AI 대화창(ai-dock) — 공통 위젯. 2026-10-13 통합사이트 개편 2단계.
+   🔴 2026-11-18 이사장 지시(통합사이트 개편 5번): 화면 위 AI 상담 띠와 휴대폰 「💬 상담」 단추를 모든 화면에서 없앴다.
+      대화창은 통합 첫 화면의 「내 페이지」 본문(skai.mode('inline', 자리))에만 뜬다. 다른 사이트 화면에서는 아무것도 그리지 않는다(mode=off).
+      남는 것: 통합관리자용 「🛠️ 데카」 띠(별도 .bar)와 그 띠가 머리를 44px 내리는 보정, 모든 화면 하단 「문의하기·이용자 제안」 단추.
    <script src="https://sakyowon.co.kr/ai-dock.js" defer></script> 한 줄로 어느 사이트에서든 붙는다.
    백엔드는 https://sakyowon.co.kr/api/ai/dock/* (허브 통합 계정 쿠키 sk_session, 같은 도메인 CORS). */
 (function () {
@@ -81,6 +84,8 @@
     '@media(max-width:640px){.logo span{display:none}.who{display:none}.b.lbl{display:none}}' +
     // ── 11-04 화면 개편(개선안 13·M6): 모드 셋 — bar(위 띠) · inline(내 페이지 넓은 상담창) · fab(오른쪽 아래 「상담」 단추 + 아래 판)
     '.fabbtn,.scrim,.shead,.mic{display:none}' +
+    ':host([data-mode=off]){display:none!important}' +   // 11-18: 내 페이지 본문 말고는 그리지 않는다
+    '#bDeka,#tDeka{display:none!important}' +   // 11-18: 위 띠가 없어져 띠 안 「데카」 단추도 쓰지 않는다(데카는 맨 위 전용 띠로). 넓은 대화창에서 hidden 이 .b 규칙에 덮여 모든 회원에게 보이던 것도 함께 막는다
     ':host([data-mode=inline]),:host([data-mode=fab]){position:static;z-index:auto}' +
     ':host([data-mode=inline]) .logo,:host([data-mode=inline]) .who,:host([data-mode=inline]) #bTog,:host([data-mode=inline]) #bDoc,:host([data-mode=fab]) .logo,:host([data-mode=fab]) .who,:host([data-mode=fab]) #bTog,:host([data-mode=fab]) #bDoc{display:none}' +
     ':host([data-mode=inline]) .bar,:host([data-mode=fab]) .bar{height:auto;background:transparent;color:inherit;box-shadow:none;padding:0;flex-wrap:wrap;gap:8px}' +
@@ -140,7 +145,7 @@
 
   // 본문을 44px 내리고, 맨 위에 고정된 머리띠는 그만큼 밀어 준다
   function pushPage() {
-    var b = document.body; if (!b || (host.getAttribute('data-mode') !== 'bar' && !stripOn)) return;   // 11-04: 위 띠일 때만(11-08: 또는 데카 띠)
+    var b = document.body; if (!b || !stripOn) return;   // 11-18: 위 상담 띠가 없어졌다 — 통합관리자 데카 띠가 있을 때만 내린다
     var mt = parseFloat(getComputedStyle(b).marginTop) || 0;
     if (!b.getAttribute('data-skai-pushed')) { b.setAttribute('data-skai-mt0', b.style.marginTop || ''); b.style.marginTop = (mt + H) + 'px'; b.setAttribute('data-skai-pushed', '1'); }
     Array.prototype.forEach.call(document.querySelectorAll('header, nav, [role=banner], .topbar, .top-bar, .navbar, .site-header'), function (el) {
@@ -157,19 +162,19 @@
     if (b.getAttribute('data-skai-pushed')) { b.style.marginTop = b.getAttribute('data-skai-mt0') || ''; b.removeAttribute('data-skai-pushed'); b.removeAttribute('data-skai-mt0'); }
     Array.prototype.forEach.call(document.querySelectorAll('[data-skai-top][data-skai-top0]'), function (el) { el.style.top = el.getAttribute('data-skai-top0') || ''; el.removeAttribute('data-skai-top'); el.removeAttribute('data-skai-top0'); });   // 앱이 일부러 단 표식(data-skai-top 만 있는 것)은 그대로
   }
-  // ── 모드 정하기: 폭 760px 이하는 fab, 그 위는 bar. 앱이 <html data-skai-mode="bar"> 로 고정할 수 있고, 첫 화면은 skai.mode('inline', 자리)로 바꾼다
+  // ── 모드 정하기(11-18): inline(통합 첫 화면 「내 페이지」 본문 — skai.mode('inline', 자리)) 아니면 off(아무것도 안 그림).
+  //    옛 위 띠(bar)·휴대폰 단추(fab)는 쓰지 않는다. <html data-skai-mode="bar"> 로 고정하던 앱이 있어도 무시한다
   var MQ = window.matchMedia ? window.matchMedia('(max-width:760px)') : null;
   var want = window.__skaiMode || { m: 'auto', el: null };
   var PH = { bar: '이 화면에 대해 물어보세요 — 파일·이미지를 올리고 문서도 만듭니다', wide: '무엇을 도와드릴까요? 예: 결재함 보여 줘', small: '무엇이든 물어보세요' };
-  function autoMode() { var a = document.documentElement.getAttribute('data-skai-mode'); return (a === 'bar' || a === 'fab') ? a : (MQ && MQ.matches ? 'fab' : 'bar'); }
   function applyMode() {
-    var m = (want.m === 'inline' && want.el) ? 'inline' : ((want.m === 'bar' || want.m === 'fab') ? want.m : autoMode());
+    var m = (want.m === 'inline' && want.el) ? 'inline' : 'off';
     if (m === 'inline') { if (host.parentNode !== want.el) want.el.appendChild(host); }
     else if (host.parentNode !== document.documentElement) document.documentElement.appendChild(host);
     host.setAttribute('data-mode', m);
     if (m !== 'fab') setSheet(false, true);
     if (m !== 'inline') host.removeAttribute('data-fabshow');
-    if (m === 'bar' || stripOn) pushPage(); else unpushPage();
+    if (stripOn) pushPage(); else unpushPage();
     dekaStripSync();
     $('q').placeholder = m === 'bar' ? PH.bar : (m === 'inline' && !(MQ && MQ.matches) ? PH.wide : PH.small);
   }
@@ -253,7 +258,7 @@
       sroot.addEventListener('keydown', function (e) { if (e.key === 'Escape') { var pan = sroot.getElementById('sPan'); if (pan.classList.contains('on')) sroot.getElementById('sOpen').click(); } });
     }
     if (strip) strip.style.display = want ? '' : 'none';
-    if (want !== stripOn) { stripOn = want; unpushPage(); if (inBar() || stripOn) pushPage(); }
+    if (want !== stripOn) { stripOn = want; unpushPage(); if (stripOn) pushPage(); }
     if (!want && strip) { var pan = sroot.getElementById('sPan'); if (pan.classList.contains('on')) sroot.getElementById('sOpen').click(); sroot.getElementById('sHost').innerHTML = ''; }
   }
   function dekaFrame() {
@@ -510,8 +515,9 @@
     });
   }
   // 다른 화면(개인페이지·둘러보기)이 「이렇게 말해 보세요」 예시를 넣을 때 쓴다 (AX 2단계)
-  window.skai = { say: function (t, go) { try { $('q').value = String(t || ''); if (go || host.getAttribute('data-mode') !== 'inline') { open(true); tab('chat'); } if (go) send(); else $('q').focus(); } catch (e) {} },
-                  open: function () { open(true); tab('chat'); },
+  function isOff() { return host.getAttribute('data-mode') !== 'inline'; }   // 11-18: 대화창이 없는 화면 — 말 넣기·열기는 조용히 넘어간다(부르는 쪽 코드가 죽지 않게)
+  window.skai = { say: function (t, go) { if (isOff()) return false; try { $('q').value = String(t || ''); if (go) { open(true); tab('chat'); send(); } else $('q').focus(); } catch (e) {} return true; },
+                  open: function () { if (isOff()) return false; open(true); tab('chat'); return true; },
                   // 11-04 화면 개편: 모드 바꾸기(첫 화면이 부른다) · 내 대화 열기 · 넓은 상담창이 화면 밖이면 떠 있는 단추
                   mode: function (m, el) { want = { m: m || 'auto', el: el || null }; applyMode(); },
                   openThread: function (id) { return openThread(id); },
@@ -562,7 +568,7 @@
       '.d .r{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}.d .r button{min-height:44px;padding:0 18px;border-radius:10px;border:1px solid #2c5842;background:#fff;color:#2c5842;font-size:15px;cursor:pointer;font-family:inherit}' +
       '.d .r .go{background:#2c5842;color:#fff}.d .r .go:disabled{opacity:.5}.d .msg{font-size:13px;margin-top:8px;min-height:1em}.d .msg.err{color:#8a2a2a}.d .msg.ok{color:#2c5842}' +
       '</style>' +
-      '<nav class="f" aria-label="문의와 제안"><a id="fQ" href="https://home.sakyowon.co.kr/#/contact" target="_blank" rel="noopener">✉️ 문의하기</a><button type="button" id="fS">💡 이용자 제안</button></nav>' +
+      '<nav class="f" aria-label="문의와 제안"><a id="fQ" href="https://sakyowon.co.kr/#/ask" target="_blank" rel="noopener">✉️ 문의하기</a><button type="button" id="fS">💡 이용자 제안</button></nav>' +
       '<div class="bk" id="fBk"><div class="d" role="dialog" aria-modal="true" aria-labelledby="fT">' +
       '<h2 id="fT">이용자 제안</h2><p>사이트·서비스를 쓰면서 불편했던 점이나 바랐던 점을 적어 주세요. 사교원 운영진이 읽고 개선합니다. 지금 보고 있는 화면 주소가 함께 전달됩니다.</p>' +
       '<label for="fM">제안 내용</label><textarea id="fM" maxlength="3000" placeholder="예: 휴대폰에서 입찰정보 글씨가 작아요"></textarea>' +
@@ -595,5 +601,5 @@
     });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', footInit); else footInit();
-  window.skAiDock = { open: function () { open(true); $('q').focus(); }, ask: function (q) { $('q').value = q; send(); } };
+  window.skAiDock = { open: function () { if (isOff()) return false; open(true); $('q').focus(); return true; }, ask: function (q) { if (isOff()) return false; $('q').value = q; send(); return true; } };
 })();
