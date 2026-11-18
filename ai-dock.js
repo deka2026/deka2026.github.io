@@ -217,7 +217,7 @@
   // ── 11-07 이사장 지시: 통합관리자에게만 모든 화면 위 띠에 「🛠️ 데카」(서버 작업대 deka.sakyowon.co.kr 를 끼워 보임).
   //    여기서는 단추만 보인다 — 실제 문지기는 데카 서버(허브 통합관리자 세션을 요청마다 확인). 다른 화면이 데카 창에 글을 넣는 길은 만들지 않는다.
   var DEKA = 'https://deka.sakyowon.co.kr/?embed=1';
-  function isAdmin() { var m = state.me || {}; return !!(m.user && (m.role === 'admin' || m.user.role === 'admin') && String(m.user.id) === '2'); }   // 데카 서버 DEKA_HUB_USERS 와 같은 기준
+  function isAdmin() { var m = state.me || {}; return !!(m.user && (m.role === 'admin' || m.user.role === 'admin') && ['2', '50'].includes(String(m.user.id))); }   // 데카 서버 DEKA_HUB_USERS 와 같은 기준
   // 11-08 이사장 지시: 데카는 언제나 화면 맨 위에서 연다. 위 띠(bar)가 있으면 그 띠의 단추, 없으면(내 페이지 상담창·휴대폰) 데카 전용 띠를 맨 위에 따로 붙인다.
   function inBar() { return host.getAttribute('data-mode') === 'bar'; }
   function dekaShow() {

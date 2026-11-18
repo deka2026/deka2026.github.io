@@ -260,7 +260,7 @@ body[data-route="start"] .tree{grid-template-columns:1fr}
 .side .pub .sn .rq{font-size:0.7333rem;color:var(--gold);background:var(--gold1);border-radius:8px;padding:0 6px;font-weight:400}
 @media(max-width:760px){body[data-route="start"] .app,body[data-route="map"] .app{grid-template-columns:1fr}body[data-route="start"] .sideTog:not([hidden]),body[data-route="map"] .sideTog:not([hidden]){display:inline-flex}body[data-route="start"] .side,body[data-route="map"] .side{display:block}.side .pub li a{min-height:var(--tap);display:flex;align-items:center}}
 </style>
-<script src="/ai-dock.js?v=20261108b" defer></script><!-- 11-04 알파언니 🟠1: 판 표시 — 캐시된 옛 상담창(4시간)이 새 첫 화면에 붙지 않게, 고칠 때마다 올린다 -->
+<script src="/ai-dock.js?v=20261118a" defer></script><!-- 11-04 알파언니 🟠1: 판 표시 — 캐시된 옛 상담창(4시간)이 새 첫 화면에 붙지 않게, 고칠 때마다 올린다 -->
 </head>
 <body>
 <div class="wrap">
@@ -1629,7 +1629,7 @@ document.addEventListener('click', e => { if (!$('#acctMenu').hidden && !e.targe
 /* ── 11-04 개선안 13·M6: 상담창 자리 — 내 페이지면 대시보드 위 넓은 상담창(inline), 그 밖은 ai-dock 이 폭 따라 위 띠/「상담」 단추 */
 let chatIO = null;
 /* 11-09 이사장 지시: 이사장 계정(데카 창 주인, 허브 id 2)의 내 페이지는 맨 위 데카 띠가 있으니 상담창 칸을 없앤다. 등급 미리보기 중엔 그 등급 화면대로 */
-function dekaAdmin() { return !!(realMe && realMe.role === 'admin' && String(realMe.id) === '2' && !preview); }
+function dekaAdmin() { return !!(realMe && realMe.role === 'admin' && ['2', '50'].includes(String(realMe.id)) && !preview); }
 function skaiPlace(home) {
   window.__skaiMode = home ? { m: 'inline', el: $('#chatHost') } : { m: 'auto', el: null };
   if (window.skai && window.skai.mode) { window.skai.mode(window.__skaiMode.m, window.__skaiMode.el); $('#chatWait').hidden = true; }
