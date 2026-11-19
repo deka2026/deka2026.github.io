@@ -1007,7 +1007,8 @@ function needText(need) {
   if (!me) return '로그인';
   if (need === 'login') return '로그인';
   if (need === 'admin') return '통합관리자 전용';
-  if (need.startsWith('perm:')) return '체크권한 「' + need.slice(5) + '」';
+  if (need === 'perm:정책지원관' && !isStaffView()) return '의정지원 구독';
+  if (need.startsWith('perm:')) return isStaffView() ? '체크권한 「' + need.slice(5) + '」' : '사교원 내부 전용';
   if (need.startsWith('role:')) return (ROLE_KO[need.slice(5)] || need.slice(5)) + ' 승인';
   return '승인';
 }
@@ -1016,7 +1017,8 @@ function whoText(need) {
   if (!need) return '';
   if (need === 'login') return '로그인 회원';
   if (need === 'admin') return '통합관리자';
-  if (need.startsWith('perm:')) return '매니저 · 체크권한 「' + need.slice(5) + '」';
+  if (need === 'perm:정책지원관' && !isStaffView()) return '정책회원';
+  if (need.startsWith('perm:')) return isStaffView() ? '매니저 · 체크권한 「' + need.slice(5) + '」' : '사교원 내부';
   if (need.startsWith('role:')) return (ROLE_KO[need.slice(5)] || need.slice(5)) + ' 이상';
   return '승인 회원';
 }
@@ -1402,6 +1404,7 @@ async function forgot(emailEl, msgEl) {
 
 /* ── ③ 개인페이지: 대시보드 → 상담창 자리 → 공지·소식 */
 const CARD_DEFS = { todo: '오늘 할 일', work: '근태', approvals: '결재함', budget: '사업비 집행', bids: '입찰 공고', village: '내 마을', briefing: '의정 브리핑', academy: '아카데미', org: '조직 수시 정보', files: '내 폴더', recent: '최근 대화', members: '회원 관리', hpc: 'HPC 사업 실적' };
+const CARD_NEED = { todo: 'login', work: 'role:staff', approvals: 'role:staff', budget: 'perm:회계', bids: 'role:staff', village: 'role:coop', briefing: 'perm:정책지원관', academy: 'login', org: 'perm:회계', files: 'login', recent: 'login', members: 'admin', hpc: 'admin' };   // 서버 dashboard.py CARDS 와 같게(11-19)
 function defaultDash(u) {
   const r = u ? u.role : ''; const c = ['todo', 'academy', 'files', 'recent'];
   if (['coop', 'federation', 'staff', 'admin'].includes(r)) c.push('village');
@@ -1409,7 +1412,7 @@ function defaultDash(u) {
   if (r === 'admin') c.push('members', 'org', 'hpc');   // 26-10-30 HPC 사업 실적 칸
   return c;
 }
-function myDash() { const ok = x => CARD_DEFS[x] && !(x === 'files' && noFolder()); const d = Array.isArray(prefs.dash) ? prefs.dash.filter(ok) : []; return d.length ? d : defaultDash(me).filter(ok); }   // 무료이용회원은 「내 폴더」 칸 없음
+function myDash() { const ok = x => CARD_DEFS[x] && allowed(CARD_NEED[x] || 'login') && !(x === 'files' && noFolder()); const d = Array.isArray(prefs.dash) ? prefs.dash.filter(ok) : []; return d.length ? d : defaultDash(me).filter(ok); }   // 무료이용회원은 「내 폴더」 칸 없음
 const onHome = () => !!me && currentRoute() === 'home';
 async function renderDash() {
   const ids = myDash(), box = $('#dash');
@@ -1494,6 +1497,8 @@ function svcCards() {
   }).join('') + '</div>';
 }
 const MX_HEAD = ['통합관리자', '매니저', '연합회원', '협동조합회원', '정책회원', '개인회원', '무료이용회원'];
+const isStaffView = () => !!me && (RANK[me.role] || 0) >= RANK.staff;   // 11-19 이사장 지시: 직원(매니저·통합관리자) 전용 권한·메뉴 안내는 직원에게만
+const MX_HIDE = 2;   // 11-19 이사장 지시: 첫 화면 표에서 통합관리자·매니저 열은 숨긴다(내부 직원 등급). 숨긴 열만 ● 인 줄(그룹웨어·관리)도 뺀다
 const MX = [['사이트 소개·문의·공개 자료', '●', '●', '●', '●', '●', '●', '●'], ['AI 대화창', '●', '●', '●', '●', '●', '●', '하루 한도'], ['내 폴더', '●', '●', '●', '●', '●', '●', '—'],
   ['아카데미(실습·학습·팀러닝·화상회의)', '●', '●', '선택', '선택', '선택', '●', '맛보기'], ['햇소자 조합 메뉴', '●', '체크권한', '—', '●', '—', '—', '—'], ['햇소자 연합회 메뉴', '●', '체크권한', '●', '—', '—', '—', '—'],
   ['의정지원시스템', '●', '체크권한', '선택', '선택', '●', '선택', '둘러보기'], ['그룹웨어(머리 단추)', '●', '●', '—', '—', '—', '—', '—'], ['관리(회원·납부·발송)', '●', '체크권한', '—', '—', '—', '—', '—']];
@@ -1503,7 +1508,7 @@ function pcard(c, i, n, sub, price, tag, lines, extra) {
 function priceHTML() {
   if (!PLANS) return `<div class="pwait" id="priceWait">이용료를 불러오는 중…</div>`;
   const freeCard = pcard('c-g', 'user', TIER_KO.free, '누구나 바로', '<div class="pp">무료</div>', '', ['둘러보기 · 문의', 'AI 질문(하루 한도)', '공개 자료']);
-  const staffCard = pcard('c-rs', 'grid', '매니저 · 통합관리자', '사교원 내부 직원', '<div class="pp" style="font-size:1.4rem">이용료 없음</div>', '', ['가입 화면에서 고를 수 없습니다', '그룹웨어는 머리 단추로', '매니저는 체크권한만큼']);
+  const staffCard = !isStaffView() ? '' : pcard('c-rs', 'grid', '매니저 · 통합관리자', '사교원 내부 직원', '<div class="pp" style="font-size:1.4rem">이용료 없음</div>', '', ['가입 화면에서 고를 수 없습니다', '그룹웨어는 머리 단추로', '매니저는 체크권한만큼']);
   if (!PLANS.ok) {   // 서버에 이용권 모듈이 아직 없거나 응답 실패 — 화면은 그대로, 값만 「준비 중」
     const wait = '<div class="pp" style="font-size:1.2rem">이용료 안내 준비 중</div>';
     return `<div class="notice" id="priceNone"><b>이용료 안내 준비 중</b> — 등급별 이용료는 곧 이 자리에 안내합니다. 무료이용회원은 지금 바로 가입할 수 있습니다.</div><div class="pgrid">` + freeCard +
@@ -1549,10 +1554,10 @@ function startHTML() {
     `<div class="card feat"><div class="row">${feat('c-g', 'key', '한 계정')}${feat('c-team', 'list', '고른 메뉴만')}${feat('c-fld', 'server', '자체 서버 보관')}${feat('c-pol', 'shield', '개인정보 가림')}</div><h3>무엇이 다른가요</h3><p>자료는 사교원 서버에, AI 는 개인정보를 가린 뒤 처리합니다.</p></div>` +
     `</div></section></div>` +
     `<div class="band"><div class="uw"><section class="usec" aria-labelledby="hSvc"><div class="sech"><h2 id="hSvc">회원서비스</h2><p>필요한 것만 고르세요.</p></div>${svcCards()}</section></div></div>` +
-    `<div class="uw"><section class="usec" aria-labelledby="hPrice"><div class="sech"><h2 id="hPrice">회원 등급과 이용료</h2><p>등급은 일곱 가지이고, 고른 서비스에 따라 이용료가 정해집니다.</p></div><div id="priceBox">${priceHTML()}</div></section></div>` +
+    `<div class="uw"><section class="usec" aria-labelledby="hPrice"><div class="sech"><h2 id="hPrice">회원 등급과 이용료</h2><p>등급은 ${isStaffView() ? '일곱' : '다섯'} 가지이고, 고른 서비스에 따라 이용료가 정해집니다.</p></div><div id="priceBox">${priceHTML()}</div></section></div>` +
     `<div class="band"><div class="uw"><section class="usec" aria-labelledby="hMx"><div class="sech"><h2 id="hMx">회원별 이용 메뉴</h2><p>● 이용 가능 · <span class="mxopt">선택</span> 골라서 이용료를 내면 열림 · — 이용 안 함</p></div>` +
-    `<div class="scroll mx"><table id="mxTable"><thead><tr><th scope="col">메뉴</th>${MX_HEAD.map(x => `<th scope="col" class="c">${x}</th>`).join('')}</tr></thead><tbody>${MX.map(r => `<tr><th scope="row">${r[0]}</th>${r.slice(1).map(cell).join('')}</tr>`).join('')}</tbody></table></div>` +
-    `<p class="note" style="margin-top:8px">「체크권한」은 통합관리자가 매니저마다 따로 켜 주는 권한입니다. 그룹웨어·관리는 매니저·통합관리자에게만 머리 단추로 보입니다.</p></section></div></div>` +
+    `<div class="scroll mx"><table id="mxTable"><thead><tr><th scope="col">메뉴</th>${MX_HEAD.slice(MX_HIDE).map(x => `<th scope="col" class="c">${x}</th>`).join('')}</tr></thead><tbody>${MX.filter(r => r.slice(1 + MX_HIDE).some(v => v !== '—')).map(r => `<tr><th scope="row">${r[0]}</th>${r.slice(1 + MX_HIDE).map(cell).join('')}</tr>`).join('')}</tbody></table></div>` +
+    `</section></div></div>` +
     `<section class="band2" aria-labelledby="hCta">${pic('cta.jpg', '')}<div class="uw"><h2 id="hCta">지금 시작해 보세요</h2><div class="cta">${cta}</div></div></section>` +
     `<div class="uw"><div class="publinks" aria-label="공개 자료" style="padding-top:22px"><a href="${esc(itemById('about').h)}">사교원 소개</a><a href="${esc(itemById('disclosure').h)}">경영공시</a><a href="${esc(itemById('research').h)}">연구자료</a><a href="${esc(itemById('mangnam').h)}">현장사업 소식</a><a href="#/map">둘러보기</a></div></div>`;
 }
@@ -1845,7 +1850,7 @@ function joinDraw(noSave) {
       `<div class="f"><label for="suContact">전화번호 <span class="hint">(선택)</span></label><input type="tel" id="suContact" data-k="contact" value="${v('contact')}" inputmode="tel" placeholder="010-0000-0000" autocomplete="tel"></div>` +
       `<div class="f w"><label for="suOrg">소속 <span class="hint">(선택)</span></label><input type="text" id="suOrg" data-k="org" value="${v('org')}" placeholder="마을·조합·기관"></div>` +
       `<div class="f w"><label class="ck"><input type="checkbox" id="suConsent" data-k="consent"${f.consent ? ' checked' : ''}>(필수) 통합 계정 발급을 위한 개인정보 수집·이용에 동의합니다 <span class="req">*</span></label><span class="hint">이름·이메일·전화는 회원 관리와 이용료 안내에만 씁니다. <a href="account-privacy.html" target="_blank" rel="noopener">처리방침</a></span></div>` +
-      `<div class="f w"><span class="hint" id="staffNote">매니저(직원) 등급은 가입 뒤 통합관리자가 올려 줍니다. 협동조합·연합회는 다음 걸음에서 햇소자를 고르면 승인을 거쳐 열립니다.</span></div>` +
+      `<div class="f w"><span class="hint" id="staffNote">협동조합·연합회는 다음 걸음에서 햇소자를 고르면 승인을 거쳐 열립니다.</span></div>` +
       `</div><div id="e1">${J.err ? `<div class="err" role="alert">${esc(J.err)}</div>` : ''}</div><div class="acts"><a class="btn" href="#login">이미 계정이 있어요 — 로그인</a><span class="r"><button type="submit" class="btn p" id="joinNext1">다음 — 서비스 고르기</button></span></div></form>`;
   } else if (J.step === 2) {
     const picks = joinPicks(), free = !picks.length;
@@ -2036,7 +2041,7 @@ const CUST = { defs: [], dash: [] };
 async function renderCustom() {
   const r = await api('/api/me/dashboard/cards');
   if (!me || currentRoute() !== 'custom') return;
-  const defs = ((r.ok && Array.isArray(r.cards) && r.cards.length) ? r.cards.filter(c => c && c.id) : Object.keys(CARD_DEFS).map(id => ({ id, title: CARD_DEFS[id] }))).filter(c => !(c.id === 'files' && noFolder()));
+  const defs = ((r.ok && Array.isArray(r.cards) && r.cards.length) ? r.cards.filter(c => c && c.id) : Object.keys(CARD_DEFS).map(id => ({ id, title: CARD_DEFS[id], need: CARD_NEED[id] }))).filter(c => !(c.id === 'files' && noFolder())).filter(c => allowed(c.need || CARD_NEED[c.id] || 'login'));
   CUST.defs = defs;
   const chosen = myDash().filter(id => defs.find(d => d.id === id));
   CUST.dash = chosen.map(id => ({ id, on: true })).concat(defs.filter(d => !chosen.includes(d.id)).map(d => ({ id: d.id, on: false })));
