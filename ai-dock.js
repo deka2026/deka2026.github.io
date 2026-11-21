@@ -482,11 +482,11 @@
     if (!state.me || !state.me.user) { open(true); addMsg('err', '파일·이미지 업로드는 로그인한 뒤 쓸 수 있습니다. <a href="' + API + '/#login">로그인</a>'); return; }
     Array.prototype.forEach.call(files, function (f) {
       open(true); tab('chat');
-      var m = addMsg('file', '📎 ' + esc(f.name) + ' 올리는 중… (AI 에는 개인정보를 가린 글자만 보냅니다. PDF·한글·그림은 「근거확보해」용 원본을 본인만 볼 수 있게 7일 보관한 뒤 지웁니다 — 대화를 지우면 바로 지웁니다)');
+      var m = addMsg('file', '📎 ' + esc(f.name) + ' 올리는 중… (AI 에는 전화·주민번호·이메일 같은 정해진 개인정보를 가린 글자만 보냅니다 — 문장 속 이름은 남을 수 있습니다. PDF·한글·그림은 「근거확보해」용 원본을 본인만 볼 수 있게 7일 보관한 뒤 지웁니다 — 대화를 지우면 바로 지웁니다)');
       var fd = new FormData(); fd.append('file', f); if (state.thread) fd.append('thread_id', state.thread);
       api('/api/ai/dock/upload', { method: 'POST', form: fd }).then(function (r) {
         if (r.thread_id) setThread(r.thread_id);
-        if (r.ok) { state.files.push(r); renderFiles(); m.innerHTML = '📎 <b>' + esc(r.name) + '</b> 첨부됨 — ' + r.chars + '자 읽음(' + esc(r.method) + ')' + (r.masked && r.masked.length ? ' · 가린 것: ' + esc(r.masked.join(', ')) : '') + '<br><span class="note">' + esc(r.preview) + '…</span><br><span class="note">답을 받은 뒤 「근거확보해」라고 하면 이 파일에서 근거 쪽을 그림으로 떠 드립니다(PDF·한글·그림 원본만 7일 보관, 위의 「가린 것」은 AI 로 보낸 글자 기준입니다).</span>'; }
+        if (r.ok) { state.files.push(r); renderFiles(); m.innerHTML = '📎 <b>' + esc(r.name) + '</b> 첨부됨 — ' + r.chars + '자 읽음(' + esc(r.method) + ')' + (r.masked && r.masked.length ? ' · 가린 것: ' + esc(r.masked.join(', ')) : '') + '<br><span class="note">' + esc(r.preview) + '…</span><br><span class="note">답을 받은 뒤 「근거확보해」라고 하면 이 파일에서 근거 쪽을 그림으로 떠 드립니다(PDF·한글·그림 원본만 7일 보관, 위의 「가린 것」은 AI 로 보낸 글자에서 지운 꼴입니다).</span>'; }
         else { m.className = 'm err'; m.textContent = r.message || (r.error === 'too_large' ? '50MB 를 넘습니다.' : r.error === 'unauthorized' ? '로그인이 필요합니다.' : '읽어 내지 못했습니다.'); }
       });
     });
