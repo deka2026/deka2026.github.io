@@ -638,6 +638,114 @@ footer{
 @media (max-width:600px){ .prc-opt{grid-template-columns:24px 1fr;} .prc-opt .pr{grid-column:2;} .prc-amt{font-size:20px;} .prc-sum{position:static;} }
 </style>
 <script src="/ai-dock.js?v=20261121i" defer></script>
+<style id="hv-visual">
+/* 2026-11-21 통합사이트 시각 언어 맞춤 — 토큰·머리 메뉴·사진 히어로·색 타일·사진 카드 (기능 무변경) */
+:root{
+  --paper:#f5f1e6;--paper-soft:#ede6d3;--card:#fff;
+  --ink:#1e2b1c;--ink-soft:#3d5238;--ink-faint:#6e8469;
+  --primary:#2c5842;--primary-dark:#0d3b2c;--primary-light:#4a6741;--primary-50:#edf2e5;--primary-100:#dbe4d0;
+  --gold:#b47d14;--gold-soft:#f6eac9;--gold-dark:#8a5e0c;
+  --line:rgba(60,80,50,.2);--line-soft:rgba(60,80,50,.13);
+  --radius:14px;--radius-lg:20px;
+  --shadow-sm:0 1px 2px rgba(30,43,28,.04),0 2px 10px rgba(30,43,28,.05);
+  --shadow-md:0 4px 10px rgba(30,43,28,.06),0 16px 36px rgba(30,43,28,.10);
+  --font-serif:var(--font-sans);
+}
+body{background:var(--paper);word-break:keep-all;}
+h1,h2,h3{font-weight:800;letter-spacing:-.02em;}
+/* 머리 메뉴: 글자가 두 줄로 꺾이지 않게 */
+.topnav{background:rgba(245,241,230,.94);border-bottom:1px solid var(--line-soft);}
+.topnav-in{max-width:1360px;gap:14px;padding:12px 24px;}
+.brand{white-space:nowrap;flex-shrink:0;font-weight:800;font-size:19px;}
+.brand-icon{width:36px;height:36px;background:var(--primary);color:#f6c34a;font-size:18px;box-shadow:inset 0 0 0 2px rgba(246,195,74,.35);}
+.pub-nav{flex:1 1 auto;min-width:0;justify-content:flex-end;gap:2px;overflow-x:auto;scrollbar-width:none;}
+.pub-nav::-webkit-scrollbar{display:none;}
+.pub-nav a{white-space:nowrap;flex-shrink:0;padding:8px 11px;font-size:14px;}
+.pub-nav a.on{background:var(--primary);}
+.fontsize-btns,.top-actions{flex-shrink:0;}
+.fontsize-btns button{white-space:nowrap;}
+.top-actions .btn,.top-actions a,.top-actions button{white-space:nowrap;}
+.top-actions .btn{border-radius:999px;}
+.role-btn{white-space:nowrap;}
+@media (max-width:1200px){.pub-nav a{padding:7px 8px;font-size:13.5px;}.fontsize-btns{display:none;}}
+@media (max-width:900px){.topnav-in{flex-wrap:nowrap;}.topnav-in.nav-open{flex-wrap:wrap;}.pub-nav{overflow:visible;}.top-actions{margin-left:auto;}}
+@media (max-width:900px){.nav-toggle{flex-shrink:0;}.top-actions{min-width:0;}.top-actions .user-chip{min-width:0;overflow:hidden;}.top-actions .user-chip .user-name,.top-actions .user-chip .user-role{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}}
+@media (max-width:560px){.top-actions .user-chip .user-role,.top-actions .user-chip .role-tag{display:none;}.top-actions .user-chip{padding:4px 10px 4px 4px;}}
+@media (max-width:420px){.topnav-in{padding:10px 12px;gap:8px;}.brand{font-size:17px;}.brand-icon{width:32px;height:32px;}.top-actions{gap:6px;}.top-actions .btn{padding:6px 11px;font-size:13px;}}
+/* 단추·카드 */
+.btn{border-radius:999px;}
+.card,.feature,.kpi,.sidebar{border-radius:var(--radius);border-color:var(--line-soft);}
+.side-item{border-radius:10px;}
+.side-item.on{background:var(--primary);}
+/* 사진 히어로 */
+.hero.hero-photo{position:relative;overflow:hidden;padding:84px 48px 64px;border:0;color:#fff;
+  background:linear-gradient(90deg,rgba(9,30,20,.86) 0%,rgba(9,30,20,.62) 48%,rgba(9,30,20,.18) 100%),var(--hero-img) center/cover no-repeat,#16382a;}
+.pub-main .hero.hero-photo{border:0;border-radius:18px;}
+.hero.hero-photo .hero-in{text-align:left;max-width:760px;margin:0;}
+.hero.hero-photo .hero-tags{justify-content:flex-start;margin-bottom:18px;gap:8px;}
+.hero-pill{display:inline-flex;align-items:center;padding:6px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.12);backdrop-filter:blur(4px);color:#fff;font-size:13px;font-weight:600;}
+.hero.hero-photo h1{color:#fff;font-size:44px;font-weight:800;line-height:1.22;letter-spacing:-.03em;margin-bottom:16px;text-shadow:0 2px 18px rgba(0,0,0,.25);}
+.hero.hero-photo .hero-sub{color:rgba(255,255,255,.9);margin:0 0 28px;max-width:620px;font-size:16px;line-height:1.7;}
+.hero.hero-photo .hero-cta{justify-content:flex-start;}
+.btn-pill-gold{background:#f2b632 !important;color:#2a1d00 !important;border-color:#f2b632 !important;font-weight:700;border-radius:999px;box-shadow:0 6px 18px rgba(242,182,50,.35);}
+.btn-pill-gold:hover{background:#ffc845 !important;}
+.btn-pill-white{background:#fff !important;color:var(--ink) !important;border-color:#fff !important;font-weight:600;}
+.btn-pill-white:hover{background:#f5f1e6 !important;}
+.btn-pill-ghost{background:transparent !important;color:#fff !important;border-color:rgba(255,255,255,.55) !important;}
+.btn-pill-ghost:hover{background:rgba(255,255,255,.12) !important;}
+.hero-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px;}
+.hero-chips span{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:#fff;color:var(--ink);font-size:12.5px;font-weight:700;}
+.hero-chips span::before{content:'';width:7px;height:7px;border-radius:50%;background:#f2b632;}
+/* 섹션 제목: 굵게 + 옆에 회색 부제 */
+.sec-title{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 12px;margin:8px 0 18px;}
+.sec-title h2{font-size:26px;font-weight:800;color:var(--primary-dark);margin:0;}
+.sec-title p{margin:0;color:var(--ink-faint);font-size:14.5px;}
+.sec-head h1{font-weight:800;color:var(--primary-dark);letter-spacing:-.02em;}
+.sec-head{padding-left:14px;border-left:4px solid var(--gold);}
+/* 기능 카드 + 색 타일 */
+.feature-grid{margin-top:0;gap:16px;}
+.feature{padding:24px;transition:transform .18s ease,box-shadow .18s ease,border-color .18s;}
+.feature:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:rgba(180,125,20,.35);}
+.feature-icon{width:46px;height:46px;border-radius:13px;margin-bottom:16px;}
+.feature-icon svg{width:23px;height:23px;}
+.feature h3{font-size:18px;font-weight:800;}
+.t-gold{background:#fbefd2 !important;color:#a06d0c !important;}
+.t-blue{background:#e5ebf7 !important;color:#2f4f8f !important;}
+.t-purple{background:#eee7f7 !important;color:#6a4a9c !important;}
+.t-green{background:#e3eedc !important;color:#2c5842 !important;}
+.t-teal{background:#dcefec !important;color:#1f6f68 !important;}
+.t-rose{background:#f8e5df !important;color:#a14a35 !important;}
+/* 사진 위 · 색 띠 4px 카드 */
+.photo-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.photo-card{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line-soft);border-top:4px solid var(--gold);border-radius:var(--radius);overflow:hidden;color:var(--ink);box-shadow:var(--shadow-sm);transition:transform .18s ease,box-shadow .18s ease;}
+.photo-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);text-decoration:none;}
+.photo-card .pc-img{aspect-ratio:16/10;background:#dbe4d0 center/cover no-repeat;}
+.photo-card .pc-body{padding:16px 18px 18px;}
+.photo-card h3{font-size:17px;color:#8a5e0c;margin:0 0 6px;}
+.photo-card p{margin:0 0 10px;color:var(--ink-soft);font-size:14px;line-height:1.6;}
+.photo-card .pc-more{font-size:13.5px;font-weight:700;color:var(--primary);}
+/* 아래 시작 띠 */
+.cta-band{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:34px 36px;border-radius:18px;color:#fff;
+  background:linear-gradient(90deg,rgba(9,30,20,.88),rgba(9,30,20,.45)),var(--cta-img) center/cover no-repeat,#16382a;}
+.cta-band h3{color:#fff;font-size:24px;font-weight:800;margin:0 0 6px;}
+.cta-band p{margin:0;color:rgba(255,255,255,.88);font-size:14.5px;}
+@media (max-width:900px){
+  .hero.hero-photo{padding:52px 22px 40px;}
+  .hero.hero-photo h1{font-size:30px;}
+  .photo-cards{grid-template-columns:1fr;}
+  .cta-band{padding:26px 22px;}
+}
+@media (max-width:420px){
+  .hero.hero-photo h1{font-size:26px;}
+  .hero.hero-photo .hero-cta .btn{width:100%;justify-content:center;}
+  .sec-title h2{font-size:22px;}
+}
+@media (max-width:600px){
+  .feature{display:grid;grid-template-columns:46px 1fr;gap:2px 14px;padding:16px 18px;align-items:start;}
+  .feature-icon{grid-row:1 / span 2;margin:0;}
+  .feature h3{font-size:16.5px;margin:2px 0 4px;}
+}
+</style>
 </head>
 <body>
 
@@ -709,11 +817,11 @@ footer{
 
 <!-- HOME -->
 <section class="view" id="v-pub-home">
-  <div class="hero">
+  <div class="hero hero-photo" style="--hero-img:url('/img/unified/c_hat.jpg')">
     <div class="hero-in">
-      <div class="tag-row" style="justify-content:center;margin-bottom:16px;">
-        <span class="badge badge-gold">사교원 사회적협동조합</span>
-        <span class="badge badge-primary">햇빛소득마을 사업 지원</span>
+      <div class="tag-row hero-tags">
+        <span class="hero-pill">사교원 사회적협동조합</span>
+        <span class="hero-pill">햇빛소득마을 사업 지원</span>
       </div>
       <h1>신청부터 배당까지,<br>햇빛소득마을의 모든 업무를 한 곳에서.</h1>
       <p class="hero-sub">
@@ -722,55 +830,68 @@ footer{
         표준화·자동화하는 통합 운영 플랫폼입니다. 상업발전 전에는 전면 무료이고, 2026년 12월까지는 모든 회원이 무료입니다.
       </p>
       <div class="hero-cta">
-        <a class="btn btn-primary btn-lg" href="#/pub/diagnose">☀️ 무료 자가진단·수익 계산</a>
-        <button class="btn btn-outline btn-lg" onclick="openLogin()">로그인하고 시작하기</button>
-        <a class="btn btn-outline btn-lg" href="#/pub/about">사업 자세히 보기</a>
+        <a class="btn btn-primary btn-lg btn-pill-gold" href="#/pub/diagnose">무료 자가진단·수익 계산</a>
+        <button class="btn btn-outline btn-lg btn-pill-white" onclick="openLogin()">로그인하고 시작하기</button>
+        <a class="btn btn-outline btn-lg btn-pill-ghost" href="#/pub/about">사업 자세히 보기 ›</a>
       </div>
+      <div class="hero-chips"><span>진단·신청</span><span>조합 설립</span><span>정산·배당</span><span>마을사업</span></div>
     </div>
   </div>
 
   <div class="wrap">
-    <div class="text-center" style="margin-bottom:20px;">
-      <h2 class="serif">이런 업무를 자동화합니다</h2>
-      <p class="text-mute">협동조합 실무자가 매일 부딪히는 반복 업무를 AI로 처리합니다.</p>
+    <div class="sec-title">
+      <h2>이런 업무를 자동화합니다</h2>
+      <p>협동조합 실무자가 매일 부딪히는 반복 업무를 AI로 처리합니다.</p>
     </div>
     <div class="feature-grid">
       <div class="feature">
-        <div class="feature-icon">📝</div>
+        <div class="feature-icon t-gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg></div>
         <h3>문서 자동 생성</h3>
         <p>정관·총회 회의록·사업계획서·결산서를 조합 정보만 입력하면 AI가 초안을 작성합니다.</p>
       </div>
       <div class="feature">
-        <div class="feature-icon">📄</div>
+        <div class="feature-icon t-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="m9 14 2 2 4-4"/></svg></div>
         <h3>서류 AI 검토</h3>
         <p>작성한 서류를 업로드하면 누락·오류·개선점을 AI가 점검합니다.</p>
       </div>
       <div class="feature">
-        <div class="feature-icon">⚖️</div>
+        <div class="feature-icon t-purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M7 21h10"/><path d="M5 7h14"/><path d="m5 7-3 6a3 3 0 0 0 6 0z"/><path d="m19 7-3 6a3 3 0 0 0 6 0z"/></svg></div>
         <h3>법령·인허가 안내</h3>
         <p>발전사업 허가·조합법·전기설비 등 관련 법령을 자연어로 질문·확인합니다.</p>
       </div>
       <div class="feature">
-        <div class="feature-icon">💰</div>
+        <div class="feature-icon t-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div>
         <h3>수익 시뮬레이션</h3>
         <p>설비 규모·발전량을 입력하면 매출·배당·상환 계획을 자동 계산합니다.</p>
       </div>
       <div class="feature">
-        <div class="feature-icon">👥</div>
+        <div class="feature-icon t-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 4.5a3 3 0 0 1 0 6M18 20a6 6 0 0 0-3-5.2"/></svg></div>
         <h3>조합원 관리</h3>
         <p>조합원 명부·출자금·의결권·배당 이력을 통합 관리합니다.</p>
       </div>
       <div class="feature">
-        <div class="feature-icon">📅</div>
+        <div class="feature-icon t-rose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></div>
         <h3>일정·마감 관리</h3>
         <p>총회·이사회·공모 마감을 자동으로 알려드립니다.</p>
       </div>
     </div>
 
-    <div class="mt-32 text-center card" style="background:var(--primary-50);border-color:var(--primary-100);">
-      <h3 class="serif" style="margin-bottom:8px;">지금 바로 무료로 시작하세요</h3>
-      <p class="text-mute" style="margin-bottom:16px;">햇빛소득마을 조합원·예비조합원 대상 · 2026년 12월까지 모두 무료 · 이후에도 상업발전 전 무료</p>
-      <button class="btn btn-primary" onclick="openLogin()">로그인 · 회원가입</button>
+    <div class="sec-title mt-32">
+      <h2>마을 발전소의 한 살이</h2>
+      <p>단계마다 필요한 화면이 따로 있습니다.</p>
+    </div>
+    <div class="photo-cards">
+      <a class="photo-card" href="#/pub/diagnose"><div class="pc-img" style="background-image:url('/img/unified/s_fed.jpg')"></div><div class="pc-body"><h3>진단·신청</h3><p>후보지와 설비 규모를 넣으면 수익과 주민동의 준비물을 알려 줍니다.</p><span class="pc-more">자가진단 하기 ›</span></div></a>
+      <a class="photo-card" href="#/pub/join"><div class="pc-img" style="background-image:url('/img/unified/s_hat.jpg')"></div><div class="pc-body"><h3>조합 설립·발전</h3><p>정관·창립총회부터 발전소 대장·고장 장부까지 한곳에서 챙깁니다.</p><span class="pc-more">가입절차 보기 ›</span></div></a>
+      <a class="photo-card" href="#/pub/cases"><div class="pc-img" style="background-image:url('/img/unified/b_co1.jpg')"></div><div class="pc-body"><h3>정산·배당·마을사업</h3><p>발전 수익을 배당·마을기금으로 나누고, 마을식당·점빵으로 넓혀 갑니다.</p><span class="pc-more">사례 보기 ›</span></div></a>
+    </div>
+
+    <div class="mt-32 cta-band" style="--cta-img:url('/img/unified/cta.jpg')">
+      <div>
+        <h3>지금 바로 무료로 시작하세요</h3>
+        <p>햇빛소득마을 조합원·예비조합원 대상 · 2026년 12월까지 모두 무료 · 이후에도 상업발전 전 무료</p>
+      </div>
+      <button class="btn btn-primary btn-pill-gold" onclick="openLogin()">로그인 · 회원가입</button>
     </div>
   </div>
 </section>
