@@ -1470,7 +1470,7 @@ footer{
       <div class="form-row"><label>회원 등급</label><select class="input" id="su-tier"><option value="coop">조합회원 — 햇빛소득마을 회원협동조합 (승인 후)</option><option value="federation">연합회회원 — 연합회 (승인 후)</option><option value="general">일반이용자 — 둘러보기·AI 질문 (바로 가입)</option></select></div>
       <label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;margin-bottom:10px;cursor:pointer;">
         <input type="checkbox" id="su-consent" style="margin-top:3px;">
-        <span>(필수) 계정 발급을 위한 개인정보 수집·이용에 동의합니다. <a href="#/pub/privacy" target="_blank">처리방침</a></span>
+        <span>(필수) 만 14세 이상이며, 계정 발급을 위한 개인정보 수집·이용에 동의합니다. <a href="#/pub/privacy" target="_blank">처리방침</a></span>
       </label>
       <button class="btn btn-primary" style="width:100%;" onclick="doSignup()">가입 신청하기</button>
     </div>
@@ -2223,7 +2223,7 @@ async function doSignup(){
   if(!document.getElementById('su-name').value.trim()){ toast('이름을 적어 주세요.'); return; }
   if(!sido || !sigungu){ toast('활동지역(광역·시군구)을 골라 주세요.'); return; }
   if(tier !== 'general' && !document.getElementById('su-contact').value.trim()){ toast('승인 안내를 받을 전화번호를 적어 주세요.'); return; }
-  if(!document.getElementById('su-consent').checked){ toast('개인정보 수집·이용에 동의해 주세요.'); return; }
+  if(!document.getElementById('su-consent').checked){ toast('만 14세 이상 확인과 개인정보 수집·이용 동의에 체크해 주세요.'); return; }
   if(!REAL_API){ toast('가입 신청은 sakyowon.co.kr/hatsoja 에서 할 수 있습니다.'); return; }
   try{
     const res = await fetch('/api/auth/signup', {
