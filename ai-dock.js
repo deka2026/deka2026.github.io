@@ -76,6 +76,7 @@
     '.m p{margin:0 0 6px}.m h3,.m h4,.m h5{margin:8px 0 4px;font-size:14px}.m ul{margin:4px 0 6px 18px;padding:0}.m table{border-collapse:collapse;margin:6px 0;font-size:13px}.m th,.m td{border:1px solid #d9d2c0;padding:3px 7px}.m .gap{height:4px}' +
     '.row{display:flex;gap:8px;margin-top:10px;align-items:flex-start}.ta{flex:1;min-height:60px;border:1px solid #d9d2c0;border-radius:8px;padding:8px;font-size:14px;font-family:inherit}' +
     '.pb{border:none;background:#2c5842;color:#fff;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:13px}.pb.ghost{background:#fff;color:#2c5842;border:1px solid #2c5842}.pb:disabled{opacity:.5;cursor:default}' +
+    '.gg figure{margin:8px 0;border:1px solid #d6dbe6;border-radius:8px;overflow:hidden;background:#fff}.gg img{display:block;width:100%;min-height:40px;cursor:zoom-in}.gg figcaption{font-size:12px;padding:5px 9px;background:#f3f5fa;color:#334}' +
     '.files{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}.chip{font-size:12px;background:#fff7e0;border:1px solid #e0c070;border-radius:12px;padding:2px 9px}' +
     '.draft{border:1px solid #d9d2c0;border-radius:8px;padding:10px 14px;background:#fffdf7;margin-top:8px;line-height:1.6}' +
     '.list{display:flex;flex-direction:column;gap:4px}.li{display:flex;gap:8px;align-items:center;padding:6px 8px;border:1px solid #eee;border-radius:8px;cursor:pointer;font-size:13px}.li:hover{background:#faf6ec}.li .t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
@@ -434,12 +435,35 @@
     var q = $('q').value.trim(); if (!q || state.busy) return;
     $('q').value = ''; open(true); tab('chat');
     addMsg('user', esc(q));
+    if (/^\s*근거\s*확보/.test(q)) { geungeo(q); return; }   // 26-11-21 이사장 지시: 「근거확보해」 — 올린 원본에서 근거 쪽 그림
     var hint = null, full = q;
     if (state.pending) { hint = state.pending.tool; full = state.pending.prev + ' ' + q; }
     var wait = addMsg('ai', '확인 중…'); state.busy = true; $('send').disabled = true;
     plan(full, wait, hint).then(function (handled) {
       state.busy = false; $('send').disabled = false;
       if (!handled) { wait.remove(); ask(q); }
+    });
+  }
+  // 26-11-21 「근거확보해」: 이 대화에 올린 원본 파일에서 방금 답의 근거 쪽을 찾아 자료 이름·쪽수 띠를 단 그림으로 받는다(AI 횟수 안 씀)
+  function geungeo(q) {
+    if (!state.me || !state.me.user) { addMsg('err', '근거 그림은 로그인한 뒤, 이 대화에 올린 원본 파일에서 뜰 수 있습니다. <a href="' + API + '/#login">로그인</a>'); return; }
+    var wait = addMsg('ai', '올린 원본에서 근거 쪽을 찾는 중…'); state.busy = true; $('send').disabled = true;
+    api('/api/ai/dock/geungeo', { method: 'POST', body: { thread_id: state.thread, message: q } }).then(function (r) {
+      state.busy = false; $('send').disabled = false;
+      if (!r.ok) { wait.className = 'm err'; wait.textContent = r.answer || '근거 그림을 만들지 못했습니다.'; return; }
+      wait.innerHTML = md(r.answer) + '<div class="gg">' + r.images.map(function (x, i) {
+        return '<figure><img data-i="' + i + '" alt="' + esc(x.label) + '"><figcaption>' + esc(x.label) + ' · <a href="#" data-dl="' + i + '">내려받기</a></figcaption></figure>';
+      }).join('') + (r.zip ? '<a href="#" data-zip="1" class="pb ghost">모두 내려받기(zip)</a>' : '') + '</div>';
+      var got = {};
+      function blob(url) { return got[url] || (got[url] = api(url, { blob: true }).then(function (b) { return URL.createObjectURL(b); })); }
+      function save(url, name) { blob(url).then(function (u) { var a = document.createElement('a'); a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove(); }, function () { alert('내려받지 못했습니다(1시간이 지났거나 로그인이 끊겼습니다).'); }); }
+      r.images.forEach(function (x, i) {
+        var img = wait.querySelector('img[data-i="' + i + '"]');
+        blob(x.url).then(function (u) { img.src = u; img.onclick = function () { window.open(u, '_blank'); }; }, function () { img.alt = '그림을 불러오지 못했습니다'; });
+        wait.querySelector('a[data-dl="' + i + '"]').addEventListener('click', function (e) { e.preventDefault(); save(x.url, x.name); });
+      });
+      var z = wait.querySelector('a[data-zip]'); if (z) z.addEventListener('click', function (e) { e.preventDefault(); save(r.zip, '근거그림_묶음.zip'); });
+      $('panel').scrollTop = $('panel').scrollHeight;
     });
   }
   function sendOld() {
@@ -462,7 +486,7 @@
       var fd = new FormData(); fd.append('file', f); if (state.thread) fd.append('thread_id', state.thread);
       api('/api/ai/dock/upload', { method: 'POST', form: fd }).then(function (r) {
         if (r.thread_id) setThread(r.thread_id);
-        if (r.ok) { state.files.push(r); renderFiles(); m.innerHTML = '📎 <b>' + esc(r.name) + '</b> 첨부됨 — ' + r.chars + '자 읽음(' + esc(r.method) + ')' + (r.masked && r.masked.length ? ' · 가린 것: ' + esc(r.masked.join(', ')) : '') + '<br><span class="note">' + esc(r.preview) + '…</span>'; }
+        if (r.ok) { state.files.push(r); renderFiles(); m.innerHTML = '📎 <b>' + esc(r.name) + '</b> 첨부됨 — ' + r.chars + '자 읽음(' + esc(r.method) + ')' + (r.masked && r.masked.length ? ' · 가린 것: ' + esc(r.masked.join(', ')) : '') + '<br><span class="note">' + esc(r.preview) + '…</span><br><span class="note">답을 받은 뒤 「근거확보해」라고 하면 이 파일에서 근거 쪽을 그림으로 떠 드립니다(원본은 7일 보관).</span>'; }
         else { m.className = 'm err'; m.textContent = r.message || (r.error === 'too_large' ? '50MB 를 넘습니다.' : r.error === 'unauthorized' ? '로그인이 필요합니다.' : '읽어 내지 못했습니다.'); }
       });
     });
