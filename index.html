@@ -1468,6 +1468,9 @@ async function renderNotices() {
 let PLANS = null, plansP = null;      // /api/membership/plans — null 아직 | {ok:false} 서버에 없음·실패 | 응답
 function loadPlans() { if (!plansP) plansP = api('/api/membership/plans').then(r => { PLANS = (r.ok && Array.isArray(r.products)) ? r : { ok: false }; return PLANS; }); return plansP; }
 const won = n => (Number(n) || 0).toLocaleString('ko-KR') + '원';
+// 11-21: 이용권 기간 단위(아카데미 2개월). period 가 없거나 1이면 「월」.
+const perU = x => (x && +x.period > 1) ? (+x.period) + '개월' : '월';
+const hasPeriod = () => joinPicks().some(x => +((jProd(x.product) || {}).period || 1) > 1) || ((MB && MB.subs) || []).some(s => +s.period > 1 && ['apply', 'wait_pay', 'trial', 'active'].includes(s.status));
 const mbText = r => r.status === 429 ? ERR.rate_limited : (r.message || ERR[r.error] || '처리하지 못했습니다. 잠시 후 다시 시도해 주세요.');
 function billStart(bf) { const m = /^(\d{4})-(\d{2})$/.exec(bf || ''); if (!m) return null; const y = +m[1], mo = +m[2]; return { y, m: mo, py: mo === 1 ? y - 1 : y, pm: mo === 1 ? 12 : mo - 1 }; }
 function trialLine(src) { const b = (src && src.trial) ? billStart(src.billing_from) : null; return b ? `${b.py}년 ${b.pm}월까지 무료 시범` : ''; }
@@ -1520,7 +1523,7 @@ function priceHTML() {
     const lines = m.lines.map(esc);
     if (opts.length) lines.push('선택 기능: ' + opts.map(o => `${esc(o.name)} ${won(o.amount)}`).join(' · '));
     if (p.approve) lines.push('신청 뒤 사교원의 승인을 거칩니다');
-    return pcard(m.c, m.i, p.tier_ko || p.name, m.who || p.name, `<div class="pp">${won(p.base)} <small>/ 월</small></div>` + (opts.length ? `<div class="p2">기본 ${won(p.base)} + 선택 기능${p.allin ? ` · 올인원 <b>${won(p.allin)}</b>` : ''}</div>` : ''), taxTag(p.tax), lines);
+    return pcard(m.c, m.i, p.tier_ko || p.name, m.who || p.name, `<div class="pp">${won(p.base)} <small>/ ${perU(p)}</small></div>` + (opts.length ? `<div class="p2">기본 ${won(p.base)} + 선택 기능${p.allin ? ` · 올인원 <b>${won(p.allin)}</b>` : ''}</div>` : ''), taxTag(p.tax), lines);
   };
   const ext = x => {
     const m = pmOf(x.product), ps = Array.isArray(x.prices) ? x.prices : [], lo = ps.length ? Math.min.apply(null, ps.map(q => +q.amount || 0)) : 0;
@@ -1639,8 +1642,8 @@ function renderMyBox() {
   const live = subs.filter(s => ['apply', 'wait_pay', 'trial', 'active'].includes(s.status));
   // ① 등급·이용 서비스
   let t1 = `<div class="tile" id="tileSvc"><div class="hd">${ic('user', 's')}내 등급 · 이용 서비스</div><div class="v" id="myTierV">${esc(tierKo(me))}</div>`;
-  if (subs.length) t1 += `<ul class="mbl" id="mySubs" style="margin-top:8px">` + subs.map(s => `<li data-sub="${esc(s.product)}"><span class="nm">${esc(s.name || s.product)}</span><span class="st ${SUB_ST[s.status] || 'free'}">${esc(SUB_KO[s.status] || s.status)}</span><span class="am">월 ${won(s.amount)} <small class="note">${taxWord(s.tax)}</small></span>` +
-      (s.next_amount != null ? `<span class="note" style="flex-basis:100%">다음 기간부터 월 ${won(s.next_amount)}</span>` : '') +
+  if (subs.length) t1 += `<ul class="mbl" id="mySubs" style="margin-top:8px">` + subs.map(s => `<li data-sub="${esc(s.product)}"><span class="nm">${esc(s.name || s.product)}</span><span class="st ${SUB_ST[s.status] || 'free'}">${esc(SUB_KO[s.status] || s.status)}</span><span class="am">${perU(s)} ${won(s.amount)} <small class="note">${taxWord(s.tax)}</small></span>` +
+      (s.next_amount != null ? `<span class="note" style="flex-basis:100%">다음 기간부터 ${perU(s)} ${won(s.next_amount)}</span>` : '') +
       (s.paid_until ? `<span class="note" style="flex-basis:100%">이용 기간 ${esc(ymd(s.paid_until))} 까지</span>` : '') +
       (['apply', 'wait_pay', 'trial', 'active'].includes(s.status) ? `<button type="button" class="btn sm" data-cancel="${esc(s.product)}" data-n="${esc(s.name || s.product)}">그만두기</button>` : '') + `</li>`).join('') + `</ul>`;
   else t1 += `<p class="note" style="margin-top:6px">${me.role === 'admin' ? '통합관리자는 전 서비스를 이용료 없이 씁니다.' : staff ? '매니저는 이용료 없이, 체크권한으로 열린 서비스(' + keys.map(k => SVC[k].n).join(' · ') + ')를 씁니다.' : keys.length ? '지금 등급으로 쓰는 서비스: ' + keys.map(k => SVC[k].n).join(' · ') : '고른 유료 서비스가 없습니다. 필요한 서비스를 골라 보세요.'}</p>`;
@@ -1652,10 +1655,11 @@ function renderMyBox() {
   else if (MB_STATE === '') t2 += `<p class="note">불러오는 중…</p>`;
   else if (MB_STATE !== 'ok') t2 += `<p class="note" id="payNone">${MB_STATE === 'none' ? '이용료·납부 안내는 준비 중입니다.' : '이용료 정보를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.'}</p>`;
   else {
-    const fee = live.reduce((a, s) => a + (+s.amount || 0), 0);
+    const fee = live.reduce((a, s) => a + (+s.amount || 0), 0), feeM = live.filter(s => !(+s.period > 1)).reduce((a, s) => a + (+s.amount || 0), 0);
+    const feeTxt = [feeM ? '월 ' + won(feeM) : ''].concat(live.filter(s => +s.period > 1).map(s => perU(s) + ' ' + won(s.amount))).filter(Boolean).join(' · ');
     const inv = (MB.invoices || []).find(i => i.status === 'wait');
     const tl = trialLine(MB);
-    t2 += `<div class="v" id="myFee">${fee ? '월 ' + won(fee) : '낼 이용료가 없습니다'}</div>`;
+    t2 += `<div class="v" id="myFee">${fee ? feeTxt : '낼 이용료가 없습니다'}</div>`;
     if (inv) {
       const due = live.map(s => s.grace_until).filter(Boolean).sort()[0];
       t2 += `<div style="margin-top:6px"><span class="st wait">입금 대기</span></div><ul class="plain kv" id="myInv" style="margin-top:6px"><li><span>낼 금액</span><b>${won(inv.amount)}${inv.months === 12 ? ' (연납)' : ''}</b></li><li><span>입금 계좌</span><b>${esc(MB.bank || '계좌 안내 준비 중')}</b></li>${MB.payinfo ? `<li><span>입금자명</span><b>${esc(MB.payinfo.depositor || '')}</b></li>` : ''}${due ? `<li><span>입금 기한</span><b>${esc(ymd(due))}</b></li>` : ''}</ul><p class="note" style="margin-top:4px">입금이 확인되면 자동으로 열립니다.</p>`;
@@ -1759,7 +1763,7 @@ function pickerHTML() {
   PLANS.products.forEach(p => {
     const k = p.product, m = pmOf(k), s = J.sel[k] || { on: false, opts: [] }, held = J.held[k], opts = Array.isArray(p.options) ? p.options : [];
     const all = opts.length > 0 && opts.every(o => s.opts.includes(o.key));
-    h += `<div class="svc ${m.c}${s.on ? ' sel' : ''}" data-prodbox="${esc(k)}"><div class="hd"><input type="checkbox" id="j-${esc(k)}" data-prod="${esc(k)}"${s.on ? ' checked' : ''}${held ? ' disabled' : ''}><label class="t" for="j-${esc(k)}"><b>${esc(p.name)}</b> <span class="chip">${esc(p.tier_ko || '')}</span><small>${m.lines.map(esc).join(' · ')}${p.approve ? ' <b>(승인 필요)</b>' : ''}${held ? ' · <b>' + esc(SUB_KO[held] || '이용 중') + '</b> — 그만두기는 내 페이지에서' : ''}</small></label><span class="pr">${opts.length ? '기본 ' : ''}월 ${won(p.base)}<br><small class="an">${taxWord(p.tax)}</small></span></div>`;
+    h += `<div class="svc ${m.c}${s.on ? ' sel' : ''}" data-prodbox="${esc(k)}"><div class="hd"><input type="checkbox" id="j-${esc(k)}" data-prod="${esc(k)}"${s.on ? ' checked' : ''}${held ? ' disabled' : ''}><label class="t" for="j-${esc(k)}"><b>${esc(p.name)}</b> <span class="chip">${esc(p.tier_ko || '')}</span><small>${m.lines.map(esc).join(' · ')}${p.approve ? ' <b>(승인 필요)</b>' : ''}${held ? ' · <b>' + esc(SUB_KO[held] || '이용 중') + '</b> — 그만두기는 내 페이지에서' : ''}</small></label><span class="pr">${opts.length ? '기본 ' : ''}${perU(p)} ${won(p.base)}<br><small class="an">${taxWord(p.tax)}</small></span></div>`;
     if (s.on && opts.length) {
       const sum = (+p.base || 0) + opts.filter(o => s.opts.includes(o.key)).reduce((a, o) => a + (+o.amount || 0), 0);
       h += `<div class="sub"><span class="note">선택 기능</span>` + opts.map(o => `<div class="row"><label class="ck"><input type="checkbox" id="j-${esc(k)}-${esc(o.key)}" data-opt="${esc(k)}:${esc(o.key)}"${s.opts.includes(o.key) ? ' checked' : ''}>${esc(o.name)}</label><span class="p">+${won(o.amount)}</span></div>`).join('') +
@@ -1776,11 +1780,13 @@ function pickerHTML() {
   return h + '</div>';
 }
 function sumHTML() {
-  const picks = joinPicks(); let h = '<div class="card sum" id="sumBox" aria-live="polite"><h3>월 이용료 합계</h3>', tot = 0;
+  const picks = joinPicks(), per = picks.some(x => +((jProd(x.product) || {}).period || 1) > 1);
+  let h = `<div class="card sum" id="sumBox" aria-live="polite"><h3>${per ? '이용료 합계' : '월 이용료 합계'}</h3>`, tot = 0, tm = 0;
   if (!picks.length) h += `<div class="li"><span>${TIER_KO.free}</span><span>무료</span></div>`;
-  picks.forEach(x => { const p = jProd(x.product); if (!p) return; const v = jPrice(p, J.sel[x.product]); tot += v; h += `<div class="li"><span>${esc(p.name)} <small>${taxWord(p.tax)}</small></span><span>${won(v)}</span></div>`; });
-  h += `<div class="tot"><span>한 달에 낼 금액</span><b id="sumTotal">${won(tot)}</b></div>`;
-  if (tot && J.step === 3 && J.pay.method === 'transfer' && J.pay.cycle === 'year' && PLANS && PLANS.year_months) h += `<div class="li" style="margin-top:6px"><span>연납(${esc(PLANS.year_months)}개월 값)</span><span><b id="sumYear">${won(tot * PLANS.year_months)}</b></span></div>`;
+  picks.forEach(x => { const p = jProd(x.product); if (!p) return; const v = jPrice(p, J.sel[x.product]); tot += v; if (!(+p.period > 1)) tm += v; h += `<div class="li"><span>${esc(p.name)} <small>${taxWord(p.tax)}</small></span><span>${per ? perU(p) + ' ' : ''}${won(v)}</span></div>`; });
+  h += `<div class="tot"><span>${per ? '처음 한 번에 낼 금액' : '한 달에 낼 금액'}</span><b id="sumTotal">${won(tot)}</b></div>`;
+  if (per) h += `<p class="note" style="margin-top:4px">아카데미 이용권은 2개월마다 한 번 냅니다(연납 할인·자동이체 없음).</p>`;
+  if (tot && J.step === 3 && J.pay.method === 'transfer' && J.pay.cycle === 'year' && PLANS && PLANS.year_months) h += `<div class="li" style="margin-top:6px"><span>연납(${esc(PLANS.year_months)}개월 값)${per ? ' + 아카데미 2개월' : ''}</span><span><b id="sumYear">${won(tm * PLANS.year_months + (tot - tm))}</b></span></div>`;
   const order = (PLANS && Array.isArray(PLANS.tiers)) ? PLANS.tiers.map(t => t.code) : Object.keys(TIER_KO);
   const cand = [me ? tierOf(me) : 'free'].concat(picks.map(x => (jProd(x.product) || {}).tier).filter(Boolean)).sort((a, b) => order.indexOf(a) - order.indexOf(b));
   const tl = tot ? trialLine(PLANS) : '';
@@ -1800,7 +1806,8 @@ function payFormHTML() {
   let h = `<form class="card" id="f3" novalidate><div class="form">`;
   if (hasSaved && !J.payOnly) h += `<div class="f w"><span class="lb">납부 정보</span><div class="checks" role="radiogroup" aria-label="납부 정보"><label><input type="radio" name="pmode" data-paymode="saved"${J.payMode === 'saved' ? ' checked' : ''}>적어 둔 납부 정보 그대로</label><label><input type="radio" name="pmode" data-paymode="new"${J.payMode !== 'saved' ? ' checked' : ''}>새로 적기</label></div>` + (J.payMode === 'saved' ? `<div class="infobox"><ul class="plain kv">${payinfoRows(MB.payinfo)}</ul></div>` : '') + `</div>`;
   if (!(hasSaved && !J.payOnly && J.payMode === 'saved')) {
-    h += `<div class="f w"><span class="lb">납부 방식</span><div class="checks" role="radiogroup" aria-label="납부 방식">${rd('pm', 'method', 'transfer', '이체 — 달마다 직접 보냅니다')}${rd('pm', 'method', 'auto', '자동이체 — 정한 날에 저절로 나갑니다')}</div></div>`;
+    const noAuto = hasPeriod(); if (noAuto && P.method === 'auto') P.method = 'transfer';   // 11-21: 아카데미(2개월 단위)는 자동이체로 받지 않는다(서버도 400 auto_period)
+    h += `<div class="f w"><span class="lb">납부 방식</span><div class="checks" role="radiogroup" aria-label="납부 방식">${rd('pm', 'method', 'transfer', '이체 — 달마다 직접 보냅니다')}${rd('pm', 'method', 'auto', '자동이체 — 정한 날에 저절로 나갑니다', noAuto)}</div>${noAuto ? '<span class="hint" id="noAutoHint">연대지능활동가 아카데미 이용권(2개월 단위)은 이체로만 낼 수 있습니다.</span>' : ''}</div>`;
     if (P.method === 'auto') h += `<div class="f w"><span class="lb">매월 납부일</span><div class="checks" role="radiogroup" aria-label="매월 납부일">${[5, 15, 25].map(d => rd('pd', 'auto_day', d, d + '일')).join('')}</div></div>` +
       `<div class="f w"><span class="lb">자동이체 방식</span><div class="checks" role="radiogroup" aria-label="자동이체 방식" style="flex-direction:column"><label><input type="radio" name="pa" checked>① 내 은행에서 자동이체 걸기</label><label><input type="radio" name="pa" disabled>② 출금 동의(CMS) <span class="tg">준비 중</span></label></div>` +
       `<div class="infobox" id="autoBank"><b>내 은행 앱이나 창구에서 아래대로 자동이체를 걸어 주세요.</b><ul class="dot"><li>받는 계좌: ${esc((PLANS && PLANS.bank) || (MB && MB.bank) || '신청을 마치면 내 페이지에서 안내합니다')}</li>${tot ? `<li>금액: 월 ${won(tot)}</li>` : ''}<li>날짜: 매월 ${esc(P.auto_day)}일</li></ul></div></div>`;
