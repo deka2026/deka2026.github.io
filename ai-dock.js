@@ -435,7 +435,7 @@
     var q = $('q').value.trim(); if (!q || state.busy) return;
     $('q').value = ''; open(true); tab('chat');
     addMsg('user', esc(q));
-    if (/^\s*근거\s*확보/.test(q)) { geungeo(q); return; }   // 26-11-21 이사장 지시: 「근거확보해」 — 올린 원본에서 근거 쪽 그림
+    if (/^\s*근거\s*확보(?![^"「“『]*?(뭐|무엇|방법|어떻게|알려|이란|란\b|\?))/.test(q)) { geungeo(q); return; }   // 「근거확보가 뭐야?」 같은 질문은 AI 로(서버 명령꼴과 같은 기준)   // 26-11-21 이사장 지시: 「근거확보해」 — 올린 원본에서 근거 쪽 그림
     var hint = null, full = q;
     if (state.pending) { hint = state.pending.tool; full = state.pending.prev + ' ' + q; }
     var wait = addMsg('ai', '확인 중…'); state.busy = true; $('send').disabled = true;
@@ -482,11 +482,11 @@
     if (!state.me || !state.me.user) { open(true); addMsg('err', '파일·이미지 업로드는 로그인한 뒤 쓸 수 있습니다. <a href="' + API + '/#login">로그인</a>'); return; }
     Array.prototype.forEach.call(files, function (f) {
       open(true); tab('chat');
-      var m = addMsg('file', '📎 ' + esc(f.name) + ' 올리는 중… (글자를 읽어 내고 개인정보는 가립니다)');
+      var m = addMsg('file', '📎 ' + esc(f.name) + ' 올리는 중… (AI 에는 개인정보를 가린 글자만 보냅니다. PDF·한글·그림은 「근거확보해」용 원본을 본인만 볼 수 있게 7일 보관한 뒤 지웁니다 — 대화를 지우면 바로 지웁니다)');
       var fd = new FormData(); fd.append('file', f); if (state.thread) fd.append('thread_id', state.thread);
       api('/api/ai/dock/upload', { method: 'POST', form: fd }).then(function (r) {
         if (r.thread_id) setThread(r.thread_id);
-        if (r.ok) { state.files.push(r); renderFiles(); m.innerHTML = '📎 <b>' + esc(r.name) + '</b> 첨부됨 — ' + r.chars + '자 읽음(' + esc(r.method) + ')' + (r.masked && r.masked.length ? ' · 가린 것: ' + esc(r.masked.join(', ')) : '') + '<br><span class="note">' + esc(r.preview) + '…</span><br><span class="note">답을 받은 뒤 「근거확보해」라고 하면 이 파일에서 근거 쪽을 그림으로 떠 드립니다(원본은 7일 보관).</span>'; }
+        if (r.ok) { state.files.push(r); renderFiles(); m.innerHTML = '📎 <b>' + esc(r.name) + '</b> 첨부됨 — ' + r.chars + '자 읽음(' + esc(r.method) + ')' + (r.masked && r.masked.length ? ' · 가린 것: ' + esc(r.masked.join(', ')) : '') + '<br><span class="note">' + esc(r.preview) + '…</span><br><span class="note">답을 받은 뒤 「근거확보해」라고 하면 이 파일에서 근거 쪽을 그림으로 떠 드립니다(PDF·한글·그림 원본만 7일 보관, 위의 「가린 것」은 AI 로 보낸 글자 기준입니다).</span>'; }
         else { m.className = 'm err'; m.textContent = r.message || (r.error === 'too_large' ? '50MB 를 넘습니다.' : r.error === 'unauthorized' ? '로그인이 필요합니다.' : '읽어 내지 못했습니다.'); }
       });
     });
