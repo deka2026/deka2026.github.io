@@ -15523,9 +15523,23 @@ loadUploads();
 loadClosings();
 loadTax();
 renderTopActions();
-ssoBoot();   // 통합 계정 세션이 있으면 자동 로그인 (sakyowon.co.kr 서빙 시)
+/* 11-21 이사장 지시: 주소 없이 처음 들어온 로그인 회원은 공개 홈 대신 자기 화면(대시보드)으로.
+   「홈」을 눌러 #/pub/home 으로 가는 것은 그대로 공개 홈. 손님(승인 대기)은 공개 홈 그대로. */
+const _BOOT_BARE = !/^#\/./.test(location.hash || '');
+function bootLand(){
+  if(!_BOOT_BARE || bootLand.done) return false;
+  const u = currentUser();
+  if(!u) return false;
+  const role = normalizeRole(u.role, u.status, u.perms);
+  if(role === 'guest') return false;
+  bootLand.done = true;
+  if(currentRoute() !== 'pub/home') return false;   // 그사이 다른 화면으로 옮겼으면 건드리지 않음
+  location.hash = roleHome(role);
+  return true;
+}
+ssoBoot().then(bootLand).catch(() => {});   // 통합 계정 세션이 있으면 자동 로그인 (sakyowon.co.kr 서빙 시)
 viewCoopCheck();   // 조합 보기 중이었는데 서버에서 이미 풀렸으면 관리자로 되돌린다
-navigate();
+if(!bootLand()) navigate();
 
 // 모달 배경 클릭 시 닫기
 document.getElementById('loginModal').addEventListener('click', e => {
