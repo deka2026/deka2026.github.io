@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>시민주권 모니터링 플랫폼 (시범)</title>
+<meta name="description" content="전남광주 시민이 시정·의정을 묻고 제보하면 AI가 공개 자료를 조사해 근거와 함께 답하고 이슈브리핑을 만드는 시민주권 모니터링 플랫폼 시범판.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0f5c63">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='3' y='3' width='26' height='26' rx='7' fill='%230f5c63'/><circle cx='16' cy='15' r='6' fill='none' stroke='%23fff' stroke-width='2.4'/><path d='M20.5 19.5l4 4' stroke='%23fff' stroke-width='2.4' stroke-linecap='round'/></svg>">
+<style>
+/* 레이아웃: 위 머리띠 + 탭 + 본문 한 줄기(최대 1040px). 감시 기록은 청록, 문제 제기는 주황 갈색 */
+:root{
+  --bg:#f4f6f5; --surface:#ffffff; --ink:#17232a; --muted:#56646c; --faint:#87949a; --line:#d8dfdc; --line-soft:#e8edeb;
+  --accent:#0f5c63; --accent-ink:#0b4a50; --accent-soft:#e0eeed;
+  --signal:#b4561b; --signal-soft:#f7e8dc;
+  --ok:#2f6b3a; --ok-soft:#e3f0e4; --warn:#8a6a10; --warn-soft:#f6efd6; --bad:#a53333; --bad-soft:#f6e0e0;
+  --head:#0d2f33; --head-ink:#eaf3f2;
+  --font:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif; --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#10171a; --surface:#172126; --ink:#e3ebe9; --muted:#9eadb2; --faint:#7a898f; --line:#2a373c; --line-soft:#212c31;
+  --accent:#5fb8bd; --accent-ink:#8fd2d5; --accent-soft:#17353a; --signal:#e39360; --signal-soft:#3a2618;
+  --ok:#7cc488; --ok-soft:#1c3220; --warn:#d8b850; --warn-soft:#352d12; --bad:#e58a8a; --bad-soft:#3b1d1d;
+  --head:#0a2226; --head-ink:#e3efee; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10171a; --surface:#172126; --ink:#e3ebe9; --muted:#9eadb2; --faint:#7a898f; --line:#2a373c; --line-soft:#212c31;
+  --accent:#5fb8bd; --accent-ink:#8fd2d5; --accent-soft:#17353a; --signal:#e39360; --signal-soft:#3a2618;
+  --ok:#7cc488; --ok-soft:#1c3220; --warn:#d8b850; --warn-soft:#352d12; --bad:#e58a8a; --bad-soft:#3b1d1d;
+  --head:#0a2226; --head-ink:#e3efee; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.7}
+a{color:var(--accent-ink)}
+button,input,select,textarea{font-family:inherit;font-size:15px}
+.hidden{display:none!important}
+.wrap{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{background:var(--head);color:var(--head-ink);padding-block:16px 14px}
+header.top .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px}
+header.top h1{font-size:20px;margin:0;font-weight:700;letter-spacing:-.01em}
+.pilot{font-size:12px;font-weight:700;border:1px solid currentColor;border-radius:999px;padding:0 8px;margin-left:6px;vertical-align:2px;opacity:.85}
+header.top .sub{font-size:13px;opacity:.78;flex-basis:100%}
+header.top .who{margin-left:auto;font-size:14px}
+header.top .who a{color:#f3d9a6}
+nav.tabs{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+nav.tabs .wrap{display:flex;gap:2px;overflow-x:auto}
+nav.tabs a{padding:12px 14px;text-decoration:none;color:var(--muted);font-weight:500;white-space:nowrap;border-bottom:3px solid transparent;font-size:15.5px}
+nav.tabs a.on{color:var(--accent-ink);border-bottom-color:var(--accent);font-weight:700}
+nav.tabs a:focus-visible{outline:2px solid var(--signal);outline-offset:-2px}
+main{padding-block:20px 64px}
+h2{font-size:22px;margin:4px 0 6px;letter-spacing:-.01em}
+h3{font-size:17px;margin:18px 0 6px}
+.lead{color:var(--muted);margin:0 0 14px;max-width:46em}
+.card{background:var(--surface);border:1px solid var(--line-soft);border-radius:12px;padding:18px 20px;margin-bottom:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.grid3,.grid2{grid-template-columns:minmax(0,1fr)}}
+.tile{background:var(--surface);border:1px solid var(--line-soft);border-radius:10px;padding:14px 16px;min-width:0}
+.tile .k{font-size:13px;color:var(--muted)}
+.tile .v{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.3}
+.tile .s{font-size:13px;color:var(--muted)}
+.src-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:860px){.src-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:420px){.src-list{grid-template-columns:minmax(0,1fr)}}
+.src{border:1px solid var(--line-soft);border-radius:10px;padding:12px 14px;background:var(--surface);cursor:pointer;text-align:left;color:inherit;min-width:0}
+.src.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.src b{display:block;font-size:15px}
+.src .n{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.src .t{font-size:12.5px;color:var(--muted)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px;background:var(--ok)}
+.dot.late{background:var(--signal)}
+.tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:999px;font-weight:500;white-space:nowrap}
+.t-acc{background:var(--accent-soft);color:var(--accent-ink)} .t-sig{background:var(--signal-soft);color:var(--signal)}
+.t-ok{background:var(--ok-soft);color:var(--ok)} .t-warn{background:var(--warn-soft);color:var(--warn)} .t-bad{background:var(--bad-soft);color:var(--bad)}
+.search{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 6px}
+.search input{flex:1 1 240px;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+.btn{border:0;border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer;background:var(--accent);color:#fff}
+.btn.s{background:var(--surface);color:var(--accent-ink);border:1px solid var(--line)}
+.btn.warm{background:var(--signal)}
+.btn.sm{padding:6px 12px;font-size:14px}
+.btn:disabled{opacity:.55;cursor:default}
+.btn:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+.feed{border-top:1px solid var(--line-soft)}
+.fi{display:grid;grid-template-columns:96px minmax(0,1fr);gap:4px 12px;padding:11px 2px;border-bottom:1px solid var(--line-soft);cursor:pointer}
+.fi:hover .ft{color:var(--accent-ink)}
+.fi time{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.ft{font-weight:500}
+.fs{grid-column:2;font-size:13.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+@media (max-width:520px){.fi{grid-template-columns:minmax(0,1fr)}.fs{grid-column:1}}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.field label{font-size:14px;font-weight:500}
+.field input,.field textarea,.field select{padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);width:100%}
+.field textarea{min-height:140px;resize:vertical}
+.field small{color:var(--faint);font-size:13px}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:14.5px;margin:6px 0}
+.check input{margin-top:5px}
+.msg{font-size:14px;padding:8px 12px;border-radius:8px;margin:8px 0}
+.msg.err{background:var(--bad-soft);color:var(--bad)} .msg.ok{background:var(--ok-soft);color:var(--ok)}
+.answer{border-left:3px solid var(--accent);padding:4px 0 4px 16px;margin-top:10px}
+.answer p{margin:6px 0}
+.cites{font-size:14px;color:var(--muted);margin:8px 0 0;padding-left:1.1em}
+.cites li{margin:3px 0}
+.cites a{cursor:pointer}
+.small{font-size:13px;color:var(--faint)}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp 1s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+.qitem,.ritem{border:1px solid var(--line-soft);border-radius:10px;padding:12px 14px;margin-bottom:10px;background:var(--surface)}
+.qitem .q,.ritem .t{font-weight:500}
+.ritem{cursor:pointer}
+.ritem:hover{border-color:var(--accent)}
+.brief h3{font-size:16px;margin:16px 0 4px;color:var(--accent-ink)}
+.brief ul{margin:4px 0;padding-left:1.2em}
+.brief li{margin:3px 0}
+.brief .yo{font-size:16.5px;margin:8px 0 4px}
+.brief .head{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.modal{position:fixed;inset:0;background:rgba(10,20,24,.55);z-index:20;display:flex;align-items:flex-start;justify-content:center;padding:max(24px,env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) 24px max(12px,env(safe-area-inset-left,0px));overflow:auto}
+.modal .box{background:var(--surface);border-radius:12px;max-width:820px;width:100%;padding:20px;min-width:0}
+.modal pre{white-space:pre-wrap;word-break:break-word;font-family:var(--font);font-size:14.5px;line-height:1.75;max-height:60vh;overflow:auto;background:var(--bg);padding:12px;border-radius:8px}
+.note{background:var(--warn-soft);color:var(--ink);border-radius:10px;padding:12px 16px;font-size:14.5px;margin-bottom:14px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;z-index:30;font-size:14.5px}
+footer{color:var(--faint);font-size:13px;padding-block:24px 40px;border-top:1px solid var(--line-soft)}
+.about p,.about li{max-width:46em}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <h1>시민주권 모니터링 플랫폼<span class="pilot">시범</span></h1>
+    <span class="who" id="who"></span>
+    <span class="sub">전남광주 시민이 시정·의정을 묻고 제보하면 AI가 공개 자료를 조사해 근거와 함께 답합니다 · 운영: 전남광주 시민사회(협약 준비 중) · 기술지원: 사교원</span>
+  </div>
+</header>
+<nav class="tabs" aria-label="메뉴"><div class="wrap">
+  <a href="#home" data-t="home">감시판</a>
+  <a href="#ask" data-t="ask">묻고 답하기</a>
+  <a href="#report" data-t="report">시민제보</a>
+  <a href="#brief" data-t="brief">이슈브리핑</a>
+  <a href="#admin" data-t="admin" class="hidden" id="tab-admin">운영</a>
+  <a href="#about" data-t="about">플랫폼 안내</a>
+</div></nav>
+
+<main class="wrap">
+<!-- 감시판 -->
+<section id="v-home">
+  <h2>감시판</h2>
+  <p class="lead">통합시의회 회의록, 통합시 보도자료, 조례·규칙, 나라장터 입찰공고를 날마다 자동으로 모읍니다. 자료원을 누르면 그 자료만 보이고, 제목을 누르면 원문을 볼 수 있습니다.</p>
+  <div class="grid3" id="tot"></div>
+  <h3>자료원과 수집 상태</h3>
+  <div class="src-list" id="srcs"></div>
+  <form class="search" id="fsearch" onsubmit="return false">
+    <label for="fq" class="hidden">자료 검색</label>
+    <input id="fq" placeholder="낱말로 찾기 — 예: 행정사무감사, 재생에너지, 수의계약">
+    <button class="btn" id="fgo" type="submit">찾기</button>
+    <button class="btn s" id="fclear" type="button">전체</button>
+  </form>
+  <div class="feed" id="feed"></div>
+  <div class="row" style="margin-top:12px"><button class="btn s sm" id="fmore" type="button">더 보기</button></div>
+</section>
+
+<!-- 묻고 답하기 -->
+<section id="v-ask" class="hidden">
+  <h2>묻고 답하기</h2>
+  <p class="lead">시정이나 의정에 대해 평소 말로 물어보세요. AI가 모아 둔 공개 자료에서 근거를 찾아 답하고, 문장마다 출처 번호를 붙입니다. 근거를 찾지 못하면 그렇다고 답하고 정보공개청구할 내용을 알려 드립니다.</p>
+  <div class="card" id="ask-login"></div>
+  <div class="card" id="ask-form">
+    <div class="field"><label for="aq">질문</label>
+      <textarea id="aq" maxlength="500" style="min-height:96px" placeholder="예: 통합시가 올해 재생에너지 보급 국비를 얼마나 확보했나요?"></textarea>
+      <small>이름·전화번호 같은 개인정보는 적지 마세요. 공무원 개인 대신 부서와 업무로 물어 주세요. 하루 20번까지 물을 수 있습니다.</small></div>
+    <label class="check"><input type="checkbox" id="apub"> 이 질문과 답을 다른 시민도 볼 수 있게 공개합니다</label>
+    <div class="row"><button class="btn" id="ago" type="button">AI에게 묻기</button><span class="small">답이 나오기까지 1~2분 걸립니다</span></div>
+    <div id="amsg"></div>
+  </div>
+  <div id="acur"></div>
+  <h3>내 질문</h3><div id="amine"><p class="small">아직 물어본 질문이 없습니다.</p></div>
+  <h3>공개된 질문과 답</h3><div id="apublic"><p class="small">아직 공개된 질문이 없습니다.</p></div>
+</section>
+
+<!-- 시민제보 -->
+<section id="v-report" class="hidden">
+  <h2>시민제보</h2>
+  <p class="lead">현장에서 본 시정·의정의 문제를 알려 주세요. 접수하면 AI가 바로 공개 자료를 조사해 <b>이슈브리핑</b>을 만들어 드립니다. 브리핑은 확인된 사실, 쟁점, 관련 규정, 확인이 필요한 점과 할 수 있는 일로 정리됩니다.</p>
+  <div class="card" id="rep-login"></div>
+  <div class="card" id="rep-form">
+    <div class="field"><label for="rt">제목</label><input id="rt" maxlength="120" placeholder="예: 동네 공원 리모델링, 주민설명회 없이 착공"></div>
+    <div class="grid2">
+      <div class="field"><label for="rp">장소 (선택)</label><input id="rp" maxlength="100" placeholder="예: 광산구 ○○동 공원"></div>
+      <div class="field"><label for="rh">언제 (선택)</label><input id="rh" maxlength="40" placeholder="예: 2026-11-20 또는 11월 셋째 주"></div>
+    </div>
+    <div class="field"><label for="rb">무슨 일인가요</label>
+      <textarea id="rb" maxlength="4000" placeholder="본 일, 들은 일, 문제라고 생각하는 까닭을 적어 주세요. 다른 사람의 이름·연락처는 적지 마세요."></textarea>
+      <small>사진·문서 첨부는 시범 기간 뒤에 엽니다. 하루 5건까지 제보할 수 있습니다.</small></div>
+    <label class="check"><input type="checkbox" id="ranon" checked> 익명으로 제보합니다 (운영자에게도 이름을 밝히지 않음)</label>
+    <div class="field hidden" id="rcwrap"><label for="rc">연락받을 곳 (선택, 운영자만 봅니다)</label><input id="rc" maxlength="100" placeholder="이메일 또는 전화"></div>
+    <label class="check"><input type="checkbox" id="rcons"> 브리핑이 운영자 검토를 거쳐 공개되는 것에 동의합니다 (제보 본문과 연락처는 공개하지 않습니다)</label>
+    <div class="row"><button class="btn warm" id="rgo" type="button">제보하고 브리핑 받기</button><span class="small">브리핑까지 1~3분 걸립니다</span></div>
+    <div id="rmsg"></div>
+  </div>
+  <h3>내 제보</h3><div id="rmine"><p class="small">아직 제보한 내용이 없습니다.</p></div>
+</section>
+
+<!-- 이슈브리핑 -->
+<section id="v-brief" class="hidden">
+  <div id="bdetail"></div>
+  <div id="blist-wrap">
+    <h2>이슈브리핑</h2>
+    <p class="lead">시민 제보로 만들어지고 운영자 검토를 거쳐 공개된 브리핑입니다. 공감이 모인 사안은 시민활동지원센터의 오픈토론 후보가 됩니다.</p>
+    <div id="blist"><p class="small">아직 공개된 브리핑이 없습니다.</p></div>
+  </div>
+</section>
+
+<!-- 운영 -->
+<section id="v-admin" class="hidden">
+  <h2>운영 — 제보 검토</h2>
+  <p class="lead">들어온 제보와 AI 브리핑을 원문과 맞대 보고 공개 여부를 정합니다. 제보자가 공개에 동의한 제보만 공개할 수 있습니다. 거친 말이 있는 제보는 표시됩니다.</p>
+  <div id="adm"></div>
+</section>
+
+<!-- 안내 -->
+<section id="v-about" class="hidden about">
+  <h2>플랫폼 안내</h2>
+  <div class="note">지금은 <b>시범판</b>입니다. 사교원 통합사이트의 한 메뉴로 먼저 열었고, 협약과 운영위원회가 꾸려지면 독립 주소로 떼어 내 광주시민단체협의회 서버로 옮길 예정입니다.</div>
+  <h3>무엇을 하나요</h3>
+  <ul>
+    <li><b>자동 수집</b>: 통합시의회 전자회의록, 통합시 보도자료, 법제처 자치법규, 조달청 나라장터 입찰공고를 날마다 모읍니다.</li>
+    <li><b>묻고 답하기</b>: 시민 질문에 AI가 모은 자료에서 근거를 찾아 답합니다. 출처와 자료 기준 시각은 AI가 아니라 시스템이 붙입니다.</li>
+    <li><b>시민제보와 이슈브리핑</b>: 제보가 들어오면 AI가 곧바로 조사해 사실·쟁점·규정·확인 필요 사항을 정리합니다.</li>
+    <li><b>공감과 오픈토론</b>: 공개된 브리핑에 공감이 모이면 시민활동지원센터 오픈토론 후보가 됩니다.</li>
+  </ul>
+  <h3>원칙</h3>
+  <ul>
+    <li>AI는 판단하지 않고 자료를 찾아 정리합니다. 「위법」 같은 판정은 사람이 합니다.</li>
+    <li>근거를 찾지 못하면 지어내지 않고 「확인되지 않습니다」라고 답합니다. 임시회의록은 확정본이 아니라고 밝힙니다.</li>
+    <li>질문과 제보에 개인정보가 보이면 AI에 보내지 않습니다. 공개 자료 속 연락처도 가린 뒤 AI에 보냅니다.</li>
+    <li>제보 본문과 연락처는 공개하지 않습니다. 제보자는 언제든 자기 제보를 지울 수 있습니다.</li>
+  </ul>
+  <h3>운영 구조(협약안)</h3>
+  <ul>
+    <li><b>운영 주체</b>: 전남광주 시민사회 — 운영위원회, 시민검증단, 오픈토론 주관</li>
+    <li><b>협약 상대</b>: 전남광주통합특별시 — 자료 공개 협조, 시민활동지원센터 지원</li>
+    <li><b>기술지원</b>: 사교원(사회혁신교육원사회적협동조합) — 개발·서버·AI 운영</li>
+  </ul>
+  <p class="small">자료원: <a href="https://assem.jeonnam-gwangju.go.kr/" target="_blank" rel="noopener">통합시의회 전자회의록</a> · <a href="https://www.jeonnam-gwangju.go.kr/" target="_blank" rel="noopener">통합시 누리집</a> · <a href="https://www.law.go.kr/" target="_blank" rel="noopener">국가법령정보센터</a> · <a href="https://www.g2b.go.kr/" target="_blank" rel="noopener">나라장터</a></p>
+</section>
+</main>
+<footer><div class="wrap">시민주권 모니터링 플랫폼 시범판 · 기술지원 사교원 · AI 답변은 공개 자료를 정리한 것이며 사실 확인은 원문으로 해 주세요.</div></footer>
+
+<div class="modal hidden" id="modal" role="dialog" aria-modal="true" aria-labelledby="mtitle"><div class="box">
+  <div class="row" style="justify-content:space-between"><b id="mtitle"></b><button class="btn s sm" id="mclose" type="button">닫기</button></div>
+  <div class="small" id="mmeta" style="margin:6px 0"></div>
+  <pre id="mbody"></pre>
+  <div class="row"><a class="btn s sm" id="morig" target="_blank" rel="noopener">원래 누리집에서 보기 ↗</a></div>
+</div></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const safeUrl = u => /^https?:\/\//.test(u || '') ? u : '#';
+let me = { login: false }, user = null, srcSel = '', feedPage = 1, feedQ = '';
+async function api(path, opts = {}) {
+  let res;
+  try {
+    res = await fetch(path, { credentials: 'same-origin', method: opts.method || (opts.body ? 'POST' : 'GET'),
+      headers: opts.body ? { 'Content-Type': 'application/json' } : {}, body: opts.body ? JSON.stringify(opts.body) : undefined });
+  } catch (e) { return { ok: false, error: '서버에 닿지 못했습니다. 잠시 뒤 다시 해 주세요.' }; }
+  let d = {};
+  try { d = await res.json(); } catch (_) {}
+  if (!res.ok) return { ok: false, status: res.status, error: d.detail || d.message || d.error || ('오류 ' + res.status) };
+  return Object.assign({ ok: true }, d);
+}
+function toast(t) { const e = document.createElement('div'); e.className = 'toast'; e.textContent = t; document.body.appendChild(e); setTimeout(() => e.remove(), 2600); }
+const 판정표 = { '확인': ['t-ok', '원문 확인'], '일부': ['t-warn', '일부 확인'], '없음': ['t-sig', '자료 없음'] };
+const srcTag = { council: 't-acc', press: 't-ok', ordin: 't-warn', g2b: 't-sig' };
+const fmtAt = s => s ? s.slice(0, 16).replace('T', ' ') : '';
+
+/* ── 원문 보기 ── */
+async function openDoc(id) {
+  const d = await api('/api/simin/doc/' + id);
+  if (!d.ok) { toast(d.error); return; }
+  $('#mtitle').textContent = d.title;
+  $('#mmeta').textContent = `${d.src_name} · ${d.date || ''}${d.tmp ? ' · 임시회의록(확정본 아님)' : ''} · 수집 ${fmtAt(d.first_seen)}`;
+  $('#mbody').textContent = d.body || '(본문 없음)';
+  $('#morig').href = safeUrl(d.url);
+  $('#modal').classList.remove('hidden'); $('#mclose').focus();
+}
+$('#mclose').onclick = () => $('#modal').classList.add('hidden');
+$('#modal').onclick = e => { if (e.target.id === 'modal') $('#modal').classList.add('hidden'); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape') $('#modal').classList.add('hidden'); });
+
+/* ── 로그인 안내 ── */
+function needLogin(el, what) {
+  el.innerHTML = `<b>「${esc(what)}」은 사교원 통합 계정으로 로그인한 뒤 쓸 수 있습니다.</b>
+    <p class="lead" style="margin:6px 0 10px">감시판과 공개된 이슈브리핑은 로그인 없이 볼 수 있습니다.</p>
+    <div class="grid2"><div class="field"><label>아이디 또는 이메일</label><input class="lu" autocomplete="username"></div>
+    <div class="field"><label>비밀번호</label><input class="lp" type="password" autocomplete="current-password"></div></div>
+    <div class="field hidden lc"><label>2단계 인증 코드</label><input class="lcode" inputmode="numeric" autocomplete="one-time-code"></div>
+    <div class="lmsg"></div>
+    <div class="row"><button class="btn lb" type="button">로그인</button><a class="btn s" href="/">회원가입·사교원 첫 화면</a></div>`;
+  el.classList.remove('hidden');
+  let pending = false;
+  const 말 = t => { el.querySelector('.lmsg').innerHTML = `<div class="msg err">${esc(t)}</div>`; };
+  el.querySelector('.lb').onclick = async () => {
+    const b = el.querySelector('.lb'); b.disabled = true; let r;
+    if (pending) {
+      r = await api('/api/auth/2fa/verify', { body: { code: el.querySelector('.lcode').value.trim() } });
+    } else {
+      const id = el.querySelector('.lu').value.trim();
+      r = await api('/api/auth/login', { body: { email: id, username: id, password: el.querySelector('.lp').value } });
+      if (r.ok && r.twofa === 'pending') { pending = true; b.disabled = false; el.querySelector('.lc').classList.remove('hidden'); b.textContent = '코드 확인'; 말('2단계 인증 코드를 입력해 주세요.'); return; }
+    }
+    b.disabled = false;
+    if (!r.ok) { 말(r.error === 'invalid_credentials' ? '아이디 또는 비밀번호가 맞지 않습니다.' : (r.error || '로그인하지 못했습니다.')); return; }
+    toast('로그인했습니다'); location.reload();
+  };
+}
+
+/* ── 감시판 ── */
+async function loadStatus() {
+  const s = await api('/api/simin/status');
+  if (!s.ok) { $('#srcs').innerHTML = `<div class="msg err">${esc(s.error)}</div>`; return; }
+  const 전체 = s.sources.reduce((a, x) => a + x.count, 0);
+  const 최근 = s.sources.map(x => x.last_ok).filter(Boolean).sort().pop();
+  $('#tot').innerHTML = `<div class="tile"><div class="k">모은 공개 자료</div><div class="v">${전체.toLocaleString()}건</div><div class="s">마지막 수집 ${esc(fmtAt(최근) || '아직 없음')}</div></div>
+    <div class="tile"><div class="k">시민 질문</div><div class="v">${s.totals.questions.toLocaleString()}</div><div class="s">AI가 근거와 함께 답함</div></div>
+    <div class="tile"><div class="k">시민제보</div><div class="v">${s.totals.reports.toLocaleString()}</div><div class="s">공개된 이슈브리핑 ${s.totals.public_reports}건</div></div>`;
+  $('#srcs').innerHTML = s.sources.map(x => `<button type="button" class="src${srcSel === x.src ? ' on' : ''}" data-src="${esc(x.src)}">
+      <b><span class="dot${x.late ? ' late' : ''}"></span>${esc(x.name)}</b><span class="n">${x.count.toLocaleString()}</span>
+      <div class="t">최근 자료 ${esc(x.latest || '-')}<br>${x.late ? '갱신 지연 — 확인 중' : '수집 ' + esc(fmtAt(x.last_ok))}</div></button>`).join('');
+  $('#srcs').querySelectorAll('.src').forEach(b => b.onclick = () => { srcSel = srcSel === b.dataset.src ? '' : b.dataset.src; feedQ = ''; $('#fq').value = ''; feedPage = 1; loadStatus(); loadFeed(); });
+}
+function feedRow(x) {
+  const m = x.meta || {};
+  const 덧 = x.src === 'g2b' && m.금액 ? ` · ${Number(m.금액).toLocaleString()}원 · ${esc(m.계약방법 || '')}` : (x.src === 'ordin' && m.제개정구분명 ? ` · ${esc(m.제개정구분명)}` : '');
+  return `<div class="fi" data-id="${x.id}" tabindex="0" role="button"><time>${esc(x.date || '')}</time>
+    <div class="ft"><span class="tag ${srcTag[x.src] || 't-acc'}">${esc(x.src_name)}</span> ${esc(x.title)}${x.tmp ? ' <span class="tag t-warn">임시</span>' : ''}<span class="small">${덧}</span></div>
+    <div class="fs">${esc(x.snippet)}</div></div>`;
+}
+async function loadFeed(more) {
+  const p = new URLSearchParams({ src: srcSel, q: feedQ, page: feedPage });
+  const d = await api('/api/simin/feed?' + p);
+  if (!d.ok) { $('#feed').innerHTML = `<div class="msg err">${esc(d.error)}</div>`; return; }
+  const h = d.items.map(feedRow).join('');
+  if (more) $('#feed').insertAdjacentHTML('beforeend', h); else $('#feed').innerHTML = h || '<p class="small" style="padding:12px 0">찾은 자료가 없습니다.</p>';
+  $('#fmore').classList.toggle('hidden', !!feedQ || d.items.length < 30);
+  $('#feed').querySelectorAll('.fi:not([data-b])').forEach(e => { e.dataset.b = 1; e.onclick = () => openDoc(e.dataset.id); e.onkeydown = ev => { if (ev.key === 'Enter') openDoc(e.dataset.id); }; });
+}
+$('#fgo').onclick = () => { feedQ = $('#fq').value.trim(); feedPage = 1; loadFeed(); };
+$('#fclear').onclick = () => { feedQ = ''; $('#fq').value = ''; srcSel = ''; feedPage = 1; loadStatus(); loadFeed(); };
+$('#fmore').onclick = () => { feedPage++; loadFeed(true); };
+
+/* ── 출처 목록 ── */
+function citeList(cs) {
+  if (!cs || !cs.length) return '';
+  return `<ol class="cites">${cs.map(c => `<li value="${c.n}"><a data-doc="${c.doc_id}" tabindex="0">${esc(c.src)} · ${esc(c.title)}</a> <span class="small">${esc(c.date || '')}${c.tmp ? ' · 임시회의록' : ''}</span></li>`).join('')}</ol>`;
+}
+function bindCites(root) { root.querySelectorAll('[data-doc]').forEach(a => { a.onclick = () => openDoc(a.dataset.doc); a.onkeydown = e => { if (e.key === 'Enter') openDoc(a.dataset.doc); }; }); }
+const paras = t => esc(t || '').split(/\n+/).filter(Boolean).map(x => `<p>${x}</p>`).join('');
+
+/* ── 묻고 답하기 ── */
+function answerHtml(q) {
+  if (q.status === '조사중') return `<div class="answer"><span class="spin"></span>AI가 자료를 조사하고 있습니다…</div>`;
+  if (q.status === '실패') return `<div class="msg err">${esc(q.error || '조사하지 못했습니다.')}</div>`;
+  const a = q.answer || {}; const [cl, lb] = 판정표[a.판정] || 판정표['일부'];
+  return `<div class="answer"><span class="tag ${cl}">${lb}</span>${paras(a.답)}
+    ${a.확인필요 && a.확인필요.length ? `<div class="small">확인되지 않은 점: ${a.확인필요.map(esc).join(' · ')}</div>` : ''}
+    ${a.정보공개청구 ? `<div class="small">정보공개청구로 요청해 볼 내용: ${esc(a.정보공개청구)}</div>` : ''}
+    ${citeList(a.출처)}<div class="small">자료 기준 ${esc(a.기준 || '-')} · AI 답변은 원문으로 꼭 확인해 주세요</div></div>`;
+}
+function qItem(q) { return `<div class="qitem"><div class="q">${esc(q.q)}</div><div class="small">${esc(fmtAt(q.created))}${q.public ? ' · 공개' : ''}</div>${answerHtml(q)}</div>`; }
+async function loadAsks() {
+  const [m, p] = await Promise.all([api('/api/simin/asks?mine=1'), api('/api/simin/asks')]);
+  if (m.ok && m.items.length) { $('#amine').innerHTML = m.items.map(qItem).join(''); bindCites($('#amine')); }
+  if (p.ok && p.items.length) { $('#apublic').innerHTML = p.items.map(qItem).join(''); bindCites($('#apublic')); }
+}
+async function poll(path, done, n = 0) {
+  const r = await api(path);
+  if (r.ok && r.status === '조사중' && n < 120) { setTimeout(() => poll(path, done, n + 1), 2500); }
+  done(r);
+}
+$('#ago').onclick = async () => {
+  const q = $('#aq').value.trim(); if (q.length < 5) { $('#amsg').innerHTML = '<div class="msg err">질문을 다섯 글자 이상 적어 주세요.</div>'; return; }
+  $('#ago').disabled = true; $('#amsg').innerHTML = '';
+  const r = await api('/api/simin/ask', { body: { q, public: $('#apub').checked } });
+  $('#ago').disabled = false;
+  if (!r.ok) { $('#amsg').innerHTML = `<div class="msg err">${esc(r.error)}</div>`; return; }
+  $('#aq').value = '';
+  poll('/api/simin/ask/' + r.id, q2 => { if (!q2.ok) return; $('#acur').innerHTML = `<div class="card">${qItem(q2)}</div>`; bindCites($('#acur')); if (q2.status !== '조사중') loadAsks(); });
+};
+
+/* ── 시민제보 ── */
+$('#ranon').onchange = () => $('#rcwrap').classList.toggle('hidden', $('#ranon').checked);
+const 상태표 = r => r.status === '조사중' ? '<span class="tag t-acc"><span class="spin"></span>조사 중</span>' : r.status === '실패' ? '<span class="tag t-bad">조사 실패</span>' : (r.publish ? '<span class="tag t-ok">공개됨</span>' : '<span class="tag t-warn">비공개</span>');
+function rItem(r) {
+  return `<div class="ritem" data-rid="${r.id}" tabindex="0" role="button"><div class="row"><span class="t">${esc((r.briefing && r.briefing.제목) || r.title)}</span>${상태표(r)}${r.flags ? '<span class="tag t-bad">' + esc(r.flags) + '</span>' : ''}</div>
+    <div class="small">${esc(r.place || '')} ${r.place ? '· ' : ''}제보 ${esc(fmtAt(r.created))}${r.empathy ? ' · 공감 ' + r.empathy : ''}</div>
+    ${r.briefing && r.briefing.요지 ? `<div class="small" style="color:var(--muted)">${esc(r.briefing.요지)}</div>` : ''}</div>`;
+}
+function bindR(root) { root.querySelectorAll('[data-rid]').forEach(e => { e.onclick = () => location.hash = 'brief-' + e.dataset.rid; e.onkeydown = ev => { if (ev.key === 'Enter') location.hash = 'brief-' + e.dataset.rid; }; }); }
+async function loadMine() {
+  const m = await api('/api/simin/reports?mine=1');
+  if (m.ok && m.items.length) { $('#rmine').innerHTML = m.items.map(rItem).join(''); bindR($('#rmine')); if (m.items.some(x => x.status === '조사중')) setTimeout(loadMine, 4000); }
+}
+$('#rgo').onclick = async () => {
+  const body = { title: $('#rt').value.trim(), place: $('#rp').value.trim(), happened: $('#rh').value.trim(), body: $('#rb').value.trim(),
+    anon: $('#ranon').checked, contact: $('#rc').value.trim(), consent: $('#rcons').checked };
+  if (body.title.length < 4 || body.body.length < 20) { $('#rmsg').innerHTML = '<div class="msg err">제목은 네 글자 이상, 내용은 스무 글자 이상 적어 주세요.</div>'; return; }
+  $('#rgo').disabled = true;
+  const r = await api('/api/simin/report', { body });
+  $('#rgo').disabled = false;
+  if (!r.ok) { $('#rmsg').innerHTML = `<div class="msg err">${esc(r.error)}</div>`; return; }
+  ['#rt', '#rp', '#rh', '#rb', '#rc'].forEach(s => $(s).value = '');
+  $('#rmsg').innerHTML = '<div class="msg ok">접수했습니다. AI가 조사를 시작했습니다. 브리핑이 완성되면 아래 「내 제보」에서 볼 수 있습니다.</div>';
+  location.hash = 'brief-' + r.id;
+};
+
+/* ── 이슈브리핑 ── */
+function li(xs) { return xs && xs.length ? `<ul>${xs.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '<p class="small">없음</p>'; }
+function briefHtml(r) {
+  const b = r.briefing;
+  let h = `<div class="row" style="margin-bottom:8px"><a href="#brief" class="btn s sm">← 목록</a></div><div class="card brief">`;
+  h += `<div class="head"><h2 style="margin:0">${esc((b && b.제목) || r.title)}</h2>${상태표(r)}</div>`;
+  h += `<div class="small">${esc(r.place || '')} ${r.place ? '· ' : ''}${r.happened ? esc(r.happened) + ' · ' : ''}제보 ${esc(fmtAt(r.created))}${b ? ' · 브리핑 ' + esc(fmtAt(b.작성)) + ' (판 ' + r.ver + ')' : ''} · <span class="tag t-warn">AI 초안 · 검증 전</span></div>`;
+  if (r.status === '조사중') return h + `<p><span class="spin"></span>AI가 공개 자료를 조사해 브리핑을 쓰고 있습니다. 1~3분 걸립니다.</p></div>`;
+  if (r.status === '실패') h += `<div class="msg err">${esc(r.error || '조사하지 못했습니다.')}</div>`;
+  if (b) {
+    h += `<p class="yo">${esc(b.요지)}</p>`;
+    if (b.권리 && b.권리.length) h += `<div class="row">${b.권리.map(x => `<span class="tag t-sig">${esc(x)}</span>`).join('')}</div>`;
+    h += `<h3>제보 내용</h3><p>${esc(b.제보내용)}</p><h3>확인된 사실</h3>${li(b.확인된사실)}<h3>쟁점</h3>${li(b.쟁점)}<h3>관련 규정</h3>${li(b.관련규정)}
+      <h3>확인이 필요한 점</h3>${li(b.확인필요)}<h3>정보공개청구해 볼 자료</h3>${li(b.정보공개청구)}<h3>할 수 있는 일</h3>${li(b.할수있는일)}
+      <h3>출처</h3>${citeList(b.출처) || '<p class="small">관련 공개 자료를 찾지 못했습니다.</p>'}<p class="small">자료 기준 ${esc(b.기준 || '-')} · 브리핑은 AI가 공개 자료를 정리한 초안입니다. 사실 확인은 원문으로 해 주세요.</p>`;
+  }
+  if (r.body) h += `<h3>내가 쓴 제보 원문 <span class="small">(제보자와 운영자만 봅니다)</span></h3><pre style="white-space:pre-wrap;font-family:inherit;background:var(--bg);padding:10px;border-radius:8px">${esc(r.body)}</pre>`;
+  h += `<div class="row" style="margin-top:12px">`;
+  if (r.publish) h += `<button class="btn ${r.my_empathy ? 's' : 'warm'}" id="bemp" type="button">${r.my_empathy ? '공감 취소' : '공감합니다'} · ${r.empathy}</button>`;
+  if (r.mine || me.운영자) h += `<button class="btn s" id="breb" type="button">새 자료로 다시 조사</button><button class="btn s" id="bdel" type="button">제보 지우기</button>`;
+  h += `</div><div id="bconfirm"></div></div>`;
+  return h;
+}
+async function showBrief(id) {
+  $('#blist-wrap').classList.add('hidden');
+  const r = await api('/api/simin/report/' + id);
+  if (!r.ok) { $('#bdetail').innerHTML = `<div class="row"><a href="#brief" class="btn s sm">← 목록</a></div><div class="msg err">${esc(r.error)}</div>`; return; }
+  $('#bdetail').innerHTML = briefHtml(r); bindCites($('#bdetail'));
+  if (r.status === '조사중') { setTimeout(() => { if (location.hash === '#brief-' + id) showBrief(id); }, 3000); return; }
+  const e = $('#bemp'); if (e) e.onclick = async () => { if (!me.login) { toast('공감하려면 로그인해 주세요'); location.hash = 'report'; return; } const x = await api(`/api/simin/report/${id}/empathy`, { method: 'POST' }); if (x.ok) showBrief(id); else toast(x.error); };
+  const rb = $('#breb'); if (rb) rb.onclick = async () => { const x = await api(`/api/simin/report/${id}/rebrief`, { method: 'POST' }); if (x.ok) showBrief(id); else toast(x.error); };
+  const d = $('#bdel'); if (d) d.onclick = () => {
+    $('#bconfirm').innerHTML = `<div class="msg err">이 제보와 브리핑을 지웁니다. 되돌릴 수 없습니다. <button class="btn sm warm" id="bdel2" type="button">지우기</button> <button class="btn sm s" id="bdel0" type="button">그만두기</button></div>`;
+    $('#bdel0').onclick = () => $('#bconfirm').innerHTML = '';
+    $('#bdel2').onclick = async () => { const x = await api('/api/simin/report/' + id, { method: 'DELETE' }); if (x.ok) { toast('지웠습니다'); location.hash = 'report'; } else toast(x.error); };
+  };
+}
+async function loadBriefs() {
+  $('#bdetail').innerHTML = ''; $('#blist-wrap').classList.remove('hidden');
+  const p = await api('/api/simin/reports');
+  if (p.ok && p.items.length) { $('#blist').innerHTML = p.items.map(rItem).join(''); bindR($('#blist')); }
+}
+
+/* ── 운영 ── */
+async function loadAdmin() {
+  const a = await api('/api/simin/reports?all=1');
+  if (!a.ok) { $('#adm').innerHTML = `<div class="msg err">${esc(a.error)}</div>`; return; }
+  if (!a.items.length) { $('#adm').innerHTML = '<p class="small">들어온 제보가 없습니다.</p>'; return; }
+  $('#adm').innerHTML = a.items.map(r => `<div class="qitem"><div class="row"><b>${esc(r.title)}</b>${상태표(r)}${r.flags ? '<span class="tag t-bad">' + esc(r.flags) + '</span>' : ''}
+      <span class="tag ${r.consent ? 't-ok' : 't-warn'}">${r.consent ? '공개 동의' : '공개 동의 안 함'}</span><span class="tag t-acc">${r.anon ? '익명' : '실명'}</span></div>
+      <div class="small">제보 ${esc(fmtAt(r.created))}${r.contact ? ' · 연락처 ' + esc(r.contact) : ''}${r.empathy ? ' · 공감 ' + r.empathy : ''}</div>
+      <div class="row" style="margin-top:8px"><a class="btn s sm" href="#brief-${r.id}">브리핑·원문 보기</a>
+      ${r.publish ? `<button class="btn s sm" data-pub="0" data-id="${r.id}" type="button">비공개로</button>` : (r.consent && r.status === '완료' ? `<button class="btn sm" data-pub="1" data-id="${r.id}" type="button">공개하기</button>` : '')}</div></div>`).join('');
+  $('#adm').querySelectorAll('[data-pub]').forEach(b => b.onclick = async () => {
+    const x = await api('/api/simin/admin/report/' + b.dataset.id, { body: { publish: b.dataset.pub === '1' } });
+    if (x.ok) { toast(b.dataset.pub === '1' ? '공개했습니다' : '비공개로 돌렸습니다'); loadAdmin(); } else toast(x.error);
+  });
+}
+
+/* ── 길잡이 ── */
+function route() {
+  const h = (location.hash || '#home').slice(1);
+  const t = h.startsWith('brief-') ? 'brief' : (['home', 'ask', 'report', 'brief', 'admin', 'about'].includes(h) ? h : 'home');
+  document.querySelectorAll('main > section').forEach(s => s.classList.toggle('hidden', s.id !== 'v-' + t));
+  document.querySelectorAll('nav.tabs a').forEach(a => a.classList.toggle('on', a.dataset.t === t));
+  if (t === 'home') { loadStatus(); loadFeed(); }
+  if (t === 'ask') { if (!me.login) { needLogin($('#ask-login'), '묻고 답하기'); $('#ask-form').classList.add('hidden'); } else { $('#ask-login').classList.add('hidden'); } loadAsks(); }
+  if (t === 'report') { if (!me.login) { needLogin($('#rep-login'), '시민제보'); $('#rep-form').classList.add('hidden'); } else { $('#rep-login').classList.add('hidden'); loadMine(); } }
+  if (t === 'brief') { if (h.startsWith('brief-')) showBrief(parseInt(h.slice(6), 10)); else loadBriefs(); }
+  if (t === 'admin') loadAdmin();
+  window.scrollTo(0, 0);
+}
+window.addEventListener('hashchange', route);
+(async () => {
+  const m = await api('/api/simin/me');
+  if (m.ok) me = m;
+  $('#who').innerHTML = me.login ? `${esc(me.name)}님${me.운영자 ? ' · 운영자' : ''} · <a href="/">사교원 첫 화면</a>` : `<a href="#ask">로그인</a> · <a href="/">회원가입</a>`;
+  $('#tab-admin').classList.toggle('hidden', !me.운영자);
+  route();
+})();
+</script>
+</body>
+</html>

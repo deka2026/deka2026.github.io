@@ -924,6 +924,7 @@ const TREE = [
       { id: 'hatsoja', t: '햇빛소득마을 (햇소자)', d: '신청·진단 → 조합 설립 → 정산·배당 — 협동조합·연합회 회원', h: '/hatsoja/', al: '햇소자|햇빛소득마을' },
       { id: 'center', t: '시민자산육성지원센터', d: '센터 업무·참여 조합 업무자동화 포털(시험판) — 별도 로그인', h: 'https://center.sakyowon.co.kr/', ext: true, sub: true, hide: true, tmp: '시험판', al: '시민자산지원센터|시민자산센터|센터 포털|센터' },
       { id: 'policy', t: '지자체 의정지원시스템', d: '공약·조례·문서작성·브리핑 — 로그인하면 둘러보기 무료, 구독료를 입금하면 자동으로 전체 기능', h: HOME + 'policy', need: 'login', al: '의정지원시스템|정책지원관 지원시스템|정책지원관 시스템|의정지원' },
+      { id: 'simin', t: '시민주권 모니터링 플랫폼', d: '시정·의정 묻고 답하기 · 시민제보 → AI 이슈브리핑 · 회의록·조례·보도자료·입찰 자동 수집 감시판', h: '/simin/', tmp: '시범', al: '시민주권 모니터링|시민주권 모니터링 플랫폼|시정 감시|의정 감시|시민제보|이슈브리핑|시민주권' },
       { id: 'academy', t: '연대지능활동가 아카데미', d: '실습 15단계 · 학습 7단계 · 지식 검증 게임 · 연대지능활동가 교육 신청(아카데미 안)', h: '/academy-site/' },
       { id: 'edu-ai', t: '연대지능활동가 교육 신청', d: '필요 진단 · 예상 비용 · 신청', h: '/academy-site/#edu-apply', sub: true, hide: true, al: '교육 신청|교육신청|교육프로그램 신청|교육프로그램|연대지능 교육 신청' },
       { id: 'teamlearning', t: '사회혁신팀러닝', d: '팀러닝 자문·컨설팅 · 주민자치·지역문제해결 교육 신청(팀러닝 안)', h: '/academy-site/#tl-home', al: '팀러닝' },
@@ -1130,6 +1131,7 @@ function lookItems(keys) {
   if (!keys.includes('acad')) a.push(['아카데미 맛보기', '/academy-site/'], ['사회혁신팀러닝', AC + 'tl-home']);
   if (!keys.includes('policy')) a.push(['의정지원 둘러보기', HOME + 'policy']);
   if (!keys.includes('coop') && !keys.includes('fed')) a.push(['햇소자 둘러보기', '/hatsoja/']);
+  a.push(['시민주권 모니터링(시범)', '/simin/']);
   a.push(['연구자료', HOME + 'research']);
   return a;
 }
