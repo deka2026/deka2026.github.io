@@ -1589,6 +1589,8 @@ function renderMap() {
       mapBlog('mangnam', 'c-fld', pic('b_mn1.jpg', '전복을 물로 씻는 손 사진'), '현장 소식') + mapBlog('yangyang', 'c-fld', ILL.yang(), '현장 소식') + mapBlog('mangnam-coop', 'c-fld', pic('b_co1.jpg', '화분과 물건을 늘어놓은 마을 가게 사진'), '조합 소식') + `</div></div>` +
     `<div class="mapsec" id="map-research"><h3 class="sub3"><span class="bub c-rs">${ic('chart')}</span>연구</h3><div class="g4">` +
       mapBlog('research', 'c-rs', ILL.research(0), '보고서·발제문') + mapBlog('cre', 'c-rs', ILL.research(1), '과제 소개') + mapBlog('wiki', 'c-rs', pic('b_rs.jpg', '벽에 붙인 색색 붙임쪽지 사진'), '지식 모음') + mapBlog('poomasi-wiki', 'c-rs', pic('b_wk.jpg', '촬영 장비를 놓은 온라인 중계 방 사진'), '공동 지식') + `</div></div>` +
+    `<div class="mapsec" id="map-civic"><h3 class="sub3"><span class="bub c-pol">${ic('gov')}</span>시민참여 (시범)</h3><div class="g2">` +
+      mapIcard('simin', ILL.policy()) + `</div></div>` +
     `<div class="mapsec" id="map-about"><h3 class="sub3"><span class="bub c-rs">${ic('home')}</span>소개</h3><div class="g2">` +
       mapIcard('about', pic('intro.jpg', '언덕에서 내려다본 포구 마을 사진')) + mapIcard('disclosure', ILL.office()) + `</div></div></section></div></div>` +
     `<div class="uw"><div class="tourend"><img class="dogr" src="${IMG}dog6.jpg" alt=""><span><b>여기까지 둘러보셨어요.</b><br>${me ? '<a href="#/">내 페이지로 돌아가기</a>' : '<a href="#/join">회원가입</a> · <a href="#/ask">문의하기</a>'}</span></div></div>`;

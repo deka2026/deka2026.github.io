@@ -169,8 +169,8 @@ footer{color:var(--faint);font-size:13px;padding-block:24px 40px;border-top:1px 
   <div class="card" id="ask-form">
     <div class="field"><label for="aq">질문</label>
       <textarea id="aq" maxlength="500" style="min-height:96px" placeholder="예: 통합시가 올해 재생에너지 보급 국비를 얼마나 확보했나요?"></textarea>
-      <small>이름·전화번호 같은 개인정보는 적지 마세요. 공무원 개인 대신 부서와 업무로 물어 주세요. 하루 20번까지 물을 수 있습니다.</small></div>
-    <label class="check"><input type="checkbox" id="apub"> 이 질문과 답을 다른 시민도 볼 수 있게 공개합니다</label>
+      <small>전화번호·주민번호 같은 개인정보가 보이면 접수하지 않습니다. 사람 이름은 걸러지지 않을 수 있으니 적지 말고, 공무원 개인 대신 부서와 업무로 물어 주세요. 하루 20번까지 물을 수 있습니다.</small></div>
+    <label class="check"><input type="checkbox" id="apub"> 이 질문과 답의 공개를 요청합니다 (운영자가 확인한 뒤 공개되고, 언제든 철회하거나 지울 수 있습니다)</label>
     <div class="row"><button class="btn" id="ago" type="button">AI에게 묻기</button><span class="small">답이 나오기까지 1~2분 걸립니다</span></div>
     <div id="amsg"></div>
   </div>
@@ -191,11 +191,11 @@ footer{color:var(--faint);font-size:13px;padding-block:24px 40px;border-top:1px 
       <div class="field"><label for="rh">언제 (선택)</label><input id="rh" maxlength="40" placeholder="예: 2026-11-20 또는 11월 셋째 주"></div>
     </div>
     <div class="field"><label for="rb">무슨 일인가요</label>
-      <textarea id="rb" maxlength="4000" placeholder="본 일, 들은 일, 문제라고 생각하는 까닭을 적어 주세요. 다른 사람의 이름·연락처는 적지 마세요."></textarea>
+      <textarea id="rb" maxlength="4000" placeholder="본 일, 들은 일, 문제라고 생각하는 까닭을 적어 주세요. 다른 사람의 이름·연락처는 적지 마세요(전화번호 등은 접수되지 않고, 이름은 걸러지지 않을 수 있습니다)."></textarea>
       <small>사진·문서 첨부는 시범 기간 뒤에 엽니다. 하루 5건까지 제보할 수 있습니다.</small></div>
-    <label class="check"><input type="checkbox" id="ranon" checked> 익명으로 제보합니다 (운영 화면과 공개 화면에 이름이 나타나지 않습니다)</label>
+    <label class="check"><input type="checkbox" id="ranon" checked> 익명으로 제보합니다 (공개 화면에는 언제나 이름이 나가지 않습니다. 익명을 끄면 운영자에게 내 아이디가 보이고, 연락받을 곳을 적을 수 있습니다)</label>
     <div class="field hidden" id="rcwrap"><label for="rc">연락받을 곳 (선택, 운영자만 봅니다)</label><input id="rc" maxlength="100" placeholder="이메일 또는 전화"></div>
-    <label class="check"><input type="checkbox" id="rcons"> 브리핑이 운영자 검토를 거쳐 공개되는 것에 동의합니다 (제보 본문과 연락처는 공개하지 않습니다)</label>
+    <label class="check"><input type="checkbox" id="rcons"> AI 브리핑이 운영자 검토를 거쳐 공개되는 것에 동의합니다. 공개되는 것은 브리핑(제보를 요약한 글과 장소가 들어갈 수 있음)이고, 제보 원문·연락처·아이디는 공개하지 않습니다. 다시 조사하면 운영자가 다시 볼 때까지 비공개로 돌아갑니다.</label>
     <div class="row"><button class="btn warm" id="rgo" type="button">제보하고 브리핑 받기</button><span class="small">브리핑까지 1~3분 걸립니다</span></div>
     <div id="rmsg"></div>
   </div>
@@ -217,6 +217,8 @@ footer{color:var(--faint);font-size:13px;padding-block:24px 40px;border-top:1px 
   <h2>운영 — 제보 검토</h2>
   <p class="lead">들어온 제보와 AI 브리핑을 원문과 맞대 보고 공개 여부를 정합니다. 제보자가 공개에 동의한 제보만 공개할 수 있습니다. 거친 말이 있는 제보는 표시됩니다.</p>
   <div id="adm"></div>
+  <h3>공개를 요청한 질문</h3>
+  <div id="admq"><p class="small">공개를 요청한 질문이 없습니다.</p></div>
 </section>
 
 <!-- 안내 -->
@@ -234,8 +236,9 @@ footer{color:var(--faint);font-size:13px;padding-block:24px 40px;border-top:1px 
   <ul>
     <li>AI는 판단하지 않고 자료를 찾아 정리합니다. 「위법」 같은 판정은 사람이 합니다.</li>
     <li>근거를 찾지 못하면 지어내지 않고 「확인되지 않습니다」라고 답합니다. 임시회의록은 확정본이 아니라고 밝힙니다.</li>
-    <li>질문과 제보에 개인정보가 보이면 AI에 보내지 않습니다. 공개 자료 속 연락처도 가린 뒤 AI에 보냅니다.</li>
-    <li>제보 본문과 연락처는 공개하지 않습니다. 제보자는 언제든 자기 제보를 지울 수 있습니다.</li>
+    <li>질문과 제보에 전화번호·주민번호 같은 개인정보가 보이면 접수하지 않습니다. 「홍길동 주무관」 꼴의 이름은 가린 뒤 AI에 보내지만 모든 이름을 걸러 내지는 못하니 사람 이름은 적지 말아 주세요. 공개 자료 속 연락처도 가린 뒤 AI에 보냅니다.</li>
+    <li>AI는 공공 연산 자원(HPC)을 먼저 쓰고, 그것이 응답하지 않을 때는 외부 AI 서비스(Anthropic Claude)를 씁니다. 보내는 글은 위처럼 가린 뒤 보냅니다.</li>
+    <li>제보 원문과 연락처는 공개하지 않습니다. 제보자와 질문자는 언제든 자기 글을 지울 수 있습니다. 제보 연락처는 1년 뒤, 공개되지 않은 질문과 제보는 2년 뒤 지웁니다. 회원을 탈퇴하면 함께 지웁니다.</li>
   </ul>
   <h3>운영 구조(협약안)</h3>
   <ul>
@@ -328,7 +331,7 @@ async function loadStatus() {
     <div class="tile"><div class="k">시민제보</div><div class="v">${s.totals.reports.toLocaleString()}</div><div class="s">공개된 이슈브리핑 ${s.totals.public_reports}건</div></div>`;
   $('#srcs').innerHTML = s.sources.map(x => `<button type="button" class="src${srcSel === x.src ? ' on' : ''}" data-src="${esc(x.src)}">
       <b><span class="dot${x.late ? ' late' : ''}"></span>${esc(x.name)}</b><span class="n">${x.count.toLocaleString()}</span>
-      <div class="t">최근 자료 ${esc(x.latest || '-')}<br>${x.late ? '갱신 지연 — 확인 중' : '수집 ' + esc(fmtAt(x.last_ok))}</div></button>`).join('');
+      <div class="t">최근 자료 ${esc(x.latest || '-')}<br>${x.late ? '갱신 지연 — 확인 중' : '수집 ' + esc(fmtAt(x.last_ok))}${x.last_fail ? '<br>' + esc(x.last_fail) : ''}</div></button>`).join('');
   $('#srcs').querySelectorAll('.src').forEach(b => b.onclick = () => { srcSel = srcSel === b.dataset.src ? '' : b.dataset.src; feedQ = ''; $('#fq').value = ''; feedPage = 1; loadStatus(); loadFeed(); });
 }
 function feedRow(x) {
@@ -369,10 +372,18 @@ function answerHtml(q) {
     ${a.정보공개청구 ? `<div class="small">정보공개청구로 요청해 볼 내용: ${esc(a.정보공개청구)}</div>` : ''}
     ${citeList(a.출처)}<div class="small">자료 기준 ${esc(a.기준 || '-')} · AI 답변은 원문으로 꼭 확인해 주세요</div></div>`;
 }
-function qItem(q) { return `<div class="qitem"><div class="q">${esc(q.q)}</div><div class="small">${esc(fmtAt(q.created))}${q.public ? ' · 공개' : ''}</div>${answerHtml(q)}</div>`; }
+function qItem(q) {
+  const 상태 = q.public ? ' · 공개됨' : (q.public_wait ? ' · 공개 대기(운영자 확인 중)' : '');
+  const 단추 = q.mine ? `<div class="row" style="margin-top:8px">${q.public || q.public_wait ? `<button class="btn s sm" data-qpub="0" data-q="${q.id}" type="button">공개 철회</button>` : (q.status === '완료' ? `<button class="btn s sm" data-qpub="1" data-q="${q.id}" type="button">공개 요청</button>` : '')}<button class="btn s sm" data-qdel="${q.id}" type="button">지우기</button></div>` : '';
+  return `<div class="qitem"><div class="q">${esc(q.q)}</div><div class="small">${esc(fmtAt(q.created))}${상태}</div>${answerHtml(q)}${단추}</div>`;
+}
+function bindQ(root) {
+  root.querySelectorAll('[data-qpub]').forEach(b => b.onclick = async () => { const x = await api(`/api/simin/ask/${b.dataset.q}/public`, { body: { public: b.dataset.qpub === '1' } }); if (x.ok) { toast(b.dataset.qpub === '1' ? '공개를 요청했습니다' : '공개를 철회했습니다'); loadAsks(); } else toast(x.error); });
+  root.querySelectorAll('[data-qdel]').forEach(b => b.onclick = async () => { const x = await api('/api/simin/ask/' + b.dataset.qdel, { method: 'DELETE' }); if (x.ok) { toast('지웠습니다'); $('#acur').innerHTML = ''; loadAsks(); } else toast(x.error); });
+}
 async function loadAsks() {
   const [m, p] = await Promise.all([api('/api/simin/asks?mine=1'), api('/api/simin/asks')]);
-  if (m.ok && m.items.length) { $('#amine').innerHTML = m.items.map(qItem).join(''); bindCites($('#amine')); }
+  if (m.ok) { $('#amine').innerHTML = m.items.length ? m.items.map(qItem).join('') : '<p class="small">아직 물어본 질문이 없습니다.</p>'; bindCites($('#amine')); bindQ($('#amine')); }
   if (p.ok && p.items.length) { $('#apublic').innerHTML = p.items.map(qItem).join(''); bindCites($('#apublic')); }
 }
 async function poll(path, done, n = 0) {
@@ -387,7 +398,7 @@ $('#ago').onclick = async () => {
   $('#ago').disabled = false;
   if (!r.ok) { $('#amsg').innerHTML = `<div class="msg err">${esc(r.error)}</div>`; return; }
   $('#aq').value = '';
-  poll('/api/simin/ask/' + r.id, q2 => { if (!q2.ok) return; $('#acur').innerHTML = `<div class="card">${qItem(q2)}</div>`; bindCites($('#acur')); if (q2.status !== '조사중') loadAsks(); });
+  poll('/api/simin/ask/' + r.id, q2 => { if (!q2.ok) return; $('#acur').innerHTML = `<div class="card">${qItem(q2)}</div>`; bindCites($('#acur')); bindQ($('#acur')); if (q2.status !== '조사중') loadAsks(); });
 };
 
 /* ── 시민제보 ── */
@@ -446,7 +457,7 @@ async function showBrief(id) {
   $('#bdetail').innerHTML = briefHtml(r); bindCites($('#bdetail'));
   if (r.status === '조사중') { setTimeout(() => { if (location.hash === '#brief-' + id) showBrief(id); }, 3000); return; }
   const e = $('#bemp'); if (e) e.onclick = async () => { if (!me.login) { toast('공감하려면 로그인해 주세요'); location.hash = 'report'; return; } const x = await api(`/api/simin/report/${id}/empathy`, { method: 'POST' }); if (x.ok) showBrief(id); else toast(x.error); };
-  const rb = $('#breb'); if (rb) rb.onclick = async () => { const x = await api(`/api/simin/report/${id}/rebrief`, { method: 'POST' }); if (x.ok) showBrief(id); else toast(x.error); };
+  const rb = $('#breb'); if (rb) rb.onclick = async () => { const x = await api(`/api/simin/report/${id}/rebrief`, { method: 'POST' }); if (x.ok) { if (r.publish) toast('다시 조사하는 동안 비공개로 돌렸습니다. 운영자가 확인하면 다시 공개됩니다.'); showBrief(id); } else toast(x.error); };
   const d = $('#bdel'); if (d) d.onclick = () => {
     $('#bconfirm').innerHTML = `<div class="msg err">이 제보와 브리핑을 지웁니다. 되돌릴 수 없습니다. <button class="btn sm warm" id="bdel2" type="button">지우기</button> <button class="btn sm s" id="bdel0" type="button">그만두기</button></div>`;
     $('#bdel0').onclick = () => $('#bconfirm').innerHTML = '';
@@ -465,7 +476,7 @@ async function loadAdmin() {
   if (!a.ok) { $('#adm').innerHTML = `<div class="msg err">${esc(a.error)}</div>`; return; }
   if (!a.items.length) { $('#adm').innerHTML = '<p class="small">들어온 제보가 없습니다.</p>'; return; }
   $('#adm').innerHTML = a.items.map(r => `<div class="qitem"><div class="row"><b>${esc(r.title)}</b>${상태표(r)}${r.flags ? '<span class="tag t-bad">' + esc(r.flags) + '</span>' : ''}
-      <span class="tag ${r.consent ? 't-ok' : 't-warn'}">${r.consent ? '공개 동의' : '공개 동의 안 함'}</span><span class="tag t-acc">${r.anon ? '익명' : '실명'}</span></div>
+      <span class="tag ${r.consent ? 't-ok' : 't-warn'}">${r.consent ? '공개 동의' : '공개 동의 안 함'}</span><span class="tag t-acc">${r.anon ? '익명' : '실명 ' + esc(r.who || '')}</span></div>
       <div class="small">제보 ${esc(fmtAt(r.created))}${r.contact ? ' · 연락처 ' + esc(r.contact) : ''}${r.empathy ? ' · 공감 ' + r.empathy : ''}</div>
       <div class="row" style="margin-top:8px"><a class="btn s sm" href="#brief-${r.id}">브리핑·원문 보기</a>
       ${r.publish ? `<button class="btn s sm" data-pub="0" data-id="${r.id}" type="button">비공개로</button>` : (r.consent && r.status === '완료' ? `<button class="btn sm" data-pub="1" data-id="${r.id}" type="button">공개하기</button>` : '')}</div></div>`).join('');
@@ -473,6 +484,13 @@ async function loadAdmin() {
     const x = await api('/api/simin/admin/report/' + b.dataset.id, { body: { publish: b.dataset.pub === '1' } });
     if (x.ok) { toast(b.dataset.pub === '1' ? '공개했습니다' : '비공개로 돌렸습니다'); loadAdmin(); } else toast(x.error);
   });
+  const w = await api('/api/simin/asks?wait=1');
+  if (w.ok && w.items.length) {
+    $('#admq').innerHTML = w.items.map(q => `<div class="qitem">${qItem(Object.assign({}, q, { mine: false }))}<div class="row"><span class="tag ${q.public ? 't-ok' : 't-warn'}">${q.public ? '공개됨' : '공개 대기'}</span>
+      ${q.public ? `<button class="btn s sm" data-qa="0" data-q="${q.id}" type="button">숨기기</button>` : `<button class="btn sm" data-qa="1" data-q="${q.id}" type="button">공개하기</button><button class="btn s sm" data-qa="0" data-q="${q.id}" type="button">거절</button>`}</div></div>`).join('');
+    bindCites($('#admq'));
+    $('#admq').querySelectorAll('[data-qa]').forEach(b => b.onclick = async () => { const x = await api(`/api/simin/ask/${b.dataset.q}/public`, { body: { approve: b.dataset.qa === '1' } }); if (x.ok) { toast(b.dataset.qa === '1' ? '공개했습니다' : '숨겼습니다'); loadAdmin(); } else toast(x.error); });
+  } else if (w.ok) $('#admq').innerHTML = '<p class="small">공개를 요청한 질문이 없습니다.</p>';
 }
 
 /* ── 길잡이 ── */
