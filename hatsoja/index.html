@@ -4277,31 +4277,47 @@ async function statRecollect(){
   const b = document.getElementById('stat-recollect');
   if(!confirm('전력거래소·에너지공단에서 자료를 다시 받아 옵니다. 30분에 한 번만 되고, 전력거래소 하루 호출 한도를 씁니다. 진행할까요?')) return;
   if(b) b.disabled = true;
-  statAdminMsg('다시 수집하는 중… (1분쯤 걸릴 수 있습니다)');
+  statAdminMsg('다시 수집을 요청하는 중…');
   try{
-    const r = await fetch('/api/hatsoja/dashboard/refresh', {method:'POST'});
+    const r = await fetch('/api/hatsoja/dashboard/refresh', {method:'POST', cache:'no-store'});
     const d = await r.json().catch(() => ({}));
-    if(r.status === 429){ statAdminMsg(d.message || '30분 안에 이미 수집했습니다.'); return; }
-    if(r.status === 401 || r.status === 403){ statAdminMsg('다시 수집은 햇소자 관리 권한이 있어야 합니다.'); return; }
-    if(!r.ok || !d.ok){ statAdminMsg('다시 수집하지 못했습니다. 옛 자료는 그대로입니다.'); return; }
-    const 시 = (d.결과 || {}).시간별 || {}, 군 = (d.결과 || {}).시군연간 || {};
+    if(r.status === 401){ statAdminMsg(d.message || '로그인이 풀렸습니다. 다시 로그인해 주세요.'); return; }
+    if(r.status === 403){ statAdminMsg(d.message || '다시 수집은 햇소자 관리 권한이 있어야 합니다.'); return; }
+    if(r.status === 429){ statAdminMsg(d.message || '지금은 다시 수집할 수 없습니다.'); return; }
+    if(r.status !== 202 || !d.ok){ statAdminMsg('다시 수집을 시작하지 못했습니다. 옛 자료는 그대로입니다.'); return; }
+    statAdminMsg('다시 수집하는 중… (' + (d.시작시각 || '') + ' 시작, 1~2분 걸립니다)');
+    const 끝 = await statRecollectWait(180);
+    if(!끝){ statAdminMsg('수집이 아직 끝나지 않았습니다. 잠시 뒤 「보관 자료로 다시 그리기」를 눌러 확인해 주세요.'); return; }
+    const 결 = 끝.결과 || {}, 시 = 결.시간별 || {}, 군 = 결.시군연간 || {};
     const 줄 = [
       '시간별: ' + (시.결과 === 'ok' ? (시.새자료 ? '새 날 ' + 시.새자료 : '새 자료 없음') + ' · 호출 ' + Number(시.호출 || 0) + '회' : '오류'),
       '시군 연간: ' + (군.결과 === 'ok' ? ((군.새로받음 || []).length ? '바뀐 판 ' + 군.새로받음.join('·') : '바뀐 판 없음') + ' · 최신 ' + (군.최신연도 || '') + '년' : '오류')
     ].join(' / ');
     await statLoad();
-    statAdminMsg((d.모두성공 ? '다시 수집했습니다 — ' : '일부만 수집했습니다(옛 자료는 남음) — ') + 줄 + ' (' + (d.시각 || '') + ')');
+    statAdminMsg((끝.모두성공 ? '다시 수집했습니다 — ' : '일부만 수집했습니다(옛 자료는 남음) — ') + 줄 + ' (' + (끝.시각 || '') + ')');
   }catch(e){
-    statAdminMsg('다시 수집하지 못했습니다(연결 오류). 옛 자료는 그대로입니다.');
+    statAdminMsg('다시 수집 상태를 확인하지 못했습니다(연결 오류). 잠시 뒤 「보관 자료로 다시 그리기」로 확인해 주세요.');
   }finally{
     if(b) b.disabled = false;
   }
+}
+/* 배경 수집이 끝날 때까지 상태 창구를 묻는다(4초 간격, 최대 sec초). 끝나면 마지막 기록 줄, 시간 넘기면 null */
+async function statRecollectWait(sec){
+  const 끝시각 = Date.now() + sec * 1000;
+  while(Date.now() < 끝시각){
+    await new Promise(r => setTimeout(r, window.__statPollMs || 4000));
+    const r = await fetch('/api/hatsoja/dashboard/refresh', {cache:'no-store'});
+    if(!r.ok) continue;
+    const d = await r.json().catch(() => null);
+    if(d && d.ok && !d.진행중) return d.마지막 || {};
+  }
+  return null;
 }
 async function statLoad(){
   const box = document.getElementById('stat-body');
   if(!box) return;
   try{
-    const r = await fetch('/api/hatsoja/dashboard');
+    const r = await fetch('/api/hatsoja/dashboard', {cache:'no-store'});   // 11-23: 서버가 1시간 캐시를 허용해 다시 수집 뒤에도 옛 값을 보일 수 있었다
     const d = await r.json();
     if(!r.ok || !d || !d.ok) throw new Error('no-data');
     box.innerHTML = statHtml(d);
