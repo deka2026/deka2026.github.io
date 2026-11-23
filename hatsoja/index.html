@@ -496,6 +496,7 @@ input,select,textarea{font-family:inherit;font-size:14px;}
 .ask-group .ask-q:hover{border-color:var(--primary);background:var(--primary-50);}
 .ask-tip{font-size:12.5px;color:var(--ink-soft);margin:0 0 12px;}
 .chat-input .input{flex:1;}
+#hsMic.rec{background:#c0392b;color:#fff;border-color:#c0392b;}   /* 2026-11-24 소리로 묻기 녹음 중 */
 
 /* Toast */
 .toast{
@@ -9582,6 +9583,8 @@ async function sendChat(){
     if(pending){   // 답변 대기 중 다른 화면으로 이동했으면 조용히 종료
       pending.removeAttribute('id');
       pending.innerHTML = chatAnswerHtml(answer) + chatMetaHtml(meta);
+      const sp = document.getElementById('hsSpeak');
+      if(sp && sp.checked && meta) hsSpeak(answer);   // 2026-11-24 실험실 「답을 소리로 듣기」 — 기기 목소리만
       if(meta && meta.insufficient === true) pending.classList.add('insufficient');
       if(meta && meta.request_id) pending.setAttribute('data-req', String(meta.request_id));
       body.scrollTop = body.scrollHeight;
@@ -14553,8 +14556,96 @@ function admVideoJobs(){
     <div class="card" id="vidAdm">불러오는 중…</div>`;
 }
 
+/* ── 2026-11-24 소리로 묻고 듣기(수업 13·16·17·20회차 STT·TTS 반영, 지금은 관리자 실험실만) ──
+   묻기: 녹음(MediaRecorder) → 브라우저에서 16kHz 모노 WAV → /api/hatsoja/voice/stt(사교원 서버 → HPC 받아쓰기) → 입력 칸. 보내기는 사람이 확인하고 누른다.
+   듣기: 서버를 거치지 않고 이 기기에 깔린 한국어 목소리(speechSynthesis, localService=true)로만 읽는다. 기기 목소리가 없으면 끈다
+   (크롬의 일부 목소리는 구글 서버를 거치므로 localService=false 는 쓰지 않는다). 녹음 변환은 품에·데카 대화창 voiceInput 과 같은 방식. */
+function hsVoiceMsg(t){ const m = document.getElementById('hsVoiceMsg'); if(m) m.textContent = t || ''; }
+function hsKoVoice(){
+  if(!('speechSynthesis' in window)) return null;
+  const vs = window.speechSynthesis.getVoices() || [];
+  return vs.find(v => /^ko/i.test(v.lang || '') && v.localService === true) || null;
+}
+function hsSpeakSetup(){
+  const box = document.getElementById('hsSpeak');
+  if(!box) return;
+  const ok = !!hsKoVoice();
+  box.disabled = !ok;
+  if(!ok){ box.checked = false; box.parentElement.title = '이 기기에 한국어 목소리가 없어 읽어 줄 수 없습니다(바깥 서버 목소리는 쓰지 않습니다)'; }
+  else box.parentElement.title = '이 기기의 한국어 목소리(' + hsKoVoice().name + ')로 읽습니다. 서버로 보내지 않습니다.';
+}
+function hsSpeakText(t){
+  return String(t || '').replace(/https?:\/\/\S+/g, ' 링크 ').replace(/[#*_`>|]/g, ' ')
+    .split('\n').filter(l => !/^\s*(검산|출처|근거|기준일)\s*[:：]/.test(l)).join('. ').replace(/\s+/g, ' ').trim().slice(0, 1200);
+}
+function hsSpeak(t){
+  const v = hsKoVoice();
+  if(!v) return;
+  try{
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(hsSpeakText(t));
+    u.voice = v; u.lang = v.lang; u.rate = 1.0;
+    window.speechSynthesis.speak(u);
+  }catch(e){}
+}
+function hsSpeakStop(){ try{ window.speechSynthesis && window.speechSynthesis.cancel(); }catch(e){} }
+function hsVoiceSetup(){
+  hsSpeakSetup();
+  if('speechSynthesis' in window) window.speechSynthesis.onvoiceschanged = hsSpeakSetup;   // 목소리 목록은 늦게 온다
+  const btn = document.getElementById('hsMic');
+  if(!btn || btn.dataset.ready) return;
+  btn.dataset.ready = '1';
+  const can = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder && (window.AudioContext || window.webkitAudioContext));
+  if(!can){ btn.disabled = true; btn.title = '이 브라우저에서는 소리로 묻기를 쓸 수 없습니다'; return; }
+  let rec = null, stream = null, chunks = [], timer = null, busy = false;
+  const MAX_SEC = 60;
+  function wav16k(samples){
+    const buf = new ArrayBuffer(44 + samples.length * 2), v = new DataView(buf);
+    const w = (o, s) => { for(let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+    w(0, 'RIFF'); v.setUint32(4, 36 + samples.length * 2, true); w(8, 'WAVE'); w(12, 'fmt ');
+    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, 16000, true);
+    v.setUint32(28, 32000, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, 'data'); v.setUint32(40, samples.length * 2, true);
+    for(let i = 0; i < samples.length; i++){ const x = Math.max(-1, Math.min(1, samples[i])); v.setInt16(44 + i * 2, x < 0 ? x * 0x8000 : x * 0x7fff, true); }
+    return new Blob([buf], {type:'audio/wav'});
+  }
+  async function toWav(blob){
+    const AC = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AC(); const audio = await ctx.decodeAudioData(await blob.arrayBuffer()); ctx.close && ctx.close();
+    const off = new OfflineAudioContext(1, Math.max(1, Math.ceil(audio.duration * 16000)), 16000);
+    const src = off.createBufferSource(); src.buffer = audio; src.connect(off.destination); src.start();
+    return wav16k((await off.startRendering()).getChannelData(0));
+  }
+  async function finish(){
+    clearTimeout(timer); btn.classList.remove('rec'); btn.textContent = '🎙️'; btn.disabled = true; busy = true;
+    hsVoiceMsg('받아쓰는 중… (고성능컴퓨팅 엔진)');
+    try{
+      const wav = await toWav(new Blob(chunks, {type: (rec && rec.mimeType) || 'audio/webm'}));
+      const r = await fetch('/api/hatsoja/voice/stt', {method:'POST', headers:{'Content-Type':'audio/wav'}, body: wav, credentials:'same-origin'});
+      const j = await r.json().catch(() => ({}));
+      if(!r.ok || !j.ok) throw new Error(j.error || ('받아쓰기 실패 ' + r.status));
+      const inp = document.getElementById('chatIn');
+      if(inp){ inp.value = (inp.value.trim() ? inp.value.trim() + ' ' : '') + j.text; inp.focus(); }
+      hsVoiceMsg('받아쓴 글을 입력 칸에 넣었습니다. 확인하고 「보내기」를 눌러 주세요.');
+    }catch(e){ hsVoiceMsg('⚠️ ' + e.message); }
+    finally{ btn.disabled = false; busy = false; if(stream) stream.getTracks().forEach(t => t.stop()); stream = null; rec = null; }
+  }
+  btn.addEventListener('click', async () => {
+    if(busy) return;
+    if(rec && rec.state === 'recording'){ rec.stop(); return; }
+    hsSpeakStop();
+    try{ stream = await navigator.mediaDevices.getUserMedia({audio:true}); }
+    catch(e){ hsVoiceMsg('⚠️ 마이크를 쓸 수 없습니다. 주소창의 마이크 권한을 허용해 주세요.'); return; }
+    chunks = []; rec = new MediaRecorder(stream);
+    rec.ondataavailable = e => { if(e.data && e.data.size) chunks.push(e.data); };
+    rec.onstop = finish;
+    rec.start(); btn.classList.add('rec'); btn.textContent = '⏹';
+    hsVoiceMsg('🎙️ 듣는 중… 말씀을 마치면 단추를 다시 누르세요(최대 1분).');
+    timer = setTimeout(() => { if(rec && rec.state === 'recording') rec.stop(); }, MAX_SEC * 1000);
+  });
+}
 function admLab(){
   setTimeout(labLoadHealth, 0);
+  setTimeout(hsVoiceSetup, 0);   // 2026-11-24 소리로 묻고 듣기(실험실만)
   return `
     <div class="sec-head">
       <h1 class="tmp" title="오픈 전 제거·확인">🧪 상담 체인 실험실</h1>
@@ -14594,6 +14685,12 @@ function admLab(){
         <input class="input" id="chatIn" placeholder="질문을 입력하세요..." onkeydown="if(event.key==='Enter')sendChat()">
         <button class="btn btn-primary" onclick="sendChat()">보내기</button>
         <button class="btn btn-outline" onclick="labAB()" title="같은 질문을 지금 구성(A)과 프롬프트를 바꾼 구성(B)으로 동시에 돌려 나란히 봅니다">A/B 비교</button>
+        <button class="btn btn-outline" type="button" id="hsMic" title="소리로 묻기 — 녹음은 사교원 서버를 거쳐 고성능컴퓨팅 받아쓰기로 갑니다(저장하지 않음)">🎙️</button>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px;font-size:12.5px;">
+        <label style="display:flex;align-items:center;gap:4px;"><input type="checkbox" id="hsSpeak"> 답을 소리로 듣기</label>
+        <button class="btn btn-ghost" type="button" id="hsStop" onclick="hsSpeakStop()" style="padding:2px 10px;font-size:12px;">읽기 멈춤</button>
+        <span id="hsVoiceMsg" class="text-mute"></span>
       </div>
       <details style="margin-top:10px;"><summary class="text-mute" style="cursor:pointer;font-size:13px;">마지막 응답 원문(JSON)</summary>
         <pre id="labMeta" style="font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere;max-height:360px;overflow:auto;background:var(--primary-50);padding:10px;border-radius:8px;"></pre></details>
