@@ -14597,8 +14597,16 @@ function hsVoiceSetup(){
   btn.dataset.ready = '1';
   const can = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder && (window.AudioContext || window.webkitAudioContext));
   if(!can){ btn.disabled = true; btn.title = '이 브라우저에서는 소리로 묻기를 쓸 수 없습니다'; return; }
-  let rec = null, stream = null, chunks = [], timer = null, busy = false;
+  let rec = null, stream = null, chunks = [], timer = null, busy = false, cancelled = false;
   const MAX_SEC = 60;
+  // 화면을 옮기면 녹음·마이크·읽기를 바로 끈다(최대 60초 더 켜져 있다가 다른 화면 입력 칸에 들어가던 것, 11-24 알파언니)
+  window.addEventListener('hashchange', function hsLeave(){
+    if(location.hash.startsWith('#/adm/lab')) return;
+    hsSpeakStop();
+    if(rec && rec.state === 'recording'){ cancelled = true; rec.stop(); }
+    else if(stream){ stream.getTracks().forEach(t => t.stop()); stream = null; }
+    window.removeEventListener('hashchange', hsLeave);
+  });
   function wav16k(samples){
     const buf = new ArrayBuffer(44 + samples.length * 2), v = new DataView(buf);
     const w = (o, s) => { for(let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
@@ -14617,14 +14625,18 @@ function hsVoiceSetup(){
   }
   async function finish(){
     clearTimeout(timer); btn.classList.remove('rec'); btn.textContent = '🎙️'; btn.disabled = true; busy = true;
+    if(cancelled || !location.hash.startsWith('#/adm/lab')){   // 화면을 떠나며 멈춘 녹음은 보내지 않는다(11-24 알파언니)
+      busy = false; if(stream) stream.getTracks().forEach(t => t.stop()); stream = null; rec = null; return;
+    }
     hsVoiceMsg('받아쓰는 중… (고성능컴퓨팅 엔진)');
     try{
       const wav = await toWav(new Blob(chunks, {type: (rec && rec.mimeType) || 'audio/webm'}));
       const r = await fetch('/api/hatsoja/voice/stt', {method:'POST', headers:{'Content-Type':'audio/wav'}, body: wav, credentials:'same-origin'});
       const j = await r.json().catch(() => ({}));
       if(!r.ok || !j.ok) throw new Error(j.error || ('받아쓰기 실패 ' + r.status));
-      const inp = document.getElementById('chatIn');
-      if(inp){ inp.value = (inp.value.trim() ? inp.value.trim() + ' ' : '') + j.text; inp.focus(); }
+      const inp = location.hash.startsWith('#/adm/lab') ? document.getElementById('chatIn') : null;   // 받는 동안 화면을 옮겼으면 넣지 않는다
+      if(!inp) return;
+      inp.value = (inp.value.trim() ? inp.value.trim() + ' ' : '') + j.text; inp.focus();
       hsVoiceMsg('받아쓴 글을 입력 칸에 넣었습니다. 확인하고 「보내기」를 눌러 주세요.');
     }catch(e){ hsVoiceMsg('⚠️ ' + e.message); }
     finally{ btn.disabled = false; busy = false; if(stream) stream.getTracks().forEach(t => t.stop()); stream = null; rec = null; }
@@ -14635,7 +14647,7 @@ function hsVoiceSetup(){
     hsSpeakStop();
     try{ stream = await navigator.mediaDevices.getUserMedia({audio:true}); }
     catch(e){ hsVoiceMsg('⚠️ 마이크를 쓸 수 없습니다. 주소창의 마이크 권한을 허용해 주세요.'); return; }
-    chunks = []; rec = new MediaRecorder(stream);
+    chunks = []; cancelled = false; rec = new MediaRecorder(stream);
     rec.ondataavailable = e => { if(e.data && e.data.size) chunks.push(e.data); };
     rec.onstop = finish;
     rec.start(); btn.classList.add('rec'); btn.textContent = '⏹';
