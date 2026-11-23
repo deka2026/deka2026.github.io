@@ -4255,7 +4255,7 @@ function memStat(){
     <div class="sec-head">
       <h1>🗺 전남 발전 현황</h1>
       <p class="sec-desc">전국 시도 가운데 전남 태양광의 위치, 월별 흐름, 월 이용률(<b>전남광주 합산</b>), 2005~2023 추세를 <b>공개 통계 실측값</b>으로 봅니다.
-        아래 <b>전남 22개 시군</b> 카드는 에너지공단 화면 조회 스냅샷(자동 갱신 아님)입니다. 우리 마을 실적과의 비교는 <a href="#/mem/power">발전·정산·배당</a>에서 봅니다.
+        <b>전남 22개 시군 × 에너지원</b> 카드는 에너지공단 연간 통계(공공데이터포털, 해마다 갱신)이고, 시군 태양광 개소·설비 카드는 에너지공단 화면 조회 스냅샷(자동 갱신 아님)입니다. 우리 마을 실적과의 비교는 <a href="#/mem/power">발전·정산·배당</a>에서 봅니다.
         <br><span class="text-mute" style="font-size:12.5px;">※ 여기서 「전남」은 전남광주통합특별시 출범(2026-07-01) 전 통계의 집계 단위(옛 전라남도, 광주 제외)입니다. 대부분의 공개 통계가 아직 옛 시도 구분으로 나와 그대로 적습니다(아래 「가장 최근 공개일」 카드의 통합특별시 칸은 예외).</span></p>
     </div>
     <div id="stat-body"><div class="card"><p class="text-mute" style="margin:0;">불러오는 중…</p></div></div>`;
@@ -4268,9 +4268,49 @@ async function statLoad(){
     const d = await r.json();
     if(!r.ok || !d || !d.ok) throw new Error('no-data');
     box.innerHTML = statHtml(d);
+    if(window.__statSE) statSERender();
   }catch(e){
     box.innerHTML = '<div class="card"><p style="margin:0;">현황 자료를 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.</p></div>';
   }
+}
+/* 시군 × 에너지원 카드 그리기 — 시군을 바꾸면 그 시군에 있는 에너지원만 고르게 하고, 고르던 것이 없으면 「전체」로 */
+function statSERender(){
+  const S = window.__statSE, body = document.getElementById('stat-se-body');
+  const cs = document.getElementById('stat-se-city'), es = document.getElementById('stat-se-src');
+  if(!S || !body || !cs || !es) return;
+  const g = cs.value, prev = es.value;
+  const 원들 = g ? (S.시군별_에너지원[g] || []) : Object.keys(S.전남_에너지원합).filter(e => Number(S.전남_에너지원합[e].발전량_MWh) > 0 || Number(S.전남_에너지원합[e].설비_누적_kW) > 0);
+  es.innerHTML = '<option value="">전체</option>' + 원들.map(e => `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join('');
+  es.value = 원들.includes(prev) ? prev : '';
+  const e = es.value;
+  const bar = (label, v, max, tail) => `
+    <div style="display:flex;align-items:center;gap:8px;margin:3px 0;font-size:13px;">
+      <span style="width:52px;text-align:right;">${escapeHtml(label)}</span>
+      <span style="flex:1;min-width:40px;height:14px;background:var(--paper-soft);border-radius:4px;overflow:hidden;">
+        ${v == null ? '' : `<span style="display:block;height:100%;width:${Math.max(v > 0 ? 1 : 0, v / max * 100)}%;background:var(--primary);opacity:.8;"></span>`}</span>
+      <span style="width:150px;font-size:12px;white-space:nowrap;">${v == null ? '자료 없음' : statFmt(v, 0) + ' MWh'}${tail || ''}</span>
+    </div>`;
+  let rows = [], head = '', note = '';
+  if(!g && !e){
+    rows = 원들.map(x => [x, Number(S.전남_에너지원합[x].발전량_MWh)]).sort((a, b) => b[1] - a[1]);
+    head = `전남 22개 시군 합 — 에너지원별`;
+  }else if(!g && e){
+    rows = S.목록.map(x => [x.시군, Number(((x.에너지원 || {})[e] || {}).발전량_MWh || 0)]).filter(r => r[1] > 0).sort((a, b) => b[1] - a[1]);
+    head = `${e} — 발전량이 있는 시군 ${rows.length}곳`;
+  }else if(g && !e){
+    const row = S.목록.find(x => x.시군 === g) || {에너지원: {}};
+    rows = 원들.map(x => [x, Number((row.에너지원[x] || {}).발전량_MWh || 0)]).sort((a, b) => b[1] - a[1]);
+    head = `${g} — 에너지원별`;
+  }else{
+    const t = (S.추세_발전량_MWh[g] || {})[e] || [];
+    rows = S.연도들.map((y, i) => [y + '년', t[i] == null ? null : Number(t[i])]);
+    head = `${g} ${e} — 연도별(2020년판은 공개되지 않음)`;
+    if(e === '폐기물' && S.기준변경) note = S.기준변경;
+  }
+  const max = Math.max(1, ...rows.map(r => r[1] || 0));
+  body.innerHTML = `<p style="font-size:13px;margin:0 0 6px;"><b>${escapeHtml(head)}</b></p>` +
+    (rows.length ? rows.map(r => bar(r[0], r[1], max)).join('') : '<p class="text-mute" style="font-size:13px;">이 조합의 발전량 자료가 없습니다.</p>') +
+    (note ? `<p class="text-mute" style="font-size:12.5px;margin:6px 0 0;">⚠ ${escapeHtml(note)}</p>` : '');
 }
 function statFmt(n, dig){ return Number(n).toLocaleString('ko-KR', {maximumFractionDigits: dig == null ? 1 : dig}); }
 function statSrc(o){
@@ -4357,6 +4397,29 @@ function statHtml(d){
       ${statSrc(군)}
     </div>`;
   }
+  /* 2026-11-23 수업 19·20회차: 시군 × 에너지원 연간(에너지공단 15086292) — 지역 → 에너지원 종속 거름, 빈 해는 0으로 그리지 않음 */
+  window.__statSE = d.시군에너지원 || null;
+  const seCard = (d.시군에너지원 && d.시군에너지원.목록) ? `
+    <div class="card" style="margin-bottom:16px;" id="stat-se-card">
+      <div class="card-title"><h3 class="serif">전남 22개 시군 × 에너지원 — ${Number(d.시군에너지원.연도)}년 발전량</h3>
+        <span class="badge badge-gold">연간 통계 · 실시간 아님</span></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px;">
+        <label style="font-size:13px;">시군 <select id="stat-se-city" onchange="statSERender()" style="margin-left:4px;"><option value="">전체</option>${d.시군에너지원.목록.map(x => x.시군).slice().sort().map(g => `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join('')}</select></label>
+        <label style="font-size:13px;">에너지원 <select id="stat-se-src" onchange="statSERender()" style="margin-left:4px;"></select></label>
+      </div>
+      <div id="stat-se-body"></div>
+      <p class="text-mute" style="font-size:12.5px;margin:8px 0 0;">${escapeHtml(d.시군에너지원.검산 || '')}</p>
+      <p class="text-mute" style="font-size:12.5px;margin:6px 0 0;">${escapeHtml(d.시군에너지원.주의 || '')}</p>
+      ${statSrc(d.시군에너지원)}
+    </div>` : '';
+  const 공 = (d.공급처 || []).filter(x => x.상태 !== '미연동');
+  const srcCard = 공.length ? `
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title"><h3 class="serif">이 화면의 자료 공급처</h3></div>
+      <ul style="margin:0;padding-left:18px;font-size:13px;line-height:1.7;">${공.map(x => `<li><b>${escapeHtml(x.이름)}</b> (${escapeHtml(x.기관)}) —
+        <span class="badge ${x.실시간 ? 'badge-success' : 'badge-mute'}">${x.실시간 ? '실시간' : '실시간 아님'}</span>
+        ${escapeHtml(x.지역단위)} 단위 · ${escapeHtml(x.갱신주기)} · 기준 ${escapeHtml(x.기준일 || '확인 전')}${x.지난날 != null ? '(' + Number(x.지난날) + '일 전)' : ''} · ${escapeHtml(x.형태)} · 이용허락: ${escapeHtml(x.이용허락)}</li>`).join('')}</ul>
+    </div>` : '';
   /* 2026-11-13 수업 15회차: 전력거래소 시간별 태양광 API 의 가장 최근 공개일(실시간 아님 — 기준일·지연 일수를 늘 보인다) */
   let hourCard = '';
   const 시 = d.시간별;
@@ -4397,8 +4460,10 @@ function statHtml(d){
     </div>
     ${hourCard}
     ${sigunCard}
+    ${seCard}
     ${cfCard}
     ${trendCard}
+    ${srcCard}
     <div class="card" style="margin-bottom:16px;background:var(--paper-soft);box-shadow:none;">
       <h3 class="serif" style="margin-top:0;">읽을 때 알아 두세요</h3>
       <ul style="margin:0;padding-left:18px;font-size:13.5px;line-height:1.7;">${(d.한계 || []).map(t => '<li>' + escapeHtml(t) + '</li>').join('')}</ul>
