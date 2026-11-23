@@ -4258,7 +4258,44 @@ function memStat(){
         <b>전남 22개 시군 × 에너지원</b> 카드는 에너지공단 연간 통계(공공데이터포털, 해마다 갱신)이고, 시군 태양광 개소·설비 카드는 에너지공단 화면 조회 스냅샷(자동 갱신 아님)입니다. 우리 마을 실적과의 비교는 <a href="#/mem/power">발전·정산·배당</a>에서 봅니다.
         <br><span class="text-mute" style="font-size:12.5px;">※ 여기서 「전남」은 전남광주통합특별시 출범(2026-07-01) 전 통계의 집계 단위(옛 전라남도, 광주 제외)입니다. 대부분의 공개 통계가 아직 옛 시도 구분으로 나와 그대로 적습니다(아래 「가장 최근 공개일」 카드의 통합특별시 칸은 예외).</span></p>
     </div>
+    ${isAdminUser() ? `<div class="card" id="stat-admin" style="margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+      <b style="font-size:13.5px;">관리자</b>
+      <button class="btn btn-ghost" type="button" onclick="statRedraw()" title="서버에 보관된 자료로 화면만 다시 그립니다(바깥 기관을 부르지 않음)">보관 자료로 다시 그리기</button>
+      <button class="btn btn-primary" type="button" id="stat-recollect" onclick="statRecollect()" title="전력거래소·에너지공단에서 새 자료를 다시 받아 옵니다(30분에 한 번, 하루 호출 한도를 씀)">다시 수집</button>
+      <span id="stat-admin-msg" class="text-mute" style="font-size:12.5px;"></span>
+    </div>` : ''}
     <div id="stat-body"><div class="card"><p class="text-mute" style="margin:0;">불러오는 중…</p></div></div>`;
+}
+/* 2026-11-23 수업 18회차: 「DB만 새로 고침」과 「파이프라인 다시 실행」을 나눈다 — 다시 그리기는 보관본만, 다시 수집은 관리자만·30분에 한 번(서버가 다시 확인) */
+function statAdminMsg(t){ const m = document.getElementById('stat-admin-msg'); if(m) m.textContent = t; }
+async function statRedraw(){
+  statAdminMsg('보관 자료로 다시 그리는 중…');
+  await statLoad();
+  statAdminMsg('다시 그렸습니다(' + new Date().toLocaleTimeString('ko-KR') + ').');
+}
+async function statRecollect(){
+  const b = document.getElementById('stat-recollect');
+  if(!confirm('전력거래소·에너지공단에서 자료를 다시 받아 옵니다. 30분에 한 번만 되고, 전력거래소 하루 호출 한도를 씁니다. 진행할까요?')) return;
+  if(b) b.disabled = true;
+  statAdminMsg('다시 수집하는 중… (1분쯤 걸릴 수 있습니다)');
+  try{
+    const r = await fetch('/api/hatsoja/dashboard/refresh', {method:'POST'});
+    const d = await r.json().catch(() => ({}));
+    if(r.status === 429){ statAdminMsg(d.message || '30분 안에 이미 수집했습니다.'); return; }
+    if(r.status === 401 || r.status === 403){ statAdminMsg('다시 수집은 햇소자 관리 권한이 있어야 합니다.'); return; }
+    if(!r.ok || !d.ok){ statAdminMsg('다시 수집하지 못했습니다. 옛 자료는 그대로입니다.'); return; }
+    const 시 = (d.결과 || {}).시간별 || {}, 군 = (d.결과 || {}).시군연간 || {};
+    const 줄 = [
+      '시간별: ' + (시.결과 === 'ok' ? (시.새자료 ? '새 날 ' + 시.새자료 : '새 자료 없음') + ' · 호출 ' + Number(시.호출 || 0) + '회' : '오류'),
+      '시군 연간: ' + (군.결과 === 'ok' ? ((군.새로받음 || []).length ? '바뀐 판 ' + 군.새로받음.join('·') : '바뀐 판 없음') + ' · 최신 ' + (군.최신연도 || '') + '년' : '오류')
+    ].join(' / ');
+    await statLoad();
+    statAdminMsg((d.모두성공 ? '다시 수집했습니다 — ' : '일부만 수집했습니다(옛 자료는 남음) — ') + 줄 + ' (' + (d.시각 || '') + ')');
+  }catch(e){
+    statAdminMsg('다시 수집하지 못했습니다(연결 오류). 옛 자료는 그대로입니다.');
+  }finally{
+    if(b) b.disabled = false;
+  }
 }
 async function statLoad(){
   const box = document.getElementById('stat-body');
