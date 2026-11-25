@@ -1819,6 +1819,7 @@ const ROLE_MENUS = {
       ['mem','taxpay','💸','지급·원천징수'],
       ['mem','ledgers','📒','표준장부·거래처'],
       ['mem','dist','💧','수익 배분 계획'],
+      ['mem','surplus','🧮','잉여금 처분 계산'],
       ['mem','finstat','📊','재무제표·컨설팅'],
       ['mem','closing','📁','월마감·보고서'],
       ['mem','members','👥','조합원 관리'],
@@ -2106,6 +2107,7 @@ const MENU_DESC = {
   feddues:['회비 부과·수납','회원조합 정산금을 기준으로 회비를 산정해 부과하고 수납을 기록합니다'],
   fedbiz:['공동사업','공동 REC 판매·공동 O&M 등 연합회 공동사업의 성과를 회비와 대비해 봅니다'],
   fedbooks:['연합회 회계·결산','연합회 자체 수입(회비·공동사업)과 지출만 담은 회계입니다'],
+  surplus:['잉여금 처분 계산','결산상 잉여금을 손실 보전 → 법정적립금 → 정관 적립 → 임의적립 → 배당 → 이월 순서로 나누고 법정 한도를 점검합니다(협동조합 기본법 제50·51·97·98조)'],
   dist:['수익 배분 계획','발전수익을 ①원리금 ②운영관리비 ③공동사업 ④배당 순위로 배분하고, 사업기간 20년을 버티는지 따집니다'],
   finstat:['재무제표·컨설팅','올린 실적과 기초값으로 손익계산서·재무상태표를 만들고, GPU 엔진 근거로 재무건전성 컨설팅 보고서를 받습니다'],
   fedfinstat:['재무제표·컨설팅','연합회 법인 자신의 손익과 재무건전성 진단입니다'],
@@ -2795,6 +2797,7 @@ function renderMemberPage(page){
     case 'finstat':   return memFinStat();
     case 'fedfinstat':return fedFinStat();
     case 'dist':      return memDist();
+    case 'surplus':   return memSurplus();
     case 'docs':      return memDocs();
     case 'review':    return memReview();
     case 'law':       return memLaw();
@@ -4658,8 +4661,10 @@ function memPower(){
           <input class="input" id="pw-debt" type="number" value="8234" min="0" step="100" style="width:90px;"> 만 원</label>
         <label style="display:flex;align-items:center;gap:6px;">조합원
           <input class="input" id="pw-mem" type="number" value="65" min="1" style="width:70px;"> 명</label>
-        <label style="display:flex;align-items:center;gap:6px;">연금 대상 (70세 이상)
-          <input class="input" id="pw-eld" type="number" value="35" min="0" style="width:70px;"> 명</label>
+<label style="display:flex;align-items:center;gap:6px;">연금 대상 <input class="input" id="pw-age" type="number" value="70" min="0" max="120" style="width:62px;"> 세 이상 <input class="input" id="pw-eld" type="number" value="35" min="0" style="width:70px;"> 명</label>
+      <label style="display:flex;align-items:center;gap:6px;">운영비 <input class="input" id="pw-opex" type="number" min="0" step="10" placeholder="비우면 매출 14%" style="width:130px;"> 만 원</label>
+      <label style="display:flex;align-items:center;gap:6px;">법인세 등 <input class="input" id="pw-tax" type="number" min="0" step="10" placeholder="0" style="width:80px;"> 만 원</label>
+      <label style="display:flex;align-items:center;gap:6px;" title="결산상 당기순이익 × 정관 비율(일반 10% 이상·사회적 30% 이상). 「🧮 잉여금 처분 계산」에서 구한 값을 넣으세요">법정적립금 <input class="input" id="pw-legal" type="number" min="0" step="10" placeholder="0" style="width:80px;"> 만 원</label>
         <button class="btn btn-primary" onclick="pwStrategy()">배분 비교</button>
       </div>
       <div id="pw-strategy"></div>
@@ -4696,14 +4701,19 @@ function pwStrategy(){
   const debt = Math.max(0, Number(document.getElementById('pw-debt').value) || 0) * 1e4;
   const mem  = Math.max(1, Number(document.getElementById('pw-mem').value) || 1);
   const eld  = Math.max(0, Number(document.getElementById('pw-eld').value) || 0);
-  const opex = rev * 0.14;                 // 유지관리6+보험2+교체적립4+시스템2
-  const avail = rev - opex - debt;         // 배분 가능 잉여
+  /* 2026-11-25 운영비 직접 입력(비우면 매출의 14% 어림)·법인세 등·법정적립금·연금 대상 연령 — 해남 3일차 교육 반영 */
+  const _v = id => { const el = document.getElementById(id); return el && el.value !== '' ? Math.max(0, Number(el.value) || 0) : null; };
+  const opexIn = _v('pw-opex'), tax = (_v('pw-tax') || 0) * 1e4, legal = (_v('pw-legal') || 0) * 1e4;
+  const age = _v('pw-age') != null ? _v('pw-age') : 70;
+  const opexGuess = opexIn == null;
+  const opex = opexGuess ? rev * 0.14 : opexIn * 1e4;   // 어림: 유지관리6+보험2+교체적립4+시스템2
+  const avail = rev - opex - debt - tax - legal;         // 배분 가능 잉여(현금 기준)
   const box = document.getElementById('pw-strategy');
   if(avail <= 0){
     box.innerHTML = `<div style="background:var(--paper-soft);border-radius:8px;padding:12px 14px;">
       <b style="color:var(--danger);">배분할 잉여가 없습니다</b>
       <p class="text-mute" style="font-size:13px;margin:4px 0 0;">연 매출 ${fmtWon(rev)}에서 운영비 ${fmtWon(opex)}와
-      원리금 ${fmtWon(debt)}을 빼면 남는 돈이 없습니다. 이 상태에서는 배당·공동사업을 계획할 수 없으므로
+      원리금 ${fmtWon(debt)}${tax||legal ? `, 법인세 등·법정적립금 ${fmtWon(tax+legal)}` : ''}을 빼면 남는 돈이 없습니다. 이 상태에서는 배당·공동사업을 계획할 수 없으므로
       <a href="#/mem/finance">자부담·융자 신청</a> 화면에서 조달 구조를 다시 검토하세요.</p></div>`;
     return;
   }
@@ -4714,10 +4724,14 @@ function pwStrategy(){
       <tbody>
         <tr><td style="width:190px;"><b>연 매출</b></td><td style="text-align:right;width:120px;">${fmtWon(rev)}</td>
           <td class="text-mute" style="font-size:12.5px;">발전소가 버는 돈</td></tr>
-        <tr><td>− 운영비 (매출의 14%)</td><td style="text-align:right;color:var(--danger);">−${fmtWon(opex)}</td>
-          <td class="text-mute" style="font-size:12.5px;">유지관리·보험료·시설교체 적립·시스템비용 적립</td></tr>
+        <tr><td>− 운영비 ${opexGuess ? '(매출의 14% 어림)' : '(입력값)'}</td><td style="text-align:right;color:var(--danger);">−${fmtWon(opex)}</td>
+          <td class="text-mute" style="font-size:12.5px;">${opexGuess ? '유지관리·보험료·시설교체 적립·시스템비용 적립 어림값 — 우리 결산서의 현금 비용(부지 임차료·세무 수수료 등 포함)을 「운영비」 칸에 넣으면 정확해집니다' : '감가상각비처럼 통장에서 나가지 않는 비용은 빼고 넣은 값'}</td></tr>
         <tr><td>− 차입금 원리금 <b>(의무)</b></td><td style="text-align:right;color:var(--danger);">−${fmtWon(debt)}</td>
           <td class="text-mute" style="font-size:12.5px;">정책융자 + 자부담 융자 — 배분보다 먼저 확보</td></tr>
+        <tr><td>− 법인세 등</td><td style="text-align:right;color:var(--danger);">${tax ? '−' + fmtWon(tax) : '—'}</td>
+          <td class="text-mute" style="font-size:12.5px;">${tax ? '결산서의 법인세비용' : '넣지 않음 — 이익이 나면 법인세가 붙는다(세무대리인 확인)'}</td></tr>
+        <tr><td>− 법정적립금 <b>(의무)</b></td><td style="text-align:right;color:var(--danger);">${legal ? '−' + fmtWon(legal) : '—'}</td>
+          <td class="text-mute" style="font-size:12.5px;">${legal ? '결산상 잉여금에서 먼저 적립 — 손실 보전·해산 외 못 씀(협동조합 기본법 제50조)' : '넣지 않음 — 잉여금의 10% 이상(사회적협동조합 30% 이상)을 먼저 적립해야 한다. 「🧮 잉여금 처분 계산」 참고'}</td></tr>
         <tr style="background:var(--paper-soft);"><td><b>= 배분 가능 잉여</b></td>
           <td style="text-align:right;"><b style="color:var(--primary);">${fmtWon(avail)}</b></td>
           <td class="text-mute" style="font-size:12.5px;">아래 네 전략은 이 금액을 나누는 방식입니다</td></tr>
@@ -4735,10 +4749,15 @@ function pwStrategy(){
           }).join('')}</tr>`).join('')}
         <tr style="background:var(--paper-soft);"><td><b>조합원 1인당 연 배당</b></td>
           ${PW_STRAT.map(s => `<td style="text-align:right;"><b>${fmtWon(avail*(s.mix.조합원배당||0)/100/mem)}</b></td>`).join('')}</tr>
-        <tr><td><b>마을연금 (${eld}명 기준)</b></td>
+        <tr><td><b>마을연금 (${age}세 이상 ${eld}명, 1인당 월)</b></td>
           ${PW_STRAT.map(s => {
             const y = avail*(s.mix.마을연금||0)/100;
             return `<td style="text-align:right;">${eld && y ? '월 ' + fmtWon(y/eld/12) : '—'}</td>`;
+          }).join('')}</tr>
+        <tr><td><b>마을연금 1인당 연</b></td>
+          ${PW_STRAT.map(s => {
+            const y = avail*(s.mix.마을연금||0)/100;
+            return `<td style="text-align:right;">${eld && y ? fmtWon(y/eld) : '—'}</td>`;
           }).join('')}</tr>
         <tr><td><b>재투자 기금 20년 누계</b></td>
           ${PW_STRAT.map(s => `<td style="text-align:right;">${fmtWon(avail*(s.mix.재투자||0)/100*20)}</td>`).join('')}</tr>
@@ -5447,7 +5466,14 @@ function fedBooksPage(){
       제도·법령 설명만 GPU 엔진(넥서스 H200)이 쓴다 — 보고서 3절에 그렇게 밝혀 둔다. */
 
 const FIN_PAGES = ['finstat', 'fedfinstat'];
-let _FIN = {stat:null, base:null, list:null, all:null, 때:null, 로딩:false, 실데이터:false};
+/* 2026-11-25 체험 모드 예시 값 — 체험 사용자는 /api/my/* 가 401 이라 재무제표·배분계획이 「불러오는 중」에 멈췄다.
+   가상 조합(300kW·총사업비 5억·출자 8,000만·융자 4.2억 2.5%·연 39만kWh×165원, 해남 3일차 교안)을
+   서버 계산 함수(coop_statements·dist_solve)에 그대로 넣어 얻은 값이다. 실제 조합 자료가 아니다. */
+const DEMO_FINDIST = {"fin":{"ok":true,"scope":"coop","village_id":0,"statements":{"base":{"village_id":14,"asset_cost":500000000,"useful_life":20,"loan_principal":420000000,"loan_rate":0.025,"equity":80000000,"opening_cash":15000000,"note":"체험 예시 — 해남 3일차 교안 가상 조합","updated_at":"2026-11-25T00:00:00+09:00","updated_by":0,"opening_cash_derived":false},"months":[{"month":"2026-01","kwh":21450,"매출액":3539250,"운영비":1480000,"감가상각비":2083333,"영업이익":-24083,"이자비용":875000,"당기순이익":-899083,"원금상환":2333333,"원리금":3208333,"미지급이자":0,"현금":13850917,"유형자산":497916667,"자산총계":511767584,"차입금":417666667,"부채총계":417666667,"자본금":80000000,"이익잉여금":-899083,"자본총계":79100917,"통장잔액":0},{"month":"2026-02","kwh":25350,"매출액":4182750,"운영비":1480000,"감가상각비":2083333,"영업이익":619417,"이자비용":870139,"당기순이익":-250722,"원금상환":2338194,"원리금":3208333,"미지급이자":0,"현금":13345334,"유형자산":495833333,"자산총계":509178667,"차입금":415328473,"부채총계":415328473,"자본금":80000000,"이익잉여금":-1149806,"자본총계":78850194,"통장잔액":0},{"month":"2026-03","kwh":33150,"매출액":5469750,"운영비":1480000,"감가상각비":2083333,"영업이익":1906417,"이자비용":865268,"당기순이익":1041149,"원금상환":2343065,"원리금":3208333,"미지급이자":0,"현금":14126751,"유형자산":493750000,"자산총계":507876751,"차입금":412985408,"부채총계":412985408,"자본금":80000000,"이익잉여금":-108657,"자본총계":79891343,"통장잔액":0},{"month":"2026-04","kwh":37050,"매출액":6113250,"운영비":1480000,"감가상각비":2083333,"영업이익":2549917,"이자비용":860386,"당기순이익":1689530,"원금상환":2347947,"원리금":3208333,"미지급이자":0,"현금":15551668,"유형자산":491666667,"자산총계":507218335,"차입금":410637461,"부채총계":410637461,"자본금":80000000,"이익잉여금":1580874,"자본총계":81580874,"통장잔액":0},{"month":"2026-05","kwh":40950,"매출액":6756750,"운영비":1480000,"감가상각비":2083333,"영업이익":3193417,"이자비용":855495,"당기순이익":2337922,"원금상환":2352838,"원리금":3208333,"미지급이자":0,"현금":17620085,"유형자산":489583333,"자산총계":507203418,"차입금":408284623,"부채총계":408284623,"자본금":80000000,"이익잉여금":3918796,"자본총계":83918796,"통장잔액":0},{"month":"2026-06","kwh":37050,"매출액":6113250,"운영비":1480000,"감가상각비":2083333,"영업이익":2549917,"이자비용":850593,"당기순이익":1699324,"원금상환":2357740,"원리금":3208333,"미지급이자":0,"현금":19045002,"유형자산":487500000,"자산총계":506545002,"차입금":405926882,"부채총계":405926882,"자본금":80000000,"이익잉여금":5618120,"자본총계":85618120,"통장잔액":0},{"month":"2026-07","kwh":33150,"매출액":5469750,"운영비":1480000,"감가상각비":2083333,"영업이익":1906417,"이자비용":845681,"당기순이익":1060736,"원금상환":2362652,"원리금":3208333,"미지급이자":0,"현금":19826419,"유형자산":485416667,"자산총계":505243086,"차입금":403564230,"부채총계":403564230,"자본금":80000000,"이익잉여금":6678855,"자본총계":86678855,"통장잔액":0},{"month":"2026-08","kwh":37050,"매출액":6113250,"운영비":1480000,"감가상각비":2083333,"영업이익":2549917,"이자비용":840759,"당기순이익":1709158,"원금상환":2367574,"원리금":3208333,"미지급이자":0,"현금":21251336,"유형자산":483333333,"자산총계":504584669,"차입금":401196656,"부채총계":401196656,"자본금":80000000,"이익잉여금":8388013,"자본총계":88388013,"통장잔액":0},{"month":"2026-09","kwh":35100,"매출액":5791500,"운영비":1480000,"감가상각비":2083333,"영업이익":2228167,"이자비용":835826,"당기순이익":1392340,"원금상환":2372507,"원리금":3208333,"미지급이자":0,"현금":22354503,"유형자산":481250000,"자산총계":503604503,"차입금":398824150,"부채총계":398824150,"자본금":80000000,"이익잉여금":9780353,"자본총계":89780353,"통장잔액":0},{"month":"2026-10","kwh":33150,"매출액":5469750,"운영비":1480000,"감가상각비":2083333,"영업이익":1906417,"이자비용":830884,"당기순이익":1075533,"원금상환":2377449,"원리금":3208333,"미지급이자":0,"현금":23135920,"유형자산":479166667,"자산총계":502302587,"차입금":396446700,"부채총계":396446700,"자본금":80000000,"이익잉여금":10855886,"자본총계":90855886,"통장잔액":0},{"month":"2026-11","kwh":27300,"매출액":4504500,"운영비":1480000,"감가상각비":2083333,"영업이익":941167,"이자비용":825931,"당기순이익":115236,"원금상환":2382402,"원리금":3208333,"미지급이자":0,"현금":22952087,"유형자산":477083333,"자산총계":500035420,"차입금":394064298,"부채총계":394064298,"자본금":80000000,"이익잉여금":10971122,"자본총계":90971122,"통장잔액":0},{"month":"2026-12","kwh":29250,"매출액":4826250,"운영비":1480000,"감가상각비":2083333,"영업이익":1262917,"이자비용":820967,"당기순이익":441949,"원금상환":2387366,"원리금":3208333,"미지급이자":0,"현금":23090004,"유형자산":475000000,"자산총계":498090004,"차입금":391676932,"부채총계":391676932,"자본금":80000000,"이익잉여금":11413072,"자본총계":91413072,"통장잔액":0}],"cumulative":{"월수":12,"기간":"2026-01 ~ 2026-12","발전량":390000,"매출액":64350000,"운영비":17760000,"감가상각비":25000000,"영업이익":21590000,"이자비용":10176928,"당기순이익":11413072,"원리금":38499996,"원금상환":28323068,"현금":23090004,"유형자산":475000000,"자산총계":498090004,"차입금":391676932,"미지급이자":0,"부채총계":391676932,"자본금":80000000,"이익잉여금":11413072,"자본총계":91413072,"대차차액":15000000}},"findings":[{"급":"high","제목":"부채비율 428%","한줄":"자본 대비 차입이 지나치게 큽니다.","설명":"조기상환 재원을 배당보다 앞세우고, 추가 출자·마을기금 증자를 총회에 올리세요.","근거":["배당"]},{"급":"mid","제목":"내부유보 17.7% (권고 30~50%)","한줄":"초기 5년은 수익의 30~50%를 쌓아야 6년차 수지 마이너스를 넘깁니다.","설명":"행안부 계산으로 연매출 2억 기준 6년차에 약 400만원 마이너스가 납니다. 지금 배당을 늘리면 그때 갚을 곳이 없습니다.","근거":["적립","배당"]}]},"finbase":{"village_id":0,"asset_cost":500000000,"useful_life":20,"loan_principal":420000000,"loan_rate":0.025,"equity":80000000,"opening_cash":15000000,"note":"체험 예시 — 해남 3일차 교안 가상 조합","updated_at":"2026-11-25T00:00:00+09:00","updated_by":0},"dist":{"ok":true,"solve":{"이미_가능":false,"필요조치":[{"항목":"수선충당 요율","값":"5.8%","확정여부":"총회 의결로 정할 수 있음"}],"적용":{"subsidy_rate":0.0,"policy_term":19,"repair_rate":0.058},"기준안":{"사업기간_운영가능":false,"첫_부도연차":12,"최저_운전자금":-4426839,"최저DSCR":1.16,"손익분기_연매출":38728035,"현재_연매출":64350000,"감당가능_연원리금":46590000,"현재_연원리금":28039458,"필요_수선충당률":0.0532,"현재_수선충당률":0.04}},"plan":{"village_id":14,"village_name":"햇살마을협동조합(체험 예시)","capacity":"300 kW","policy":{"policy_rate":0.025,"subsidy_rate":0.0,"policy_grace":1,"policy_term":19,"local_rate":0.045,"local_term":10,"om_rate":0.06,"ins_rate":0.02,"sys_rate":0.02,"land_rate":0.0,"tax_rate":0.01,"labor_month":0,"repair_rate":0.058,"work_cap_months":3,"legal_reserve":0.1,"biz_share":0.6,"degrade":0.005,"opex_infl":0.02,"major_year":12,"major_rate":0.08,"village_id":14,"policy_loan":420000000,"local_loan":0,"updated_at":null},"실적월":12,"연매출기준":64350000,"연실비기준":17760000,"일회성비용":0,"실부담금리":0.025,"정책융자원리금":28039458,"자부담융자원리금":0,"years":[{"연차":1,"매출":64350000,"원리금":10500000,"운영실비":17760000,"①원리금":10500000,"①부족":0,"②운영관리비":24709800,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3732300,"운전자금적립":3217500,"법정적립금":2914020,"③공동사업":15735708,"④배당":10490472,"대수선":0,"수선적립잔액":3732300,"운전자금잔액":3217500,"DSCR":4.44,"판정":"정상"},{"연차":2,"매출":64028250,"원리금":28039458,"운영실비":18115200,"①원리금":28039458,"①부족":0,"②운영관리비":23140138,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3713638,"운전자금적립":1311300,"법정적립금":1284865,"③공동사업":6938273,"④배당":4625515,"대수선":0,"수선적립잔액":7445938,"운전자금잔액":4528800,"DSCR":1.64,"판정":"정상"},{"연차":3,"매출":63708109,"원리금":28039458,"운영실비":18477504,"①원리금":28039458,"①부족":0,"②운영관리비":22263150,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3695070,"운전자금적립":90576,"법정적립금":1340550,"③공동사업":7238970,"④배당":4825980,"대수선":0,"수선적립잔액":11141008,"운전자금잔액":4619376,"DSCR":1.61,"판정":"정상"},{"연차":4,"매출":63389568,"원리금":28039458,"운영실비":18847054,"①원리금":28039458,"①부족":0,"②운영관리비":22616037,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3676595,"운전자금적립":92388,"법정적립금":1273407,"③공동사업":6876400,"④배당":4584266,"대수선":0,"수선적립잔액":14817603,"운전자금잔액":4711764,"DSCR":1.59,"판정":"정상"},{"연차":5,"매출":63072620,"원리금":28039458,"운영실비":19223995,"①원리금":28039458,"①부족":0,"②운영관리비":22976442,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3658212,"운전자금적립":94235,"법정적립금":1205672,"③공동사업":6510629,"④배당":4340419,"대수선":0,"수선적립잔액":18475815,"운전자금잔액":4805999,"DSCR":1.56,"판정":"정상"},{"연차":6,"매출":62757257,"원리금":28039458,"운영실비":19608475,"①원리금":28039458,"①부족":0,"②운영관리비":23344516,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3639921,"운전자금적립":96120,"법정적립금":1137328,"③공동사업":6141573,"④배당":4094382,"대수선":0,"수선적립잔액":22115736,"운전자금잔액":4902119,"DSCR":1.54,"판정":"정상"},{"연차":7,"매출":62443471,"원리금":28039458,"운영실비":20000645,"①원리금":28039458,"①부족":0,"②운영관리비":23720408,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3621721,"운전자금적립":98042,"법정적립금":1068360,"③공동사업":5769146,"④배당":3846098,"대수선":0,"수선적립잔액":25737457,"운전자금잔액":5000161,"DSCR":1.51,"판정":"정상"},{"연차":8,"매출":62131254,"원리금":28039458,"운영실비":20400657,"①원리금":28039458,"①부족":0,"②운영관리비":24104274,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3603613,"운전자금적립":100003,"법정적립금":998752,"③공동사업":5393262,"④배당":3595508,"대수선":0,"수선적립잔액":29341070,"운전자금잔액":5100164,"DSCR":1.49,"판정":"정상"},{"연차":9,"매출":61820597,"원리금":28039458,"운영실비":20808671,"①원리금":28039458,"①부족":0,"②운영관리비":24496269,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3585595,"운전자금적립":102004,"법정적립금":928487,"③공동사업":5013830,"④배당":3342553,"대수선":0,"수선적립잔액":32926665,"운전자금잔액":5202168,"DSCR":1.46,"판정":"정상"},{"연차":10,"매출":61511494,"원리금":28039458,"운영실비":21224844,"①원리금":28039458,"①부족":0,"②운영관리비":24896554,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3567667,"운전자금적립":104043,"법정적립금":857548,"③공동사업":4630760,"④배당":3087174,"대수선":0,"수선적립잔액":36494332,"운전자금잔액":5306211,"DSCR":1.44,"판정":"정상"},{"연차":11,"매출":61203937,"원리금":28039458,"운영실비":21649341,"①원리금":28039458,"①부족":0,"②운영관리비":25305293,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3549828,"운전자금적립":106124,"법정적립금":785919,"③공동사업":4243960,"④배당":2829307,"대수선":0,"수선적립잔액":40044160,"운전자금잔액":5412335,"DSCR":1.41,"판정":"정상"},{"연차":12,"매출":60897917,"원리금":28039458,"운영실비":22082328,"①원리금":28039458,"①부족":0,"②운영관리비":25722654,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3532079,"운전자금적립":108247,"법정적립금":713581,"③공동사업":3853335,"④배당":2568890,"대수선":40000000,"수선적립잔액":3576239,"운전자금잔액":5520582,"DSCR":1.38,"판정":"정상"},{"연차":13,"매출":60593428,"원리금":28039458,"운영실비":22523974,"①원리금":28039458,"①부족":0,"②운영관리비":26148805,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3514419,"운전자금적립":110412,"법정적립금":640516,"③공동사업":3458789,"④배당":2305859,"대수선":0,"수선적립잔액":7090658,"운전자금잔액":5630994,"DSCR":1.36,"판정":"정상"},{"연차":14,"매출":60290460,"원리금":28039458,"운영실비":22974454,"①원리금":28039458,"①부족":0,"②운영관리비":26583920,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3496847,"운전자금적립":112619,"법정적립금":566708,"③공동사업":3060224,"④배당":2040150,"대수선":0,"수선적립잔액":10587505,"운전자금잔액":5743613,"DSCR":1.33,"판정":"정상"},{"연차":15,"매출":59989008,"원리금":28039458,"운영실비":23433943,"①원리금":28039458,"①부족":0,"②운영관리비":27028178,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3479362,"운전자금적립":114873,"법정적립금":492137,"③공동사업":2657541,"④배당":1771694,"대수선":0,"수선적립잔액":14066867,"운전자금잔액":5858486,"DSCR":1.3,"판정":"정상"},{"연차":16,"매출":59689063,"원리금":28039458,"운영실비":23902622,"①원리금":28039458,"①부족":0,"②운영관리비":27481757,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3461966,"운전자금적립":117169,"법정적립금":416785,"③공동사업":2250638,"④배당":1500425,"대수선":0,"수선적립잔액":17528833,"운전자금잔액":5975655,"DSCR":1.28,"판정":"정상"},{"연차":17,"매출":59390618,"원리금":28039458,"운영실비":24380674,"①원리금":28039458,"①부족":0,"②운영관리비":27944843,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3444656,"운전자금적립":119514,"법정적립금":340632,"③공동사업":1839411,"④배당":1226273,"대수선":0,"수선적립잔액":20973489,"운전자금잔액":6095169,"DSCR":1.25,"판정":"정상"},{"연차":18,"매출":59093665,"원리금":28039458,"운영실비":24868288,"①원리금":28039458,"①부족":0,"②운영관리비":28417623,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3427433,"운전자금적립":121903,"법정적립금":263658,"③공동사업":1423755,"④배당":949170,"대수선":0,"수선적립잔액":24400922,"운전자금잔액":6217072,"DSCR":1.22,"판정":"정상"},{"연차":19,"매출":58798196,"원리금":28039458,"운영실비":25365653,"①원리금":28039458,"①부족":0,"②운영관리비":28900290,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3410295,"운전자금적립":124341,"법정적립금":185845,"③공동사업":1003562,"④배당":669041,"대수선":0,"수선적립잔액":27811217,"운전자금잔액":6341413,"DSCR":1.19,"판정":"정상"},{"연차":20,"매출":58504205,"원리금":28039458,"운영실비":25872966,"①원리금":28039458,"①부족":0,"②운영관리비":29393039,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3393244,"운전자금적립":126829,"법정적립금":107171,"③공동사업":578722,"④배당":385815,"대수선":0,"수선적립잔액":31204461,"운전자금잔액":6468242,"DSCR":1.16,"판정":"정상"}],"누적":{"매출":1227663117,"①원리금":543249702,"②운영관리비":509193990,"③공동사업":94618488,"④배당":63078991,"법정적립금":17521941},"판정":{"사업기간_운영가능":true,"첫_부도연차":null,"최저_운전자금":3217500,"최저DSCR":1.16,"손익분기_연매출":38728035,"현재_연매출":64350000,"감당가능_연원리금":46590000,"현재_연원리금":28039458,"필요_수선충당률":0.0532,"현재_수선충당률":0.058},"대안":[]},"findings":[{"급":"low","제목":"사업기간 20년 내내 발전수익으로 감당된다","한줄":"최저 DSCR 1.16 · 최저 운전자금 3,217,500원.","설명":"우선순위대로 채우고 남는 것만 배당으로 갑니다. 이 순서를 총회 의결로 못 박아 두세요.","근거":["배분","배당"]},{"급":"mid","제목":"이차보전을 안 넣고 계산했다","한줄":"정책융자 실부담 금리 2.50% 그대로입니다.","설명":"전남광주 민심정책은 협동조합 정책자금 2.5% 이차보전을 추진하고 있습니다(확정 아님). 적용되면 원리금이 크게 줄어드니, 확정 여부를 지자체에 확인하고 화면에서 켜 보세요.","근거":["배분"]},{"급":"mid","제목":"최저 DSCR 1.16","한줄":"발전량이 나쁜 해가 한 번 오면 바로 빠듯해집니다.","설명":"수선충당과 운전자금을 먼저 채우고, 배당은 그 뒤 남는 것으로만 하세요.","근거":["적립","배당"]}]}};
+function _isDemoUser(){ const u = currentUser(); return !!(u && !u.unified && !u.preview); }
+const DEMO_FIN_NOTE = `<div class="card" style="background:#FFF7E0;border:1px solid #EAD9A0;margin-bottom:14px;padding:10px 14px;font-size:13.5px;">
+  🌱 <b>체험 예시 값</b> — 가상 조합(300kW, 총사업비 5억 원, 출자금 8,000만 원, 융자 4.2억 원 연 2.5%, 연 39만 kWh)으로 서버가 계산한 화면입니다. 저장은 되지 않습니다. 우리 조합 숫자로 보려면 가입 후 로그인하세요.</div>`;
+let _FIN = {stat:null, base:null, list:null, all:null, 때:null, 로딩:false, 실데이터:false, 예시:false};
 
 async function finLoad(page, force){
   if(_FIN.로딩) return;
@@ -5466,6 +5492,9 @@ async function finLoad(page, force){
       if(ls.ok) _FIN.list = ls.items || [];
     }
   }catch(e){ /* 서버 미연결 */ }
+  if(!_FIN.stat && _isDemoUser()){
+    _FIN.stat = DEMO_FINDIST.fin; _FIN.base = DEMO_FINDIST.finbase; _FIN.list = _FIN.list || []; _FIN.예시 = true;
+  }
   _FIN.때 = new Date().toISOString();
   _FIN.로딩 = false;
   const main = document.getElementById('appMain');
@@ -5622,6 +5651,7 @@ function memFinStat(){
       <h1>📊 재무제표·컨설팅</h1>
       <p class="sec-desc">올린 월별 실적과 아래 기초값으로 <b>손익계산서·재무상태표</b>를 만듭니다. 금액은 서버가 계산합니다.</p>
     </div>
+    ${_FIN.예시 ? DEMO_FIN_NOTE : ''}
 
     <div class="card">
       <div class="card-title"><h3 class="serif">⚙️ 재무제표 기초값</h3>
@@ -5879,12 +5909,138 @@ async function distLoad(force){
       if(j.ok){ _DIST.plan = j.plan; _DIST.solve = j.solve; _DIST.findings = j.findings; }
     }
   }catch(e){}
+  if(!_DIST.plan && _isDemoUser()){
+    const d = DEMO_FINDIST.dist; _DIST.plan = d.plan; _DIST.solve = d.solve; _DIST.findings = d.findings; _DIST.예시 = true;
+  }
   _DIST.때 = new Date().toISOString();
   _DIST.로딩 = false;
   const main = document.getElementById('appMain');
   if(main && currentRoute() === 'mem/dist') main.innerHTML = renderMemberPage('dist');
 }
 function distRefresh(){ _DIST.때 = null; distLoad(true); toast('다시 계산하는 중입니다.'); }
+
+/* 2026-11-25 🧮 잉여금 처분 계산 — 결산상 잉여금(장부)을 법 순서대로 나눈다. 브라우저 안 계산만, 저장·서버 호출 없음(체험 모드에서도 됨).
+   근거: 협동조합 기본법 제50조(법정적립 10% 이상, 출자금 납입총액 3배까지, 손실 보전·해산 외 사용 금지)·제51조(손실 보전 순서, 배당 한도)
+         제97조(사회적 30% 이상)·제98조(사회적 배당 불가, 남은 잉여금 임의적립) · 행안부 정관 예시문 제27조의3·제28조·제72조 */
+const SP_DEFAULT = {net:1000, prior:0, type:'일반', equity:8000, legalSum:0, rate:10,
+  items:[['시설 유지보수·교체 적립',30],['마을공동기금',20],['마을복지·장학 적립',20],['',0]], free:0, divUse:150, divEq:120};
+function memSurplus(){
+  const d = SP_DEFAULT;
+  const inp = (id, v, w, extra) => `<input class="input" id="${id}" type="number" value="${v}" style="width:${w||110}px;" oninput="spCalc()" ${extra||''}>`;
+  return `
+    <div class="sec-head">
+      <h1>🧮 잉여금 처분 계산</h1>
+      <p class="sec-desc">결산이 끝나 <b>처분 전 잉여금</b>이 나오면, 법과 정관이 정한 <b>순서</b>대로 나눕니다.
+        손실 보전 → 법정적립금 → 정관 적립 → 임의적립금 → 배당 → 이월. 숫자는 이 화면 안에서만 계산하고 저장하지 않습니다.</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><h3 class="serif">⚙️ 넣을 값 (만 원)</h3><span class="badge badge-mute">기본값 = 해남 교육 가상 조합</span></div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;">
+        <label style="display:flex;gap:6px;align-items:center;">당기순이익 ${inp('sp-net', d.net)}</label>
+        <label style="display:flex;gap:6px;align-items:center;">전기 이월(손실이면 -) ${inp('sp-prior', d.prior, 100)}</label>
+        <label style="display:flex;gap:6px;align-items:center;">조합 유형
+          <select class="input" id="sp-type" style="width:130px;" onchange="spTypeChange()"><option>일반</option><option>사회적</option></select></label>
+        <label style="display:flex;gap:6px;align-items:center;">출자금 납입총액 ${inp('sp-eq', d.equity)}</label>
+        <label style="display:flex;gap:6px;align-items:center;">지금까지 쌓은 법정적립금 ${inp('sp-lsum', d.legalSum, 100)}</label>
+        <label style="display:flex;gap:6px;align-items:center;">법정적립 비율(정관) ${inp('sp-rate', d.rate, 70, 'min="0" max="100"')} %</label>
+      </div>
+      <div class="text-mute" style="font-size:12.5px;margin:10px 0 6px;">정관 적립 — 우리 정관 제27조의3(예시문 「100분의 OO」) 비율. 법정적립을 뺀 나머지에 곱합니다.</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px 18px;">
+        ${d.items.map(([n, r], i) => `<label style="display:flex;gap:6px;align-items:center;">
+          <input class="input" id="sp-in${i}" value="${n}" placeholder="항목 이름" style="width:170px;" oninput="spCalc()">
+          ${inp('sp-ir' + i, r, 64, 'min="0" max="100"')} %</label>`).join('')}
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-top:10px;">
+        <label style="display:flex;gap:6px;align-items:center;">임의적립(총회 결정) ${inp('sp-free', d.free, 64, 'min="0" max="100"')} %</label>
+        <label style="display:flex;gap:6px;align-items:center;">이용실적 배당 ${inp('sp-du', d.divUse, 90)}</label>
+        <label style="display:flex;gap:6px;align-items:center;">출자 배당 ${inp('sp-de', d.divEq, 90)}</label>
+      </div>
+    </div>
+    <div id="sp-out" class="mt-20">${spResultHtml(spRead(true))}</div>
+    <div class="card mt-20" style="background:var(--paper-soft);box-shadow:none;">
+      <div class="card-title"><h3 class="serif">읽는 법</h3></div>
+      <ul style="margin:0;padding-left:18px;font-size:13.5px;line-height:1.8;">
+        <li>이 계산은 <b>장부상 잉여금</b>을 나눈 것입니다. 배당·지원금은 현금으로 나가므로 통장 잔액과 다음 해 운영자금(이자·보험료 등)을 따로 확인하세요 — 「⚡ 발전·정산·배당 → 수익금 배분 전략」.</li>
+        <li>법정적립금은 손실 보전과 해산 때 말고는 쓸 수 없습니다(법 제50조③).</li>
+        <li>정관 적립 비율을 바꾸려면 정관 변경(총조합원 과반수 출석, 출석 3분의 2 이상 찬성 — 법 제29조②)과 마을총회 의견수렴(정관 예시 제12조)이 필요합니다.</li>
+        <li>나이·거주기간에 따른 주민 지원은 배당이 아니라 복지사업으로 설계합니다(정관 사업 근거·운영 규정·총회 의결). 결과는 결산 보고서와 정기총회 회의록(「④ 산출물 만들기」)으로 남깁니다.</li>
+        <li>잉여금의 범위(당기분인지, 이월분 포함인지) 같은 세부 판단은 실제 결산 때 세무대리인·회계 담당과 확인하세요.</li>
+      </ul>
+    </div>`;
+}
+function spTypeChange(){
+  const t = document.getElementById('sp-type').value, r = document.getElementById('sp-rate');
+  if(t === '사회적' && Number(r.value) < 30) r.value = 30;
+  if(t === '일반' && Number(r.value) === 30) r.value = 10;
+  spCalc();
+}
+function spRead(useDefault){
+  const d = SP_DEFAULT;
+  const g = (id, dv) => { const el = document.getElementById(id); if(!el || useDefault) return dv; const v = Number(el.value); return isNaN(v) ? 0 : v; };
+  const gs = (id, dv) => { const el = document.getElementById(id); return (!el || useDefault) ? dv : el.value.trim(); };
+  return {net:g('sp-net', d.net), prior:g('sp-prior', d.prior), type:gs('sp-type', d.type), equity:g('sp-eq', d.equity),
+    legalSum:g('sp-lsum', d.legalSum), rate:g('sp-rate', d.rate),
+    items:d.items.map(([n, r], i) => [gs('sp-in' + i, n), g('sp-ir' + i, r)]).filter(([n, r]) => n || r),
+    free:g('sp-free', d.free), divUse:g('sp-du', d.divUse), divEq:g('sp-de', d.divEq)};
+}
+function spCalc(){ const o = document.getElementById('sp-out'); if(o) o.innerHTML = spResultHtml(spRead(false)); }
+function spResultHtml(v){
+  const f = n => (Math.round(n * 10) / 10).toLocaleString('ko-KR') + ' 만 원';
+  const social = v.type === '사회적', minRate = social ? 30 : 10;
+  const warn = [], ok = [];
+  const rows = [];
+  const before = v.net + v.prior;
+  rows.push(['', '처분 전 잉여금', before, '당기순이익 ' + f(v.net) + ' + 전기 이월 ' + f(v.prior)]);
+  if(v.net <= 0){
+    warn.push('당기 잉여금이 없습니다. 손실은 미처분이월금 → 임의적립금 → 법정적립금 순으로 보전하고, 남으면 다음 해로 넘깁니다(법 제51조①). 법정적립·배당은 하지 않습니다.');
+    return spTable(rows, warn, ok);
+  }
+  const loss = v.prior < 0 ? Math.min(-v.prior, v.net) : 0;
+  if(loss) rows.push(['0', '이월 손실 보전', loss, '넘어온 손실을 먼저 메운다']);
+  const base = v.net - loss;
+  let legal = base * v.rate / 100;
+  const room = Math.max(0, v.equity * 3 - v.legalSum);
+  if(v.rate < minRate) warn.push('법정적립 비율 ' + v.rate + '%는 법이 정한 최소(' + (social ? '사회적협동조합 30%' : '일반협동조합 10%') + ')보다 낮습니다(법 ' + (social ? '제97조①' : '제50조①') + ').');
+  if(v.equity > 0 && legal > room){ legal = room; ok.push('법정적립금이 출자금 납입총액의 3배(' + f(v.equity * 3) + ')에 닿아 남은 ' + f(room) + '만 적립합니다(법 제50조①).'); }
+  rows.push(['1', '법정적립금 (' + v.rate + '%)', legal, social ? '사회적 30% 이상 · 법 제97조①' : '일반 10% 이상 · 법 제50조①']);
+  const avail = Math.max(0, before - legal);
+  rows.push(['', '법정적립 뒤 남은 금액', avail, '정관 적립·임의적립의 기준액']);
+  let used = 0;
+  const pct = v.items.reduce((a, [, r]) => a + r, 0) + v.free;
+  if(pct > 100) warn.push('정관 적립과 임의적립 비율의 합이 ' + pct + '%로 100%를 넘습니다.');
+  v.items.forEach(([n, r]) => { const a = avail * r / 100; used += a; rows.push(['2', (n || '정관 적립') + ' (' + r + '%)', a, '정관 제27조의3']); });
+  const free = avail * v.free / 100; used += free;
+  if(v.free) rows.push(['3', '임의적립금 (' + v.free + '%)', free, '법 제50조② · 정관 제28조 — 적립 목적을 함께 정한다']);
+  let rest = avail - used;
+  const div = v.divUse + v.divEq;
+  if(social){
+    if(div > 0) warn.push('사회적협동조합은 조합원에게 배당할 수 없습니다(법 제98조②). 남은 금액은 임의적립금으로 적립합니다. 주민 환원은 복지사업으로 하세요.');
+    rows.push(['3', '남은 잉여금 → 임의적립금', Math.max(rest, 0), '사회적협동조합 · 법 제98조②']);
+    rest = 0;
+  } else {
+    rows.push(['4', '이용실적 배당', v.divUse, '배당 총액의 50% 이상 · 법 제51조③']);
+    rows.push(['4', '출자 배당', v.divEq, '납입출자금의 10% 이하 · 법 제51조③']);
+    if(div > rest + 0.05) warn.push('배당 합계 ' + f(div) + '가 적립 뒤 남은 금액 ' + f(Math.max(rest, 0)) + '보다 많습니다.');
+    if(div > 0 && v.divUse < div * 0.5 - 0.05) warn.push('이용실적 배당(' + f(v.divUse) + ')이 배당 총액의 50%(' + f(div * 0.5) + ')보다 적습니다(법 제51조③).');
+    if(v.equity > 0 && v.divEq > v.equity * 0.1 + 0.05) warn.push('출자 배당(' + f(v.divEq) + ')이 납입출자금의 10%(' + f(v.equity * 0.1) + ')를 넘습니다(법 제51조③).');
+    if(div > 0) ok.push('배당은 맨 마지막입니다 — 법정적립·정관 적립을 먼저 채웠는지 확인하세요. 무엇을 「이용실적」으로 볼지는 규약으로 정합니다(정관 예시 제72조③).');
+    rest -= div;
+  }
+  rows.push(['5', '다음 회계연도로 이월', Math.max(rest, 0), '총회 결의 · 정관 예시 제72조④']);
+  if(rest < -0.05) warn.push('나눈 금액이 처분 전 잉여금보다 ' + f(-rest) + ' 많습니다. 비율이나 배당을 줄이세요.');
+  return spTable(rows, warn, ok);
+}
+function spTable(rows, warn, ok){
+  const f = n => (Math.round(n * 10) / 10).toLocaleString('ko-KR');
+  return `<div class="card">
+    <div class="card-title"><h3 class="serif">📋 처분 결과</h3><span class="badge badge-info">총회 의결 사항 — 잉여금처분안</span></div>
+    <table class="tbl"><thead><tr><th style="width:44px;">순서</th><th>항목</th><th style="text-align:right;">금액(만 원)</th><th>근거</th></tr></thead>
+    <tbody>${rows.map(([n, t, a, g]) => `<tr${n === '' ? ' style="background:var(--paper-soft);"' : ''}><td style="text-align:center;">${n}</td><td>${n === '' ? '<b>' + escapeHtml(t) + '</b>' : escapeHtml(t)}</td>
+      <td style="text-align:right;">${f(a)}</td><td class="text-mute" style="font-size:12.5px;">${escapeHtml(g)}</td></tr>`).join('')}</tbody></table>
+    ${warn.map(w => `<div style="margin-top:8px;padding:8px 12px;border-radius:6px;background:#FDECEA;color:#8a2d22;font-size:13.5px;">⚠ ${escapeHtml(w)}</div>`).join('')}
+    ${ok.map(w => `<div style="margin-top:8px;padding:8px 12px;border-radius:6px;background:var(--paper-soft);font-size:13.5px;">ⓘ ${escapeHtml(w)}</div>`).join('')}
+  </div>`;
+}
 
 function memDist(){
   const P = _DIST.plan;
@@ -5901,6 +6057,7 @@ function memDist(){
       <p class="sec-desc">발전수익을 <b>순위대로</b> 배분합니다. 고정 비율표를 쓰지 않습니다 —
         조합마다 융자 조건이 달라 같은 비율로는 어떤 조합이 이자도 못 냅니다.</p>
     </div>
+    ${_DIST.예시 ? DEMO_FIN_NOTE : ''}
 
     <div class="card" style="border-left:4px solid var(--primary);">
       <div class="card-title"><h3 class="serif">배분 순위</h3><span class="badge badge-primary">총회 의결 사항</span></div>
@@ -11254,8 +11411,8 @@ const DOC_PROMPTS = {
   '조합 정관': v => '다음 정보로 햇빛소득마을 협동조합 정관 전문 초안을 협동조합기본법에 맞게 작성해주세요. 공고문상 정관 5대 필수요건(재생에너지사업 명시, 수익배분, 의사결정, 투명성, 배분방식)을 반드시 반영하세요.\n조합명: ' + (v.coop_name||'') + '\n주 사무소: ' + (v.address||'') + '\n사업 목적: ' + (v.purpose||'') + '\n예상 조합원 수: ' + (v.members||'') + '명\n출자 1좌 금액: ' + (v.share||'') + '원',
   '창립총회 회의록': v => '다음 정보로 협동조합 창립총회 회의록을 협동조합기본법에 맞는 법정 형식(성원 확인, 안건별 의결, 서명·날인란)으로 작성해주세요.\n조합명: ' + (v.coop_name||'') + '\n일시: ' + (v.date||'') + '\n장소: ' + (v.place||'') + '\n참석: ' + (v.attendees||'') + '명\n안건:\n' + (v.agenda||''),
   '사업계획서': v => '다음 정보를 바탕으로 2026년 햇빛소득마을 사업계획서(서식3) 초안을 작성해주세요.\n조합명: ' + (v.coop_name||'') + '\n사업연도: ' + (v.year||'') + '\n발전설비 용량: ' + (v.capacity||'') + 'kW\n예상 사업비: ' + (v.budget||'') + '억원\n사업 요약: ' + (v.summary||'') + '\n\n서식3의 6개 항목(1.협동조합현황 2.마을공동체현황 3.협동조합세부현황(의사결정·운영·수익배분) 4.태양광발전사업추진계획(부지·설치비·기자재) 5.태양광발전사업관리계획 6.햇빛소득마을사업관리계획(수익활용·회계·관리자)) 순서로 실무에서 바로 활용 가능한 수준으로 작성해주세요.',
-  '정기총회 회의록': v => '다음 정보로 협동조합 정기총회 회의록을 법정 형식으로 작성해주세요.\n조합명: ' + (v.coop_name||'') + '\n일시: ' + (v.date||'') + '\n회계연도: ' + (v.year||'') + '\n안건:\n' + (v.agenda||''),
-  '결산 보고서': v => '다음 정보로 협동조합 회계연도 결산 보고서를 작성해주세요. 수입·지출 총괄표, 유보금 적립, 감사 의견란을 포함하세요.\n조합명: ' + (v.coop_name||'') + '\n회계연도: ' + (v.year||'') + '\n매출: ' + (v.revenue||'') + '만원\n비용: ' + (v.expense||'') + '만원\n특이사항: ' + (v.note||''),
+  '정기총회 회의록': v => '다음 정보로 협동조합 정기총회 회의록을 법정 형식으로 작성해주세요.\n조합명: ' + (v.coop_name||'') + '\n일시: ' + (v.date||'') + '\n회계연도: ' + (v.year||'') + '\n안건:\n' + (v.agenda||'') + '\n서명란은 의장과 총회에서 선출한 조합원 3인 이상의 기명날인(협동조합 기본법 제30조②)으로 만드세요.',
+  '결산 보고서': v => '다음 정보로 협동조합 회계연도 결산 보고서를 작성해주세요. 수입·지출 총괄표, 유보금 적립, 감사 의견란을 포함하세요.\n조합명: ' + (v.coop_name||'') + '\n회계연도: ' + (v.year||'') + '\n매출: ' + (v.revenue||'') + '만원\n비용(법인세 등 포함): ' + (v.expense||'') + '만원\n조합 유형: ' + (v.coop_type||'일반') + '\n전기 이월 잉여금: ' + (v.prior||'0') + '만원\n법정적립 비율(정관): ' + (v.legal_rate||'') + '%\n정관 적립·임의적립: ' + (v.reserve||'') + '\n특이사항: ' + (v.note||'') + '\n잉여금 처분(안)은 협동조합 기본법 순서(손실 보전 → 법정적립금[일반 10% 이상·사회적 30% 이상] → 정관 적립 → 임의적립금 → 배당[이용실적 50% 이상·출자 배당 10% 이하, 사회적협동조합은 배당 불가] → 이월)로 쓰고, 정관 비율을 모르면 빈칸으로 두세요.',
   '이사회 회의록': v => '다음 정보로 협동조합 이사회 회의록을 작성해주세요.\n조합명: ' + (v.coop_name||'') + '\n일시: ' + (v.date||'') + '\n참석 이사: ' + (v.attendees||'') + '\n안건: ' + (v.agenda||''),
   '발전사업 허가 신청서': v => '다음 정보로 전기사업법상 발전사업 허가 신청서 초안과 필요 첨부서류 목록을 작성해주세요.\n신청인(조합): ' + (v.coop_name||'') + '\n설비 용량: ' + (v.capacity||'') + 'kW\n설비 위치: ' + (v.location||'') + '\n설비 종류: ' + (v.kind||'') + '\n공사 예정일: ' + (v.start||''),
   '분양 계약서': v => '다음 정보로 햇빛소득마을 조합원 분양(출자) 계약서 초안을 작성해주세요. 마을(조합원)에게 불리한 조항이 없도록 균형 있게 작성하세요.\n조합명: ' + (v.coop_name||'') + '\n총 분양 좌수: ' + (v.total_share||'') + '\n좌당 금액: ' + (v.unit_price||'') + '원\n분양 기간: ' + (v.term||''),
@@ -11394,8 +11551,12 @@ const DOC_FIELDS = {
     {k:'coop_name', label:'조합 이름', req:true},
     {k:'year',      label:'회계연도', type:'number', ph:'예: 2025', req:true},
     {k:'revenue',   label:'매출 (만원)', type:'number', ph:'예: 12500'},
-    {k:'expense',   label:'비용 (만원)', type:'number', ph:'예: 4200'},
-    {k:'note',      label:'특이사항', type:'textarea', ph:'예: 초기 설비 감가상각 반영, 유보금 30% 적립'},
+    {k:'expense',   label:'비용 (만원, 법인세 등 포함)', type:'number', ph:'예: 4200'},
+    {k:'coop_type', label:'조합 유형 (일반 / 사회적)', ph:'일반'},
+    {k:'prior',     label:'전기 이월 잉여금 (만원, 이월 손실이면 앞에 -)', type:'number', ph:'0'},
+    {k:'legal_rate',label:'법정적립 비율 (%) — 우리 정관', type:'number', ph:'일반 10 이상 · 사회적 30 이상'},
+    {k:'reserve',   label:'정관 적립·임의적립 (우리 정관 비율·총회 결정)', type:'textarea', ph:'예: 시설 유지보수·교체 30%, 마을공동기금 20%, 마을복지·장학 20% (법정적립 뒤 남은 금액 기준)'},
+    {k:'note',      label:'특이사항', type:'textarea', ph:'예: 초기 설비 감가상각 반영'},
   ],
   '이사회 회의록': [
     {k:'coop_name', label:'조합 이름', req:true},
@@ -11448,6 +11609,39 @@ function startDoc(name){
     <button class="btn btn-primary" onclick="generateDoc('${escapeJs(name)}')">✨ AI로 초안 생성</button>
   `;
   showDyn({title:name + ' 생성', sub:'', body:bodyHtml, foot, size:'lg'});
+}
+
+/* 2026-11-25 결산 보고서 잉여금 처분(안) — 법정적립 비율·임의적립을 정관 값으로(옛 「임의적립 20%」 고정 문구 대체).
+   근거: 협동조합 기본법 제50조(일반 10% 이상)·제97조(사회적 30% 이상)·제51조③(배당 한도)·제98조②(사회적 배당 불가) */
+function settleDisposalText(v){
+  const num = x => (x === '' || x == null || isNaN(Number(x))) ? null : Number(x);
+  const social = /사회/.test(v.coop_type || '');
+  const minRate = social ? 30 : 10;
+  const rev = num(v.revenue), exp = num(v.expense), prior = num(v.prior) || 0;
+  const net = (rev != null && exp != null) ? rev - exp : null;
+  let rate = num(v.legal_rate); const rateGiven = rate != null; if(!rateGiven) rate = minRate;
+  const f = n => Math.round(n).toLocaleString();
+  const L = [];
+  if(net == null){ L.push('・ 매출과 비용을 넣으면 처분 전 잉여금을 계산합니다.'); }
+  else {
+    const loss = prior < 0 ? Math.min(-prior, Math.max(net, 0)) : 0;
+    L.push('・ 처분 전 잉여금: ' + f(net + prior) + ' 만원 (당기순이익 ' + f(net) + ' + 전기 이월 ' + f(prior) + ')');
+    if(prior < 0) L.push('・ 이월 손실 보전: ' + f(loss) + ' 만원 (먼저 메운다)');
+    if(net <= 0){ L.push('・ 당기 잉여금이 없어 법정적립·배당을 하지 않습니다. 손실은 미처분이월금 → 임의적립금 → 법정적립금 순으로 보전합니다(법 제51조①).'); }
+    else {
+      const base = Math.max(net - loss, 0);
+      L.push('・ 법정적립금(' + rate + '%): ' + f(base * rate / 100) + ' 만원 — 출자금 납입총액의 3배가 될 때까지, ' + (social ? '사회적협동조합 30% 이상(법 제97조①)' : '일반협동조합 10% 이상(법 제50조①)'));
+      if(rate < minRate) L.push('  ⚠ 법이 정한 최소 비율(' + minRate + '%)보다 낮습니다. 정관과 법을 확인하세요.');
+      if(!rateGiven) L.push('  (법정적립 비율을 넣지 않아 법정 최소 ' + minRate + '%로 계산했습니다. 우리 정관 비율로 고쳐 쓰세요.)');
+      L.push('・ 정관 적립·임의적립: ' + (v.reserve ? escapeHtml(v.reserve) : '(우리 정관의 적립 비율과 총회가 정한 임의적립을 적는다)'));
+      L.push(social
+        ? '・ 조합원 배당: 하지 않음 — 사회적협동조합은 남은 잉여금을 임의적립금으로 적립한다(법 제98조②). 주민 환원은 복지사업으로.'
+        : '・ 조합원 배당: 정관·총회 결의로 — 이용실적 배당이 배당 총액의 50% 이상, 출자 배당은 납입출자금의 10% 이하(법 제51조③)');
+      L.push('・ 남은 금액: 다음 회계연도로 이월(총회 결의)');
+    }
+  }
+  L.push('* 처분 순서: 손실 보전 → 법정적립금 → 정관 적립 → 임의적립금 → 배당 → 이월. 「🧮 잉여금 처분 계산」 화면에서 금액을 나눠 볼 수 있습니다.');
+  return L.join('\n');
 }
 
 function generateDoc(name){
@@ -12025,9 +12219,14 @@ ${escapeHtml(v.agenda || '1. 전년도 결산 승인\n2. 당해년도 사업계�
 
       <h4>■ 의결</h4>
 각 안건은 참석 조합원 과반수의 찬성으로 원안대로 가결되다.
+(정관 변경·해산 등 특별 의결 안건은 총조합원 과반수 출석, 출석자 3분의 2 이상 찬성 — 법 제29조②)
+
+위 회의의 진행 상황과 결과가 사실과 다름없음을 확인하며, 의장과 총회에서 선출한 조합원 3인이 기명날인한다(협동조합 기본법 제30조②).
 
 작성일: ${today}
-의장: (인)  서기: (인)`;
+의장: (인)
+총회에서 선출한 조합원: (인)  (인)  (인)
+서기: (인)`;
 
     case '결산 보고서': return `
       <h3>${coop} ${escapeHtml(v.year || 'OOOO')}회계연도 결산 보고서</h3>
@@ -12037,10 +12236,8 @@ ${escapeHtml(v.agenda || '1. 전년도 결산 승인\n2. 당해년도 사업계�
 ・ 총비용: ${v.expense ? Number(v.expense).toLocaleString() : 'OOO'} 만원
 ・ 당기순이익: ${(v.revenue && v.expense) ? (Number(v.revenue)-Number(v.expense)).toLocaleString() : 'OOO'} 만원
 
-      <h4>2. 배당 및 유보</h4>
-・ 법정적립금: 당기순이익의 10%
-・ 임의적립금: 당기순이익의 20%
-・ 조합원 배당: 잔여 이익금
+      <h4>2. 잉여금 처분(안)</h4>
+${settleDisposalText(v)}
 
       <h4>3. 특이사항</h4>
 ${escapeHtml(v.note || '(특이사항 없음)')}
