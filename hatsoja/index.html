@@ -6770,6 +6770,7 @@ function memDocs(){
       <h1>문서 자동 생성</h1>
       <p class="sec-desc">필요한 문서를 선택하면 우리 마을 정보 기반으로 AI가 초안을 작성합니다.</p>
     </div>
+    ${docsReopenHtml()}
 
     <div class="card">
       <h3 class="serif">📁 문서 템플릿</h3>
@@ -10829,7 +10830,12 @@ function showDyn(opts){
   document.getElementById('dynFoot').style.display = opts.foot ? 'flex' : 'none';
   document.getElementById('dynModal').classList.add('on');
 }
-function closeDyn(){ document.getElementById('dynModal').classList.remove('on'); }
+function closeDyn(){
+  /* 11-26 이사장 지적: 문서 생성 중 창이 닫혀 작성하던 것이 사라졌다 — 작성 중이면 한 번 묻고, 닫아도 작성은 계속된다 */
+  if(_docGen.busy && document.getElementById('aiDocOut')
+     && !confirm('AI가 문서를 작성하는 중입니다.\n\n창을 닫아도 작성은 계속되고, 끝나면 「문서 자동 생성」 화면의 「방금 만든 문서 다시 열기」로 볼 수 있습니다.\n\n창을 닫을까요?')) return;
+  document.getElementById('dynModal').classList.remove('on');
+}
 
 /* ─── Document generation ─── */
 
@@ -11882,7 +11888,7 @@ ${HSJ_GONGGO}
 // /api/ai 스트리밍 호출. 서버가 키 미설정 등으로 JSON을 돌려주면 ok:false.
 async function callAIDoc(userContent, opts){
   const o = opts || {};
-  const el = o.targetEl || null;
+  const 칸 = () => o.targetId ? document.getElementById(o.targetId) : (o.targetEl || null);
   try{
     const res = await fetch('/api/ai', {
       method:'POST', headers:{'Content-Type':'application/json'},
@@ -11914,6 +11920,8 @@ async function callAIDoc(userContent, opts){
           const j = JSON.parse(dat);
           if(j.type === 'content_block_delta' && j.delta && j.delta.text){
             full += j.delta.text;
+            if(o.onText) o.onText(full);
+            const el = 칸();
             if(el){ el.textContent = full; el.scrollTop = el.scrollHeight; }
           }
           if(j.type === 'error' && j.error){
@@ -12196,32 +12204,84 @@ function generateDoc(name){
   }, 900);
 }
 
-async function generateDocAI(name, values){
-  document.getElementById('dynBody').innerHTML = `
+/* 작성 상태는 창 밖에 둔다 — 창을 닫거나 다른 창을 열어도 작성은 계속되고 결과는 _lastGenDoc 에 남는다 */
+const _docGen = {busy:false, name:'', text:''};
+function _docGenRunningHtml(name){
+  return `
     <p class="text-mute text-small" style="margin-bottom:12px;">
       <span class="spinner"></span> AI가 <strong>${escapeHtml(name)}</strong> 초안을 작성하고 있습니다. 내용이 아래에 실시간으로 표시됩니다.
+      <br>창을 닫아도 작성은 계속됩니다 — 「문서 자동 생성」 화면에서 다시 열 수 있습니다.
     </p>
-    <div class="doc-preview" id="aiDocOut" style="white-space:pre-wrap;min-height:120px;"></div>`;
-  document.getElementById('dynFoot').innerHTML = `<button class="btn btn-ghost" onclick="closeDyn()">닫기</button>`;
-
-  const r = await callAIDoc(buildDocPrompt(name, values), {maxTokens:3000, targetEl: document.getElementById('aiDocOut')});
-  const body = document.getElementById('dynBody');
-  if(!body || !document.getElementById('aiDocOut')) return; // 사용자가 모달을 닫음
-
-  if(!r.ok){
-    // AI 미연결(키 미설정)·오류 → 표준 서식 초안으로 폴백
-    showDocPreview(name, values, 'AI 연결이 아직 준비되지 않아(' + r.error + ') 표준 서식 기반 초안을 대신 제공합니다.');
-    return;
-  }
-  _lastGenDoc = {name, values, content: escapeHtml(r.text).replace(/\n/g,'<br>'), raw: r.text};
-  body.querySelector('p').innerHTML = '✓ AI가 초안을 작성했습니다. 아래 내용을 확인하고 필요 시 편집·다운로드하세요. <strong>초안은 검토 후 사용</strong>을 권장합니다 — 아래 [AI 검토받기]로 바로 이어집니다.';
-  document.getElementById('dynFoot').innerHTML = `
+    <div class="doc-preview" id="aiDocOut" style="white-space:pre-wrap;min-height:120px;">${escapeHtml(_docGen.text)}</div>`;
+}
+function _docResultFoot(name){
+  return `
     <button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
     <button class="btn btn-outline" onclick="startDoc('${escapeJs(name)}')">↻ 다시 생성</button>
     <button class="btn btn-outline" onclick="downloadStub('${escapeJs(name)}')">📥 다운로드</button>
     <button class="btn btn-outline" onclick="reviewFromDoc()">🔍 이 문서 AI 검토받기</button>
     <button class="btn btn-primary" onclick="saveDocStub('${escapeJs(name)}')">💾 저장</button>
   `;
+}
+function _showAiDocResult(){
+  const d = _lastGenDoc;
+  showDyn({title: d.name + ' 생성', sub:'', size:'lg',
+    body: `<p class="text-mute text-small" style="margin-bottom:12px;">✓ AI가 초안을 작성했습니다. 아래 내용을 확인하고 필요 시 편집·다운로드하세요. <strong>초안은 검토 후 사용</strong>을 권장합니다 — 아래 [AI 검토받기]로 바로 이어집니다.</p>
+      <div class="doc-preview" id="aiDocOut" style="white-space:pre-wrap;">${escapeHtml(d.raw)}</div>`,
+    foot: _docResultFoot(d.name)});
+}
+/* 「방금 만든 문서 다시 열기」 — 작성 중이면 진행 화면을, 끝났으면 결과를 다시 띄운다 */
+function reopenLastDoc(){
+  if(_docGen.busy){
+    showDyn({title: _docGen.name + ' 생성', sub:'', size:'lg', body: _docGenRunningHtml(_docGen.name),
+      foot: '<button class="btn btn-ghost" onclick="closeDyn()">닫기</button>'});
+    return;
+  }
+  if(!_lastGenDoc){ toast('아직 만든 문서가 없습니다.'); return; }
+  if(_lastGenDoc.raw) _showAiDocResult();
+  else showDocPreview(_lastGenDoc.name, _lastGenDoc.values, _lastGenDoc.note);
+}
+
+async function generateDocAI(name, values){
+  if(_docGen.busy && !confirm('「' + _docGen.name + '」를 아직 작성하는 중입니다. 새로 시작하면 그 결과는 버립니다. 새로 시작할까요?')) return;
+  const 차례 = (_docGen.seq = (_docGen.seq || 0) + 1);
+  _docGen.busy = true; _docGen.name = name; _docGen.text = '';
+  document.getElementById('dynBody').innerHTML = _docGenRunningHtml(name);
+  document.getElementById('dynFoot').innerHTML = `<button class="btn btn-ghost" onclick="closeDyn()">닫기</button>`;
+
+  let r;
+  try{
+    r = await callAIDoc(buildDocPrompt(name, values), {maxTokens:3000, targetId:'aiDocOut',
+      onText: t => { if(차례 === _docGen.seq) _docGen.text = t; }});
+  } finally {
+    if(차례 === _docGen.seq) _docGen.busy = false;
+  }
+  if(차례 !== _docGen.seq) return;   // 그사이 새 생성을 시작했다
+  const 보는중 = document.getElementById('dynModal').classList.contains('on') && document.getElementById('aiDocOut');
+
+  if(!r.ok){
+    // AI 미연결(키 미설정)·오류 → 표준 서식 초안으로 폴백
+    const note = 'AI 연결이 아직 준비되지 않아(' + r.error + ') 표준 서식 기반 초안을 대신 제공합니다.';
+    if(보는중) showDocPreview(name, values, note);
+    else { _lastGenDoc = {name, values, content: renderSampleDoc(name, values), note}; toast('「' + name + '」 초안이 준비됐습니다 — 문서 자동 생성 화면에서 다시 열 수 있습니다.'); refreshDocsBanner(); }
+    return;
+  }
+  _lastGenDoc = {name, values, content: escapeHtml(r.text).replace(/\n/g,'<br>'), raw: r.text};
+  if(보는중) _showAiDocResult();
+  else { toast('「' + name + '」 초안을 다 썼습니다 — 문서 자동 생성 화면의 「방금 만든 문서 다시 열기」로 보세요.'); refreshDocsBanner(); }
+}
+/* 문서 자동 생성 화면에 떠 있으면 다시 열기 띠만 새로 그린다 */
+function refreshDocsBanner(){
+  const box = document.getElementById('docsReopen');
+  if(box) box.outerHTML = docsReopenHtml();
+}
+function docsReopenHtml(){
+  if(!_docGen.busy && !_lastGenDoc) return '<div id="docsReopen"></div>';
+  const n = _docGen.busy ? _docGen.name : _lastGenDoc.name;
+  return `<div id="docsReopen" class="card" style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;">
+      <div>${_docGen.busy ? '<span class="spinner"></span> ' : '📄 '}<strong>${escapeHtml(n)}</strong> ${_docGen.busy ? '— AI가 작성하는 중입니다' : '— 방금 만든 초안이 있습니다'}</div>
+      <button class="btn btn-primary btn-sm" onclick="reopenLastDoc()">방금 만든 문서 다시 열기</button>
+    </div>`;
 }
 
 let _lastGenDoc = null;
@@ -12246,7 +12306,7 @@ function reviewFromDoc(){
 }
 
 function showDocPreview(name, values, fallbackNote){
-  _lastGenDoc = {name, values, content: renderSampleDoc(name, values)};
+  _lastGenDoc = {name, values, content: renderSampleDoc(name, values), note: fallbackNote};
   const content = _lastGenDoc.content;
   const note = fallbackNote
     ? `⚠ ${escapeHtml(fallbackNote)}`
@@ -16633,8 +16693,12 @@ if(!bootLand()) navigate();
 document.getElementById('loginModal').addEventListener('click', e => {
   if(e.target.id === 'loginModal') closeLogin();
 });
+// 11-26: 문서 생성·입력 창(dynModal)은 바깥을 눌러도 닫지 않는다 — 실수로 눌러 작성 중인 문서·입력값이 사라졌다. 닫기는 ×·닫기 단추·Esc 로
 document.getElementById('dynModal').addEventListener('click', e => {
-  if(e.target.id === 'dynModal') closeDyn();
+  if(e.target.id === 'dynModal'){
+    const c = document.getElementById('dynModalCard');
+    c.animate([{transform:'scale(1)'},{transform:'scale(1.015)'},{transform:'scale(1)'}], {duration:180});
+  }
 });
 // ESC 키로 모달 닫기
 document.addEventListener('keydown', e => {
