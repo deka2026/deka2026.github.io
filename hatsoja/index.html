@@ -226,6 +226,8 @@ input,select,textarea{font-family:inherit;font-size:14px;}
 .subtab{border:1px solid var(--line-soft);background:var(--card);border-radius:999px;padding:7px 14px;font-size:13.5px;cursor:pointer;color:var(--ink);}
 .subtab:hover{background:var(--primary-50);}
 .subtab.on{background:var(--primary);border-color:var(--primary);color:#fff;font-weight:600;}
+.rv-pane[hidden]{display:none!important;}
+@media (max-width:720px){ .rv-pane table.tbl{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;} }  /* 20년 표는 휴대폰에서 표 안에서만 옆으로 굴림 */
 .ac-flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:-4px 0 14px;font-size:12.5px;color:var(--ink-soft);}
 .ac-flow b{background:var(--primary-50);border-radius:6px;padding:3px 8px;font-weight:600;color:var(--ink);}
 .side-group{margin-bottom:16px;}
@@ -1863,7 +1865,8 @@ const ROLE_MENUS = {
       ['mem','stat','🗺','전남 발전 현황'],   // 11-26 이사장 지시: 운영관리 → 확장
       ['mem','library','📚','공지·자료실'],
       ['mem','video','🎬','활동 영상 만들기'],
-      ['mem','chat','💬','AI 상담'],
+      /* 11-26 이사장 지시: AI 상담은 업무 시작 상담창과 같은 기능(같은 sendChat·/api/ai/chat, 업무 시작엔 음성 입력까지)이라 메뉴에서 뺌.
+         주소 #/mem/chat 은 그대로 열린다(💬 둥근 단추·업무 시작 「크게 보기 →」) */
       CENTER_MENU,
     ]],
     /* 11-26 이사장 지시: 내 조합은 사이드바 맨 아래로, 그 아래 이용안내(사용 설명서·내 AI 연결 안내) */
@@ -2597,7 +2600,7 @@ function menuTitle(s, p){
   return MENU_DESC[dk] ? escapeHtml(MENU_DESC[dk][1]) : '';
 }
 /* 11-26 한 메뉴로 합친 화면의 둘째 주소 — 메뉴에 없으면 합친 메뉴에 불을 켠다(연합회처럼 taxops 가 따로 있으면 그대로) */
-const MENU_ALIAS = {'mem/taxops':'mem/accounting', 'mem/dist':'mem/revenue'};
+const MENU_ALIAS = {'mem/taxops':'mem/accounting', 'mem/dist':'mem/revenue', 'mem/chat':'mem/home'};   // 11-26 조합 회원 AI 상담 크게 보기 → 사이드바 불은 업무 시작
 function menuCur(role, cur){
   const has = k => (ROLE_MENUS[role] || []).some(([, it]) => it.some(([s, p]) => s + '/' + p === k));
   return (!has(cur) && MENU_ALIAS[cur] && has(MENU_ALIAS[cur])) ? MENU_ALIAS[cur] : cur;
@@ -2695,9 +2698,9 @@ function navigate(){
     if(scope === 'mem' && FED_PAGES.indexOf(page) !== -1) fedLoad(page);
     if(scope === 'mem' && FIN_PAGES.indexOf(page) !== -1) finLoad(page);
     if(scope === 'adm' && page === 'consult') admFinLoad();
-    if(scope === 'mem' && page === 'dist') distLoad();
+    if(scope === 'mem' && (page === 'dist' || page === 'revenue')) distLoad();
     if(scope === 'mem' && page === 'library') shareLoad();
-    if(scope === 'mem' && (page === 'power' || page === 'dist' || page === 'docs' || page === 'home')){ if(_MY_STRAT === undefined) pwStratLoad(); else { pwMineRender(); distStratRender(); } }
+    if(scope === 'mem' && (page === 'power' || page === 'dist' || page === 'revenue' || page === 'docs' || page === 'home')){ if(_MY_STRAT === undefined) pwStratLoad(); else { pwMineRender(); distStratRender(); rvTabLabel(); } }
     if(scope === 'mem' && page === 'power' && _MY_MONTHLY === null) powerLoadMine();
     if(scope === 'mem' && page === 'power' && _MY_PLANTS === null) plantLoad();
     if(scope === 'mem' && page === 'power' && _MY_DOCS === null) docsLoad();
@@ -4890,6 +4893,14 @@ function memPower(){
       <p class="text-mute" style="font-size:12.5px;">※ 배당은 발전수익의 10%를 매월 적립해 분기마다 지역화폐로 지급합니다. 배당 기준(균등/출자 비례)은 총회가 의결합니다.</p>
     </div>
 
+    ${pwStrategyCard()}
+  `;
+}
+
+/* 수익 배분 전략 — 잉여(운영비·원리금 차감 후)를 5개 용도로 배분 */
+/* 11-26: 「발전·정산·배당」과 「수익 시뮬레이션·배분 계획 → 배분 전략 선택」이 같은 카드를 쓴다 */
+function pwStrategyCard(){
+  return `
     <div class="card mt-20">
       <div class="card-title"><h3 class="serif">수익금 배분 전략 — 네 가지 모델 비교</h3>
         <span class="badge badge-info">총회 의결 사항</span></div>
@@ -4915,8 +4926,6 @@ function memPower(){
     </div>
   `;
 }
-
-/* 수익 배분 전략 — 잉여(운영비·원리금 차감 후)를 5개 용도로 배분 */
 /* ─── 우리 조합 배분 전략 정하기 (2026-11-26 이사장 지시) ───
    네 모델 비교는 계산기였고 고르는 자리가 없었다. 조합이 한 전략(또는 직접 정한 비율)을 골라 서버(/api/my/strategy)에 남긴다.
    정한 전략은 수익 배분 계획(③공동사업 몫)·정기총회 회의록 안건·공개 현황판(「우리 조합 배분 원칙」)에서 쓴다. */
@@ -4936,6 +4945,7 @@ async function pwStratLoad(){
     Object.keys(m).forEach(function(k){ const el = document.getElementById(m[k]); if(el && _MY_STRAT.inputs[k] != null) el.value = _MY_STRAT.inputs[k]; });
   }
   if(document.getElementById('distStratBox')) distStratRender();
+  rvTabLabel();
 }
 function pwMineRender(){
   const box = document.getElementById('pw-mine'); if(!box) return;
@@ -4947,7 +4957,7 @@ function pwMineRender(){
       + '<div style="font-size:13.5px;margin-top:4px;">' + escapeHtml(pwMixText(s.mix)) + '</div>'
       + (s.note ? '<div class="text-mute" style="font-size:12.5px;margin-top:2px;">' + escapeHtml(s.note) + '</div>' : '')
       + '<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;"><button class="btn btn-outline btn-sm" onclick="pwStratForm(null)">✏️ 고치기</button>'
-      + '<a class="btn btn-ghost btn-sm" href="#/mem/dist">💧 수익 배분 계획에서 보기</a><a class="btn btn-ghost btn-sm" href="#/mem/library">📣 조합원에게 공개하기</a></div></div>'
+      + '<a class="btn btn-ghost btn-sm" href="#/mem/dist" onclick="return rvGo(\'plan\')">📅 이 전략으로 20년 배분 계획 보기</a><a class="btn btn-ghost btn-sm" href="#/mem/library">📣 조합원에게 공개하기</a></div></div>'
     : '<div style="background:var(--paper-soft);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:13.5px;">아직 우리 조합 전략을 정하지 않았습니다. 「배분 비교」를 누른 뒤 마음에 드는 모델에서 <b>「우리 조합 전략으로 정하기」</b>를 누르거나, <a href="#" onclick="pwStratForm(null);return false;">비율을 직접 정하세요</a>.</div>';
 }
 function _pwInputs(){
@@ -4986,7 +4996,7 @@ async function pwStratSave(){
     const r = await fetch('/api/my/strategy', {method:'PUT', credentials:'same-origin', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
     const j = await r.json().catch(function(){ return {}; });
     if(!j.ok){ toast('저장하지 못했습니다: ' + (j.error || r.status)); return; }
-    _MY_STRAT = j.strategy; closeDyn(); pwMineRender();
+    _MY_STRAT = j.strategy; closeDyn(); pwMineRender(); distStratRender(); rvTabLabel();
     if(document.getElementById('pw-strategy') && document.getElementById('pw-strategy').innerHTML) pwStrategy();
     toast('「' + j.strategy.name + '」을 우리 조합 전략으로 정했습니다.');
   }catch(e){ toast('서버에 닿지 못했습니다.'); }
@@ -4995,7 +5005,7 @@ async function pwStratSave(){
 function distStratRender(){
   const box = document.getElementById('distStratBox'); if(!box) return;
   const s = _MY_STRAT;
-  if(!s){ box.innerHTML = '<div class="card mt-20" style="font-size:13.5px;">아직 우리 조합 배분 전략을 정하지 않았습니다. <a href="#/mem/power">⚡ 발전·정산·배당 → 수익금 배분 전략</a>에서 네 모델을 비교하고 정하세요.</div>'; return; }
+  if(!s){ box.innerHTML = '<div class="card mt-20" style="font-size:13.5px;">아직 우리 조합 배분 전략을 정하지 않았습니다. <a href="#/mem/power" onclick="return rvGo(\'strat\')">🧭 배분 전략 선택</a>에서 네 모델을 비교하고 정하세요.</div>'; return; }
   const biz = Math.round((100 - (s.mix.조합원배당 || 0)) * 10) / 1000;
   box.innerHTML = '<div class="card mt-20" style="border-left:4px solid var(--primary);"><div class="card-title"><h3 class="serif">✅ 우리 조합 배분 전략: ' + escapeHtml(s.name) + '</h3>'
     + '<span class="badge ' + (s.resolved_on ? 'badge-success' : 'badge-mute') + '">' + (s.resolved_on ? '총회 의결 ' + escapeHtml(s.resolved_on) : '총회 의결 전') + '</span></div>'
@@ -6254,7 +6264,8 @@ async function distLoad(force){
   _DIST.때 = new Date().toISOString();
   _DIST.로딩 = false;
   const main = document.getElementById('appMain');
-  if(main && currentRoute() === 'mem/dist'){ main.innerHTML = renderMemberPage('dist'); if(_MY_STRAT === undefined) pwStratLoad(); else distStratRender(); }
+  const rvPlan = document.getElementById('rvPanePlan');
+  if(rvPlan){ rvPlan.innerHTML = memDistBody(); if(_MY_STRAT === undefined) pwStratLoad(); else distStratRender(); }
 }
 function distRefresh(){ _DIST.때 = null; distLoad(true); toast('다시 계산하는 중입니다.'); }
 
@@ -6457,10 +6468,10 @@ function spTable(rows, warn, ok){
   </div>`;
 }
 
-function memDist(){
+function memDist(){ return memRevPlan('plan'); }
+function memDistBody(){
   const P = _DIST.plan;
-  if(!P) return `<div class="sec-head"><h1>💰 수익 시뮬레이션·배분 계획</h1></div>${rvTabs('dist')}
-    <div class="card"><p style="margin:0;">${REAL_API ? '계산하는 중…'
+  if(!P) return `<div class="card"><p style="margin:0;">${REAL_API ? '계산하는 중…'
       : '체험 모드에서는 계획을 세우지 않습니다. 실계정으로 로그인하면 올린 실적으로 자동 계산됩니다.'}</p></div>
     <div id="distStratBox"></div>`;
   const j = P['판정'], p = P.policy, sv = _DIST.solve || {};
@@ -6468,12 +6479,8 @@ function memDist(){
   const 가능 = j['사업기간_운영가능'] === true;
   const y1 = (P.years || [])[0];
   return `
-    <div class="sec-head">
-      <h1>💰 수익 시뮬레이션·배분 계획</h1>
-      <p class="sec-desc">발전수익을 <b>순위대로</b> 배분합니다(20년). 고정 비율표를 쓰지 않습니다 —
-        조합마다 융자 조건이 달라 같은 비율로는 어떤 조합이 이자도 못 냅니다.</p>
-    </div>
-    ${rvTabs('dist')}
+    <p class="text-mute" style="margin:0 0 12px;font-size:13.5px;">발전수익을 <b>순위대로</b> 배분합니다(20년). 고정 비율표를 쓰지 않습니다 —
+        조합마다 융자 조건이 달라 같은 비율로는 어떤 조합이 이자도 못 냅니다. 위 「🧭 배분 전략 선택」에서 정한 우리 조합 전략이 ③공동사업 몫에 들어갑니다.</p>
     ${_DIST.예시 ? DEMO_FIN_NOTE : ''}
     <div id="distStratBox"></div>
 
@@ -9759,19 +9766,48 @@ async function askLaw(){
   }
 }
 
-/* 11-26 이사장 지시: 「수익 시뮬레이션」과 「수익 배분 계획」을 한 메뉴로 — 사업 전 어림(#/mem/revenue)과 실적 기준 20년 계획(#/mem/dist)을 위 나눔 단추로 오간다 */
-function rvTabs(cur){
-  return `<div class="subtabs">${[['revenue','🔮 수익 시뮬레이션 (사업 전 어림)'],['dist','💧 수익 배분 계획 (20년 · 실적 기준)']]
-    .map(([k, n]) => `<button class="subtab ${k === cur ? 'on' : ''}" onclick="location.hash='#/mem/${k}'">${n}</button>`).join('')}</div>`;
+/* 11-26 이사장 지시: 「수익 시뮬레이션·배분 계획」은 한 화면에 세 단추 — ①수익 시뮬레이션 ②배분 전략 선택 ③우리 조합 20년 배분 계획.
+   단추를 누르면 다른 페이지로 가지 않고 아래 내용만 바뀐다(세 칸을 한 번에 그려 두고 보이기만 바꿈 — 넣던 값이 남는다).
+   옛 주소 #/mem/revenue 는 ①, #/mem/dist 는 ③으로 열린다. */
+const RV_TABS = [['sim','🔮 수익 시뮬레이션'],['strat','🧭 배분 전략 선택'],['plan','📅 우리 조합 20년 배분 계획']];
+let _RV_TAB = 'sim';
+function rvTabLabel(){
+  const b = document.querySelector('.subtab[data-rv="plan"]'); if(!b) return;
+  b.textContent = '📅 우리 조합 20년 배분 계획' + (_MY_STRAT && _MY_STRAT.name ? ' · ' + _MY_STRAT.name : '');
 }
-function memRevenue(){
+function rvShow(k){
+  if(!RV_TABS.some(t => t[0] === k)) k = 'sim';
+  _RV_TAB = k;
+  document.querySelectorAll('.subtab[data-rv]').forEach(b => { const on = b.dataset.rv === k; b.classList.toggle('on', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
+  document.querySelectorAll('.rv-pane').forEach(el => { el.hidden = el.dataset.rv !== k; });
+  if(k === 'plan'){ distLoad(); distStratRender(); }
+  if(k === 'strat') pwMineRender();
+  const bar = document.querySelector('.subtabs[data-rvbar]');
+  if(bar && bar.getBoundingClientRect().top < 0) bar.scrollIntoView({block:'start'});
+}
+/* 전략 상자·배분 계획 상자의 연결 — 같은 화면이면 단추만 바꾸고, 다른 화면이면 주소로 간다 */
+function rvGo(k){
+  if(document.querySelector('.rv-pane')){ rvShow(k); return false; }
+  return true;
+}
+function memRevPlan(tab){
+  _RV_TAB = tab || 'sim';
   return `
     <div class="sec-head">
       <h1>💰 수익 시뮬레이션·배분 계획</h1>
-      <p class="sec-desc">설비 규모·발전 조건을 입력하면 예상 매출·배당·상환 계획을 자동 계산합니다. 실적이 쌓이면 「💧 수익 배분 계획」에서 실제 발전수익을 순위대로 나눕니다.
+      <p class="sec-desc">① 설비 조건으로 예상 수익을 어림하고, ② 남는 돈을 어디에 쓸지 배분 전략을 고른 뒤, ③ 그 전략으로 우리 조합 20년 배분 계획을 봅니다.
         <button class="btn btn-outline btn-sm" onclick="showGlossary()" style="margin-left:6px;">📖 용어 쉬운 말 풀이</button></p>
     </div>
-    ${rvTabs('revenue')}
+    <div class="subtabs" data-rvbar role="tablist">${RV_TABS.map(([k, n]) =>
+      `<button type="button" class="subtab ${k === _RV_TAB ? 'on' : ''}" data-rv="${k}" role="tab" aria-selected="${k === _RV_TAB}" onclick="rvShow('${k}')">${n}</button>`).join('')}</div>
+    <div class="rv-pane" data-rv="sim"${_RV_TAB === 'sim' ? '' : ' hidden'}>${memRevenueBody()}</div>
+    <div class="rv-pane" data-rv="strat"${_RV_TAB === 'strat' ? '' : ' hidden'}>${pwStrategyCard().replace('<div class="card mt-20">', '<div class="card">')}</div>
+    <div class="rv-pane" data-rv="plan"${_RV_TAB === 'plan' ? '' : ' hidden'} id="rvPanePlan">${memDistBody()}</div>`;
+}
+function memRevenue(){ return memRevPlan('sim'); }
+function memRevenueBody(){
+  return `
+    <p class="text-mute" style="margin:0 0 12px;font-size:13.5px;">설비 규모·발전 조건을 입력하면 예상 매출·배당·상환 계획을 자동 계산합니다(사업 전 어림). 실적이 쌓이면 「📅 우리 조합 20년 배분 계획」이 실제 발전수익으로 계산합니다.</p>
 
     <div class="grid grid-2">
       <div class="card">
