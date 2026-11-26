@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>사교원 데이터 저장소 — 사회혁신교육원 사회적협동조합</title>
+<title>사교원 데이터 저장소 — 사회혁신교육원사회적협동조합</title>
 <meta name="theme-color" content="#4a6741">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
@@ -227,7 +227,7 @@ table.grid tr:hover td .rowdel{visibility:visible;}
         <div id="browse-empty" class="empty">
           <div class="big">▦</div>
           <div>왼쪽에서 표를 고르거나, <b>엑셀·CSV 올리기</b>로 새 표를 만드세요.</div>
-          <div style="font-size:12.5px">올린 표는 데카(AI)가 API로 바로 읽어갑니다. 더 이상 파일을 채팅에 던지지 않아도 됩니다.</div>
+          <div style="font-size:12.5px">올린 표는 데카(AI)가 바로 읽어 갑니다. 파일을 대화창에 따로 올리지 않아도 됩니다.</div>
         </div>
         <div id="browse-body" class="hidden" style="display:flex;flex-direction:column;flex:1;min-height:0">
           <div class="toolbar">
@@ -326,7 +326,7 @@ const ERROR_TEXT = {
   empty_file: '빈 파일입니다.', empty_sheet: '시트에 데이터가 없습니다.',
   file_too_large: '파일이 너무 큽니다(30MB 이하).', sheet_not_found: '시트를 찾지 못했습니다.',
   select_only: 'SELECT(조회) 문만 실행할 수 있습니다.', timeout: '조회가 너무 오래 걸려 중단했습니다.',
-  not_found: '대상을 찾지 못했습니다.', openpyxl_missing: '서버에 엑셀 읽기 모듈(openpyxl)이 없습니다. 서버 갱신이 필요합니다.',
+  not_found: '대상을 찾지 못했습니다.', openpyxl_missing: '지금은 엑셀 파일을 읽을 수 없습니다. 관리자에게 알려 주세요.',
 };
 function errText(r, fb) {
   if (r.status === 429) return '요청이 잠시 제한되었습니다. 1분 후 다시 시도해 주세요.';
@@ -347,7 +347,7 @@ function show(view) { ['boot-view', 'login-view', 'app'].forEach(id => $('#' + i
 async function boot() {
   const r = await api('/api/auth/me');
   if (r.ok && r.user && (r.user.role === 'admin' || r.user.role === 'staff')) return enter(r.user);
-  if (r.ok && r.user) { await api('/api/auth/logout', { method: 'POST' }); show('login-view'); showMsg($('#login-msg'), '직원·관리자 계정만 이용할 수 있습니다.', 'error'); return; }
+  if (r.ok && r.user) { show('login-view'); showMsg($('#login-msg'), '이 화면은 매니저·통합관리자만 쓸 수 있습니다. 지금 로그인은 그대로입니다. 3초 뒤 내 페이지로 돌아갑니다.', 'error'); setTimeout(() => { location.href = '/#/'; }, 3000); return; }   // 11-27 전수개선: 예전엔 통합 로그아웃까지 했다
   show('login-view');
 }
 $('#login-form').addEventListener('submit', async e => {
@@ -357,8 +357,7 @@ $('#login-form').addEventListener('submit', async e => {
   btn.disabled = false;
   if (r.ok && r.user) {
     if (r.user.role === 'admin' || r.user.role === 'staff') return enter(r.user);
-    await api('/api/auth/logout', { method: 'POST' });
-    return showMsg($('#login-msg'), '직원·관리자 계정만 이용할 수 있습니다.', 'error');
+    return showMsg($('#login-msg'), '이 화면은 매니저·통합관리자만 쓸 수 있습니다. 로그인은 됐으니 내 페이지에서 이어서 쓰세요.', 'error');
   }
   showMsg($('#login-msg'), errText(r), 'error');
 });
@@ -488,7 +487,7 @@ $('#q').addEventListener('keydown', e => { if (e.key === 'Enter') { state.q = $(
 $('#f-add').addEventListener('click', () => {
   const col = $('#f-col').value, op = $('#f-op').value, val = $('#f-val').value.trim();
   if (!col) return;
-  if (op !== 'is' && !val) return toast('값을 입력하세요.', true);
+  if (op !== 'is' && !val) return toast('값을 입력해 주세요.', true);
   state.filters.push({ col, op, val: op === 'is' ? (val || 'null') : val });
   $('#f-val').value = ''; state.offset = 0; renderChips(); loadRows();
 });
@@ -650,7 +649,7 @@ async function runSql() {
 $('#sql-run').addEventListener('click', runSql);
 $('#sql').addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') runSql(); });
 $('#sql-csv').addEventListener('click', () => {
-  if (!sqlResult) return toast('먼저 실행하세요.', true);
+  if (!sqlResult) return toast('먼저 실행해 주세요.', true);
   const q = v => { const s = v === null ? '' : String(v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
   const csv = '﻿' + [sqlResult.columns.map(q).join(','), ...sqlResult.rows.map(r => r.map(q).join(','))].join('\n');
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = 'query.csv'; a.click();

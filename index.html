@@ -305,6 +305,17 @@ footer .fs{margin-left:6px}
 .side .smore{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
 .side .smore a{display:flex;justify-content:center;align-items:center;gap:6px;border:1px dashed #b9c4b3;border-radius:8px;padding:8px;color:var(--g7);font-weight:600}
 .side .smore a:hover{background:var(--g0)}
+/* 11-27 전수개선: 유료 입구를 눈에 띄게(금색) */
+/* 11-27 전수개선 U-03: 「내 페이지·내 폴더」는 위(휴대폰은 아래) 탭 줄에 있으니 사이드바에서 한 번 더 보이지 않게 */
+.side .sfix{display:none}
+/* U-01: 대시보드 칸 글씨가 작았다(13px·10.8px) */
+.dcard li{font-size:.95rem}.dcard small,.dcard .note,.dcard .asof,.dcard .empty{font-size:.84rem}
+.side .smore a.smore-pay{border:1.5px solid #d9a93a;background:#fff8e6;color:#7a5200}
+.side .smore a.smore-pay:hover{background:#ffefc4}
+.paycta{display:block;margin-top:10px;padding:12px 14px;border:1.5px solid #d9a93a;border-radius:12px;background:#fff8e6;color:#5c3e00;text-decoration:none}
+.paycta b{display:block;font-size:1rem;margin-bottom:2px}
+.paycta span{font-size:.88rem;color:#7a5a1a}
+.paycta:hover{background:#ffefc4}
 .u2 h1,.u2 h2,.u2 h3,.u2 h4,.u2 p{margin:0}
 .u2 button,.u2 input,.u2 select,.u2 textarea{font-family:inherit;font-size:1rem;color:inherit}
 .u2 button{cursor:pointer}
@@ -670,7 +681,7 @@ svg.ic.s{width:17px;height:17px}
         <span id="whoEmailBox"></span>
         <button class="btn" id="btnPw" type="button" style="display:none">🔑 비밀번호 변경</button>
         <button class="btn" id="btnTwofa" type="button" style="display:none">🔐 2단계 인증 <span class="tfs" id="acctTf"></span></button>
-        <a class="btn" href="#/join">➕ 서비스 더 고르기</a>
+        <a class="btn" href="#/join" id="acctMore">⭐ 서비스 이용 신청</a>
         <a class="btn" href="#/start">🏛️ 첫 화면(소개)</a>
       </div>
     </div>
@@ -681,7 +692,7 @@ svg.ic.s{width:17px;height:17px}
   </nav>
 
   <!-- 통합관리자 등급별 미리보기 띠 — 관문·둘러보기에서도 보여야 「원래대로」로 돌아온다 -->
-  <details class="pv" id="pv"><summary><b>🧪 등급 미리보기</b> <span class="pvsub tmp" title="오픈 전 제거">(시험용 · 통합관리자만 · 오픈 전 제거)</span><span class="now" id="pvNow"></span></summary><div class="pvb" id="pvBtns" role="group" aria-label="미리볼 등급"></div></details>
+  <details class="pv" id="pv"><summary><b>🧪 등급 미리보기</b> <span class="pvsub tmp" >(통합관리자만 보입니다)</span><span class="now" id="pvNow"></span></summary><div class="pvb" id="pvBtns" role="group" aria-label="미리볼 등급"></div></details>
 
   <!-- 공통 틀 — 사이드바 + 본문(옛 트리 / 개인페이지 / 내 폴더 / 꾸미기) -->
   <div id="shell" class="view">
@@ -698,7 +709,7 @@ svg.ic.s{width:17px;height:17px}
 
       <!-- ① 첫 화면 (#/start · 비로그인 #/) — 11-18 이사장 지시: 플랫폼 소개 → 회원서비스 → 등급·이용료 → 회원별 메뉴 → 회원가입·문의 -->
       <main id="vStart" class="view u2" aria-label="첫 화면">
-        <div class="uw"><div id="axLockBar" role="status" hidden class="tmp" style="margin:0 0 14px;padding:10px 14px;border:1px solid #e0c070;background:#fff7e0;border-radius:10px;font-size:14px">🧪 (개편 중 임시 안내 · 오픈 전 제거) 🛠️ 사교원 사이트를 새 모습으로 고치는 중입니다. 내 페이지·내 폴더·둘러보기는 그대로 쓰실 수 있고, 상담창의 실행(보내기·바꾸기)·발송·정기 루틴만 개편이 끝날 때까지 쉬고 있습니다.</div></div>
+        <div class="uw"><div id="axLockBar" role="status" hidden class="tmp" style="margin:0 0 14px;padding:10px 14px;border:1px solid #e0c070;background:#fff7e0;border-radius:10px;font-size:14px">🛠️ 사이트를 새 모습으로 고치는 중입니다. 내 페이지·내 폴더·둘러보기는 그대로 쓰실 수 있고, 상담창의 실행(보내기·바꾸기)·발송·정기 루틴만 개편이 끝날 때까지 쉬고 있습니다.</div></div>
         <div id="startBody"></div>
       </main>
 
@@ -721,7 +732,7 @@ svg.ic.s{width:17px;height:17px}
         </section>
         <section class="u2" id="myBox" aria-label="내 정보와 이용료"></section>
         <section aria-labelledby="dashT">
-          <div class="secT"><h2 id="dashT">대시보드</h2><a href="#/custom" class="btn sm">🎨 꾸미기</a></div>
+          <div class="secT"><h2 id="dashT">대시보드</h2><a href="#/custom" class="btn sm" id="dashCustom">🎨 내 페이지 꾸미기</a></div>
           <div class="dgrid" id="dash"></div>
         </section>
         <section aria-labelledby="ntT">
@@ -731,8 +742,8 @@ svg.ic.s{width:17px;height:17px}
       </main>
       <!-- ④ 내 폴더 (#/files) -->
       <main id="vFiles" class="view" aria-label="내 폴더">
-        <section class="u2" id="fClosed" aria-labelledby="fClosedT"><div class="card" style="text-align:center;padding:34px 22px"><h2 id="fClosedT" style="font-family:var(--serif);color:var(--g9);font-size:1.3rem;margin-bottom:8px">내 폴더는 유료 회원 서비스입니다</h2><p style="color:var(--ink2);margin-bottom:16px">무료이용회원은 내 폴더를 쓸 수 없습니다. 서비스를 고르면 내 폴더가 함께 열립니다.</p><a class="btn p" href="#/join">서비스 더 고르기</a> <a class="btn" href="#/">내 페이지로</a></div></section>
-        <div class="secT"><h2>내 폴더</h2><p class="sub">서버에 두는 내 자료. 상담창이 이 폴더의 파일을 바로 읽고 씁니다.</p></div>
+        <section class="u2" id="fClosed" aria-labelledby="fClosedT"><div class="card" style="text-align:center;padding:34px 22px"><h2 id="fClosedT" style="font-family:var(--serif);color:var(--g9);font-size:1.3rem;margin-bottom:8px">내 폴더는 서비스를 신청한 회원이 쓰는 기능입니다</h2><p style="color:var(--ink2);margin-bottom:16px">무료이용회원은 내 폴더를 쓸 수 없습니다. 서비스를 고르면 내 폴더가 함께 열립니다.</p><a class="btn p" href="#/join">서비스 이용 신청</a> <a class="btn" href="#/">내 페이지로</a></div></section>
+        <div class="secT"><h2>내 폴더</h2><p class="sub">사교원 서버에 두는 내 자료입니다. AI 대화창이 이 폴더의 파일을 바로 읽고 씁니다.</p></div>
         <div class="ftabs" role="tablist"><button type="button" role="tab" data-ft="files" class="on" aria-selected="true">내 파일</button><button type="button" role="tab" data-ft="trash" aria-selected="false">🗑️ 휴지통 (7일 보관)</button></div>
         <div class="fbar">
           <nav class="crumb" aria-label="폴더 경로" id="fCrumb"></nav><span class="sp"></span>
@@ -754,7 +765,7 @@ svg.ic.s{width:17px;height:17px}
           <table class="flist" aria-label="연결 상태"><thead><tr><th>종류</th><th>라벨</th><th>상태</th><th>마지막 수신</th><th>파일 수</th><th>용량(MB)</th><th>동작</th></tr></thead><tbody id="flList"><tr><td colspan="7" class="n">아직 연결한 것이 없습니다</td></tr></tbody></table>
           <div class="lgrid">
             <section class="dcard lcard" aria-labelledby="lc1T">
-              <h3 id="lc1T"><span>💻 내 PC 폴더 자동 올리기</span><button class="btn sm" type="button" data-say="내 컴퓨터 자료 자동으로 올리고 싶어" aria-label="내 PC 폴더 자동 올리기를 상담창에 묻기">💬 상담창에 묻기</button></h3>
+              <h3 id="lc1T"><span>💻 내 PC 폴더 자동 올리기</span><button class="btn sm" type="button" data-say="내 컴퓨터 자료 자동으로 올리고 싶어" aria-label="내 PC 폴더 자동 올리기를 AI 대화창에 묻기">💬 AI 대화창에 묻기</button></h3>
               <p class="sub" style="margin:0 0 6px">PC 의 지정 폴더가 서버로 계속 복사됩니다(Syncthing). 큰 파일·많은 파일에 알맞습니다.</p>
               <ol class="steps">
                 <li>설치기를 내려받아 설치합니다: <a id="flInst" href="#" download>⬇️ 설치기 내려받기</a></li>
@@ -768,7 +779,7 @@ svg.ic.s{width:17px;height:17px}
               <p class="lim"><b>알려진 제약</b> 서버는 받기 전용이지만, PC 에서 지우거나 바뀐 파일은 서버에도 그대로 반영됩니다. 이전 판은 버전 보관으로 되살립니다(올라온 자료는 「PC 동기화(읽기 전용)」 폴더에).</p>
             </section>
             <section class="dcard lcard" aria-labelledby="lc2T">
-              <h3 id="lc2T"><span>🗂️ 네트워크 드라이브</span><button class="btn sm" type="button" data-say="내 컴퓨터 자료 자동으로 올리고 싶어" aria-label="네트워크 드라이브 연결을 상담창에 묻기">💬 상담창에 묻기</button></h3>
+              <h3 id="lc2T"><span>🗂️ 네트워크 드라이브</span><button class="btn sm" type="button" data-say="내 컴퓨터 자료 자동으로 올리고 싶어" aria-label="네트워크 드라이브 연결을 AI 대화창에 묻기">💬 AI 대화창에 묻기</button></h3>
               <p class="sub" style="margin:0 0 6px">윈도우 탐색기에 내 폴더를 「사교원 드라이브」로 붙여 직접 열고 저장합니다(웹다브).</p>
               <div class="inl"><span>주소</span><code id="flDav">(불러오는 중)</code><button class="btn sm" type="button" data-cp="#flDav" aria-label="드라이브 주소 복사">복사</button></div>
               <form class="inl" id="flKeyForm"><input id="flKeyLabel" placeholder="열쇠 이름 (예: 사무실 PC)" aria-label="열쇠 이름" maxlength="40"><select id="flKeyMode" aria-label="열쇠 종류"><option value="drive">네트워크 드라이브(지우기 가능)</option><option value="nas">조직 NAS 자동 올리기(지우기·옮기기 불가, 덮으면 옛 판 휴지통)</option></select><button class="btn sm p" type="submit" id="flKeyBtn">🔑 전용 열쇠 만들기</button></form>
@@ -778,19 +789,19 @@ svg.ic.s{width:17px;height:17px}
                 <li>탐색기 「내 PC」 → 「네트워크 드라이브 연결」</li>
                 <li>폴더 칸에 위 주소를 붙여넣고 「다른 자격 증명을 사용하여 연결」 체크</li>
                 <li>아이디는 사이트 아이디, 비밀번호 칸에는 사이트 비밀번호가 아니라 위에서 만든 <b>전용 열쇠</b></li>
-                <li>드라이브 이름이 뜨면 끝. 파일을 넣으면 바로 내 폴더에 들어갑니다</li>
+                <li>드라이브 이름이 보이면 끝났습니다. 파일을 넣으면 바로 내 폴더에 들어갑니다</li>
               </ol>
               <p class="lim"><b>알려진 제약</b> 윈도우 기본 기능은 파일 약 50MB 한도, 서버는 파일 하나 100MB 한도. 마이크로소프트가 사용 중단 예정 기능으로 정했습니다. 맥·휴대폰은 별도 앱(웹다브 클라이언트)이 필요합니다.</p>
             </section>
             <section class="dcard lcard" aria-labelledby="lc3T">
-              <h3 id="lc3T"><span>🏢 조직 서버·NAS 자동 업로드</span><button class="btn sm" type="button" data-say="내 컴퓨터 자료 자동으로 올리고 싶어" aria-label="조직 서버 연결을 상담창에 묻기">💬 상담창에 묻기</button></h3>
+              <h3 id="lc3T"><span>🏢 조직 서버·NAS 자동 업로드</span><button class="btn sm" type="button" data-say="내 컴퓨터 자료 자동으로 올리고 싶어" aria-label="조직 서버 연결을 AI 대화창에 묻기">💬 AI 대화창에 묻기</button></h3>
               <p class="sub" style="margin:0 0 6px">자체 서버나 NAS 가 있는 조합·기관은 그 장비의 「클라우드 동기화(WebDAV)」에 같은 주소와 전용 열쇠를 넣어 예약 실행합니다.</p>
               <ol class="steps">
                 <li>NAS 관리 화면 → 클라우드 동기화 → 「WebDAV」 추가, 주소는 위 네트워크 드라이브 주소</li>
                 <li>계정은 사이트 아이디, 비밀번호는 전용 열쇠(위 단추로 만든 것, 이 연결에만 쓰는 것으로 따로)</li>
                 <li>방향은 「NAS → 서버」 한쪽, 주기는 하루 1회 이상. 열쇠는 그 폴더 하나에만 듣고 지우기는 막습니다</li>
               </ol>
-              <p class="lim"><b>안내</b> 개인정보 처리 위탁 약정을 맺은 조합·기관만 쓸 수 있습니다. 약정은 <a href="https://home.sakyowon.co.kr/#/contact" target="_blank" rel="noopener">문의하기 ↗</a> 로, 설정할 사람이 없으면 데카가 원격으로 도와드립니다.</p>
+              <p class="lim"><b>안내</b> 개인정보 처리 위탁 약정을 맺은 조합·기관만 쓸 수 있습니다. 약정은 <a href="https://home.sakyowon.co.kr/#/contact" target="_blank" rel="noopener">문의하기 ↗</a> 로, 설정할 사람이 없으면 사교원이 원격으로 도와드립니다.</p>
             </section>
           </div>
         </section>
@@ -798,8 +809,8 @@ svg.ic.s{width:17px;height:17px}
 
       <!-- ⑥ 꾸미기 (#/custom) — 11-18: 사이드바는 「내가 고른 서비스」로 정해지므로 대시보드 칸만 꾸민다 -->
       <main id="vCustom" class="view" aria-label="내 페이지 꾸미기">
-        <div class="secT"><h2>내 페이지 꾸미기</h2><p class="sub">대시보드 칸을 체크하면 넣고, ▲▼ 로 순서를 바꿉니다. 저장하면 어느 기기에서 로그인해도 같습니다. 사이드바는 내가 고른 서비스대로 놓입니다 — 바꾸려면 <a href="#/join">서비스 더 고르기</a>.</p></div>
-        <div class="ctabs" role="group" aria-label="꾸미기 묶음 고르기"><button type="button" data-ct="dash" aria-pressed="true" aria-controls="cDashBox">📊 대시보드 칸</button><button type="button" data-ct="prev" aria-pressed="false" aria-controls="cPrevBox">👀 미리보기</button></div>
+        <div class="secT"><h2>내 페이지 꾸미기</h2><p class="sub">대시보드 칸을 체크하면 넣고, ▲▼ 로 순서를 바꿉니다. 저장하면 어느 기기에서 로그인해도 같습니다. 사이드바는 내가 고른 서비스대로 놓입니다 — 바꾸려면 <a href="#/join">서비스 이용 신청</a>.</p></div>
+        <a class="paycta" href="#/join" id="customSvc" style="margin:0 0 12px"><b>🧩 사이드바에 서비스 더하기</b><span>사이드바 메뉴는 신청한 서비스대로 놓입니다. 햇소자·아카데미·의정지원을 신청하면 메뉴가 늘어납니다.</span></a><div class="ctabs" role="group" aria-label="꾸미기 묶음 고르기"><button type="button" data-ct="dash" aria-pressed="true" aria-controls="cDashBox">📊 대시보드 칸</button><button type="button" data-ct="prev" aria-pressed="false" aria-controls="cPrevBox">👀 미리보기</button></div>
         <div class="cgrid">
           <section class="grp" id="cDashBox" data-ct="dash" aria-labelledby="cDashT"><h3 id="cDashT">📊 대시보드 칸</h3><ul class="clist" id="cDash"></ul></section>
           <aside class="grp" id="cPrevBox" data-ct="prev" aria-labelledby="cPrevT"><h3 id="cPrevT">미리보기</h3><div class="mini" id="cPrev"></div></aside>
@@ -817,7 +828,7 @@ svg.ic.s{width:17px;height:17px}
 
 <footer>
   <b>사회혁신교육원사회적협동조합</b> · 본사 대전광역시 서구 관저중로80번길 8, 3층 · 사업자등록번호 397-82-00424 · 교육·컨설팅·IT · 활동 지역 전남광주통합특별시·전북특별자치도<br>
-  <span class="mgronly" hidden><a href="admin.html" rel="nofollow">🔐 통합 관리자</a> · <a href="data.html" rel="nofollow">▦ 데이터 저장소</a> · </span><a href="account-privacy.html">개인정보처리방침</a> · <a href="https://wiki.poomasi.org/" target="_blank" rel="noopener">연대지능 위키 ↗</a> · <a href="sakyowon-wiki/">사교원 위키</a> · <a href="#/map">둘러보기</a> · <a href="#/start">첫 화면</a> · <a href="#/ask">문의하기</a>
+  <span class="mgronly" hidden><a href="admin.html" rel="nofollow">🔐 통합관리자</a> · <a href="data.html" rel="nofollow">▦ 데이터 저장소</a> · </span><a href="account-privacy.html">개인정보처리방침</a> · <a href="https://wiki.poomasi.org/" target="_blank" rel="noopener">연대지능 위키 ↗</a> · <a href="sakyowon-wiki/">사교원 위키</a> · <a href="#/map">둘러보기</a> · <a href="#/start">첫 화면</a> · <a href="#/ask">문의하기</a>
   <span class="fs" role="group" aria-label="글자 크기"><button type="button" data-fs="-1" aria-label="글자 작게">가−</button><button type="button" data-fs="1" aria-label="글자 크게">가+</button></span>
 </footer>
 
@@ -923,7 +934,7 @@ const TREE = [
     { ic: '🧩', name: '회원서비스', items: [
       { id: 'hatsoja', t: '햇빛소득마을 (햇소자)', d: '신청·진단 → 조합 설립 → 정산·배당 — 협동조합·연합회 회원', h: '/hatsoja/', al: '햇소자|햇빛소득마을' },
       { id: 'center', t: '시민자산육성지원센터', d: '센터 업무·참여 조합 업무자동화 포털(시험판) — 별도 로그인', h: 'https://center.sakyowon.co.kr/', ext: true, sub: true, hide: true, tmp: '시험판', al: '시민자산지원센터|시민자산센터|센터 포털|센터' },
-      { id: 'policy', t: '지자체 의정지원시스템', d: '공약·조례·문서작성·브리핑 — 로그인하면 둘러보기 무료, 구독료를 입금하면 자동으로 전체 기능', h: HOME + 'policy', need: 'login', al: '의정지원시스템|정책지원관 지원시스템|정책지원관 시스템|의정지원' },
+      { id: 'policy', t: '지자체 의정지원시스템', d: '공약·조례·문서작성·브리핑 — 로그인하면 무료로 둘러보고, 이용료를 내면 모든 기능을 씁니다', h: HOME + 'policy', need: 'login', al: '의정지원시스템|정책지원관 지원시스템|정책지원관 시스템|의정지원' },
       { id: 'simin', t: '시민주권 모니터링 플랫폼', d: '시정·의정 묻고 답하기 · 시민제보 → AI 이슈브리핑 · 회의록·조례·보도자료·입찰 자동 수집 감시판', h: '/simin/', tmp: '시범', al: '시민주권 모니터링|시민주권 모니터링 플랫폼|시정 감시|의정 감시|시민제보|이슈브리핑|시민주권' },
       { id: 'academy', t: '연대지능활동가 아카데미', d: '실습 15단계 · 학습 7단계 · 지식 검증 게임 · 연대지능활동가 교육 신청(아카데미 안)', h: '/academy-site/' },
       { id: 'edu-ai', t: '연대지능활동가 교육 신청', d: '필요 진단 · 예상 비용 · 신청', h: '/academy-site/#edu-apply', sub: true, hide: true, al: '교육 신청|교육신청|교육프로그램 신청|교육프로그램|연대지능 교육 신청' },
@@ -935,7 +946,7 @@ const TREE = [
   { ic: '🏛️', name: '사교원 홈페이지', secs: [
     { ic: '🌊', name: '현장사업', items: [
       { id: 'mangnam', t: '망남어촌신활력 (전남광주 완도)', d: '사업 안내 · 소식 · 기획안/보고서 · KPI · 예산 집행실적', h: 'https://vitality.sakyowon.co.kr/', al: '망남|망남 사업|어촌신활력|망남생활권' },
-      { id: 'yangyang', t: '양양어촌신활력 (강원 양양)', d: '망남과 같은 구성으로 채우는 중', h: 'https://vitality.sakyowon.co.kr/', soon: true, al: '양양|양양 사업' },
+      { id: 'yangyang', t: '양양어촌신활력 (강원 양양)', d: '준비 중입니다', h: 'https://vitality.sakyowon.co.kr/', soon: true, al: '양양|양양 사업' },
       { id: 'mangnam-coop', t: '망남마을협동조합', d: '마을사업 · 마을학교 · 플로깅 · 물멍 예약 · 경영공시', h: '/mangnam-coop/' },
     ]},
     { ic: '🔬', name: '연구', items: [
@@ -961,7 +972,7 @@ const TREE = [
       { id: 'work', t: '근태 (출퇴근·휴가)', d: 'GPS 출퇴근 · 휴가 결재', h: 'https://work.sakyowon.co.kr/', need: 'role:staff' },
       { id: 'hr', t: '인사기록', d: '체크권한 「인사열람」', h: 'https://hr.sakyowon.co.kr/', need: 'perm:인사열람' },
       { id: 'accounting', t: '회계 · 세무 · 자산', d: '체크권한별', h: HOME + 'admin/accounting', need: 'perm:회계' },
-      { id: 'admin-members', t: '회원 · 권한', d: '승인 · 등급 · 체크권한 · 비번 초기화', h: '/admin.html', need: 'perm:회원열람' },
+      { id: 'admin-members', t: '회원 · 권한', d: '승인 · 등급 · 체크권한 · 비밀번호 초기화', h: '/admin.html', need: 'perm:회원열람' },
       { id: 'admin-pay', t: '회원 · 납부 · 발송', d: '전 회원 납부 현황 · 입금 확인 · 이메일 발송 — 통합관리자 전용', h: '/members.html', need: 'admin' },
       { id: 'admin-site', t: '사이트 관리 · 개선의견', d: '', h: '/admin.html', need: 'role:staff' },
       { id: 'home-admin', t: '홈페이지 관리자', d: '회계·세무·인사·자산 · 콘텐츠', h: HOME + 'admin', need: 'role:staff' },
@@ -986,6 +997,8 @@ function tierOf(u) {
 let FOLDER_403 = false;
 const noFolder = u => { u = u === undefined ? me : u; return !!u && (u.tier === 'free' || (FOLDER_403 && u === me)); };
 const tierKo = u => u ? (u.tier_ko || TIER_KO[tierOf(u)] || '') : '';
+/* 11-27 전수개선: 유료 입구 이름 — 무료이용회원은 「유료 서비스 신청」, 이미 쓰는 회원은 「서비스 더 신청」 */
+const moreTxt = () => (!me || tierOf(me) === 'free') ? '유료 서비스 신청' : '서비스 더 신청';
 let me = null;                        // 화면을 그리는 기준(미리보기 중엔 가짜 등급)
 let realMe = null;                    // 실제 로그인 계정
 let preview = null;                   // 통합관리자 등급별 미리보기(임시) — 'none' | role 키
@@ -1008,7 +1021,7 @@ function needText(need) {
   if (!me) return '로그인';
   if (need === 'login') return '로그인';
   if (need === 'admin') return '통합관리자 전용';
-  if (need === 'perm:정책지원관' && !isStaffView()) return '의정지원 구독';
+  if (need === 'perm:정책지원관' && !isStaffView()) return '의정지원 이용 신청';
   if (need.startsWith('perm:')) return isStaffView() ? '체크권한 「' + need.slice(5) + '」' : '사교원 내부 전용';
   if (need.startsWith('role:')) return (ROLE_KO[need.slice(5)] || need.slice(5)) + ' 승인';
   return '승인';
@@ -1092,9 +1105,9 @@ const ILL = {
    세부 메뉴 주소는 각 사이트의 실제 화면 주소(아카데미 #쪽이름 · 햇소자 #/mem/… ). 의정지원시스템은 화면 안에서 탭을 고르는 구조라 들어가는 문만 놓는다. */
 const HS = '/hatsoja/#/', AC = '/academy-site/#';
 const SVC = {
-  acad: { n: '아카데미', c: 'c-aca', img: 's_aca.jpg', icn: 'book', items: [['아카데미 홈', '/academy-site/'], ['실습 15단계', AC + 'course-practice'], ['학습 7단계(학습개요)', AC + 'course-overview'], ['지식 검증 게임', AC + 'verify-game'], ['사회혁신팀러닝', AC + 'tl-home'], ['화상회의', AC + 'meeting']] },
+  acad: { n: '아카데미', c: 'c-aca', img: 's_aca.jpg', icn: 'book', items: [['아카데미 홈', '/academy-site/'], ['실습 15단계', AC + 'course-practice'], ['학습 개요', AC + 'course-overview'], ['지식 검증 게임', AC + 'verify-game'], ['사회혁신팀러닝', AC + 'tl-home'], ['화상회의', AC + 'meeting']] },
   policy: { n: '의정지원시스템', c: 'c-pol', icn: 'gov', items: [['의정지원시스템 열기', HOME + 'policy'], ['의정지원 사이트(공약·조례·문서작성·브리핑)', 'https://talk.sakyowon.co.kr/system', 1], ['의정소통(대화방)', 'https://talk.sakyowon.co.kr/chat', 1]] },
-  coop: { n: '햇소자', c: 'c-hat', img: 's_hat.jpg', icn: 'sun', items: [['조합 대시보드', HS + 'mem/dashboard'], ['자료함', HS + 'mem/inbox'], ['우리 조합 현황', HS + 'mem/state'], ['설립·건설', HS + 'mem/setup'], ['운영관리(발전·정산·배당)', HS + 'mem/power']] },
+  coop: { n: '햇소자', c: 'c-hat', img: 's_hat.jpg', icn: 'sun', items: [['업무 시작', HS + 'mem/home'], ['현황 대시보드', HS + 'mem/dashboard'], ['조합 원장', HS + 'mem/state'], ['업무 달력', HS + 'mem/cycle'], ['발전·정산·배당', HS + 'mem/power']] },   // 11-27: 햇소자 11-26 메뉴(업무 시작 중심)와 맞춤
   fed: { n: '햇소자 연합회', c: 'c-hat', img: 's_fed.jpg', icn: 'users', items: [['회원조합 지원 현황판', HS + 'mem/fedsupport'], ['지원요청 처리', HS + 'mem/fedqueue'], ['조합·마을 현황', HS + 'adm/villages'], ['공지·자료 배포', HS + 'mem/library'], ['사무국 운영', HS + 'mem/fedoffice'], ['전남 발전 현황', HS + 'mem/stat']] },
 };
 /* 햇소자 선택 기능(이용권 options 키) → 세부 메뉴. 이용권이 있으면 고른 것만, 등급으로 물러선 회원(이용권 없음)은 전부 */
@@ -1160,7 +1173,7 @@ function renderSideHome() {
       : (requestable(it.need) ? `<li class="locked"><a href="#locked" data-need="${esc(it.need || '')}" data-t="${esc(it.t)}"><span>🔒 ${esc(it.t)}</span><span class="rq">${esc(needText(it.need))}</span></a></li>` : '')).join('');
     if (lis) h += `<div class="cap">직원 · 관리</div>` + sgHTML('staff', '직원 · 관리', { c: 'c-g', icn: 'tool' }, lis, false);
   }
-  h += (adm ? `<div class="smore"><a href="/members.html#applyBox" id="sideApply">${ic('list', 's')}서비스 신청 확인<span class="apn" data-apn></span></a></div>` : `<div class="smore"><a href="#/join">${ic('plus', 's')}서비스 더 고르기</a></div>`)
+  h += (adm ? `<div class="smore"><a href="/members.html#applyBox" id="sideApply">${ic('list', 's')}서비스 신청 확인<span class="apn" data-apn></span></a></div>` : `<div class="smore"><a href="#/join" class="smore-pay">${ic('plus', 's')}${moreTxt()}</a></div>`)
     + `<div class="sfoot"><a href="#/map">🗺️ 둘러보기(사이트맵)</a></div></nav>`;
   $('#side').innerHTML = h;
   if (adm && !preview) loadApplyN();
@@ -1218,10 +1231,10 @@ const JOIN_POLICY = 'https://talk.sakyowon.co.kr/system?go=join';   // 의정지
 function lockHow(need) {
   const C = { label: '✉️ 사교원에 요청하기', href: '#/ask' };   // 11-18: 문의는 통합 문의 화면으로 모은다(닫혀 있으면 그 화면이 홈페이지 창구를 안내)
   if (need === 'admin') return { txt: '통합관리자만 쓰는 메뉴입니다. 따로 신청할 수 없습니다.', act: [] };
-  if (need === 'perm:정책지원관') return { txt: '지자체 의정지원시스템은 구독 서비스입니다. 구독을 신청하면 이용 권한이 열립니다. 신청 전에도 둘러보기로 화면을 살펴볼 수 있습니다.', act: [{ label: '📝 의정지원 구독 신청', href: JOIN_POLICY, ext: true }, { label: '👀 둘러보기', href: 'https://talk.sakyowon.co.kr/system', ext: true }] };
-  if (need === 'role:staff') return { txt: '사교원 직원(매니저회원) 전용 메뉴입니다. 직원이시면 통합관리자에게 매니저회원 승인을 요청해 주세요.', act: [C] };
-  if (need === 'role:coop' || need === 'role:federation') return { txt: `햇빛소득마을 ${need === 'role:coop' ? '협동조합' : '연합회'} 회원용 메뉴입니다. 「서비스 더 고르기」에서 햇소자를 고르면 승인 뒤 열립니다.`, act: [{ label: '➕ 서비스 더 고르기', href: '#/join' }, C] };
-  if (need.startsWith('perm:')) return { txt: `체크권한 「${need.slice(5)}」이 필요한 메뉴입니다. 매니저회원에게 통합관리자가 켜 주는 권한이라, 필요하면 요청해 주세요.`, act: [C] };
+  if (need === 'perm:정책지원관') return { txt: '의정지원시스템은 이용료를 내고 쓰는 서비스입니다. 이용을 신청하면 모든 기능이 열립니다. 신청 전에도 둘러보기로 화면을 살펴볼 수 있습니다.', act: [{ label: '📝 의정지원 구독 신청', href: JOIN_POLICY, ext: true }, { label: '👀 둘러보기', href: 'https://talk.sakyowon.co.kr/system', ext: true }] };
+  if (need === 'role:staff') return { txt: '사교원 직원(매니저) 전용 메뉴입니다. 직원이시면 통합관리자에게 매니저 승인을 요청해 주세요.', act: [C] };
+  if (need === 'role:coop' || need === 'role:federation') return { txt: `햇빛소득마을 ${need === 'role:coop' ? '협동조합' : '연합회'} 회원용 메뉴입니다. 「서비스 이용 신청」에서 햇소자를 고르면 승인 뒤 열립니다.`, act: [{ label: '➕ 서비스 이용 신청', href: '#/join' }, C] };
+  if (need.startsWith('perm:')) return { txt: `체크권한 「${need.slice(5)}」이 필요한 메뉴입니다. 통합관리자가 매니저에게 켜 주는 권한입니다. 필요하면 통합관리자에게 요청해 주세요.`, act: [C] };
   return { txt: '로그인하면 열리는 메뉴입니다.', act: [{ label: '🔑 로그인', href: '#login' }] };
 }
 function closeLockDrop(back) {
@@ -1293,6 +1306,7 @@ function route() {
     else goBackIfReady().then(ok => { if (!ok) checkTempPassword(); });
     history.replaceState(null, '', location.pathname + location.search); return route();
   }
+  if ((h === '#login' || h === '#/login') && me && BOOTED) { $('#authModal').classList.remove('on'); history.replaceState(null, '', location.pathname + location.search + '#/'); return route(); }   // 11-27 전수개선 E-5: 이미 로그인한 회원에게 로그인 창을 띄우지 않는다
   if (h === '#login' || h === '#/login') openAuth('login');
   if (h === '#signup' || h === '#/signup') { history.replaceState(null, '', location.pathname + location.search + '#/join'); }   // 옛 가입 주소 → 가입 3걸음
   if (h.startsWith('#/contact')) { history.replaceState(null, '', location.pathname + location.search + '#/ask'); }
@@ -1405,7 +1419,7 @@ async function loggedIn(user) {
   if (window.skAiDock && !stay) { document.documentElement.classList.add('booting'); location.reload(); }   // 대화창을 로그인 판으로 다시 붙이려 새로 읽는다 — 그 사이 화면은 가린다
 }
 async function forgot(emailEl, msgEl) {
-  const email = ($(emailEl).value || '').trim() || prompt('가입한 이메일을 입력하세요:') || '';
+  const email = ($(emailEl).value || '').trim() || prompt('가입한 이메일을 입력해 주세요.') || '';
   const m = $(msgEl);
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) { m.className = 'msg err'; m.textContent = '이메일 주소를 입력해 주세요.'; return; }
   await api('/api/auth/forgot', { method: 'POST', body: { email: email.trim().toLowerCase() } });
@@ -1513,7 +1527,7 @@ const MX_HEAD = ['통합관리자', '매니저', '연합회원', '협동조합�
 const isStaffView = () => !!me && (RANK[me.role] || 0) >= RANK.staff;   // 11-19 이사장 지시: 직원(매니저·통합관리자) 전용 권한·메뉴 안내는 직원에게만
 const MX_HIDE = 2;   // 11-19 이사장 지시: 첫 화면 표에서 통합관리자·매니저 열은 숨긴다(내부 직원 등급). 숨긴 열만 ● 인 줄(그룹웨어·관리)도 뺀다
 const MX = [['사이트 소개·문의·공개 자료', '●', '●', '●', '●', '●', '●', '●'], ['AI 대화창', '●', '●', '●', '●', '●', '●', '하루 한도'], ['내 폴더', '●', '●', '●', '●', '●', '●', '—'],
-  ['아카데미(실습·학습·팀러닝·화상회의)', '●', '●', '선택', '선택', '선택', '●', '맛보기'], ['햇소자 조합 메뉴', '●', '체크권한', '—', '●', '—', '—', '—'], ['햇소자 연합회 메뉴', '●', '체크권한', '●', '—', '—', '—', '—'],
+  ['아카데미(실습·학습·팀러닝·화상회의)', '●', '●', '●', '●', '●', '●', '맛보기'], ['햇소자 조합 메뉴', '●', '체크권한', '—', '●', '—', '—', '—'], ['햇소자 연합회 메뉴', '●', '체크권한', '●', '—', '—', '—', '—'],
   ['의정지원시스템', '●', '체크권한', '선택', '선택', '●', '선택', '둘러보기'], ['그룹웨어(머리 단추)', '●', '●', '—', '—', '—', '—', '—'], ['관리(회원·납부·발송)', '●', '체크권한', '—', '—', '—', '—', '—']];
 function pcard(c, i, n, sub, price, tag, lines, extra) {
   return `<article class="card pcard ${c}"><div class="pn"><span class="bub">${ic(i)}</span><span><b>${esc(n)}</b><small>${esc(sub)}</small></span></div>${price}${tag ? `<div>${tag}</div>` : ''}<ul>${lines.map(l => `<li>${ic('check', 's')}<span>${l}</span></li>`).join('')}</ul>${extra || ''}</article>`;
@@ -1556,7 +1570,7 @@ function startHTML() {
   const feat = (c, i, t) => `<span class="it ${c}"><span class="bub">${ic(i)}</span>${t}</span>`;
   const cell = v => { const c = v === '●' ? 'mxon' : v === '—' ? 'mxoff' : 'mxopt'; return `<td class="c"><span class="${c}"${v === '●' ? ' aria-label="이용 가능"' : v === '—' ? ' aria-label="이용 안 함"' : ''}>${v}</span></td>`; };
   const cta = me
-    ? `<a class="btn y big" href="#/">내 페이지로</a><a class="btn w big" href="#/join">서비스 더 고르기</a><a class="btn w big" href="#/ask">문의하기</a>`
+    ? `<a class="btn y big" href="#/">내 페이지로</a><a class="btn w big" href="#/join">${moreTxt()}</a><a class="btn w big" href="#/ask">문의하기</a>`
     : `<a class="btn y big" href="#/join" data-cta="join">회원가입</a><a class="btn w big" href="#/ask" data-cta="ask">문의하기</a>`;
   return `<section class="hero2" aria-labelledby="hHero">${pic('hero.jpg', '').replace('loading="lazy"', 'loading="eager"')}<div class="uw"><span class="eyebrow">지역에서 일하는 사람들의 업무·학습 플랫폼</span>` +
     `<h2 class="h1" id="hHero">로컬리스트 플랫폼,<br>사교원 통합사이트</h2><p>한 계정으로, 내가 고른 서비스만.</p><div class="cta">${cta}</div>` +
@@ -1661,7 +1675,7 @@ function renderMyBox() {
   else t1 += `<p class="note" style="margin-top:6px">${me.role === 'admin' ? '통합관리자는 전 서비스를 이용료 없이 씁니다.' : staff ? '매니저는 이용료 없이, 체크권한으로 열린 서비스(' + keys.map(k => SVC[k].n).join(' · ') + ')를 씁니다.' : keys.length ? '지금 등급으로 쓰는 서비스: ' + keys.map(k => SVC[k].n).join(' · ') : '고른 유료 서비스가 없습니다. 필요한 서비스를 골라 보세요.'}</p>`;
   t1 += (me.role === 'admin' && !preview
     ? `<div class="myacts"><a class="btn sm p" href="/members.html#applyBox" id="myApply">${ic('list', 's')}서비스 신청 확인<span class="apn" data-apn></span></a><a class="btn sm" href="/members.html">회원·납부 관리</a></div>`
-    : `<div class="myacts"><a class="btn sm p" href="#/join" id="myMore">${ic('plus', 's')}서비스 더 고르기</a></div>`) + `<div class="msg" id="myMsg" aria-live="polite"></div></div>`;
+    : `<div class="myacts"><a class="btn sm p" href="#/join" id="myMore">${ic('plus', 's')}${moreTxt()}</a></div>`) + `<div class="msg" id="myMsg" aria-live="polite"></div></div>`;
   if (me.role === 'admin' && !preview) loadApplyN();
   // ② 이용료·납부 상태
   let t2 = `<div class="tile" id="tilePay"><div class="hd">${ic('card', 's')}이용료 · 납부 상태</div>`;
@@ -1675,6 +1689,7 @@ function renderMyBox() {
     const inv = (MB.invoices || []).find(i => i.status === 'wait');
     const tl = trialLine(MB);
     t2 += `<div class="v" id="myFee">${fee ? feeTxt : '낼 이용료가 없습니다'}</div>`;
+    if (!fee && !live.length && tierOf(me) === 'free') t2 += `<a class="paycta" href="#/join" id="payCta"><b>⭐ 유료 서비스 신청</b><span>햇소자 · 아카데미 · 의정지원을 내 페이지에 더합니다</span></a>`;
     if (inv) {
       const due = live.map(s => s.grace_until).filter(Boolean).sort()[0];
       t2 += `<div style="margin-top:6px"><span class="st wait">입금 대기</span></div><ul class="plain kv" id="myInv" style="margin-top:6px"><li><span>낼 금액</span><b>${won(inv.amount)}${inv.months === 12 ? ' (연납)' : ''}</b></li><li><span>입금 계좌</span><b>${esc(MB.bank || '계좌 안내 준비 중')}</b></li>${MB.payinfo ? `<li><span>입금자명</span><b>${esc(MB.payinfo.depositor || '')}</b></li>` : ''}${due ? `<li><span>입금 기한</span><b>${esc(ymd(due))}</b></li>` : ''}</ul><p class="note" style="margin-top:4px">입금이 확인되면 자동으로 열립니다.</p>`;
@@ -1723,7 +1738,7 @@ function renderHome() {
   if (!preview) loadMB().then(() => { if (onHome()) { renderGreet(); renderMyBox(); renderSideHome(); } });
 }
 
-/* ── 회원가입 3걸음(#/join) — ①계정 정보 ②이용 서비스 고르기 ③이용료 납부 정보. 로그인한 회원은 2걸음부터(「서비스 더 고르기」), #/join/pay 는 납부 정보만 고치기
+/* ── 회원가입 3걸음(#/join) — ①계정 정보 ②이용 서비스 고르기 ③이용료 납부 정보. 로그인한 회원은 2걸음부터(「서비스 이용 신청」), #/join/pay 는 납부 정보만 고치기
    계정은 기존 가입 API(/api/auth/signup)로 만들고, 로그인된 상태에서 /api/membership/apply 를 부른다. 바로 로그인이 안 되면 고른 서비스(상품 키만)를 이 기기에 잠시 두었다가 내 페이지 「신청 이어가기」로 잇는다 */
 const JOIN_KEY = 'sk_join_pending';
 function stashGet() { try { const v = JSON.parse(localStorage.getItem(JOIN_KEY) || 'null'); return (v && Array.isArray(v.picks) && v.picks.length) ? v : null; } catch (_) { return null; } }
@@ -1785,7 +1800,7 @@ function pickerHTML() {
   const picks = joinPicks(), free = !picks.length, heldAny = Object.keys(J.held).length > 0;
   let h = '<div class="pick" id="pickBox">';
   h += `<div class="svc c-g${free ? ' sel' : ''}"><div class="hd"><input type="checkbox" id="j-free" data-svc="free"${free ? ' checked' : ''}${heldAny ? ' disabled' : ''} aria-describedby="j-freeD"><label class="t" for="j-free"><b>무료로 시작</b><small id="j-freeD">둘러보기 · 문의 · AI 질문(하루 한도) · 공개 자료</small></label><span class="pr">무료</span></div></div>`;
-  if (!PLANS.ok) return h + `<div class="notice" id="pickNone" style="margin:0"><b>이용료 안내 준비 중</b> — 지금은 무료로 가입하실 수 있고, 유료 서비스는 열리는 대로 「서비스 더 고르기」에서 고를 수 있습니다.</div></div>`;
+  if (!PLANS.ok) return h + `<div class="notice" id="pickNone" style="margin:0"><b>이용료 안내 준비 중</b> — 지금은 무료로 가입하실 수 있고, 유료 서비스는 열리는 대로 「서비스 이용 신청」에서 고를 수 있습니다.</div></div>`;
   PLANS.products.forEach(p => {
     const k = p.product, m = pmOf(k), s = J.sel[k] || { on: false, opts: [] }, held = J.held[k], opts = Array.isArray(p.options) ? p.options : [];
     const all = opts.length > 0 && opts.every(o => s.opts.includes(o.key));
@@ -1824,7 +1839,7 @@ function sbpvHTML() {
   let h = '<div class="card sbpv" id="sbpvBox" aria-live="polite"><h3>로그인하면 보일 사이드바</h3><div class="mini"><div class="fx">내 페이지 · AI 대화창</div>' + ((picks.length || (me && !noFolder())) ? '<div class="fx">내 폴더</div>' : '');
   keys.forEach(k => { const sel = J.sel[k]; const opt = SVC_OPT[k]; const items = SVC[k].items.concat(opt ? Object.keys(opt).filter(o => !sel || !sel.on || sel.opts.includes(o)).map(o => opt[o]) : []); h += `<div class="g"><span class="cchip ${SVC[k].c}">${esc(SVC[k].n)}</span></div>` + items.map(i => `<div class="i">${esc(i[0])}</div>`).join(''); });
   if (!keys.length) h += `<div class="g"><span class="cchip c-rs">무료로 써 보기</span></div>` + lookItems([]).map(i => `<div class="i">${esc(i[0])}</div>`).join('');
-  return h + '<div class="fx" style="color:var(--g7)">+ 서비스 더 고르기</div></div></div>';
+  return h + '<div class="fx" style="color:var(--g7)">+ 서비스 이용 신청</div></div></div>';
 }
 function payFormHTML() {
   const P = J.pay, tot = joinTotal(), hasSaved = !!(MB && MB.payinfo), v = k => esc(P[k] || '');
@@ -1851,7 +1866,7 @@ function doneHTML() {
   const D = J.done, nm = esc((me && (me.name || me.email)) || J.f.name || '회원');
   let h = `<div class="card done" id="joinDone" data-kind="${esc(D.kind)}"><div class="dogw"><img class="dogr" src="${IMG}dog2.jpg" alt=""><span class="okb" aria-hidden="true">${ic('check', 's')}</span></div>`;
   const goMy = `<div class="cta" style="margin-top:14px"><a class="btn p" href="#/" id="toMy">내 페이지로</a><a class="btn" href="#/start">첫 화면으로</a></div>`;
-  if (D.kind === 'free') h += `<h2>가입되었습니다</h2><p class="lead" style="margin:6px 0 0">${nm} 님, 고맙습니다.</p><div class="box"><b>${TIER_KO.free}</b>으로 바로 쓸 수 있습니다. 나중에 「서비스 더 고르기」에서 서비스를 더할 수 있습니다.</div>` + goMy;
+  if (D.kind === 'free') h += `<h2>가입되었습니다</h2><p class="lead" style="margin:6px 0 0">${nm} 님, 고맙습니다.</p><div class="box"><b>${TIER_KO.free}</b>으로 바로 쓸 수 있습니다. 나중에 「서비스 이용 신청」에서 서비스를 더할 수 있습니다.</div>` + goMy;
   else if (D.kind === 'pay') h += `<h2>납부 정보를 저장했습니다</h2><div class="box"><ul class="plain kv">${payinfoRows(MB && MB.payinfo)}</ul></div>` + goMy;
   else if (D.kind === 'closed') h += `<h2>${D.wasNew ? '계정은 만들어졌습니다' : '유료 서비스 신청은 ' + openWhen()}</h2><p class="lead" style="margin:6px 0 0">${nm} 님, 고맙습니다.</p><div class="box" id="closedBox"><b>유료 서비스 신청은 ${openWhen()}.${D.wasNew ? ' 계정은 만들어졌습니다.' : ''}</b><br>고르신 서비스는 이 기기에 적어 두었습니다. 신청이 열리면 내 페이지의 「신청 이어가기」에서 이어서 하실 수 있고, 그때까지 ${TIER_KO.free}으로 쓰실 수 있습니다.</div>` + goMy;
   else if (D.kind === 'needlogin') h += `<h2>계정이 만들어졌습니다</h2><div class="box">${D.picks ? '로그인한 뒤 내 페이지의 <b>「신청 이어가기」</b>를 누르면 고르신 서비스 신청을 이어서 합니다.' : '로그인하면 바로 쓸 수 있습니다.'}</div><div class="cta" style="margin-top:14px"><a class="btn p" href="#login">로그인</a></div>`;
@@ -1871,7 +1886,7 @@ function joinDraw(noSave) {
   const act = document.activeElement && root.contains(document.activeElement) ? document.activeElement.id : '';
   if (!noSave) joinSave();
   const f = J.f, v = k => esc(f[k] || '');
-  let h = `<div class="sech"><h2>${J.payOnly ? '납부 정보 고치기' : me && !J.created ? '서비스 더 고르기' : '회원가입'}</h2><p>${J.payOnly ? '이용료 납부 방식과 증빙 정보를 고칩니다.' : me && !J.created ? '필요한 서비스를 더 골라 보세요. 고른 대로 사이드바와 이용료가 정해집니다.' : '세 걸음이면 끝납니다. 무료만 고르면 납부 정보는 건너뜁니다.'}</p></div>` + (J.payOnly ? '' : stepsHTML());
+  let h = `<div class="sech"><h2>${J.payOnly ? '납부 정보 고치기' : me && !J.created ? '서비스 이용 신청' : '회원가입'}</h2><p>${J.payOnly ? '이용료 납부 방식과 증빙 정보를 고칩니다.' : me && !J.created ? '필요한 서비스를 더 골라 보세요. 고른 대로 사이드바와 이용료가 정해집니다.' : '세 걸음이면 끝납니다. 무료만 고르면 납부 정보는 건너뜁니다.'}</p></div>` + (J.payOnly ? '' : stepsHTML());
   if (J.done) h += doneHTML();
   else if (J.step === 1) {
     h += `<form class="card" id="f1" novalidate><div class="form">` +
@@ -1884,7 +1899,7 @@ function joinDraw(noSave) {
       `<div class="f w"><label for="suOrg">소속 <span class="hint">(선택)</span></label><input type="text" id="suOrg" data-k="org" value="${v('org')}" placeholder="마을·조합·기관"></div>` +
       `<div class="f w"><label class="ck"><input type="checkbox" id="suConsent" data-k="consent"${f.consent ? ' checked' : ''}>(필수) 만 14세 이상이며, 통합 계정 발급을 위한 개인정보 수집·이용에 동의합니다 <span class="req">*</span></label><span class="hint">이름·이메일·전화는 회원 관리와 이용료 안내에만 씁니다. <a href="account-privacy.html" target="_blank" rel="noopener">처리방침</a></span></div>` +
       `<div class="f w"><span class="hint" id="staffNote">협동조합·연합회는 다음 걸음에서 햇소자를 고르면 승인을 거쳐 열립니다.</span></div>` +
-      `</div><div id="e1">${J.err ? `<div class="err" role="alert">${esc(J.err)}</div>` : ''}</div><div class="acts"><a class="btn" href="#login">이미 계정이 있어요 — 로그인</a><span class="r"><button type="submit" class="btn p" id="joinNext1">다음 — 서비스 고르기</button></span></div></form>`;
+      `</div><div id="e1">${J.err ? `<div class="err" role="alert">${esc(J.err)}</div>` : ''}</div><div class="acts"><a class="btn" href="#login">이미 계정이 있습니다 — 로그인</a><span class="r"><button type="submit" class="btn p" id="joinNext1">다음 — 서비스 고르기</button></span></div></form>`;
   } else if (J.step === 2) {
     const picks = joinPicks(), free = !picks.length;
     const closed = !!(PLANS && PLANS.ok) && mbClosed();
@@ -2180,7 +2195,7 @@ const fmtSize = n => { n = +n || 0; if (n < 1024) return n + ' B'; if (n < 10485
 const fmtTime = t => { if (!t) return ''; const d = typeof t === 'number' ? new Date(t * (t < 1e12 ? 1000 : 1)) : new Date(t); return isNaN(d) ? String(t) : d.toLocaleString('ko-KR', { year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }); };
 const fsJoin = name => (FS.path ? FS.path + '/' : '') + name;
 function fsMsg(txt, ok) { const m = $('#fMsg'); m.className = 'msg' + (txt ? (ok ? ' ok' : ' err') : ''); m.textContent = txt || ''; }
-function renderFiles() { fsMsg(''); fsLoad(); renderLinks(); document.querySelectorAll('#fLinks button[data-say]').forEach(b => { b.hidden = dekaAdmin(); }); }   // 대화창 칸이 없는 계정(데카 띠를 쓰는 관리자)에겐 반응 없는 「상담창에 묻기」 단추를 숨긴다
+function renderFiles() { fsMsg(''); fsLoad(); renderLinks(); document.querySelectorAll('#fLinks button[data-say]').forEach(b => { b.hidden = dekaAdmin(); }); }   // 대화창 칸이 없는 계정(데카 띠를 쓰는 관리자)에겐 반응 없는 「AI 대화창에 묻기」 단추를 숨긴다
 function fsCrumb() {
   const parts = FS.path ? FS.path.split('/').filter(Boolean) : [];
   let acc = '';
@@ -2404,6 +2419,7 @@ async function boot() {
   document.documentElement.classList.remove('booting');   // 회원 정보로 화면을 그린 뒤에 보인다(깜빡임 방지)
   if (twofaWait || (BACK && !me)) openAuth('login');   // 하위 앱이 ?back= 만 달아 보낸 비로그인도 로그인 창부터
   if (me) { checkTempPassword(); loadTwofa(); }
+  if (me && !BACK && ['#login', '#/login'].includes(location.hash)) { $('#authModal').classList.remove('on'); history.replaceState(null, '', location.pathname + location.search + '#/'); route(); }   // 11-27 전수개선 E-5
 }
 /* 로그인 창 — 회원가입은 #/join 화면(3걸음) */
 function openAuth(tab, note) {
@@ -2414,6 +2430,8 @@ function openAuth(tab, note) {
   else if (note && !m.textContent) { m.className = 'msg'; m.textContent = note; }
   setTimeout(() => { const f = $(LG.pending ? '#lgCode' : (rid && $('#lgEmail').value ? '#lgPw' : '#lgEmail')); if (f) f.focus(); }, 0);
 }
+/* 11-27 전수개선: 로그인 창을 띄운 채 다른 화면(#/join·#/ask…)으로 옮기면 창이 남던 것 */
+window.addEventListener('hashchange', () => { if (!['#login', '#signup', '#/login', '#/signup'].includes(location.hash)) $('#authModal').classList.remove('on'); });
 function closeAuth() { $('#authModal').classList.remove('on'); if (['#login', '#signup', '#/login', '#/signup'].includes(location.hash)) { history.replaceState(null, '', location.pathname); route(); } }
 $('#btnLogin').addEventListener('click', () => openAuth('login'));
 $('#authClose').addEventListener('click', closeAuth);
