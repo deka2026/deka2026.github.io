@@ -70,6 +70,7 @@ function stat(s){
   if (s.key === "schedule") return `<div class="kpi" style="grid-column:1/-1"><div class="l">${esc(s.label)} <span class="s">${esc(s.asof)}</span></div>` +
     ((s.events || []).length ? s.events.map(e => `<div style="padding:4px 0"><b>${esc(e.date.slice(5).replace("-", "/"))}</b> ${esc(e.title)} ${e.kind ? `<span class="tag">${esc(e.kind)}</span>` : ""}</div>`).join("") : `<div class="s">다가오는 일정이 없습니다.</div>`) + `</div>`;
   if (s.key === "dist") return `<div class="kpi"><div class="l">${esc(s.label)}</div>` + ((s.parts || []).length ? s.parts.map(p => `<div style="font-size:14px">${esc(p.name)} <b>${num(p.value)}</b>원</div>`).join("") : `<div class="s">자료 없음</div>`) + `<div class="s">${esc(s.asof)}</div></div>`;
+  if (s.key === "strategy") return `<div class="kpi"><div class="l">${esc(s.label)}</div><div class="n" style="font-size:20px">${esc(s.text || "—")}</div>` + (s.parts || []).map(p => `<div style="font-size:14px">${esc(p.name)} <b>${esc(p.value)}</b>%</div>`).join("") + (s.note ? `<div class="s">${esc(s.note)}</div>` : "") + `<div class="s">${esc(s.asof || "")}</div></div>`;
   if (s.key === "phase") return `<div class="kpi"><div class="l">${esc(s.label)}</div><div class="n" style="font-size:20px">${esc(s.text || "—")}</div><div class="s">진행 ${num(s.value)}%</div></div>`;
   return `<div class="kpi"><div class="l">${esc(s.label)}</div><div class="n">${num(s.value)} <small>${esc(s.unit || "")}</small></div>${s.sub ? `<div class="s">${esc(s.sub)}</div>` : ""}<div class="s">${esc(s.asof || "")}</div></div>`;
 }

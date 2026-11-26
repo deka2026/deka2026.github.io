@@ -2666,6 +2666,7 @@ function navigate(){
     if(scope === 'adm' && page === 'consult') admFinLoad();
     if(scope === 'mem' && page === 'dist') distLoad();
     if(scope === 'mem' && page === 'library') shareLoad();
+    if(scope === 'mem' && (page === 'power' || page === 'dist' || page === 'docs' || page === 'home')){ if(_MY_STRAT === undefined) pwStratLoad(); else { pwMineRender(); distStratRender(); } }
     if(scope === 'mem' && page === 'power' && _MY_MONTHLY === null) powerLoadMine();
     if(scope === 'mem' && page === 'power' && _MY_PLANTS === null) plantLoad();
     if(scope === 'mem' && page === 'power' && _MY_DOCS === null) docsLoad();
@@ -4762,6 +4763,7 @@ function memPower(){
       <b>① 조합원 배당 ② 주민 마을연금 ③ 공동사업 기금 ④ 차입금 상환 ⑤ 재투자 기금</b>
       다섯 가지로 나눠 씁니다. 차입금 원리금은 <b>의무 지출</b>이라 먼저 확보하고, 남는 잉여를 어떻게 배분할지가 마을의 선택입니다.
       정답은 없고, <b>주민이 정해 20년간 유지할 수 있는 원칙</b>이 중요합니다.</p>
+      <div id="pw-mine"></div>
       <div style="display:flex;gap:10px 14px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
         <label style="display:flex;align-items:center;gap:6px;">연 매출
           <input class="input" id="pw-rev" type="number" value="22036" min="0" step="100" style="width:95px;"> 만 원</label>
@@ -4781,6 +4783,96 @@ function memPower(){
 }
 
 /* 수익 배분 전략 — 잉여(운영비·원리금 차감 후)를 5개 용도로 배분 */
+/* ─── 우리 조합 배분 전략 정하기 (2026-11-26 이사장 지시) ───
+   네 모델 비교는 계산기였고 고르는 자리가 없었다. 조합이 한 전략(또는 직접 정한 비율)을 골라 서버(/api/my/strategy)에 남긴다.
+   정한 전략은 수익 배분 계획(③공동사업 몫)·정기총회 회의록 안건·공개 현황판(「우리 조합 배분 원칙」)에서 쓴다. */
+let _MY_STRAT;              // undefined = 아직 안 읽음, null = 정한 것 없음
+const PW_USES = ['조합원배당','마을연금','공동사업','조기상환','재투자'];
+const PW_USE_LABEL = {조합원배당:'조합원 배당', 마을연금:'주민 마을연금', 공동사업:'공동사업 기금', 조기상환:'차입금 조기상환', 재투자:'재투자 기금'};
+function pwMixText(mix){ return PW_USES.filter(function(k){ return mix[k]; }).map(function(k){ return PW_USE_LABEL[k] + ' ' + mix[k] + '%'; }).join(' · '); }
+async function pwStratLoad(){
+  if(!REAL_API){ _MY_STRAT = null; pwMineRender(); return; }
+  try{
+    const j = await fetch('/api/my/strategy', {credentials:'same-origin'}).then(function(r){ return r.json(); });
+    _MY_STRAT = j.ok ? j.strategy : null;
+  }catch(e){ _MY_STRAT = null; }
+  pwMineRender();
+  if(_MY_STRAT && _MY_STRAT.inputs){   // 정할 때 넣었던 값으로 비교 칸을 채운다(비어 있는 칸만)
+    const m = {rev:'pw-rev', debt:'pw-debt', mem:'pw-mem', eld:'pw-eld', age:'pw-age', opex:'pw-opex', tax:'pw-tax', legal:'pw-legal'};
+    Object.keys(m).forEach(function(k){ const el = document.getElementById(m[k]); if(el && _MY_STRAT.inputs[k] != null) el.value = _MY_STRAT.inputs[k]; });
+  }
+  if(document.getElementById('distStratBox')) distStratRender();
+}
+function pwMineRender(){
+  const box = document.getElementById('pw-mine'); if(!box) return;
+  const s = _MY_STRAT;
+  box.innerHTML = s
+    ? '<div style="border:2px solid var(--primary);border-radius:10px;padding:12px 14px;margin-bottom:12px;background:#fff;">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;"><b>✅ 우리 조합 전략: ' + escapeHtml(s.name) + '</b>'
+      + '<span class="text-mute" style="font-size:12.5px;">' + (s.resolved_on ? '총회 의결 ' + escapeHtml(s.resolved_on) : '정한 날 ' + escapeHtml((s.updated_at || '').slice(0, 10)) + ' · 총회 의결 전') + '</span></div>'
+      + '<div style="font-size:13.5px;margin-top:4px;">' + escapeHtml(pwMixText(s.mix)) + '</div>'
+      + (s.note ? '<div class="text-mute" style="font-size:12.5px;margin-top:2px;">' + escapeHtml(s.note) + '</div>' : '')
+      + '<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;"><button class="btn btn-outline btn-sm" onclick="pwStratForm(null)">✏️ 고치기</button>'
+      + '<a class="btn btn-ghost btn-sm" href="#/mem/dist">💧 수익 배분 계획에서 보기</a><a class="btn btn-ghost btn-sm" href="#/mem/library">📣 조합원에게 공개하기</a></div></div>'
+    : '<div style="background:var(--paper-soft);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:13.5px;">아직 우리 조합 전략을 정하지 않았습니다. 「배분 비교」를 누른 뒤 마음에 드는 모델에서 <b>「우리 조합 전략으로 정하기」</b>를 누르거나, <a href="#" onclick="pwStratForm(null);return false;">비율을 직접 정하세요</a>.</div>';
+}
+function _pwInputs(){
+  const g = function(id){ const el = document.getElementById(id); return el && el.value !== '' ? Number(el.value) : null; };
+  return {rev:g('pw-rev'), debt:g('pw-debt'), mem:g('pw-mem'), eld:g('pw-eld'), age:g('pw-age'), opex:g('pw-opex'), tax:g('pw-tax'), legal:g('pw-legal')};
+}
+function pwStratForm(i){
+  if(!REAL_API){ toast('체험 모드에서는 저장되지 않습니다. 실제 조합 계정으로 로그인하면 정할 수 있습니다.'); return; }
+  const base = i == null ? null : PW_STRAT[i];
+  const cur = _MY_STRAT || {};
+  const mix = base ? base.mix : (cur.mix || {조합원배당:20, 마을연금:20, 공동사업:30, 조기상환:10, 재투자:20});
+  const name = base ? base.name : (cur.name || '우리 조합 전략');
+  showDyn({title: base ? '「' + base.name + '」을 우리 조합 전략으로' : '우리 조합 배분 전략 정하기', sub:'비율은 마을 사정에 맞게 고칠 수 있습니다. 합은 100%여야 합니다.', size:'md',
+    body: '<div class="form-row"><label>전략 이름</label><input class="input" id="psName" maxlength="30" value="' + escapeHtml(name) + '"></div>'
+      + '<input type="hidden" id="psBase" value="' + escapeHtml(base ? base.name : (cur.base || '직접')) + '">'
+      + '<div style="display:grid;grid-template-columns:1fr 110px;gap:6px 10px;align-items:center;">'
+      + PW_USES.map(function(k){ return '<label for="ps-' + k + '">' + PW_USE_LABEL[k] + '</label><span><input class="input" type="number" min="0" max="100" step="1" id="ps-' + k + '" value="' + (mix[k] || 0) + '" oninput="pwStratSum()" style="width:80px;"> %</span>'; }).join('')
+      + '</div><p id="psSum" style="font-weight:600;margin:8px 0;"></p>'
+      + '<div class="form-row"><label>총회 의결일(의결했으면)</label><input class="input" type="date" id="psDate" value="' + escapeHtml(cur.resolved_on || '') + '"></div>'
+      + '<div class="form-row"><label>메모(선택)</label><input class="input" id="psNote" maxlength="300" value="' + escapeHtml(cur.note || '') + '" placeholder="예: 3년 뒤 다시 의결"></div>'
+      + '<p class="text-mute" style="font-size:12.5px;margin-bottom:0;">지금 비교 칸에 넣은 매출·원리금·조합원 수도 함께 남깁니다. 배분 비율의 최종 결정은 조합 총회 의결 사항입니다.</p>',
+    foot: '<button class="btn btn-outline" onclick="closeDyn()">취소</button><button class="btn btn-primary" onclick="pwStratSave()">✅ 우리 조합 전략으로 저장</button>'});
+  pwStratSum();
+}
+function pwStratSum(){
+  const t = PW_USES.reduce(function(a, k){ return a + (Number((document.getElementById('ps-' + k) || {}).value) || 0); }, 0);
+  const el = document.getElementById('psSum'); if(el){ el.textContent = '합계 ' + Math.round(t * 10) / 10 + '%' + (Math.abs(t - 100) > 0.05 ? ' — 100%가 되게 맞춰 주세요' : ' ✓'); el.style.color = Math.abs(t - 100) > 0.05 ? 'var(--danger)' : 'var(--primary)'; }
+  return t;
+}
+async function pwStratSave(){
+  if(Math.abs(pwStratSum() - 100) > 0.05){ toast('다섯 용도 비율의 합을 100%로 맞춰 주세요.'); return; }
+  const mix = {}; PW_USES.forEach(function(k){ mix[k] = Number(document.getElementById('ps-' + k).value) || 0; });
+  const body = {name:document.getElementById('psName').value, base:document.getElementById('psBase').value, mix:mix,
+    resolved_on:document.getElementById('psDate').value, note:document.getElementById('psNote').value, inputs:_pwInputs()};
+  try{
+    const r = await fetch('/api/my/strategy', {method:'PUT', credentials:'same-origin', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+    const j = await r.json().catch(function(){ return {}; });
+    if(!j.ok){ toast('저장하지 못했습니다: ' + (j.error || r.status)); return; }
+    _MY_STRAT = j.strategy; closeDyn(); pwMineRender();
+    if(document.getElementById('pw-strategy') && document.getElementById('pw-strategy').innerHTML) pwStrategy();
+    toast('「' + j.strategy.name + '」을 우리 조합 전략으로 정했습니다.');
+  }catch(e){ toast('서버에 닿지 못했습니다.'); }
+}
+/* 수익 배분 계획 화면 — 정한 전략을 보이고 ③공동사업 몫(잔여 중 배당 아닌 몫)에 넣을 수 있게 */
+function distStratRender(){
+  const box = document.getElementById('distStratBox'); if(!box) return;
+  const s = _MY_STRAT;
+  if(!s){ box.innerHTML = '<div class="card mt-20" style="font-size:13.5px;">아직 우리 조합 배분 전략을 정하지 않았습니다. <a href="#/mem/power">⚡ 발전·정산·배당 → 수익금 배분 전략</a>에서 네 모델을 비교하고 정하세요.</div>'; return; }
+  const biz = Math.round((100 - (s.mix.조합원배당 || 0))) / 100;
+  box.innerHTML = '<div class="card mt-20" style="border-left:4px solid var(--primary);"><div class="card-title"><h3 class="serif">✅ 우리 조합 배분 전략: ' + escapeHtml(s.name) + '</h3>'
+    + '<span class="badge ' + (s.resolved_on ? 'badge-success' : 'badge-mute') + '">' + (s.resolved_on ? '총회 의결 ' + escapeHtml(s.resolved_on) : '총회 의결 전') + '</span></div>'
+    + '<p style="margin:0 0 6px;">' + escapeHtml(pwMixText(s.mix)) + '</p>'
+    + '<p class="text-mute" style="font-size:12.5px;margin:0 0 8px;">이 계획의 ③·④는 원리금·운영관리비를 낸 뒤 남는 돈을 나눕니다. 전략의 조합원 배당 ' + (s.mix.조합원배당 || 0) + '%를 ④배당으로, 나머지(마을연금·공동사업·조기상환·재투자)를 ③공동사업 몫으로 보면 ③ 몫은 <b>' + biz + '</b>입니다.</p>'
+    + '<button class="btn btn-outline btn-sm" onclick="distUseStrat(' + biz + ')">③공동사업 몫을 ' + biz + '로 넣고 다시 계산</button></div>';
+}
+function distUseStrat(v){
+  const el = document.getElementById('dp-biz'); if(!el){ toast('아래 배분·융자 조건 칸을 찾지 못했습니다.'); return; }
+  el.value = v; distSave();
+}
 const PW_STRAT = [
   {name:'상환 가속형', tag:'안정 우선',
    desc:'남는 돈의 상당 부분을 원금 조기상환에 넣어 이자 총액을 줄입니다. 초기 몇 년은 배당이 적지만, 상환이 끝나는 해부터 공동소득이 크게 늘어납니다.',
@@ -4872,8 +4964,8 @@ function pwStrategy(){
       </tbody>
     </table></div>
     <div class="grid grid-2 mt-20">
-      ${PW_STRAT.map(s => `
-        <div class="card" style="box-shadow:none;background:var(--paper-soft);">
+      ${PW_STRAT.map((s, si) => `
+        <div class="card" style="box-shadow:none;background:var(--paper-soft);${_MY_STRAT && _MY_STRAT.base === s.name ? 'outline:2px solid var(--primary);' : ''}">
           <div class="card-title" style="margin-bottom:6px;">
             <h3 class="serif" style="font-size:16px;">${s.name}</h3>
             <span class="badge badge-mute">${s.tag}</span></div>
@@ -4886,7 +4978,11 @@ function pwStrategy(){
           <div class="text-mute" style="font-size:12.5px;line-height:1.7;">
             <b>이 전략이 맞는 마을</b> — ${s.fit}<br>
             <b style="color:#9c6a00;">주의</b> — ${s.risk}</div>
+          ${_MY_STRAT && _MY_STRAT.base === s.name ? '<div style="margin-top:8px;font-weight:600;color:var(--primary);">✅ 지금 우리 조합 전략</div>'
+            : `<button class="btn btn-primary btn-sm" style="margin-top:8px;" onclick="pwStratForm(${si})">✅ 우리 조합 전략으로 정하기</button>`}
         </div>`).join('')}
+    </div>
+    <div style="text-align:right;margin-top:8px;"><button class="btn btn-outline btn-sm" onclick="pwStratForm(null)">✏️ 비율을 직접 정하기</button>
     </div>
     <div style="background:var(--paper-soft);border-radius:8px;padding:12px 14px;margin-top:12px;">
       <b>배분을 정할 때 함께 문서로 남길 것</b>
@@ -6024,7 +6120,7 @@ async function distLoad(force){
   _DIST.때 = new Date().toISOString();
   _DIST.로딩 = false;
   const main = document.getElementById('appMain');
-  if(main && currentRoute() === 'mem/dist') main.innerHTML = renderMemberPage('dist');
+  if(main && currentRoute() === 'mem/dist'){ main.innerHTML = renderMemberPage('dist'); if(_MY_STRAT === undefined) pwStratLoad(); else distStratRender(); }
 }
 function distRefresh(){ _DIST.때 = null; distLoad(true); toast('다시 계산하는 중입니다.'); }
 
@@ -6231,7 +6327,8 @@ function memDist(){
   const P = _DIST.plan;
   if(!P) return `<div class="sec-head"><h1>💧 수익 배분 계획 (20년)</h1></div>
     <div class="card"><p style="margin:0;">${REAL_API ? '계산하는 중…'
-      : '체험 모드에서는 계획을 세우지 않습니다. 실계정으로 로그인하면 올린 실적으로 자동 계산됩니다.'}</p></div>`;
+      : '체험 모드에서는 계획을 세우지 않습니다. 실계정으로 로그인하면 올린 실적으로 자동 계산됩니다.'}</p></div>
+    <div id="distStratBox"></div>`;
   const j = P['판정'], p = P.policy, sv = _DIST.solve || {};
   const 미산출 = j['사업기간_운영가능'] === null;
   const 가능 = j['사업기간_운영가능'] === true;
@@ -6243,6 +6340,7 @@ function memDist(){
         조합마다 융자 조건이 달라 같은 비율로는 어떤 조합이 이자도 못 냅니다.</p>
     </div>
     ${_DIST.예시 ? DEMO_FIN_NOTE : ''}
+    <div id="distStratBox"></div>
 
     <div class="card" style="border-left:4px solid var(--primary);">
       <div class="card-title"><h3 class="serif">배분 순위</h3><span class="badge badge-primary">총회 의결 사항</span></div>
@@ -10285,6 +10383,7 @@ async function shareLoad(){
 function _shareVal(s){
   if(s.key === 'schedule') return (s.events || []).length ? (s.events || []).slice(0, 3).map(function(e){ return '<div style="font-size:13px;">' + escapeHtml(e.date.slice(5)) + ' ' + escapeHtml(e.title) + '</div>'; }).join('') : '<div class="text-mute" style="font-size:13px;">일정 없음</div>';
   if(s.key === 'dist') return (s.parts || []).length ? s.parts.map(function(p){ return '<div style="font-size:12.5px;">' + escapeHtml(p.name) + ' ' + Number(p.value).toLocaleString() + '원</div>'; }).join('') : '<div class="text-mute" style="font-size:13px;">자료 없음</div>';
+  if(s.key === 'strategy') return '<div class="kpi-n" style="font-size:18px;">' + escapeHtml(s.text || '—') + '</div>' + (s.parts || []).map(function(p){ return '<div style="font-size:12.5px;">' + escapeHtml(p.name) + ' ' + p.value + '%</div>'; }).join('');
   if(s.key === 'phase') return '<div class="kpi-n" style="font-size:20px;">' + escapeHtml(s.text || '—') + '</div><div class="kpi-sub">진행 ' + (s.value || 0) + '%</div>';
   return '<div class="kpi-n">' + (s.value == null ? '—' : Number(s.value).toLocaleString()) + '<span style="font-size:13px;font-weight:500;"> ' + escapeHtml(s.unit || '') + '</span></div>' + (s.sub ? '<div class="kpi-sub">' + escapeHtml(s.sub) + '</div>' : '');
 }
@@ -12284,6 +12383,9 @@ const DOC_PROMPTS = {
 };
 function buildDocPrompt(name, v){
   const f = DOC_PROMPTS[name];
+  /* 11-26: 조합이 정한 배분 전략을 정기총회 회의록 안건에 넣는다 */
+  if(f && name === '정기총회 회의록' && _MY_STRAT) return f(v) + '\n안건에 「수익 배분 원칙」을 넣으세요: 우리 조합 배분 전략은 「' + _MY_STRAT.name + '」(' + pwMixText(_MY_STRAT.mix) + ')'
+    + (_MY_STRAT.resolved_on ? ', ' + _MY_STRAT.resolved_on + ' 총회 의결.' : ' — 이번 총회에서 의결할 안건으로 쓰세요.');
   if(f) return f(v);
   const lines = (DOC_FIELDS[name]||[]).map(x => x.label + ': ' + (v[x.k]||'')).join('\n');
   return '다음 정보를 바탕으로 "' + name + '" 문서를 공식 서식으로 작성해주세요.\n' + lines;
