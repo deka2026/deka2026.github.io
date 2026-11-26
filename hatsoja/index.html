@@ -793,7 +793,7 @@ h1,h2,h3{font-weight:800;letter-spacing:-.02em;}
 @media (min-width:901px){ .pub-nav,.role-nav{display:none!important;} .topnav-in>.brand{margin-right:auto;} }
 /* H-09: 사이드바 맨 위 알약 두 개 */
 .side-top{display:flex;gap:6px;flex-wrap:wrap;padding:0 4px 12px;margin-bottom:10px;border-bottom:1px solid var(--line-soft);}
-.side-pill{border:1px solid var(--line-soft);background:#fff;border-radius:999px;padding:6px 11px;font-size:13px;cursor:pointer;color:var(--ink);font-weight:600;}
+.side-pill{border:1px solid var(--line-soft);background:#fff;border-radius:999px;padding:5px 9px;font-size:12.5px;cursor:pointer;color:var(--ink);font-weight:600;}
 .side-pill:hover{background:var(--primary-50);}
 .side-pill.gold{background:#fff6dc;border-color:#e9cf86;color:#6b4e00;}
 .side-tools,.side-tools button{font-size:13px;}
@@ -813,6 +813,8 @@ details.prc-rule{margin-top:18px;}
 details.prc-rule>summary{cursor:pointer;font-weight:700;list-style:revert;}
 details.prc-rule[open]>summary{margin-bottom:8px;}
 @media (max-width:600px){.pub-photo{height:110px;}}
+/* H-04 덧: 데스크톱에서도 표가 든 카드는 카드 안에서만 옆으로 민다(재무제표 1,407px 넘침) */
+#v-app .main .card:has(table){overflow-x:auto;}
 /* H-01: 휴대폰 로그인 화면 — 사이드바는 ☰ 로만 연다(머리띠 아래 덮개) */
 @media (max-width:900px){
   #v-app .app>.sidebar{display:none;}
@@ -1254,7 +1256,7 @@ details.prc-rule[open]>summary{margin-bottom:8px;}
       <h1>가입 절차</h1>
       <p class="sec-desc">햇소자 플랫폼 가입 및 마을 등록 절차를 안내합니다.</p>
     </div>
-    <div class="pub-photo" style="--ph:url('img/sun-workshop-back-01.jpg')" role="img" aria-label="햇빛소득마을 워크숍(2026년 1월)"><span>햇빛소득마을 워크숍(2026년 1월)</span></div>
+    <div class="pub-photo" style="--ph:url('/hatsoja/img/sun-workshop-back-01.jpg')" role="img" aria-label="햇빛소득마을 워크숍(2026년 1월)"><span>햇빛소득마을 워크숍(2026년 1월)</span></div>
     <div data-hs-apply></div>
 
     <div class="card">
@@ -1317,7 +1319,7 @@ details.prc-rule[open]>summary{margin-bottom:8px;}
       <h1>참여 사례</h1>
       <p class="sec-desc">햇빛소득마을 사업에 참여 중인 마을들의 사례를 소개합니다.</p>
     </div>
-    <div class="pub-photo" style="--ph:url('/img/unified/b_co3.jpg')" role="img" aria-label="마을 안 태양광 그늘막"><span>마을 안 태양광 그늘막</span></div>
+    <div class="pub-photo" style="--ph:url('/img/unified/b_co3.jpg');background-position:center 12%" role="img" aria-label="마을 안 태양광 그늘막"><span>마을 안 태양광 그늘막</span></div>
 
     <div class="grid grid-2">
       <div class="case">
@@ -1370,7 +1372,7 @@ details.prc-rule[open]>summary{margin-bottom:8px;}
       </div>
 
       <div class="case">
-        <div class="case-ph" style="background:#ede4fb" aria-hidden="true">🧂</div>
+        <div class="case-ph" style="background:#ede4fb" aria-hidden="true">🏞</div>
         <div class="case-body">
           <span class="case-tag">사전 검토</span>
           <div class="case-title">신안군 D리 폐염전 태양광</div>
@@ -1399,7 +1401,7 @@ details.prc-rule[open]>summary{margin-bottom:8px;}
       <h1>자주 묻는 질문</h1>
       <p class="sec-desc">궁금한 점을 먼저 확인해보세요. 없으면 상담 신청으로 문의해 주세요.</p>
     </div>
-    <div class="pub-photo" style="--ph:url('img/sun-workshop-back-01.jpg')" role="img" aria-label="햇빛소득마을 워크숍(2026년 1월)"><span>햇빛소득마을 워크숍(2026년 1월)</span></div>
+    <div class="pub-photo" style="--ph:url('/hatsoja/img/sun-workshop-back-01.jpg')" role="img" aria-label="햇빛소득마을 워크숍(2026년 1월)"><span>햇빛소득마을 워크숍(2026년 1월)</span></div>
 
     <div class="faq">
       <details open>
