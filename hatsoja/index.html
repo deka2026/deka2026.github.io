@@ -1865,7 +1865,8 @@ const ROLE_MENUS = {
       ['mem','stat','🗺','전남 발전 현황'],   // 11-26 이사장 지시: 운영관리 → 확장
       ['mem','library','📚','공지·자료실'],
       ['mem','video','🎬','활동 영상 만들기'],
-      ['mem','chat','💬','AI 상담'],
+      /* 11-26 이사장 지시: AI 상담은 업무 시작 상담창과 같은 기능(같은 sendChat·/api/ai/chat, 업무 시작엔 음성 입력까지)이라 메뉴에서 뺌.
+         주소 #/mem/chat 은 그대로 열린다(💬 둥근 단추·업무 시작 「크게 보기 →」) */
       CENTER_MENU,
     ]],
     /* 11-26 이사장 지시: 내 조합은 사이드바 맨 아래로, 그 아래 이용안내(사용 설명서·내 AI 연결 안내) */
@@ -2599,7 +2600,7 @@ function menuTitle(s, p){
   return MENU_DESC[dk] ? escapeHtml(MENU_DESC[dk][1]) : '';
 }
 /* 11-26 한 메뉴로 합친 화면의 둘째 주소 — 메뉴에 없으면 합친 메뉴에 불을 켠다(연합회처럼 taxops 가 따로 있으면 그대로) */
-const MENU_ALIAS = {'mem/taxops':'mem/accounting', 'mem/dist':'mem/revenue'};
+const MENU_ALIAS = {'mem/taxops':'mem/accounting', 'mem/dist':'mem/revenue', 'mem/chat':'mem/home'};   // 11-26 조합 회원 AI 상담 크게 보기 → 사이드바 불은 업무 시작
 function menuCur(role, cur){
   const has = k => (ROLE_MENUS[role] || []).some(([, it]) => it.some(([s, p]) => s + '/' + p === k));
   return (!has(cur) && MENU_ALIAS[cur] && has(MENU_ALIAS[cur])) ? MENU_ALIAS[cur] : cur;
