@@ -473,6 +473,13 @@ input,select,textarea{font-family:inherit;font-size:14px;}
 }
 
 /* Chat */
+.home3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:stretch;}
+.home3-card{display:flex;flex-direction:column;margin:0;}
+.home3-card .chat-body{flex:1;}
+.home-drop{border:2px dashed var(--line);border-radius:12px;padding:26px 14px;text-align:center;cursor:pointer;flex:1;display:flex;flex-direction:column;justify-content:center;}
+.home-drop.on{border-color:var(--brand);}
+.home-docs{display:grid;grid-template-columns:1fr;gap:8px;}
+@media (max-width:1100px){ .home3{grid-template-columns:1fr;} }
 .chat-body{
   height:340px;overflow-y:auto;padding:12px;
   background:var(--paper-soft);border-radius:var(--radius);
@@ -1718,7 +1725,7 @@ const AUTH_KEY = 'sunvillage_auto_user';
 const ROLES = {
   admin:      {label:'관리자',       emoji:'🔐', home:'#/adm/dashboard', desc:'플랫폼 전체 운영 · 회원 승인 · 콘텐츠 관리'},
   federation: {label:'연합회',       emoji:'🤝', home:'#/mem/fedsupport', desc:'회원조합 지원업무 · 연합회 자체 사무'},
-  coop:       {label:'회원협동조합', emoji:'🏘', home:'#/mem/dashboard', desc:'우리 마을 조합의 설립·건설·운영 업무'},
+  coop:       {label:'회원협동조합', emoji:'🏘', home:'#/mem/home', desc:'우리 마을 조합의 설립·건설·운영 업무'},
   guest:      {label:'손님',         emoji:'👋', home:'#/pub/home',      desc:'사업 소개 · 자가진단 · 상담 신청 (승인 전)'},
 };
 /* 2026-11-07 이사장 지시 「햇소자 안으로 시민자산육성지원센터 메뉴」 — 별도 로그인·새 창. scope 'ext' = 바깥 주소(page 자리에 URL).
@@ -1788,15 +1795,19 @@ const ROLE_MENUS = {
     ]],
   ],
   coop: [
-    ['여기서 시작', [
-      ['mem','inbox','📥','① 자료함'],
-      ['mem','state','📒','② 우리 조합 현황'],
-      ['mem','todo','✅','③ 할 일'],
-      ['mem','docs','📤','④ 산출물 만들기'],
-      ['mem','chat','💬','⑤ 물어보기'],
+    /* 2026-11-26 이사장 지시: 첫 화면은 업무 세 창(상담·자료 입력·문서 생성)만, 사이드바 맨 위는 골라 보는 현황 대시보드 */
+    ['현황', [
+      ['mem','dashboard','📊','현황 대시보드'],
+      ['mem','state','📒','조합 원장(확정 값)'],
+      ['mem','todo','✅','할 일'],
+    ]],
+    ['업무', [
+      ['mem','home','🏠','업무 시작'],
+      ['mem','chat','💬','상담'],
+      ['mem','inbox','📥','자료 입력'],
+      ['mem','docs','📝','문서 생성'],
     ]],
     ['내 조합', [
-      ['mem','dashboard','🏠','대시보드'],
       ['mem','mypage','👤','마이페이지'],
       ['pub','pricing','💳','요금 안내'],
     ]],
@@ -2059,7 +2070,8 @@ function updateConvenienceUI(scope, page){
 /* 사이드바 메뉴 한 줄 설명 (개선안 4-3) — [메뉴명, 설명]. AI 상담 맥락 전달에도 재사용 */
 const MENU_DESC = {
   stat:['전남 발전 현황','전남 태양광의 전국 순위·월별 흐름·월 이용률·추세와 22개 시군 설비·발전량을 공개 통계로 봅니다'],
-  dashboard:['대시보드','우리 마을 현황과 이번 주 할 일을 한눈에 봅니다'],
+  home:['업무 시작','상담·자료 입력·문서 생성 세 가지 업무 창을 한 화면에서 엽니다'],
+  dashboard:['현황 대시보드','보고 싶은 항목을 골라 우리 조합 현황을 한 화면에 모아 봅니다'],
   admDashboard:['통계 대시보드','플랫폼 전체 현황과 처리 대기 항목을 확인합니다'],
   contest:['공모·심사','공모 접수 현황과 심사 진행을 관리합니다'],
   villages:['조합·마을 관리','참여 마을(조합)의 단계·담당자·서류를 관리합니다'],
@@ -2776,6 +2788,7 @@ function renderMemberPage(page){
     case 'inbox':     return memInbox();
     case 'state':     return memState();
     case 'todo':      return memTodo();
+    case 'home':      return memHome(u);
     case 'dashboard': return memDashboard(u);
     case 'mypage':    return memMyPage(u);
     case 'structure': return memStructure();
@@ -6319,76 +6332,153 @@ function todoStrip(village){
   </div>`;
 }
 
+/* 2026-11-26 업무 시작 — 회원조합 첫 화면. 업무 세 창만 둔다(이사장 지시).
+   상담은 AI 상담과 같은 chatIn/chatBody/sendChat 을 쓴다. 자료 입력은 자료함으로 넘겨 확정까지 거기서 한다. */
+const HOME_DOCS = ['결산 보고서','정기총회 회의록','이사회 회의록','사업계획서','자금수지계획서','조합 정관','창립총회 회의록','차입 의결 총회 의사록','분양 계약서'];
+function memHome(u){
+  const village = myVillage();
+  return `
+    <div class="sec-head">
+      <h1>업무 시작</h1>
+      <p class="sec-desc">${escapeHtml(village && village.name ? village.name : '우리 조합')} — 묻고, 자료를 넣고, 문서를 만듭니다. 조합 현황은 왼쪽 「📊 현황 대시보드」에서 봅니다.</p>
+    </div>
+    <div class="home3">
+      <div class="card home3-card">
+        <div class="card-title"><h3 class="serif">💬 상담</h3><a href="#/mem/chat" class="text-small">크게 보기 →</a></div>
+        <div class="chat-body" id="chatBody" style="height:300px;">
+          <div class="msg ai">조합 운영·회계·총회·발전사업 무엇이든 물어보세요.<br>예: 「법정적립금은 얼마나 쌓아야 하나요?」</div>
+        </div>
+        <div class="chat-input">
+          <input class="input" id="chatIn" placeholder="질문을 입력하세요" onkeydown="if(event.key==='Enter')sendChat()">
+          <button class="btn btn-primary" onclick="sendChat()">보내기</button>
+        </div>
+      </div>
+      <div class="card home3-card">
+        <div class="card-title"><h3 class="serif">📥 자료 입력</h3><a href="#/mem/inbox" class="text-small">자료함 →</a></div>
+        <div id="homeDrop" class="home-drop" onclick="document.getElementById('homeFile').click()"
+          ondragover="event.preventDefault();this.classList.add('on');" ondragleave="this.classList.remove('on');"
+          ondrop="event.preventDefault();this.classList.remove('on');homeAddFiles(event.dataTransfer.files);">
+          <div style="font-size:30px;line-height:1;">📂</div>
+          <p style="margin:10px 0 4px;font-weight:600;">끌어다 놓거나 눌러서 고르세요</p>
+          <p class="text-mute" style="font-size:13px;margin:0;">통장 거래내역 · 조합원 명부 · 회의록 · 정관 · 세금계산서·영수증 · 한전 정산명세 · 발전량 등 ${DOC_KINDS.length}가지</p>
+          <input type="file" id="homeFile" multiple style="display:none;" onchange="homeAddFiles(this.files)">
+        </div>
+        <p class="text-mute" style="font-size:12.5px;margin:10px 0 0;">올리면 자료함에서 어떤 자료인지 알아보고 값을 읽어 <b>제안</b>합니다. 눈으로 확인하고 <b>확정</b>해야 장부에 들어갑니다.</p>
+      </div>
+      <div class="card home3-card">
+        <div class="card-title"><h3 class="serif">📝 문서 생성</h3><a href="#/mem/docs" class="text-small">전체 서식 →</a></div>
+        <div class="home-docs">
+          ${HOME_DOCS.map(n => `<button class="btn btn-outline" onclick="startDoc('${escapeJs(n)}')">${escapeHtml(n)}</button>`).join('')}
+        </div>
+        <p class="text-mute" style="font-size:12.5px;margin:10px 0 0;">문서를 고르면 우리 조합 원장의 확정 값을 채워 초안을 만듭니다.</p>
+      </div>
+    </div>`;
+}
+function homeAddFiles(files){
+  if(!files || !files.length) return;
+  const fs = Array.prototype.slice.call(files);
+  location.hash = '#/mem/inbox';
+  setTimeout(function(){ inboxAddFiles(fs); toast(fs.length + '개 자료를 자료함에 올렸습니다. 어떤 자료인지 확인하고 확정하세요.'); }, 350);
+}
+
+/* 현황 대시보드 — 보고 싶은 칸을 골라 본다. 고른 것은 이 브라우저에 기억한다(화면 설정일 뿐, 자료가 아니다). */
+const DASH_TILES = [
+  ['todo',   '할 일·다음 단계'],
+  ['kpi',    '조합 기본 지표'],
+  ['stage',  '사업 단계'],
+  ['fin',    '재무 요약'],
+  ['ledger', '자료 확인 대기'],
+  ['members','조합원·출자금'],
+  ['events', '다가오는 일정'],
+  ['docs',   '최근 문서'],
+];
+const DASH_KEY = 'hsj_dash_tiles';
+function dashPicked(){
+  try{ const v = JSON.parse(localStorage.getItem(DASH_KEY) || 'null'); if(Array.isArray(v)) return v; }catch(e){}
+  return ['todo','stage','kpi','fin','events','docs'];
+}
+function dashToggle(id, on){
+  let v = dashPicked().filter(x => x !== id); if(on) v.push(id);
+  v = DASH_TILES.map(t => t[0]).filter(x => v.includes(x));
+  try{ localStorage.setItem(DASH_KEY, JSON.stringify(v)); }catch(e){}
+  const main = document.getElementById('appMain'); if(main) main.innerHTML = renderMemberPage('dashboard');
+}
 function memDashboard(u){
   const village = myVillage(); // 배정된 실마을 > 데모 첫 마을
   const unassigned = _realMode && !_myVillage;
-  const upcoming = upcomingEvents(3);
-  return `
-    <div class="sec-head">
-      <h1>안녕하세요, ${escapeHtml(u.name)}님</h1>
-      <p class="sec-desc">${unassigned ? '소속 마을 배정 대기 중' : `${escapeHtml(village.name)} · ${village.phase} · 마감 ${ddayLabel(village.deadline)}`}</p>
-    </div>
-
-    ${unassigned ? `<div class="card" style="margin-bottom:16px;background:var(--paper-soft);box-shadow:none;">
-      ⓘ 아직 <b>소속 마을이 배정되지 않았습니다.</b> 관리자가 회원 관리에서 마을을 배정하면
-      우리 마을의 실제 현황이 여기에 표시됩니다. 아래 수치는 예시 화면입니다.
-    </div>` : ''}
-
-    ${todoStrip(village)}
-
-    ${lifecycleStepper(village)}
-
-    <div class="grid grid-4">
+  const pick = dashPicked();
+  const has = id => pick.includes(id);
+  if(has('fin') && !_FIN.때 && !_FIN.로딩) setTimeout(function(){ finLoad('dashboard'); }, 0);
+  const tile = {};
+  tile.todo = () => todoStrip(village);
+  tile.stage = () => lifecycleStepper(village);
+  tile.kpi = () => `<div class="grid grid-4">
       <div class="kpi"><div class="kpi-n">${village.members}</div><div class="kpi-l">조합원 수</div></div>
       <div class="kpi"><div class="kpi-n">${village.capacity}</div><div class="kpi-l">설비 규모</div></div>
       <div class="kpi"><div class="kpi-n">${village.progress}%</div><div class="kpi-l">준비 진행률</div><div class="kpi-sub">${village.phase}</div></div>
       <div class="kpi"><div class="kpi-n">${ddayLabel(village.deadline)}</div><div class="kpi-l">1차 마감</div><div class="kpi-sub">${village.deadline}</div></div>
+    </div>`;
+  tile.fin = () => {
+    const S = _FIN.stat, c = S && S.statements ? S.statements.cumulative : null;
+    const 억 = v => (Number(v || 0) / 100000000).toFixed(2) + '억';
+    const body = c ? `<div class="grid grid-4">
+        <div class="kpi"><div class="kpi-n">${억(c['매출액'])}</div><div class="kpi-l">누적 매출</div></div>
+        <div class="kpi"><div class="kpi-n">${억(c['당기순이익'])}</div><div class="kpi-l">누적 당기순이익</div></div>
+        <div class="kpi"><div class="kpi-n">${c['원리금'] ? ((c['영업이익'] + c['감가상각비']) / c['원리금']).toFixed(2) : '—'}</div><div class="kpi-l">DSCR(상환능력)</div></div>
+        <div class="kpi"><div class="kpi-n">${억(c['현금'])}</div><div class="kpi-l">현금(월말)</div></div></div>`
+      : `<p class="text-mute" style="margin:0;">${_FIN.로딩 || !_FIN.때 ? '불러오는 중…' : '월별 실적이 아직 없습니다. 「📥 자료 입력」으로 한전 정산명세·통장을 올리세요.'}</p>`;
+    return `<div class="card"><div class="card-title"><h3 class="serif">📊 재무 요약</h3>
+      ${_FIN.예시 ? '<span class="badge badge-warn">체험 예시 값</span>' : ''}<a href="#/mem/finstat" class="text-small">재무제표 →</a></div>${body}
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+        <button class="btn btn-outline btn-sm" onclick="location.hash='#/mem/surplus'">🧮 잉여금 처분 계산</button>
+        <button class="btn btn-outline btn-sm" onclick="location.hash='#/mem/dist'">💧 수익 배분 계획</button></div></div>`;
+  };
+  tile.ledger = () => {
+    let 제안 = 0, 확정 = 0;
+    try{ const L = loadLedger(); 제안 = (L.제안 || []).length; 확정 = Object.keys(L.확정 || {}).length; }catch(e){}
+    return `<div class="card"><div class="card-title"><h3 class="serif">🕵️ 자료 확인 대기</h3><a href="#/mem/inbox" class="text-small">자료함 →</a></div>
+      <div class="grid grid-2"><div class="kpi"><div class="kpi-n">${제안}</div><div class="kpi-l">확인 기다리는 값(제안)</div></div>
+      <div class="kpi"><div class="kpi-n">${확정}</div><div class="kpi-l">원장에 확정된 항목</div></div></div></div>`;
+  };
+  tile.members = () => {
+    const ms = (MOCK.members || []);
+    const _won = v => { const t = String(v == null ? '' : v).replace(/,/g, ''); const n = parseFloat(t) || 0; return /억/.test(t) ? n * 1e8 : /만/.test(t) ? n * 1e4 : n; };
+    const eq = ms.reduce((a, m) => a + _won(m.share != null ? m.share : (m.equity || m.출자금)), 0);
+    return `<div class="card"><div class="card-title"><h3 class="serif">👥 조합원·출자금</h3><a href="#/mem/members" class="text-small">조합원 관리 →</a></div>
+      <div class="grid grid-2"><div class="kpi"><div class="kpi-n">${ms.length}</div><div class="kpi-l">명부 조합원</div></div>
+      <div class="kpi"><div class="kpi-n">${eq ? Math.round(eq / 10000).toLocaleString() + '만원' : '—'}</div><div class="kpi-l">출자금 합계</div><div class="kpi-sub">출자 배당 한도 = 10%</div></div></div></div>`;
+  };
+  tile.events = () => { const up = upcomingEvents(4); return `<div class="card">
+      <div class="card-title"><h3 class="serif">📅 다가오는 일정</h3><a href="#/mem/schedule" class="text-small">전체보기 →</a></div>
+      ${up.length ? up.map(e => `<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line-soft);">
+        <div style="width:60px;text-align:center;"><div style="font-weight:700;color:var(--primary-dark);">${e.date.slice(5).replace('-','.')}</div>
+        <div class="text-small text-mute">${ddayLabel(e.date)}</div></div>
+        <div style="flex:1;"><div style="font-weight:600;">${escapeHtml(e.title)}</div><div class="text-small text-mute">${e.kind}</div></div>
+        ${e.urgent ? '<span class="badge badge-danger">긴급</span>' : ''}</div>`).join('') : '<p class="text-mute">다가오는 일정이 없습니다.</p>'}</div>`; };
+  tile.docs = () => `<div class="card"><div class="card-title"><h3 class="serif">📝 최근 문서</h3><a href="#/mem/docs" class="text-small">전체보기 →</a></div>
+      ${MOCK.documents.slice(0,4).map(d => `<div style="padding:8px 0;border-bottom:1px solid var(--line-soft);display:flex;justify-content:space-between;align-items:center;">
+        <div><div style="font-weight:600;">${escapeHtml(d.title)}</div><div class="text-small text-mute">${d.type} · ${d.date}</div></div>
+        <span class="badge ${d.status === '완료' ? 'badge-success' : 'badge-info'}">${d.status}</span></div>`).join('')}</div>`;
+  const pairs = ['events','docs','ledger','members'];
+  const full = pick.filter(id => !pairs.includes(id)).map(id => `<div class="mt-20">${tile[id]()}</div>`).join('');
+  const halves = pick.filter(id => pairs.includes(id)).map(id => tile[id]());
+  return `
+    <div class="sec-head">
+      <h1>현황 대시보드</h1>
+      <p class="sec-desc">${unassigned ? '소속 마을 배정 대기 중' : `${escapeHtml(village.name)} · ${village.phase}`} — 보고 싶은 항목을 골라 한 화면에 모아 봅니다.</p>
     </div>
-
-    <div class="grid grid-2 mt-20">
-      <div class="card">
-        <div class="card-title"><h3 class="serif">📅 다가오는 일정</h3>
-          <a href="#/mem/schedule" class="text-small">전체보기 →</a></div>
-        ${upcoming.map(e => `
-          <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line-soft);">
-            <div style="width:60px;text-align:center;">
-              <div style="font-family:var(--font-serif);font-size:20px;font-weight:700;color:var(--primary-dark);">${e.date.slice(5).replace('-','.')}</div>
-              <div class="text-small text-mute">${ddayLabel(e.date)}</div>
-            </div>
-            <div style="flex:1;">
-              <div style="font-weight:600;">${escapeHtml(e.title)}</div>
-              <div class="text-small text-mute">${e.kind}</div>
-            </div>
-            ${e.urgent ? '<span class="badge badge-danger">긴급</span>' : ''}
-          </div>
-        `).join('')}
-      </div>
-
-      <div class="card">
-        <div class="card-title"><h3 class="serif">📝 최근 문서</h3>
-          <a href="#/mem/docs" class="text-small">전체보기 →</a></div>
-        ${MOCK.documents.slice(0,4).map(d => `
-          <div style="padding:10px 0;border-bottom:1px solid var(--line-soft);">
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-              <div>
-                <div style="font-weight:600;">${escapeHtml(d.title)}</div>
-                <div class="text-small text-mute">${d.type} · ${d.date}</div>
-              </div>
-              <span class="badge ${d.status === '완료' ? 'badge-success' : 'badge-info'}">${d.status}</span>
-            </div>
-          </div>
-        `).join('')}
+    ${unassigned ? `<div class="card" style="margin-bottom:16px;background:var(--paper-soft);box-shadow:none;">
+      ⓘ 아직 <b>소속 마을이 배정되지 않았습니다.</b> 관리자가 마을을 배정하면 우리 마을의 실제 현황이 여기에 표시됩니다. 아래 수치는 예시 화면입니다.</div>` : ''}
+    <div class="card" style="box-shadow:none;background:var(--paper-soft);">
+      <div style="font-weight:600;margin-bottom:6px;">볼 항목 고르기</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px 16px;">
+        ${DASH_TILES.map(([id, n]) => `<label style="display:flex;align-items:center;gap:5px;cursor:pointer;">
+          <input type="checkbox" ${has(id) ? 'checked' : ''} onchange="dashToggle('${id}', this.checked)"> ${n}</label>`).join('')}
       </div>
     </div>
-
-    <div class="card mt-20">
-      <div class="card-title"><h3 class="serif">🚀 빠른 시작</h3></div>
-      <div class="grid grid-3">
-        <button class="btn btn-outline" onclick="location.hash='#/mem/docs'">📝 정관 초안 만들기</button>
-        <button class="btn btn-outline" onclick="location.hash='#/mem/review'">📄 서류 검토 요청</button>
-        <button class="btn btn-outline" onclick="location.hash='#/mem/revenue'">💰 수익 시뮬레이션</button>
-      </div>
-    </div>
+    ${full}
+    ${halves.length ? `<div class="grid grid-2 mt-20">${halves.join('')}</div>` : ''}
+    ${!pick.length ? '<p class="text-mute mt-20">고른 항목이 없습니다. 위에서 볼 항목을 고르세요.</p>' : ''}
   `;
 }
 
