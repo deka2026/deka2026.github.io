@@ -1826,7 +1826,6 @@ const ROLE_MENUS = {
       ['mem','cost','🧱','사업비·부품 구성'],
       ['mem','finance','🏦','자부담·융자 신청'],
       ['mem','vendor','🔍','사업자(ReSCO) 선정'],
-      ['mem','docs','📝','문서 자동 생성'],
       ['mem','review','📄','서류 AI 검토'],
       ['mem','law','⚖️','법령·인허가'],
     ]],
@@ -6489,7 +6488,9 @@ function todoStrip(village){
 
 /* 2026-11-26 업무 시작 — 회원조합 첫 화면. 업무 세 창만 둔다(이사장 지시).
    상담은 AI 상담과 같은 chatIn/chatBody/sendChat 을 쓴다. 자료 입력은 자료함으로 넘겨 확정까지 거기서 한다. */
-const HOME_DOCS = ['결산 보고서','정기총회 회의록','이사회 회의록','사업계획서','자금수지계획서','조합 정관','창립총회 회의록','차입 의결 총회 의사록','분양 계약서'];
+const HOME_DOCS = ['결산 보고서','정기총회 회의록','이사회 회의록','사업계획서','자금수지계획서','조합 정관','창립총회 회의록','차입 의결 총회 의사록','분양 계약서',
+  /* 11-26: 「문서 자동 생성」 메뉴를 사이드바에서 빼며 그 화면에만 있던 셋을 더했다 — 업무 시작에서 12종 전부 쓴다 */
+  '발전사업 허가 신청서','신협 여신 신청서','자부담 조달계획서'];
 /* ==================== 조합 대장 · 업무 달력 (2026-11-26 이사장 지시) ====================
    계약서·회의록·지출결의 대장은 서버(/api/my/store: contracts·minutes·expenses)에 둔다. 거래처는 표준장부의 거래처 마스터(MOCK.tax.vendors).
    자료함에서 읽은 값(제안·확정)을 「대장에 넣기」 한 번으로 옮기고, 메뉴에서 직접 넣을 수도 있다. */
@@ -6784,7 +6785,8 @@ function memHome(u){
         <p class="text-mute" style="font-size:12.5px;margin:10px 0 0;">올리면 자료함에서 어떤 자료인지 알아보고 값을 읽어 <b>제안</b>합니다. 눈으로 확인하고 <b>확정</b>해야 장부에 들어갑니다.</p>
       </div>
       <div class="card home3-card">
-        <div class="card-title"><h3 class="serif">📝 문서 생성</h3><a href="#/mem/docs" class="text-small">전체 서식 →</a></div>
+        <div class="card-title"><h3 class="serif">📝 문서 생성</h3><a href="#/mem/docs" class="text-small">생성한 문서 →</a></div>
+        ${docsReopenHtml()}
         <div class="home-docs">
           ${HOME_DOCS.map(n => `<button class="btn btn-outline" onclick="startDoc('${escapeJs(n)}')">${escapeHtml(n)}</button>`).join('')}
         </div>
