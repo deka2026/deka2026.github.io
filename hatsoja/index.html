@@ -233,12 +233,13 @@ input,select,textarea{font-family:inherit;font-size:14px;}
 .side-item:hover{background:var(--primary-50);}
 .side-item.on{background:var(--primary);color:#fff;font-weight:600;}
 /* 11-26 사이드바 메뉴 감추기·다시 보이기 */
-.side-row{display:flex;align-items:center;gap:4px;}
+.side-row{display:flex;align-items:center;gap:4px;flex-wrap:wrap;min-width:0;max-width:100%;}
 .side-row .side-item{flex:1;min-width:0;}
 .side-row.hid .side-item{opacity:.45;text-decoration:line-through;}
 .side-eye{border:1px solid var(--line, #d8dde6);background:#fff;border-radius:6px;font-size:12px;padding:3px 6px;cursor:pointer;white-space:nowrap;color:#334;}
 .side-eye:hover{background:var(--primary-50);}
 .side-use{font-size:10.5px;color:#7a8090;white-space:nowrap;}
+@media (max-width:480px){ .side-row .side-use{display:none;} }
 .side-tools{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line, #d8dde6);font-size:12.5px;display:flex;flex-direction:column;gap:6px;}
 .side-tools button{text-align:left;background:none;border:none;color:var(--primary);cursor:pointer;padding:2px 4px;font-size:12.5px;}
 .side-item.on:hover{background:var(--primary-dark);}
@@ -2860,7 +2861,10 @@ function renderPubSidebar(active){
 const SIDE_HIDE_KEY = 'hsj_side_hidden', SIDE_USE_KEY = 'hsj_side_use';
 let _sideEdit = false;
 function _sideWho(){ const u = currentUser(); return u ? String(u.id || u.email || u.role || 'u') : 'guest'; }
-function _sideKey(s, p){ return (s + '/' + p).slice(0, 40); }
+function _sideKey(s, p){
+  const u = currentUser(), k = (u ? normalizeRole(u.role) : 'guest') + ':' + s + '/' + p;
+  return k.length <= 40 ? k : k.slice(0, 30) + '#' + _taxHash(k);   // 바깥 주소처럼 긴 것은 지문으로(앞부분이 같아 섞이지 않게)
+}
 function sideHidden(){
   const w = _sideWho();
   if(!window._sideHid || window._sideHid.who !== w){
@@ -6732,7 +6736,19 @@ function _expAmt(r){ return Math.round(_regWon(r && r.amount)); }
 function _expDays(a, b){ return Math.abs((new Date(String(a).slice(0, 10) + 'T00:00:00') - new Date(String(b).slice(0, 10) + 'T00:00:00')) / 864e5); }
 function _expNorm(s){ return String(s || '').replace(/\s|\(주\)|㈜|주식회사|\(유\)|유한회사|[()·.,-]/g, '').toLowerCase(); }
 function _expNameHit(a, b){ a = _expNorm(a); b = _expNorm(b); if(!a || !b) return false; const k = Math.min(4, a.length, b.length); return a.indexOf(b.slice(0, k)) !== -1 || b.indexOf(a.slice(0, k)) !== -1; }
-function _expCard(){ MOCK.tax.card = MOCK.tax.card || []; return MOCK.tax.card; }
+/* 카드 사용 내역은 세무 자료(tax)와 따로 둔다(서버 종류 cards — 알파언니 🟠6: 한 덩어리면 몇 해 뒤 한도에 걸려 세무 자료 전체가 막힌다) */
+const CARD_KEY = 'hsj_card';
+let _cardCache = {raw: undefined, arr: []};
+function _expCardLoad(){ let raw = null; try{ raw = localStorage.getItem(CARD_KEY); }catch(e){}
+  if(raw !== _cardCache.raw){ let a = []; try{ a = JSON.parse(raw || '[]'); }catch(e){} _cardCache = {raw, arr: Array.isArray(a) ? a : []}; }
+  return _cardCache.arr; }
+function _expCardSave(a){ _save(CARD_KEY, a); _cardCache = {raw: undefined, arr: a}; }
+function _expCard(){
+  if(MOCK.tax.card && MOCK.tax.card.length){ const old = MOCK.tax.card; delete MOCK.tax.card; persistTax(); _expCardSave(_expCardLoad().concat(old)); }
+  return _expCardLoad();
+}
+function _expPersist(){ persistTax(); _expCardSave(_expCard()); }
+const _expCardOk = x => x && !x.cancelled && !x.cancelOf && x.amount > 0;
 function _expCardRow(id){ return _expCard().filter(c => c.id === id)[0]; }
 /* 거래처 대장에서 기본 계정 — 수입 계정(전력판매·보조금·출자금 등)은 지출 계정으로 쓰지 않는다 */
 function expAcctFor(vendor, biz){
@@ -6749,8 +6765,13 @@ function expStatus(r){
     const 합 = regLoad('expenses').filter(x => x.match && x.match.src === 'bank' && x.match.ids[0] === t.id).reduce((a, x) => a + _expAmt(x), 0);
     return 합 === t.out ? {k:'ok', t:'통장 대조'} : {k:'warn', t:'통장 출금 ' + t.out.toLocaleString() + '원과 합 ' + 합.toLocaleString() + '원'};
   }
-  if(m && m.src === 'card') return _expCardRow(m.ids[0]) ? {k:'ok', t:'카드 대조'} : {k:'warn', t:'카드 기록 사라짐'};
-  if(/간이영수증/.test(r.pay || '')) return {k:'warn', t:'현금·간이영수증 — 적격증빙 아님' + (_expAmt(r) > 30000 ? '(3만원 초과)' : '')};
+  if(m && m.src === 'card'){
+    const c = _expCardRow(m.ids[0]); if(!c) return {k:'warn', t:'카드 기록 사라짐'};
+    if(!_expCardOk(c)) return {k:'warn', t:'취소된 카드 결제'};
+    const 합 = regLoad('expenses').filter(x => x.match && x.match.src === 'card' && x.match.ids[0] === c.id).reduce((a, x) => a + _expAmt(x), 0);
+    return 합 === c.amount ? {k:'ok', t:'카드 대조'} : {k:'warn', t:'카드 ' + c.amount.toLocaleString() + '원과 합 ' + 합.toLocaleString() + '원'};
+  }
+  if(/간이영수증/.test(r.pay || '')) return {k:'warn', t:'현금·간이영수증 — 적격증빙 아님' + (_expAmt(r) > 30000 ? '(3만원 초과 — 가산세 2%)' : '')};
   if(/현금영수증/.test(r.pay || '')) return {k:'bad', t:'현금영수증 승인번호·파일 필요'};
   return {k:'bad', t:'미대조' + (r.matchHint ? ' · ' + r.matchHint : '')};
 }
@@ -6759,12 +6780,13 @@ function _expBadge(s){ return `<span class="badge ${s.k === 'ok' ? 'badge-succes
 /* 대조된 통장·카드 기록을 증빙 보관함에 남긴다(같은 기록·같은 줄이면 한 번만) */
 function _expEvidence(r, src, x){
   const T = MOCK.tax;
-  if(T.evidence.some(e => e.srcId === x.id && e.expId === r.id)) return;
+  const 있음 = T.evidence.filter(e => e.auto && e.srcId === x.id)[0];
+  if(있음){ 있음.expIds = Array.from(new Set((있음.expIds || [있음.expId]).concat([r.id]))); return; }
   const 금액 = src === 'bank' ? x.out : x.amount, 날 = x.date, 상대 = r.vendor || (src === 'bank' ? x.desc : x.merchant) || '';
   const 종류 = src === 'bank' ? '계좌이체 내역' : '신용카드 매출전표';
   const e = {id:_tid('ev'), kind:종류, date:날, amount:금액, vendor:상대, bizNo:'', vatIncl:true, grant:false, grantCode:'', leaseType:'', orig:'', auto:true,
     fileName:`${taxCoopCode()}_${날.replace(/-/g, '')}_${상대.replace(/\s/g, '').slice(0, 20)}_${금액}_${src === 'bank' ? '통장기록' : '카드기록'}`,
-    keepUntil:_addYears(날, 5), uploaded:_ymd(), expId:r.id, srcId:x.id,
+    keepUntil:_addYears(날, 5), uploaded:_ymd(), expId:r.id, expIds:[r.id], srcId:x.id,
     srcText: src === 'bank' ? x.desc : (x.merchant + (x.approval ? ' · 승인 ' + x.approval : '') + (x.cardLast ? ' · 카드 ' + x.cardLast : ''))};
   T.evidence.push(e);
   if(src === 'bank' && !x.evId) x.evId = e.id;
@@ -6777,16 +6799,17 @@ function _expLink(r, src, ids, how){
     _expEvidence(r, src, x);
   });
 }
+/* 합이 target 인 2~maxK 장 묶음 — 답이 꼭 하나일 때만 돌려준다(둘 이상이면 어느 쪽인지 모르므로 null · 알파언니 🟠1) */
 function _subsetSum(vals, target, maxK){
-  const n = vals.length; let found = null;
+  const n = vals.length; let found = null, 수 = 0;
   (function go(i, k, sum, pick){
-    if(found || sum > target) return;
-    if(sum === target && pick.length >= 2){ found = pick.slice(); return; }
+    if(수 > 1 || sum > target) return;
+    if(sum === target && pick.length >= 2){ 수++; if(!found) found = pick.slice(); return; }
     if(i >= n || k >= maxK) return;
     pick.push(i); go(i + 1, k + 1, sum + vals[i], pick); pick.pop();
     go(i + 1, k, sum, pick);
   })(0, 0, 0, []);
-  return found;
+  return 수 === 1 ? found : null;
 }
 /* 자동 대조 — 확실한 것만 붙이고, 후보가 여럿이면 붙이지 않고 「후보 n건」만 적는다(사람이 고른다) */
 function expMatchAll(show){
@@ -6801,26 +6824,28 @@ function expMatchAll(show){
   rows.forEach(r => {
     if(r.match) return; const amt = _expAmt(r); if(!amt || !r.date) return;
     let c = [];
-    if(카드가능(r)) c = c.concat(card.filter(x => !쓴카드.has(x.id) && x.amount === amt && _expDays(x.date, r.date) <= 3).map(x => ({src:'card', x, name:x.merchant})));
+    if(카드가능(r)) c = c.concat(card.filter(x => _expCardOk(x) && !쓴카드.has(x.id) && x.amount === amt && _expDays(x.date, r.date) <= 3).map(x => ({src:'card', x, name:x.merchant})));
     if(통장가능(r)) c = c.concat(T.bank.filter(t => t.out === amt && !쓴통장.has(t.id) && _expDays(t.date, r.date) <= 7).map(t => ({src:'bank', x:t, name:t.desc})));
     if(!c.length){ delete r.matchHint; return; }
     const 이름맞음 = c.filter(o => _expNameHit(o.name, r.vendor));
-    const p = 이름맞음.length === 1 ? 이름맞음[0] : (c.length === 1 ? c[0] : null);
+    // 알파언니 🔴1: 금액만 같은 다른 거래(한전 출금 ↔ 식당 영수증)를 붙이지 않는다 — 거래처·가맹점 이름이 맞는 한 건일 때만 자동
+    const p = 이름맞음.length === 1 ? 이름맞음[0] : null;
     if(!p){ r.matchHint = '후보 ' + c.length + '건 — 「대조」로 고르세요'; return; }
     _expLink(r, p.src, [p.x.id], '자동'); (p.src === 'card' ? 쓴카드 : 쓴통장).add(p.x.id); n++;
   });
-  // ③ 한 번 출금 = 영수증 여러 장(2~5장, 출금일 앞뒤 7일)
-  T.bank.filter(t => t.out && !쓴통장.has(t.id)).forEach(t => {
+  // ③ 한 번 출금 = 영수증 여러 장(2~5장, 출금일 앞뒤 7일). 영수증을 한 장씩 넣을 때마다 돌리면 먼저 들어온 묶음이 확정되므로
+  //    사람이 「🔗 통장·카드와 대조」를 누를 때만, 답이 하나일 때만 붙인다(알파언니 🟠1)
+  if(show) T.bank.filter(t => t.out && !쓴통장.has(t.id)).forEach(t => {
     const pool = rows.filter(r => !r.match && 통장가능(r) && r.date && _expDays(r.date, t.date) <= 7 && _expAmt(r) > 0 && _expAmt(r) < t.out).slice(0, 14);
     const pick = pool.length >= 2 ? _subsetSum(pool.map(_expAmt), t.out, 5) : null;
     if(pick){ pick.forEach(i => { _expLink(pool[i], 'bank', [t.id], '자동(여러 장 합)'); n++; }); 쓴통장.add(t.id); }
   });
   // ④ 카드대금 출금 = 그 전 두 달 안 카드 사용 합
-  T.bank.filter(t => t.out && /카드/.test(t.desc) && !t.cardBill && !쓴통장.has(t.id)).forEach(t => {
+  T.bank.filter(t => t.out && /카드|결제대금/.test(t.desc) && !t.cardBill && !쓴통장.has(t.id)).forEach(t => {
     const pool = card.filter(x => !x.billTx && x.date <= t.date && _expDays(x.date, t.date) <= 62);
     if(pool.length && pool.reduce((a, x) => a + x.amount, 0) === t.out){ pool.forEach(x => { x.billTx = t.id; }); t.cardBill = pool.map(x => x.id); n++; }
   });
-  regSave('expenses', rows); persistTax();
+  regSave('expenses', rows); _expPersist();
   if(show){
     const 남 = rows.filter(r => !r.match && !/간이영수증/.test(r.pay || '')).length;
     toast(`대조 ${n}건을 붙였습니다. 아직 안 맞은 ${남}건은 「대조」 단추로 직접 고르세요.`);
@@ -6834,11 +6859,11 @@ function expPick(id){
   const amt = _expAmt(r), card = _expCard();
   const 쓴 = new Set(); regLoad('expenses').forEach(x => { if(x.match && x.id !== id) (x.match.ids || []).forEach(i => 쓴.add(i)); });
   const 통장 = MOCK.tax.bank.filter(t => t.out && !t.cardBill && (t.out === amt ? _expDays(t.date, r.date) <= 31 : (t.out > amt && _expDays(t.date, r.date) <= 7)));
-  const 카드 = card.filter(x => !쓴.has(x.id) && x.amount === amt && _expDays(x.date, r.date) <= 31);
+  const 카드 = card.filter(x => _expCardOk(x) && !쓴.has(x.id) && x.amount === amt && _expDays(x.date, r.date) <= 31);
   const 줄 = (src, x) => {
     const a = src === 'bank' ? x.out : x.amount, 같음 = a === amt;
     return `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line-soft);">
-      <span>${src === 'bank' ? '🏦 통장' : '💳 카드'} · ${x.date} · ${escapeHtml(src === 'bank' ? x.desc : x.merchant)} · <b>${a.toLocaleString()}원</b>
+      <span>${src === 'bank' ? '🏦 통장' : '💳 카드'} · ${escapeHtml(x.date)} · ${escapeHtml(src === 'bank' ? x.desc : x.merchant)} · <b>${a.toLocaleString()}원</b>
       ${같음 ? '' : '<span class="badge badge-gold">여러 장 중 한 장</span>'}${쓴.has(x.id) ? ' <span class="badge badge-mute">다른 영수증과 묶임</span>' : ''}</span>
       <button class="btn btn-primary btn-sm" onclick="expLinkPick('${escapeJs(id)}','${src}','${escapeJs(x.id)}')">이것</button></div>`;
   };
@@ -6852,19 +6877,22 @@ function expLinkPick(id, src, xid){
   const rows = regLoad('expenses'), r = rows.filter(x => x.id === id)[0]; if(!r) return;
   if(r.match) _expUnlinkRow(r);
   _expLink(r, src === 'card' ? 'card' : 'bank', [xid], '직접');
-  regSave('expenses', rows); persistTax(); closeDyn(); navigate(); toast('대조했습니다. 기록은 증빙 보관함에 남았습니다.');
+  regSave('expenses', rows); _expPersist(); closeDyn(); navigate(); toast('대조했습니다. 기록은 증빙 보관함에 남았습니다.');
 }
 function _expUnlinkRow(r){
   const m = r.match; if(!m) return;
   (m.ids || []).forEach(id => { const x = m.src === 'card' ? _expCardRow(id) : _taxTx(id); if(x && x.expIds) x.expIds = x.expIds.filter(i => i !== r.id); });
-  const 지울 = MOCK.tax.evidence.filter(e => e.auto && e.expId === r.id).map(e => e.id);
+  const 지울 = [];
+  MOCK.tax.evidence.forEach(e => { if(!e.auto) return; const ids = (e.expIds || [e.expId]).filter(i => i !== r.id);
+    if(ids.length === (e.expIds || [e.expId]).length) return;
+    if(ids.length){ e.expIds = ids; e.expId = ids[0]; } else 지울.push(e.id); });
   MOCK.tax.evidence = MOCK.tax.evidence.filter(e => 지울.indexOf(e.id) === -1);
   MOCK.tax.bank.forEach(t => { if(지울.indexOf(t.evId) !== -1) t.evId = ''; });
   delete r.match;
 }
 function expUnlink(id){
   const rows = regLoad('expenses'), r = rows.filter(x => x.id === id)[0]; if(!r) return;
-  _expUnlinkRow(r); regSave('expenses', rows); persistTax(); closeDyn(); navigate(); toast('대조를 풀었습니다.');
+  _expUnlinkRow(r); regSave('expenses', rows); _expPersist(); closeDyn(); navigate(); toast('대조를 풀었습니다.');
 }
 
 /* 카드 사용 내역 올리기(카드사 홈페이지·법인카드 CSV·엑셀). 카드번호는 끝 4자리만 남긴다 */
@@ -6878,7 +6906,15 @@ function expImportCard(file, done){
     const 열 = re => head.findIndex(h => re.test(h));
     const iD = 열(/이용일|승인일|거래일|사용일|일자/), iM = 열(/가맹점|이용처|사용처/), iA = (열(/이용금액|승인금액|결제금액|사용금액/) >= 0 ? 열(/이용금액|승인금액|결제금액|사용금액/) : 열(/금액/));
     const iN = 열(/승인번호/), iC = 열(/카드번호|카드/), iX = 열(/취소|상태|구분/);
-    const card = _expCard(), 있음 = new Set(card.map(c => c.date + '|' + c.amount + '|' + (c.approval || c.merchant)));
+    const 파일지문 = _taxHash(rows.map(r => r.join('\t')).join('\n'));
+    MOCK.tax.cardFiles = MOCK.tax.cardFiles || [];
+    if(MOCK.tax.cardFiles.some(f => f.hash === 파일지문)){ 끝(0, '같은 카드 내역 파일을 이미 올렸습니다(' + file.name + ').'); return; }
+    const card = _expCard();
+    // 겹침 열쇠: 승인번호가 있으면 승인번호, 없으면 날짜·금액·가맹점 + 「몇 번째」(같은 날 같은 가게 같은 금액 두 번도 살린다 — 알파언니 🟠4)
+    const 기본열쇠 = c => c.approval ? 'A' + c.approval + '|' + c.amount : c.date + '|' + c.amount + '|' + c.merchant;
+    const 있음 = new Set(), 셈 = {};
+    card.forEach(c => { const b = 기본열쇠(c); 셈[b] = (셈[b] || 0) + 1; 있음.add(b + '#' + 셈[b]); });
+    const 새셈 = {};
     let n = 0;
     rows.slice(hi + 1).forEach(r => {
       const date = _rosterDate(r[iD]); if(!date) return;
@@ -6886,16 +6922,35 @@ function expImportCard(file, done){
       if(iX >= 0 && /취소/.test(String(r[iX])) && amount > 0) amount = -amount;
       const merchant = String(r[iM] || '').trim(), approval = iN >= 0 ? String(r[iN] || '').replace(/\D/g, '').slice(0, 12) : '';
       const last = iC >= 0 ? (String(r[iC] || '').replace(/\D/g, '').slice(-4)) : '';
-      const k = date + '|' + amount + '|' + (approval || merchant); if(있음.has(k)) return; 있음.add(k);
-      card.push({id:_tid('cd'), date, merchant, amount, approval, cardLast:last, file:file.name}); n++;
+      const 새 = {id:_tid('cd'), date, merchant, amount, approval, cardLast:last, file:file.name};
+      const b = 기본열쇠(새); 새셈[b] = (새셈[b] || 0) + 1; if(있음.has(b + '#' + 새셈[b])) return;
+      card.push(새); n++;
     });
     card.sort((a, b) => a.date < b.date ? -1 : 1);
-    persistTax(); taxLog('카드 사용 내역 업로드', file.name);
+    const 취소 = _expCardPairCancels(card);
+    MOCK.tax.cardFiles.push({name:file.name, hash:파일지문, rows:n, date:_ymd()});
+    _expPersist(); taxLog('카드 사용 내역 업로드', file.name);
     const m = expMatchAll(false);
-    끝(n, `카드 사용 ${n}건을 읽었습니다(겹친 줄은 뺐습니다). 지출결의와 ${m}건을 대조했습니다.`);
+    끝(n, `카드 사용 ${n}건을 읽었습니다(겹친 줄은 뺐습니다).${취소 ? ' 취소 ' + 취소 + '쌍은 서로 지웠습니다.' : ''} 지출결의와 ${m}건을 대조했습니다.`);
   });
 }
 
+/* 카드 취소 짝 — 같은 승인번호(없으면 같은 가맹점·같은 금액·60일 안)의 결제와 취소를 서로 지운다. 취소된 결제에 붙은 영수증은 대조를 푼다(알파언니 🔴2) */
+function _expCardPairCancels(card){
+  let n = 0;
+  card.filter(c => c.amount < 0 && !c.cancelOf).forEach(c => {
+    const p = card.filter(x => x.amount === -c.amount && !x.cancelled && !x.cancelOf && x.date <= c.date && _expDays(x.date, c.date) <= 60
+      && (c.approval && x.approval ? x.approval === c.approval : x.merchant === c.merchant))[0];
+    if(!p) return;
+    p.cancelled = c.id; c.cancelOf = p.id; n++;
+    if(p.expIds && p.expIds.length){
+      const rows = regLoad('expenses');
+      rows.forEach(r => { if(r.match && r.match.src === 'card' && r.match.ids[0] === p.id){ _expUnlinkRow(r); r.matchHint = '카드 결제가 취소됨'; } });
+      regSave('expenses', rows);
+    }
+  });
+  return n;
+}
 /* 영수증 파일을 서버 서류함에 올린다(체험 계정은 이름만 남는다) */
 async function expUploadDoc(id, file, 종류){
   const 말 = {too_big:'파일이 너무 크거나 보관함이 찼습니다.', duplicate:'같은 파일이 이미 서류함에 있습니다.', bad_type:'올릴 수 없는 파일 종류입니다(pdf·jpg·png).', empty:'빈 파일입니다.'};
@@ -6914,7 +6969,7 @@ async function expUploadDoc(id, file, 종류){
       T.evidence.push({id:_tid('ev'), kind:r2.evKind || '기타', date:날, amount:_expAmt(r2), vendor:r2.vendor || '', bizNo:'', vatIncl:true, grant:/보조금/.test(r2.biz || ''), grantCode:'', leaseType:'',
         orig:file.name, fileName:`${taxCoopCode()}_${날.replace(/-/g, '')}_${String(r2.vendor || '').replace(/\s/g, '').slice(0, 20)}_${_expAmt(r2)}_${String(r2.evKind || '영수증').replace(/\s/g, '')}`,
         keepUntil:_addYears(날, 5), uploaded:_ymd(), expId:id, docId:j.item.id, auto:false});
-      persistTax(); expMatchAll(false); navigate(); toast('영수증 파일을 서류함에 올렸습니다.');
+      _expPersist(); expMatchAll(false); navigate(); toast('영수증 파일을 서류함에 올렸습니다.');
     }
   }catch(e){ toast('영수증 파일을 올리지 못했습니다(연결 오류). 다시 「고치기」로 올려 주세요.'); }
 }
@@ -6925,7 +6980,8 @@ async function expSaveRecord(ym, 조용히){
   if(!(typeof _storeSync !== 'undefined' && _storeSync.on)){ if(!조용히) toast('체험 화면에서는 서버에 저장하지 않습니다.'); return; }
   const q = s => '"' + String(s == null ? '' : s).replace(/"/g, '""') + '"';
   const 달들 = Array.from(new Set(rows.map(r => r.date.slice(0, 7)))).sort();
-  let 올림 = 0;
+  let 올림 = 0, 옛판 = [];
+  try{ const L = await fetch('/api/my/docs', {credentials:'same-origin'}).then(x => x.json()); 옛판 = ((L && L.items) || []).filter(d => d.kind === '통장·카드 대조 기록'); }catch(e){}
   for(const m of 달들){
     const 줄 = [['지출일','거래처','내용','금액','사업 구분','계정','결제 수단','증빙 종류','현금영수증 승인번호','대조 상태','대조 출처','기록 일자','기록 내용','기록 금액','영수증 파일'].map(q).join(',')];
     rows.filter(r => r.date.slice(0, 7) === m).forEach(r => {
@@ -6935,7 +6991,14 @@ async function expSaveRecord(ym, 조용히){
     });
     const 이름 = `지출증빙대조_${taxCoopCode()}_${m}_${_ymd().replace(/-/g, '')}.csv`;
     const fd = new FormData(); fd.append('file', new File(['﻿' + 줄.join('\n')], 이름, {type:'text/csv'})); fd.append('kind', '통장·카드 대조 기록');
-    try{ const j = await fetch('/api/my/docs', {method:'POST', credentials:'same-origin', body:fd}).then(x => x.json()); if(j.ok || j.error === 'duplicate') 올림++; }catch(e){}
+    try{
+      const j = await fetch('/api/my/docs', {method:'POST', credentials:'same-origin', body:fd}).then(x => x.json());
+      if(j.ok || j.error === 'duplicate'){
+        올림++;
+        if(j.ok){ const 앞 = `지출증빙대조_${taxCoopCode()}_${m}_`;   // 그 달 옛 판은 지운다 — 달마다 한 판
+          for(const d of 옛판){ if(String(d.filename || '').indexOf(앞) === 0 && d.id !== j.item.id){ try{ await fetch('/api/my/docs/' + Number(d.id), {method:'DELETE', credentials:'same-origin'}); }catch(e){} } } }
+      }
+    }catch(e){}
   }
   if(!조용히) toast(올림 ? `대조 기록 ${올림}개월분을 서류함(통장·카드 대조 기록)에 저장했습니다.` : '서류함에 저장하지 못했습니다. 잠시 뒤 다시 눌러 주세요.');
 }
@@ -6962,6 +7025,7 @@ function memExpenses(){
           <td style="font-size:12px;">${Object.entries(o.거래처).sort((x, y) => y[1] - x[1]).map(([v, s]) => escapeHtml(v) + ' ' + Math.round(s).toLocaleString()).join(' · ')}</td></tr>`).join('')}
         <tr><td><b>합계</b></td><td style="text-align:right;">${rows.length}</td><td></td><td style="text-align:right;"><b>${Math.round(합).toLocaleString()}</b></td><td></td><td></td></tr>
       </tbody></table></div>
+      <p class="text-mute" style="margin:8px 0 0;font-size:12px;">이 표는 영수증 기준입니다(간이영수증 현금 포함). 「세무 표준장부 › 사업비용 관리대장」은 통장 출금·카드대금 기준이라 금액이 다를 수 있습니다.</p>
       <p style="margin:8px 0 0;font-size:13px;">사업 구분별: ${Object.entries(사업).map(([b, s]) => `<span class="badge badge-mute">${escapeHtml(b)} ${Math.round(s).toLocaleString()}원</span>`).join(' ')}</p>`
       : '<p class="text-mute">아직 없습니다.</p>'}
     </div>
@@ -6973,7 +7037,7 @@ function memExpenses(){
           <button class="btn btn-outline btn-sm" onclick="expMatchAll(true)">🔗 통장·카드와 대조</button>
           <button class="btn btn-outline btn-sm" onclick="regEdit('expenses','',{pay:'현금(현금영수증)', evKind:'현금영수증'})">💵 현금 지출(현금영수증)</button>
           <button class="btn btn-primary btn-sm" onclick="regEdit('expenses','')">+ 영수증 넣기</button></div></div>
-      <p class="text-mute" style="font-size:12.5px;margin:0 0 8px;">통장 출금 ${MOCK.tax.bank.filter(t => t.out).length}건 · 카드 사용 ${카드.length}건과 대조합니다(통장은 「세무 표준장부」에서 올립니다). 대조된 기록은 증빙 보관함과 서버 서류함에 「통장·카드 대조 기록」으로 남습니다.
+      <p class="text-mute" style="font-size:12.5px;margin:0 0 8px;">통장 출금 ${MOCK.tax.bank.filter(t => t.out).length}건 · 카드 사용 ${카드.length}건과 대조합니다(통장은 「세무 표준장부」에서 올립니다). 대조된 통장·카드 기록은 증빙 보관함(5년)에 바로 남고, 「🔗 통장·카드와 대조」나 아래 링크를 누르면 서버 서류함에 「통장·카드 대조 기록」 CSV 로 달마다 한 판씩 남습니다.
         ${rows.length ? ` <a href="javascript:void(0)" onclick="expSaveRecord(null)">대조 기록 지금 서류로 저장</a>` : ''}</p>
       ${rows.length ? `<div style="overflow-x:auto;"><table class="tbl" style="font-size:13px;min-width:860px;"><thead><tr><th>지출일</th><th>거래처</th><th>내용</th><th style="text-align:right;">금액</th><th>사업</th><th>계정</th><th>결제</th><th>증빙</th><th>대조</th><th></th></tr></thead><tbody>
         ${rows.map(r => `<tr><td>${escapeHtml(r.date || '')}</td><td>${escapeHtml(r.vendor || '')}</td><td>${escapeHtml(r.item || '')}</td><td style="text-align:right;">${_expAmt(r).toLocaleString()}</td>
@@ -7003,7 +7067,7 @@ function expFormExtra(r){
   return `<datalist id="exp-vendors">${이름들.map(n => `<option value="${escapeHtml(n)}">`).join('')}</datalist>
     <div class="form-row"><label>영수증 파일 (사진·PDF)${r.docName ? ' — 지금: ' + escapeHtml(r.docName) : ''}</label><input type="file" id="rg-file" accept="image/*,.pdf"></div>
     <p class="text-mute" style="font-size:12px;margin:0;">계정은 「무슨 일에 쓴 돈인가」로 고릅니다. 주민환원 잔치 장보기·식사처럼 업체가 여러 곳이어도 사업 구분을 「주민환원」으로 두면 모두 주민환원사업비로 합산됩니다.
-    현금은 현금영수증(승인번호나 사진)이 있어야 대조 완료가 됩니다. 3만원 넘는 지출을 간이영수증으로 받으면 비용 인정에 문제가 될 수 있습니다.</p>`;
+    현금은 현금영수증(승인번호나 사진)이 있어야 대조 완료가 됩니다. 건당 3만원(부가세 포함)을 넘는 지출을 세금계산서·카드전표·현금영수증 없이 받으면 그 금액의 2%가 가산세로 붙고(법인세법 제75조의5·시행령 제158조), 3만원 넘는 접대비는 비용으로 인정되지 않습니다(같은 법 제25조·시행령 제41조).</p>`;
 }
 
 const REG = {
@@ -7064,6 +7128,7 @@ function regEdit(k, id, pre){
 function regSaveForm(k, id){
   const R = REG[k], a = regLoad(k), u = currentUser();
   const rec = id ? (a.filter(x => x.id === id)[0] || {}) : {id: 'r' + Date.now() + Math.floor(Math.random() * 1000), at: new Date().toISOString()};
+  const _전 = k === 'expenses' ? {a: _expAmt(rec), p: rec.pay || '', d: rec.date || ''} : null;
   R.칸.forEach(([key]) => { const el = document.getElementById('rg-' + key); if(el) rec[key] = el.value.trim(); });
   const src = document.getElementById('rg-src'); if(src && src.value) rec.src = src.value;
   if(!R.칸.some(([key]) => rec[key])){ toast('넣은 값이 없습니다.'); return; }
@@ -7072,7 +7137,9 @@ function regSaveForm(k, id){
     const fe = document.getElementById('rg-file'), fid = (document.getElementById('rg-fid') || {}).value;
     파일 = fe && fe.files && fe.files[0] ? fe.files[0] : (fid && _inboxFiles[fid]) || null;
     if(!rec.date || !_expAmt(rec)){ toast('지출일과 금액은 꼭 넣어 주세요.'); return; }
+    if(rec.cashNo && String(rec.cashNo).replace(/\D/g, '').length < 8){ toast('현금영수증 승인번호는 숫자 8자리 이상입니다(영수증에 적힌 번호 그대로).'); return; }
     if(/현금영수증/.test(rec.pay || '') && !rec.cashNo && !파일 && !rec.docId){ toast('현금 지출은 현금영수증 승인번호를 적거나 현금영수증 사진을 올려야 씁니다.'); return; }
+    if(id && rec.match && _전 && (_전.a !== _expAmt(rec) || _전.p !== (rec.pay || '') || _전.d !== (rec.date || ''))){ _expUnlinkRow(rec); toast('금액·결제 수단·날짜가 바뀌어 대조를 다시 합니다.'); }
     if(!rec.acct) rec.acct = expAcctFor(rec.vendor, rec.biz) || '기타';
     if(rec.match && rec.match.src === 'cash' && !/현금영수증/.test(rec.pay || '')) delete rec.match;
   }
@@ -7084,7 +7151,10 @@ function regSaveForm(k, id){
   if(_regAfter){ const f = _regAfter; _regAfter = null; f(); }
 }
 let _regAfter = null;
-function regDelete(k, id){ if(!confirm('지울까요? (서버에 30판까지 이력이 남아 되돌릴 수 있습니다)')) return; regSave(k, regLoad(k).filter(x => x.id !== id)); navigate(); }
+function regDelete(k, id){ if(!confirm('지울까요? (서버에 30판까지 이력이 남아 되돌릴 수 있습니다)')) return;
+  const a = regLoad(k);
+  if(k === 'expenses'){ const r = a.filter(x => x.id === id)[0]; if(r && r.match){ _expUnlinkRow(r); _expPersist(); } }   // 알파언니 🟠2: 통장 줄·증빙에 찌꺼기를 남기지 않는다
+  regSave(k, a.filter(x => x.id !== id)); navigate(); }
 function _inboxValues(name){
   const L = loadLedger(), v = {};
   Object.entries(L.확정 || {}).forEach(([f, o]) => { if(o && o.출처 === name) v[f] = o.값; });
@@ -14041,7 +14111,7 @@ function _storeKinds(){
   return {
     [STORE.members]:'members', [STORE.events]:'events', [STORE.uploads]:'uploads', [STORE.closings]:'closings',
     [STORE.accounting]:'accounting', [STORE_INBOX]:'inbox', [STORE_LEDGER]:'ledger', [STORE_POWER]:'power',
-    [TAX_STORE]:'tax', [DASH_KEY]:'dash', [REG_KEY('contracts')]:'contracts', [REG_KEY('minutes')]:'minutes',
+    [TAX_STORE]:'tax', [CARD_KEY]:'cards', [DASH_KEY]:'dash', [REG_KEY('contracts')]:'contracts', [REG_KEY('minutes')]:'minutes',
     [REG_KEY('expenses')]:'expenses', [TASK_KEY]:'tasks', [SURPLUS_KEY]:'surplus', [EXT_KEY]:'ext',
   };
 }
@@ -14073,7 +14143,8 @@ async function _storePush(kind, key){
     } else if(j.ok){
       _storeSync.ver[kind] = j.ver;
     } else {
-      toast(j.error && j.error.length > 20 ? j.error : '서버 저장에 실패했습니다(' + (j.error || r.status) + '). 잠시 뒤 다시 저장해 주세요.');
+      toast(j.error === 'too_large' ? '서버 저장 한도를 넘었습니다(' + kind + '). 다시 눌러도 같습니다 — 지난 해 통장·카드 내역을 내려받아 보관하고 지운 뒤 저장하거나 사교원에 한도를 문의하세요.'
+        : j.error && j.error.length > 20 ? j.error : '서버 저장에 실패했습니다(' + (j.error || r.status) + '). 잠시 뒤 다시 저장해 주세요.');
     }
   }catch(e){ toast('서버에 저장하지 못했습니다. 인터넷 연결을 확인하세요(이 기기에는 남아 있습니다).'); }
   finally{ _storeSync.busy--; }
@@ -17092,9 +17163,9 @@ function memAccounting(){
     <div class="card mt-20">
       <div class="card-title"><h3 class="serif">📎 증빙 보관함 (5년 보존)</h3><button class="btn btn-primary btn-sm" onclick="taxAddEvidence()">+ 증빙 등록</button></div>
       <p class="text-mute" style="font-size:12.5px;margin-top:0;">영수증은 세무사에게 보내지 않지만 품목 정리를 위해 조합이 5년 보관합니다. 계약서는 거래일·금액·거래처·사업자번호 4가지가 없으면 저장되지 않습니다. 파일명은 <code>조합코드_날짜_거래처_금액_종류</code> 규칙으로 자동 정리됩니다.</p>
-      ${T.evidence.length ? `<table class="tbl" style="font-size:13px;"><thead><tr><th>종류</th><th>거래일</th><th>거래처</th><th>금액</th><th>사업자번호</th><th>부가세</th><th>보조금</th><th>정리 파일명</th><th>보존기한</th><th></th></tr></thead><tbody>
-        ${T.evidence.slice().reverse().map(e => `<tr><td><span class="badge ${e.kind==='보조금 교부결정서'?'badge-gold':'badge-mute'}">${e.kind}</span></td><td>${e.date}</td><td>${escapeHtml(e.vendor)}</td><td>${Number(e.amount).toLocaleString()}</td><td>${escapeHtml(e.bizNo||'—')}</td><td>${e.vatIncl?'포함':'미포함'}</td><td>${e.grant ? escapeHtml(e.grantCode||'보조금') : '—'}</td><td class="text-mute" style="font-size:12px;">${escapeHtml(e.fileName)}</td><td>${e.keepUntil}</td><td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="taxRemoveEvidence('${escapeJs(e.id)}')">삭제</button></td></tr>`).join('')}
-      </tbody></table>` : '<p class="text-mute text-center" style="padding:14px 0;">등록된 증빙이 없습니다.</p>'}
+      ${T.evidence.length ? `<div style="overflow-x:auto;"><table class="tbl" style="font-size:13px;min-width:760px;"><thead><tr><th>종류</th><th>거래일</th><th>거래처</th><th>금액</th><th>사업자번호</th><th>부가세</th><th>보조금</th><th>정리 파일명</th><th>보존기한</th><th></th></tr></thead><tbody>
+        ${T.evidence.slice().reverse().map(e => `<tr><td><span class="badge ${e.kind==='보조금 교부결정서'?'badge-gold':'badge-mute'}">${escapeHtml(e.kind)}</span></td><td>${escapeHtml(e.date)}</td><td>${escapeHtml(e.vendor)}</td><td>${Number(e.amount).toLocaleString()}</td><td>${escapeHtml(e.bizNo||'—')}</td><td>${e.vatIncl?'포함':'미포함'}</td><td>${e.grant ? escapeHtml(e.grantCode||'보조금') : '—'}</td><td class="text-mute" style="font-size:12px;">${escapeHtml(e.fileName)}</td><td>${escapeHtml(e.keepUntil)}</td><td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="taxRemoveEvidence('${escapeJs(e.id)}')">삭제</button></td></tr>`).join('')}
+      </tbody></table></div>` : '<p class="text-mute text-center" style="padding:14px 0;">등록된 증빙이 없습니다.</p>'}
     </div>
 
     <div class="card mt-20">
@@ -17615,19 +17686,26 @@ function taxRemoveVendor(id){ MOCK.tax.vendors = MOCK.tax.vendors.filter(v => v.
 function taxExpenseByAcctHtml(tbl){
   const T = MOCK.tax, ex = {}; regLoad('expenses').forEach(r => { ex[r.id] = r; });
   const agg = {}, 더 = (a, 원, 거래처, 출처) => { a = a || '미분류'; agg[a] = agg[a] || {합:0, n:0, v:new Set(), s:new Set()}; agg[a].합 += 원; agg[a].n++; if(거래처) agg[a].v.add(거래처); agg[a].s.add(출처); };
+  let 현금인출 = 0;
   const 나눠 = (총, ids, 기본, 출처) => { const rs = (ids || []).map(i => ex[i]).filter(Boolean); let 남 = 총;
     rs.forEach(r => { const a = Math.min(_expAmt(r), 남); if(a > 0){ 더(r.acct, a, r.vendor, 출처); 남 -= a; } });
     if(남 > 0) 더(기본, 남, '', 출처); };
   for(const t of T.bank){
     if(!t.out) continue;
     const 기본 = t.acctSel || (taxVendor(t.vendorId) || {}).acct || '미분류';
-    if(t.cardBill){ let 남 = t.out; t.cardBill.forEach(cid => { const c = _expCardRow(cid); if(!c) return; 나눠(c.amount, c.expIds, '카드대금(영수증 미대조)', '카드'); 남 -= c.amount; }); if(남) 더('카드대금(영수증 미대조)', 남, '', '카드'); continue; }
-    if(t.expIds && t.expIds.length){ 나눠(t.out, t.expIds, 기본, '통장'); continue; }
+    if(t.cardBill){ let 남 = t.out; t.cardBill.forEach(cid => { const c = _expCardRow(cid); if(!c) return;
+        if(c.cancelled || c.cancelOf){ 남 -= c.amount; return; }            // 결제·취소 짝은 서로 지워진다
+        if(c.amount < 0){ 더('카드 취소·환불(짝 없음)', c.amount, c.merchant, '카드'); 남 -= c.amount; return; }
+        나눠(c.amount, c.expIds, '카드대금(영수증 미대조)', '카드'); 남 -= c.amount; });
+      if(남) 더('카드대금(영수증 미대조)', 남, '', '카드'); continue; }
+    const 붙은 = (t.expIds || []).filter(i => ex[i]);
+    if(붙은.length){ 나눠(t.out, 붙은, 기본, '통장'); continue; }
+    if(t.cash){ 현금인출 += t.out; continue; }                             // 현금 인출은 비용이 아니다 — 현금영수증 지출로 센다(이중 계산 막기)
     if(t.confirmed || t.acctSel) 더(기본, t.out, (taxVendor(t.vendorId) || {}).name || '', '통장');
   }
   regLoad('expenses').forEach(r => { if(r.match && r.match.src === 'cash') 더(r.acct, _expAmt(r), r.vendor, '현금영수증'); });
   return tbl(['계정','건수','거래처 수','합계','출처'], Object.entries(agg).sort((a, b) => b[1].합 - a[1].합).map(([k, o]) => [escapeHtml(k), o.n, o.v.size, Math.round(o.합).toLocaleString(), Array.from(o.s).join('·')]))
-    + '<p class="text-mute" style="font-size:12.5px;">한 번 출금에 영수증이 여러 장 붙으면 영수증의 계정대로 나눕니다. 거래처가 여러 곳이어도 같은 계정이면 한 줄로 합칩니다. 현금영수증 지출은 통장 기록이 없어도 더합니다.</p>';
+    + '<p class="text-mute" style="font-size:12.5px;">한 번 출금에 영수증이 여러 장 붙으면 영수증의 계정대로 나눕니다. 거래처가 여러 곳이어도 같은 계정이면 한 줄로 합칩니다. 현금영수증 지출은 통장 기록이 없어도 더하고, 현금 인출(' + 현금인출.toLocaleString() + '원)은 비용에서 뺍니다(같은 돈을 두 번 세지 않게). 카드 결제·취소 짝은 서로 지웁니다.</p>';
 }
 function taxLedgerView(key){
   const T = MOCK.tax; const L = TAX_LEDGERS.find(l => l[2] === key); let body = '';
