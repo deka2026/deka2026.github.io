@@ -265,6 +265,11 @@ input,select,textarea{font-family:inherit;font-size:14px;}
 .pub-sidebar .side-item a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;width:100%;}
 .pub-sidebar .side-cta{display:flex;flex-direction:column;gap:6px;padding:10px 12px 4px;border-top:1px solid var(--line-soft);margin-top:4px;}
 .pub-sidebar .side-cta .btn{width:100%;justify-content:center;}
+/* 11-27 일반회원 유료회원 신청 띠·카드 */
+.hs-apply-band{background:#fff6dc;border:1px solid #e9cf86;border-radius:12px;margin:0 0 16px;padding:10px 14px;}
+.hs-apply-band .hab-in{display:flex;gap:10px 14px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:14px;}
+.hs-apply-band .hab-btns{display:flex;gap:6px;flex-wrap:wrap;}
+.hs-apply-card{margin-bottom:18px;}
 .pub-sidebar .side-note{font-size:12px;color:var(--ink-faint);padding:8px 12px 0;line-height:1.5;}
 @media (max-width:900px){
   .pub-shell{grid-template-columns:1fr;padding:12px;}
@@ -851,6 +856,7 @@ h1,h2,h3{font-weight:800;letter-spacing:-.02em;}
 <div class="pub-shell" id="pubShell">
   <aside class="sidebar pub-sidebar" id="pubSidebar" aria-label="공개 메뉴"></aside>
   <div class="main pub-main">
+<div id="hsApplyBand" class="hs-apply-band" hidden></div>
 
 <!-- HOME -->
 <section class="view" id="v-pub-home">
@@ -1213,6 +1219,7 @@ h1,h2,h3{font-weight:800;letter-spacing:-.02em;}
       <h1>가입 절차</h1>
       <p class="sec-desc">햇소자 플랫폼 가입 및 마을 등록 절차를 안내합니다.</p>
     </div>
+    <div data-hs-apply></div>
 
     <div class="card">
       <div class="timeline">
@@ -1412,6 +1419,7 @@ h1,h2,h3{font-weight:800;letter-spacing:-.02em;}
       <h1>요금 안내 <span class="badge badge-gold">2027년 1월부터 적용</span></h1>
       <p class="sec-desc">기본 이용료에 필요한 AI 메뉴만 골라 더합니다. 아래에서 메뉴를 고르면 한 달 요금이 바로 계산됩니다.</p>
     </div>
+    <div data-hs-apply></div>
     <div class="card prc-rule">
       <ul>
         <li><strong>요금은 2027년 1월부터 받습니다.</strong> 2026년 12월까지는 모든 회원이 무료 시범으로 씁니다.</li>
@@ -2680,6 +2688,7 @@ function navigate(){
     else document.getElementById('v-pub-home').classList.add('on');
     document.getElementById('pubShell').classList.add('on');
     renderPubSidebar(view ? page : 'home');
+    hsApplyRender();
     if(page === 'diagnose'){ svDiagUnit(); svRenderChecks(); svFillLawSelects(); }
     if(page === 'pricing') pricingRender();
   } else {
@@ -2850,6 +2859,34 @@ function prcCalc(){
     ${올인원이싸다 ? `<div class="prc-hint">고르신 메뉴는 올인원보다 비싸서 올인원 값(${prcWon(P.올인원)})으로 계산했습니다. 나머지 메뉴도 같이 쓰실 수 있습니다.</div>` : ''}`;
 }
 
+/* 11-27 이사장 「햇소자에 일반회원으로 로그인하고 유료회원을 신청하는 곳이 눈에 띄지 않아」:
+   통합 계정으로 로그인했지만 햇소자에선 손님(일반·무료회원)인 사람에게 공개 화면 위 띠·사이드바·가입절차·요금 화면에 「유료회원 신청」 단추.
+   신청은 통합사이트 한 곳(/#/join)에서 받고(승인은 통합관리자 「회원·신청·납부」), ?pick= 으로 협동조합·연합회를 미리 골라 둔다. */
+const HS_APPLY_URL = {coop:'/#/join?pick=coop', fed:'/#/join?pick=fed'};
+function hsApplyWho(){
+  const u = currentUser();
+  if(!u || !u.unified || u.preview || u.viewVillage) return null;       // 비로그인·체험·관리자 미리보기는 해당 없음
+  return normalizeRole(u.role, u.status, u.perms) === 'guest' ? u : null;
+}
+function hsApplyBtns(size){
+  return `<a class="btn btn-primary ${size || ''}" href="${HS_APPLY_URL.coop}">🏘 협동조합 회원 신청</a>`
+    + `<a class="btn btn-outline ${size || ''}" href="${HS_APPLY_URL.fed}">🤝 연합회 회원 신청</a>`;
+}
+function hsApplyCard(){
+  return `<div class="card hs-apply-card" style="border:2px solid var(--primary);"><h3 class="serif" style="margin-top:0;">☀ 햇소자 유료회원 신청</h3>`
+    + `<p style="margin:0 0 10px;">지금 계정은 <b>일반회원</b>이라 공개 화면만 열립니다. 협동조합·연합회 회원으로 신청하면 사교원이 확인해 승인한 뒤 조합 업무 화면이 열립니다(무료 시범 기간 — 이용료는 2027년 1월부터).</p>`
+    + `<div style="display:flex;gap:8px;flex-wrap:wrap;">${hsApplyBtns()}</div></div>`;
+}
+function hsApplyRender(){
+  const u = hsApplyWho();
+  const band = document.getElementById('hsApplyBand');
+  if(band){
+    band.hidden = !u;
+    band.innerHTML = u ? `<div class="hab-in"><span><b>${escapeHtml(u.name || '')}</b> 님은 지금 일반회원입니다 — 햇소자 조합 업무를 쓰려면 유료회원을 신청하세요.</span><span class="hab-btns">${hsApplyBtns('btn-sm')}</span></div>` : '';
+  }
+  document.querySelectorAll('[data-hs-apply]').forEach(function(el){ el.innerHTML = u ? hsApplyCard() : ''; });
+}
+
 /* 공개 페이지 사이드 메뉴 — 손님 메뉴(ROLE_MENUS.guest)와 같은 항목 + 안내·로그인 CTA */
 const PUB_DESC = {
   home:'플랫폼 소개와 로그인·진단 바로가기', about:'햇빛소득마을 사업의 구조와 취지', cases:'참여 마을들의 진행 사례', faq:'자주 묻는 질문과 답변', pricing:'기본 이용료 + 고른 메뉴 — 한 달 요금 계산(2027년 1월부터 적용)',
@@ -2868,7 +2905,10 @@ function renderPubSidebar(active){
     ${item('privacy','🔒','개인정보 처리방침')}
     <button class="side-item" onclick="location.href='tel:070-4196-4677'" title="대표전화로 바로 전화"><span class="side-emoji">📞</span>전화 상담 070-4196-4677</button>
   </div>`;
-  const cta = u
+  const cta = hsApplyWho()
+    ? `<div class="side-cta">${hsApplyBtns('btn-sm')}</div>
+       <div class="side-note">${escapeHtml(u.name || '')} · 일반회원으로 로그인 중 — 신청하면 승인 뒤 조합 업무 화면이 열립니다</div>`
+    : u
     ? `<div class="side-cta"><button class="btn btn-primary btn-sm" onclick="location.hash='${escapeJs(roleHome(u.role))}'">${ROLES[normalizeRole(u.role)].emoji} 내 화면으로 가기</button></div>
        <div class="side-note">${escapeHtml(u.name || '')} · ${roleLabel(normalizeRole(u.role))} 등급으로 로그인 중</div>`
     : `<div class="side-cta"><button class="btn btn-primary btn-sm" onclick="openLogin()">로그인</button>

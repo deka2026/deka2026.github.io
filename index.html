@@ -1112,8 +1112,10 @@ function myServiceKeys(u) {
   const sv = Array.isArray(u.services) ? u.services : [], out = [];
   const adm = u.role === 'admin', staff = adm || u.role === 'staff', pm = u.perms || [];
   const hs = adm || (u.role === 'staff' && pm.includes('햇소자관리'));
-  if (staff || sv.includes('academy')) out.push('acad');
-  if (adm || tierOf(u) === 'policy' || pm.includes('정책지원관')) out.push('policy');
+  /* 11-27 이사장 지시: 협동조합·연합회·정책회원·매니저는 아카데미 무료. 매니저의 의정지원은 체크권한 「의정지원」으로(정책지원관 체크도 그대로) */
+  const pol = adm || tierOf(u) === 'policy' || pm.includes('정책지원관') || (u.role === 'staff' && pm.includes('의정지원'));
+  if (staff || sv.includes('academy') || u.role === 'coop' || u.role === 'federation' || sv.includes('coop') || sv.includes('fed') || pol) out.push('acad');
+  if (pol) out.push('policy');
   if (hs || sv.includes('coop') || u.role === 'coop') out.push('coop');
   if (hs || sv.includes('fed') || u.role === 'federation') out.push('fed');
   return out;
@@ -1181,7 +1183,7 @@ const PREVIEWS = [
   { k: 'coop', t: '협동조합회원', mk: () => pvUser('coop', 'coop', ['coop']) },
   { k: 'federation', t: '연합회원', mk: () => pvUser('federation', 'federation', ['fed']) },
   { k: 'staff0', t: '매니저(체크권한 없음)', mk: () => pvUser('staff', 'staff') },
-  { k: 'staff1', t: '매니저(체크권한 전부)', mk: () => pvUser('staff', 'staff', [], MENU_PERMS.concat(['햇소자관리', '정책지원관'])) },
+  { k: 'staff1', t: '매니저(체크권한 전부)', mk: () => pvUser('staff', 'staff', [], MENU_PERMS.concat(['햇소자관리', '정책지원관', '그룹웨어', '의정지원'])) },
 ];
 let savedPrefs = null;
 function setPreview(k) {
@@ -1250,7 +1252,9 @@ document.addEventListener('click', e => { if (!e.target.closest('.lockDrop') && 
 /* 11-18 이사장 지시: 머리 오른쪽 단추 — 매니저·통합관리자에게만 「그룹웨어」, 통합관리자에게만 「관리」·「회원·납부」. 다른 등급에는 요소를 아예 그리지 않는다 */
 function renderHdrStaff() {
   const staff = !!me && (RANK[me.role] || 0) >= RANK.staff, adm = !!me && me.role === 'admin';
-  const L = staff ? [['btnGw', 'https://gw.sakyowon.co.kr', ic('grid', 's') + '그룹웨어', 'btn gold']].concat(adm ? [['btnAdm', '/admin.html', '관리', 'btn'], ['btnMembers', '/members.html', '회원·신청·납부', 'btn']] : []) : [];
+  /* 11-27 이사장 지시: 매니저의 그룹웨어 이용은 관리자가 체크권한 「그룹웨어」로 준다(서버 hub_sso 도 같은 검사) */
+  const gwOk = adm || (staff && (me.perms || []).includes('그룹웨어'));
+  const L = staff ? (gwOk ? [['btnGw', 'https://gw.sakyowon.co.kr', ic('grid', 's') + '그룹웨어', 'btn gold']] : []).concat(adm ? [['btnAdm', '/admin.html', '관리', 'btn'], ['btnMembers', '/members.html', '회원·신청·납부', 'btn']] : []) : [];
   $('#hdrStaff').innerHTML = L.map(x => `<a class="${x[3]}" id="${x[0]}" href="${x[1]}">${x[2]}</a>`).join('');
   $('#acctStaff').innerHTML = L.map(x => `<a class="btn" href="${x[1]}">${x[2]}</a>`).join('');   // 휴대폰은 계정 메뉴 안에(머리가 좁다)
 }
@@ -1750,6 +1754,8 @@ async function renderJoin(fresh) {
   if (fresh || !J) {
     J = joinNew();
     const st = stashGet(); if (st) st.picks.forEach(p => { J.sel[p.product] = { on: true, opts: p.options || [] }; });
+    /* 11-27: 햇소자 「유료회원 신청」 단추는 #/join?pick=coop(,fed) 로 온다 — 그 서비스를 미리 골라 둔다 */
+    const pk = /[?&]pick=([a-z,]+)/.exec(location.hash || ''); if (pk) pk[1].split(',').forEach(k => { if (['academy', 'coop', 'fed'].includes(k)) J.sel[k] = { on: true, opts: (J.sel[k] && J.sel[k].opts) || [] }; });
     if (me && /^#\/join\/pay/.test(location.hash || '')) { J.payOnly = true; J.step = 3; }
   }
   const wantPay = !!me && /^#\/join\/pay/.test(location.hash || '');       // #/join/pay = 납부 정보만 고치기(회원 정보를 받은 뒤에 판단한다)
