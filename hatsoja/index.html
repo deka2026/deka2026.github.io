@@ -1814,6 +1814,9 @@ const ROLE_MENUS = {
       ['mem','expenses','🧾','지출결의'],
       ['mem','ledgers','📒','거래처·표준장부'],
     ]],
+    ['내 AI', [
+      ['mem','ai','🤖','내 AI·내 기능'],
+    ]],
     ['내 조합', [
       ['mem','mypage','👤','마이페이지'],
       ['pub','pricing','💳','요금 안내'],
@@ -2081,6 +2084,7 @@ const MENU_DESC = {
   contracts:['계약서 대장','조합이 맺은 계약과 만기'],
   minutes:['회의록 대장','총회·이사회·마을총회 회의록과 의결사항'],
   expenses:['지출결의','영수증마다 계정·예산·이체 확인'],
+  ai:['내 AI·내 기능','우리 조합 AI 를 연결하고, AI 가 만든 우리 조합만의 칸·업무를 관리합니다'],
   home:['업무 시작','상담·자료 입력·문서 생성 세 가지 업무 창을 한 화면에서 엽니다'],
   dashboard:['현황 대시보드','보고 싶은 항목을 골라 우리 조합 현황을 한 화면에 모아 봅니다'],
   admDashboard:['통계 대시보드','플랫폼 전체 현황과 처리 대기 항목을 확인합니다'],
@@ -2802,6 +2806,7 @@ function renderMemberPage(page){
     case 'state':     return memState();
     case 'todo':      return memTodo();
     case 'home':      return memHome(u);
+    case 'ai':        return memAi();
     case 'cycle':     return memCycle();
     case 'contracts': return memRegister('contracts');
     case 'minutes':   return memRegister('minutes');
@@ -6595,6 +6600,103 @@ function taskSaveForm(){
 }
 function taskDelete(id){ if(!confirm('이 업무를 지울까요?')) return; const o = taskLoad(); o.custom = o.custom.filter(t => t.id !== id); taskSave(o); navigate(); }
 
+/* ==================== 내 AI 연결 · 내 기능 (2026-11-26 이사장 지시) ====================
+   조합이 자기 AI(Claude·ChatGPT 등 MCP 를 쓰는 AI)를 열쇠로 연결해 우리 조합 자료를 읽고 대장·업무·제안·「내 기능」을 만든다.
+   기본 기능은 AI 도구에 없어 못 고친다. 내 기능은 설계도(JSON)만 — 이 화면이 정해진 꼴(합계·건수·목록·글)로 그린다. 서버 hatsoja_mcp.py */
+const EXT_KEY = 'hsj_ext';
+const MCP_URL = 'https://sakyowon.co.kr/api/mcp/hatsoja';
+function extLoad(){ const o = _loadObj(EXT_KEY) || {}; o.tiles = Array.isArray(o.tiles) ? o.tiles : []; o.off = o.off || {}; return o; }
+function _extRows(src){
+  if(src === 'expenses' || src === 'contracts' || src === 'minutes') return regLoad(src);
+  if(src === 'tasks') return taskLoad().custom.map(t => ({title: t.제목, cycle: t.주기, months: t.달, day: t.날, owner: t.담당}));
+  if(src === 'events') return (MOCK.events || []).map(e => ({title: e.title, date: e.date, kind: e.kind}));
+  return [];
+}
+function _extFilter(rows, f){
+  if(!f || !f.field) return rows;
+  return rows.filter(r => { const v = String(r[f.field] == null ? '' : r[f.field]);
+    if(f.equals != null && v !== f.equals) return false;
+    if(f.contains != null && v.indexOf(f.contains) < 0) return false;
+    if(f.since != null && v < f.since) return false;
+    if(f.until != null && v > f.until) return false;
+    return true; });
+}
+function extTileHtml(t){
+  const 머리 = `<div class="card-title"><h3 class="serif">🤖 ${escapeHtml(t.title || '')}</h3><span class="badge badge-mute">내 기능</span></div>`;
+  let 몸 = '';
+  if(t.kind === 'text') 몸 = `<p style="margin:0;white-space:pre-wrap;">${escapeHtml(t.text || '')}</p>`;
+  else {
+    const rows = _extFilter(_extRows(t.source), t.filter);
+    if(t.kind === 'count') 몸 = `<div class="kpi-n">${rows.length.toLocaleString()}건</div>`;
+    else if(t.kind === 'sum') 몸 = `<div class="kpi-n">${Math.round(rows.reduce((a, r) => a + _regWon(r[t.field || 'amount']), 0)).toLocaleString()}원</div>`;
+    else if(t.kind === 'list'){ const fs = (t.fields || ['title']).slice(0, 5);
+      몸 = rows.length ? `<table class="tbl" style="font-size:13px;"><tbody>${rows.slice(0, t.limit || 5).map(r => `<tr>${fs.map(f => `<td>${escapeHtml(String(r[f] == null ? '' : r[f]))}</td>`).join('')}</tr>`).join('')}</tbody></table>` : '<p class="text-mute" style="margin:0;">해당하는 자료가 없습니다.</p>'; }
+  }
+  return `<div class="card">${머리}${몸}${t.note ? `<p class="text-mute" style="font-size:12px;margin:8px 0 0;">${escapeHtml(t.note)}</p>` : ''}</div>`;
+}
+let _aiState = {keys: null, log: null, newKey: null, err: null, loading: false};
+async function aiLoad(){
+  if(_aiState.loading) return; _aiState.loading = true;
+  try{
+    const [k, l] = await Promise.all([fetch('/api/my/ai-keys', {credentials:'same-origin'}).then(r => r.json()), fetch('/api/my/ai-log', {credentials:'same-origin'}).then(r => r.json())]);
+    _aiState.keys = k.ok ? k.items : null; _aiState.log = l.ok ? l.items : null; _aiState.err = k.ok ? null : (k.error || 'error');
+  }catch(e){ _aiState.err = 'offline'; }
+  _aiState.loading = false;
+  if(currentRoute() === 'mem/ai') navigate();
+}
+async function aiNewKey(){
+  const name = (document.getElementById('ai-name') || {}).value || '내 AI';
+  const scopes = ['read', 'write', 'ext'].filter(x => (document.getElementById('ai-s-' + x) || {}).checked);
+  const j = await fetch('/api/my/ai-keys', {method:'POST', credentials:'same-origin', headers:{'content-type':'application/json'}, body: JSON.stringify({name, scopes})}).then(r => r.json()).catch(() => ({}));
+  if(!j.ok){ toast(j.error && j.error.length > 15 ? j.error : '열쇠를 만들지 못했습니다(' + (j.error || '연결') + ').'); return; }
+  _aiState.newKey = j; _aiState.keys = null; aiLoad();
+}
+async function aiRevoke(id){
+  if(!confirm('이 열쇠를 지울까요? 지우면 그 AI 는 바로 연결이 끊깁니다.')) return;
+  await fetch('/api/my/ai-keys/' + id, {method:'DELETE', credentials:'same-origin'}).catch(() => {});
+  _aiState.keys = null; aiLoad();
+}
+function extToggle(id, on){ const o = extLoad(); if(on) delete o.off[id]; else o.off[id] = 1; _save(EXT_KEY, o); navigate(); }
+function extDelete(id){ if(!confirm('이 칸을 지울까요? (서버에 30판까지 이력이 남습니다)')) return; const o = extLoad(); o.tiles = o.tiles.filter(t => t.id !== id); _save(EXT_KEY, o); navigate(); }
+function memAi(){
+  const u = currentUser(), real = !!(u && u.unified);
+  if(real && _aiState.keys === null && !_aiState.loading && !_aiState.err) setTimeout(aiLoad, 0);
+  const ext = extLoad(), nk = _aiState.newKey;
+  const 연결 = `<div class="card"><div class="card-title"><h3 class="serif">🔌 연결하는 법</h3></div>
+    <ol style="margin:0;padding-left:20px;line-height:1.9;font-size:14px;">
+      <li>아래에서 <b>열쇠</b>를 만듭니다(처음 한 번만 보입니다 — 바로 복사해 두세요).</li>
+      <li>AI 프로그램의 「연결(커넥터·MCP 서버) 추가」에 주소와 열쇠를 넣습니다.<br>
+        주소 <code>${MCP_URL}</code> · 머리글 <code>Authorization: Bearer 열쇠</code></li>
+      <li>Claude Code 라면 한 줄: <code>claude mcp add --transport http hatsoja ${MCP_URL} --header "Authorization: Bearer 열쇠"</code></li>
+      <li>AI 에게 말로 시킵니다 — 예: 「우리 조합 계약서 대장 보고 6개월 안에 끝나는 것 알려 줘」, 「매달 25일 경로당 난방비 지급 확인을 업무 달력에 넣어 줘」, 「올해 지출을 계정별로 보는 칸을 현황에 만들어 줘」.</li>
+    </ol>
+    <p class="text-mute" style="font-size:12.5px;margin:10px 0 0;">AI 가 할 수 있는 것: 우리 조합 일정·대장·업무·처분안·재무 요약 읽기, 대장·업무 더하기, 원장에 값 「제안」(확정은 사람), 「내 기능」 칸 만들기. <b>할 수 없는 것</b>: 사이트 기본 기능 바꾸기, 다른 조합 자료 보기, 조합원 명부 보기(개인정보 — 인원수만). AI 회사로 우리 조합 자료가 넘어가므로 개인정보는 넣지 마세요. ChatGPT 의 로그인형(OAuth) 연결은 다음 판에 붙습니다.</p></div>`;
+  const 열쇠 = !real ? `<div class="card mt-20"><p style="margin:0;">🌱 체험 모드에서는 열쇠를 만들 수 없습니다. 가입한 조합 계정으로 로그인하면 우리 조합 AI 를 연결할 수 있습니다.</p></div>`
+    : `<div class="card mt-20"><div class="card-title"><h3 class="serif">🔑 열쇠</h3><span class="badge badge-mute">조합마다 5개까지</span></div>
+      ${nk ? `<div style="background:var(--paper-soft);border-radius:8px;padding:12px;margin-bottom:12px;"><b>새 열쇠 「${escapeHtml(nk.name)}」 — 지금만 보입니다. 복사해 AI 에 넣으세요.</b>
+        <div style="display:flex;gap:8px;margin-top:8px;"><input class="input" id="ai-newkey" readonly value="${escapeHtml(nk.key)}" style="font-family:monospace;flex:1;">
+        <button class="btn btn-primary btn-sm" onclick="navigator.clipboard && navigator.clipboard.writeText(document.getElementById('ai-newkey').value).then(() => toast('복사했습니다.'))">복사</button></div></div>` : ''}
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <input class="input" id="ai-name" placeholder="열쇠 이름(예: 이사장 클로드)" style="width:220px;">
+        <label><input type="checkbox" id="ai-s-read" checked> 읽기</label>
+        <label><input type="checkbox" id="ai-s-write" checked> 대장·업무 더하기·제안</label>
+        <label><input type="checkbox" id="ai-s-ext" checked> 내 기능 만들기</label>
+        <button class="btn btn-primary" onclick="aiNewKey()">열쇠 만들기</button></div>
+      ${_aiState.err ? `<p class="text-mute">열쇠 목록을 읽지 못했습니다(${escapeHtml(_aiState.err)}).</p>` : _aiState.keys === null ? '<p class="text-mute">불러오는 중…</p>'
+        : _aiState.keys.length ? `<table class="tbl" style="font-size:13px;margin-top:12px;"><thead><tr><th>이름</th><th>할 수 있는 것</th><th>만든 때</th><th>마지막 사용</th><th></th></tr></thead><tbody>
+          ${_aiState.keys.map(k => `<tr${k.revoked ? ' style="opacity:.5;"' : ''}><td>${escapeHtml(k.name)}</td><td>${escapeHtml(String(k.scopes).replace('read', '읽기').replace('write', '더하기·제안').replace('ext', '내 기능'))}</td>
+            <td>${String(k.created_at).slice(0, 10)}</td><td>${k.last_used ? String(k.last_used).slice(0, 16).replace('T', ' ') : '—'}</td>
+            <td>${k.revoked ? '지움' : `<button class="btn btn-ghost btn-sm" onclick="aiRevoke(${Number(k.id)})">지우기</button>`}</td></tr>`).join('')}</tbody></table>` : '<p class="text-mute" style="margin-top:10px;">아직 만든 열쇠가 없습니다.</p>'}
+      </div>
+      <div class="card mt-20"><div class="card-title"><h3 class="serif">📜 AI 가 한 일(최근 50건)</h3></div>
+      ${_aiState.log && _aiState.log.length ? `<table class="tbl" style="font-size:12.5px;"><tbody>${_aiState.log.map(l => `<tr><td>${String(l.at).slice(0, 16).replace('T', ' ')}</td><td>${escapeHtml(l.name || '')}</td><td>${escapeHtml(l.tool || '')}</td><td>${l.ok ? '✅' : '⚠ 오류'}</td></tr>`).join('')}</tbody></table>` : '<p class="text-mute" style="margin:0;">아직 기록이 없습니다.</p>'}</div>`;
+  const 내기능 = `<div class="card mt-20"><div class="card-title"><h3 class="serif">🧩 내 기능 — 우리 AI 가 만든 칸 (${ext.tiles.length})</h3>${ext.by ? `<span class="badge badge-mute">${escapeHtml(ext.by)}</span>` : ''}</div>
+    <p class="text-mute" style="font-size:13px;margin-top:0;">AI 가 만든 칸은 현황 대시보드의 「내 기능」에 보입니다. 사람이 끄거나 지울 수 있고, 지워도 서버에 이력이 남습니다.</p>
+    ${ext.tiles.length ? ext.tiles.map(t => `<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;"><label style="padding-top:14px;"><input type="checkbox" ${ext.off[t.id] ? '' : 'checked'} onchange="extToggle('${escapeHtml(String(t.id))}', this.checked)"></label>
+      <div style="flex:1;">${extTileHtml(t)}</div><button class="btn btn-ghost btn-sm" style="margin-top:10px;" onclick="extDelete('${escapeHtml(String(t.id))}')">지우기</button></div>`).join('') : '<p class="text-mute" style="margin:0;">아직 없습니다. 연결한 AI 에게 「현황에 ○○ 칸을 만들어 줘」라고 시켜 보세요.</p>'}</div>`;
+  return `<div class="sec-head"><h1>🤖 내 AI·내 기능</h1><p class="sec-desc">우리 조합이 쓰는 AI 를 연결해, 우리 조합만의 칸·업무·대장을 AI 와 함께 키웁니다. 사이트의 기본 기능은 바뀌지 않습니다.</p></div>${연결}${열쇠}${내기능}`;
+}
+
 function memHome(u){
   const village = myVillage();
   return `
@@ -6653,11 +6755,12 @@ const DASH_TILES = [
   ['docs',   '최근 문서'],
   ['cycle',  '이번 달 업무'],
   ['expire', '계약 만기'],
+  ['ext',    '내 기능(우리 AI 가 만든 칸)'],
 ];
 const DASH_KEY = 'hsj_dash_tiles';
 function dashPicked(){
   try{ const v = JSON.parse(localStorage.getItem(DASH_KEY) || 'null'); if(Array.isArray(v)) return v; }catch(e){}
-  return ['cycle','todo','stage','kpi','fin','events','docs','expire'];
+  return ['cycle','todo','stage','kpi','fin','events','docs','expire','ext'];
 }
 function dashToggle(id, on){
   let v = dashPicked().filter(x => x !== id); if(on) v.push(id);
@@ -6727,6 +6830,8 @@ function memDashboard(u){
     const cs = regLoad('contracts').filter(c => c.end && c.end >= 오늘 && c.end <= 끝).sort((a, b) => a.end.localeCompare(b.end));
     return `<div class="card"><div class="card-title"><h3 class="serif">📑 90일 안에 끝나는 계약 (${cs.length})</h3><a href="#/mem/contracts" class="text-small">계약서 대장 →</a></div>
       ${cs.map(c => `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line-soft);"><span>${escapeHtml(c.title || '')} · ${escapeHtml(c.party || '')}</span><span class="badge badge-warn">${escapeHtml(c.end)} (${ddayLabel(c.end)})</span></div>`).join('') || '<p class="text-mute" style="margin:0;">곧 끝나는 계약이 없습니다.</p>'}</div>`; };
+  tile.ext = () => { const o = extLoad(), ts = o.tiles.filter(t => !o.off[t.id]);
+    return ts.length ? `<div class="grid grid-2">${ts.map(extTileHtml).join('')}</div>` : `<div class="card"><div class="card-title"><h3 class="serif">🧩 내 기능</h3><a href="#/mem/ai" class="text-small">내 AI 연결 →</a></div><p class="text-mute" style="margin:0;">우리 AI 가 만든 칸이 여기에 보입니다. 「🤖 내 AI·내 기능」에서 AI 를 연결하세요.</p></div>`; };
   const pairs = ['events','docs','ledger','members','expire'];
   const full = pick.filter(id => !pairs.includes(id)).map(id => `<div class="mt-20">${tile[id]()}</div>`).join('');
   const halves = pick.filter(id => pairs.includes(id)).map(id => tile[id]());
@@ -7792,7 +7897,7 @@ function powerSubmitCard(){
     + '<div class="card-title"><h3 class="serif">📤 월 실적을 연합회에 제출</h3>'
     + '<button class="btn btn-primary btn-sm" onclick="powerSubmitAll()">전체 제출</button></div>'
     + '<p class="text-mute" style="font-size:12.5px;margin-top:0;">올라가는 값은 <b>집계 숫자뿐</b>입니다 — 발전량·정산금·운영비·원리금·월말잔액. '
-    + '조합원 명부와 거래 적요는 브라우저를 떠나지 않습니다. 같은 달을 다시 올리면 덮어씁니다(두 번 잡히지 않습니다).</p>'
+    + '명부·통장 파일 원본은 서버로 보내지 않고, 브라우저가 읽어 낸 값만 우리 조합 자료로 저장합니다. 같은 달을 다시 올리면 덮어씁니다(두 번 잡히지 않습니다).</p>'
     + '<table class="tbl"><thead><tr><th>월</th><th class="num">발전(kWh)</th><th class="num">정산금</th>'
     + '<th class="num">운영비</th><th class="num">원리금</th><th class="num">월말잔액</th><th>제출</th><th></th></tr></thead><tbody>'
     + ms.map(function(m){
@@ -8293,7 +8398,8 @@ async function powerSubmitAll(){
 
 /* ─── 조합원 명부 파일 — 브라우저 안에서만 처리한다 (2026-09-28, 11-26 엑셀·조합원 관리 화면 올리기) ───
    🔴 개인정보다. 설계 원칙 셋:
-     ① 서버로 절대 안 보낸다 — 파싱도 저장도 브라우저 안에서 끝낸다(엑셀도 브라우저가 직접 푼다)
+     ① 파일 원본은 서버로 안 보낸다 — 파싱은 브라우저 안에서(엑셀도 브라우저가 직접 푼다).
+        읽어 낸 명부(성명·직위·가입일·출자금)는 11-26부터 persistMembers → /api/my/store 로 조합 자료에 저장된다
      ② 최소수집 — 명부에 필요한 것(성명·직위·가입일·출자금·출자좌수)만 가져오고 나머지 열은 버린다
      ③ 주민등록번호가 섞여 있으면 아예 들이지 않는다 — 열을 지우고 다시 올리게 한다
    재업로드는 성명(+가입일)으로 맞춰 갱신하므로 여러 번 올려도 중복되지 않는다.
@@ -8483,13 +8589,13 @@ function inboxParseRoster(file, fid){
       + ' · 총 출자금 ' + 총출자.toLocaleString() + '만원'
       + (버린열.length ? ' · 안 쓰는 열 ' + 버린열.length + '개 버림(' + 버린열.slice(0, 3).join(', ') + (버린열.length > 3 ? ' 외' : '') + ')' : '')
       + (건너뜀 ? ' · 성명이 비어 건너뜀 ' + 건너뜀 + '줄' : '')
-      + ' · 🔒 이 기기 안에만 저장했습니다',
+      + ' · 🔒 파일 원본은 서버로 보내지 않았습니다',
       '#/mem/members');
 
     // 원장에도 조합원 수를 제안으로 올린다(사람이 확정해야 들어간다)
     addProposal('조합원수', String(MOCK.members.length), file.name, '명부에서 셈');
     inboxRender();
-    toast((새로 + 갱신) + '명을 명부에 넣었습니다. 서버로 보내지 않았습니다.');
+    toast((새로 + 갱신) + '명을 명부에 넣었습니다. 파일 원본은 서버로 보내지 않았습니다.');
   });
 }
 
@@ -8524,7 +8630,7 @@ function memRosterUpload(input){
                 + escapeHtml(r.share) + (r.shares ? ' (' + r.shares + '좌)' : '') + '</td><td>' + (있음(r) ? '<span class="badge badge-mute">갱신</span>' : '<span class="badge badge-success">새로</span>') + '</td></tr>';
             }).join('')
           + '</tbody></table></div>'
-          + '<p class="text-mute" style="font-size:12.5px;margin-bottom:0;">🔒 파일은 서버로 보내지 않았습니다. 이 기기(브라우저) 안에서만 읽고 저장합니다.</p>',
+          + '<p class="text-mute" style="font-size:12.5px;margin-bottom:0;">🔒 파일 원본은 서버로 보내지 않고 브라우저 안에서 읽습니다. 「명부에 넣기」를 누르면 위 표의 성명·직위·가입일·출자금만 우리 조합 명부에 저장합니다.</p>',
       foot: '<button class="btn btn-outline" onclick="_rosterPending=null;closeDyn()">취소</button>'
           + '<button class="btn btn-primary" onclick="memRosterConfirm()">명부에 넣기</button>'
     });
@@ -8536,7 +8642,7 @@ function memRosterConfirm(){
   const n = _rosterApply(p.recs);
   addProposal('조합원수', String(MOCK.members.length), p.name, '명부에서 셈');
   closeDyn();
-  toast((n.새로 + n.갱신) + '명을 명부에 넣었습니다(새로 ' + n.새로 + ', 갱신 ' + n.갱신 + '). 서버로 보내지 않았습니다.');
+  toast((n.새로 + n.갱신) + '명을 명부에 넣었습니다(새로 ' + n.새로 + ', 갱신 ' + n.갱신 + '). 파일 원본은 서버로 보내지 않았습니다.');
   refresh();
 }
 
@@ -9514,7 +9620,7 @@ function memMembers(){
       <div class="card-title">
         <h3 class="serif">👥 조합원 명부</h3>
         <div style="display:flex;gap:6px;">
-          <label class="btn btn-outline btn-sm" style="cursor:pointer;" title="성명·직위·가입일·출자금 열이 있는 엑셀(.xlsx)·CSV — 서버로 보내지 않습니다">📤 명부 파일 올리기
+          <label class="btn btn-outline btn-sm" style="cursor:pointer;" title="성명·직위·가입일·출자금 열이 있는 엑셀(.xlsx)·CSV — 파일 원본은 서버로 보내지 않고, 읽어 낸 네 항목만 명부에 저장합니다">📤 명부 파일 올리기
             <input type="file" accept=".xlsx,.csv,.txt" style="display:none;" onchange="memRosterUpload(this)"></label>
           <button class="btn btn-outline btn-sm" onclick="downloadMembers()">📥 명부 다운로드 (Excel · A4)</button>
           <button class="btn btn-primary btn-sm" onclick="addMember()">+ 조합원 추가</button>
@@ -13188,7 +13294,7 @@ function _storeKinds(){
     [STORE.members]:'members', [STORE.events]:'events', [STORE.uploads]:'uploads', [STORE.closings]:'closings',
     [STORE.accounting]:'accounting', [STORE_INBOX]:'inbox', [STORE_LEDGER]:'ledger', [STORE_POWER]:'power',
     [TAX_STORE]:'tax', [DASH_KEY]:'dash', [REG_KEY('contracts')]:'contracts', [REG_KEY('minutes')]:'minutes',
-    [REG_KEY('expenses')]:'expenses', [TASK_KEY]:'tasks', [SURPLUS_KEY]:'surplus',
+    [REG_KEY('expenses')]:'expenses', [TASK_KEY]:'tasks', [SURPLUS_KEY]:'surplus', [EXT_KEY]:'ext',
   };
 }
 function _storeQueue(key, val){
