@@ -347,7 +347,7 @@ function show(view) { ['boot-view', 'login-view', 'app'].forEach(id => $('#' + i
 async function boot() {
   const r = await api('/api/auth/me');
   if (r.ok && r.user && (r.user.role === 'admin' || r.user.role === 'staff')) return enter(r.user);
-  if (r.ok && r.user) { await api('/api/auth/logout', { method: 'POST' }); show('login-view'); showMsg($('#login-msg'), '직원·관리자 계정만 이용할 수 있습니다.', 'error'); return; }
+  if (r.ok && r.user) { show('login-view'); showMsg($('#login-msg'), '이 화면은 매니저·통합관리자만 쓸 수 있습니다. 지금 로그인은 그대로입니다. 3초 뒤 내 페이지로 돌아갑니다.', 'error'); setTimeout(() => { location.href = '/#/'; }, 3000); return; }   // 11-27 전수개선: 예전엔 통합 로그아웃까지 했다
   show('login-view');
 }
 $('#login-form').addEventListener('submit', async e => {
@@ -357,8 +357,7 @@ $('#login-form').addEventListener('submit', async e => {
   btn.disabled = false;
   if (r.ok && r.user) {
     if (r.user.role === 'admin' || r.user.role === 'staff') return enter(r.user);
-    await api('/api/auth/logout', { method: 'POST' });
-    return showMsg($('#login-msg'), '직원·관리자 계정만 이용할 수 있습니다.', 'error');
+    return showMsg($('#login-msg'), '이 화면은 매니저·통합관리자만 쓸 수 있습니다. 로그인은 됐으니 내 페이지에서 이어서 쓰세요.', 'error');
   }
   showMsg($('#login-msg'), errText(r), 'error');
 });
