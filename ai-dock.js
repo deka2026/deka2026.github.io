@@ -124,7 +124,7 @@
     '<div class="logo" id="logo">🤖 <b>사교원 AI</b><span> 도우미</span></div>' +
     '<input class="q" id="q" placeholder="이 화면에 대해 물어보세요 — 파일·이미지를 올리고 문서도 만듭니다" autocomplete="off">' +
     '<button class="b" id="send" title="보내기">보내기</button>' +
-    '<button class="b lbl" id="bUp" title="파일·이미지 올리기">📎 <span class="ul">업로드</span></button>' +
+    '<button class="b lbl" id="bUp" title="파일·이미지 올리기">📎 <span class="ul">올리기</span></button>' +
     '<button class="b lbl" id="bDoc" title="문서 작성">📝 문서</button>' +
     '<button class="b dk" id="bDeka" type="button" hidden title="데카(서버 작업대)에게 직접 지시 — 통합관리자 전용">🛠️ 데카</button>' +
     '<button class="b" id="bTog" title="열기/닫기">▾</button>' +
@@ -197,7 +197,7 @@
   function setWho() {
     var m = state.me || {};
     if (m.user) $('who').innerHTML = esc(m.user.name || m.user.email || m.user.username) + ' · ' + esc(m.user.tier_ko || m.user.role_ko || '') + ' · ' + (m.used || 0) + '/' + m.limit;
-    else $('who').innerHTML = '<a href="' + API + '/#login">로그인</a>하면 업로드·문서작성 · 안내 ' + (m.used || 0) + '/' + (m.limit || 10);
+    else $('who').innerHTML = '<a href="' + API + '/#login">로그인</a>하면 파일 올리기·문서 작성 · 안내 ' + (m.used || 0) + '/' + (m.limit || 10);
   }
   function loadMe() { return api('/api/ai/dock/me').then(function (r) { state.me = r.ok ? r : {}; setWho(); dekaShow(); }); }
   loadMe();
@@ -501,7 +501,7 @@
       });
   }
   function upload(files) {
-    if (!state.me || !state.me.user) { open(true); addMsg('err', '파일·이미지 업로드는 로그인한 뒤 쓸 수 있습니다. <a href="' + API + '/#login">로그인</a>'); return; }
+    if (!state.me || !state.me.user) { open(true); addMsg('err', '파일·이미지 올리기는 로그인한 뒤 쓸 수 있습니다. <a href="' + API + '/#login">로그인</a>'); return; }
     Array.prototype.forEach.call(files, function (f) {
       open(true); tab('chat');
       var m = addMsg('file', '📎 ' + esc(f.name) + ' 올리는 중… (AI 에는 전화·주민번호·이메일 같은 정해진 개인정보를 가린 글자만 보냅니다 — 문장 속 이름은 남을 수 있습니다. PDF·한글·그림은 「근거확보해」용 원본을 본인만 볼 수 있게 7일 보관한 뒤 지웁니다 — 대화를 지우면 바로 지웁니다)');

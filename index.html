@@ -810,7 +810,7 @@ svg.ic.s{width:17px;height:17px}
       <!-- ⑥ 꾸미기 (#/custom) — 11-18: 사이드바는 「내가 고른 서비스」로 정해지므로 대시보드 칸만 꾸민다 -->
       <main id="vCustom" class="view" aria-label="내 페이지 꾸미기">
         <div class="secT"><h2>내 페이지 꾸미기</h2><p class="sub">대시보드 칸을 체크하면 넣고, ▲▼ 로 순서를 바꿉니다. 저장하면 어느 기기에서 로그인해도 같습니다. 사이드바는 내가 고른 서비스대로 놓입니다 — 바꾸려면 <a href="#/join">서비스 이용 신청</a>.</p></div>
-        <div class="ctabs" role="group" aria-label="꾸미기 묶음 고르기"><button type="button" data-ct="dash" aria-pressed="true" aria-controls="cDashBox">📊 대시보드 칸</button><button type="button" data-ct="prev" aria-pressed="false" aria-controls="cPrevBox">👀 미리보기</button></div>
+        <a class="paycta" href="#/join" id="customSvc" style="margin:0 0 12px"><b>🧩 사이드바에 서비스 더하기</b><span>사이드바 메뉴는 신청한 서비스대로 놓입니다. 햇소자·아카데미·의정지원을 신청하면 메뉴가 늘어납니다.</span></a><div class="ctabs" role="group" aria-label="꾸미기 묶음 고르기"><button type="button" data-ct="dash" aria-pressed="true" aria-controls="cDashBox">📊 대시보드 칸</button><button type="button" data-ct="prev" aria-pressed="false" aria-controls="cPrevBox">👀 미리보기</button></div>
         <div class="cgrid">
           <section class="grp" id="cDashBox" data-ct="dash" aria-labelledby="cDashT"><h3 id="cDashT">📊 대시보드 칸</h3><ul class="clist" id="cDash"></ul></section>
           <aside class="grp" id="cPrevBox" data-ct="prev" aria-labelledby="cPrevT"><h3 id="cPrevT">미리보기</h3><div class="mini" id="cPrev"></div></aside>
@@ -1306,7 +1306,7 @@ function route() {
     else goBackIfReady().then(ok => { if (!ok) checkTempPassword(); });
     history.replaceState(null, '', location.pathname + location.search); return route();
   }
-  if ((h === '#login' || h === '#/login') && me && BOOTED) { history.replaceState(null, '', location.pathname + location.search + '#/'); return route(); }   // 11-27 전수개선 E-5: 이미 로그인한 회원에게 로그인 창을 띄우지 않는다
+  if ((h === '#login' || h === '#/login') && me && BOOTED) { $('#authModal').classList.remove('on'); history.replaceState(null, '', location.pathname + location.search + '#/'); return route(); }   // 11-27 전수개선 E-5: 이미 로그인한 회원에게 로그인 창을 띄우지 않는다
   if (h === '#login' || h === '#/login') openAuth('login');
   if (h === '#signup' || h === '#/signup') { history.replaceState(null, '', location.pathname + location.search + '#/join'); }   // 옛 가입 주소 → 가입 3걸음
   if (h.startsWith('#/contact')) { history.replaceState(null, '', location.pathname + location.search + '#/ask'); }
@@ -2419,6 +2419,7 @@ async function boot() {
   document.documentElement.classList.remove('booting');   // 회원 정보로 화면을 그린 뒤에 보인다(깜빡임 방지)
   if (twofaWait || (BACK && !me)) openAuth('login');   // 하위 앱이 ?back= 만 달아 보낸 비로그인도 로그인 창부터
   if (me) { checkTempPassword(); loadTwofa(); }
+  if (me && !BACK && ['#login', '#/login'].includes(location.hash)) { $('#authModal').classList.remove('on'); history.replaceState(null, '', location.pathname + location.search + '#/'); route(); }   // 11-27 전수개선 E-5
 }
 /* 로그인 창 — 회원가입은 #/join 화면(3걸음) */
 function openAuth(tab, note) {
