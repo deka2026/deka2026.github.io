@@ -601,7 +601,7 @@ footer{
 .chat-fab.on{display:block;}
 /* 11-07 (C2) 공용 상담창(ai-dock)이 휴대폰 「💬 상담」 단추(fab 모드)로 떠 있으면 햇소자 자체 💬 단추는 숨긴다 — 단추 두 개 금지 */
 :root:has(#sk-ai-dock[data-mode="fab"]) .chat-fab.on{display:none;}
-/* 11-07 이사장 지시: 오픈 전 시험·실험용으로 넣어 둔 것은 빨간 글씨로 표시(지우지 않고 표시만, title="오픈 전 제거·확인") */
+/* 11-07 이사장 지시: 오픈 전 시험·실험용으로 넣어 둔 것은 빨간 글씨로 표시(지우지 않고 표시만,) */
 .tmp{color:#b03a3a;font-weight:600;}
 /* 11-04 사교원 공통 상담창(ai-dock) 휴대폰 「상담」 단추를 햇소자 AI 상담 단추 위로 올린다 */
 :root{--skai-bottom:84px;}
@@ -787,6 +787,47 @@ h1,h2,h3{font-weight:800;letter-spacing:-.02em;}
   .feature-icon{grid-row:1 / span 2;margin:0;}
   .feature h3{font-size:16.5px;margin:2px 0 4px;}
 }
+
+/* ── 11-27 전수 개선(알파 디자인 점검 H-01~H-12) ── */
+/* H-02·H-03: 데스크톱은 왼쪽 사이드바 하나만 — 위 메뉴줄(공개)·등급 드롭다운(로그인)은 같은 메뉴라 숨긴다 */
+@media (min-width:901px){ .pub-nav,.role-nav{display:none!important;} .topnav-in>.brand{margin-right:auto;} }
+/* H-09: 사이드바 맨 위 알약 두 개 */
+.side-top{display:flex;gap:6px;flex-wrap:wrap;padding:0 4px 12px;margin-bottom:10px;border-bottom:1px solid var(--line-soft);}
+.side-pill{border:1px solid var(--line-soft);background:#fff;border-radius:999px;padding:5px 9px;font-size:12.5px;cursor:pointer;color:var(--ink);font-weight:600;}
+.side-pill:hover{background:var(--primary-50);}
+.side-pill.gold{background:#fff6dc;border-color:#e9cf86;color:#6b4e00;}
+.side-tools,.side-tools button{font-size:13px;}
+.side-tools button{color:var(--primary-dark,#2f5d3a);}
+/* H-12: 깊이 보기 묶음 접기 */
+.side-fold{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:0;cursor:pointer;text-align:left;border-radius:6px;}
+.side-fold:hover{background:var(--primary-50);color:var(--ink);}
+.side-caret{font-size:12px;letter-spacing:0;}
+.side-foldg:not(.open){margin-bottom:6px;}
+.side-fold-body[hidden]{display:none!important;}
+/* H-06: 공개 하위 화면 사진 띠·사례 카드 색 타일 · H-07: 요금 화면 */
+.pub-photo{height:140px;border-radius:var(--radius);background:var(--ph) center/cover no-repeat,#e8e2d2;margin:0 0 20px;position:relative;overflow:hidden;}
+.pub-photo span{position:absolute;right:10px;bottom:8px;background:rgba(0,0,0,.45);color:#fff;font-size:12px;padding:3px 9px;border-radius:999px;}
+.case-ph{height:84px;display:flex;align-items:center;justify-content:center;font-size:38px;border-radius:var(--radius) var(--radius) 0 0;}
+.prc-free{background:#fff6dc;border:1px solid #e9cf86;border-radius:12px;padding:10px 14px;margin:0 0 16px;font-size:14.5px;}
+details.prc-rule{margin-top:18px;}
+details.prc-rule>summary{cursor:pointer;font-weight:700;list-style:revert;}
+details.prc-rule[open]>summary{margin-bottom:8px;}
+@media (max-width:600px){.pub-photo{height:110px;}}
+/* H-04 덧: 데스크톱에서도 표가 든 카드는 카드 안에서만 옆으로 민다(재무제표 1,407px 넘침) */
+#v-app .main .card:has(table){overflow-x:auto;}
+/* H-08: 휴대폰 진단 화면의 두 칸 표(머리행 없는 것)는 줄마다 제목 위·값 아래 카드로 */
+@media (max-width:640px){
+  #v-pub-diagnose table.tbl:not(:has(thead)) tr{display:block;padding:10px 0;border-bottom:1px solid var(--line-soft);}
+  #v-pub-diagnose table.tbl:not(:has(thead)) td{display:block;width:auto!important;border:0;padding:2px 0;}
+}
+/* H-01: 휴대폰 로그인 화면 — 사이드바는 ☰ 로만 연다(머리띠 아래 덮개) */
+@media (max-width:900px){
+  #v-app .app>.sidebar{display:none;}
+  body.side-open #v-app .app>.sidebar{display:block;position:fixed;left:0;right:0;bottom:0;top:var(--hs-top,64px);z-index:65;max-height:none;overflow-y:auto;border-radius:0;margin:0;box-shadow:0 14px 30px rgba(0,0,0,.18);}
+  body.side-open .topnav-in.nav-open .role-nav{display:none!important;}
+  /* H-04: 넓은 표는 카드 안에서만 옆으로 민다 */
+  #v-app .card{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+}
 </style>
 </head>
 <body>
@@ -809,7 +850,7 @@ h1,h2,h3{font-weight:800;letter-spacing:-.02em;}
       <a href="#/pub/cases">사례</a>
       <a href="#/pub/faq">FAQ</a>
       <a href="#/pub/contact">상담신청</a>
-      <a href="https://center.sakyowon.co.kr/" target="_blank" rel="noopener" title="시민자산육성지원센터 업무포털 — 별도 로그인 · 새 창">시민자산육성지원센터 <span class="tmp" title="오픈 전 제거·확인">🧪 시험판</span></a>
+      <a href="https://center.sakyowon.co.kr/" target="_blank" rel="noopener" title="시민자산육성지원센터 업무포털 — 별도 로그인 · 새 창">시민자산육성지원센터</a>
       <a href="manual.html">이용안내</a>
     </div>
 
@@ -946,6 +987,7 @@ h1,h2,h3{font-weight:800;letter-spacing:-.02em;}
       <h1>사업 소개</h1>
       <p class="sec-desc">햇빛소득마을 협동조합 업무자동화 플랫폼이 무엇을 왜 하는지 안내합니다.</p>
     </div>
+    <div class="pub-photo" style="--ph:url('/img/unified/s_hat.jpg')" role="img" aria-label="학교 지붕에 올린 태양광"><span>학교 지붕에 올린 태양광</span></div>
 
     <div class="card">
       <h3 class="serif">햇빛소득마을이란?</h3>
@@ -1120,7 +1162,7 @@ h1,h2,h3{font-weight:800;letter-spacing:-.02em;}
     </div>
 
     <div class="card" style="margin-bottom:18px;">
-      <div class="card-title"><h3 class="serif">③ 주민동의 전자수합 <span class="badge badge-mute tmp" title="오픈 전 제거·확인">데모</span></h3></div>
+      <div class="card-title"><h3 class="serif">③ 주민동의 전자수합 <span class="badge badge-mute">예시</span></h3></div>
       <p class="text-mute" style="margin-top:0;">가구별 동의 링크를 문자·카카오톡으로 보내고 수합률을 실시간 집계합니다.
       공모 요건은 <b>주민 70% 이상 동의</b>이며, 마을 자치규약에 따른 <b>총회 의결서</b>가 함께 필요합니다.
       <b>동의는 반드시 본인이 직접</b> 하며, 고령층은 서면 동의서 스캔과 대면 확인을 병행합니다(대리입력은 하지 않습니다).</p>
@@ -1219,6 +1261,7 @@ h1,h2,h3{font-weight:800;letter-spacing:-.02em;}
       <h1>가입 절차</h1>
       <p class="sec-desc">햇소자 플랫폼 가입 및 마을 등록 절차를 안내합니다.</p>
     </div>
+    <div class="pub-photo" style="--ph:url('/hatsoja/img/sun-workshop-back-01.jpg')" role="img" aria-label="햇빛소득마을 워크숍(2026년 1월)"><span>햇빛소득마을 워크숍(2026년 1월)</span></div>
     <div data-hs-apply></div>
 
     <div class="card">
@@ -1281,9 +1324,11 @@ h1,h2,h3{font-weight:800;letter-spacing:-.02em;}
       <h1>참여 사례</h1>
       <p class="sec-desc">햇빛소득마을 사업에 참여 중인 마을들의 사례를 소개합니다.</p>
     </div>
+    <div class="pub-photo" style="--ph:url('/img/unified/b_co3.jpg');background-position:center 12%" role="img" aria-label="마을 안 태양광 그늘막"><span>마을 안 태양광 그늘막</span></div>
 
     <div class="grid grid-2">
       <div class="case">
+        <div class="case-ph" style="background:#dbeafe" aria-hidden="true">🌊</div>
         <div class="case-body">
           <span class="case-tag">시범사업 · 진행 중</span>
           <div class="case-title">완도군 A리 저수지 수상태양광</div>
@@ -1300,6 +1345,7 @@ h1,h2,h3{font-weight:800;letter-spacing:-.02em;}
       </div>
 
       <div class="case">
+        <div class="case-ph" style="background:#fde7c7" aria-hidden="true">🏠</div>
         <div class="case-body">
           <span class="case-tag">준비 중</span>
           <div class="case-title">진도군 B리 마을회관 옥상 태양광</div>
@@ -1315,6 +1361,7 @@ h1,h2,h3{font-weight:800;letter-spacing:-.02em;}
       </div>
 
       <div class="case">
+        <div class="case-ph" style="background:#dcf2d6" aria-hidden="true">🌾</div>
         <div class="case-body">
           <span class="case-tag">준비 중</span>
           <div class="case-title">해남군 C리 유휴 농지 영농형 태양광</div>
@@ -1330,6 +1377,7 @@ h1,h2,h3{font-weight:800;letter-spacing:-.02em;}
       </div>
 
       <div class="case">
+        <div class="case-ph" style="background:#ede4fb" aria-hidden="true">🏞</div>
         <div class="case-body">
           <span class="case-tag">사전 검토</span>
           <div class="case-title">신안군 D리 폐염전 태양광</div>
@@ -1356,8 +1404,9 @@ h1,h2,h3{font-weight:800;letter-spacing:-.02em;}
   <div class="wrap pub-page">
     <div class="sec-head">
       <h1>자주 묻는 질문</h1>
-      <p class="sec-desc">궁금한 점을 먼저 확인해보세요. 없으면 상담 신청으로 문의해주세요.</p>
+      <p class="sec-desc">궁금한 점을 먼저 확인해보세요. 없으면 상담 신청으로 문의해 주세요.</p>
     </div>
+    <div class="pub-photo" style="--ph:url('/hatsoja/img/sun-workshop-back-01.jpg')" role="img" aria-label="햇빛소득마을 워크숍(2026년 1월)"><span>햇빛소득마을 워크숍(2026년 1월)</span></div>
 
     <div class="faq">
       <details open>
@@ -1420,7 +1469,13 @@ h1,h2,h3{font-weight:800;letter-spacing:-.02em;}
       <p class="sec-desc">기본 이용료에 필요한 AI 메뉴만 골라 더합니다. 아래에서 메뉴를 고르면 한 달 요금이 바로 계산됩니다.</p>
     </div>
     <div data-hs-apply></div>
-    <div class="card prc-rule">
+    <div class="prc-free">🎁 <b>2026년 12월까지 모든 회원 무료 시범</b> · 이용료는 2027년 1월부터, 상업발전 전에는 계속 무료</div>
+    <div class="prc-tabs" role="tablist">
+      <button type="button" class="prc-tab on" data-prc="coop" role="tab" aria-selected="true">협동조합 회원</button>
+      <button type="button" class="prc-tab" data-prc="fed" role="tab" aria-selected="false">연합회 회원</button>
+    </div>
+    <div id="prcBody"></div>
+    <details class="card prc-rule"><summary>요금 규칙 자세히 (무료 시범·상업발전 전 무료·창립 회원 반값·결제)</summary>
       <ul>
         <li><strong>요금은 2027년 1월부터 받습니다.</strong> 2026년 12월까지는 모든 회원이 무료 시범으로 씁니다.</li>
         <li><strong>상업발전 전에는 모든 메뉴가 무료</strong>입니다. 2027년 1월 이후에도 요금은 상업운전을 시작한 다음 달부터 붙습니다.</li>
@@ -1429,12 +1484,7 @@ h1,h2,h3{font-weight:800;letter-spacing:-.02em;}
         <li>한 달 한도를 넘으면 추가 묶음을 사서 이어 쓰고, 다음 달 1일에 한도가 다시 채워집니다.</li>
         <li>결제는 <strong>계좌이체</strong>로 받습니다 — 하나은행 380-910028-79905 (예금주 사회혁신교육원사회적협동조합). 현금영수증·세금계산서를 발행합니다.</li>
       </ul>
-    </div>
-    <div class="prc-tabs" role="tablist">
-      <button type="button" class="prc-tab on" data-prc="coop" role="tab" aria-selected="true">협동조합 회원</button>
-      <button type="button" class="prc-tab" data-prc="fed" role="tab" aria-selected="false">연합회 회원</button>
-    </div>
-    <div id="prcBody"></div>
+    </details>
     <div class="text-center mt-32">
       <a class="btn btn-primary btn-lg" href="#/pub/contact">요금·도입 상담 신청</a>
     </div>
@@ -1476,6 +1526,7 @@ h1,h2,h3{font-weight:800;letter-spacing:-.02em;}
       <h1>상담 신청</h1>
       <p class="sec-desc">햇빛소득마을 사업·플랫폼 이용에 대해 상담을 신청하세요.</p>
     </div>
+    <div class="pub-photo" style="--ph:url('/img/unified/s_hat.jpg')" role="img" aria-label="학교 지붕에 올린 태양광"><span>학교 지붕에 올린 태양광</span></div>
 
     <div class="grid grid-2">
       <div class="card">
@@ -1565,10 +1616,9 @@ h1,h2,h3{font-weight:800;letter-spacing:-.02em;}
     <div>
       <a href="https://sakyowon.co.kr/" target="_blank">사교원 사이트</a> ·
       <a href="https://home.sakyowon.co.kr/sunvillage.html">햇빛소득 종합업무도우미</a> ·
-      <a href="https://home.sakyowon.co.kr/wando-solar.html">완도 시범사업 계획서</a> ·
       <a href="manual.html">사용 설명서</a> ·
       <a href="#/pub/privacy">개인정보처리방침</a>
-      <div style="margin-top:8px"><a href="https://sakyowon.co.kr/admin.html" rel="nofollow" style="display:inline-block;padding:5px 14px;border:1px solid rgba(128,128,128,.45);border-radius:999px;font-size:12px;color:inherit;text-decoration:none">🔐 통합 관리자</a></div>
+      <div id="footAdmin" hidden style="margin-top:8px"><a href="https://sakyowon.co.kr/admin.html" rel="nofollow" style="display:inline-block;padding:5px 14px;border:1px solid rgba(128,128,128,.45);border-radius:999px;font-size:12px;color:inherit;text-decoration:none">🔐 통합 관리자</a></div>
     </div>
   </div>
 </footer>
@@ -1608,7 +1658,7 @@ h1,h2,h3{font-weight:800;letter-spacing:-.02em;}
     </div>
 
     <!-- 등급별 데모 계정 — 버튼 하나로 해당 등급의 화면·기능을 바로 점검 -->
-    <p class="text-small tmp" title="오픈 전 제거·확인" style="margin:14px 0 6px;font-weight:600;">등급별 데모 로그인 (계정 없이 기능 점검)</p>
+    <p class="text-small" style="margin:14px 0 6px;font-weight:600;">등급별 체험 (계정 없이 둘러보기)</p>
     <div class="demo-buttons" style="flex-wrap:wrap;">
       <button class="btn btn-outline btn-sm" style="flex:1 1 46%;" onclick="demoLogin('admin')">🔐 관리자</button>
       <button class="btn btn-outline btn-sm" style="flex:1 1 46%;" onclick="demoLogin('federation')">🤝 연합회</button>
@@ -1619,7 +1669,7 @@ h1,h2,h3{font-weight:800;letter-spacing:-.02em;}
       ⓘ <strong>사교원 통합 계정 하나로 로그인</strong>합니다.
       다른 사교원 사이트에 이미 로그인돼 있으면 자동으로 이어집니다(SSO).
       계정이 없으면 <a href="#" onclick="toggleSignup(true);return false;">가입 신청</a>하세요.
-      <span class="tmp" title="오픈 전 제거·확인">위 등급 버튼을 누르면 계정 없이 그 등급의 화면과 기능을 바로 점검할 수 있습니다.</span>
+      <span>위 등급 버튼을 누르면 계정 없이 그 등급의 화면과 기능을 바로 점검할 수 있습니다.</span>
     </p>
 
     <!-- 통합 계정 가입 신청 (승인제) -->
@@ -1633,7 +1683,7 @@ h1,h2,h3{font-weight:800;letter-spacing:-.02em;}
       <div class="form-row"><label>활동지역 <span style="color:#b03a3a">*</span></label><div style="display:flex;gap:6px"><select class="input" id="su-sido" style="flex:1"><option value="">광역</option></select><select class="input" id="su-sigungu" style="flex:1"><option value="">시군구</option></select></div></div>
       <div class="form-row"><label>전화번호 <span class="text-mute text-small">(조합·연합회 신청은 필수)</span></label><input class="input" id="su-contact" inputmode="tel" placeholder="010-0000-0000"></div>
       <div class="form-row"><label>소속 마을·조직 (선택)</label><input class="input" id="su-org"></div>
-      <div class="form-row"><label>회원 등급</label><select class="input" id="su-tier"><option value="coop">조합회원 — 햇빛소득마을 회원협동조합 (승인 후)</option><option value="federation">연합회회원 — 연합회 (승인 후)</option><option value="general">일반이용자 — 둘러보기·AI 질문 (바로 가입)</option></select></div>
+      <div class="form-row"><label>회원 등급</label><select class="input" id="su-tier"><option value="coop">협동조합회원 — 햇빛소득마을 마을협동조합 (승인 후 이용)</option><option value="federation">연합회원 — 협동조합 연합회 (승인 후 이용)</option><option value="general">무료이용회원 — 둘러보기·AI 질문 (바로 가입)</option></select></div>
       <label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;margin-bottom:10px;cursor:pointer;">
         <input type="checkbox" id="su-consent" style="margin-top:3px;">
         <span>(필수) 만 14세 이상이며, 계정 발급을 위한 개인정보 수집·이용에 동의합니다. <a href="#/pub/privacy" target="_blank">처리방침</a></span>
@@ -1755,14 +1805,14 @@ const AUTH_KEY = 'sunvillage_auto_user';
    메뉴·접근권한은 ROLE_MENUS 한 곳에서만 정의한다 — 상단 메뉴바·사이드바·라우터 접근검사가 모두 이 표를 본다. */
 const ROLES = {
   admin:      {label:'관리자',       emoji:'🔐', home:'#/adm/dashboard', desc:'플랫폼 전체 운영 · 회원 승인 · 콘텐츠 관리'},
-  federation: {label:'연합회',       emoji:'🤝', home:'#/mem/fedsupport', desc:'회원조합 지원업무 · 연합회 자체 사무'},
-  coop:       {label:'회원협동조합', emoji:'🏘', home:'#/mem/home', desc:'우리 마을 조합의 설립·건설·운영 업무'},
+  federation: {label:'연합회원',     emoji:'🤝', home:'#/mem/fedsupport', desc:'회원조합 지원업무 · 연합회 자체 사무'},
+  coop:       {label:'협동조합회원', emoji:'🏘', home:'#/mem/home', desc:'우리 마을 조합의 설립·건설·운영 업무'},
   guest:      {label:'손님',         emoji:'👋', home:'#/pub/home',      desc:'사업 소개 · 자가진단 · 상담 신청 (승인 전)'},
 };
 /* 2026-11-07 이사장 지시 「햇소자 안으로 시민자산육성지원센터 메뉴」 — 별도 로그인·새 창. scope 'ext' = 바깥 주소(page 자리에 URL).
    모든 등급(손님 포함)에 보인다. 🧪 시험판 표시는 오픈 전 제거·확인(.tmp). 렌더러는 menuOnclick()/menuTitle() 로 ext 를 가른다. */
 const CENTER_URL = 'https://center.sakyowon.co.kr/';
-const CENTER_MENU = ['ext', CENTER_URL, '🏛', '시민자산육성지원센터 <span class="tmp" title="오픈 전 제거·확인">🧪 시험판</span>'];
+const CENTER_MENU = ['ext', CENTER_URL, '🏛', '시민자산육성지원센터'];
 const ROLE_MENUS = {
   admin: [
     ['플랫폼 관리', [
@@ -1788,8 +1838,8 @@ const ROLE_MENUS = {
       ['mem','video','🎬','활동 영상 만들기'],
     ]],
     /* 2026-10-22 상담 체인(분류→도구→RAG→HPC→출처·기준일)은 관리자가 먼저 써 보는 실험실 뒤에 둔다. 라이브 /api/ai/chat 은 그대로. */
-    ['<span class="tmp" title="오픈 전 제거·확인">실험실</span>', [
-      ['adm','lab','🧪','<span class="tmp" title="오픈 전 제거·확인">상담 체인 실험실</span>'],
+    ['<span class="tmp">실험실</span>', [
+      ['adm','lab','🧪','<span class="tmp">상담 체인 실험실</span>'],
     ]],
   ],
   /* 연합회 메뉴는 두 갈래로 나눈다 (2026-09-29).
@@ -1821,7 +1871,7 @@ const ROLE_MENUS = {
       ['mem','stat','🗺','전남 발전 현황'],
       ['mem','chat','💬','AI 상담'],
       ['mem','video','🎬','활동 영상 만들기'],
-      ['mem','mypage','👤','마이페이지'],
+      ['mem','mypage','👤','내 페이지'],
       ['pub','pricing','💳','요금 안내'],
     ]],
   ],
@@ -1879,7 +1929,7 @@ const ROLE_MENUS = {
     ]],
     /* 11-26 이사장 지시: 내 조합은 사이드바 맨 아래로, 그 아래 이용안내(사용 설명서·내 AI 연결 안내) */
     ['내 조합', [
-      ['mem','mypage','👤','마이페이지'],
+      ['mem','mypage','👤','내 페이지'],
       ['pub','pricing','💳','요금 안내'],
     ]],
     ['이용안내', [
@@ -2134,7 +2184,7 @@ const MENU_DESC = {
   finance:['자부담·융자 신청','자부담 비율과 융자 신청 서류를 준비합니다'],
   vendor:['사업자(ReSCO) 선정','시공·운영 사업자를 비교하고 선정합니다'],
   success:['20년 성공 조건','장기 운영을 위한 점검 항목을 확인합니다'],
-  mypage:['마이페이지','내 정보와 출자·배당 내역을 확인합니다'],
+  mypage:['내 페이지','내 정보와 출자·배당 내역을 확인합니다'],
   setup:['설립 내비게이터·청약','조합 설립 단계를 안내받고 조합원 청약을 진행합니다'],
   docs:['문서 자동 생성','정관·회의록·사업계획서 초안을 AI가 만들어 줍니다'],
   review:['서류 AI 검토','작성한 서류의 누락·오류를 AI가 점검합니다'],
@@ -2226,7 +2276,7 @@ async function loadRealData(){
       if(mvRes.error === 'unauthorized' || vRes.error === 'unauthorized'){   // 26-11-26 알파언니 🟠6: 세션이 끝났는데 로그인된 척하지 않는다
         try{ storeClearLocal(); }catch(e){}
         setUser(null); location.hash = '#/pub/home';
-        toast('로그인이 끝났습니다. 다시 로그인해 주세요.');
+        toast('로그인한 지 오래되어 로그아웃되었습니다. 다시 로그인해 주세요.');
       }
       return;
     }
@@ -2320,7 +2370,7 @@ async function doLogin(){
     }catch(e){
       loginErr(`통합 계정 서버에 연결하지 못했습니다. 인터넷 연결을 확인해 주세요.<br>
         <button class="btn btn-outline btn-sm" onclick="doLogin()">다시 시도</button>
-        <button class="btn btn-ghost btn-sm" onclick="clearLoginErr();demoLogin('coop')">데모로 둘러보기</button>`);
+        <button class="btn btn-ghost btn-sm" onclick="clearLoginErr();demoLogin('coop')">체험으로 둘러보기</button>`);
     }
     return;
   }
@@ -2334,7 +2384,7 @@ async function doLogin(){
            loginAt:new Date().toISOString()});
   closeLogin();
   location.hash = roleHome(role);
-  toast(`환영합니다, ${name}님 (${roleLabel(role)}) — 데모 모드`);
+  toast(`환영합니다, ${name}님 (${roleLabel(role)}) — 체험 모드`);
 }
 
 function toggleSignup(show){
@@ -2513,7 +2563,14 @@ async function eduConsentOk(){
 }
 
 /* SSO 자동 로그인: 통합 관리자 등에서 이미 로그인돼 있으면 그 세션을 그대로 인식 */
+/* 11-27 보라 E-2: 통합 로그인을 늦게 알아챈 뒤(첫 그리기 다음) 공개 화면의 유료회원 신청 띠·사이드바를 다시 그린다 */
+function hsApplyRefresh(){
+  try{ const [sc, pg] = currentRoute().split('/'); if(sc === 'pub'){ renderPubSidebar(document.getElementById('v-pub-' + pg) ? pg : 'home'); hsApplyRender(); } }catch(e){}
+}
 async function ssoBoot(){
+  try{ await ssoBoot0(); } finally { hsApplyRefresh(); }
+}
+async function ssoBoot0(){
   const cu = currentUser();
   /* 2026-11-26: 로그인해 둔 통합 계정으로 새로 고치면 실데이터·조합 자료(서버)를 다시 읽는다 — 전엔 처음 로그인 때만 읽어 새로고침하면 예시 화면이 나왔다 */
   if(REAL_API && cu && cu.unified && (cu.hubRole || Array.isArray(cu.perms))){ loadRealData(); return; }
@@ -2521,7 +2578,7 @@ async function ssoBoot(){
   try{
     const res = await fetch('/api/auth/me', {credentials:'same-origin'});
     const d = await res.json().catch(() => ({}));
-    if(d.ok && d.user) applyUnifiedUser(d.user, {redirect:false, silent:false});
+    if(d.ok && d.user){ applyUnifiedUser(d.user, {redirect:false, silent:false}); hsApplyRefresh(); }
   }catch(e){ /* 통합 계정 서버 미연결 — 조용히 무시 */ }
 }
 /* 등급별 데모 계정 — 로그인 창의 등급 버튼·체험 띠의 등급 전환 버튼이 모두 여기로 온다 */
@@ -2550,8 +2607,8 @@ function demoLogin(role){
   const home = roleHome(acc.role);
   if(location.hash === home) navigate(); else location.hash = home;   // 같은 화면이면 즉시 다시 그림
   toast(acc.role === 'guest'
-    ? '데모 손님 계정입니다 — 승인 전 회원이 보는 공개 화면만 열립니다.'
-    : `데모 ${roleLabel(acc.role)} 계정으로 로그인했습니다.`);
+    ? '체험 손님 계정입니다 — 승인 전 회원이 보는 공개 화면만 열립니다.'
+    : `체험 ${roleLabel(acc.role)} 계정으로 로그인했습니다.`);
 }
 function logout(){
   const u = currentUser();
@@ -2577,14 +2634,14 @@ function renderTopActions(){
   pn.style.display = role === 'guest' ? '' : 'none';
   if(nt) nt.style.display = '';
   if(u){
-    const sub = role === 'guest' ? '승인 대기 · 공개 메뉴만 이용'
+    const sub = role === 'guest' ? (u.unified ? '공개 메뉴 이용 · 회원 신청 가능' : '승인 대기 · 공개 메뉴만 이용')
               : role === 'admin' ? (u.village || '전체')
               : (u.village || '소속 미배정');
     el.innerHTML = `
       <div class="user-chip">
         <div class="avatar ${role}">${(u.name || '?').slice(0,1).toUpperCase()}</div>
         <div>
-          <div class="user-name"><span class="role-tag ${role}">${ROLES[role].emoji} ${ROLES[role].label}</span>${escapeHtml(u.name)}${u.unified ? '' : ' <span class="badge badge-gold" style="font-size:10px;vertical-align:middle;">데모</span>'}</div>
+          <div class="user-name"><span class="role-tag ${role}">${ROLES[role].emoji} ${role === 'guest' && u.unified ? '무료이용회원' : ROLES[role].label}</span>${escapeHtml(u.name)}${u.unified ? '' : ' <span class="badge badge-gold" style="font-size:10px;vertical-align:middle;">체험</span>'}</div>
           <div class="user-role">${escapeHtml(sub)}${u.unified ? '' : ' · 체험 모드'}</div>
         </div>
       </div>
@@ -2597,6 +2654,8 @@ function renderTopActions(){
     `;
   }
   renderRoleNav();
+  { const fa = document.getElementById('footAdmin');   // 11-27 보라 E-8: 꼬리말 「통합 관리자」는 매니저·통합관리자에게만
+    if(fa) fa.hidden = !(u && u.unified && !u.preview && (role === 'admin' || ['admin','staff','manager'].indexOf(String(u.hubRole || '').toLowerCase()) !== -1)); }
 }
 
 /* 11-07 메뉴 항목의 onclick·툴팁 — scope 'ext'(바깥 주소, 예: 시민자산육성지원센터)는 새 창으로 연다 */
@@ -2672,6 +2731,7 @@ function navigate(){
   // 라우트 이동 시 열려 있던 모달·모바일 메뉴·드롭다운을 닫는다
   closeDyn(); closeLogin();
   document.querySelector('.topnav-in').classList.remove('nav-open');
+  document.body.classList.remove('side-open');
   document.querySelectorAll('.role-group.open').forEach(g => g.classList.remove('open'));
 
   // Hide all views
@@ -2724,7 +2784,13 @@ window.addEventListener('hashchange', navigate);
 
 /* 모바일 메뉴 토글 */
 function toggleNav(){
-  document.querySelector('.topnav-in').classList.toggle('nav-open');
+  const t = document.querySelector('.topnav-in');
+  const on = !t.classList.contains('nav-open');
+  t.classList.toggle('nav-open', on);
+  /* 11-27 알파 H-01: 휴대폰 로그인 화면에선 ☰ 가 사이드바(내 페이지·요금·메뉴 정리까지 든 메뉴 전체)를 머리띠 아래에 펼친다 — 평소엔 사이드바를 접어 본문이 바로 보이게 */
+  const app = document.getElementById('v-app'), inApp = !!(app && app.classList.contains('on'));
+  document.body.classList.toggle('side-open', on && inApp);
+  if(on && inApp){ const nv = document.querySelector('.topnav'); document.body.style.setProperty('--hs-top', Math.max(0, nv ? nv.getBoundingClientRect().bottom : 64) + 'px'); }
 }
 
 /* ─── Logged-in app rendering ─── */
@@ -2747,11 +2813,12 @@ const PRICING = {
   coop: {
     이름: '협동조합 회원',
     기본: {값: 10000, 한도: '사용자 3명 · 저장 2GB', 메뉴: [
-      '여기서 시작 — 자료함 · 우리 조합 현황 · 할 일',
-      '내 조합 — 대시보드 · 마이페이지',
+      '현황·업무 — 현황 대시보드 · 조합 원장 · 할 일 · 업무 시작(상담·자료함·문서)',
+      '조합 대장·업무 — 업무 달력 · 계약서 대장 · 회의록 대장 · 지출결의 · 거래처·표준장부',
+      '내 조합 — 내 페이지 · 요금 안내',
       '설립·건설 — 마을회·조합 설계 · 설립 내비게이터·청약 · 사업비·부품 구성 · 자부담·융자 신청 · 사업자(ReSCO) 선정',
-      '운영관리 — 발전·정산·배당 · 전남 발전 현황 · 수익 시뮬레이션 · 회계·세무 자료이관 · 표준장부·거래처 · 수익 배분 계획 · 재무제표 · 월마감·보고서 · 조합원 관리 · 일정·마감 · 20년 성공 조건',
-      '확장 — 마을비즈니스 · 연합체·커뮤니티 · 공지·자료실']},
+      '운영관리 — 발전·정산·배당 · 수익 시뮬레이션·배분 계획 · 회계·세무 자진신고 · 잉여금 처분 계산 · 재무제표·컨설팅 · 월마감·보고서 · 조합원 관리 · 일정·마감 · 20년 성공 조건',
+      '확장 — 마을비즈니스 · 연합체·커뮤니티 · 전남 발전 현황 · 공지·자료실 · 활동 영상 만들기']},
     선택: [
       {k:'chat',  이름:'💬 AI 상담·법령 안내', 메뉴:'물어보기 · AI 상담 · 법령·인허가', 한도:'월 100회', 값:5000},
       {k:'docs',  이름:'📝 문서 자동 생성', 메뉴:'산출물 만들기 · 문서 자동 생성 · 수익 보고서', 한도:'월 30건', 값:5000},
@@ -2768,7 +2835,7 @@ const PRICING = {
     기본: {값: 30000, 한도: '사용자 5명 · 회원조합 20곳까지(넘으면 1곳당 월 1,000원) · 저장 10GB', 메뉴: [
       '회원 지원업무 — 회원조합 지원 현황판 · 지원요청 처리 · 조합·마을 현황 · 공모·심사 지원 · 세무 파일럿 KPI · 회원조합 신고 현황 · 공지·자료 배포',
       '연합회 자체 사무 — 사무국 운영(총회·이사회) · 회비 부과·수납 · 공동사업 · 연합회 회계·결산 · 재무제표',
-      '소통 — 전남 발전 현황 · 마이페이지']},
+      '소통 — 전남 발전 현황 · 내 페이지']},
     선택: [
       {k:'review',이름:'📄 서류 검토 대행', 메뉴:'회원조합 서류 AI 검토', 한도:'월 60건', 값:10000},
       {k:'docs',  이름:'📝 문서 작성 지원', 메뉴:'문서 작성 지원', 한도:'월 60건', 값:10000},
@@ -2873,8 +2940,8 @@ function hsApplyBtns(size){
     + `<a class="btn btn-outline ${size || ''}" href="${HS_APPLY_URL.fed}">🤝 연합회 회원 신청</a>`;
 }
 function hsApplyCard(){
-  return `<div class="card hs-apply-card" style="border:2px solid var(--primary);"><h3 class="serif" style="margin-top:0;">☀ 햇소자 유료회원 신청</h3>`
-    + `<p style="margin:0 0 10px;">지금 계정은 <b>일반회원</b>이라 공개 화면만 열립니다. 협동조합·연합회 회원으로 신청하면 사교원이 확인해 승인한 뒤 조합 업무 화면이 열립니다(무료 시범 기간 — 이용료는 2027년 1월부터).</p>`
+  return `<div class="card hs-apply-card" style="border:2px solid var(--primary);"><h3 class="serif" style="margin-top:0;">☀ 햇소자 서비스 이용 신청</h3>`
+    + `<p style="margin:0 0 10px;">지금 계정은 <b>무료이용회원</b>이라 공개 화면만 열립니다. 협동조합·연합회 회원으로 신청하면 사교원이 확인해 승인한 뒤 조합 업무 화면이 열립니다(무료 시범 기간 — 이용료는 2027년 1월부터).</p>`
     + `<div style="display:flex;gap:8px;flex-wrap:wrap;">${hsApplyBtns()}</div></div>`;
 }
 function hsApplyRender(){
@@ -2882,7 +2949,7 @@ function hsApplyRender(){
   const band = document.getElementById('hsApplyBand');
   if(band){
     band.hidden = !u;
-    band.innerHTML = u ? `<div class="hab-in"><span><b>${escapeHtml(u.name || '')}</b> 님은 지금 일반회원입니다 — 햇소자 조합 업무를 쓰려면 유료회원을 신청하세요.</span><span class="hab-btns">${hsApplyBtns('btn-sm')}</span></div>` : '';
+    band.innerHTML = u ? `<div class="hab-in"><span><b>${escapeHtml(u.name || '')}</b> 님은 지금 무료이용회원입니다 — 햇소자 조합 업무를 쓰려면 협동조합·연합회 회원을 신청하세요.</span><span class="hab-btns">${hsApplyBtns('btn-sm')}</span></div>` : '';
   }
   document.querySelectorAll('[data-hs-apply]').forEach(function(el){ el.innerHTML = u ? hsApplyCard() : ''; });
 }
@@ -2907,7 +2974,7 @@ function renderPubSidebar(active){
   </div>`;
   const cta = hsApplyWho()
     ? `<div class="side-cta">${hsApplyBtns('btn-sm')}</div>
-       <div class="side-note">${escapeHtml(u.name || '')} · 일반회원으로 로그인 중 — 신청하면 승인 뒤 조합 업무 화면이 열립니다</div>`
+       <div class="side-note">${escapeHtml(u.name || '')} · 무료이용회원으로 로그인 중 — 신청하면 승인 뒤 조합 업무 화면이 열립니다</div>`
     : u
     ? `<div class="side-cta"><button class="btn btn-primary btn-sm" onclick="location.hash='${escapeJs(roleHome(u.role))}'">${ROLES[normalizeRole(u.role)].emoji} 내 화면으로 가기</button></div>
        <div class="side-note">${escapeHtml(u.name || '')} · ${roleLabel(normalizeRole(u.role))} 등급으로 로그인 중</div>`
@@ -2994,20 +3061,38 @@ function sideHideSuggested(role){
   if(!confirm('30일 넘게 안 쓴 메뉴 ' + g.list.length + '개를 감출까요? 언제든 「메뉴 정리」에서 다시 보이게 할 수 있습니다.')) return;
   sideSaveHidden(sideHidden().concat(g.list)); toast('메뉴 ' + g.list.length + '개를 감췄습니다.');
 }
+function sideFold(role, gi, btn){
+  window._sideOpen = window._sideOpen || {};
+  const g = btn.closest('.side-group'), body = g && g.querySelector('.side-fold-body');
+  if(!body) return;
+  const open = body.hidden;
+  body.hidden = !open; g.classList.toggle('open', open);
+  btn.setAttribute('aria-expanded', String(open));
+  const c = btn.querySelector('.side-caret'); if(c) c.textContent = open ? '▾' : '▸';
+  window._sideOpen[role + gi] = open;
+}
 function renderRoleSidebar(role, scope, active){
   const cur = menuCur(role, scope + '/' + active);
   sideMarkUse(cur.split('/')[0], cur.split('/')[1]);
   { const u = currentUser(), w = _sideWho(); if(u && u.unified && window._sidePrefsFor !== w){ window._sidePrefsFor = w; setTimeout(sidePrefsLoad, 0); } }
   const 사용 = _sideUse();
   let 감춤수 = 0;
-  const html = (ROLE_MENUS[role] || []).map(([label, items]) => {
+  const html = (role === 'guest' || _sideEdit ? '' : `
+    <div class="side-top">
+      <button class="side-pill gold" onclick="location.hash='#/pub/pricing'" title="쓰는 서비스와 이용료를 봅니다">💳 이용 서비스·요금</button>
+      <button class="side-pill" onclick="sideEditToggle()" title="안 쓰는 메뉴를 감추거나 다시 보이게 합니다">⚙ 메뉴 정리</button>
+    </div>`) + (ROLE_MENUS[role] || []).map(([label, items], gi) => {
     const 보일 = items.filter(([s,p]) => !menuHidden(s, p)).filter(([s,p]) => {
       const h = sideIsHidden(s, p); if(h) 감춤수++;
       return _sideEdit || !h || s + '/' + p === cur; });
     if(!보일.length) return '';
+    /* 11-27 알파 H-12: 「깊이 보기」 묶음은 처음엔 접고, 지금 화면이 든 묶음만 펼친다(누르면 열고 닫힘) */
+    const 접기 = !_sideEdit && /^깊이 보기/.test(label);
+    const 열림 = !접기 || 보일.some(([s,p]) => s + '/' + p === cur) || !!(window._sideOpen || {})[role + gi];
     return `
-    <div class="side-group">
-      <div class="side-label">${label}</div>
+    <div class="side-group${접기 ? ' side-foldg' + (열림 ? ' open' : '') : ''}">
+      ${접기 ? `<button type="button" class="side-label side-fold" aria-expanded="${열림}" onclick="sideFold('${escapeJs(role)}', ${gi}, this)">${label}<span class="side-caret">${열림 ? '▾' : '▸'}</span></button>` : `<div class="side-label">${label}</div>`}
+      <div class="side-fold-body"${열림 ? '' : ' hidden'}>
       ${보일.map(([s,p,e,n]) => {
         const h = sideIsHidden(s, p);
         const btn = `
@@ -3020,6 +3105,7 @@ function renderRoleSidebar(role, scope, active){
         return `<div class="side-row${h ? ' hid' : ''}">${btn}
           <span class="side-use">${d === null ? '안 씀' : d === 0 ? '오늘' : d + '일 전'}</span>
           ${_sideKeep(s, p) ? '' : `<button class="side-eye" onclick="sideToggle('${escapeJs(s)}','${escapeJs(p)}')" title="${h ? '다시 보이기' : '감추기'}">${h ? '보이기' : '감추기'}</button>`}</div>`; }).join('')}
+      </div>
     </div>`; }).join('')
     + (role === 'guest' ? '' : `
     <div class="side-tools">
@@ -4871,7 +4957,7 @@ function memPower(){
       <h1>⚡ 발전·정산·배당</h1>
       <p class="sec-desc">발전 계량 데이터와 한전 정산내역을 자동 대조하고, 수익 배분·배당 적립·이상 감지까지 한 번에 — 조합원 누구나 같은 숫자를 봅니다.
         ${실측 ? '<span class="badge badge-success">우리 조합 실측 (자료함에 올린 자료 기준)</span>'
-               : '<span class="badge badge-mute">데모 데이터 (1MW 표준모델) — 자료함에 올리면 실측으로 바뀝니다</span>'}</p>
+               : '<span class="badge badge-mute">예시 자료 (1MW 표준모델) — 자료함에 올리면 실측으로 바뀝니다</span>'}</p>
     </div>
 
     <div class="grid grid-4">
@@ -5143,9 +5229,9 @@ function pwStrategy(){
         <tr><td>− 차입금 원리금 <b>(의무)</b></td><td style="text-align:right;color:var(--danger);">−${fmtWon(debt)}</td>
           <td class="text-mute" style="font-size:12.5px;">정책융자 + 자부담 융자 — 배분보다 먼저 확보</td></tr>
         <tr><td>− 법인세 등</td><td style="text-align:right;color:var(--danger);">${tax ? '−' + fmtWon(tax) : '—'}</td>
-          <td class="text-mute" style="font-size:12.5px;">${tax ? '결산서의 법인세비용' : '넣지 않음 — 이익이 나면 법인세가 붙는다(세무대리인 확인)'}</td></tr>
+          <td class="text-mute" style="font-size:12.5px;">${tax ? '결산서의 법인세비용' : '넣지 않음 — 이익이 나면 법인세가 붙습니다(세무대리인에게 확인하세요)'}</td></tr>
         <tr><td>− 법정적립금 <b>(의무)</b></td><td style="text-align:right;color:var(--danger);">${legal ? '−' + fmtWon(legal) : '—'}</td>
-          <td class="text-mute" style="font-size:12.5px;">${legal ? '결산상 잉여금에서 먼저 적립 — 손실 보전·해산 외 못 씀(협동조합 기본법 제50조)' : '넣지 않음 — 잉여금의 10% 이상(사회적협동조합 30% 이상)을 먼저 적립해야 한다. 「🧮 잉여금 처분 계산」 참고'}</td></tr>
+          <td class="text-mute" style="font-size:12.5px;">${legal ? '결산상 잉여금에서 먼저 적립 — 손실 보전·해산 외 못 씀(협동조합 기본법 제50조)' : '넣지 않음 — 잉여금의 10% 이상(사회적협동조합 30% 이상)을 먼저 적립해야 합니다. 「🧮 잉여금 처분 계산」을 참고하세요'}</td></tr>
         <tr style="background:var(--paper-soft);"><td><b>= 배분 가능 잉여</b></td>
           <td style="text-align:right;"><b style="color:var(--primary);">${fmtWon(avail)}</b></td>
           <td class="text-mute" style="font-size:12.5px;">아래 네 전략은 이 금액을 나누는 방식입니다</td></tr>
@@ -5245,7 +5331,7 @@ function memBiz(){
     </div>
 
     <div class="card">
-      <div class="card-title"><h3 class="serif">창업 타당성 간이 진단 <span class="badge badge-mute tmp" title="오픈 전 제거·확인">데모</span></h3></div>
+      <div class="card-title"><h3 class="serif">창업 타당성 간이 진단 <span class="badge badge-mute">예시</span></h3></div>
       <p class="text-mute" style="margin-top:0;">"안 될 사업은 시작 전에 걸러주는" 것이 본부의 역할입니다.</p>
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
         <label style="display:flex;align-items:center;gap:6px;">마을 인구
@@ -5271,7 +5357,7 @@ function svBizCheck(){
     <p class="text-mute" style="font-size:12.5px;margin-top:8px;">
     ${ok ? '고정비(인건비·임차·재료)를 반영한 정식 타당성 진단과 사업계획서 작성으로 넘어갈 수 있습니다.'
          : '현재 인구·방문객 규모로는 고정비를 감당하기 어렵습니다. 관광 연계·배송형(반찬공방) 업종을 먼저 검토하세요.'}
-    ※ 주민 월 2회 이용 8천 원, 방문객 1.2만 원 가정의 간이 계산입니다. <span class="tmp" title="오픈 전 제거·확인">(데모)</span></p>`;
+    ※ 주민 월 2회 이용 8천 원, 방문객 1.2만 원 가정의 간이 계산입니다. <span>(예시)</span></p>`;
 }
 
 /* ─── 연합체·커뮤니티 ─── */
@@ -5325,9 +5411,9 @@ function memUnion(){
     <div class="card">
       <div class="card-title"><h3 class="serif">교육·연수 · 마을 간 교류</h3></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <button class="btn btn-outline" onclick="toast('임원 아카데미 신청이 접수되었습니다. (데모)')">🎓 임원 아카데미 신청</button>
-        <button class="btn btn-outline" onclick="toast('회계 실무 교육 신청이 접수되었습니다. (데모)')">🧾 회계 실무 교육</button>
-        <button class="btn btn-outline" onclick="toast('선진지 연수 수요조사에 등록되었습니다. (데모)')">🚌 선진지 연수</button>
+        <button class="btn btn-outline" onclick="toast('임원 아카데미 신청이 접수되었습니다. (체험 화면)')">🎓 임원 아카데미 신청</button>
+        <button class="btn btn-outline" onclick="toast('회계 실무 교육 신청이 접수되었습니다. (체험 화면)')">🧾 회계 실무 교육</button>
+        <button class="btn btn-outline" onclick="toast('선진지 연수 수요조사에 등록되었습니다. (체험 화면)')">🚌 선진지 연수</button>
         <button class="btn btn-outline" onclick="location.hash='#/mem/library'">📚 사례 공유 게시판</button>
       </div>
     </div>
@@ -5421,7 +5507,7 @@ function fedEmptyCard(무엇){
 }
 function fedStamp(){
   return `<p class="text-mute" style="font-size:12px;margin:6px 0 0;">
-    ${_FED.실데이터 ? '서버 실데이터' : '예시(데모) — 서버에 연결되면 실제 값으로 바뀝니다'}
+    ${_FED.실데이터 ? '서버 실데이터' : '예시 — 서버에 연결되면 실제 값으로 바뀝니다'}
     ${_FED.때 ? ' · 읽은 때 ' + escapeHtml(_FED.때.slice(0,16).replace('T',' ')) : ''}
     <button class="btn btn-ghost btn-sm" onclick="fedRefresh()">↻ 새로 읽기</button></p>`;
 }
@@ -5626,7 +5712,7 @@ function fedOfficePage(){
           <td><span class="badge ${x.status==='완료'?'badge-success':'badge-info'}">${escapeHtml(x.status)}</span></td>
           <td>${escapeHtml(x.owner||'—')}</td>
           <td class="num">${x.amount ? _fmtN(x.amount)+'원' : '—'}</td>
-          <td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="fedAffairDel('${escapeJs(x.id)}')">삭제</button></td>
+          <td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="fedAffairDel('${escapeJs(x.id)}')">지우기</button></td>
         </tr>`).join('')}</tbody></table>` : fedEmptyCard('사무 기록')}
       ${fedStamp()}
     </div>
@@ -5691,7 +5777,7 @@ function fedDuesPage(){
         <thead><tr><th>시행일</th><th class="num">요율</th><th>의결 근거</th><th></th></tr></thead>
         <tbody>${hist.map(h => `<tr><td>${escapeHtml(h.시행)}</td><td class="num">${(h.rate*100).toFixed(2)}%</td>
           <td>${escapeHtml(h.근거 || '—')}</td>
-          <td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="fedAffairDel('${escapeJs(h.id)}')">삭제</button></td></tr>`).join('')}
+          <td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="fedAffairDel('${escapeJs(h.id)}')">지우기</button></td></tr>`).join('')}
         </tbody></table>`
         : `<p class="text-mute" style="margin:0;">등록된 개정이 없어 기본 요율 ${(FED_DUES_RATE*100).toFixed(1)}%를 씁니다.</p>`}
       <div class="grid grid-3" style="margin-top:10px;">
@@ -5887,7 +5973,7 @@ const FIN_PAGES = ['finstat', 'fedfinstat'];
 /* 2026-11-25 체험 모드 예시 값 — 체험 사용자는 /api/my/* 가 401 이라 재무제표·배분계획이 「불러오는 중」에 멈췄다.
    가상 조합(300kW·총사업비 5억·출자 8,000만·융자 4.2억 2.5%·연 39만kWh×165원, 해남 3일차 교안)을
    서버 계산 함수(coop_statements·dist_solve)에 그대로 넣어 얻은 값이다. 실제 조합 자료가 아니다. */
-const DEMO_FINDIST = {"fin":{"ok":true,"scope":"coop","village_id":0,"statements":{"base":{"village_id":14,"asset_cost":500000000,"useful_life":20,"loan_principal":420000000,"loan_rate":0.025,"equity":80000000,"opening_cash":15000000,"note":"체험 예시 — 해남 3일차 교안 가상 조합","updated_at":"2026-11-25T00:00:00+09:00","updated_by":0,"opening_cash_derived":false},"months":[{"month":"2026-01","kwh":21450,"매출액":3539250,"운영비":1480000,"감가상각비":2083333,"영업이익":-24083,"이자비용":875000,"당기순이익":-899083,"원금상환":2333333,"원리금":3208333,"미지급이자":0,"현금":13850917,"유형자산":497916667,"자산총계":511767584,"차입금":417666667,"부채총계":417666667,"자본금":80000000,"이익잉여금":-899083,"자본총계":79100917,"통장잔액":0},{"month":"2026-02","kwh":25350,"매출액":4182750,"운영비":1480000,"감가상각비":2083333,"영업이익":619417,"이자비용":870139,"당기순이익":-250722,"원금상환":2338194,"원리금":3208333,"미지급이자":0,"현금":13345334,"유형자산":495833333,"자산총계":509178667,"차입금":415328473,"부채총계":415328473,"자본금":80000000,"이익잉여금":-1149806,"자본총계":78850194,"통장잔액":0},{"month":"2026-03","kwh":33150,"매출액":5469750,"운영비":1480000,"감가상각비":2083333,"영업이익":1906417,"이자비용":865268,"당기순이익":1041149,"원금상환":2343065,"원리금":3208333,"미지급이자":0,"현금":14126751,"유형자산":493750000,"자산총계":507876751,"차입금":412985408,"부채총계":412985408,"자본금":80000000,"이익잉여금":-108657,"자본총계":79891343,"통장잔액":0},{"month":"2026-04","kwh":37050,"매출액":6113250,"운영비":1480000,"감가상각비":2083333,"영업이익":2549917,"이자비용":860386,"당기순이익":1689530,"원금상환":2347947,"원리금":3208333,"미지급이자":0,"현금":15551668,"유형자산":491666667,"자산총계":507218335,"차입금":410637461,"부채총계":410637461,"자본금":80000000,"이익잉여금":1580874,"자본총계":81580874,"통장잔액":0},{"month":"2026-05","kwh":40950,"매출액":6756750,"운영비":1480000,"감가상각비":2083333,"영업이익":3193417,"이자비용":855495,"당기순이익":2337922,"원금상환":2352838,"원리금":3208333,"미지급이자":0,"현금":17620085,"유형자산":489583333,"자산총계":507203418,"차입금":408284623,"부채총계":408284623,"자본금":80000000,"이익잉여금":3918796,"자본총계":83918796,"통장잔액":0},{"month":"2026-06","kwh":37050,"매출액":6113250,"운영비":1480000,"감가상각비":2083333,"영업이익":2549917,"이자비용":850593,"당기순이익":1699324,"원금상환":2357740,"원리금":3208333,"미지급이자":0,"현금":19045002,"유형자산":487500000,"자산총계":506545002,"차입금":405926882,"부채총계":405926882,"자본금":80000000,"이익잉여금":5618120,"자본총계":85618120,"통장잔액":0},{"month":"2026-07","kwh":33150,"매출액":5469750,"운영비":1480000,"감가상각비":2083333,"영업이익":1906417,"이자비용":845681,"당기순이익":1060736,"원금상환":2362652,"원리금":3208333,"미지급이자":0,"현금":19826419,"유형자산":485416667,"자산총계":505243086,"차입금":403564230,"부채총계":403564230,"자본금":80000000,"이익잉여금":6678855,"자본총계":86678855,"통장잔액":0},{"month":"2026-08","kwh":37050,"매출액":6113250,"운영비":1480000,"감가상각비":2083333,"영업이익":2549917,"이자비용":840759,"당기순이익":1709158,"원금상환":2367574,"원리금":3208333,"미지급이자":0,"현금":21251336,"유형자산":483333333,"자산총계":504584669,"차입금":401196656,"부채총계":401196656,"자본금":80000000,"이익잉여금":8388013,"자본총계":88388013,"통장잔액":0},{"month":"2026-09","kwh":35100,"매출액":5791500,"운영비":1480000,"감가상각비":2083333,"영업이익":2228167,"이자비용":835826,"당기순이익":1392340,"원금상환":2372507,"원리금":3208333,"미지급이자":0,"현금":22354503,"유형자산":481250000,"자산총계":503604503,"차입금":398824150,"부채총계":398824150,"자본금":80000000,"이익잉여금":9780353,"자본총계":89780353,"통장잔액":0},{"month":"2026-10","kwh":33150,"매출액":5469750,"운영비":1480000,"감가상각비":2083333,"영업이익":1906417,"이자비용":830884,"당기순이익":1075533,"원금상환":2377449,"원리금":3208333,"미지급이자":0,"현금":23135920,"유형자산":479166667,"자산총계":502302587,"차입금":396446700,"부채총계":396446700,"자본금":80000000,"이익잉여금":10855886,"자본총계":90855886,"통장잔액":0},{"month":"2026-11","kwh":27300,"매출액":4504500,"운영비":1480000,"감가상각비":2083333,"영업이익":941167,"이자비용":825931,"당기순이익":115236,"원금상환":2382402,"원리금":3208333,"미지급이자":0,"현금":22952087,"유형자산":477083333,"자산총계":500035420,"차입금":394064298,"부채총계":394064298,"자본금":80000000,"이익잉여금":10971122,"자본총계":90971122,"통장잔액":0},{"month":"2026-12","kwh":29250,"매출액":4826250,"운영비":1480000,"감가상각비":2083333,"영업이익":1262917,"이자비용":820967,"당기순이익":441949,"원금상환":2387366,"원리금":3208333,"미지급이자":0,"현금":23090004,"유형자산":475000000,"자산총계":498090004,"차입금":391676932,"부채총계":391676932,"자본금":80000000,"이익잉여금":11413072,"자본총계":91413072,"통장잔액":0}],"cumulative":{"월수":12,"기간":"2026-01 ~ 2026-12","발전량":390000,"매출액":64350000,"운영비":17760000,"감가상각비":25000000,"영업이익":21590000,"이자비용":10176928,"당기순이익":11413072,"원리금":38499996,"원금상환":28323068,"현금":23090004,"유형자산":475000000,"자산총계":498090004,"차입금":391676932,"미지급이자":0,"부채총계":391676932,"자본금":80000000,"이익잉여금":11413072,"자본총계":91413072,"대차차액":15000000}},"findings":[{"급":"high","제목":"부채비율 428%","한줄":"자본 대비 차입이 지나치게 큽니다.","설명":"조기상환 재원을 배당보다 앞세우고, 추가 출자·마을기금 증자를 총회에 올리세요.","근거":["배당"]},{"급":"mid","제목":"내부유보 17.7% (권고 30~50%)","한줄":"초기 5년은 수익의 30~50%를 쌓아야 6년차 수지 마이너스를 넘깁니다.","설명":"행안부 계산으로 연매출 2억 기준 6년차에 약 400만원 마이너스가 납니다. 지금 배당을 늘리면 그때 갚을 곳이 없습니다.","근거":["적립","배당"]}]},"finbase":{"village_id":0,"asset_cost":500000000,"useful_life":20,"loan_principal":420000000,"loan_rate":0.025,"equity":80000000,"opening_cash":15000000,"note":"체험 예시 — 해남 3일차 교안 가상 조합","updated_at":"2026-11-25T00:00:00+09:00","updated_by":0},"dist":{"ok":true,"solve":{"이미_가능":false,"필요조치":[{"항목":"수선충당 요율","값":"5.8%","확정여부":"총회 의결로 정할 수 있음"}],"적용":{"subsidy_rate":0.0,"policy_term":19,"repair_rate":0.058},"기준안":{"사업기간_운영가능":false,"첫_부도연차":12,"최저_운전자금":-4426839,"최저DSCR":1.16,"손익분기_연매출":38728035,"현재_연매출":64350000,"감당가능_연원리금":46590000,"현재_연원리금":28039458,"필요_수선충당률":0.0532,"현재_수선충당률":0.04}},"plan":{"village_id":14,"village_name":"햇살마을협동조합(체험 예시)","capacity":"300 kW","policy":{"policy_rate":0.025,"subsidy_rate":0.0,"policy_grace":1,"policy_term":19,"local_rate":0.045,"local_term":10,"om_rate":0.06,"ins_rate":0.02,"sys_rate":0.02,"land_rate":0.0,"tax_rate":0.01,"labor_month":0,"repair_rate":0.058,"work_cap_months":3,"legal_reserve":0.1,"biz_share":0.6,"degrade":0.005,"opex_infl":0.02,"major_year":12,"major_rate":0.08,"village_id":14,"policy_loan":420000000,"local_loan":0,"updated_at":null},"실적월":12,"연매출기준":64350000,"연실비기준":17760000,"일회성비용":0,"실부담금리":0.025,"정책융자원리금":28039458,"자부담융자원리금":0,"years":[{"연차":1,"매출":64350000,"원리금":10500000,"운영실비":17760000,"①원리금":10500000,"①부족":0,"②운영관리비":24709800,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3732300,"운전자금적립":3217500,"법정적립금":2914020,"③공동사업":15735708,"④배당":10490472,"대수선":0,"수선적립잔액":3732300,"운전자금잔액":3217500,"DSCR":4.44,"판정":"정상"},{"연차":2,"매출":64028250,"원리금":28039458,"운영실비":18115200,"①원리금":28039458,"①부족":0,"②운영관리비":23140138,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3713638,"운전자금적립":1311300,"법정적립금":1284865,"③공동사업":6938273,"④배당":4625515,"대수선":0,"수선적립잔액":7445938,"운전자금잔액":4528800,"DSCR":1.64,"판정":"정상"},{"연차":3,"매출":63708109,"원리금":28039458,"운영실비":18477504,"①원리금":28039458,"①부족":0,"②운영관리비":22263150,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3695070,"운전자금적립":90576,"법정적립금":1340550,"③공동사업":7238970,"④배당":4825980,"대수선":0,"수선적립잔액":11141008,"운전자금잔액":4619376,"DSCR":1.61,"판정":"정상"},{"연차":4,"매출":63389568,"원리금":28039458,"운영실비":18847054,"①원리금":28039458,"①부족":0,"②운영관리비":22616037,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3676595,"운전자금적립":92388,"법정적립금":1273407,"③공동사업":6876400,"④배당":4584266,"대수선":0,"수선적립잔액":14817603,"운전자금잔액":4711764,"DSCR":1.59,"판정":"정상"},{"연차":5,"매출":63072620,"원리금":28039458,"운영실비":19223995,"①원리금":28039458,"①부족":0,"②운영관리비":22976442,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3658212,"운전자금적립":94235,"법정적립금":1205672,"③공동사업":6510629,"④배당":4340419,"대수선":0,"수선적립잔액":18475815,"운전자금잔액":4805999,"DSCR":1.56,"판정":"정상"},{"연차":6,"매출":62757257,"원리금":28039458,"운영실비":19608475,"①원리금":28039458,"①부족":0,"②운영관리비":23344516,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3639921,"운전자금적립":96120,"법정적립금":1137328,"③공동사업":6141573,"④배당":4094382,"대수선":0,"수선적립잔액":22115736,"운전자금잔액":4902119,"DSCR":1.54,"판정":"정상"},{"연차":7,"매출":62443471,"원리금":28039458,"운영실비":20000645,"①원리금":28039458,"①부족":0,"②운영관리비":23720408,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3621721,"운전자금적립":98042,"법정적립금":1068360,"③공동사업":5769146,"④배당":3846098,"대수선":0,"수선적립잔액":25737457,"운전자금잔액":5000161,"DSCR":1.51,"판정":"정상"},{"연차":8,"매출":62131254,"원리금":28039458,"운영실비":20400657,"①원리금":28039458,"①부족":0,"②운영관리비":24104274,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3603613,"운전자금적립":100003,"법정적립금":998752,"③공동사업":5393262,"④배당":3595508,"대수선":0,"수선적립잔액":29341070,"운전자금잔액":5100164,"DSCR":1.49,"판정":"정상"},{"연차":9,"매출":61820597,"원리금":28039458,"운영실비":20808671,"①원리금":28039458,"①부족":0,"②운영관리비":24496269,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3585595,"운전자금적립":102004,"법정적립금":928487,"③공동사업":5013830,"④배당":3342553,"대수선":0,"수선적립잔액":32926665,"운전자금잔액":5202168,"DSCR":1.46,"판정":"정상"},{"연차":10,"매출":61511494,"원리금":28039458,"운영실비":21224844,"①원리금":28039458,"①부족":0,"②운영관리비":24896554,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3567667,"운전자금적립":104043,"법정적립금":857548,"③공동사업":4630760,"④배당":3087174,"대수선":0,"수선적립잔액":36494332,"운전자금잔액":5306211,"DSCR":1.44,"판정":"정상"},{"연차":11,"매출":61203937,"원리금":28039458,"운영실비":21649341,"①원리금":28039458,"①부족":0,"②운영관리비":25305293,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3549828,"운전자금적립":106124,"법정적립금":785919,"③공동사업":4243960,"④배당":2829307,"대수선":0,"수선적립잔액":40044160,"운전자금잔액":5412335,"DSCR":1.41,"판정":"정상"},{"연차":12,"매출":60897917,"원리금":28039458,"운영실비":22082328,"①원리금":28039458,"①부족":0,"②운영관리비":25722654,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3532079,"운전자금적립":108247,"법정적립금":713581,"③공동사업":3853335,"④배당":2568890,"대수선":40000000,"수선적립잔액":3576239,"운전자금잔액":5520582,"DSCR":1.38,"판정":"정상"},{"연차":13,"매출":60593428,"원리금":28039458,"운영실비":22523974,"①원리금":28039458,"①부족":0,"②운영관리비":26148805,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3514419,"운전자금적립":110412,"법정적립금":640516,"③공동사업":3458789,"④배당":2305859,"대수선":0,"수선적립잔액":7090658,"운전자금잔액":5630994,"DSCR":1.36,"판정":"정상"},{"연차":14,"매출":60290460,"원리금":28039458,"운영실비":22974454,"①원리금":28039458,"①부족":0,"②운영관리비":26583920,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3496847,"운전자금적립":112619,"법정적립금":566708,"③공동사업":3060224,"④배당":2040150,"대수선":0,"수선적립잔액":10587505,"운전자금잔액":5743613,"DSCR":1.33,"판정":"정상"},{"연차":15,"매출":59989008,"원리금":28039458,"운영실비":23433943,"①원리금":28039458,"①부족":0,"②운영관리비":27028178,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3479362,"운전자금적립":114873,"법정적립금":492137,"③공동사업":2657541,"④배당":1771694,"대수선":0,"수선적립잔액":14066867,"운전자금잔액":5858486,"DSCR":1.3,"판정":"정상"},{"연차":16,"매출":59689063,"원리금":28039458,"운영실비":23902622,"①원리금":28039458,"①부족":0,"②운영관리비":27481757,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3461966,"운전자금적립":117169,"법정적립금":416785,"③공동사업":2250638,"④배당":1500425,"대수선":0,"수선적립잔액":17528833,"운전자금잔액":5975655,"DSCR":1.28,"판정":"정상"},{"연차":17,"매출":59390618,"원리금":28039458,"운영실비":24380674,"①원리금":28039458,"①부족":0,"②운영관리비":27944843,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3444656,"운전자금적립":119514,"법정적립금":340632,"③공동사업":1839411,"④배당":1226273,"대수선":0,"수선적립잔액":20973489,"운전자금잔액":6095169,"DSCR":1.25,"판정":"정상"},{"연차":18,"매출":59093665,"원리금":28039458,"운영실비":24868288,"①원리금":28039458,"①부족":0,"②운영관리비":28417623,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3427433,"운전자금적립":121903,"법정적립금":263658,"③공동사업":1423755,"④배당":949170,"대수선":0,"수선적립잔액":24400922,"운전자금잔액":6217072,"DSCR":1.22,"판정":"정상"},{"연차":19,"매출":58798196,"원리금":28039458,"운영실비":25365653,"①원리금":28039458,"①부족":0,"②운영관리비":28900290,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3410295,"운전자금적립":124341,"법정적립금":185845,"③공동사업":1003562,"④배당":669041,"대수선":0,"수선적립잔액":27811217,"운전자금잔액":6341413,"DSCR":1.19,"판정":"정상"},{"연차":20,"매출":58504205,"원리금":28039458,"운영실비":25872966,"①원리금":28039458,"①부족":0,"②운영관리비":29393039,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3393244,"운전자금적립":126829,"법정적립금":107171,"③공동사업":578722,"④배당":385815,"대수선":0,"수선적립잔액":31204461,"운전자금잔액":6468242,"DSCR":1.16,"판정":"정상"}],"누적":{"매출":1227663117,"①원리금":543249702,"②운영관리비":509193990,"③공동사업":94618488,"④배당":63078991,"법정적립금":17521941},"판정":{"사업기간_운영가능":true,"첫_부도연차":null,"최저_운전자금":3217500,"최저DSCR":1.16,"손익분기_연매출":38728035,"현재_연매출":64350000,"감당가능_연원리금":46590000,"현재_연원리금":28039458,"필요_수선충당률":0.0532,"현재_수선충당률":0.058},"대안":[]},"findings":[{"급":"low","제목":"사업기간 20년 내내 발전수익으로 감당된다","한줄":"최저 DSCR 1.16 · 최저 운전자금 3,217,500원.","설명":"우선순위대로 채우고 남는 것만 배당으로 갑니다. 이 순서를 총회 의결로 못 박아 두세요.","근거":["배분","배당"]},{"급":"mid","제목":"이차보전을 안 넣고 계산했다","한줄":"정책융자 실부담 금리 2.50% 그대로입니다.","설명":"전남광주 민심정책은 협동조합 정책자금 2.5% 이차보전을 추진하고 있습니다(확정 아님). 적용되면 원리금이 크게 줄어드니, 확정 여부를 지자체에 확인하고 화면에서 켜 보세요.","근거":["배분"]},{"급":"mid","제목":"최저 DSCR 1.16","한줄":"발전량이 나쁜 해가 한 번 오면 바로 빠듯해집니다.","설명":"수선충당과 운전자금을 먼저 채우고, 배당은 그 뒤 남는 것으로만 하세요.","근거":["적립","배당"]}]}};
+const DEMO_FINDIST = {"fin":{"ok":true,"scope":"coop","village_id":0,"statements":{"base":{"village_id":14,"asset_cost":500000000,"useful_life":20,"loan_principal":420000000,"loan_rate":0.025,"equity":80000000,"opening_cash":15000000,"note":"체험 예시 — 해남 3일차 교안 가상 조합","updated_at":"2026-11-25T00:00:00+09:00","updated_by":0,"opening_cash_derived":false},"months":[{"month":"2026-01","kwh":21450,"매출액":3539250,"운영비":1480000,"감가상각비":2083333,"영업이익":-24083,"이자비용":875000,"당기순이익":-899083,"원금상환":2333333,"원리금":3208333,"미지급이자":0,"현금":13850917,"유형자산":497916667,"자산총계":511767584,"차입금":417666667,"부채총계":417666667,"자본금":80000000,"이익잉여금":-899083,"자본총계":79100917,"통장잔액":0},{"month":"2026-02","kwh":25350,"매출액":4182750,"운영비":1480000,"감가상각비":2083333,"영업이익":619417,"이자비용":870139,"당기순이익":-250722,"원금상환":2338194,"원리금":3208333,"미지급이자":0,"현금":13345334,"유형자산":495833333,"자산총계":509178667,"차입금":415328473,"부채총계":415328473,"자본금":80000000,"이익잉여금":-1149806,"자본총계":78850194,"통장잔액":0},{"month":"2026-03","kwh":33150,"매출액":5469750,"운영비":1480000,"감가상각비":2083333,"영업이익":1906417,"이자비용":865268,"당기순이익":1041149,"원금상환":2343065,"원리금":3208333,"미지급이자":0,"현금":14126751,"유형자산":493750000,"자산총계":507876751,"차입금":412985408,"부채총계":412985408,"자본금":80000000,"이익잉여금":-108657,"자본총계":79891343,"통장잔액":0},{"month":"2026-04","kwh":37050,"매출액":6113250,"운영비":1480000,"감가상각비":2083333,"영업이익":2549917,"이자비용":860386,"당기순이익":1689530,"원금상환":2347947,"원리금":3208333,"미지급이자":0,"현금":15551668,"유형자산":491666667,"자산총계":507218335,"차입금":410637461,"부채총계":410637461,"자본금":80000000,"이익잉여금":1580874,"자본총계":81580874,"통장잔액":0},{"month":"2026-05","kwh":40950,"매출액":6756750,"운영비":1480000,"감가상각비":2083333,"영업이익":3193417,"이자비용":855495,"당기순이익":2337922,"원금상환":2352838,"원리금":3208333,"미지급이자":0,"현금":17620085,"유형자산":489583333,"자산총계":507203418,"차입금":408284623,"부채총계":408284623,"자본금":80000000,"이익잉여금":3918796,"자본총계":83918796,"통장잔액":0},{"month":"2026-06","kwh":37050,"매출액":6113250,"운영비":1480000,"감가상각비":2083333,"영업이익":2549917,"이자비용":850593,"당기순이익":1699324,"원금상환":2357740,"원리금":3208333,"미지급이자":0,"현금":19045002,"유형자산":487500000,"자산총계":506545002,"차입금":405926882,"부채총계":405926882,"자본금":80000000,"이익잉여금":5618120,"자본총계":85618120,"통장잔액":0},{"month":"2026-07","kwh":33150,"매출액":5469750,"운영비":1480000,"감가상각비":2083333,"영업이익":1906417,"이자비용":845681,"당기순이익":1060736,"원금상환":2362652,"원리금":3208333,"미지급이자":0,"현금":19826419,"유형자산":485416667,"자산총계":505243086,"차입금":403564230,"부채총계":403564230,"자본금":80000000,"이익잉여금":6678855,"자본총계":86678855,"통장잔액":0},{"month":"2026-08","kwh":37050,"매출액":6113250,"운영비":1480000,"감가상각비":2083333,"영업이익":2549917,"이자비용":840759,"당기순이익":1709158,"원금상환":2367574,"원리금":3208333,"미지급이자":0,"현금":21251336,"유형자산":483333333,"자산총계":504584669,"차입금":401196656,"부채총계":401196656,"자본금":80000000,"이익잉여금":8388013,"자본총계":88388013,"통장잔액":0},{"month":"2026-09","kwh":35100,"매출액":5791500,"운영비":1480000,"감가상각비":2083333,"영업이익":2228167,"이자비용":835826,"당기순이익":1392340,"원금상환":2372507,"원리금":3208333,"미지급이자":0,"현금":22354503,"유형자산":481250000,"자산총계":503604503,"차입금":398824150,"부채총계":398824150,"자본금":80000000,"이익잉여금":9780353,"자본총계":89780353,"통장잔액":0},{"month":"2026-10","kwh":33150,"매출액":5469750,"운영비":1480000,"감가상각비":2083333,"영업이익":1906417,"이자비용":830884,"당기순이익":1075533,"원금상환":2377449,"원리금":3208333,"미지급이자":0,"현금":23135920,"유형자산":479166667,"자산총계":502302587,"차입금":396446700,"부채총계":396446700,"자본금":80000000,"이익잉여금":10855886,"자본총계":90855886,"통장잔액":0},{"month":"2026-11","kwh":27300,"매출액":4504500,"운영비":1480000,"감가상각비":2083333,"영업이익":941167,"이자비용":825931,"당기순이익":115236,"원금상환":2382402,"원리금":3208333,"미지급이자":0,"현금":22952087,"유형자산":477083333,"자산총계":500035420,"차입금":394064298,"부채총계":394064298,"자본금":80000000,"이익잉여금":10971122,"자본총계":90971122,"통장잔액":0},{"month":"2026-12","kwh":29250,"매출액":4826250,"운영비":1480000,"감가상각비":2083333,"영업이익":1262917,"이자비용":820967,"당기순이익":441949,"원금상환":2387366,"원리금":3208333,"미지급이자":0,"현금":23090004,"유형자산":475000000,"자산총계":498090004,"차입금":391676932,"부채총계":391676932,"자본금":80000000,"이익잉여금":11413072,"자본총계":91413072,"통장잔액":0}],"cumulative":{"월수":12,"기간":"2026-01 ~ 2026-12","발전량":390000,"매출액":64350000,"운영비":17760000,"감가상각비":25000000,"영업이익":21590000,"이자비용":10176928,"당기순이익":11413072,"원리금":38499996,"원금상환":28323068,"현금":23090004,"유형자산":475000000,"자산총계":498090004,"차입금":391676932,"미지급이자":0,"부채총계":391676932,"자본금":80000000,"이익잉여금":11413072,"자본총계":91413072,"대차차액":15000000}},"findings":[{"급":"high","제목":"부채비율 428%","한줄":"자본 대비 차입이 지나치게 큽니다.","설명":"조기상환 재원을 배당보다 앞세우고, 추가 출자·마을기금 증자를 총회에 올리세요.","근거":["배당"]},{"급":"mid","제목":"내부유보 17.7% (권고 30~50%)","한줄":"초기 5년은 수익의 30~50%를 쌓아야 6년차 수지 마이너스를 넘깁니다.","설명":"행안부 계산으로 연매출 2억 기준 6년차에 약 400만원 마이너스가 납니다. 지금 배당을 늘리면 그때 갚을 곳이 없습니다.","근거":["적립","배당"]}]},"finbase":{"village_id":0,"asset_cost":500000000,"useful_life":20,"loan_principal":420000000,"loan_rate":0.025,"equity":80000000,"opening_cash":15000000,"note":"체험 예시 — 해남 3일차 교안 가상 조합","updated_at":"2026-11-25T00:00:00+09:00","updated_by":0},"dist":{"ok":true,"solve":{"이미_가능":false,"필요조치":[{"항목":"수선충당 요율","값":"5.8%","확정여부":"총회 의결로 정할 수 있음"}],"적용":{"subsidy_rate":0.0,"policy_term":19,"repair_rate":0.058},"기준안":{"사업기간_운영가능":false,"첫_부도연차":12,"최저_운전자금":-4426839,"최저DSCR":1.16,"손익분기_연매출":38728035,"현재_연매출":64350000,"감당가능_연원리금":46590000,"현재_연원리금":28039458,"필요_수선충당률":0.0532,"현재_수선충당률":0.04}},"plan":{"village_id":14,"village_name":"햇살마을협동조합(체험 예시)","capacity":"300 kW","policy":{"policy_rate":0.025,"subsidy_rate":0.0,"policy_grace":1,"policy_term":19,"local_rate":0.045,"local_term":10,"om_rate":0.06,"ins_rate":0.02,"sys_rate":0.02,"land_rate":0.0,"tax_rate":0.01,"labor_month":0,"repair_rate":0.058,"work_cap_months":3,"legal_reserve":0.1,"biz_share":0.6,"degrade":0.005,"opex_infl":0.02,"major_year":12,"major_rate":0.08,"village_id":14,"policy_loan":420000000,"local_loan":0,"updated_at":null},"실적월":12,"연매출기준":64350000,"연실비기준":17760000,"일회성비용":0,"실부담금리":0.025,"정책융자원리금":28039458,"자부담융자원리금":0,"years":[{"연차":1,"매출":64350000,"원리금":10500000,"운영실비":17760000,"①원리금":10500000,"①부족":0,"②운영관리비":24709800,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3732300,"운전자금적립":3217500,"법정적립금":2914020,"③공동사업":15735708,"④배당":10490472,"대수선":0,"수선적립잔액":3732300,"운전자금잔액":3217500,"DSCR":4.44,"판정":"정상"},{"연차":2,"매출":64028250,"원리금":28039458,"운영실비":18115200,"①원리금":28039458,"①부족":0,"②운영관리비":23140138,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3713638,"운전자금적립":1311300,"법정적립금":1284865,"③공동사업":6938273,"④배당":4625515,"대수선":0,"수선적립잔액":7445938,"운전자금잔액":4528800,"DSCR":1.64,"판정":"정상"},{"연차":3,"매출":63708109,"원리금":28039458,"운영실비":18477504,"①원리금":28039458,"①부족":0,"②운영관리비":22263150,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3695070,"운전자금적립":90576,"법정적립금":1340550,"③공동사업":7238970,"④배당":4825980,"대수선":0,"수선적립잔액":11141008,"운전자금잔액":4619376,"DSCR":1.61,"판정":"정상"},{"연차":4,"매출":63389568,"원리금":28039458,"운영실비":18847054,"①원리금":28039458,"①부족":0,"②운영관리비":22616037,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3676595,"운전자금적립":92388,"법정적립금":1273407,"③공동사업":6876400,"④배당":4584266,"대수선":0,"수선적립잔액":14817603,"운전자금잔액":4711764,"DSCR":1.59,"판정":"정상"},{"연차":5,"매출":63072620,"원리금":28039458,"운영실비":19223995,"①원리금":28039458,"①부족":0,"②운영관리비":22976442,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3658212,"운전자금적립":94235,"법정적립금":1205672,"③공동사업":6510629,"④배당":4340419,"대수선":0,"수선적립잔액":18475815,"운전자금잔액":4805999,"DSCR":1.56,"판정":"정상"},{"연차":6,"매출":62757257,"원리금":28039458,"운영실비":19608475,"①원리금":28039458,"①부족":0,"②운영관리비":23344516,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3639921,"운전자금적립":96120,"법정적립금":1137328,"③공동사업":6141573,"④배당":4094382,"대수선":0,"수선적립잔액":22115736,"운전자금잔액":4902119,"DSCR":1.54,"판정":"정상"},{"연차":7,"매출":62443471,"원리금":28039458,"운영실비":20000645,"①원리금":28039458,"①부족":0,"②운영관리비":23720408,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3621721,"운전자금적립":98042,"법정적립금":1068360,"③공동사업":5769146,"④배당":3846098,"대수선":0,"수선적립잔액":25737457,"운전자금잔액":5000161,"DSCR":1.51,"판정":"정상"},{"연차":8,"매출":62131254,"원리금":28039458,"운영실비":20400657,"①원리금":28039458,"①부족":0,"②운영관리비":24104274,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3603613,"운전자금적립":100003,"법정적립금":998752,"③공동사업":5393262,"④배당":3595508,"대수선":0,"수선적립잔액":29341070,"운전자금잔액":5100164,"DSCR":1.49,"판정":"정상"},{"연차":9,"매출":61820597,"원리금":28039458,"운영실비":20808671,"①원리금":28039458,"①부족":0,"②운영관리비":24496269,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3585595,"운전자금적립":102004,"법정적립금":928487,"③공동사업":5013830,"④배당":3342553,"대수선":0,"수선적립잔액":32926665,"운전자금잔액":5202168,"DSCR":1.46,"판정":"정상"},{"연차":10,"매출":61511494,"원리금":28039458,"운영실비":21224844,"①원리금":28039458,"①부족":0,"②운영관리비":24896554,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3567667,"운전자금적립":104043,"법정적립금":857548,"③공동사업":4630760,"④배당":3087174,"대수선":0,"수선적립잔액":36494332,"운전자금잔액":5306211,"DSCR":1.44,"판정":"정상"},{"연차":11,"매출":61203937,"원리금":28039458,"운영실비":21649341,"①원리금":28039458,"①부족":0,"②운영관리비":25305293,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3549828,"운전자금적립":106124,"법정적립금":785919,"③공동사업":4243960,"④배당":2829307,"대수선":0,"수선적립잔액":40044160,"운전자금잔액":5412335,"DSCR":1.41,"판정":"정상"},{"연차":12,"매출":60897917,"원리금":28039458,"운영실비":22082328,"①원리금":28039458,"①부족":0,"②운영관리비":25722654,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3532079,"운전자금적립":108247,"법정적립금":713581,"③공동사업":3853335,"④배당":2568890,"대수선":40000000,"수선적립잔액":3576239,"운전자금잔액":5520582,"DSCR":1.38,"판정":"정상"},{"연차":13,"매출":60593428,"원리금":28039458,"운영실비":22523974,"①원리금":28039458,"①부족":0,"②운영관리비":26148805,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3514419,"운전자금적립":110412,"법정적립금":640516,"③공동사업":3458789,"④배당":2305859,"대수선":0,"수선적립잔액":7090658,"운전자금잔액":5630994,"DSCR":1.36,"판정":"정상"},{"연차":14,"매출":60290460,"원리금":28039458,"운영실비":22974454,"①원리금":28039458,"①부족":0,"②운영관리비":26583920,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3496847,"운전자금적립":112619,"법정적립금":566708,"③공동사업":3060224,"④배당":2040150,"대수선":0,"수선적립잔액":10587505,"운전자금잔액":5743613,"DSCR":1.33,"판정":"정상"},{"연차":15,"매출":59989008,"원리금":28039458,"운영실비":23433943,"①원리금":28039458,"①부족":0,"②운영관리비":27028178,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3479362,"운전자금적립":114873,"법정적립금":492137,"③공동사업":2657541,"④배당":1771694,"대수선":0,"수선적립잔액":14066867,"운전자금잔액":5858486,"DSCR":1.3,"판정":"정상"},{"연차":16,"매출":59689063,"원리금":28039458,"운영실비":23902622,"①원리금":28039458,"①부족":0,"②운영관리비":27481757,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3461966,"운전자금적립":117169,"법정적립금":416785,"③공동사업":2250638,"④배당":1500425,"대수선":0,"수선적립잔액":17528833,"운전자금잔액":5975655,"DSCR":1.28,"판정":"정상"},{"연차":17,"매출":59390618,"원리금":28039458,"운영실비":24380674,"①원리금":28039458,"①부족":0,"②운영관리비":27944843,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3444656,"운전자금적립":119514,"법정적립금":340632,"③공동사업":1839411,"④배당":1226273,"대수선":0,"수선적립잔액":20973489,"운전자금잔액":6095169,"DSCR":1.25,"판정":"정상"},{"연차":18,"매출":59093665,"원리금":28039458,"운영실비":24868288,"①원리금":28039458,"①부족":0,"②운영관리비":28417623,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3427433,"운전자금적립":121903,"법정적립금":263658,"③공동사업":1423755,"④배당":949170,"대수선":0,"수선적립잔액":24400922,"운전자금잔액":6217072,"DSCR":1.22,"판정":"정상"},{"연차":19,"매출":58798196,"원리금":28039458,"운영실비":25365653,"①원리금":28039458,"①부족":0,"②운영관리비":28900290,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3410295,"운전자금적립":124341,"법정적립금":185845,"③공동사업":1003562,"④배당":669041,"대수선":0,"수선적립잔액":27811217,"운전자금잔액":6341413,"DSCR":1.19,"판정":"정상"},{"연차":20,"매출":58504205,"원리금":28039458,"운영실비":25872966,"①원리금":28039458,"①부족":0,"②운영관리비":29393039,"②부족":0,"필수부족":0,"적립부족":0,"수선충당":3393244,"운전자금적립":126829,"법정적립금":107171,"③공동사업":578722,"④배당":385815,"대수선":0,"수선적립잔액":31204461,"운전자금잔액":6468242,"DSCR":1.16,"판정":"정상"}],"누적":{"매출":1227663117,"①원리금":543249702,"②운영관리비":509193990,"③공동사업":94618488,"④배당":63078991,"법정적립금":17521941},"판정":{"사업기간_운영가능":true,"첫_부도연차":null,"최저_운전자금":3217500,"최저DSCR":1.16,"손익분기_연매출":38728035,"현재_연매출":64350000,"감당가능_연원리금":46590000,"현재_연원리금":28039458,"필요_수선충당률":0.0532,"현재_수선충당률":0.058},"대안":[]},"findings":[{"급":"low","제목":"사업기간 20년 내내 발전수익으로 감당됩니다","한줄":"최저 DSCR 1.16 · 최저 운전자금 3,217,500원.","설명":"우선순위대로 채우고 남는 것만 배당으로 갑니다. 이 순서를 총회 의결로 못 박아 두세요.","근거":["배분","배당"]},{"급":"mid","제목":"이차보전을 넣지 않고 계산했습니다","한줄":"정책융자 실부담 금리 2.50% 그대로입니다.","설명":"전남광주 민심정책은 협동조합 정책자금 2.5% 이차보전을 추진하고 있습니다(확정 아님). 적용되면 원리금이 크게 줄어드니, 확정 여부를 지자체에 확인하고 화면에서 켜 보세요.","근거":["배분"]},{"급":"mid","제목":"최저 DSCR 1.16","한줄":"발전량이 나쁜 해가 한 번 오면 바로 빠듯해집니다.","설명":"수선충당과 운전자금을 먼저 채우고, 배당은 그 뒤 남는 것으로만 하세요.","근거":["적립","배당"]}]}};
 function _isDemoUser(){ const u = currentUser(); return !!(u && !u.unified && !u.preview); }
 const DEMO_FIN_NOTE = `<div class="card" style="background:#FFF7E0;border:1px solid #EAD9A0;margin-bottom:14px;padding:10px 14px;font-size:13.5px;">
   🌱 <b>체험 예시 값</b> — 가상 조합(300kW, 총사업비 5억 원, 출자금 8,000만 원, 융자 4.2억 원 연 2.5%, 연 39만 kWh)으로 서버가 계산한 화면입니다. 저장은 되지 않습니다. 우리 조합 숫자로 보려면 가입 후 로그인하세요.</div>`;
@@ -6311,7 +6397,7 @@ function admConsult(){
       위에서부터 채우고 남는 것만 아래로. 배당은 맨 뒤라 남는 게 없으면 저절로 0 이 된다. */
 
 const DIST_STEPS = [
-  ['①', '정책융자 원리금', '이차보전 반영. 못 채우면 그 해는 밖에서 꿔야 한다 — 최우선', 'var(--danger)'],
+  ['①', '정책융자 원리금', '이차보전 반영 — 최우선. 못 채우면 그해는 밖에서 빌려야 합니다', 'var(--danger)'],
   ['②', '운영관리비', 'O&M·보험·계통·부지·세무·인건비 + 수선충당 + 운전자금', '#b58900'],
   ['③', '공동사업', '①②를 채우고 남은 몫 가운데 총회가 정한 비율', 'var(--primary)'],
   ['④', '배당', '맨 마지막. 법정적립금을 채운 뒤에만', '#4a7'],
@@ -6425,7 +6511,7 @@ function spResultHtml(v){
     return spTable(rows, warn, ok);
   }
   const loss = v.prior < 0 ? Math.min(-v.prior, v.net) : 0;
-  if(loss) rows.push(['0', '이월 손실 보전', loss, '넘어온 손실을 먼저 메운다']);
+  if(loss) rows.push(['0', '이월 손실 보전', loss, '넘어온 손실을 먼저 메웁니다']);
   const base = v.net - loss;
   let legal = base * v.rate / 100;
   const room = Math.max(0, v.equity * 3 - v.legalSum);
@@ -6439,7 +6525,7 @@ function spResultHtml(v){
   if(pct > 100) warn.push('정관 적립과 임의적립 비율의 합이 ' + pct + '%로 100%를 넘습니다.');
   v.items.forEach(([n, r]) => { const a = avail * r / 100; used += a; rows.push(['2', (n || '정관 적립') + ' (' + r + '%)', a, '정관 제27조의3']); });
   const free = avail * v.free / 100; used += free;
-  if(v.free) rows.push(['3', '임의적립금 (' + v.free + '%)', free, '법 제50조② · 정관 제28조 — 적립 목적을 함께 정한다']);
+  if(v.free) rows.push(['3', '임의적립금 (' + v.free + '%)', free, '법 제50조② · 정관 제28조 — 적립 목적을 함께 정합니다']);
   let rest = avail - used;
   const div = v.divUse + v.divEq;
   if(social){
@@ -6685,7 +6771,7 @@ async function distApply(){
   }catch(e){ toast('서버에 닿지 못했습니다.'); }
 }
 
-/* ─── 마이페이지: 내 계정으로 한 일 전체 보기 ─── */
+/* ─── 내 페이지: 내 계정으로 한 일 전체 보기 ─── */
 function memMyPage(u){
   const myDocs = MOCK.documents.filter(d => d._user);
   const done = myDocs.filter(d => d.status === '완료').length;
@@ -6698,7 +6784,7 @@ function memMyPage(u){
     : '—';
   return `
     <div class="sec-head">
-      <h1>👤 마이페이지</h1>
+      <h1>👤 내 페이지</h1>
       <p class="sec-desc">내 계정으로 진행한 업무 내용을 한눈에 봅니다.</p>
     </div>
 
@@ -6739,7 +6825,7 @@ function memMyPage(u){
               <td><span class="badge ${d.status==='완료'?'badge-success':'badge-info'}">${d.status}</span></td>
               <td class="tbl-actions" style="white-space:nowrap;">
                 <button class="btn btn-ghost btn-sm" onclick="viewDoc('${escapeJs(d.id)}')">보기</button>
-                <button class="btn btn-outline btn-sm" onclick="downloadDoc('${escapeJs(d.id)}')">📥 다운로드</button>
+                <button class="btn btn-outline btn-sm" onclick="downloadDoc('${escapeJs(d.id)}')">📥 내려받기</button>
               </td>
             </tr>`).join('')}
         </tbody>
@@ -7666,7 +7752,7 @@ function memDocs(){
               <td><span class="badge ${d.status === '완료' ? 'badge-success' : 'badge-info'}">${d.status}</span></td>
               <td class="tbl-actions">
                 <button class="btn btn-ghost btn-sm" onclick="viewDoc('${escapeJs(d.id)}')">보기</button>
-                <button class="btn btn-ghost btn-sm" onclick="downloadDoc('${escapeJs(d.id)}')">다운로드</button>
+                <button class="btn btn-ghost btn-sm" onclick="downloadDoc('${escapeJs(d.id)}')">내려받기</button>
               </td>
             </tr>
           `).join('')}
@@ -7706,7 +7792,7 @@ function memReview(){
         </div>
         <div class="form-row">
           <label>중점 확인 사항 (선택)</label>
-          <textarea class="textarea" id="rvMemo" placeholder="예: 조합원 배당 조항이 협동조합법에 맞는지 확인해주세요."></textarea>
+          <textarea class="textarea" id="rvMemo" placeholder="예: 조합원 배당 조항이 협동조합법에 맞는지 확인해 주세요."></textarea>
         </div>
         <button class="btn btn-primary" id="rvBtn" onclick="runReview()">검토 시작</button>
       </div>
@@ -7773,18 +7859,18 @@ function rvAddFiles(files){
 }
 
 async function runReview(){
-  if(!REAL_API){ toast('AI가 서류를 검토 중입니다... (데모)'); return; }
+  if(!REAL_API){ toast('AI가 서류를 검토 중입니다... (체험 화면)'); return; }
   const kind = (document.getElementById('rvKind')||{}).value || '기타';
   const text = ((document.getElementById('rvText')||{}).value || '').trim();
   const memo = ((document.getElementById('rvMemo')||{}).value || '').trim();
-  if(!text && !_rvFiles.length){ toast('서류 본문을 붙여넣거나 이미지를 첨부해주세요.'); return; }
+  if(!text && !_rvFiles.length){ toast('서류 본문을 붙여넣거나 이미지를 첨부해 주세요.'); return; }
 
   const guide = REVIEW_GUIDE[kind] || REVIEW_GUIDE['기타'];
   const content = [];
   _rvFiles.forEach(f => content.push({type:'image', source:{type:'base64', media_type:f.mime, data:f.data.split(',')[1]}}));
   content.push({type:'text', text: guide
     + (memo ? '\n\n추가 요청사항: ' + memo : '')
-    + (text ? '\n\n[검토 대상 서류 본문]\n' + text : '\n\n첨부한 이미지를 분석하여 검토 결과를 제공해주세요.')});
+    + (text ? '\n\n[검토 대상 서류 본문]\n' + text : '\n\n첨부한 이미지를 분석하여 검토 결과를 제공해 주세요.')});
 
   const card = document.getElementById('rvOutCard');
   const out = document.getElementById('rvOut');
@@ -8750,7 +8836,7 @@ function plantCard(){
     + 칸('부지 사용허가 만료일', 'pl-permit_end', v('permit_end'), 'type="date"')
     + 칸('하자보증 만료일', 'pl-warranty_end', v('warranty_end'), 'type="date"')
     + 칸('메모(사람 이름·전화는 적지 마세요)', 'pl-note', v('note'), 'style="width:340px;" maxlength="400"')
-    + '<label style="display:inline-block;margin:4px 10px 4px 0;font-size:12.5px;"><input type="checkbox" id="pl-in_monthly" ' + (!ed || ed.in_monthly ? 'checked' : '') + '> 월 실적에 이 발전소 발전량이 들어간다</label>'
+    + '<label style="display:inline-block;margin:4px 10px 4px 0;font-size:12.5px;"><input type="checkbox" id="pl-in_monthly" ' + (!ed || ed.in_monthly ? 'checked' : '') + '> 월 실적에 이 발전소 발전량을 넣습니다</label>'
     + '<div style="margin-top:6px;"><button class="btn btn-primary btn-sm" onclick="plantSave()">' + (ed ? '고친 내용 저장' : '넣기') + '</button> '
     + (ed ? '<button class="btn btn-outline btn-sm" onclick="plantEdit(null)">그만두기</button>' : '') + '</div></div></details>';
   const 종류 = (d.kinds && d.kinds.length ? d.kinds : ['고장','수리','점검','청소','통신 끊김','기타']);
@@ -9428,7 +9514,7 @@ function inboxRender(){
             + '<td><span class="badge ' + (it.상태 === '완료' ? 'badge-success' : it.상태 === '중복' ? 'badge-danger' : 'badge-info') + '">' + escapeHtml(it.상태) + '</span></td>'
             + '<td><button class="btn btn-primary btn-sm" onclick="inboxProcess(\'' + escapeJs(it.id) + '\')">처리</button> '
             + (INBOX_TO_REG[it.kind] && it.상태 !== '대기' && it.상태 !== '처리중' ? '<button class="btn btn-outline btn-sm" onclick="inboxToRegister(\'' + escapeJs(it.id) + '\')">' + (it.대장 ? '✅ 대장에 들어감' : '📒 대장에 넣기') + '</button> ' : '')
-            + '<button class="btn btn-outline btn-sm" onclick="inboxRemove(\'' + escapeJs(it.id) + '\')">삭제</button></td></tr>'
+            + '<button class="btn btn-outline btn-sm" onclick="inboxRemove(\'' + escapeJs(it.id) + '\')">지우기</button></td></tr>'
             + (it.요약
                 ? '<tr><td colspan="4" style="font-size:12.5px;padding-top:0;">'
                   + '<b>' + (it.상태 === '중복' ? '⚠ ' : '✅ ') + '</b>' + escapeHtml(it.요약)
@@ -9821,15 +9907,15 @@ function lawTopic(t){
 }
 
 async function askLaw(){
-  if(!REAL_API){ toast('AI가 답변을 준비 중입니다... (데모)'); return; }
+  if(!REAL_API){ toast('AI가 답변을 준비 중입니다... (체험 화면)'); return; }
   const q = ((document.getElementById('lawQ')||{}).value || '').trim();
-  if(!q){ toast('질문 내용을 입력해주세요.'); return; }
+  if(!q){ toast('질문 내용을 입력해 주세요.'); return; }
   const card = document.getElementById('lawOutCard');
   const out = document.getElementById('lawOut');
   const btn = document.getElementById('lawBtn');
   card.style.display = ''; out.textContent = '답변을 작성 중입니다...';
   if(btn) btn.disabled = true;
-  const r = await callAIDoc(q + '\n\n법령·인허가 관점에서 근거 조항과 함께 답변해주세요.', {maxTokens:2000, targetEl: out});
+  const r = await callAIDoc(q + '\n\n법령·인허가 관점에서 근거 조항과 함께 답변해 주세요.', {maxTokens:2000, targetEl: out});
   if(btn) btn.disabled = false;
   if(!r.ok){
     out.textContent = 'AI 답변을 받지 못했습니다 (' + r.error + '). 잠시 후 다시 시도하거나, 급한 질문은 상담신청으로 남겨주세요.';
@@ -9978,17 +10064,17 @@ async function genRevenueReport(){
   const btn = document.getElementById('rvRptBtn');
   out.style.display = ''; out.textContent = '리포트를 작성 중입니다...';
   if(btn) btn.disabled = true;
-  const prompt = `다음 수익성 데이터를 바탕으로 마을 주민 설명회용 수익성 리포트를 작성해주세요.
+  const prompt = `다음 수익성 데이터를 바탕으로 마을 주민 설명회용 수익성 리포트를 작성해 주세요.
 설치 용량: ${c.cap}kW / 연간 이용률: ${(c.cf*100).toFixed(1)}%
 연간 발전량: ${Math.round(c.annualGen/1000).toLocaleString()}MWh / 연간 매출: ${(c.annualRev/1e8).toFixed(2)}억원
 초기 투자비: ${(c.invest/1e8).toFixed(1)}억원 / 투자 회수: ${c.payback.toFixed(1)}년
 25년 누적 순이익: ${(c.netProfit/1e8).toFixed(1)}억원 / 조합원 ${c.mem}명 기준 1인 25년 배당 약 ${(c.perMember/1e4).toFixed(0)}만원
 
-주민이 이해하기 쉬운 언어로, 생활에 와닿는 비유와 구체적 금액을 들어 설명해주세요. 과장 없이, 변동 가능성(발전량·단가·운영비)도 정직하게 짚어주세요.`;
+주민이 이해하기 쉬운 언어로, 생활에 와닿는 비유와 구체적 금액을 들어 설명해 주세요. 과장 없이, 변동 가능성(발전량·단가·운영비)도 정직하게 짚어주세요.`;
   const r = await callAIDoc(prompt, {maxTokens:1500, targetEl: out});
   if(btn) btn.disabled = false;
   if(!r.ok){
-    out.textContent = 'AI 리포트를 만들지 못했습니다 (' + r.error + '). 잠시 후 다시 시도해주세요.';
+    out.textContent = 'AI 리포트를 만들지 못했습니다 (' + r.error + '). 잠시 후 다시 시도해 주세요.';
   }
 }
 
@@ -10075,10 +10161,10 @@ function startAccounting(kind){
     periodField = `
       <div class="form-row"><label>대상 분기 <span style="color:var(--danger);">*</span></label>
         <select class="select" id="ap-period">
-          <option value="${yyyy}-Q1"${q===1?' selected':''}>${yyyy}년 제1기 (1~3월)</option>
-          <option value="${yyyy}-Q2"${q===2?' selected':''}>${yyyy}년 제2기 (4~6월)</option>
-          <option value="${yyyy}-Q3"${q===3?' selected':''}>${yyyy}년 제3기 (7~9월)</option>
-          <option value="${yyyy}-Q4"${q===4?' selected':''}>${yyyy}년 제4기 (10~12월)</option>
+          <option value="${yyyy}-Q1"${q===1?' selected':''}>${yyyy}년 1분기 (1~3월)</option>
+          <option value="${yyyy}-Q2"${q===2?' selected':''}>${yyyy}년 2분기 (4~6월)</option>
+          <option value="${yyyy}-Q3"${q===3?' selected':''}>${yyyy}년 3분기 (7~9월)</option>
+          <option value="${yyyy}-Q4"${q===4?' selected':''}>${yyyy}년 4분기 (10~12월)</option>
         </select></div>`;
   } else {
     periodField = `
@@ -10094,7 +10180,7 @@ function startAccounting(kind){
     sub: '업로드된 자료를 기반으로 AI가 자동 정리합니다.',
     body: `
       ${noData ? `<div class="card" style="background:var(--gold-soft);border-color:var(--gold);margin-bottom:16px;padding:12px 14px;">
-        <strong>ⓘ</strong> 업로드된 자료가 없습니다. 데모 데이터로 샘플이 생성됩니다.
+        <strong>ⓘ</strong> 업로드된 자료가 없습니다. 예시 자료로 견본을 만듭니다.
       </div>` : ''}
       ${periodField}
       <div class="form-row"><label>포함할 자료</label>
@@ -10118,13 +10204,13 @@ function generateAccounting(kind){
   const tpl = ACCOUNTING_TEMPLATES.find(x => x.kind === kind);
   if(!tpl){ closeDyn(); return; }
   const period = document.getElementById('ap-period').value;
-  if(!period){ toast('대상 기간을 입력해주세요.'); return; }
+  if(!period){ toast('대상 기간을 입력해 주세요.'); return; }
   const note = document.getElementById('ap-note').value.trim();
 
   document.getElementById('dynBody').innerHTML = `
     <div class="loading-box">
       <div><span class="spinner"></span>AI가 <strong>${escapeHtml(tpl.title)}</strong> 초안을 작성 중입니다...</div>
-      <div class="text-small text-mute" style="margin-top:8px;">업로드된 자료를 분석하는 중 (데모: 즉시 완료)</div>
+      <div class="text-small text-mute" style="margin-top:8px;">업로드된 자료를 분석하는 중 (체험: 즉시 완료)</div>
     </div>`;
   document.getElementById('dynFoot').innerHTML = `<button class="btn btn-ghost" onclick="closeDyn()">닫기</button>`;
 
@@ -10140,7 +10226,7 @@ function generateAccounting(kind){
     document.getElementById('dynFoot').innerHTML = `
       <button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
       <button class="btn btn-outline" onclick="startAccounting('${escapeJs(kind)}')">↻ 다시 생성</button>
-      <button class="btn btn-outline" onclick="downloadAccountingCurrent()">📥 다운로드</button>
+      <button class="btn btn-outline" onclick="downloadAccountingCurrent()">📥 내려받기</button>
       <button class="btn btn-primary" onclick="saveAccounting()">💾 저장</button>`;
   }, 900);
 }
@@ -10176,7 +10262,7 @@ function viewAccounting(id){
     sub: `${a.typeLabel} · ${a.period} · 생성일 ${a.date}`,
     body: `<div class="doc-preview" style="font-family:var(--font-sans);font-size:12.5px;">${a._content}</div>`,
     foot: `<button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
-           <button class="btn btn-outline" onclick="downloadAccounting('${escapeJs(id)}')">📥 다운로드</button>`,
+           <button class="btn btn-outline" onclick="downloadAccounting('${escapeJs(id)}')">📥 내려받기</button>`,
     size: 'lg'
   });
 }
@@ -10355,7 +10441,7 @@ function renderAccountingSample(kind, period, note){
             <tr><td>매입세액 (공제)</td><td class="num">− ${purchaseVat.toLocaleString()}</td></tr>
             <tr class="total"><td>납부세액</td><td class="num">${payable.toLocaleString()} 원</td></tr>
           </table>
-          <p style="font-size:10.5pt;color:#666;margin:8px 0 0;">※ 신고·납부 기한: 예정신고 → 7/25, 확정신고 → 다음 해 1/25</p>
+          <p style="font-size:10.5pt;color:#666;margin:8px 0 0;">※ 신고·납부 기한: 1기 예정 4/25 · 1기 확정 7/25 · 2기 예정 10/25 · 2기 확정 다음 해 1/25</p>
         </div>`;
     }
 
@@ -10577,7 +10663,7 @@ function memClosing(){
     ['2','근태 집계·급여 계산','말일','급여근태대장, 급여명세서'],
     ['3','급여 이체·원천세·4대보험 신고','익월 10일','원천징수 신고서, 보험료 납부'],
     ['4','한전 정산내역 수령·발전량 대조','정산일','발전대장, 차이율 확인(±2%)'],
-    ['5','자금 배분 이체 (50/10/20/20)','정산 후 3일 내','배분 지시서, 4개 계좌 이체'],
+    ['5','자금 배분 이체 (①원리금 → ②운영관리비 → ③공동사업 → ④배당 순)','정산 후 3일 내','배분 지시서, 4개 계좌 이체'],
     ['6','융자 원리금 자동이체 확인','약정일','상환 대장 갱신'],
     ['7','기장·시산표 마감, 배당 적립 계산','말일','회계대장, 배당적립대장'],
     ['8','월간 운영보고서 작성·운영위 보고','익월 첫 주','월간 운영보고서(한글)'],
@@ -10609,7 +10695,7 @@ function memClosing(){
     <div class="card mt-20" style="border-color:var(--primary);">
       <div class="card-title"><h3 class="serif">▶ 월 마감 실행</h3><span class="badge badge-primary">자동 산출</span></div>
       <p class="text-mute" style="margin-top:0;font-size:13px;">
-        통장 거래내역 CSV를 자동 분류·기장하고, 한전 정산 수입의 50/10/20/20 배분 계산과 실제 이체 대조,
+        통장 거래내역 CSV를 자동 분류·기장하고, 한전 정산 수입을 ①원리금 → ②운영관리비 → ③공동사업 → ④배당 순으로 나눈 계산과 실제 이체 대조,
         계정과목별 집계까지 담은 <strong>월간 운영보고서</strong>를 생성합니다.
         ${(bankFiles.length || inboxTx) ? '' : '먼저 <a href="#/mem/inbox" style="color:var(--primary);">자료함</a>이나 <a href="#/mem/accounting" style="color:var(--primary);">회계·세무 자진신고</a>에 통장 내역을 올리거나, 실행 창에서 직접 파일을 선택하세요.'}
       </p>
@@ -10628,8 +10714,8 @@ function memClosing(){
               <td>${escapeHtml(c.date)}</td>
               <td class="tbl-actions">
                 <button class="btn btn-ghost btn-sm" onclick="viewClosing('${escapeJs(c.id)}')">보기</button>
-                <button class="btn btn-ghost btn-sm" onclick="downloadClosing('${escapeJs(c.id)}')">다운로드</button>
-                <button class="btn btn-ghost btn-sm" onclick="removeClosing('${escapeJs(c.id)}')">삭제</button>
+                <button class="btn btn-ghost btn-sm" onclick="downloadClosing('${escapeJs(c.id)}')">내려받기</button>
+                <button class="btn btn-ghost btn-sm" onclick="removeClosing('${escapeJs(c.id)}')">지우기</button>
               </td>
             </tr>`).join('')}
         </tbody>
@@ -10654,7 +10740,7 @@ function memClosing(){
       <div class="card-title"><h3 class="serif">📄 자동 생성 보고서 6종</h3></div>
       <div class="feature-grid">
         ${reports.map(r => `
-          <div class="feature" style="cursor:pointer;" onclick="${r.name.includes('통지문') ? "location.hash='#/mem/taxpay'" : r.name==='급여명세서' ? "location.hash='#/mem/taxpay'" : `toast('${r.name}는 대장 데이터로 자동 생성됩니다. (데모)')`}">
+          <div class="feature" style="cursor:pointer;" onclick="${r.name.includes('통지문') ? "location.hash='#/mem/taxpay'" : r.name==='급여명세서' ? "location.hash='#/mem/taxpay'" : `toast('「${r.name}」 — 대장에 적은 자료로 자동으로 만듭니다(체험 화면).')`}">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;">
               <div class="feature-icon">${r.icon}</div>
               <span class="badge badge-primary">${r.cycle}</span>
@@ -10748,7 +10834,7 @@ function closingStart(){
 function closingRun(){
   const village = document.getElementById('cl-village').value;
   const ym = document.getElementById('cl-period').value;
-  if(!village || !ym){ toast('대상 조합과 월을 선택해주세요.'); return; }
+  if(!village || !ym){ toast('대상 조합과 월을 선택해 주세요.'); return; }
   const direct = document.getElementById('cl-direct').files[0];
   if(direct){
     _readTextFile(direct, text => _closingProcess(village, ym, text, direct.name));
@@ -10768,7 +10854,7 @@ function closingRun(){
     return;
   }
   const f = MOCK.uploads.find(x => x.id === fid && x._text);
-  if(!f){ toast('통장 CSV를 선택하거나 파일을 직접 첨부해주세요.'); return; }
+  if(!f){ toast('통장 CSV를 선택하거나 파일을 직접 첨부해 주세요.'); return; }
   _closingProcess(village, ym, f._text, f.name);
 }
 
@@ -10793,7 +10879,7 @@ const _closingNum = v => Number(String(v ?? '').replace(/[^\d.-]/g, '')) || 0;
 
 function _closingProcess(village, ym, csvText, fileName){
   const rows = _closingCsvParse(csvText);
-  if(rows.length < 2){ toast('CSV에서 거래를 읽지 못했습니다. 파일 내용을 확인해주세요.'); return; }
+  if(rows.length < 2){ toast('CSV에서 거래를 읽지 못했습니다. 파일 내용을 확인해 주세요.'); return; }
   // 열 위치 탐색 (헤더명 기준, 못 찾으면 표준 순서 가정)
   const head = rows[0].map(h => String(h).trim());
   const col = (names, def) => _colOf(head, names, def);   // 이름 순서가 우선순위 (_colOf 주석 참조)
@@ -10821,7 +10907,7 @@ function _closingProcess(village, ym, csvText, fileName){
     body: `<div class="doc-preview" style="font-family:var(--font-sans);font-size:12.5px;">${content}</div>`,
     foot: `<button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
            <button class="btn btn-outline" onclick="closingStart()">↻ 다시 실행</button>
-           <button class="btn btn-outline" onclick="downloadClosingCurrent()">📥 다운로드</button>
+           <button class="btn btn-outline" onclick="downloadClosingCurrent()">📥 내려받기</button>
            <button class="btn btn-primary" onclick="saveClosing()">💾 저장</button>`,
     size: 'xl'
   });
@@ -10959,7 +11045,7 @@ function viewClosing(id){
     sub: `대상 ${c.period} · 생성일 ${c.date}`,
     body: `<div class="doc-preview" style="font-family:var(--font-sans);font-size:12.5px;">${c._content}</div>`,
     foot: `<button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
-           <button class="btn btn-outline" onclick="downloadClosing('${escapeJs(id)}')">📥 다운로드</button>`,
+           <button class="btn btn-outline" onclick="downloadClosing('${escapeJs(id)}')">📥 내려받기</button>`,
     size: 'xl'
   });
 }
@@ -11183,7 +11269,7 @@ function memLibrary(){
               <div style="font-weight:600;">${escapeHtml(f.title)}</div>
               <div class="text-small text-mute">${escapeHtml(f.size)}${f.date ? ' · ' + escapeHtml(f.date) : ''}</div>
             </div>
-            <button class="btn btn-ghost btn-sm" onclick="downloadFile('${escapeJs(f.title)}')">다운로드</button>
+            <button class="btn btn-ghost btn-sm" onclick="downloadFile('${escapeJs(f.title)}')">내려받기</button>
           </div>
         `).join('') : '<p class="text-mute text-center" style="padding:20px 0;">등록된 자료가 없습니다.</p>'}
       </div>
@@ -11348,7 +11434,7 @@ async function sendChat(){
   }
   setTimeout(() => {
     body.insertAdjacentHTML('beforeend', `<div class="msg ai">
-      (데모 응답) 질문 감사합니다. sakyowon.co.kr/hatsoja 에서 이용하시면 사교원 실무 지식을 갖춘 AI가 실제 답변을 제공합니다.
+      (예시 답변) 질문 감사합니다. sakyowon.co.kr/hatsoja 에서 이용하시면 사교원 실무 지식을 갖춘 AI가 실제 답변을 제공합니다.
     </div>`);
     body.scrollTop = body.scrollHeight;
   }, 500);
@@ -11749,7 +11835,7 @@ function svConsentDemo(){
       <td><span style="position:relative;display:inline-block;width:120px;height:10px;background:var(--paper-soft);border-radius:5px;overflow:hidden;vertical-align:middle;"><span style="display:block;height:100%;width:${Math.round(p)}%;background:${p >= 70 ? 'var(--primary)' : '#c9a227'};"></span><span style="position:absolute;left:70%;top:-2px;width:2px;height:14px;background:var(--ink-soft);"></span></span>
       <span style="margin-left:6px;color:${p >= 70 ? 'inherit' : '#9c6a00'};">${p.toFixed(0)}%</span></td></tr>`;
     }).join('')}</tbody></table>
-    <p class="text-mute" style="font-size:12.5px;"><span class="tmp" title="오픈 전 제거·확인">※ 데모 화면입니다.</span> 실제 서비스에서는 주민별 링크 발송·본인 인증·서면 스캔 보관이 함께 동작합니다.
+    <p class="text-mute" style="font-size:12.5px;"><span>※ 체험 화면입니다.</span> 실제 서비스에서는 주민별 링크 발송·본인 인증·서면 스캔 보관이 함께 동작합니다.
     동의율은 <b>2026.3.31 기준 주민등록 주민</b>을 분모로 계산하며, 동의서 외에 <b>마을 자치규약에 따른 총회 의결서</b>를 함께 제출해야 합니다.
     숫자를 채우는 것보다 <b>주민이 사업 내용(비용·위험·수익 사용처)을 이해한 상태에서 동의했는지</b>가 사업의 성패를 가릅니다.</p>`;
 }
@@ -13011,14 +13097,14 @@ async function callAIDoc(userContent, opts){
 
 // 문서 유형별 생성 프롬프트 (없는 유형은 buildDocPrompt가 항목 나열로 생성)
 const DOC_PROMPTS = {
-  '조합 정관': v => '다음 정보로 햇빛소득마을 협동조합 정관 전문 초안을 협동조합기본법에 맞게 작성해주세요. 공고문상 정관 5대 필수요건(재생에너지사업 명시, 수익배분, 의사결정, 투명성, 배분방식)을 반드시 반영하세요.\n조합명: ' + (v.coop_name||'') + '\n주 사무소: ' + (v.address||'') + '\n사업 목적: ' + (v.purpose||'') + '\n예상 조합원 수: ' + (v.members||'') + '명\n출자 1좌 금액: ' + (v.share||'') + '원',
-  '창립총회 회의록': v => '다음 정보로 협동조합 창립총회 회의록을 협동조합기본법에 맞는 법정 형식(성원 확인, 안건별 의결, 서명·날인란)으로 작성해주세요.\n조합명: ' + (v.coop_name||'') + '\n일시: ' + (v.date||'') + '\n장소: ' + (v.place||'') + '\n참석: ' + (v.attendees||'') + '명\n안건:\n' + (v.agenda||''),
-  '사업계획서': v => '다음 정보를 바탕으로 2026년 햇빛소득마을 사업계획서(서식3) 초안을 작성해주세요.\n조합명: ' + (v.coop_name||'') + '\n사업연도: ' + (v.year||'') + '\n발전설비 용량: ' + (v.capacity||'') + 'kW\n예상 사업비: ' + (v.budget||'') + '억원\n사업 요약: ' + (v.summary||'') + '\n\n서식3의 6개 항목(1.협동조합현황 2.마을공동체현황 3.협동조합세부현황(의사결정·운영·수익배분) 4.태양광발전사업추진계획(부지·설치비·기자재) 5.태양광발전사업관리계획 6.햇빛소득마을사업관리계획(수익활용·회계·관리자)) 순서로 실무에서 바로 활용 가능한 수준으로 작성해주세요.',
-  '정기총회 회의록': v => '다음 정보로 협동조합 정기총회 회의록을 법정 형식으로 작성해주세요.\n조합명: ' + (v.coop_name||'') + '\n일시: ' + (v.date||'') + '\n회계연도: ' + (v.year||'') + '\n안건:\n' + (v.agenda||'') + '\n서명란은 의장과 총회에서 선출한 조합원 3인 이상의 기명날인(협동조합 기본법 제30조②)으로 만드세요.',
-  '결산 보고서': v => '다음 정보로 협동조합 회계연도 결산 보고서를 작성해주세요. 수입·지출 총괄표, 유보금 적립, 감사 의견란을 포함하세요.\n조합명: ' + (v.coop_name||'') + '\n회계연도: ' + (v.year||'') + '\n매출: ' + (v.revenue||'') + '만원\n비용(법인세 등 포함): ' + (v.expense||'') + '만원\n조합 유형: ' + (v.coop_type||'일반') + '\n전기 이월 잉여금: ' + (v.prior||'0') + '만원\n법정적립 비율(정관): ' + (v.legal_rate||'') + '%\n정관 적립·임의적립: ' + (v.reserve||'') + '\n특이사항: ' + (v.note||'') + '\n잉여금 처분(안)은 협동조합 기본법 순서(손실 보전 → 법정적립금[일반 10% 이상·사회적 30% 이상] → 정관 적립 → 임의적립금 → 배당[이용실적 50% 이상·출자 배당 10% 이하, 사회적협동조합은 배당 불가] → 이월)로 쓰고, 정관 비율을 모르면 빈칸으로 두세요.',
-  '이사회 회의록': v => '다음 정보로 협동조합 이사회 회의록을 작성해주세요.\n조합명: ' + (v.coop_name||'') + '\n일시: ' + (v.date||'') + '\n참석 이사: ' + (v.attendees||'') + '\n안건: ' + (v.agenda||''),
-  '발전사업 허가 신청서': v => '다음 정보로 전기사업법상 발전사업 허가 신청서 초안과 필요 첨부서류 목록을 작성해주세요.\n신청인(조합): ' + (v.coop_name||'') + '\n설비 용량: ' + (v.capacity||'') + 'kW\n설비 위치: ' + (v.location||'') + '\n설비 종류: ' + (v.kind||'') + '\n공사 예정일: ' + (v.start||''),
-  '분양 계약서': v => '다음 정보로 햇빛소득마을 조합원 분양(출자) 계약서 초안을 작성해주세요. 마을(조합원)에게 불리한 조항이 없도록 균형 있게 작성하세요.\n조합명: ' + (v.coop_name||'') + '\n총 분양 좌수: ' + (v.total_share||'') + '\n좌당 금액: ' + (v.unit_price||'') + '원\n분양 기간: ' + (v.term||''),
+  '조합 정관': v => '다음 정보로 햇빛소득마을 협동조합 정관 전문 초안을 협동조합기본법에 맞게 작성해 주세요. 공고문상 정관 5대 필수요건(재생에너지사업 명시, 수익배분, 의사결정, 투명성, 배분방식)을 반드시 반영하세요.\n조합명: ' + (v.coop_name||'') + '\n주 사무소: ' + (v.address||'') + '\n사업 목적: ' + (v.purpose||'') + '\n예상 조합원 수: ' + (v.members||'') + '명\n출자 1좌 금액: ' + (v.share||'') + '원',
+  '창립총회 회의록': v => '다음 정보로 협동조합 창립총회 회의록을 협동조합기본법에 맞는 법정 형식(성원 확인, 안건별 의결, 서명·날인란)으로 작성해 주세요.\n조합명: ' + (v.coop_name||'') + '\n일시: ' + (v.date||'') + '\n장소: ' + (v.place||'') + '\n참석: ' + (v.attendees||'') + '명\n안건:\n' + (v.agenda||''),
+  '사업계획서': v => '다음 정보를 바탕으로 2026년 햇빛소득마을 사업계획서(서식3) 초안을 작성해 주세요.\n조합명: ' + (v.coop_name||'') + '\n사업연도: ' + (v.year||'') + '\n발전설비 용량: ' + (v.capacity||'') + 'kW\n예상 사업비: ' + (v.budget||'') + '억원\n사업 요약: ' + (v.summary||'') + '\n\n서식3의 6개 항목(1.협동조합현황 2.마을공동체현황 3.협동조합세부현황(의사결정·운영·수익배분) 4.태양광발전사업추진계획(부지·설치비·기자재) 5.태양광발전사업관리계획 6.햇빛소득마을사업관리계획(수익활용·회계·관리자)) 순서로 실무에서 바로 활용 가능한 수준으로 작성해 주세요.',
+  '정기총회 회의록': v => '다음 정보로 협동조합 정기총회 회의록을 법정 형식으로 작성해 주세요.\n조합명: ' + (v.coop_name||'') + '\n일시: ' + (v.date||'') + '\n회계연도: ' + (v.year||'') + '\n안건:\n' + (v.agenda||'') + '\n서명란은 의장과 총회에서 선출한 조합원 3인 이상의 기명날인(협동조합 기본법 제30조②)으로 만드세요.',
+  '결산 보고서': v => '다음 정보로 협동조합 회계연도 결산 보고서를 작성해 주세요. 수입·지출 총괄표, 유보금 적립, 감사 의견란을 포함하세요.\n조합명: ' + (v.coop_name||'') + '\n회계연도: ' + (v.year||'') + '\n매출: ' + (v.revenue||'') + '만원\n비용(법인세 등 포함): ' + (v.expense||'') + '만원\n조합 유형: ' + (v.coop_type||'일반') + '\n전기 이월 잉여금: ' + (v.prior||'0') + '만원\n법정적립 비율(정관): ' + (v.legal_rate||'') + '%\n정관 적립·임의적립: ' + (v.reserve||'') + '\n특이사항: ' + (v.note||'') + '\n잉여금 처분(안)은 협동조합 기본법 순서(손실 보전 → 법정적립금[일반 10% 이상·사회적 30% 이상] → 정관 적립 → 임의적립금 → 배당[이용실적 50% 이상·출자 배당 10% 이하, 사회적협동조합은 배당 불가] → 이월)로 쓰고, 정관 비율을 모르면 빈칸으로 두세요.',
+  '이사회 회의록': v => '다음 정보로 협동조합 이사회 회의록을 작성해 주세요.\n조합명: ' + (v.coop_name||'') + '\n일시: ' + (v.date||'') + '\n참석 이사: ' + (v.attendees||'') + '\n안건: ' + (v.agenda||''),
+  '발전사업 허가 신청서': v => '다음 정보로 전기사업법상 발전사업 허가 신청서 초안과 필요 첨부서류 목록을 작성해 주세요.\n신청인(조합): ' + (v.coop_name||'') + '\n설비 용량: ' + (v.capacity||'') + 'kW\n설비 위치: ' + (v.location||'') + '\n설비 종류: ' + (v.kind||'') + '\n공사 예정일: ' + (v.start||''),
+  '분양 계약서': v => '다음 정보로 햇빛소득마을 조합원 분양(출자) 계약서 초안을 작성해 주세요. 마을(조합원)에게 불리한 조항이 없도록 균형 있게 작성하세요.\n조합명: ' + (v.coop_name||'') + '\n총 분양 좌수: ' + (v.total_share||'') + '\n좌당 금액: ' + (v.unit_price||'') + '원\n분양 기간: ' + (v.term||''),
 };
 function buildDocPrompt(name, v){
   const f = DOC_PROMPTS[name];
@@ -13027,23 +13113,23 @@ function buildDocPrompt(name, v){
     + (_MY_STRAT.resolved_on ? ', ' + _MY_STRAT.resolved_on + ' 총회 의결.' : ' — 이번 총회에서 의결할 안건으로 쓰세요.');
   if(f) return f(v);
   const lines = (DOC_FIELDS[name]||[]).map(x => x.label + ': ' + (v[x.k]||'')).join('\n');
-  return '다음 정보를 바탕으로 "' + name + '" 문서를 공식 서식으로 작성해주세요.\n' + lines;
+  return '다음 정보를 바탕으로 "' + name + '" 문서를 공식 서식으로 작성해 주세요.\n' + lines;
 }
 
 // 서류 검토 유형별 가이드 (sunvillage reviewTypes 이식)
 const REVIEW_GUIDE = {
-  '정관': '협동조합 정관을 2026년 햇빛소득마을 공고문 기준으로 검토해주세요. 5대 필수요건(재생에너지사업 명시, 수익배분, 의사결정, 투명성, 배분방식) 충족 여부를 분석해주세요.',
-  '사업계획서': '사업계획서를 공고문 평가기준과 서식3의 6개 항목 구성에 맞춰 검토해주세요. 누락 항목과 보완 방향을 제시해주세요.',
-  '회의록': '회의록(총회·이사회)의 법정 요건(성원 확인, 의결 정족수, 안건별 의결 결과, 서명·날인)을 검토해주세요.',
-  '결산 보고서': '결산 보고서의 수입·지출 정합성, 유보금 적립, 배당 규정 부합 여부를 검토해주세요.',
-  '발전사업 허가 신청서': '전기사업법 기준으로 발전사업 허가 신청서의 기재사항과 첨부서류 완비 여부를 검토해주세요.',
-  '토지대장': '토지대장을 햇빛소득마을 태양광 발전소 설치 관점에서 검토해주세요. 지목·면적·소유자·권리관계를 확인하고 문제 여부를 분석해주세요.',
-  '건축물대장': '건축물대장을 건물형 태양광 설치 관점에서 검토해주세요. 구조·면적·건축연도·위반건축물 여부를 확인해주세요.',
-  '계통연계 검토의견서': '한전 계통연계 검토의견서를 분석해주세요. 여유용량·연계 가능 여부·조건사항을 확인하고 사업계획서 기재 방법을 안내해주세요.',
-  '탄소배출량 검증인정서': '태양광 모듈 탄소배출량 검증인정서를 검토해주세요. 공고문 기준(655kgCO2/kW 이하) 충족 여부와 사업계획서 기재 방법을 안내해주세요.',
-  'KS인증서': 'KS인증서를 검토해주세요. 모듈/인버터/접속함 기준 충족 여부와 사업계획서 서식3-사 항목에 기재할 내용을 안내해주세요.',
-  '계약서 (ReSCO·PPA)': '계약서(ReSCO 도급계약서 또는 PPA계약서)를 검토해주세요. 공고문 기준에 맞는지, 마을에 불리한 조항은 없는지 분석해주세요.',
-  '기타': '업로드된 서류를 햇빛소득마을 공모 신청 관점에서 검토해주세요. 서류의 용도와 완성도, 보완이 필요한 부분을 분석해주세요.',
+  '정관': '협동조합 정관을 2026년 햇빛소득마을 공고문 기준으로 검토해 주세요. 5대 필수요건(재생에너지사업 명시, 수익배분, 의사결정, 투명성, 배분방식) 충족 여부를 분석해 주세요.',
+  '사업계획서': '사업계획서를 공고문 평가기준과 서식3의 6개 항목 구성에 맞춰 검토해 주세요. 누락 항목과 보완 방향을 제시해 주세요.',
+  '회의록': '회의록(총회·이사회)의 법정 요건(성원 확인, 의결 정족수, 안건별 의결 결과, 서명·날인)을 검토해 주세요.',
+  '결산 보고서': '결산 보고서의 수입·지출 정합성, 유보금 적립, 배당 규정 부합 여부를 검토해 주세요.',
+  '발전사업 허가 신청서': '전기사업법 기준으로 발전사업 허가 신청서의 기재사항과 첨부서류 완비 여부를 검토해 주세요.',
+  '토지대장': '토지대장을 햇빛소득마을 태양광 발전소 설치 관점에서 검토해 주세요. 지목·면적·소유자·권리관계를 확인하고 문제 여부를 분석해 주세요.',
+  '건축물대장': '건축물대장을 건물형 태양광 설치 관점에서 검토해 주세요. 구조·면적·건축연도·위반건축물 여부를 확인해 주세요.',
+  '계통연계 검토의견서': '한전 계통연계 검토의견서를 분석해 주세요. 여유용량·연계 가능 여부·조건사항을 확인하고 사업계획서 기재 방법을 안내해 주세요.',
+  '탄소배출량 검증인정서': '태양광 모듈 탄소배출량 검증인정서를 검토해 주세요. 공고문 기준(655kgCO2/kW 이하) 충족 여부와 사업계획서 기재 방법을 안내해 주세요.',
+  'KS인증서': 'KS인증서를 검토해 주세요. 모듈/인버터/접속함 기준 충족 여부와 사업계획서 서식3-사 항목에 기재할 내용을 안내해 주세요.',
+  '계약서 (ReSCO·PPA)': '계약서(ReSCO 도급계약서 또는 PPA계약서)를 검토해 주세요. 공고문 기준에 맞는지, 마을에 불리한 조항은 없는지 분석해 주세요.',
+  '기타': '업로드된 서류를 햇빛소득마을 공모 신청 관점에서 검토해 주세요. 서류의 용도와 완성도, 보완이 필요한 부분을 분석해 주세요.',
 };
 
 const DOC_FIELDS = {
@@ -13263,7 +13349,7 @@ function generateDoc(name){
   for(const f of fields){
     if(f.req && !values[f.k]){ missingLabel = f.label; break; }
   }
-  if(missingLabel){ toast(`필수 항목 "${missingLabel}"을(를) 입력해주세요.`); return; }
+  if(missingLabel){ toast(`필수 항목 "${missingLabel}"을(를) 입력해 주세요.`); return; }
 
   if(REAL_API){ generateDocAI(name, values); return; }
 
@@ -13271,7 +13357,7 @@ function generateDoc(name){
   document.getElementById('dynBody').innerHTML = `
     <div class="loading-box">
       <div><span class="spinner"></span>AI가 <strong>${escapeHtml(name)}</strong> 초안을 작성 중입니다...</div>
-      <div class="text-small text-mute" style="margin-top:8px;">보통 5~15초 소요됩니다 (데모: 즉시 완료)</div>
+      <div class="text-small text-mute" style="margin-top:8px;">보통 5~15초 소요됩니다 (체험: 즉시 완료)</div>
     </div>`;
   document.getElementById('dynFoot').innerHTML = `<button class="btn btn-ghost" onclick="closeDyn()">닫기</button>`;
 
@@ -13294,7 +13380,7 @@ function _docResultFoot(name){
   return `
     <button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
     <button class="btn btn-outline" onclick="startDoc('${escapeJs(name)}')">↻ 다시 생성</button>
-    <button class="btn btn-outline" onclick="downloadStub('${escapeJs(name)}')">📥 다운로드</button>
+    <button class="btn btn-outline" onclick="downloadStub('${escapeJs(name)}')">📥 내려받기</button>
     <button class="btn btn-outline" onclick="reviewFromDoc()">🔍 이 문서 AI 검토받기</button>
     <button class="btn btn-primary" onclick="saveDocStub('${escapeJs(name)}')">💾 저장</button>
   `;
@@ -13394,7 +13480,7 @@ function showDocPreview(name, values, fallbackNote){
   document.getElementById('dynFoot').innerHTML = `
     <button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
     <button class="btn btn-outline" onclick="startDoc('${escapeJs(name)}')">↻ 다시 생성</button>
-    <button class="btn btn-outline" onclick="downloadStub('${escapeJs(name)}')">📥 다운로드</button>
+    <button class="btn btn-outline" onclick="downloadStub('${escapeJs(name)}')">📥 내려받기</button>
     <button class="btn btn-outline" onclick="reviewFromDoc()">🔍 이 문서 AI 검토받기</button>
     <button class="btn btn-primary" onclick="saveDocStub('${escapeJs(name)}')">💾 저장</button>
   `;
@@ -13976,7 +14062,7 @@ ${escapeHtml(v.agenda || '(안건 미입력)')}
 }
 
 function downloadStub(name){
-  toast(`"${name}" 다운로드는 백엔드 연동 후 지원됩니다. (데모)`);
+  toast(`"${name}" 내려받기는 체험 화면에서는 되지 않습니다.`);
 }
 const DOC_TYPE_MAP = {
   '조합 정관':'정관',
@@ -14061,7 +14147,7 @@ function viewDoc(id){
     sub: `${doc.type} · ${doc.date} · ${doc.status}`,
     body: `<div class="doc-preview">${content}</div>`,
     foot: `<button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
-           <button class="btn btn-outline" onclick="downloadDoc('${escapeJs(doc.id)}')">📥 다운로드</button>
+           <button class="btn btn-outline" onclick="downloadDoc('${escapeJs(doc.id)}')">📥 내려받기</button>
            <button class="btn btn-primary" onclick="editDoc('${escapeJs(doc.id)}')">✏ 편집</button>`,
     size:'lg'
   });
@@ -14097,7 +14183,7 @@ async function submitEditDoc(id){
   const doc = MOCK.documents.find(d => d.id === id);
   if(!doc){ closeDyn(); return; }
   const title = document.getElementById('edoc-title').value.trim();
-  if(!title){ toast('제목을 입력해주세요.'); return; }
+  if(!title){ toast('제목을 입력해 주세요.'); return; }
   doc.title    = title;
   doc.status   = document.getElementById('edoc-status').value;
   doc._content = document.getElementById('edoc-content').innerHTML;
@@ -14163,10 +14249,10 @@ function viewReview(name){
       <h4 style="color:var(--info);">💡 개선 제안</h4>
       • 회의록에는 참석 조합원의 성명·서명 목록을 부록으로 첨부하는 것이 좋습니다.<br>
       • 사업계획서의 수지예산이 매출 근거(단가·시간·이용률)를 명시하면 심사 통과율이 높아집니다.<br><br>
-      <em class="tmp" title="오픈 전 제거·확인">* 이 검토 결과는 데모입니다. 실제 서비스에서는 업로드하신 문서를 AI가 분석하여 항목별 상세 지적을 제공합니다.</em>
+      <em>* 이 검토 결과는 예시입니다. 실제 문서를 올리면 AI가 항목별로 검토해 드립니다.</em>
     </div>`,
     foot: `<button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
-           <button class="btn btn-primary" onclick="downloadReviewReport('${escapeJs(name)}')">📄 보고서 다운로드</button>`,
+           <button class="btn btn-primary" onclick="downloadReviewReport('${escapeJs(name)}')">📄 보고서 내려받기</button>`,
     size:'lg'
   });
 }
@@ -14408,9 +14494,9 @@ function formatPhone(p){
 }
 function submitAddMember(){
   const name = document.getElementById('am-name').value.trim();
-  if(!name){ toast('성명을 입력해주세요.'); return; }
+  if(!name){ toast('성명을 입력해 주세요.'); return; }
   if(MOCK.members.some(m => m.name === name)){
-    toast('이미 같은 이름의 조합원이 있습니다. 이름 뒤에 소속·기호를 붙여 구분해주세요.'); return;
+    toast('이미 같은 이름의 조합원이 있습니다. 이름 뒤에 소속·기호를 붙여 구분해 주세요.'); return;
   }
   const share = document.getElementById('am-share').value;
   const newM = {
@@ -14447,7 +14533,7 @@ function editMember(originalName){
       <div class="form-row"><label>가입일</label><input class="input" id="em-date" type="date" value="${m.joinDate}"></div>
       <div class="form-row"><label>연락처</label><input class="input" id="em-phone" value="${escapeHtml(m.phone || '')}"></div>
       <div class="form-row"><label><input type="checkbox" id="em-voting"${m.voting?' checked':''}> 의결권 부여</label></div>`,
-    foot: `<button class="btn btn-danger btn-sm" onclick="removeMember('${escapeJs(originalName)}')" style="margin-right:auto;">🗑 삭제</button>
+    foot: `<button class="btn btn-danger btn-sm" onclick="removeMember('${escapeJs(originalName)}')" style="margin-right:auto;">🗑 지우기</button>
            <button class="btn btn-outline" onclick="closeDyn()">취소</button>
            <button class="btn btn-primary" onclick="submitEditMember('${escapeJs(originalName)}')">저장</button>`
   });
@@ -14667,7 +14753,7 @@ function viewEvent(title){
         <li>회의록 서기 지정</li>
         <li>공지 발송 (최소 7일 전)</li>
       </ul>`,
-    foot: `<button class="btn btn-danger btn-sm" onclick="removeEvent('${escapeJs(title)}')" style="margin-right:auto;">🗑 삭제</button>
+    foot: `<button class="btn btn-danger btn-sm" onclick="removeEvent('${escapeJs(title)}')" style="margin-right:auto;">🗑 지우기</button>
            <button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
            <button class="btn btn-outline" onclick="editEvent('${escapeJs(title)}')">✏ 편집</button>
            <button class="btn btn-primary" onclick="closeDyn();location.hash='#/mem/docs'">📝 관련 문서 만들기</button>`
@@ -14734,8 +14820,8 @@ function addEvent(){
 function submitAddEvent(){
   const title = document.getElementById('ae-title').value.trim();
   const date  = document.getElementById('ae-date').value;
-  if(!title){ toast('제목을 입력해주세요.'); return; }
-  if(!date) { toast('일시를 선택해주세요.'); return; }
+  if(!title){ toast('제목을 입력해 주세요.'); return; }
+  if(!date) { toast('일시를 선택해 주세요.'); return; }
   MOCK.events.push({
     title, date,
     kind:   document.getElementById('ae-kind').value,
@@ -14750,7 +14836,7 @@ function submitAddEvent(){
   refresh();
 }
 function downloadFile(fname){
-  toast(`"${fname}" 다운로드는 백엔드 연동 후 지원됩니다. (데모)`);
+  toast(`"${fname}" 내려받기는 체험 화면에서는 되지 않습니다.`);
 }
 
 /* Admin */
@@ -14769,7 +14855,7 @@ function viewVillage(name){
         <div class="prog"><div class="prog-fill" style="width:${v?v.progress:0}%;"></div></div>
       </div>`,
     foot: isAdminUser()
-      ? `<button class="btn btn-danger btn-sm" onclick="removeVillage('${escapeJs(name)}')" style="margin-right:auto;">🗑 삭제</button>
+      ? `<button class="btn btn-danger btn-sm" onclick="removeVillage('${escapeJs(name)}')" style="margin-right:auto;">🗑 지우기</button>
          <button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
          <button class="btn btn-outline" onclick="editVillage('${escapeJs(name)}')">✏ 편집</button>
          <button class="btn btn-primary" onclick="assignManager('${escapeJs(name)}')">👤 담당자 배정</button>`
@@ -14908,7 +14994,7 @@ function addVillage(){
 }
 async function submitAddVillage(){
   const name = document.getElementById('av-name').value.trim();
-  if(!name){ toast('마을 이름을 입력해주세요.'); return; }
+  if(!name){ toast('마을 이름을 입력해 주세요.'); return; }
   if(MOCK.villages.some(v => v.name === name)){ toast('같은 이름의 마을이 이미 등록되어 있습니다.'); return; }
   if(_realMode){
     try{
@@ -14946,7 +15032,7 @@ async function submitAddVillage(){
   refresh();
 }
 /* 실데이터 회원 관리 — 통합 계정 API */
-let _admMembers = [];   // 마이페이지 보기에서 재사용
+let _admMembers = [];   // 내 페이지 보기에서 재사용
 async function admUsersRealLoad(){
   const box = document.getElementById('realUsersBox');
   if(!box) return;
@@ -14974,7 +15060,7 @@ async function admUsersRealLoad(){
                 </select>
               </td>
               <td class="tbl-actions" style="white-space:nowrap;">
-                <button class="btn btn-outline btn-sm" onclick="admMemberPage(${m.id})">👤 마이페이지</button>
+                <button class="btn btn-outline btn-sm" onclick="admMemberPage(${m.id})">👤 내 페이지</button>
                 ${m.status !== 'approved' ? `<button class="btn btn-primary btn-sm" onclick="setMemberStatusReal(${m.id},'approved')">승인</button>` : ''}
                 ${m.status !== 'rejected' ? `<button class="btn btn-ghost btn-sm" onclick="setMemberStatusReal(${m.id},'rejected')">거절</button>` : ''}
               </td>
@@ -15021,8 +15107,8 @@ function confirmReject(id){
   setMemberStatusReal(id, 'rejected', reason);
 }
 
-/* ─── 회원 마이페이지 열람 (관리자) ───
-   회원 관리의 [👤 마이페이지] — 회원 본인이 보는 마이페이지 정보를 관리자 시점에서 확인.
+/* ─── 회원 내 페이지 열람 (관리자) ───
+   회원 관리의 [👤 내 페이지] — 회원 본인이 보는 내 페이지 정보를 관리자 시점에서 확인.
    실데이터 모드는 회원 목록(id), 데모 모드는 MOCK.users(email)를 받는다. */
 async function admMemberPage(key){
   const STATUS_KO = {pending:'승인 대기', approved:'승인', rejected:'거절'};
@@ -15045,11 +15131,11 @@ async function admMemberPage(key){
       ['가입일', u.joined || '—'], ['상태', u.status], ['등급', roleLabel(u.role)],
     ];
     const docs = MOCK.documents.filter(d => d.village && (u.village || '').includes(d.village));
-    docsPromise = Promise.resolve({docs, label:'소속 마을 관련 문서 (데모)'});
+    docsPromise = Promise.resolve({docs, label:'소속 마을 관련 문서 (예시)'});
   }
   showDyn({
-    title: `👤 회원 마이페이지 — ${acct[0][1]}`,
-    sub: '회원 본인이 보는 마이페이지 정보를 관리자 시점에서 확인합니다.',
+    title: `👤 회원 내 페이지 — ${acct[0][1]}`,
+    sub: '회원 본인이 보는 내 페이지 정보를 관리자 시점에서 확인합니다.',
     body: `
       <table class="tbl"><tbody>
         ${acct.map(([k,v]) => `<tr><td style="width:130px;"><strong>${escapeHtml(k)}</strong></td><td>${escapeHtml(String(v))}</td></tr>`).join('')}
@@ -15208,7 +15294,7 @@ function answerInquiry(id){
 /* 자주 쓰는 회신 템플릿 (개선안 5-3) */
 const INQUIRY_TPL = {
   join: `안녕하세요, 사교원입니다. 햇소자 가입은 sakyowon.co.kr/hatsoja 첫 화면의 [로그인·회원가입] → [가입 신청]에서 하실 수 있습니다. 아이디·비밀번호·이름·연락처만 입력하시면 되고, 관리자 승인(영업일 1~2일) 후 로그인이 가능합니다. 진행이 어려우시면 070-4196-4677로 전화 주세요 — 함께 진행해 드립니다.`,
-  biz: `안녕하세요, 사교원입니다. 햇빛소득마을 사업은 마을 주민이 참여하는 마을협동조합을 설립해 수상태양광 발전소를 운영하고 수익을 배당하는 사업입니다. 참여를 위해서는 ①마을 내 후보지(저수지 등) ②주민 동의 ③조합 설립이 필요합니다. 자세한 요건과 절차는 sakyowon.co.kr/hatsoja 의 [사업소개]·[가입절차]에서 확인하실 수 있습니다.`,
+  biz: `안녕하세요, 사교원입니다. 햇빛소득마을 사업은 마을 주민이 참여하는 마을협동조합을 세워 태양광 발전소(지상형·건물형·수상형)를 운영하고 수익을 마을에 돌려주는 사업입니다. 참여하려면 ①마을 안 후보지(빈 땅·건물 지붕·저수지 등) ②주민 동의 ③조합 설립이 필요합니다. 자세한 요건과 절차는 sakyowon.co.kr/hatsoja 의 [사업소개]·[가입절차]에서 확인하실 수 있습니다.`,
   visit: `안녕하세요, 사교원입니다. 방문 상담을 도와드리겠습니다. 가능하신 날짜·시간대 두어 개와 방문 지역(마을회관 등)을 알려주시면 담당자 일정을 잡아 다시 연락드리겠습니다. 대표전화 070-4196-4677로 전화 주셔도 됩니다.`,
 };
 function fillInquiryTpl(key){
@@ -15220,7 +15306,7 @@ function submitAnswerInquiry(id){
   const q = MOCK.inquiries.find(x => x.id === id);
   if(!q){ closeDyn(); toast('문의를 찾을 수 없습니다.'); return; }
   const msg = document.getElementById('ai-msg').value.trim();
-  if(!msg){ toast('답변 내용을 입력해주세요.'); return; }
+  if(!msg){ toast('답변 내용을 입력해 주세요.'); return; }
   q.answer = msg;
   q.answeredAt = new Date().toISOString().slice(0,16).replace('T',' ');
   q.status = '완료';
@@ -15256,7 +15342,7 @@ function manageContent(kind){
         <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(title)}</div>
         <div class="text-small text-mute">${escapeHtml(meta)}</div>
       </div>
-      <button class="btn btn-danger btn-sm" onclick="removeContent('${escapeJs(kind)}','${escapeJs(x.id)}')">삭제</button>
+      <button class="btn btn-danger btn-sm" onclick="removeContent('${escapeJs(kind)}','${escapeJs(x.id)}')">지우기</button>
     </div>`;
   }).join('');
   showDyn({
@@ -15311,8 +15397,8 @@ function submitAddContent(kind){
   const title = (document.getElementById('ac-title')||{}).value?.trim();
   const body  = (document.getElementById('ac-body') ||{}).value?.trim();
   const cat   = (document.getElementById('ac-cat')  ||{}).value;
-  if(!title){ toast('제목/파일명을 입력해주세요.'); return; }
-  if(kind !== 'files' && !body){ toast('내용을 입력해주세요.'); return; }
+  if(!title){ toast('제목/파일명을 입력해 주세요.'); return; }
+  if(kind !== 'files' && !body){ toast('내용을 입력해 주세요.'); return; }
   const today = new Date().toISOString().slice(0,10);
   const id = kind[0] + Date.now().toString(36);
   const item = {id, date: today};
@@ -15440,7 +15526,7 @@ function admContest(){
     <div class="card" style="margin-bottom:16px;">
       <div class="card-title">
         <h3 class="serif">🏆 진행 중인 공모</h3>
-        <button class="btn btn-primary btn-sm" onclick="toast('공모 개설은 정식 서비스에서 발주기관 협약 후 지원됩니다. (데모)')">+ 공모 개설</button>
+        <button class="btn btn-primary btn-sm" onclick="toast('공모 개설은 정식 서비스에서 발주기관 협약 후 지원됩니다. (체험 화면)')">+ 공모 개설</button>
       </div>
       <table class="tbl">
         <tbody>
@@ -15460,12 +15546,12 @@ function admContest(){
         <tbody>${entries.map(e => `
           <tr><td><strong>${escapeHtml(e.village)}</strong></td><td>${e.date}</td><td>${e.consent}</td>
           <td><span class="badge ${e.status === '접수 완료' ? 'badge-success' : e.status === '서류 보완' ? 'badge-danger' : 'badge-mute'}">${e.status}</span></td>
-          <td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="toast('신청서 열람은 데모에서 생략됩니다.')">신청서</button></td></tr>`).join('')}</tbody>
+          <td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="toast('신청서 열람은 체험 화면에서는 열지 않습니다.')">신청서</button></td></tr>`).join('')}</tbody>
       </table>
     </div>
 
     <div class="card">
-      <div class="card-title"><h3 class="serif">심사 집계 (심사위원 평가 자동 합산 · <span class="tmp" title="오픈 전 제거·확인">데모</span>)</h3></div>
+      <div class="card-title"><h3 class="serif">심사 집계 (심사위원 평가 자동 합산 · 예시)</h3></div>
       <table class="tbl">
         <thead><tr><th>마을</th><th>심사위원 A</th><th>심사위원 B</th><th>심사위원 C</th><th>평균</th></tr></thead>
         <tbody>
@@ -15490,7 +15576,7 @@ function admVillages(){
 
     ${_realMode && !MOCK.villages.some(v => v._srv) ? `
     <div class="card" style="margin-bottom:14px;background:var(--paper-soft);box-shadow:none;">
-      ⓘ 서버에 등록된 마을이 아직 없습니다. 아래 표는 <b>데모 예시</b>이며,
+      ⓘ 서버에 등록된 마을이 아직 없습니다. 아래 표는 <b>예시</b>이며,
       ${canEdit ? '"+ 마을 등록"으로 첫 마을을 등록하면 그때부터 실제 데이터로 운영됩니다.' : '관리자가 첫 마을을 등록하면 그때부터 실제 데이터가 표시됩니다.'}
     </div>` : ''}
     <div class="card">
@@ -15575,7 +15661,7 @@ async function admVillageDocs(vid){
               <td><span class="badge ${d.status==='완료'?'badge-success':'badge-info'}">${d.status}</span></td>
               <td class="tbl-actions" style="white-space:nowrap;">
                 <button class="btn btn-ghost btn-sm" onclick="viewDoc('${escapeJs(d.id)}')">보기</button>
-                <button class="btn btn-outline btn-sm" onclick="downloadDoc('${escapeJs(d.id)}')">📥 다운로드</button>
+                <button class="btn btn-outline btn-sm" onclick="downloadDoc('${escapeJs(d.id)}')">📥 내려받기</button>
               </td>
             </tr>`).join('')}
         </tbody></table>`).join('');
@@ -15623,7 +15709,7 @@ async function genVillageReport(vid){
       </table>
       <p class="form-hint" style="margin-top:10px;">이 수치는 플랫폼에 기록된 데이터에서 자동 집계되며, 조합원·지자체에 투명하게 공유할 수 있습니다.</p>`,
     foot: `<button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
-           <button class="btn btn-primary" onclick="downloadVillageReport('${escapeJs(vid)}')">📥 리포트 다운로드 (A4)</button>`,
+           <button class="btn btn-primary" onclick="downloadVillageReport('${escapeJs(vid)}')">📥 리포트 내려받기 (A4)</button>`,
     size:'lg'
   });
 }
@@ -15738,7 +15824,7 @@ function admUsers(){
               <td><span class="badge ${u.status==='승인'?'badge-success':'badge-danger'}">${u.status}</span></td>
               <td><span class="badge ${normalizeRole(u.role)==='admin'?'badge-gold':normalizeRole(u.role)==='federation'?'badge-info':'badge-mute'}">${roleLabel(u.role)}</span></td>
               <td class="tbl-actions">
-                <button class="btn btn-outline btn-sm" onclick="admMemberPage('${escapeJs(u.email)}')">👤 마이페이지</button>
+                <button class="btn btn-outline btn-sm" onclick="admMemberPage('${escapeJs(u.email)}')">👤 내 페이지</button>
                 ${u.status === '승인대기' ? `<button class="btn btn-primary btn-sm" onclick="approveUser('${escapeJs(u.email)}')">승인</button>` : ''}
                 <button class="btn btn-ghost btn-sm" onclick="editUser('${escapeJs(u.email)}')">수정</button>
               </td>
@@ -15808,7 +15894,7 @@ function admContent(){
       </div>
       <div class="card">
         <div class="card-title"><h3 class="serif">📁 자료실</h3>
-          <button class="btn btn-primary btn-sm" onclick="addContent('files')">+ 파일 업로드</button></div>
+          <button class="btn btn-primary btn-sm" onclick="addContent('files')">+ 파일 올리기</button></div>
         <p class="text-mute">등록된 파일 ${MOCK.contents.files.length}건</p>
         <button class="btn btn-outline" style="width:100%;" onclick="manageContent('files')">자료실 관리 →</button>
       </div>
@@ -15843,7 +15929,7 @@ const LAB_PRESETS = [
 async function labTidy(file){
   const out = document.getElementById('labTidyOut');
   if(!file || !out) return;
-  if(!REAL_API){ out.textContent = '(데모 모드) 실서버에서만 손질합니다.'; return; }
+  if(!REAL_API){ out.textContent = '(체험 화면) 실제 서버에서만 손질합니다.'; return; }
   out.textContent = file.name + ' 손질 중…';
   try{
     const fd = new FormData(); fd.append('file', file, file.name);
@@ -15874,7 +15960,7 @@ async function labAB(){
   const B = {엔진: A.엔진, 프롬프트: A.프롬프트 === '간결' ? '기본' : '간결'};
   body.insertAdjacentHTML('beforeend', `<div class="msg user">${escapeHtml(q)} <span class="text-mute" style="font-size:12px;">(A/B 비교)</span></div>`);
   inp.value = '';
-  if(!REAL_API){ body.insertAdjacentHTML('beforeend', `<div class="msg ai">(데모 모드) 실서버에서만 A/B 비교를 돌립니다.</div>`); return; }
+  if(!REAL_API){ body.insertAdjacentHTML('beforeend', `<div class="msg ai">(체험 화면) 실제 서버에서만 A/B 비교를 돌립니다.</div>`); return; }
   body.insertAdjacentHTML('beforeend', `<div class="msg ai" id="chat-pending-ab">A·B 두 구성으로 동시에 작성 중…</div>`);
   body.scrollTop = body.scrollHeight;
   let d = null;
@@ -15934,7 +16020,7 @@ async function vidInit(){
   const box = document.getElementById('vidBox'); if(!box) return;
   clearTimeout(VID.poll);
   if(!REAL_API){
-    box.innerHTML = '<div class="card">체험(데모) 화면에서는 영상을 만들 수 없습니다. 사교원 통합 계정으로 <b>sakyowon.co.kr/hatsoja</b> 에 로그인해 주세요.</div>';
+    box.innerHTML = '<div class="card">체험 화면에서는 영상을 만들 수 없습니다. 사교원 통합 계정으로 <b>sakyowon.co.kr/hatsoja</b> 에 로그인해 주세요.</div>';
     return;
   }
   try{
@@ -16666,7 +16752,7 @@ function admLab(){
   setTimeout(hsVoiceSetup, 0);   // 2026-11-24 소리로 묻고 듣기(실험실만)
   return `
     <div class="sec-head">
-      <h1 class="tmp" title="오픈 전 제거·확인">🧪 상담 체인 실험실</h1>
+      <h1 class="tmp">🧪 상담 체인 실험실</h1>
       <p class="sec-desc">질문 → 가리기 → 분류(규칙·HPC 한 단어) → 도구/법령/서류/RAG 가지 → HPC 답 → 출력 파서 → 출처·기준일.
         근거가 없으면 지어내지 않고 「없음」으로 답합니다. 관리자만 보이며 라이브 AI 상담에는 아직 영향이 없습니다.</p>
     </div>
@@ -16732,7 +16818,7 @@ function admLab(){
 async function labLoadHealth(){
   const el = document.getElementById('labHealth');
   if(!el) return;
-  if(!REAL_API){ el.textContent = '(데모 모드) 실서버에서만 체인 상태를 읽습니다.'; return; }
+  if(!REAL_API){ el.textContent = '(체험 화면) 실제 서버에서만 체인 상태를 읽습니다.'; return; }
   try{
     const r = await fetch('/api/ai/lab/health');
     const d = await r.json();
@@ -16813,7 +16899,7 @@ async function submitContact(){
   const name = document.getElementById('c-name').value.trim();
   const phone = document.getElementById('c-phone').value.trim();
   const msg = document.getElementById('c-msg').value.trim();
-  if(!name || !phone || !msg){ toast('필수 항목을 모두 입력해주세요.'); return; }
+  if(!name || !phone || !msg){ toast('필수 항목을 모두 입력해 주세요.'); return; }
   if(!document.getElementById('c-consent').checked){ toast('개인정보 수집·이용에 동의해 주세요.'); return; }
   const payload = {
     name, contact: phone,
@@ -17261,7 +17347,7 @@ function memAccounting(){
         <select class="select" id="tax-bank-ym" style="width:auto;" onchange="refresh()">${[...new Set(T.bank.map(t=>t.date.slice(0,7)))].sort().reverse().map(v => `<option value="${v}"${v===(window._taxBankYm||ym)?' selected':''}>${v}</option>`).join('')}</select>
         <button class="btn btn-outline btn-sm" onclick="taxConfirmAllSuggested()">추천 거래처 전체 확정</button>
         <button class="btn btn-outline btn-sm" onclick="taxExportGrant()">📥 보조금 정산용 추출(e나라도움)</button>
-        <button class="btn btn-ghost btn-sm" onclick="taxClearBank()">전체 삭제</button>
+        <button class="btn btn-ghost btn-sm" onclick="taxClearBank()">전체 지우기</button>
       </div>
       <div style="overflow-x:auto;"><table class="tbl" style="font-size:13px;min-width:900px;">
         <thead><tr><th>일자</th><th>적요(원본·잠금)</th><th>입금</th><th>출금</th><th>거래처</th><th>계정</th><th>현금인출</th><th>사유·메모</th><th>보조금코드</th><th>증빙</th><th></th></tr></thead>
@@ -17286,7 +17372,7 @@ function memAccounting(){
       <div class="card-title"><h3 class="serif">📎 증빙 보관함 (5년 보존)</h3><button class="btn btn-primary btn-sm" onclick="taxAddEvidence()">+ 증빙 등록</button></div>
       <p class="text-mute" style="font-size:12.5px;margin-top:0;">영수증은 세무사에게 보내지 않지만 품목 정리를 위해 조합이 5년 보관합니다. 계약서는 거래일·금액·거래처·사업자번호 4가지가 없으면 저장되지 않습니다. 파일명은 <code>조합코드_날짜_거래처_금액_종류</code> 규칙으로 자동 정리됩니다.</p>
       ${T.evidence.length ? `<div style="overflow-x:auto;"><table class="tbl" style="font-size:13px;min-width:760px;"><thead><tr><th>종류</th><th>거래일</th><th>거래처</th><th>금액</th><th>사업자번호</th><th>부가세</th><th>보조금</th><th>정리 파일명</th><th>보존기한</th><th></th></tr></thead><tbody>
-        ${T.evidence.slice().reverse().map(e => `<tr><td><span class="badge ${e.kind==='보조금 교부결정서'?'badge-gold':'badge-mute'}">${escapeHtml(e.kind)}</span></td><td>${escapeHtml(e.date)}</td><td>${escapeHtml(e.vendor)}</td><td>${Number(e.amount).toLocaleString()}</td><td>${escapeHtml(e.bizNo||'—')}</td><td>${e.vatIncl?'포함':'미포함'}</td><td>${e.grant ? escapeHtml(e.grantCode||'보조금') : '—'}</td><td class="text-mute" style="font-size:12px;">${escapeHtml(e.fileName)}</td><td>${escapeHtml(e.keepUntil)}</td><td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="taxRemoveEvidence('${escapeJs(e.id)}')">삭제</button></td></tr>`).join('')}
+        ${T.evidence.slice().reverse().map(e => `<tr><td><span class="badge ${e.kind==='보조금 교부결정서'?'badge-gold':'badge-mute'}">${escapeHtml(e.kind)}</span></td><td>${escapeHtml(e.date)}</td><td>${escapeHtml(e.vendor)}</td><td>${Number(e.amount).toLocaleString()}</td><td>${escapeHtml(e.bizNo||'—')}</td><td>${e.vatIncl?'포함':'미포함'}</td><td>${e.grant ? escapeHtml(e.grantCode||'보조금') : '—'}</td><td class="text-mute" style="font-size:12px;">${escapeHtml(e.fileName)}</td><td>${escapeHtml(e.keepUntil)}</td><td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="taxRemoveEvidence('${escapeJs(e.id)}')">지우기</button></td></tr>`).join('')}
       </tbody></table></div>` : '<p class="text-mute text-center" style="padding:14px 0;">등록된 증빙이 없습니다.</p>'}
     </div>
 
@@ -17596,7 +17682,7 @@ function taxViewPackage(id, justSent){
     <span class="text-mute">제외 항목: 세금계산서 합계표·법인카드·현금영수증(홈택스 조회). 세무사 열람 링크는 14일 후 만료됩니다.</span></p>`;
   showDyn({title:`세무 패키지 ${p.ym} v${p.ver}`, sub: justSent ? '전송되었습니다. 세무사가 열면 열람 시각이 기록됩니다.' : `전송 ${p.sentAt.slice(0,10)} · ${p.openedAt ? '열람 ' + p.openedAt.slice(0,10) : '미열람'}`,
     body, size:'xl',
-    foot:`<button class="btn btn-ghost" onclick="closeDyn()">닫기</button><button class="btn btn-outline" onclick="taxDownloadPackage('${escapeJs(p.id)}')">📥 패키지 표지 다운로드</button>`});
+    foot:`<button class="btn btn-ghost" onclick="closeDyn()">닫기</button><button class="btn btn-outline" onclick="taxDownloadPackage('${escapeJs(p.id)}')">📥 패키지 표지 내려받기</button>`});
 }
 function taxDownloadPackage(id){
   const p = MOCK.tax.packages.find(x => x.id === id); if(!p) return;
@@ -17671,7 +17757,7 @@ function memTaxPay(){
 
     <div class="card mt-20" style="border-color:var(--primary);">
       <div class="card-title"><h3 class="serif">① 급여대장 — ${ym}분</h3><div style="display:flex;gap:6px;"><button class="btn btn-outline btn-sm" onclick="taxEditStaff()">직원 관리</button>${pr ? `<button class="btn btn-outline btn-sm" onclick="taxReopenPayroll('${escapeJs(ym)}')">마감 해제</button>` : `<button class="btn btn-primary btn-sm" onclick="taxClosePayroll('${escapeJs(ym)}')">📌 급여대장 마감 (5일까지)</button>`}</div></div>
-      <p class="text-mute" style="font-size:12.5px;margin-top:0;">직원으로 등록된 사람의 강사료·회의수당은 따로 책정할 수 없고 상여로 합산됩니다. 4대보험·소득세는 근사치이며 최종값은 세무사 사무소가 확정합니다. 4대보험 신고는 세무사 사무소가 서비스로 처리하고, 그 이상의 노무는 연합회 노무사 협약 대상입니다.</p>
+      <p class="text-mute" style="font-size:12.5px;margin-top:0;">직원으로 등록된 사람의 강사료·회의수당은 따로 책정할 수 없고 상여로 합산됩니다. 4대보험·소득세는 어림값입니다. 햇소자는 계산을 돕고, 확정·제출은 조합이 「세금·4대보험 직접 신고」에서 직접 합니다. 세무사에게 맡긴 조합은 세무사 사무소와 확인하세요.</p>
       <table class="tbl" style="font-size:13px;"><thead><tr><th>성명</th><th>기본급</th><th>상여(강사료·수당 합산)</th><th>4대보험(본인)</th><th>소득세+지방세</th><th>실지급액</th></tr></thead><tbody>
         ${T.staff.map(s => { const bonus = pr ? (pr.rows.find(r=>r.id===s.id)||{}).bonus||0 : (s.bonus||0); const c = taxPayrollCalc(s.base, bonus);
           return `<tr><td><strong>${escapeHtml(s.name)}</strong></td><td>${s.base.toLocaleString()}</td>
@@ -17713,7 +17799,7 @@ function memTaxPay(){
 function taxEditStaff(){
   const T = MOCK.tax;
   showDyn({title:'직원 관리', sub:'상시근로자만 등록합니다. 단발 용역·강사는 지급 유형 판별기로 처리합니다.',
-    body:`<div id="st-list">${T.staff.map(s=>`<div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line-soft);"><span style="flex:1;">${escapeHtml(s.name)} · 기본급 ${s.base.toLocaleString()}원</span><button class="btn btn-ghost btn-sm" onclick="taxRemoveStaff('${escapeJs(s.id)}')">삭제</button></div>`).join('') || '<p class="text-mute">직원 없음</p>'}</div>
+    body:`<div id="st-list">${T.staff.map(s=>`<div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line-soft);"><span style="flex:1;">${escapeHtml(s.name)} · 기본급 ${s.base.toLocaleString()}원</span><button class="btn btn-ghost btn-sm" onclick="taxRemoveStaff('${escapeJs(s.id)}')">지우기</button></div>`).join('') || '<p class="text-mute">직원 없음</p>'}</div>
       <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:6px;margin-top:12px;"><input class="input" id="st-name" placeholder="성명"><input class="input" id="st-base" type="number" placeholder="월 기본급"><button class="btn btn-primary" onclick="taxAddStaff()">추가</button></div>`,
     foot:`<button class="btn btn-primary" onclick="closeDyn();refresh()">닫기</button>`});
 }
@@ -17793,7 +17879,7 @@ function taxSunIncomeView(id){
     body:`<table class="tbl" style="font-size:12.5px;"><thead><tr><th>수령자</th><th>구분</th><th>세전</th><th>원천징수</th><th>세후 지급</th></tr></thead><tbody>${s.rows.map(r=>`<tr><td>${escapeHtml(r.name)}</td><td>${r.kind}</td><td>${r.gross.toLocaleString()}</td><td>${r.wh.toLocaleString()}</td><td><b>${r.net.toLocaleString()}</b></td></tr>`).join('')}</tbody></table>
       <h4 style="margin:14px 0 8px;">통지문 미리보기 (앞 2명)</h4>${s.rows.slice(0,2).map(notice).join('')}
       <p class="text-mute" style="font-size:12.5px;">주민환원사업 관리대장에 환원사업명·대상·집행금액·집행일·지급방법·의사결정·증빙이 기록됩니다. 수령자 주민등록번호는 암호화 저장되며 지급명세서 생성 시에만 사용합니다.</p>`,
-    foot:`<button class="btn btn-ghost" onclick="closeDyn()">닫기</button><button class="btn btn-outline" onclick="_downloadAccountingHtml('햇빛소득 지급 명세·통지문 ${s.ym}','${escapeJs(s.ym)}',document.getElementById('dynBody').innerHTML,'햇빛소득_${s.ym}.html')">📥 명세·통지문 다운로드</button></div>`});
+    foot:`<button class="btn btn-ghost" onclick="closeDyn()">닫기</button><button class="btn btn-outline" onclick="_downloadAccountingHtml('햇빛소득 지급 명세·통지문 ${s.ym}','${escapeJs(s.ym)}',document.getElementById('dynBody').innerHTML,'햇빛소득_${s.ym}.html')">📥 명세·통지문 내려받기</button></div>`});
 }
 
 /* ─── 페이지 3. 표준장부·거래처 ─── */
@@ -17848,9 +17934,9 @@ function memLedgers(){
       <div class="card-title"><h3 class="serif">💡 세제특례 점검 (설비 투자 조합)</h3></div>
       <table class="tbl" style="font-size:13px;"><thead><tr><th>특례</th><th>내용</th><th>조건</th></tr></thead><tbody>
         <tr><td><strong>통합투자세액공제</strong></td><td>설비 공급가액의 10% 법인세 공제, 한도초과액 10년 이월</td><td>보조금 제외 자부담 투자분만 · 중고·리스 제외</td></tr>
-        <tr><td><strong>조합법인 과세특례(조특법 §72)</strong></td><td>당기순이익 과세법인으로 법인세 계산</td><td>협동조합기본법 조합</td></tr>
-        <tr><td><strong>중소기업특별세액감면</strong></td><td>세액의 10~30% 감면</td><td>통합투자세액공제와 중복 불가 — 큰 쪽 선택</td></tr>
-        <tr><td><strong>사회적기업 인증</strong></td><td>5년간 법인세 100% 감면</td><td>배당 금지·잉여금 적립 조건. 사협 전환 자체는 혜택 없음</td></tr>
+        <tr><td><strong>조합법인 과세특례(조특법 §72) — 해당 없음</strong></td><td>당기순이익과세(9%)는 신협·새마을금고·농협·수협·중소기업협동조합·산림조합·엽연초생산협동조합·소비자생활협동조합만 대상(2028. 12. 31.까지)</td><td>협동조합 기본법에 따른 협동조합·사회적협동조합은 대상 아님 — 일반 법인세율 적용</td></tr>
+        <tr><td><strong>중소기업특별세액감면</strong></td><td>세액의 5~30% 감면(재생에너지 발전사업: 수도권 밖 소기업 30%·중기업 15%)</td><td>통합투자세액공제와 중복 불가 — 큰 쪽 선택</td></tr>
+        <tr><td><strong>사회적기업 인증</strong></td><td>최초 소득 발생 연도부터 3년간 100%, 이후 2년간 50% 감면(연 한도 1억원+취약계층 상시근로자 1명당 2천만원, 2028. 12. 31.까지 인증분)</td><td>인증요건: 유급근로자 고용·사회적 목적·이해관계자 참여 구조 등(사회적기업 육성법 §8①). 상법상 회사·합자조합은 배분 가능 이윤의 3분의 2 이상을 사회적 목적에 사용. 사협 전환: 조특법상 별도 감면은 없음. 비영리법인이 되어 수익사업 소득에만 과세·고유목적사업준비금 손금산입 가능(법인세법 §4③·§29), 사협에 낸 기부금은 일반기부금(법인세법 시행령 §39), 조세 외 부과금 면제(협동조합 기본법 §99) — 세무사 확인</td></tr>
       </tbody></table>
       ${T.grants.length ? `<p style="font-size:13px;margin:8px 0 0;">등록된 설비 기준 통합투자세액공제 추정: <b>${Math.round(T.grants.reduce((s,g)=>s+(g.cost-g.grant),0)*0.1).toLocaleString()}원</b> (자부담 투자분 10% · 세무사 확인 필요)</p>` : ''}
     </div>
@@ -17862,7 +17948,7 @@ function taxEditVendor(id){
     body:`<div class="form-row"><label>거래처명 *</label><input class="input" id="vd-name" value="${escapeHtml(v.name)}"></div>
       <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><div><label>유형</label><select class="select" id="vd-type">${['매출처','매입처','교부기관','조합원','임대인','금융','공공','직원','주민'].map(t=>`<option${t===v.type?' selected':''}>${t}</option>`).join('')}</select></div><div><label>표준 계정 *</label><input class="input" id="vd-acct" value="${escapeHtml(v.acct)}" placeholder="예: 발전설비유지관리비"></div></div>
       <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><div><label>사업자번호</label><input class="input" id="vd-bizno" value="${escapeHtml(v.bizNo)}"></div><div><label>적요 추천 키워드(|로 구분)</label><input class="input" id="vd-kw" value="${escapeHtml(v.kw)}"></div></div>`,
-    foot:`${id && !TAX_VENDOR_SEED.some(s=>s.id===id) ? `<button class="btn btn-danger btn-sm" style="margin-right:auto;" onclick="taxRemoveVendor('${escapeJs(id)}')">삭제</button>` : ''}<button class="btn btn-outline" onclick="closeDyn()">취소</button><button class="btn btn-primary" onclick="taxSaveVendor('${escapeJs(id)}')">저장</button>`});
+    foot:`${id && !TAX_VENDOR_SEED.some(s=>s.id===id) ? `<button class="btn btn-danger btn-sm" style="margin-right:auto;" onclick="taxRemoveVendor('${escapeJs(id)}')">지우기</button>` : ''}<button class="btn btn-outline" onclick="closeDyn()">취소</button><button class="btn btn-primary" onclick="taxSaveVendor('${escapeJs(id)}')">저장</button>`});
 }
 function taxSaveVendor(id){
   const g = k => (document.getElementById(k).value || '').trim();

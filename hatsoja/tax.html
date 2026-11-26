@@ -62,9 +62,19 @@ dialog::backdrop{background:rgba(0,0,0,.35)}
 .copy{border:1px solid var(--line);background:#fff;border-radius:6px;font-size:11.5px;padding:0 6px;cursor:pointer;margin-left:6px}
 .hidden{display:none!important}
 @media (max-width:640px){.wrap{padding:12px} .hide-m{display:none}}
+/* 11-27 알파 H-10: 햇소자 크림·초록 토큰과 머리띠(따로 열었을 때만 — 햇소자 화면 안 끼움에서는 숨김) */
+:root{--green:#2c5842;--green-l:#edf2e5;--paper:#f5f1e6;--line:#e6e0cf}
+.card{box-shadow:0 1px 2px rgba(40,40,20,.05)}
+.btn{border-radius:999px}
+.hs-top{background:rgba(245,241,230,.96);border-bottom:1px solid var(--line);}
+.hs-top-in{max-width:1100px;margin:0 auto;padding:10px 16px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.hs-top b{font-size:15px}
+.hs-top a{color:var(--green);text-decoration:none;border:1px solid var(--green);border-radius:999px;padding:5px 12px;font-size:13px;background:#fff}
 </style>
 </head>
 <body>
+<div class="hs-top" id="hsTop" hidden><div class="hs-top-in"><b>☀ 햇소자</b><a href="./#/mem/taxops">← 햇소자로 돌아가기</a></div></div>
+<script>try{ if(window.top === window && location.pathname.indexOf('/hatsoja/') >= 0) document.getElementById('hsTop').hidden = false; }catch(e){}</script>
 <div class="wrap">
   <h1 id="title">세금·4대보험 신고</h1>
   <p class="lead" id="lead">원천세·부가세·법인세와 인사변동 4대보험 신고를 기한 순서로 챙기는 계산·기록 도구입니다. 값을 승인하면 숫자가 고정되고, 홈택스·위택스·4대보험 정보연계센터에는 사업장 담당자가 직접 로그인해 넣고 제출합니다.</p>
