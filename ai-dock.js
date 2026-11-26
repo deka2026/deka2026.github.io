@@ -135,7 +135,7 @@
     '<div class="panel" id="panel"><div class="inner">' +
     '<div class="tabs"><button class="tab dk" data-t="deka" id="tDeka" hidden>🛠️ 데카 · 서버</button><button class="tab on" data-t="chat">대화</button><button class="tab" data-t="doc">문서 작성</button><button class="tab" data-t="list">내 대화</button><span class="sp"></span><span class="note" id="note"></span><button class="tab" id="bNew">새 대화</button></div>' +
     '<div id="vChat"><div class="files" id="files"></div><div class="msgs" id="msgs"></div></div>' +
-    '<div id="vDoc" style="display:none"><div class="note">어떤 문서를 만들지 적어 주세요. 올린 파일과 지금까지의 대화를 근거로 마크다운 초안을 쓰고, 한글(hwpx)로 내려받을 수 있습니다. 서식은 사교원 집 규칙(첫 줄 들여쓰기·굵게는 제목만·쪽번호)으로 맞춥니다.</div>' +
+    '<div id="vDoc" style="display:none"><div class="note">어떤 문서를 만들지 적어 주세요. 올린 파일과 지금까지의 대화를 근거로 마크다운 초안을 쓰고, 한글(hwpx)로 내려받을 수 있습니다. 서식은 사교원 문서 서식에 맞춥니다.</div>' +
     '<div class="row"><textarea class="ta" id="ask" placeholder="예: 올린 공고문을 바탕으로 사업 신청서 초안을 써 줘 (목적·내용·추진일정·예산 절 포함)"></textarea><button class="pb" id="bDraft">초안 쓰기</button></div>' +
     '<div id="draftBox"></div></div>' +
     '<div id="vList" style="display:none"><div class="list" id="list"></div></div>' +
@@ -361,7 +361,7 @@
         r.edit = (r.edit || []).map(function (f) { return Object.assign({}, f, { value: edits[f.name] != null ? edits[f.name] : f.value }); });
         showConfirm(r, c); return;
       }
-      if (x.error === 'reauth_required') { btns.innerHTML = '<span class="note">재인증이 필요합니다.</span>'; showConfirm(Object.assign({}, r, { need_reauth: true }), c); return; }
+      if (x.error === 'reauth_required') { btns.innerHTML = '<span class="note">비밀번호를 다시 확인해 주세요.</span>'; showConfirm(Object.assign({}, r, { need_reauth: true }), c); return; }
       if (!x.name && !x.kind) { c.remove(); addMsg('err', esc(x.text || '실행하지 못했습니다. 다시 말씀해 주세요.')); return; }   // 🟠4: 카드 만료·이미 실행 등은 문장으로
       c.remove(); showResult(x);
       if (x.reload) setTimeout(function () { try { location.reload(); } catch (e) {} }, 900);   // 대시보드·사이드바를 바꾼 뒤 새 설정으로
@@ -516,7 +516,7 @@
   function draft() {
     var ask = $('ask').value.trim(); if (!ask || state.busy) return;
     if (!state.me || !state.me.user) { $('draftBox').innerHTML = '<div class="m err">문서 작성은 로그인한 뒤 쓸 수 있습니다. <a href="' + API + '/#login">로그인</a></div>'; return; }
-    state.busy = true; $('bDraft').disabled = true; $('draftBox').innerHTML = '<div class="note">초안을 쓰는 중입니다… (고성능컴퓨팅 엔진, 30~90초)</div>';
+    state.busy = true; $('bDraft').disabled = true; $('draftBox').innerHTML = '<div class="note">초안을 쓰는 중입니다… (30~90초 걸립니다)</div>';
     api('/api/ai/dock/draft', { method: 'POST', body: { thread_id: state.thread, ask: ask, page: { url: location.href, title: document.title } } }).then(function (r) {
       state.busy = false; $('bDraft').disabled = false;
       if (r.thread_id) setThread(r.thread_id);

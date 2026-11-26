@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>사교원 통합 관리자 — 사회혁신교육원 사회적협동조합</title>
+<title>사교원 통합 관리자 — 사회혁신교육원사회적협동조합</title>
 <meta name="theme-color" content="#4a6741">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
@@ -199,7 +199,7 @@ table.members tr:last-child td{border-bottom:none;}
     <div class="logo">
       <span class="mark">L&amp;L</span>
       <h1>사교원 통합 관리자</h1>
-      <div class="sub">사회혁신교육원 사회적협동조합</div>
+      <div class="sub">사회혁신교육원사회적협동조합</div>
     </div>
 
     <!-- 로그인 폼 -->
@@ -239,7 +239,7 @@ table.members tr:last-child td{border-bottom:none;}
         </div>
       </div>
       <div class="field">
-        <label for="su-contact">전화번호 <span id="su-contact-req" style="font-weight:400;color:var(--ink-faint)">(일반이용자는 선택)</span></label>
+        <label for="su-contact">전화번호 <span id="su-contact-req" style="font-weight:400;color:var(--ink-faint)">(무료이용회원은 선택)</span></label>
         <input id="su-contact" name="contact" inputmode="tel" placeholder="010-0000-0000">
       </div>
       <div class="field">
@@ -249,10 +249,10 @@ table.members tr:last-child td{border-bottom:none;}
       <div class="field">
         <label for="su-tier">회원 등급</label>
         <select id="su-tier" name="tier">
-          <option value="general">일반이용자 — 바로 가입</option>
-          <option value="coop">조합회원 — 햇빛소득마을 조합 (승인 후)</option>
-          <option value="federation">연합회회원 — 햇빛소득마을 연합회 (승인 후)</option>
-          <option value="staff">매니저회원 — 사교원 그룹웨어 (통합관리자 승인 후)</option>
+          <option value="general">무료이용회원 — 바로 가입</option>
+          <option value="coop">협동조합회원 — 햇빛소득마을 조합 (승인 후)</option>
+          <option value="federation">연합회원 — 햇빛소득마을 연합회 (승인 후)</option>
+          <option value="staff">매니저 — 사교원 그룹웨어 (통합관리자 승인 후)</option>
         </select>
       </div>
       <label class="field" style="display:flex;gap:8px;align-items:flex-start;font-size:13px;cursor:pointer">
@@ -265,7 +265,7 @@ table.members tr:last-child td{border-bottom:none;}
 
     <div class="login-switch">
       <span id="switch-to-signup">아직 계정이 없으신가요? <a href="#" data-switch="signup">가입 신청</a></span>
-      <span id="switch-to-login" class="hidden">가입 후 관리자 승인이 필요합니다. <a href="#" data-switch="login">로그인으로</a></span>
+      <span id="switch-to-login" class="hidden">협동조합회원·연합회원·매니저는 승인 뒤에 열립니다. <a href="#" data-switch="login">로그인으로</a></span>
     </div>
     <div class="login-home"><a href="index.html">← 사교원 홈으로</a></div>
   </div>
@@ -314,12 +314,12 @@ table.members tr:last-child td{border-bottom:none;}
       <button class="chip" data-status="">전체</button>
       <select id="member-role" style="margin-left:6px;padding:5px 8px;border:1px solid var(--line);border-radius:8px;font-size:13px">
         <option value="">모든 등급</option>
-        <option value="admin">통합관리자</option><option value="staff">매니저회원</option><option value="federation">연합회회원</option><option value="coop">조합회원</option><option value="general">일반이용자</option>
+        <option value="admin">통합관리자</option><option value="staff">매니저</option><option value="federation">연합회원</option><option value="coop">협동조합회원</option><option value="general">무료이용회원</option>
       </select>
       <input id="member-q" placeholder="이름·이메일·연락처·소속 검색" style="margin-left:auto;min-width:220px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px">
     </div>
     <div class="site-note" style="border:1px solid var(--line-soft);border-radius:var(--radius-sm);margin-bottom:12px">
-      등급은 <strong>통합관리자 › 매니저 › 연합회 › 조합 › 일반이용자</strong> 순입니다. 매니저의 그룹웨어·관리 기능과 「지자체 의정지원시스템」(체크권한 이름은 「정책지원관」)은 등급이 아니라 <strong>체크권한</strong>으로 엽니다 — 각 줄의 「권한」을 눌러 체크하세요. 등급 변경·매니저 승인·비밀번호 초기화·삭제는 통합관리자만 할 수 있습니다.
+      등급은 <strong>통합관리자 › 매니저 › 연합회원 › 협동조합회원 › 무료이용회원</strong> 순입니다. 매니저의 그룹웨어·관리 기능과 「지자체 의정지원시스템」(체크권한 이름은 「정책지원관」)은 등급이 아니라 <strong>체크권한</strong>으로 엽니다 — 각 줄의 「권한」을 눌러 체크하세요. 등급 변경·매니저 승인·비밀번호 초기화·삭제는 통합관리자만 할 수 있습니다.
     </div>
     <div class="panel">
       <div id="members-body" class="loading">불러오는 중…</div>
@@ -494,10 +494,10 @@ async function boot() {
   const r = await api('/api/auth/me');
   if (r.ok && r.user) {
     if (r.user.role === 'admin' || r.user.role === 'staff') return enterDash(r.user);
-    // member 계정 — 관리자 화면 아님
-    await api('/api/auth/logout', { method: 'POST' });
+    // member 계정 — 관리자 화면 아님. 11-27 전수개선: 예전엔 여기서 통합 로그아웃까지 해 일반 회원이 링크 한 번에 로그인이 풀렸다 → 로그인은 그대로 두고 내 페이지로 안내
     show('login-view');
-    showMsg($('#login-msg'), '관리자·직원 계정만 이용할 수 있습니다.', 'error');
+    showMsg($('#login-msg'), '이 화면은 매니저·통합관리자만 쓸 수 있습니다. 지금 로그인은 그대로입니다. 3초 뒤 내 페이지로 돌아갑니다.', 'error');
+    setTimeout(() => { location.href = '/#/'; }, 3000);
     return;
   }
   show('login-view');
@@ -540,7 +540,7 @@ $('#login-form').addEventListener('submit', async e => {
 });
 
 fillRegionSelects($('#su-sido'), $('#su-sigungu'));
-$('#su-tier').addEventListener('change', () => { $('#su-contact-req').textContent = $('#su-tier').value === 'general' ? '(일반이용자는 선택)' : '(필수)'; });
+$('#su-tier').addEventListener('change', () => { $('#su-contact-req').textContent = $('#su-tier').value === 'general' ? '(무료이용회원은 선택)' : '(필수)'; });
 $('#signup-form').addEventListener('submit', async e => {
   e.preventDefault();
   const btn = e.target.querySelector('[type=submit]'); btn.disabled = true;
@@ -559,7 +559,7 @@ $('#signup-form').addEventListener('submit', async e => {
   btn.disabled = false;
   if (r.ok) {
     e.target.reset(); fillRegionSelects($('#su-sido'), $('#su-sigungu'));
-    return showMsg($('#signup-msg'), r.status === 'approved' ? '일반이용자로 가입되었습니다. 바로 로그인할 수 있습니다.' : '가입 신청이 접수되었습니다. 승인되면 로그인할 수 있습니다.', 'okay');
+    return showMsg($('#signup-msg'), r.status === 'approved' ? '무료이용회원으로 가입되었습니다. 바로 로그인할 수 있습니다.' : '가입 신청이 접수되었습니다. 승인되면 로그인할 수 있습니다.', 'okay');
   }
   showMsg($('#signup-msg'), errText(r), 'error');
 });
@@ -572,7 +572,7 @@ let fbStatus = '미확인';
 function enterDash(user) {
   currentUser = user;
   $('#user-name').textContent = user.name || '';
-  $('#user-role').textContent = user.role_ko || (user.role === 'admin' ? '통합관리자' : '매니저회원');
+  $('#user-role').textContent = user.role_ko || (user.role === 'admin' ? '통합관리자' : '매니저');
   const perms = user.perms || [];
   $('#tab-btn-hr').classList.toggle('hidden', !(user.role === 'admin' || perms.includes('인사열람'))); // 인사기록
   show('dash-view');
@@ -609,7 +609,7 @@ const SITES = [
     url: 'https://home.sakyowon.co.kr/', repo: 'haeory-cyber/sakyowon-site', adminUrl: 'https://home.sakyowon.co.kr/#/admin' },
   { name: '사교원 허브', desc: '통합 첫 화면 — 메뉴 트리·AI 대화창·통합 계정 (sakyowon.co.kr)',
     url: 'https://sakyowon.co.kr/', repo: 'deka2026/deka2026.github.io' },
-  { name: '연대지능활동가 아카데미', desc: '실습 15단계 · 학습 7단계 · 자격증 · 지식 검증 게임',
+  { name: '연대지능활동가 아카데미', desc: '실습 15단계 · 학습 7단계 · 지식 검증 게임',
     url: 'https://sakyowon.co.kr/academy-site/', repo: 'deka2026/academy-site' },
   { name: '연대지능 공동위키', desc: '품앗이 지식베이스 — 첫 화면 연결 단추만, 별도 운영',
     url: 'https://wiki.poomasi.org/', repo: '' },
@@ -619,7 +619,7 @@ const SITES = [
     url: 'https://sakyowon.co.kr/bjj/', repo: '' },
   { name: '망남마을협동조합', desc: '마을 협동조합 홍보 사이트',
     url: 'https://sakyowon.co.kr/mangnam-coop/', repo: 'deka2026/mangnam-coop' },
-  { name: '사교원 현장사업 — 망남·양양 어촌신활력', desc: '안내·소식·기획안·KPI·예산 집행실적·주민 관계도·문자 — 양양 카테고리는 개편 4-2단계에서 채움',
+  { name: '사교원 현장사업 — 망남·양양 어촌신활력', desc: '안내·소식·기획안·KPI·예산 집행실적·주민 관계도·문자 — 양양 사업 소개는 준비 중입니다',
     url: 'https://vitality.sakyowon.co.kr/', repo: 'deka2026/mangnam-vitality',
     adminUrl: 'https://vitality.sakyowon.co.kr/admin' },
   { name: '햇소자', desc: '햇빛소득마을 통합 운영 플랫폼 — 신청·진단, 설립·정산·배당, 통합 계정(SSO) 연동',
@@ -688,7 +688,7 @@ function loadSites() {
 
 function guard(r) {
   // 세션 만료 → 로그인 화면으로
-  if (r.status === 401) { show('login-view'); showMsg($('#login-msg'), '세션이 만료되었습니다. 다시 로그인해 주세요.', 'error'); return false; }
+  if (r.status === 401) { show('login-view'); showMsg($('#login-msg'), '로그인이 풀렸습니다. 다시 로그인해 주세요.', 'error'); return false; }
   return true;
 }
 
@@ -724,7 +724,7 @@ $('#fb-filters').addEventListener('click', e => {
 
 /* ── 회원·권한 탭 (2026-10-13 통합 계정 2판) ── */
 const M_STATUS_KO = { pending: '대기', approved: '승인됨', rejected: '거절됨' };
-const ROLE_KO = { admin: '통합관리자', staff: '매니저회원', federation: '연합회회원', coop: '조합회원', general: '일반이용자' };
+const ROLE_KO = { admin: '통합관리자', staff: '매니저', federation: '연합회원', coop: '협동조합회원', general: '무료이용회원' };
 const ROLE_LIST = ['admin', 'staff', 'federation', 'coop', 'general'];
 const TIER_USE = { staff: '그룹웨어(매니저)', coop: '햇소자 조합 메뉴', federation: '햇소자 연합회 메뉴', general: '홈페이지·AI' };
 let PERM_CATALOG = null;   // {perms:[{code,group,label}], nonstaff:[...]}
@@ -786,7 +786,7 @@ async function loadMembers() {
           ${canApprove() && m.status !== 'pending' && m.role !== 'admin' ? `<button class="btn btn-sm act-pending" data-id="${esc(m.id)}" data-set="pending">대기로</button>` : ''}
           ${m.role !== 'admin' && (isAdmin() || canGrant()) ? `<button class="btn btn-sm btn-ghost act-perms" data-id="${esc(m.id)}" data-role="${esc(m.role)}">권한</button>` : ''}
           ${isAdmin() ? `<button class="btn btn-sm btn-ghost act-edit" data-id="${esc(m.id)}">편집</button>` : ''}
-          ${isAdmin() && m.id !== currentUser.id ? `<button class="btn btn-sm btn-ghost act-reset" data-id="${esc(m.id)}" title="임시 비밀번호 발급">비번 초기화</button>` : ''}
+          ${isAdmin() && m.id !== currentUser.id ? `<button class="btn btn-sm btn-ghost act-reset" data-id="${esc(m.id)}" title="임시 비밀번호 발급">비밀번호 초기화</button>` : ''}
           ${isAdmin() && m.role !== 'admin' ? `<button class="btn btn-sm act-reject act-delete" data-id="${esc(m.id)}">삭제</button>` : ''}
         </div></td>
       </tr>

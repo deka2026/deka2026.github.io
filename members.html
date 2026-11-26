@@ -162,7 +162,7 @@ const view = $('#view'), layer = $('#layer');
 
 /* 한 번에 보낼 수 있는 인원 — 회원 목록 응답의 send_max 를 쓴다(응답에 없으면 100). 넘으면 서버도 too_many 로 거절한다. */
 let SEND_MAX = 100;
-const SMS_WAIT = '문자 발송은 아직 준비 중입니다(발송 대행 서비스 가입 뒤 열립니다)';
+const SMS_WAIT = '문자 발송은 준비 중입니다';
 const TIER_COLOR = {admin:'#0d3b2c', staff:'#4a6741', federation:'#e8892b', coop:'#f6b52e', policy:'#1f3a6e', personal:'#2e7d4f', free:'#b9c4b3'};
 const PAY_CLASS = {'완료':'ok', '미납':'no', '확인 대기':'wait', '승인 대기':'wait', '무료 시범':'tr'};
 const SUB_KO = {apply:'승인 대기', wait_pay:'입금 대기', trial:'무료 시범', active:'이용 중', cancel:'그만둠(기간 남음)'};
@@ -207,7 +207,7 @@ function leave() { setTimeout(() => { location.href = '/#/login'; }, 3500); }
 
 async function load(first) {
   const r = await api('/api/admin/membership/members');
-  if (r.status === 404) { S.data = null; return gate('회원·납부 기능은 준비 중입니다', '서버에 회원·납부 모듈이 아직 올라가지 않았습니다.', '<a class="btn" href="/">← 통합사이트</a><a class="btn" href="/admin.html">관리</a>'); }
+  if (r.status === 404) { S.data = null; return gate('회원·납부 기능은 준비 중입니다', '회원·납부 기능을 아직 쓸 수 없습니다. 잠시 뒤 다시 열어 주세요.', '<a class="btn" href="/">← 통합사이트</a><a class="btn" href="/admin.html">관리</a>'); }
   if (r.status === 401 || r.status === 403) return boot();
   if (!r.ok) { if (first || !S.data) gate('회원 목록을 불러오지 못했습니다', why(r), '<button type="button" class="btn p" id="retry">다시 시도</button>'); else toast(why(r)); return; }
   S.data = r.data;

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>입찰정보 — 사회혁신교육원 사회적협동조합</title>
+<title>입찰정보 — 사회혁신교육원사회적협동조합</title>
 <meta name="description" content="나라장터·한국에너지공단 입찰 공고를 사교원 사업과 발전사업자(햇빛발전협동조합) 분야로 골라 게시하고, 텔레그램 알림과 제안서·구비서류 작업대를 제공합니다.">
 <meta name="theme-color" content="#4a6741">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
@@ -37,6 +37,8 @@ nav.tabs{background:#fff;border-bottom:1px solid var(--line);position:sticky;top
 nav.tabs .in{max-width:1080px;margin:0 auto;display:flex;gap:2px;overflow-x:auto;padding:0 8px}
 nav.tabs a{padding:12px 14px;text-decoration:none;color:var(--ink-soft);font-weight:600;white-space:nowrap;border-bottom:3px solid transparent}
 nav.tabs a.on{color:var(--green-700);border-bottom-color:var(--green-600)}
+/* 11-27 전수개선 U-09: 휴대폰에서 탭이 화면 밖으로 잘리지 않게 탭 글씨·여백 줄이기(기본 규칙 뒤에 둠) */
+@media (max-width:480px){nav.tabs a{padding:11px 9px;font-size:14px;flex-shrink:0}}
 main{max-width:1080px;margin:0 auto;padding:16px}
 .card{background:var(--card);border:1px solid var(--line-soft);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:16px;margin-bottom:14px}
 .lead{color:var(--ink-soft);font-size:13.5px;margin:0 0 12px}
@@ -231,7 +233,7 @@ function dl(s) {
 }
 function needLogin(el, what) {
   el.innerHTML = `<b style="font-weight:600">「${esc(what)}」은 사교원 통합 계정으로 로그인한 뒤 쓸 수 있습니다.</b>
-    <p class="lead" style="margin:6px 0 10px">계정이 없으면 사교원 첫 화면에서 회원가입(무료)을 하세요. 가입 뒤 운영진 승인(보통 하루 안)이 나면 바로 쓸 수 있습니다. 공고 게시판은 로그인 없이 볼 수 있습니다.</p>
+    <p class="lead" style="margin:6px 0 10px">계정이 없으면 사교원 첫 화면에서 무료로 회원가입해 주세요. 가입하면 바로 쓸 수 있습니다. 공고 게시판은 로그인 없이 볼 수 있습니다.</p>
     <form id="lf-${what.length}" class="grid2" onsubmit="return false">
       <div class="field"><label>아이디 또는 이메일</label><input name="u" autocomplete="username"></div>
       <div class="field"><label>비밀번호</label><input name="p" type="password" autocomplete="current-password"></div>
@@ -451,11 +453,11 @@ $('#a-save').onclick = async () => {
   const body = { id: editSub && editSub.id, fields: chipVals($('#a-fields')), regions: chipVals($('#a-regions')), routes: chipVals($('#a-routes')),
     words: $('#a-words').value.split(',').map(x => x.trim()).filter(Boolean), min_days: +$('#a-min').value, period_days: +$('#a-period').value,
     active: editSub ? editSub.active : true };
-  if (!body.fields.length) { toast('분야를 하나 이상 고르세요', true); return; }
+  if (!body.fields.length) { toast('분야를 하나 이상 골라 주세요', true); return; }
   const r = await api('/api/bids/subs', { body });
   if (!r.ok) { toast(r.error, true); return; }
   $('#a-form').classList.add('hidden');
-  toast(editSub ? '조건을 바꿨습니다' : '저장했습니다 — 이제 텔레그램을 연결하세요');
+  toast(editSub ? '조건을 바꿨습니다' : '저장했습니다 — 이제 텔레그램을 연결해 주세요');
   loadAlerts();
 };
 
@@ -534,7 +536,7 @@ async function loadProject(pid) {
     </div>
     <div class="field"><label>추가 지시 (선택)</label><textarea id="w-extra" rows="2" placeholder="예: 지역 주민 참여와 발전수익 공유를 강조"></textarea></div>
     <div class="btns"><button class="btn p" id="w-gen" ${p.outputs.filter(o => o.status === '진행').length >= 2 ? 'disabled' : ''}>만들기</button></div>
-    <p class="meta">AI 초안입니다(고성능컴퓨팅 우선). 한 문서에 1~5분 걸립니다. 하루에 분석 6번·문서 15개까지.</p>
+    <p class="meta">AI 가 쓴 초안입니다. 문서 하나에 1~5분 걸립니다. 하루에 분석 6번, 문서 15개까지 만들 수 있습니다.</p>
     <div id="w-outs">${p.outputs.map(o => `<div class="item" style="cursor:default">
       <div><span class="tag ${o.status === '완료' ? 'g' : o.status === '실패' ? 'd' : 'y'}">${esc(o.status)}</span><b style="font-weight:600">${esc(o.kind)}</b> <span class="meta">${esc((o.updated || '').replace('T', ' '))}</span></div>
       ${o.status === '진행' ? `<div class="meta">⏳ ${esc(o.progress)}</div>` : ''}${o.error ? `<div class="msg err">${esc(o.error)}</div>` : ''}
