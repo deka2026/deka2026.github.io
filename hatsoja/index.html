@@ -787,6 +787,31 @@ h1,h2,h3{font-weight:800;letter-spacing:-.02em;}
   .feature-icon{grid-row:1 / span 2;margin:0;}
   .feature h3{font-size:16.5px;margin:2px 0 4px;}
 }
+
+/* ── 11-27 전수 개선(알파 디자인 점검 H-01~H-12) ── */
+/* H-02·H-03: 데스크톱은 왼쪽 사이드바 하나만 — 위 메뉴줄(공개)·등급 드롭다운(로그인)은 같은 메뉴라 숨긴다 */
+@media (min-width:901px){ .pub-nav,.role-nav{display:none!important;} .topnav-in>.brand{margin-right:auto;} }
+/* H-09: 사이드바 맨 위 알약 두 개 */
+.side-top{display:flex;gap:6px;flex-wrap:wrap;padding:0 4px 12px;margin-bottom:10px;border-bottom:1px solid var(--line-soft);}
+.side-pill{border:1px solid var(--line-soft);background:#fff;border-radius:999px;padding:6px 11px;font-size:13px;cursor:pointer;color:var(--ink);font-weight:600;}
+.side-pill:hover{background:var(--primary-50);}
+.side-pill.gold{background:#fff6dc;border-color:#e9cf86;color:#6b4e00;}
+.side-tools,.side-tools button{font-size:13px;}
+.side-tools button{color:var(--primary-dark,#2f5d3a);}
+/* H-12: 깊이 보기 묶음 접기 */
+.side-fold{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:0;cursor:pointer;text-align:left;border-radius:6px;}
+.side-fold:hover{background:var(--primary-50);color:var(--ink);}
+.side-caret{font-size:12px;letter-spacing:0;}
+.side-foldg:not(.open){margin-bottom:6px;}
+.side-fold-body[hidden]{display:none!important;}
+/* H-01: 휴대폰 로그인 화면 — 사이드바는 ☰ 로만 연다(머리띠 아래 덮개) */
+@media (max-width:900px){
+  #v-app .app>.sidebar{display:none;}
+  body.side-open #v-app .app>.sidebar{display:block;position:fixed;left:0;right:0;bottom:0;top:var(--hs-top,64px);z-index:65;max-height:none;overflow-y:auto;border-radius:0;margin:0;box-shadow:0 14px 30px rgba(0,0,0,.18);}
+  body.side-open .topnav-in.nav-open .role-nav{display:none!important;}
+  /* H-04: 넓은 표는 카드 안에서만 옆으로 민다 */
+  #v-app .card{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+}
 </style>
 </head>
 <body>
@@ -1565,10 +1590,9 @@ h1,h2,h3{font-weight:800;letter-spacing:-.02em;}
     <div>
       <a href="https://sakyowon.co.kr/" target="_blank">사교원 사이트</a> ·
       <a href="https://home.sakyowon.co.kr/sunvillage.html">햇빛소득 종합업무도우미</a> ·
-      <a href="https://home.sakyowon.co.kr/wando-solar.html">완도 시범사업 계획서</a> ·
       <a href="manual.html">사용 설명서</a> ·
       <a href="#/pub/privacy">개인정보처리방침</a>
-      <div style="margin-top:8px"><a href="https://sakyowon.co.kr/admin.html" rel="nofollow" style="display:inline-block;padding:5px 14px;border:1px solid rgba(128,128,128,.45);border-radius:999px;font-size:12px;color:inherit;text-decoration:none">🔐 통합 관리자</a></div>
+      <div id="footAdmin" hidden style="margin-top:8px"><a href="https://sakyowon.co.kr/admin.html" rel="nofollow" style="display:inline-block;padding:5px 14px;border:1px solid rgba(128,128,128,.45);border-radius:999px;font-size:12px;color:inherit;text-decoration:none">🔐 통합 관리자</a></div>
     </div>
   </div>
 </footer>
@@ -2226,7 +2250,7 @@ async function loadRealData(){
       if(mvRes.error === 'unauthorized' || vRes.error === 'unauthorized'){   // 26-11-26 알파언니 🟠6: 세션이 끝났는데 로그인된 척하지 않는다
         try{ storeClearLocal(); }catch(e){}
         setUser(null); location.hash = '#/pub/home';
-        toast('로그인이 끝났습니다. 다시 로그인해 주세요.');
+        toast('로그인한 지 오래되어 로그아웃되었습니다. 다시 로그인해 주세요.');
       }
       return;
     }
@@ -2513,7 +2537,14 @@ async function eduConsentOk(){
 }
 
 /* SSO 자동 로그인: 통합 관리자 등에서 이미 로그인돼 있으면 그 세션을 그대로 인식 */
+/* 11-27 보라 E-2: 통합 로그인을 늦게 알아챈 뒤(첫 그리기 다음) 공개 화면의 유료회원 신청 띠·사이드바를 다시 그린다 */
+function hsApplyRefresh(){
+  try{ const [sc, pg] = currentRoute().split('/'); if(sc === 'pub'){ renderPubSidebar(document.getElementById('v-pub-' + pg) ? pg : 'home'); hsApplyRender(); } }catch(e){}
+}
 async function ssoBoot(){
+  try{ await ssoBoot0(); } finally { hsApplyRefresh(); }
+}
+async function ssoBoot0(){
   const cu = currentUser();
   /* 2026-11-26: 로그인해 둔 통합 계정으로 새로 고치면 실데이터·조합 자료(서버)를 다시 읽는다 — 전엔 처음 로그인 때만 읽어 새로고침하면 예시 화면이 나왔다 */
   if(REAL_API && cu && cu.unified && (cu.hubRole || Array.isArray(cu.perms))){ loadRealData(); return; }
@@ -2521,7 +2552,7 @@ async function ssoBoot(){
   try{
     const res = await fetch('/api/auth/me', {credentials:'same-origin'});
     const d = await res.json().catch(() => ({}));
-    if(d.ok && d.user) applyUnifiedUser(d.user, {redirect:false, silent:false});
+    if(d.ok && d.user){ applyUnifiedUser(d.user, {redirect:false, silent:false}); hsApplyRefresh(); }
   }catch(e){ /* 통합 계정 서버 미연결 — 조용히 무시 */ }
 }
 /* 등급별 데모 계정 — 로그인 창의 등급 버튼·체험 띠의 등급 전환 버튼이 모두 여기로 온다 */
@@ -2597,6 +2628,8 @@ function renderTopActions(){
     `;
   }
   renderRoleNav();
+  { const fa = document.getElementById('footAdmin');   // 11-27 보라 E-8: 꼬리말 「통합 관리자」는 매니저·통합관리자에게만
+    if(fa) fa.hidden = !(u && u.unified && !u.preview && (role === 'admin' || ['admin','staff','manager'].indexOf(String(u.hubRole || '').toLowerCase()) !== -1)); }
 }
 
 /* 11-07 메뉴 항목의 onclick·툴팁 — scope 'ext'(바깥 주소, 예: 시민자산육성지원센터)는 새 창으로 연다 */
@@ -2672,6 +2705,7 @@ function navigate(){
   // 라우트 이동 시 열려 있던 모달·모바일 메뉴·드롭다운을 닫는다
   closeDyn(); closeLogin();
   document.querySelector('.topnav-in').classList.remove('nav-open');
+  document.body.classList.remove('side-open');
   document.querySelectorAll('.role-group.open').forEach(g => g.classList.remove('open'));
 
   // Hide all views
@@ -2724,7 +2758,13 @@ window.addEventListener('hashchange', navigate);
 
 /* 모바일 메뉴 토글 */
 function toggleNav(){
-  document.querySelector('.topnav-in').classList.toggle('nav-open');
+  const t = document.querySelector('.topnav-in');
+  const on = !t.classList.contains('nav-open');
+  t.classList.toggle('nav-open', on);
+  /* 11-27 알파 H-01: 휴대폰 로그인 화면에선 ☰ 가 사이드바(내 페이지·요금·메뉴 정리까지 든 메뉴 전체)를 머리띠 아래에 펼친다 — 평소엔 사이드바를 접어 본문이 바로 보이게 */
+  const app = document.getElementById('v-app'), inApp = !!(app && app.classList.contains('on'));
+  document.body.classList.toggle('side-open', on && inApp);
+  if(on && inApp){ const nv = document.querySelector('.topnav'); document.body.style.setProperty('--hs-top', Math.max(0, nv ? nv.getBoundingClientRect().bottom : 64) + 'px'); }
 }
 
 /* ─── Logged-in app rendering ─── */
@@ -2994,20 +3034,38 @@ function sideHideSuggested(role){
   if(!confirm('30일 넘게 안 쓴 메뉴 ' + g.list.length + '개를 감출까요? 언제든 「메뉴 정리」에서 다시 보이게 할 수 있습니다.')) return;
   sideSaveHidden(sideHidden().concat(g.list)); toast('메뉴 ' + g.list.length + '개를 감췄습니다.');
 }
+function sideFold(role, gi, btn){
+  window._sideOpen = window._sideOpen || {};
+  const g = btn.closest('.side-group'), body = g && g.querySelector('.side-fold-body');
+  if(!body) return;
+  const open = body.hidden;
+  body.hidden = !open; g.classList.toggle('open', open);
+  btn.setAttribute('aria-expanded', String(open));
+  const c = btn.querySelector('.side-caret'); if(c) c.textContent = open ? '▾' : '▸';
+  window._sideOpen[role + gi] = open;
+}
 function renderRoleSidebar(role, scope, active){
   const cur = menuCur(role, scope + '/' + active);
   sideMarkUse(cur.split('/')[0], cur.split('/')[1]);
   { const u = currentUser(), w = _sideWho(); if(u && u.unified && window._sidePrefsFor !== w){ window._sidePrefsFor = w; setTimeout(sidePrefsLoad, 0); } }
   const 사용 = _sideUse();
   let 감춤수 = 0;
-  const html = (ROLE_MENUS[role] || []).map(([label, items]) => {
+  const html = (role === 'guest' || _sideEdit ? '' : `
+    <div class="side-top">
+      <button class="side-pill gold" onclick="location.hash='#/pub/pricing'" title="쓰는 서비스와 이용료를 봅니다">💳 이용 서비스·요금</button>
+      <button class="side-pill" onclick="sideEditToggle()" title="안 쓰는 메뉴를 감추거나 다시 보이게 합니다">⚙ 메뉴 정리</button>
+    </div>`) + (ROLE_MENUS[role] || []).map(([label, items], gi) => {
     const 보일 = items.filter(([s,p]) => !menuHidden(s, p)).filter(([s,p]) => {
       const h = sideIsHidden(s, p); if(h) 감춤수++;
       return _sideEdit || !h || s + '/' + p === cur; });
     if(!보일.length) return '';
+    /* 11-27 알파 H-12: 「깊이 보기」 묶음은 처음엔 접고, 지금 화면이 든 묶음만 펼친다(누르면 열고 닫힘) */
+    const 접기 = !_sideEdit && /^깊이 보기/.test(label);
+    const 열림 = !접기 || 보일.some(([s,p]) => s + '/' + p === cur) || !!(window._sideOpen || {})[role + gi];
     return `
-    <div class="side-group">
-      <div class="side-label">${label}</div>
+    <div class="side-group${접기 ? ' side-foldg' + (열림 ? ' open' : '') : ''}">
+      ${접기 ? `<button type="button" class="side-label side-fold" aria-expanded="${열림}" onclick="sideFold('${escapeJs(role)}', ${gi}, this)">${label}<span class="side-caret">${열림 ? '▾' : '▸'}</span></button>` : `<div class="side-label">${label}</div>`}
+      <div class="side-fold-body"${열림 ? '' : ' hidden'}>
       ${보일.map(([s,p,e,n]) => {
         const h = sideIsHidden(s, p);
         const btn = `
@@ -3020,6 +3078,7 @@ function renderRoleSidebar(role, scope, active){
         return `<div class="side-row${h ? ' hid' : ''}">${btn}
           <span class="side-use">${d === null ? '안 씀' : d === 0 ? '오늘' : d + '일 전'}</span>
           ${_sideKeep(s, p) ? '' : `<button class="side-eye" onclick="sideToggle('${escapeJs(s)}','${escapeJs(p)}')" title="${h ? '다시 보이기' : '감추기'}">${h ? '보이기' : '감추기'}</button>`}</div>`; }).join('')}
+      </div>
     </div>`; }).join('')
     + (role === 'guest' ? '' : `
     <div class="side-tools">
