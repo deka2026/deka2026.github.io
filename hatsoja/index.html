@@ -2418,6 +2418,61 @@ async function doSignup(){
   }catch(e){ toast('가입 서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요. 급하시면 070-4196-4677.'); }
 }
 
+/* ==================== 교육 마을 익명 키 (2026-11-26 이사장 지시 — 해남 교육 HPC 실증) ====================
+   QR 주소 …/hatsoja/?k=키 → /api/edu/enter 가 그 마을 교육 계정 세션을 준다(이름·전화 안 받음).
+   교육 계정이면 위쪽 띠, 조합원 명부 숨김, 처음 한 번 자료 이용 동의. 서버 hatsoja_edu.py */
+window._edu = null;
+function menuHidden(s, p){ return !!(window._edu && s === 'mem' && p === 'members'); }
+async function eduBoot(){
+  if(!REAL_API) return;
+  let k = '';
+  try{ k = new URLSearchParams(location.search).get('k') || ''; }catch(e){}
+  if(k){
+    try{ history.replaceState(null, '', location.pathname + (location.hash || '')); }catch(e){}
+    let j = {};
+    try{ j = await fetch('/api/edu/enter', {method:'POST', credentials:'same-origin', headers:{'content-type':'application/json'}, body: JSON.stringify({key: k})}).then(r => r.json()); }catch(e){}
+    if(!j.ok){ toast(j.error === 'expired' ? '교육 키 기간이 끝났습니다.' : '교육 키를 확인하지 못했습니다. 진행 요원에게 QR 을 다시 받아 주세요.'); return; }
+    try{ storeClearLocal(); }catch(e){}
+    setUser(null);
+    try{
+      const d = await fetch('/api/auth/me', {credentials:'same-origin'}).then(r => r.json());
+      if(d.ok && d.user) applyUnifiedUser(d.user, {redirect: true, silent: true});
+    }catch(e){}
+    toast(j.label + ' 교육 계정으로 들어왔습니다.');
+  }
+  await eduCheck();
+}
+async function eduCheck(){
+  const u = currentUser();
+  if(!REAL_API || !u || !u.unified) { window._edu = null; eduBar(); return; }
+  try{ const j = await fetch('/api/edu/me', {credentials:'same-origin'}).then(r => r.json()); window._edu = j.ok ? j.edu : null; }catch(e){ window._edu = null; }
+  eduBar();
+  if(window._edu && currentRoute() === 'mem/members') location.hash = '#/mem/home';
+  if(window._edu){ try{ renderRoleNav(); navigate(); }catch(e){} }   // 교육 계정일 때만 다시 그린다(다른 사람 화면은 건드리지 않음)
+  if(window._edu && !window._edu.consent) setTimeout(eduConsentAsk, 400);   // 화면을 다시 그린 뒤에 띄운다(먼저 띄우면 navigate 가 닫는다)
+}
+function eduBar(){
+  let el = document.getElementById('eduBar');
+  if(!window._edu){ if(el) el.remove(); return; }
+  if(!el){ el = document.createElement('div'); el.id = 'eduBar'; el.className = 'mode-bar on'; el.style.cssText = 'background:#E8F0FE;border-bottom:1px solid #B5D4F4;color:#0C447C;';
+    const nav = document.querySelector('nav'); (nav && nav.parentNode ? nav.parentNode : document.body).insertBefore(el, nav ? nav.nextSibling : document.body.firstChild); }
+  el.innerHTML = '🎓 <strong>' + escapeHtml(window._edu.label) + '</strong> — 교육 실증 입력 중 · 넣은 자료는 우리 마을 서버에 저장되고 분임원이 같이 봅니다 · <b>이름·전화번호 같은 개인정보는 넣지 마세요</b> · ' + escapeHtml(window._edu.valid_until) + '까지';
+}
+function eduConsentAsk(){
+  showDyn({title:'교육 실증 자료 이용 동의', sub: window._edu.label,
+    body:'<p style="margin-top:0;">이 계정은 해남 햇빛소득마을 교육용 <b>익명 계정</b>입니다(이름·연락처를 받지 않습니다).</p>'
+      + '<ul style="line-height:1.8;padding-left:18px;"><li>넣은 마을 조건·계획과 AI 상담·서류 생성 기록은 사회혁신교육원사회적협동조합이 <b>고성능컴퓨팅 지원사업(시민재생에너지 사업자동화 AI) 현장 실증·연구</b>에 씁니다. 사람을 알아볼 수 있는 정보는 쓰지 않습니다.</li>'
+      + '<li>AI 상담 내용은 가명 처리되어 고성능컴퓨팅 엔진에서 처리됩니다.</li>'
+      + '<li>' + escapeHtml(window._edu.valid_until) + '까지 이어서 쓸 수 있고, 마을이 원하면 정식 가입 계정으로 옮깁니다. 옮기지 않은 자료는 그 뒤 지우고 집계 숫자만 남깁니다.</li>'
+      + '<li>개인정보(이름·전화번호·주민등록번호)는 넣지 마세요.</li></ul>',
+    foot:'<button class="btn btn-outline" onclick="closeDyn()">나중에</button><button class="btn btn-primary" onclick="eduConsentOk()">동의하고 시작</button>'});
+}
+async function eduConsentOk(){
+  try{ await fetch('/api/edu/consent', {method:'POST', credentials:'same-origin', headers:{'content-type':'application/json'}, body: JSON.stringify({agree:true})}); }catch(e){}
+  if(window._edu) window._edu.consent = true;
+  closeDyn(); toast('동의를 남겼습니다. 실습을 시작하세요.');
+}
+
 /* SSO 자동 로그인: 통합 관리자 등에서 이미 로그인돼 있으면 그 세션을 그대로 인식 */
 async function ssoBoot(){
   const cu = currentUser();
@@ -2521,7 +2576,7 @@ function renderRoleNav(){
       <div class="role-group">
         <button class="role-btn ${isOn ? 'on' : ''}" onclick="toggleRoleGroup(${gi})" aria-haspopup="true">${label} <span class="caret">▾</span></button>
         <div class="role-dd">
-          ${items.map(([s, p, e, n]) => `<button class="${s + '/' + p === cur ? 'on' : ''}" onclick="${menuOnclick(s, p)}"
+          ${items.filter(([s, p]) => !menuHidden(s, p)).map(([s, p, e, n]) => `<button class="${s + '/' + p === cur ? 'on' : ''}" onclick="${menuOnclick(s, p)}"
               title="${menuTitle(s, p)}">${e} ${n}</button>`).join('')}
         </div>
       </div>`;
@@ -2775,7 +2830,7 @@ function renderRoleSidebar(role, scope, active){
   const html = (ROLE_MENUS[role] || []).map(([label, items]) => `
     <div class="side-group">
       <div class="side-label">${label}</div>
-      ${items.map(([s,p,e,n]) => {
+      ${items.filter(([s,p]) => !menuHidden(s, p)).map(([s,p,e,n]) => {
         return `
         <button class="side-item ${s+'/'+p===cur?'on':''}" onclick="${menuOnclick(s, p)}"
           title="${menuTitle(s, p)}">
@@ -2845,7 +2900,7 @@ function renderMemberPage(page){
     case 'ledgers':   return memLedgers();
     case 'taxjoin':   return memTaxJoin();
     case 'closing':   return memClosing();
-    case 'members':   return memMembers();
+    case 'members':   return window._edu ? `<div class="sec-head"><h1>👥 조합원 관리</h1></div><div class="card"><p style="margin:0;">🎓 교육 실증 계정에서는 조합원 명부를 쓰지 않습니다(개인정보). 인원수만 필요한 곳(배분 전략 연금 대상 등)에 숫자로 넣으세요.</p></div>` : memMembers();
     case 'schedule':  return memSchedule();
     case 'library':   return memLibrary();
     case 'chat':      return memChat();
@@ -16793,7 +16848,7 @@ function bootLand(){
   location.hash = roleHome(role);
   return true;
 }
-ssoBoot().then(bootLand).catch(() => {});   // 통합 계정 세션이 있으면 자동 로그인 (sakyowon.co.kr 서빙 시)
+eduBoot().then(() => ssoBoot()).then(bootLand).then(() => eduCheck()).catch(() => {});   // 통합 계정 세션이 있으면 자동 로그인 (sakyowon.co.kr 서빙 시)
 viewCoopCheck();   // 조합 보기 중이었는데 서버에서 이미 풀렸으면 관리자로 되돌린다
 if(!bootLand()) navigate();
 
