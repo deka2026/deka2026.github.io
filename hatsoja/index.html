@@ -232,6 +232,15 @@ input,select,textarea{font-family:inherit;font-size:14px;}
 }
 .side-item:hover{background:var(--primary-50);}
 .side-item.on{background:var(--primary);color:#fff;font-weight:600;}
+/* 11-26 사이드바 메뉴 감추기·다시 보이기 */
+.side-row{display:flex;align-items:center;gap:4px;}
+.side-row .side-item{flex:1;min-width:0;}
+.side-row.hid .side-item{opacity:.45;text-decoration:line-through;}
+.side-eye{border:1px solid var(--line, #d8dde6);background:#fff;border-radius:6px;font-size:12px;padding:3px 6px;cursor:pointer;white-space:nowrap;color:#334;}
+.side-eye:hover{background:var(--primary-50);}
+.side-use{font-size:10.5px;color:#7a8090;white-space:nowrap;}
+.side-tools{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line, #d8dde6);font-size:12.5px;display:flex;flex-direction:column;gap:6px;}
+.side-tools button{text-align:left;background:none;border:none;color:var(--primary);cursor:pointer;padding:2px 4px;font-size:12.5px;}
 .side-item.on:hover{background:var(--primary-dark);}
 .side-emoji{width:22px;text-align:center;}
 .main{min-width:0;}
@@ -2842,19 +2851,116 @@ function renderPubSidebar(active){
 }
 
 /* 사이드바 — 상단 메뉴바와 같은 ROLE_MENUS를 그린다. 관리자는 등급별 미리보기 바로가기가 더 붙는다 */
+/* 2026-11-26 사이드바 메뉴 감추기·다시 보이기(이사장 지시) — 자기 등급에 열린 메뉴 안에서만, 사람마다 따로.
+   실계정은 서버 개인 설정(/api/auth/prefs 의 hsj_side_hidden)에 남아 어느 기기에서 들어와도 같고, 체험은 이 브라우저에만.
+   권한은 그대로다 — 감춘 메뉴도 주소로 열 수 있고, 지금 보고 있는 메뉴와 「업무 시작」은 감추지 않는다.
+   「자주 안 쓰는 메뉴」 추천은 이 브라우저의 메뉴 사용 기록(마지막 사용일)으로 하고, 기록이 14일 쌓인 뒤에만 한다. */
+const SIDE_HIDE_KEY = 'hsj_side_hidden', SIDE_USE_KEY = 'hsj_side_use';
+let _sideEdit = false;
+function _sideWho(){ const u = currentUser(); return u ? String(u.id || u.email || u.role || 'u') : 'guest'; }
+function _sideKey(s, p){ return (s + '/' + p).slice(0, 40); }
+function sideHidden(){
+  const w = _sideWho();
+  if(!window._sideHid || window._sideHid.who !== w){
+    let a = []; try{ a = JSON.parse(localStorage.getItem(SIDE_HIDE_KEY + ':' + w) || '[]'); }catch(e){}
+    window._sideHid = {who: w, list: Array.isArray(a) ? a : []};
+  }
+  return window._sideHid.list;
+}
+function _sideKeep(s, p){ return s === 'mem' && p === 'home'; }
+function sideIsHidden(s, p){ return !_sideKeep(s, p) && sideHidden().indexOf(_sideKey(s, p)) !== -1; }
+function _sideRedraw(){ const u = currentUser(), r = (location.hash || '').replace(/^#\//, '').split('/'), el = document.getElementById('sidebar');
+  if(el && u && (r[0] === 'mem' || r[0] === 'adm')) el.innerHTML = renderRoleSidebar(normalizeRole(u.role), r[0], r[1] || ''); }
+function sideSaveHidden(a){
+  a = Array.from(new Set(a)).slice(0, 120);
+  const w = _sideWho(); window._sideHid = {who: w, list: a};
+  try{ localStorage.setItem(SIDE_HIDE_KEY + ':' + w, JSON.stringify(a)); }catch(e){}
+  const u = currentUser();
+  if(u && u.unified) fetch('/api/auth/prefs', {method:'POST', credentials:'same-origin', headers:{'content-type':'application/json'}, body: JSON.stringify({hsj_side_hidden: a})}).catch(() => {});
+  _sideRedraw();
+}
+function sideToggle(s, p){
+  if(_sideKeep(s, p)) return;
+  const k = _sideKey(s, p), a = sideHidden().slice(), i = a.indexOf(k);
+  if(i === -1) a.push(k); else a.splice(i, 1);
+  sideSaveHidden(a);
+}
+function sideEditToggle(){ _sideEdit = !_sideEdit; _sideRedraw(); }
+function sideShowAll(){ sideSaveHidden([]); toast('감춘 메뉴를 모두 다시 보이게 했습니다.'); }
+async function sidePrefsLoad(){
+  const u = currentUser(); if(!u || !u.unified || !REAL_API) return;
+  try{
+    const j = await fetch('/api/auth/prefs', {credentials:'same-origin'}).then(r => r.json());
+    if(j && j.ok && j.prefs && Array.isArray(j.prefs.hsj_side_hidden)){
+      const w = _sideWho(); window._sideHid = {who: w, list: j.prefs.hsj_side_hidden};
+      try{ localStorage.setItem(SIDE_HIDE_KEY + ':' + w, JSON.stringify(j.prefs.hsj_side_hidden)); }catch(e){}
+      _sideRedraw();
+    }
+  }catch(e){}
+}
+function _sideUse(){ let o = null; try{ o = JSON.parse(localStorage.getItem(SIDE_USE_KEY + ':' + _sideWho()) || 'null'); }catch(e){} return o && o.since ? o : {since: _ymdToday(), last: {}}; }
+function sideMarkUse(s, p){
+  if(!s || !p) return;
+  const o = _sideUse(); o.last[_sideKey(s, p)] = _ymdToday();
+  try{ localStorage.setItem(SIDE_USE_KEY + ':' + _sideWho(), JSON.stringify(o)); }catch(e){}
+}
+function _sideDaysAgo(d){ return d ? Math.round((new Date(_ymdToday() + 'T00:00:00') - new Date(d + 'T00:00:00')) / 864e5) : null; }
+function sideSuggest(role){
+  const o = _sideUse(), 쌓임 = _sideDaysAgo(o.since);
+  if(쌓임 < 14) return {ready:false, days:쌓임, list:[]};
+  const list = [];
+  (ROLE_MENUS[role] || []).forEach(([, items]) => items.forEach(([s, p, e, n]) => {
+    if(menuHidden(s, p) || _sideKeep(s, p) || sideIsHidden(s, p)) return;
+    const d = _sideDaysAgo(o.last[_sideKey(s, p)]);
+    if(d === null || d > 30) list.push(_sideKey(s, p));
+  }));
+  return {ready:true, days:쌓임, list};
+}
+function sideHideSuggested(role){
+  const g = sideSuggest(role);
+  if(!g.ready){ toast('메뉴 사용 기록이 14일 쌓이면 추천합니다(지금 ' + g.days + '일).'); return; }
+  if(!g.list.length){ toast('30일 넘게 안 쓴 메뉴가 없습니다.'); return; }
+  if(!confirm('30일 넘게 안 쓴 메뉴 ' + g.list.length + '개를 감출까요? 언제든 「메뉴 정리」에서 다시 보이게 할 수 있습니다.')) return;
+  sideSaveHidden(sideHidden().concat(g.list)); toast('메뉴 ' + g.list.length + '개를 감췄습니다.');
+}
 function renderRoleSidebar(role, scope, active){
   const cur = scope + '/' + active;
-  const html = (ROLE_MENUS[role] || []).map(([label, items]) => `
+  sideMarkUse(scope, active);
+  { const u = currentUser(), w = _sideWho(); if(u && u.unified && window._sidePrefsFor !== w){ window._sidePrefsFor = w; setTimeout(sidePrefsLoad, 0); } }
+  const 사용 = _sideUse();
+  let 감춤수 = 0;
+  const html = (ROLE_MENUS[role] || []).map(([label, items]) => {
+    const 보일 = items.filter(([s,p]) => !menuHidden(s, p)).filter(([s,p]) => {
+      const h = sideIsHidden(s, p); if(h) 감춤수++;
+      return _sideEdit || !h || s + '/' + p === cur; });
+    if(!보일.length) return '';
+    return `
     <div class="side-group">
       <div class="side-label">${label}</div>
-      ${items.filter(([s,p]) => !menuHidden(s, p)).map(([s,p,e,n]) => {
-        return `
+      ${보일.map(([s,p,e,n]) => {
+        const h = sideIsHidden(s, p);
+        const btn = `
         <button class="side-item ${s+'/'+p===cur?'on':''}" onclick="${menuOnclick(s, p)}"
           title="${menuTitle(s, p)}">
           <span class="side-emoji">${e}</span>${n}
-        </button>`; }).join('')}
-    </div>
-  `).join('');
+        </button>`;
+        if(!_sideEdit) return btn;
+        const d = _sideDaysAgo(사용.last[_sideKey(s, p)]);
+        return `<div class="side-row${h ? ' hid' : ''}">${btn}
+          <span class="side-use">${d === null ? '안 씀' : d === 0 ? '오늘' : d + '일 전'}</span>
+          ${_sideKeep(s, p) ? '' : `<button class="side-eye" onclick="sideToggle('${escapeJs(s)}','${escapeJs(p)}')" title="${h ? '다시 보이기' : '감추기'}">${h ? '보이기' : '감추기'}</button>`}</div>`; }).join('')}
+    </div>`; }).join('')
+    + (role === 'guest' ? '' : `
+    <div class="side-tools">
+      ${_sideEdit
+        ? `<b style="font-size:12.5px;">메뉴 정리 중</b>
+           <span class="text-mute" style="font-size:11.5px;">「감추기」를 누른 메뉴는 사이드바에서 빠집니다. 권한은 그대로라 주소로는 열 수 있습니다.</span>
+           <button onclick="sideHideSuggested('${escapeJs(role)}')">💤 30일 넘게 안 쓴 메뉴 한 번에 감추기</button>
+           ${감춤수 ? `<button onclick="sideShowAll()">👁 감춘 메뉴 ${감춤수}개 모두 보이기</button>` : ''}
+           <button onclick="sideEditToggle()">✔ 정리 끝내기</button>`
+        : `<button onclick="sideEditToggle()">⚙ 메뉴 정리(감추기·보이기)</button>
+           ${감춤수 ? `<button onclick="sideEditToggle()">👁 감춘 메뉴 ${감춤수}개 다시 보이기</button>` : ''}`}
+    </div>`);
   if(role !== 'admin') return html;
   return html + `
     <div class="side-group">
@@ -2884,7 +2990,7 @@ function renderMemberPage(page){
     case 'cycle':     return memCycle();
     case 'contracts': return memRegister('contracts');
     case 'minutes':   return memRegister('minutes');
-    case 'expenses':  return memRegister('expenses');
+    case 'expenses':  return memExpenses();
     case 'dashboard': return memDashboard(u);
     case 'mypage':    return memMyPage(u);
     case 'structure': return memStructure();
@@ -6610,13 +6716,302 @@ const HOME_DOCS = ['결산 보고서','정기총회 회의록','이사회 회의
 /* ==================== 조합 대장 · 업무 달력 (2026-11-26 이사장 지시) ====================
    계약서·회의록·지출결의 대장은 서버(/api/my/store: contracts·minutes·expenses)에 둔다. 거래처는 표준장부의 거래처 마스터(MOCK.tax.vendors).
    자료함에서 읽은 값(제안·확정)을 「대장에 넣기」 한 번으로 옮기고, 메뉴에서 직접 넣을 수도 있다. */
+/* ==================== 지출결의 · 통장/카드 대조 · 현금영수증 (2026-11-26 이사장 지시) ====================
+   ① 계정은 거래처가 아니라 「무슨 일에 쓴 돈인가」로 붙인다 — 업체가 여러 곳이어도 같은 계정으로 합산(주민환원·유지관리 등 전 계정 공통).
+   ② 영수증 한 장 = 지출결의 한 줄. 통장 출금·카드 사용 기록과 금액·날짜·가맹점으로 대조하고, 대조된 기록은 증빙 보관함(5년)과 서버 서류함에 남긴다.
+      한 번 출금으로 여러 장을 낸 경우(2~5장 합)·카드대금 출금(그 기간 카드 사용 합)도 맞춘다.
+   ③ 현금 지출은 현금영수증(승인번호나 파일)을 내면 통장 기록 없이도 지출결의에 쓴다. 간이영수증 현금은 받되 「적격증빙 아님」으로 표시한다. */
+const EXP_ACCTS = ['발전설비유지관리비','보험료','토지임차료','지급수수료','회계·세무비용','통신비','관리비','회의비','소모품비','여비교통비','교육훈련비','광고선전비','세금과공과','인건비(급여)','4대보험료','주민환원사업비','공동사업비','기타'];
+const EXP_BIZ = ['운영','주민환원','공동사업','보조금 사업','기타'];
+const EXP_BIZ_ACCT = {'주민환원':'주민환원사업비', '공동사업':'공동사업비'};
+const EXP_PAY = ['통장 이체','카드','현금(현금영수증)','현금(간이영수증)'];
+const EXP_EV = ['세금계산서','계산서','신용카드 매출전표','현금영수증','간이영수증','계좌이체 내역','기타'];
+function _expAmt(r){ return Math.round(_regWon(r && r.amount)); }
+function _expDays(a, b){ return Math.abs((new Date(String(a).slice(0, 10) + 'T00:00:00') - new Date(String(b).slice(0, 10) + 'T00:00:00')) / 864e5); }
+function _expNorm(s){ return String(s || '').replace(/\s|\(주\)|㈜|주식회사|\(유\)|유한회사|[()·.,-]/g, '').toLowerCase(); }
+function _expNameHit(a, b){ a = _expNorm(a); b = _expNorm(b); if(!a || !b) return false; const k = Math.min(4, a.length, b.length); return a.indexOf(b.slice(0, k)) !== -1 || b.indexOf(a.slice(0, k)) !== -1; }
+function _expCard(){ MOCK.tax.card = MOCK.tax.card || []; return MOCK.tax.card; }
+function _expCardRow(id){ return _expCard().filter(c => c.id === id)[0]; }
+/* 거래처 대장에서 기본 계정 — 수입 계정(전력판매·보조금·출자금 등)은 지출 계정으로 쓰지 않는다 */
+function expAcctFor(vendor, biz){
+  if(EXP_BIZ_ACCT[biz]) return EXP_BIZ_ACCT[biz];
+  const v = (MOCK.tax.vendors || []).filter(x => x.name && _expNameHit(x.name, vendor))[0];
+  if(v && v.acct && !/수익|수입|출자금|^\(미정\)$/.test(v.acct)) return v.acct;
+  return '';
+}
+function expStatus(r){
+  const m = r.match;
+  if(m && m.src === 'cash') return {k:'ok', t:'현금영수증'};
+  if(m && m.src === 'bank'){
+    const t = _taxTx(m.ids[0]); if(!t) return {k:'warn', t:'통장 기록 사라짐'};
+    const 합 = regLoad('expenses').filter(x => x.match && x.match.src === 'bank' && x.match.ids[0] === t.id).reduce((a, x) => a + _expAmt(x), 0);
+    return 합 === t.out ? {k:'ok', t:'통장 대조'} : {k:'warn', t:'통장 출금 ' + t.out.toLocaleString() + '원과 합 ' + 합.toLocaleString() + '원'};
+  }
+  if(m && m.src === 'card') return _expCardRow(m.ids[0]) ? {k:'ok', t:'카드 대조'} : {k:'warn', t:'카드 기록 사라짐'};
+  if(/간이영수증/.test(r.pay || '')) return {k:'warn', t:'현금·간이영수증 — 적격증빙 아님' + (_expAmt(r) > 30000 ? '(3만원 초과)' : '')};
+  if(/현금영수증/.test(r.pay || '')) return {k:'bad', t:'현금영수증 승인번호·파일 필요'};
+  return {k:'bad', t:'미대조' + (r.matchHint ? ' · ' + r.matchHint : '')};
+}
+function _expBadge(s){ return `<span class="badge ${s.k === 'ok' ? 'badge-success' : s.k === 'warn' ? 'badge-gold' : 'badge-danger'}">${escapeHtml(s.t)}</span>`; }
+
+/* 대조된 통장·카드 기록을 증빙 보관함에 남긴다(같은 기록·같은 줄이면 한 번만) */
+function _expEvidence(r, src, x){
+  const T = MOCK.tax;
+  if(T.evidence.some(e => e.srcId === x.id && e.expId === r.id)) return;
+  const 금액 = src === 'bank' ? x.out : x.amount, 날 = x.date, 상대 = r.vendor || (src === 'bank' ? x.desc : x.merchant) || '';
+  const 종류 = src === 'bank' ? '계좌이체 내역' : '신용카드 매출전표';
+  const e = {id:_tid('ev'), kind:종류, date:날, amount:금액, vendor:상대, bizNo:'', vatIncl:true, grant:false, grantCode:'', leaseType:'', orig:'', auto:true,
+    fileName:`${taxCoopCode()}_${날.replace(/-/g, '')}_${상대.replace(/\s/g, '').slice(0, 20)}_${금액}_${src === 'bank' ? '통장기록' : '카드기록'}`,
+    keepUntil:_addYears(날, 5), uploaded:_ymd(), expId:r.id, srcId:x.id,
+    srcText: src === 'bank' ? x.desc : (x.merchant + (x.approval ? ' · 승인 ' + x.approval : '') + (x.cardLast ? ' · 카드 ' + x.cardLast : ''))};
+  T.evidence.push(e);
+  if(src === 'bank' && !x.evId) x.evId = e.id;
+}
+function _expLink(r, src, ids, how){
+  r.match = {src, ids, how, at:new Date().toISOString()}; delete r.matchHint;
+  ids.forEach(id => {
+    const x = src === 'bank' ? _taxTx(id) : _expCardRow(id); if(!x) return;
+    x.expIds = Array.from(new Set((x.expIds || []).concat([r.id])));
+    _expEvidence(r, src, x);
+  });
+}
+function _subsetSum(vals, target, maxK){
+  const n = vals.length; let found = null;
+  (function go(i, k, sum, pick){
+    if(found || sum > target) return;
+    if(sum === target && pick.length >= 2){ found = pick.slice(); return; }
+    if(i >= n || k >= maxK) return;
+    pick.push(i); go(i + 1, k + 1, sum + vals[i], pick); pick.pop();
+    go(i + 1, k, sum, pick);
+  })(0, 0, 0, []);
+  return found;
+}
+/* 자동 대조 — 확실한 것만 붙이고, 후보가 여럿이면 붙이지 않고 「후보 n건」만 적는다(사람이 고른다) */
+function expMatchAll(show){
+  const T = MOCK.tax, card = _expCard(), rows = regLoad('expenses');
+  const 쓴통장 = new Set(), 쓴카드 = new Set(); let n = 0;
+  rows.forEach(r => { if(r.match && r.match.ids) r.match.ids.forEach(id => (r.match.src === 'card' ? 쓴카드 : 쓴통장).add(id)); });
+  T.bank.forEach(t => { if(t.cardBill) 쓴통장.add(t.id); });
+  const 통장가능 = r => !r.pay || /통장|이체/.test(r.pay), 카드가능 = r => !r.pay || /카드/.test(r.pay);
+  // ① 현금영수증
+  rows.forEach(r => { if(!r.match && /현금영수증/.test(r.pay || '') && (r.cashNo || r.docId)){ r.match = {src:'cash', ids:[], how:'현금영수증', at:new Date().toISOString()}; n++; } });
+  // ② 한 장 = 한 기록
+  rows.forEach(r => {
+    if(r.match) return; const amt = _expAmt(r); if(!amt || !r.date) return;
+    let c = [];
+    if(카드가능(r)) c = c.concat(card.filter(x => !쓴카드.has(x.id) && x.amount === amt && _expDays(x.date, r.date) <= 3).map(x => ({src:'card', x, name:x.merchant})));
+    if(통장가능(r)) c = c.concat(T.bank.filter(t => t.out === amt && !쓴통장.has(t.id) && _expDays(t.date, r.date) <= 7).map(t => ({src:'bank', x:t, name:t.desc})));
+    if(!c.length){ delete r.matchHint; return; }
+    const 이름맞음 = c.filter(o => _expNameHit(o.name, r.vendor));
+    const p = 이름맞음.length === 1 ? 이름맞음[0] : (c.length === 1 ? c[0] : null);
+    if(!p){ r.matchHint = '후보 ' + c.length + '건 — 「대조」로 고르세요'; return; }
+    _expLink(r, p.src, [p.x.id], '자동'); (p.src === 'card' ? 쓴카드 : 쓴통장).add(p.x.id); n++;
+  });
+  // ③ 한 번 출금 = 영수증 여러 장(2~5장, 출금일 앞뒤 7일)
+  T.bank.filter(t => t.out && !쓴통장.has(t.id)).forEach(t => {
+    const pool = rows.filter(r => !r.match && 통장가능(r) && r.date && _expDays(r.date, t.date) <= 7 && _expAmt(r) > 0 && _expAmt(r) < t.out).slice(0, 14);
+    const pick = pool.length >= 2 ? _subsetSum(pool.map(_expAmt), t.out, 5) : null;
+    if(pick){ pick.forEach(i => { _expLink(pool[i], 'bank', [t.id], '자동(여러 장 합)'); n++; }); 쓴통장.add(t.id); }
+  });
+  // ④ 카드대금 출금 = 그 전 두 달 안 카드 사용 합
+  T.bank.filter(t => t.out && /카드/.test(t.desc) && !t.cardBill && !쓴통장.has(t.id)).forEach(t => {
+    const pool = card.filter(x => !x.billTx && x.date <= t.date && _expDays(x.date, t.date) <= 62);
+    if(pool.length && pool.reduce((a, x) => a + x.amount, 0) === t.out){ pool.forEach(x => { x.billTx = t.id; }); t.cardBill = pool.map(x => x.id); n++; }
+  });
+  regSave('expenses', rows); persistTax();
+  if(show){
+    const 남 = rows.filter(r => !r.match && !/간이영수증/.test(r.pay || '')).length;
+    toast(`대조 ${n}건을 붙였습니다. 아직 안 맞은 ${남}건은 「대조」 단추로 직접 고르세요.`);
+    if(typeof _storeSync !== 'undefined' && _storeSync.on) expSaveRecord(null, true);
+    navigate();
+  }
+  return n;
+}
+function expPick(id){
+  const r = regLoad('expenses').filter(x => x.id === id)[0]; if(!r) return;
+  const amt = _expAmt(r), card = _expCard();
+  const 쓴 = new Set(); regLoad('expenses').forEach(x => { if(x.match && x.id !== id) (x.match.ids || []).forEach(i => 쓴.add(i)); });
+  const 통장 = MOCK.tax.bank.filter(t => t.out && !t.cardBill && (t.out === amt ? _expDays(t.date, r.date) <= 31 : (t.out > amt && _expDays(t.date, r.date) <= 7)));
+  const 카드 = card.filter(x => !쓴.has(x.id) && x.amount === amt && _expDays(x.date, r.date) <= 31);
+  const 줄 = (src, x) => {
+    const a = src === 'bank' ? x.out : x.amount, 같음 = a === amt;
+    return `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line-soft);">
+      <span>${src === 'bank' ? '🏦 통장' : '💳 카드'} · ${x.date} · ${escapeHtml(src === 'bank' ? x.desc : x.merchant)} · <b>${a.toLocaleString()}원</b>
+      ${같음 ? '' : '<span class="badge badge-gold">여러 장 중 한 장</span>'}${쓴.has(x.id) ? ' <span class="badge badge-mute">다른 영수증과 묶임</span>' : ''}</span>
+      <button class="btn btn-primary btn-sm" onclick="expLinkPick('${escapeJs(id)}','${src}','${escapeJs(x.id)}')">이것</button></div>`;
+  };
+  showDyn({title:'통장·카드 기록과 대조', sub:`${r.date || ''} · ${r.vendor || ''} · ${amt.toLocaleString()}원 · ${r.pay || '결제 수단 미정'}`,
+    body: (통장.length + 카드.length ? 카드.map(x => 줄('card', x)).join('') + 통장.map(x => 줄('bank', x)).join('')
+      : '<p class="text-mute">금액이 같은 통장 출금·카드 사용이 없습니다(앞뒤 31일). 통장·카드 내역을 먼저 올리거나, 현금이면 결제 수단을 「현금(현금영수증)」으로 바꾸세요.</p>')
+      + '<p class="text-mute" style="font-size:12px;margin-top:8px;">「여러 장 중 한 장」은 한 번 출금으로 여러 영수증을 낸 경우입니다. 같은 출금에 나머지 영수증도 붙이면 합이 맞는지 표시됩니다.</p>',
+    foot:`${r.match ? `<button class="btn btn-ghost" onclick="expUnlink('${escapeJs(id)}')">대조 풀기</button>` : ''}<button class="btn btn-outline" onclick="closeDyn()">닫기</button>`});
+}
+function expLinkPick(id, src, xid){
+  const rows = regLoad('expenses'), r = rows.filter(x => x.id === id)[0]; if(!r) return;
+  if(r.match) _expUnlinkRow(r);
+  _expLink(r, src === 'card' ? 'card' : 'bank', [xid], '직접');
+  regSave('expenses', rows); persistTax(); closeDyn(); navigate(); toast('대조했습니다. 기록은 증빙 보관함에 남았습니다.');
+}
+function _expUnlinkRow(r){
+  const m = r.match; if(!m) return;
+  (m.ids || []).forEach(id => { const x = m.src === 'card' ? _expCardRow(id) : _taxTx(id); if(x && x.expIds) x.expIds = x.expIds.filter(i => i !== r.id); });
+  const 지울 = MOCK.tax.evidence.filter(e => e.auto && e.expId === r.id).map(e => e.id);
+  MOCK.tax.evidence = MOCK.tax.evidence.filter(e => 지울.indexOf(e.id) === -1);
+  MOCK.tax.bank.forEach(t => { if(지울.indexOf(t.evId) !== -1) t.evId = ''; });
+  delete r.match;
+}
+function expUnlink(id){
+  const rows = regLoad('expenses'), r = rows.filter(x => x.id === id)[0]; if(!r) return;
+  _expUnlinkRow(r); regSave('expenses', rows); persistTax(); closeDyn(); navigate(); toast('대조를 풀었습니다.');
+}
+
+/* 카드 사용 내역 올리기(카드사 홈페이지·법인카드 CSV·엑셀). 카드번호는 끝 4자리만 남긴다 */
+function expImportCard(file, done){
+  _rosterReadRows(file, function(rows, 오류){
+    const 끝 = (n, 말) => { if(done) done(n, 말); else { toast(말); navigate(); } };
+    if(!rows){ 끝(0, 오류 || '카드 내역을 읽지 못했습니다.'); return; }
+    let hi = rows.findIndex(r => r.some(c => /가맹점|이용처|사용처/.test(String(c))) && r.some(c => /금액/.test(String(c))));
+    if(hi < 0){ 끝(0, '머리글(이용일·가맹점·금액)을 찾지 못했습니다. 카드사에서 내려받은 원본을 그대로 올려 주세요.'); return; }
+    const head = rows[hi].map(h => String(h).replace(/\s/g, ''));
+    const 열 = re => head.findIndex(h => re.test(h));
+    const iD = 열(/이용일|승인일|거래일|사용일|일자/), iM = 열(/가맹점|이용처|사용처/), iA = (열(/이용금액|승인금액|결제금액|사용금액/) >= 0 ? 열(/이용금액|승인금액|결제금액|사용금액/) : 열(/금액/));
+    const iN = 열(/승인번호/), iC = 열(/카드번호|카드/), iX = 열(/취소|상태|구분/);
+    const card = _expCard(), 있음 = new Set(card.map(c => c.date + '|' + c.amount + '|' + (c.approval || c.merchant)));
+    let n = 0;
+    rows.slice(hi + 1).forEach(r => {
+      const date = _rosterDate(r[iD]); if(!date) return;
+      let amount = Math.round(_closingNum(r[iA])); if(!amount) return;
+      if(iX >= 0 && /취소/.test(String(r[iX])) && amount > 0) amount = -amount;
+      const merchant = String(r[iM] || '').trim(), approval = iN >= 0 ? String(r[iN] || '').replace(/\D/g, '').slice(0, 12) : '';
+      const last = iC >= 0 ? (String(r[iC] || '').replace(/\D/g, '').slice(-4)) : '';
+      const k = date + '|' + amount + '|' + (approval || merchant); if(있음.has(k)) return; 있음.add(k);
+      card.push({id:_tid('cd'), date, merchant, amount, approval, cardLast:last, file:file.name}); n++;
+    });
+    card.sort((a, b) => a.date < b.date ? -1 : 1);
+    persistTax(); taxLog('카드 사용 내역 업로드', file.name);
+    const m = expMatchAll(false);
+    끝(n, `카드 사용 ${n}건을 읽었습니다(겹친 줄은 뺐습니다). 지출결의와 ${m}건을 대조했습니다.`);
+  });
+}
+
+/* 영수증 파일을 서버 서류함에 올린다(체험 계정은 이름만 남는다) */
+async function expUploadDoc(id, file, 종류){
+  const 말 = {too_big:'파일이 너무 크거나 보관함이 찼습니다.', duplicate:'같은 파일이 이미 서류함에 있습니다.', bad_type:'올릴 수 없는 파일 종류입니다(pdf·jpg·png).', empty:'빈 파일입니다.'};
+  const rows = regLoad('expenses'), r = rows.filter(x => x.id === id)[0]; if(!r) return;
+  r.docName = file.name;
+  if(!(typeof _storeSync !== 'undefined' && _storeSync.on)){ regSave('expenses', rows); toast('체험 화면에서는 파일이 서버에 올라가지 않습니다(이름만 적어 둠).'); return; }
+  const fd = new FormData(); fd.append('file', file); fd.append('kind', 종류 || '지출 증빙(영수증·전표)');
+  try{
+    const j = await fetch('/api/my/docs', {method:'POST', credentials:'same-origin', body:fd}).then(x => x.json());
+    const rows2 = regLoad('expenses'), r2 = rows2.filter(x => x.id === id)[0]; if(!r2) return;
+    if(j.ok){ r2.docId = j.item.id; r2.docName = j.item.filename; }
+    else { toast(말[j.error] || ('영수증 파일을 올리지 못했습니다: ' + (j.error || ''))); }
+    regSave('expenses', rows2);
+    if(j.ok){
+      const T = MOCK.tax, 날 = r2.date || _ymd();
+      T.evidence.push({id:_tid('ev'), kind:r2.evKind || '기타', date:날, amount:_expAmt(r2), vendor:r2.vendor || '', bizNo:'', vatIncl:true, grant:/보조금/.test(r2.biz || ''), grantCode:'', leaseType:'',
+        orig:file.name, fileName:`${taxCoopCode()}_${날.replace(/-/g, '')}_${String(r2.vendor || '').replace(/\s/g, '').slice(0, 20)}_${_expAmt(r2)}_${String(r2.evKind || '영수증').replace(/\s/g, '')}`,
+        keepUntil:_addYears(날, 5), uploaded:_ymd(), expId:id, docId:j.item.id, auto:false});
+      persistTax(); expMatchAll(false); navigate(); toast('영수증 파일을 서류함에 올렸습니다.');
+    }
+  }catch(e){ toast('영수증 파일을 올리지 못했습니다(연결 오류). 다시 「고치기」로 올려 주세요.'); }
+}
+/* 대조 기록을 서류로 — 달마다 CSV 한 장을 서버 서류함(종류: 통장·카드 대조 기록)에 올린다 */
+async function expSaveRecord(ym, 조용히){
+  const rows = regLoad('expenses').filter(r => r.date && (!ym || r.date.slice(0, 7) === ym));
+  if(!rows.length){ if(!조용히) toast('저장할 지출결의가 없습니다.'); return; }
+  if(!(typeof _storeSync !== 'undefined' && _storeSync.on)){ if(!조용히) toast('체험 화면에서는 서버에 저장하지 않습니다.'); return; }
+  const q = s => '"' + String(s == null ? '' : s).replace(/"/g, '""') + '"';
+  const 달들 = Array.from(new Set(rows.map(r => r.date.slice(0, 7)))).sort();
+  let 올림 = 0;
+  for(const m of 달들){
+    const 줄 = [['지출일','거래처','내용','금액','사업 구분','계정','결제 수단','증빙 종류','현금영수증 승인번호','대조 상태','대조 출처','기록 일자','기록 내용','기록 금액','영수증 파일'].map(q).join(',')];
+    rows.filter(r => r.date.slice(0, 7) === m).forEach(r => {
+      const s = expStatus(r), mt = r.match || {}, x = mt.src === 'bank' ? _taxTx((mt.ids || [])[0]) : mt.src === 'card' ? _expCardRow((mt.ids || [])[0]) : null;
+      줄.push([r.date, r.vendor, r.item, _expAmt(r), r.biz, r.acct, r.pay, r.evKind, r.cashNo, s.t, mt.src === 'bank' ? '통장' : mt.src === 'card' ? '카드' : mt.src === 'cash' ? '현금영수증' : '',
+        x ? x.date : '', x ? (mt.src === 'bank' ? x.desc : x.merchant + (x.approval ? ' 승인 ' + x.approval : '')) : '', x ? (mt.src === 'bank' ? x.out : x.amount) : '', r.docName || ''].map(q).join(','));
+    });
+    const 이름 = `지출증빙대조_${taxCoopCode()}_${m}_${_ymd().replace(/-/g, '')}.csv`;
+    const fd = new FormData(); fd.append('file', new File(['﻿' + 줄.join('\n')], 이름, {type:'text/csv'})); fd.append('kind', '통장·카드 대조 기록');
+    try{ const j = await fetch('/api/my/docs', {method:'POST', credentials:'same-origin', body:fd}).then(x => x.json()); if(j.ok || j.error === 'duplicate') 올림++; }catch(e){}
+  }
+  if(!조용히) toast(올림 ? `대조 기록 ${올림}개월분을 서류함(통장·카드 대조 기록)에 저장했습니다.` : '서류함에 저장하지 못했습니다. 잠시 뒤 다시 눌러 주세요.');
+}
+
+/* 지출결의 화면 — 계정별·사업별 합계(거래처 여러 곳 합산), 대조 상태, 현금 지출 */
+function memExpenses(){
+  const R = REG.expenses, rows = regLoad('expenses').slice().sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+  const 합 = rows.reduce((a, r) => a + _expAmt(r), 0);
+  const 계정 = {}, 사업 = {};
+  rows.forEach(r => {
+    const a = r.acct || '(계정 미정)', b = r.biz || '(구분 없음)', v = r.vendor || '(거래처 없음)';
+    계정[a] = 계정[a] || {합:0, n:0, 거래처:{}, 대조:0}; 계정[a].합 += _expAmt(r); 계정[a].n++; 계정[a].거래처[v] = (계정[a].거래처[v] || 0) + _expAmt(r); if(expStatus(r).k === 'ok') 계정[a].대조++;
+    사업[b] = (사업[b] || 0) + _expAmt(r);
+  });
+  const 상태 = {ok:0, warn:0, bad:0}; rows.forEach(r => 상태[expStatus(r).k]++);
+  const 카드 = _expCard();
+  return `
+    <div class="sec-head"><h1>${R.icon} ${R.이름}</h1><p class="sec-desc">${R.설명}</p></div>
+    <div class="card">
+      <div class="card-title"><h3 class="serif">계정별 합계 — 거래처가 여러 곳이어도 계정으로 합산</h3></div>
+      ${rows.length ? `<div style="overflow-x:auto;"><table class="tbl" style="font-size:13px;min-width:560px;"><thead><tr><th>계정</th><th>건수</th><th>거래처 수</th><th style="text-align:right;">합계(원)</th><th>대조 완료</th><th>거래처별</th></tr></thead><tbody>
+        ${Object.entries(계정).sort((a, b) => b[1].합 - a[1].합).map(([a, o]) => `<tr><td><b>${escapeHtml(a)}</b></td><td style="text-align:right;">${o.n}</td><td style="text-align:right;">${Object.keys(o.거래처).length}</td>
+          <td style="text-align:right;">${Math.round(o.합).toLocaleString()}</td><td style="text-align:right;">${o.대조}/${o.n}</td>
+          <td style="font-size:12px;">${Object.entries(o.거래처).sort((x, y) => y[1] - x[1]).map(([v, s]) => escapeHtml(v) + ' ' + Math.round(s).toLocaleString()).join(' · ')}</td></tr>`).join('')}
+        <tr><td><b>합계</b></td><td style="text-align:right;">${rows.length}</td><td></td><td style="text-align:right;"><b>${Math.round(합).toLocaleString()}</b></td><td></td><td></td></tr>
+      </tbody></table></div>
+      <p style="margin:8px 0 0;font-size:13px;">사업 구분별: ${Object.entries(사업).map(([b, s]) => `<span class="badge badge-mute">${escapeHtml(b)} ${Math.round(s).toLocaleString()}원</span>`).join(' ')}</p>`
+      : '<p class="text-mute">아직 없습니다.</p>'}
+    </div>
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">${R.이름} (${rows.length}) ${rows.length ? `<span class="badge badge-success">대조 ${상태.ok}</span> <span class="badge badge-gold">확인 ${상태.warn}</span> <span class="badge badge-danger">미대조 ${상태.bad}</span>` : ''}</h3>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" onclick="location.hash='#/mem/inbox'">📥 자료로 넣기</button>
+          <label class="btn btn-outline btn-sm" style="cursor:pointer;">💳 카드 사용내역 올리기<input type="file" accept=".csv,.txt,.xlsx" style="display:none;" onchange="this.files[0] && expImportCard(this.files[0])"></label>
+          <button class="btn btn-outline btn-sm" onclick="expMatchAll(true)">🔗 통장·카드와 대조</button>
+          <button class="btn btn-outline btn-sm" onclick="regEdit('expenses','',{pay:'현금(현금영수증)', evKind:'현금영수증'})">💵 현금 지출(현금영수증)</button>
+          <button class="btn btn-primary btn-sm" onclick="regEdit('expenses','')">+ 영수증 넣기</button></div></div>
+      <p class="text-mute" style="font-size:12.5px;margin:0 0 8px;">통장 출금 ${MOCK.tax.bank.filter(t => t.out).length}건 · 카드 사용 ${카드.length}건과 대조합니다(통장은 「세무 표준장부」에서 올립니다). 대조된 기록은 증빙 보관함과 서버 서류함에 「통장·카드 대조 기록」으로 남습니다.
+        ${rows.length ? ` <a href="javascript:void(0)" onclick="expSaveRecord(null)">대조 기록 지금 서류로 저장</a>` : ''}</p>
+      ${rows.length ? `<div style="overflow-x:auto;"><table class="tbl" style="font-size:13px;min-width:860px;"><thead><tr><th>지출일</th><th>거래처</th><th>내용</th><th style="text-align:right;">금액</th><th>사업</th><th>계정</th><th>결제</th><th>증빙</th><th>대조</th><th></th></tr></thead><tbody>
+        ${rows.map(r => `<tr><td>${escapeHtml(r.date || '')}</td><td>${escapeHtml(r.vendor || '')}</td><td>${escapeHtml(r.item || '')}</td><td style="text-align:right;">${_expAmt(r).toLocaleString()}</td>
+          <td>${escapeHtml(r.biz || '')}</td><td>${escapeHtml(r.acct || '')}</td><td>${escapeHtml(r.pay || '')}</td>
+          <td style="font-size:12px;">${escapeHtml(r.evKind || '')}${r.docId ? ` <a href="/api/my/docs/${Number(r.docId)}/file" title="${escapeHtml(r.docName || '')}">📎</a>` : r.docName ? ' 📎' : ''}</td>
+          <td>${_expBadge(expStatus(r))}</td>
+          <td style="white-space:nowrap;"><button class="btn btn-outline btn-sm" onclick="expPick('${escapeJs(r.id)}')">대조</button>
+            <button class="btn btn-ghost btn-sm" onclick="regEdit('expenses','${escapeJs(r.id)}')">고치기</button>
+            <button class="btn btn-ghost btn-sm" onclick="regDelete('expenses','${escapeJs(r.id)}')">지우기</button></td></tr>`).join('')}
+      </tbody></table></div>` : '<p class="text-mute">아직 없습니다. 영수증을 「📥 자료로 넣기」로 올리거나 「+ 영수증 넣기」를 누르세요. 현금으로 낸 돈은 「💵 현금 지출」로 현금영수증을 넣으면 통장 기록 없이도 씁니다.</p>'}
+    </div>`;
+}
+/* 고치기 창 — 사업 구분·거래처로 계정 채우기, 결제 수단으로 증빙 종류 채우기, 영수증 파일 */
+function expFormWire(){
+  const $ = id => document.getElementById(id);
+  const 계정채우기 = force => { const a = expAcctFor($('rg-vendor').value, $('rg-biz').value); if(a && (force || !$('rg-acct').value)) $('rg-acct').value = a; };
+  if($('rg-biz')) $('rg-biz').addEventListener('change', () => 계정채우기(!!EXP_BIZ_ACCT[$('rg-biz').value]));
+  if($('rg-vendor')) $('rg-vendor').addEventListener('change', () => 계정채우기(false));
+  if($('rg-pay')) $('rg-pay').addEventListener('change', () => { const p = $('rg-pay').value;
+    const e = /현금영수증/.test(p) ? '현금영수증' : /간이/.test(p) ? '간이영수증' : /카드/.test(p) ? '신용카드 매출전표' : '';
+    if(e) $('rg-evKind').value = e; $('rg-cashNo').closest('.form-row').style.display = /현금영수증/.test(p) ? '' : 'none'; });
+  if($('rg-cashNo') && !/현금영수증/.test(($('rg-pay') || {}).value || '')) $('rg-cashNo').closest('.form-row').style.display = 'none';
+  const dl = $('rg-vendor'); if(dl){ dl.setAttribute('list', 'exp-vendors'); }
+}
+function expFormExtra(r){
+  const 이름들 = Array.from(new Set((MOCK.tax.vendors || []).map(v => v.name).concat(regLoad('expenses').map(x => x.vendor)).filter(Boolean)));
+  return `<datalist id="exp-vendors">${이름들.map(n => `<option value="${escapeHtml(n)}">`).join('')}</datalist>
+    <div class="form-row"><label>영수증 파일 (사진·PDF)${r.docName ? ' — 지금: ' + escapeHtml(r.docName) : ''}</label><input type="file" id="rg-file" accept="image/*,.pdf"></div>
+    <p class="text-mute" style="font-size:12px;margin:0;">계정은 「무슨 일에 쓴 돈인가」로 고릅니다. 주민환원 잔치 장보기·식사처럼 업체가 여러 곳이어도 사업 구분을 「주민환원」으로 두면 모두 주민환원사업비로 합산됩니다.
+    현금은 현금영수증(승인번호나 사진)이 있어야 대조 완료가 됩니다. 3만원 넘는 지출을 간이영수증으로 받으면 비용 인정에 문제가 될 수 있습니다.</p>`;
+}
+
 const REG = {
   contracts: {이름:'계약서 대장', icon:'📑', 설명:'시공·부지 임대·유지관리·보험 등 조합이 맺은 계약. 종료일 90일 전부터 현황·업무 달력에 뜹니다.',
     칸:[['title','계약명'],['party','상대방'],['kind','종류','시공 · 부지 임대 · 유지관리 · 보험 · 융자 · 기타'],['amount','계약금액(원)','num'],['start','시작일','date'],['end','종료일','date'],['memo','메모']]},
   minutes: {이름:'회의록 대장', icon:'🗂', 설명:'총회·이사회·마을총회 회의록. 의결사항은 업무 달력에 할 일로 더할 수 있습니다(협동조합 기본법 제30조 — 의장과 선출 조합원 3인 이상 서명).',
     칸:[['date','회의일','date'],['type','회의','정기총회 · 임시총회 · 이사회 · 마을총회'],['title','안건'],['result','의결 결과'],['attend','출석/재적'],['signed','서명(의장·선출 조합원 3인)','예 / 아니오'],['memo','메모']]},
-  expenses: {이름:'지출결의', icon:'🧾', 설명:'영수증·세금계산서 한 장마다 한 줄. 예산 항목과 계정을 붙이고, 이체했는지 표시합니다.',
-    칸:[['date','지출일','date'],['vendor','거래처'],['item','내용'],['amount','금액(원)','num'],['acct','계정','발전설비유지관리비 · 보험료 · 지급임차료 · 지급수수료 · 통신비 · 회의비 · 기타'],['budget','예산 항목'],['paid','이체 확인','예 / 아니오'],['memo','메모']]},
+  expenses: {이름:'지출결의', icon:'🧾', 설명:'영수증·세금계산서·현금영수증 한 장마다 한 줄. 계정은 거래처가 아니라 「무슨 일에 쓴 돈인가」로 붙여, 업체가 여러 곳이어도 같은 계정으로 합산됩니다. 통장·카드 기록과 대조하고, 현금은 현금영수증으로 씁니다.',
+    칸:[['date','지출일','date'],['vendor','거래처(가맹점)'],['item','내용'],['amount','금액(원, 부가세 포함)','num'],['biz','사업 구분',EXP_BIZ.join(' · '),'sel'],['acct','계정',EXP_ACCTS.join(' · '),'sel'],
+        ['pay','결제 수단',EXP_PAY.join(' · '),'sel'],['evKind','증빙 종류',EXP_EV.join(' · '),'sel'],['cashNo','현금영수증 승인번호','현금영수증에 적힌 승인번호'],['budget','예산 항목'],['memo','메모']]},
 };
 const REG_KEY = k => 'hsj_reg_' + k;
 function regLoad(k){ return _loadArr(REG_KEY(k)) || []; }
@@ -6657,9 +7052,12 @@ function regEdit(k, id, pre){
   showDyn({title: R.이름 + (id ? ' — 고치기' : ' — 넣기'), sub: pre && pre.src ? '자료에서 읽은 값입니다. 원본과 맞는지 보고 저장하세요.' : '',
     body: R.칸.map(([key, label, hint, t]) => `<div class="form-row"><label>${label}</label>
       ${key === 'memo' || key === 'result' ? `<textarea class="textarea" id="rg-${key}" placeholder="${escapeHtml(hint || '')}">${escapeHtml(r[key] || '')}</textarea>`
+        : t === 'sel' ? `<select class="select" id="rg-${key}"><option value="">— 고르기 —</option>${(function(){ const o = String(hint || '').split(' · '); if(r[key] && o.indexOf(r[key]) === -1) o.push(r[key]); return o; })().map(o => `<option${o === r[key] ? ' selected' : ''}>${escapeHtml(o)}</option>`).join('')}</select>`
         : `<input class="input" id="rg-${key}" type="${t === 'date' ? 'date' : 'text'}" value="${escapeHtml(r[key] == null ? '' : String(r[key]))}" placeholder="${escapeHtml(t === 'num' ? '예: 1,200,000' : (hint || ''))}">`}</div>`).join('')
-      + `<input type="hidden" id="rg-src" value="${escapeHtml(r.src || '')}">`,
+      + `<input type="hidden" id="rg-src" value="${escapeHtml(r.src || '')}"><input type="hidden" id="rg-fid" value="${escapeHtml(r._fid || '')}">`
+      + (k === 'expenses' ? expFormExtra(r) : ''),
     foot: `<button class="btn btn-outline" onclick="closeDyn()">취소</button><button class="btn btn-primary" onclick="regSaveForm('${escapeJs(k)}','${escapeJs(id || '')}')">저장</button>`});
+  if(k === 'expenses') expFormWire();
 }
 function regSaveForm(k, id){
   const R = REG[k], a = regLoad(k), u = currentUser();
@@ -6667,9 +7065,20 @@ function regSaveForm(k, id){
   R.칸.forEach(([key]) => { const el = document.getElementById('rg-' + key); if(el) rec[key] = el.value.trim(); });
   const src = document.getElementById('rg-src'); if(src && src.value) rec.src = src.value;
   if(!R.칸.some(([key]) => rec[key])){ toast('넣은 값이 없습니다.'); return; }
+  let 파일 = null;
+  if(k === 'expenses'){
+    const fe = document.getElementById('rg-file'), fid = (document.getElementById('rg-fid') || {}).value;
+    파일 = fe && fe.files && fe.files[0] ? fe.files[0] : (fid && _inboxFiles[fid]) || null;
+    if(!rec.date || !_expAmt(rec)){ toast('지출일과 금액은 꼭 넣어 주세요.'); return; }
+    if(/현금영수증/.test(rec.pay || '') && !rec.cashNo && !파일 && !rec.docId){ toast('현금 지출은 현금영수증 승인번호를 적거나 현금영수증 사진을 올려야 씁니다.'); return; }
+    if(!rec.acct) rec.acct = expAcctFor(rec.vendor, rec.biz) || '기타';
+    if(rec.match && rec.match.src === 'cash' && !/현금영수증/.test(rec.pay || '')) delete rec.match;
+  }
   rec.by = u ? u.name : ''; rec.updated = new Date().toISOString();
   if(!id) a.push(rec);
-  regSave(k, a); closeDyn(); navigate(); toast(R.이름 + '에 저장했습니다.');
+  regSave(k, a); closeDyn();
+  if(k === 'expenses'){ expMatchAll(false); if(파일) expUploadDoc(rec.id, 파일); }
+  navigate(); toast(R.이름 + '에 저장했습니다.');
   if(_regAfter){ const f = _regAfter; _regAfter = null; f(); }
 }
 let _regAfter = null;
@@ -6697,6 +7106,7 @@ function inboxToRegister(fid){
   Object.entries(v).forEach(([f, val]) => { if(M[f]) pre[M[f]] = pre[M[f]] ? pre[M[f]] + ' / ' + val : val; });
   if(k === 'minutes') pre.type = it.kind === 'board' ? '이사회' : '정기총회';
   if(k === 'expenses' && v['세액']) pre.memo = '세액 ' + v['세액'];
+  if(k === 'expenses'){ pre._fid = fid; pre.evKind = /계산서/.test(it.name) ? '세금계산서' : ''; pre.acct = expAcctFor(pre.vendor, '') || ''; }
   _regAfter = 끝; regEdit(k, '', pre);
 }
 
@@ -7605,6 +8015,7 @@ async function inboxProcess(fid){
     const f = _inboxFiles[fid];
     if(!f){ toast('새로고침 뒤에는 파일을 다시 올려야 읽을 수 있습니다.'); return; }
     if(it.kind === 'bank'){  inboxParseBank(f, fid);  return; }
+    if(it.kind === 'card'){  expImportCard(f, function(n, 말){ _inboxFinish(fid, n ? '완료' : '실패', 말, n ? '#/mem/expenses' : ''); toast(말); });  return; }
     if(it.kind === 'rems'){  inboxParseRems(f, fid);  return; }
     if(it.kind === 'kepco'){ inboxParseKepco(f, fid); return; }
     if(it.kind === 'roster'){ inboxParseRoster(f, fid); return; }
@@ -8894,6 +9305,9 @@ const DOC_KINDS = [
   { id:'bank',      이름:'통장 거래내역',   ext:['csv','txt','xls','xlsx'], kw:['통장','거래내역','입출금','계좌','거래명세'],
     필드:['거래일','적요','입금','출금','잔액'],
     작업:['회계 기장 자동 분류','월마감','배분 기준액 대조','월간 운영보고서'], 파싱:'client' },
+  { id:'card',      이름:'카드 사용내역',   ext:['csv','txt','xlsx'], kw:['카드','이용내역','승인내역','사용내역','법인카드'],
+    필드:['이용일','가맹점','이용금액','승인번호'],
+    작업:['지출결의 영수증과 대조','카드대금 출금과 합 대조','증빙 보관함 기록'], 파싱:'client' },
   { id:'kepco',     이름:'한전 전력거래 명세', ext:['csv','xls','xlsx','pdf'], kw:['한전','전력거래','전력대금','정산금','판매대금','smp','rec'],
     필드:['정산월','발전량kWh','SMP','REC','정산금액'],
     작업:['발전대장 기입','수익 실적','배분 기준액','대시보드'], 파싱:'client' },
@@ -16274,7 +16688,7 @@ const _won = n => Math.round(Number(n)||0).toLocaleString('ko-KR') + '원';
 const _addYears = (ymd, y) => { const d = new Date(ymd + 'T00:00:00'); d.setFullYear(d.getFullYear() + y); return _ymd(d); };
 const _nextMonth10 = ym => { const [y, m] = ym.split('-').map(Number); const d = new Date(y, m, 10); return _ymd(d); };
 function taxVendor(id){ return MOCK.tax.vendors.find(v => v.id === id); }
-function taxCoopCode(){ return MOCK.tax.profile.coopCode || (myVillage().id || 'coop').toUpperCase(); }
+function taxCoopCode(){ return MOCK.tax.profile.coopCode || String((myVillage() || {}).id || 'coop').toUpperCase(); }   // 11-26: 실계정은 마을 번호가 숫자라 toUpperCase 오류였다
 function taxContactsOk(){ const c = MOCK.tax.contacts; return !!(c.main.name && c.main.phone && c.rep.name && c.rep.phone); }
 function taxLog(action, target){ MOCK.logs.unshift({ts: new Date().toISOString().slice(0,16).replace('T',' '), user: (currentUser()||{}).email || (currentUser()||{}).id || 'coop', action, target}); }
 
@@ -16623,7 +17037,7 @@ function memAccounting(){
         <button class="btn btn-ghost btn-sm" onclick="taxClearBank()">전체 삭제</button>
       </div>
       <div style="overflow-x:auto;"><table class="tbl" style="font-size:13px;min-width:900px;">
-        <thead><tr><th>일자</th><th>적요(원본·잠금)</th><th>입금</th><th>출금</th><th>거래처</th><th>현금인출</th><th>사유·메모</th><th>보조금코드</th><th>증빙</th><th></th></tr></thead>
+        <thead><tr><th>일자</th><th>적요(원본·잠금)</th><th>입금</th><th>출금</th><th>거래처</th><th>계정</th><th>현금인출</th><th>사유·메모</th><th>보조금코드</th><th>증빙</th><th></th></tr></thead>
         <tbody>${T.bank.filter(t => t.date.slice(0,7) === (document.getElementById('tax-bank-ym') ? document.getElementById('tax-bank-ym').value : (window._taxBankYm||ym))).map(t => {
           const v = taxVendor(t.vendorId);
           return `<tr style="${t.cash && !t.cashReason ? 'background:#FDECEC;' : ''}">
@@ -16632,6 +17046,7 @@ function memAccounting(){
             <td><select class="select" style="width:150px;padding:3px 6px;font-size:12.5px;" onchange="taxSetVendor('${escapeJs(t.id)}', this.value)">
               <option value="">— 선택 —</option>${T.vendors.map(x => `<option value="${x.id}"${x.id===t.vendorId?' selected':''}>${escapeHtml(x.name)}</option>`).join('')}</select>
               ${t.vendorId ? (t.confirmed ? '<span class="badge badge-success">확정</span>' : `<span class="badge badge-gold">추천</span>`) : ''}</td>
+            <td>${t.out ? (t.cardBill ? `<span class="badge badge-mute" title="카드 사용 ${t.cardBill.length}건 합과 같음">카드대금 ${t.cardBill.length}건</span>` : (t.expIds && t.expIds.length) ? `<span class="badge badge-success" title="지출결의 계정을 따릅니다">🧾 영수증 ${t.expIds.length}장</span>` : `<select class="select" style="width:130px;padding:3px 6px;font-size:12.5px;" onchange="taxSetAcct('${escapeJs(t.id)}', this.value)"><option value="">${escapeHtml((v && v.acct) ? '거래처 계정(' + v.acct + ')' : '— 계정 —')}</option>${EXP_ACCTS.map(a => `<option${a === t.acctSel ? ' selected' : ''}>${escapeHtml(a)}</option>`).join('')}</select>`) : ''}</td>
             <td><input type="checkbox" ${t.cash?'checked':''} onchange="taxSetCash('${escapeJs(t.id)}', this.checked)"></td>
             <td><input class="input" style="width:170px;padding:3px 6px;font-size:12.5px;" value="${escapeHtml(t.cash ? t.cashReason : t.memo)}" placeholder="${t.cash ? '인출 사유(필수)' : '메모'}" onchange="taxSetMemo('${escapeJs(t.id)}', this.value)"></td>
             <td><input class="input" style="width:90px;padding:3px 6px;font-size:12.5px;" value="${escapeHtml(t.grant||'')}" placeholder="사업코드" onchange="taxSetGrant('${escapeJs(t.id)}', this.value)"></td>
@@ -16780,6 +17195,7 @@ function _taxTx(id){ return MOCK.tax.bank.find(t => t.id === id); }
 function taxSetVendor(id, vid){ const t = _taxTx(id); if(!t) return; t.vendorId = vid; t.confirmed = !!vid; persistTax(); refresh(); }
 function taxConfirmVendor(id){ const t = _taxTx(id); if(!t || !t.vendorId) return; t.confirmed = true; persistTax(); refresh(); }
 function taxConfirmAllSuggested(){ let n = 0; for(const t of MOCK.tax.bank){ if(t.vendorId && !t.confirmed){ t.confirmed = true; n++; } } persistTax(); toast(`추천 거래처 ${n}건을 확정했습니다.`); refresh(); }
+function taxSetAcct(id, a){ const t = _taxTx(id); if(!t) return; t.acctSel = a; persistTax(); }
 function taxSetCash(id, v){ const t = _taxTx(id); if(!t) return; t.cash = v; persistTax(); refresh(); }
 function taxSetMemo(id, v){ const t = _taxTx(id); if(!t) return; if(t.cash) t.cashReason = v.trim(); else t.memo = v.trim(); persistTax(); }
 function taxSetGrant(id, v){ const t = _taxTx(id); if(!t) return; t.grant = v.trim(); persistTax(); }
@@ -17160,6 +17576,25 @@ function taxSaveVendor(id){
   persistTax(); closeDyn(); toast('거래처를 저장했습니다.'); refresh();
 }
 function taxRemoveVendor(id){ MOCK.tax.vendors = MOCK.tax.vendors.filter(v => v.id !== id); persistTax(); closeDyn(); refresh(); }
+/* 사업비용 관리대장 — 계정별 합계. 한 출금에 영수증이 붙어 있으면 영수증 계정대로 나누고, 카드대금은 카드 사용에 붙은 영수증대로,
+   현금영수증 지출은 통장 기록 없이 더한다. 그 밖엔 통장 줄에서 고른 계정 → 거래처 계정 순(2026-11-26: 계정마다 거래처 여러 곳). */
+function taxExpenseByAcctHtml(tbl){
+  const T = MOCK.tax, ex = {}; regLoad('expenses').forEach(r => { ex[r.id] = r; });
+  const agg = {}, 더 = (a, 원, 거래처, 출처) => { a = a || '미분류'; agg[a] = agg[a] || {합:0, n:0, v:new Set(), s:new Set()}; agg[a].합 += 원; agg[a].n++; if(거래처) agg[a].v.add(거래처); agg[a].s.add(출처); };
+  const 나눠 = (총, ids, 기본, 출처) => { const rs = (ids || []).map(i => ex[i]).filter(Boolean); let 남 = 총;
+    rs.forEach(r => { const a = Math.min(_expAmt(r), 남); if(a > 0){ 더(r.acct, a, r.vendor, 출처); 남 -= a; } });
+    if(남 > 0) 더(기본, 남, '', 출처); };
+  for(const t of T.bank){
+    if(!t.out) continue;
+    const 기본 = t.acctSel || (taxVendor(t.vendorId) || {}).acct || '미분류';
+    if(t.cardBill){ let 남 = t.out; t.cardBill.forEach(cid => { const c = _expCardRow(cid); if(!c) return; 나눠(c.amount, c.expIds, '카드대금(영수증 미대조)', '카드'); 남 -= c.amount; }); if(남) 더('카드대금(영수증 미대조)', 남, '', '카드'); continue; }
+    if(t.expIds && t.expIds.length){ 나눠(t.out, t.expIds, 기본, '통장'); continue; }
+    if(t.confirmed || t.acctSel) 더(기본, t.out, (taxVendor(t.vendorId) || {}).name || '', '통장');
+  }
+  regLoad('expenses').forEach(r => { if(r.match && r.match.src === 'cash') 더(r.acct, _expAmt(r), r.vendor, '현금영수증'); });
+  return tbl(['계정','건수','거래처 수','합계','출처'], Object.entries(agg).sort((a, b) => b[1].합 - a[1].합).map(([k, o]) => [escapeHtml(k), o.n, o.v.size, Math.round(o.합).toLocaleString(), Array.from(o.s).join('·')]))
+    + '<p class="text-mute" style="font-size:12.5px;">한 번 출금에 영수증이 여러 장 붙으면 영수증의 계정대로 나눕니다. 거래처가 여러 곳이어도 같은 계정이면 한 줄로 합칩니다. 현금영수증 지출은 통장 기록이 없어도 더합니다.</p>';
+}
 function taxLedgerView(key){
   const T = MOCK.tax; const L = TAX_LEDGERS.find(l => l[2] === key); let body = '';
   const tbl = (head, rows) => rows.length ? `<table class="tbl" style="font-size:12.5px;"><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>` : '<p class="text-mute">아직 기록이 없습니다.</p>';
@@ -17169,7 +17604,7 @@ function taxLedgerView(key){
     case 'revenue': body = tbl(['일자','적요','입금','출금','수익원'], bankBy(t => ['ven01','ven02'].includes(t.vendorId) || t.vendorId==='ven05' && t.inn)); break;
     case 'grants': case 'assets': body = tbl(['교부기관','결정일','보조금','취득가','내용연수','연 감가상각','연 보조금수익'], T.grants.map(g=>[escapeHtml(g.agency), g.decidedAt, g.grant.toLocaleString(), g.cost.toLocaleString(), g.years, Math.round(g.cost/g.years).toLocaleString(), Math.round(g.grant/g.years).toLocaleString()])); break;
     case 'lease': body = tbl(['거래일','임대인','금액','구분','사업자번호'], T.evidence.filter(e=>e.leaseType).map(e=>[e.date, escapeHtml(e.vendor), Number(e.amount).toLocaleString(), e.leaseType, escapeHtml(e.bizNo)])) + tbl(['일자','적요','입금','출금','계정'], bankBy(t=>t.vendorId==='ven05')); break;
-    case 'expense': { const agg = {}; for(const t of T.bank){ if(t.out && t.confirmed){ const a = (taxVendor(t.vendorId)||{}).acct || '미분류'; agg[a] = (agg[a]||0) + t.out; } } body = tbl(['계정(거래처 기준)','합계'], Object.entries(agg).map(([k,v])=>[k, v.toLocaleString()])); break; }
+    case 'expense': { body = taxExpenseByAcctHtml(tbl); break; }
     case 'loan': body = tbl(['일자','적요','입금','출금','계정'], bankBy(t=>t.vendorId==='ven08')) + '<p class="text-mute" style="font-size:12.5px;">원금과 이자는 금융기관 상환 명세로 구분해 기록합니다.</p>'; break;
     case 'invoice': body = tbl(['거래일','거래처','금액','사업자번호','부가세'], T.evidence.filter(e=>e.kind==='세금계산서').map(e=>[e.date, escapeHtml(e.vendor), Number(e.amount).toLocaleString(), escapeHtml(e.bizNo), e.vatIncl?'포함':'미포함'])) + '<p class="text-mute" style="font-size:12.5px;">세무사는 홈택스에서 직접 조회합니다. 이 대장은 조합 내부 누락 점검용입니다.</p>'; break;
     case 'wht': body = tbl(['일자','대상','성격','소득구분','세전','원천징수','신고기한'], T.payments.map(p=>[p.date, escapeHtml(p.target), escapeHtml(p.nature), p.income, p.gross.toLocaleString(), p.wh.toLocaleString(), p.due])); break;
