@@ -218,7 +218,16 @@ input,select,textarea{font-family:inherit;font-size:14px;}
   border-radius:var(--radius);padding:16px 12px;
   height:fit-content;position:sticky;top:76px;
   box-shadow:var(--shadow-sm);
+  /* 11-26 이사장 지시: 메뉴가 화면보다 길면 사이드바 안에서만 굴러가게 — 메뉴 위에서 굴려도 본문이 따라 움직이지 않는다 */
+  max-height:calc(100vh - 92px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;
 }
+/* 11-26 한 메뉴 안의 화면 나눔(회계·세무 자진신고, 수익 시뮬레이션·배분 계획) */
+.subtabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 18px;padding-bottom:10px;border-bottom:1px solid var(--line-soft);}
+.subtab{border:1px solid var(--line-soft);background:var(--card);border-radius:999px;padding:7px 14px;font-size:13.5px;cursor:pointer;color:var(--ink);}
+.subtab:hover{background:var(--primary-50);}
+.subtab.on{background:var(--primary);border-color:var(--primary);color:#fff;font-weight:600;}
+.ac-flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:-4px 0 14px;font-size:12.5px;color:var(--ink-soft);}
+.ac-flow b{background:var(--primary-50);border-radius:6px;padding:3px 8px;font-weight:600;color:var(--ink);}
 .side-group{margin-bottom:16px;}
 .side-label{
   padding:6px 12px;font-size:11px;letter-spacing:.08em;
@@ -282,7 +291,7 @@ input,select,textarea{font-family:inherit;font-size:14px;}
 @media (max-width:900px){
   .grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}
   .app{grid-template-columns:1fr;}
-  .sidebar{position:relative;top:0;}
+  .sidebar{position:relative;top:0;max-height:none;overflow:visible;}
   .pub-nav,.role-nav{display:none !important;}
   .nav-toggle{display:inline-block;}
   .topnav-in{position:relative;flex-wrap:wrap;}
@@ -513,6 +522,8 @@ input,select,textarea{font-family:inherit;font-size:14px;}
 .ask-group .ask-q:hover{border-color:var(--primary);background:var(--primary-50);}
 .ask-tip{font-size:12.5px;color:var(--ink-soft);margin:0 0 12px;}
 .chat-input .input{flex:1;}
+.home3 .chat-input .input{min-width:0;}
+.home3 #hsMic{padding:0 10px;flex:none;}   /* 11-26 업무 시작 상담창 음성 입력 — 좁은 칸에서 입력 칸을 덜 먹게 */
 #hsMic.rec{background:#c0392b;color:#fff;border-color:#c0392b;}   /* 2026-11-24 소리로 묻기 녹음 중 */
 
 /* Toast */
@@ -1823,13 +1834,6 @@ const ROLE_MENUS = {
       ['mem','expenses','🧾','지출결의'],
       ['mem','ledgers','📒','거래처·표준장부'],
     ]],
-    ['내 AI', [
-      ['mem','ai','🤖','내 AI·내 기능'],
-    ]],
-    ['내 조합', [
-      ['mem','mypage','👤','마이페이지'],
-      ['pub','pricing','💳','요금 안내'],
-    ]],
     ['깊이 보기 · 설립·건설', [
       ['mem','structure','👪','마을회·조합 설계'],
       ['mem','setup','🏗','설립 내비게이터·청약'],
@@ -1841,11 +1845,10 @@ const ROLE_MENUS = {
     ]],
     ['깊이 보기 · 운영관리', [
       ['mem','power','⚡','발전·정산·배당'],
-      ['mem','revenue','💰','수익 시뮬레이션'],
-      ['mem','accounting','🧾','회계·세무 자료이관'],
-      ['mem','taxops','🗓️','세금·4대보험 직접 신고'],
+      /* 11-26 이사장 지시: 수익 시뮬레이션+수익 배분 계획, 회계·세무+세금·4대보험을 한 메뉴로. 옛 주소(#/mem/dist·taxops)는 같은 메뉴의 둘째 화면 */
+      ['mem','revenue','💰','수익 시뮬레이션·배분 계획'],
+      ['mem','accounting','🧾','회계·세무 자진신고'],
       ['mem','taxpay','💸','지급·원천징수'],
-      ['mem','dist','💧','수익 배분 계획'],
       ['mem','surplus','🧮','잉여금 처분 계산'],
       ['mem','finstat','📊','재무제표·컨설팅'],
       ['mem','closing','📁','월마감·보고서'],
@@ -1862,6 +1865,15 @@ const ROLE_MENUS = {
       ['mem','video','🎬','활동 영상 만들기'],
       ['mem','chat','💬','AI 상담'],
       CENTER_MENU,
+    ]],
+    /* 11-26 이사장 지시: 내 조합은 사이드바 맨 아래로, 그 아래 이용안내(사용 설명서·내 AI 연결 안내) */
+    ['내 조합', [
+      ['mem','mypage','👤','마이페이지'],
+      ['pub','pricing','💳','요금 안내'],
+    ]],
+    ['이용안내', [
+      ['href','manual.html','📖','사용 설명서'],
+      ['mem','ai','🤖','내 AI 연결 안내'],
     ]],
   ],
   guest: [
@@ -2093,7 +2105,7 @@ const MENU_DESC = {
   contracts:['계약서 대장','조합이 맺은 계약과 만기'],
   minutes:['회의록 대장','총회·이사회·마을총회 회의록과 의결사항'],
   expenses:['지출결의','영수증마다 계정·예산·이체 확인'],
-  ai:['내 AI·내 기능','우리 조합 AI 를 연결하고, AI 가 만든 우리 조합만의 칸·업무를 관리합니다'],
+  ai:['내 AI 연결 안내','우리 조합 AI 를 연결하고, AI 가 만든 우리 조합만의 칸·업무를 관리합니다'],
   home:['업무 시작','상담·자료 입력·문서 생성 세 가지 업무 창을 한 화면에서 엽니다'],
   dashboard:['현황 대시보드','보고 싶은 항목을 골라 우리 조합 현황을 한 화면에 모아 봅니다'],
   admDashboard:['통계 대시보드','플랫폼 전체 현황과 처리 대기 항목을 확인합니다'],
@@ -2120,8 +2132,8 @@ const MENU_DESC = {
   inbox:['자료함','가진 자료를 한 곳에 올리면 종류를 알아보고 이어지는 작업을 시작합니다'],
   law:['법령·인허가','우리 마을 조건으로 걸리는 법령을 자동 판정하고, 조문 근거와 함께 확인합니다'],
   power:['발전·정산·배당','발전량과 판매 수익, 조합원 배당을 관리합니다'],
-  revenue:['수익 시뮬레이션','설비 규모별 예상 수익을 계산해 봅니다'],
-  accounting:['회계·세무 자료이관','급여대장·통장 원본·증빙을 세무사에게 정해진 날짜에 보내고 되묻기를 받습니다'],
+  revenue:['수익 시뮬레이션·배분 계획','사업 전에는 설비 규모별 예상 수익을 어림하고, 실적이 쌓이면 발전수익을 순위대로 나누는 20년 배분 계획을 봅니다'],
+  accounting:['회계·세무 자진신고','조합이 직접 장부를 쓰고(자기 기장) 세금·4대보험 신고 값을 만들어, 조합 담당자가 홈택스에 직접 제출합니다'],
   taxops:['세금·4대보험 직접 신고','원천세·부가세·법인세와 직원 4대보험 신고의 기한·계산값을 챙기는 도구 — 제출은 조합 담당자가 홈택스에서 직접 합니다'],
   taxpay:['지급·원천징수','급여대장 5일 마감, 지급 유형 판별, 배당·햇빛소득 원천징수를 계산합니다'],
   ledgers:['표준장부·거래처','연합회 표준 관리대장 12종과 거래처별 표준 계정을 관리합니다'],
@@ -2577,11 +2589,18 @@ function renderTopActions(){
 }
 
 /* 11-07 메뉴 항목의 onclick·툴팁 — scope 'ext'(바깥 주소, 예: 시민자산육성지원센터)는 새 창으로 연다 */
-function menuOnclick(s, p){ return s === 'ext' ? `window.open('${p}','_blank','noopener')` : `location.hash='#/${s}/${p}'`; }
+function menuOnclick(s, p){ return s === 'ext' ? `window.open('${p}','_blank','noopener')` : s === 'href' ? `location.href='${p}'` : `location.hash='#/${s}/${p}'`; }
 function menuTitle(s, p){
   if(s === 'ext') return '별도 로그인 · 새 창으로 열립니다';
+  if(s === 'href') return '사용 설명서(웹) — 이 창에서 열립니다';
   const dk = (s === 'adm' && p === 'dashboard') ? 'admDashboard' : p;
   return MENU_DESC[dk] ? escapeHtml(MENU_DESC[dk][1]) : '';
+}
+/* 11-26 한 메뉴로 합친 화면의 둘째 주소 — 메뉴에 없으면 합친 메뉴에 불을 켠다(연합회처럼 taxops 가 따로 있으면 그대로) */
+const MENU_ALIAS = {'mem/taxops':'mem/accounting', 'mem/dist':'mem/revenue'};
+function menuCur(role, cur){
+  const has = k => (ROLE_MENUS[role] || []).some(([, it]) => it.some(([s, p]) => s + '/' + p === k));
+  return (!has(cur) && MENU_ALIAS[cur] && has(MENU_ALIAS[cur])) ? MENU_ALIAS[cur] : cur;
 }
 /* 등급별 상단 메뉴바 — ROLE_MENUS의 묶음을 버튼(단일)·드롭다운(복수)으로 그린다 */
 function renderRoleNav(){
@@ -2591,7 +2610,7 @@ function renderRoleNav(){
   const role = u ? normalizeRole(u.role) : 'guest';
   if(!u || role === 'guest'){ el.innerHTML = ''; el.style.display = 'none'; return; }
   const [scope, page] = currentRoute().split('/');
-  const cur = scope + '/' + (page || 'dashboard');
+  const cur = menuCur(role, scope + '/' + (page || 'dashboard'));
   el.style.display = '';
   el.innerHTML = (ROLE_MENUS[role] || []).map(([label, items], gi) => {
     const isOn = items.some(([s, p]) => s + '/' + p === cur);
@@ -2704,6 +2723,9 @@ function renderApp(scope, page){
 
   const role = u ? normalizeRole(u.role) : 'guest';
   sidebar.innerHTML = renderRoleSidebar(role, scope, page);
+  { const on = sidebar.querySelector('.side-item.on');   // 11-26 사이드바가 따로 굴러가므로, 지금 메뉴가 가려져 있으면 보이는 곳까지만 옮긴다(창은 안 움직임)
+    if(on && sidebar.scrollHeight > sidebar.clientHeight){ const t = on.getBoundingClientRect().top - sidebar.getBoundingClientRect().top + sidebar.scrollTop;
+      if(t < sidebar.scrollTop || t + on.offsetHeight > sidebar.scrollTop + sidebar.clientHeight) sidebar.scrollTop = Math.max(0, t - 80); } }
   main.innerHTML = scope === 'adm' ? renderAdminPage(page) : renderMemberPage(page);
 }
 
@@ -2930,8 +2952,8 @@ function sideHideSuggested(role){
   sideSaveHidden(sideHidden().concat(g.list)); toast('메뉴 ' + g.list.length + '개를 감췄습니다.');
 }
 function renderRoleSidebar(role, scope, active){
-  const cur = scope + '/' + active;
-  sideMarkUse(scope, active);
+  const cur = menuCur(role, scope + '/' + active);
+  sideMarkUse(cur.split('/')[0], cur.split('/')[1]);
   { const u = currentUser(), w = _sideWho(); if(u && u.unified && window._sidePrefsFor !== w){ window._sidePrefsFor = w; setTimeout(sidePrefsLoad, 0); } }
   const 사용 = _sideUse();
   let 감춤수 = 0;
@@ -4004,7 +4026,7 @@ const SUCCESS = [
       ['전문 위탁과 주민 감시를 함께', '운영을 전문업체에 맡기더라도 그것이 주민이 사업 내용을 모르는 이유가 되어서는 안 됩니다. 월간 보고서를 조합이 검토하고 운영위에 보고합니다.'],
       ['대장 5종과 월 마감 루틴 유지', '발전·회계·급여근태·조합원배당·설비정비 대장을 상시 기록하고, 매월 같은 순서로 마감합니다. 담당자가 바뀌어도 업무가 이어집니다.'],
     ],
-    links:[['발전·정산·배당', '#/mem/power'], ['월마감·보고서', '#/mem/closing'], ['회계·세무 자동화', '#/mem/accounting']],
+    links:[['발전·정산·배당', '#/mem/power'], ['월마감·보고서', '#/mem/closing'], ['회계·세무 자진신고', '#/mem/accounting']],
   },
   {
     no:'5', icon:'📜', name:'원칙과 규칙 준수',
@@ -6437,7 +6459,7 @@ function spTable(rows, warn, ok){
 
 function memDist(){
   const P = _DIST.plan;
-  if(!P) return `<div class="sec-head"><h1>💧 수익 배분 계획 (20년)</h1></div>
+  if(!P) return `<div class="sec-head"><h1>💰 수익 시뮬레이션·배분 계획</h1></div>${rvTabs('dist')}
     <div class="card"><p style="margin:0;">${REAL_API ? '계산하는 중…'
       : '체험 모드에서는 계획을 세우지 않습니다. 실계정으로 로그인하면 올린 실적으로 자동 계산됩니다.'}</p></div>
     <div id="distStratBox"></div>`;
@@ -6447,10 +6469,11 @@ function memDist(){
   const y1 = (P.years || [])[0];
   return `
     <div class="sec-head">
-      <h1>💧 수익 배분 계획 (20년)</h1>
-      <p class="sec-desc">발전수익을 <b>순위대로</b> 배분합니다. 고정 비율표를 쓰지 않습니다 —
+      <h1>💰 수익 시뮬레이션·배분 계획</h1>
+      <p class="sec-desc">발전수익을 <b>순위대로</b> 배분합니다(20년). 고정 비율표를 쓰지 않습니다 —
         조합마다 융자 조건이 달라 같은 비율로는 어떤 조합이 이자도 못 냅니다.</p>
     </div>
+    ${rvTabs('dist')}
     ${_DIST.예시 ? DEMO_FIN_NOTE : ''}
     <div id="distStratBox"></div>
 
@@ -7350,11 +7373,12 @@ function memAi(){
     <p class="text-mute" style="font-size:13px;margin-top:0;">AI 가 만든 칸은 현황 대시보드의 「내 기능」에 보입니다. 사람이 끄거나 지울 수 있고, 지워도 서버에 이력이 남습니다.</p>
     ${ext.tiles.length ? ext.tiles.map(t => `<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;"><label style="padding-top:14px;"><input type="checkbox" ${ext.off[t.id] ? '' : 'checked'} onchange="extToggle('${escapeJs(String(t.id))}', this.checked)"></label>
       <div style="flex:1;">${extTileHtml(t)}</div><button class="btn btn-ghost btn-sm" style="margin-top:10px;" onclick="extDelete('${escapeJs(String(t.id))}')">지우기</button></div>`).join('') : '<p class="text-mute" style="margin:0;">아직 없습니다. 연결한 AI 에게 「현황에 ○○ 칸을 만들어 줘」라고 시켜 보세요.</p>'}</div>`;
-  return `<div class="sec-head"><h1>🤖 내 AI·내 기능</h1><p class="sec-desc">우리 조합이 쓰는 AI 를 연결해, 우리 조합만의 칸·업무·대장을 AI 와 함께 키웁니다. 사이트의 기본 기능은 바뀌지 않습니다.</p></div>${연결}${열쇠}${내기능}`;
+  return `<div class="sec-head"><h1>🤖 내 AI 연결 안내</h1><p class="sec-desc">우리 조합이 쓰는 AI 를 연결해, 우리 조합만의 칸·업무·대장을 AI 와 함께 키웁니다. 사이트의 기본 기능은 바뀌지 않습니다.</p></div>${연결}${열쇠}${내기능}`;
 }
 
 function memHome(u){
   const village = myVillage();
+  setTimeout(function(){ hsVoiceSetup('#/mem/home'); }, 0);   // 11-26 상담창 음성 입력
   return `
     <div class="sec-head">
       <h1>업무 시작</h1>
@@ -7368,8 +7392,10 @@ function memHome(u){
         </div>
         <div class="chat-input">
           <input class="input" id="chatIn" placeholder="질문을 입력하세요" onkeydown="if(event.key==='Enter')sendChat()">
+          <button class="btn btn-outline" type="button" id="hsMic" title="음성 입력 — 누르고 말한 뒤 다시 누르면 받아쓴 글이 입력 칸에 들어갑니다(녹음은 저장하지 않음)" aria-label="음성 입력">🎙️</button>
           <button class="btn btn-primary" onclick="sendChat()">보내기</button>
         </div>
+        <div id="hsVoiceMsg" class="text-mute" style="font-size:12px;min-height:16px;margin-top:4px;"></div>
       </div>
       <div class="card home3-card">
         <div class="card-title"><h3 class="serif">📥 자료 입력</h3><a href="#/mem/inbox" class="text-small">자료함 →</a></div>
@@ -7488,7 +7514,7 @@ function memDashboard(u){
     return `<div class="card"><div class="card-title"><h3 class="serif">📑 90일 안에 끝나는 계약 (${cs.length})</h3><a href="#/mem/contracts" class="text-small">계약서 대장 →</a></div>
       ${cs.map(c => `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line-soft);"><span>${escapeHtml(c.title || '')} · ${escapeHtml(c.party || '')}</span><span class="badge badge-warn">${escapeHtml(c.end)} (${ddayLabel(c.end)})</span></div>`).join('') || '<p class="text-mute" style="margin:0;">곧 끝나는 계약이 없습니다.</p>'}</div>`; };
   tile.ext = () => { const o = extLoad(), ts = o.tiles.filter(t => !o.off[t.id]);
-    return ts.length ? `<div class="grid grid-2">${ts.map(extTileHtml).join('')}</div>` : `<div class="card"><div class="card-title"><h3 class="serif">🧩 내 기능</h3><a href="#/mem/ai" class="text-small">내 AI 연결 →</a></div><p class="text-mute" style="margin:0;">우리 AI 가 만든 칸이 여기에 보입니다. 「🤖 내 AI·내 기능」에서 AI 를 연결하세요.</p></div>`; };
+    return ts.length ? `<div class="grid grid-2">${ts.map(extTileHtml).join('')}</div>` : `<div class="card"><div class="card-title"><h3 class="serif">🧩 내 기능</h3><a href="#/mem/ai" class="text-small">내 AI 연결 →</a></div><p class="text-mute" style="margin:0;">우리 AI 가 만든 칸이 여기에 보입니다. 「이용안내 › 🤖 내 AI 연결 안내」에서 AI 를 연결하세요.</p></div>`; };
   const pairs = ['events','docs','ledger','members','expire'];
   const full = pick.filter(id => !pairs.includes(id)).map(id => `<div class="mt-20">${tile[id]()}</div>`).join('');
   const halves = pick.filter(id => pairs.includes(id)).map(id => tile[id]());
@@ -9733,13 +9759,19 @@ async function askLaw(){
   }
 }
 
+/* 11-26 이사장 지시: 「수익 시뮬레이션」과 「수익 배분 계획」을 한 메뉴로 — 사업 전 어림(#/mem/revenue)과 실적 기준 20년 계획(#/mem/dist)을 위 나눔 단추로 오간다 */
+function rvTabs(cur){
+  return `<div class="subtabs">${[['revenue','🔮 수익 시뮬레이션 (사업 전 어림)'],['dist','💧 수익 배분 계획 (20년 · 실적 기준)']]
+    .map(([k, n]) => `<button class="subtab ${k === cur ? 'on' : ''}" onclick="location.hash='#/mem/${k}'">${n}</button>`).join('')}</div>`;
+}
 function memRevenue(){
   return `
     <div class="sec-head">
-      <h1>수익 시뮬레이션</h1>
-      <p class="sec-desc">설비 규모·발전 조건을 입력하면 예상 매출·배당·상환 계획을 자동 계산합니다.
+      <h1>💰 수익 시뮬레이션·배분 계획</h1>
+      <p class="sec-desc">설비 규모·발전 조건을 입력하면 예상 매출·배당·상환 계획을 자동 계산합니다. 실적이 쌓이면 「💧 수익 배분 계획」에서 실제 발전수익을 순위대로 나눕니다.
         <button class="btn btn-outline btn-sm" onclick="showGlossary()" style="margin-left:6px;">📖 용어 쉬운 말 풀이</button></p>
     </div>
+    ${rvTabs('revenue')}
 
     <div class="grid grid-2">
       <div class="card">
@@ -10473,7 +10505,7 @@ function memClosing(){
       <p class="text-mute" style="margin-top:0;font-size:13px;">
         통장 거래내역 CSV를 자동 분류·기장하고, 한전 정산 수입의 50/10/20/20 배분 계산과 실제 이체 대조,
         계정과목별 집계까지 담은 <strong>월간 운영보고서</strong>를 생성합니다.
-        ${(bankFiles.length || inboxTx) ? '' : '먼저 <a href="#/mem/inbox" style="color:var(--primary);">자료함</a>이나 <a href="#/mem/accounting" style="color:var(--primary);">회계·세무 자동화</a>에 통장 내역을 올리거나, 실행 창에서 직접 파일을 선택하세요.'}
+        ${(bankFiles.length || inboxTx) ? '' : '먼저 <a href="#/mem/inbox" style="color:var(--primary);">자료함</a>이나 <a href="#/mem/accounting" style="color:var(--primary);">회계·세무 자진신고</a>에 통장 내역을 올리거나, 실행 창에서 직접 파일을 선택하세요.'}
       </p>
       <button class="btn btn-primary" onclick="closingStart()">📁 월 마감 실행</button>
     </div>
@@ -16383,7 +16415,11 @@ function hsSpeak(t){
   }catch(e){}
 }
 function hsSpeakStop(){ try{ window.speechSynthesis && window.speechSynthesis.cancel(); }catch(e){} }
-function hsVoiceSetup(){
+/* 11-26 이사장 지시: 「업무 시작」 상담창에도 붙인다 — pre 는 이 단추가 사는 화면 주소(떠나면 녹음을 끊고 받아쓴 글도 넣지 않는다).
+   회원에게 열리는지는 서버(/api/hatsoja/voice/state)가 정한다 — 처리방침 음성 항목 게시 전에는 실험실 권한자만 쓸 수 있다. */
+function hsVoiceSetup(pre){
+  pre = typeof pre === 'string' ? pre : '#/adm/lab';
+  const here = () => location.hash.startsWith(pre);
   hsSpeakSetup();
   if('speechSynthesis' in window) window.speechSynthesis.onvoiceschanged = hsSpeakSetup;   // 목소리 목록은 늦게 온다
   const btn = document.getElementById('hsMic');
@@ -16391,11 +16427,20 @@ function hsVoiceSetup(){
   btn.dataset.ready = '1';
   const can = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder && (window.AudioContext || window.webkitAudioContext));
   if(!can){ btn.disabled = true; btn.title = '이 브라우저에서는 소리로 묻기를 쓸 수 없습니다'; return; }
+  if(pre !== '#/adm/lab'){
+    btn.disabled = true;
+    fetch('/api/hatsoja/voice/state', {credentials:'same-origin'}).then(r => r.ok ? r.json() : {}).catch(() => ({})).then(j => {
+      if(!here()) return;
+      if(j && j.쓸수있음){ btn.disabled = false; return; }
+      btn.title = currentUser() && currentUser().unified ? '음성 입력은 준비 중입니다 — 곧 열립니다' : '체험 모드에서는 음성 입력을 쓸 수 없습니다';
+      hsVoiceMsg(currentUser() && currentUser().unified ? '🎙️ 음성 입력은 준비 중입니다(곧 열립니다).' : '');
+    });
+  }
   let rec = null, stream = null, chunks = [], timer = null, busy = false, cancelled = false;
   const MAX_SEC = 60;
   // 화면을 옮기면 녹음·마이크·읽기를 바로 끈다(최대 60초 더 켜져 있다가 다른 화면 입력 칸에 들어가던 것, 11-24 알파언니)
   window.addEventListener('hashchange', function hsLeave(){
-    if(location.hash.startsWith('#/adm/lab')) return;
+    if(here()) return;
     hsSpeakStop();
     if(rec && rec.state === 'recording'){ cancelled = true; rec.stop(); }
     else if(stream){ stream.getTracks().forEach(t => t.stop()); stream = null; }
@@ -16419,7 +16464,7 @@ function hsVoiceSetup(){
   }
   async function finish(){
     clearTimeout(timer); btn.classList.remove('rec'); btn.textContent = '🎙️'; btn.disabled = true; busy = true;
-    if(cancelled || !location.hash.startsWith('#/adm/lab')){   // 화면을 떠나며 멈춘 녹음은 보내지 않는다(11-24 알파언니)
+    if(cancelled || !here()){   // 화면을 떠나며 멈춘 녹음은 보내지 않는다(11-24 알파언니)
       busy = false; if(stream) stream.getTracks().forEach(t => t.stop()); stream = null; rec = null; return;
     }
     hsVoiceMsg('받아쓰는 중… (고성능컴퓨팅 엔진)');
@@ -16428,7 +16473,7 @@ function hsVoiceSetup(){
       const r = await fetch('/api/hatsoja/voice/stt', {method:'POST', headers:{'Content-Type':'audio/wav'}, body: wav, credentials:'same-origin'});
       const j = await r.json().catch(() => ({}));
       if(!r.ok || !j.ok) throw new Error(j.error || ('받아쓰기 실패 ' + r.status));
-      const inp = location.hash.startsWith('#/adm/lab') ? document.getElementById('chatIn') : null;   // 받는 동안 화면을 옮겼으면 넣지 않는다
+      const inp = here() ? document.getElementById('chatIn') : null;   // 받는 동안 화면을 옮겼으면 넣지 않는다
       if(!inp) return;
       inp.value = (inp.value.trim() ? inp.value.trim() + ' ' : '') + j.text; inp.focus();
       hsVoiceMsg('받아쓴 글을 입력 칸에 넣었습니다. 확인하고 「보내기」를 눌러 주세요.');
@@ -16438,6 +16483,10 @@ function hsVoiceSetup(){
   btn.addEventListener('click', async () => {
     if(busy) return;
     if(rec && rec.state === 'recording'){ rec.stop(); return; }
+    if(pre !== '#/adm/lab' && !localStorage.getItem('hsj_voice_ok')){
+      if(!confirm('음성 입력 안내\n\n· 단추를 누르는 동안(최대 1분) 녹음해 사교원 서버를 거쳐 고성능컴퓨팅 받아쓰기 엔진으로 보냅니다.\n· 녹음과 받아쓴 글은 저장하지 않고, 받아쓴 글은 입력 칸에만 넣습니다 — 확인하고 「보내기」를 누르세요.\n· 소리는 가릴 수 없으니 다른 사람의 이름·전화번호는 말하지 마세요.\n\n계속할까요?')) return;
+      try{ localStorage.setItem('hsj_voice_ok', '1'); }catch(e){}
+    }
     hsSpeakStop();
     try{ stream = await navigator.mediaDevices.getUserMedia({audio:true}); }
     catch(e){ hsVoiceMsg('⚠️ 마이크를 쓸 수 없습니다. 주소창의 마이크 권한을 허용해 주세요.'); return; }
@@ -17051,6 +17100,24 @@ async function bookSendGo(){
   closeDyn(); toast(ok + '건을 넣었습니다. 「세금·4대보험 직접 신고」에서 값을 확인하고 승인하세요.');
 }
 
+/* 11-26 이사장 지시: 「회계·세무 자료이관」과 「세금·4대보험 직접 신고」를 한 메뉴 「회계·세무 자진신고」로 합친다.
+   조합이 장부를 쓰고 → 신고 값을 만들어 → 대표가 승인하고 → 조합 담당자가 홈택스에 직접 제출한다(세무사법 — 사교원은 도구만, 신고 대행 아님).
+   ① 장부 쓰기는 #/mem/accounting, ② 신고하기는 #/mem/taxops(서버 신고 도구 tax.html), 세무사에게 일부 맡길 때는 accounting 의 셋째 화면. */
+let _acTab = 'book';
+function acHead(){
+  return `<div class="sec-head"><h1>🧾 회계·세무 자진신고</h1>
+      <p class="sec-desc">조합이 직접 장부를 쓰고(자기 기장), 신고 값을 만들어 대표가 승인한 뒤, 조합 담당자가 홈택스·위택스·4대보험 정보연계센터에 직접 로그인해 제출합니다. 사교원은 계산·기록 도구만 드리고 신고를 대신하지 않습니다.</p></div>
+    <div class="ac-flow"><b>① 통장·세금계산서 올리기</b>→<b>② 분개 확인·계정 고치기</b>→<b>③ 신고 일로 보내기</b>→<b>④ 대표 승인</b>→<b>⑤ 담당자가 홈택스에서 직접 제출·접수번호 기록</b></div>`;
+}
+function acTabs(cur){
+  return `<div class="subtabs">${[['book','📒 ① 장부 쓰기 · 통장 · 증빙'],['file','🗓️ ② 신고하기 (세금·4대보험)'],['agent','👤 담당자 · 세무사에게 맡길 때(선택)']]
+    .map(([k, n]) => `<button class="subtab ${k === cur ? 'on' : ''}" onclick="acGo('${k}')">${n}</button>`).join('')}</div>`;
+}
+function acGo(k){
+  if(k !== 'file') _acTab = k;
+  const h = k === 'file' ? '#/mem/taxops' : '#/mem/accounting';
+  if(location.hash === h) refresh(); else location.hash = h;
+}
 function memAccounting(){
   const T = MOCK.tax, ym = _ymPrev();
   const rowsYm = T.bank.filter(t => t.date.slice(0,7) === ym);
@@ -17059,13 +17126,55 @@ function memAccounting(){
   const pkg = T.packages.find(p => p.ym === ym);
   const c = T.contacts;
   const contactRow = (k, label) => `<tr><td><strong>${label}</strong></td><td>${escapeHtml(c[k].name || '—')}</td><td>${escapeHtml(c[k].phone || '—')}</td><td>${escapeHtml(c[k].email || '—')}</td></tr>`;
-  return `
-    <div class="sec-head">
-      <h1>🧾 회계·세무 자료이관</h1>
-      <p class="sec-desc">조합이 직접 장부를 쓰고(자기 기장) 세금 신고 값까지 만듭니다. 결산·외부조정만 세무사에게 맡길 때는 아래 「세무 패키지」로 원자료를 보냅니다.</p>
+  const tab = _acTab === 'agent' ? 'agent' : 'book';
+  const 장부 = `
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">🏦 통장 거래내역 — 원본 + 보조 시트</h3>
+        <div style="display:flex;gap:6px;">
+          <label class="btn btn-primary btn-sm" style="cursor:pointer;">📁 은행 CSV 올리기<input type="file" accept=".csv,.txt" style="display:none;" onchange="taxImportBank(this.files)"></label>
+          <button class="btn btn-outline btn-sm" onclick="taxSampleBank()">예시 거래 넣기</button>
+        </div></div>
+      <p class="text-mute" style="font-size:12.5px;margin-top:0;">적요는 절대 고치지 않습니다(원본은 해시와 함께 보관). 거래처는 자동 추천 뒤 사람이 확정하고, 현금 인출에는 사유를 꼭 적습니다. 계정과목 태그는 세무사에게 보내지 않습니다.</p>
+      ${T.bankFiles.length ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">${T.bankFiles.map(f => `<span class="badge badge-mute" title="해시 ${f.hash}">🔒 ${escapeHtml(f.name)} · ${f.rows}건 · ${f.date}</span>`).join('')}</div>` : ''}
+      ${T.bank.length ? `
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
+        <select class="select" id="tax-bank-ym" style="width:auto;" onchange="refresh()">${[...new Set(T.bank.map(t=>t.date.slice(0,7)))].sort().reverse().map(v => `<option value="${v}"${v===(window._taxBankYm||ym)?' selected':''}>${v}</option>`).join('')}</select>
+        <button class="btn btn-outline btn-sm" onclick="taxConfirmAllSuggested()">추천 거래처 전체 확정</button>
+        <button class="btn btn-outline btn-sm" onclick="taxExportGrant()">📥 보조금 정산용 추출(e나라도움)</button>
+        <button class="btn btn-ghost btn-sm" onclick="taxClearBank()">전체 삭제</button>
+      </div>
+      <div style="overflow-x:auto;"><table class="tbl" style="font-size:13px;min-width:900px;">
+        <thead><tr><th>일자</th><th>적요(원본·잠금)</th><th>입금</th><th>출금</th><th>거래처</th><th>계정</th><th>현금인출</th><th>사유·메모</th><th>보조금코드</th><th>증빙</th><th></th></tr></thead>
+        <tbody>${T.bank.filter(t => t.date.slice(0,7) === (document.getElementById('tax-bank-ym') ? document.getElementById('tax-bank-ym').value : (window._taxBankYm||ym))).map(t => {
+          const v = taxVendor(t.vendorId);
+          return `<tr style="${t.cash && !t.cashReason ? 'background:#FDECEC;' : ''}">
+            <td>${t.date}</td><td title="원본 적요는 수정할 수 없습니다">🔒 ${escapeHtml(t.desc)}</td>
+            <td>${t.inn ? t.inn.toLocaleString() : ''}</td><td>${t.out ? t.out.toLocaleString() : ''}</td>
+            <td><select class="select" style="width:150px;padding:3px 6px;font-size:12.5px;" onchange="taxSetVendor('${escapeJs(t.id)}', this.value)">
+              <option value="">— 선택 —</option>${T.vendors.map(x => `<option value="${x.id}"${x.id===t.vendorId?' selected':''}>${escapeHtml(x.name)}</option>`).join('')}</select>
+              ${t.vendorId ? (t.confirmed ? '<span class="badge badge-success">확정</span>' : `<span class="badge badge-gold">추천</span>`) : ''}</td>
+            <td>${t.out ? (t.cardBill ? `<span class="badge badge-mute" title="카드 사용 ${t.cardBill.length}건 합과 같음">카드대금 ${t.cardBill.length}건</span>` : (t.expIds && t.expIds.length) ? `<span class="badge badge-success" title="지출결의 계정을 따릅니다">🧾 영수증 ${t.expIds.length}장</span>` : `<select class="select" style="width:130px;padding:3px 6px;font-size:12.5px;" onchange="taxSetAcct('${escapeJs(t.id)}', this.value)"><option value="">${escapeHtml((v && v.acct) ? '거래처 계정(' + v.acct + ')' : '— 계정 —')}</option>${EXP_ACCTS.map(a => `<option${a === t.acctSel ? ' selected' : ''}>${escapeHtml(a)}</option>`).join('')}</select>`) : ''}</td>
+            <td><input type="checkbox" ${t.cash?'checked':''} onchange="taxSetCash('${escapeJs(t.id)}', this.checked)"></td>
+            <td><input class="input" style="width:170px;padding:3px 6px;font-size:12.5px;" value="${escapeHtml(t.cash ? t.cashReason : t.memo)}" placeholder="${t.cash ? '인출 사유(필수)' : '메모'}" onchange="taxSetMemo('${escapeJs(t.id)}', this.value)"></td>
+            <td><input class="input" style="width:90px;padding:3px 6px;font-size:12.5px;" value="${escapeHtml(t.grant||'')}" placeholder="사업코드" onchange="taxSetGrant('${escapeJs(t.id)}', this.value)"></td>
+            <td>${t.evId ? '📎' : `<button class="btn btn-ghost btn-sm" onclick="taxMatchEvidence('${escapeJs(t.id)}')">연결</button>`}</td>
+            <td>${t.vendorId && !t.confirmed ? `<button class="btn btn-ghost btn-sm" onclick="taxConfirmVendor('${escapeJs(t.id)}')">확정</button>` : ''}</td></tr>`; }).join('')}
+        </tbody></table></div>` : '<p class="text-mute text-center" style="padding:14px 0;">아직 거래내역이 없습니다. 은행에서 내려받은 CSV를 그대로 올리세요.</p>'}
     </div>
-    ${bookSectionHtml()}
 
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">📎 증빙 보관함 (5년 보존)</h3><button class="btn btn-primary btn-sm" onclick="taxAddEvidence()">+ 증빙 등록</button></div>
+      <p class="text-mute" style="font-size:12.5px;margin-top:0;">영수증은 세무사에게 보내지 않지만 품목 정리를 위해 조합이 5년 보관합니다. 계약서는 거래일·금액·거래처·사업자번호 4가지가 없으면 저장되지 않습니다. 파일명은 <code>조합코드_날짜_거래처_금액_종류</code> 규칙으로 자동 정리됩니다.</p>
+      ${T.evidence.length ? `<div style="overflow-x:auto;"><table class="tbl" style="font-size:13px;min-width:760px;"><thead><tr><th>종류</th><th>거래일</th><th>거래처</th><th>금액</th><th>사업자번호</th><th>부가세</th><th>보조금</th><th>정리 파일명</th><th>보존기한</th><th></th></tr></thead><tbody>
+        ${T.evidence.slice().reverse().map(e => `<tr><td><span class="badge ${e.kind==='보조금 교부결정서'?'badge-gold':'badge-mute'}">${escapeHtml(e.kind)}</span></td><td>${escapeHtml(e.date)}</td><td>${escapeHtml(e.vendor)}</td><td>${Number(e.amount).toLocaleString()}</td><td>${escapeHtml(e.bizNo||'—')}</td><td>${e.vatIncl?'포함':'미포함'}</td><td>${e.grant ? escapeHtml(e.grantCode||'보조금') : '—'}</td><td class="text-mute" style="font-size:12px;">${escapeHtml(e.fileName)}</td><td>${escapeHtml(e.keepUntil)}</td><td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="taxRemoveEvidence('${escapeJs(e.id)}')">삭제</button></td></tr>`).join('')}
+      </tbody></table></div>` : '<p class="text-mute text-center" style="padding:14px 0;">등록된 증빙이 없습니다.</p>'}
+    </div>
+
+`;
+  const 맡김 = `
+    <div class="card" style="margin-bottom:16px;">
+      <p style="margin:0;font-size:13.5px;">이 화면은 <b>결산·외부조정처럼 일부만 세무사에게 맡기는 조합</b>이 씁니다. 자진신고만 하는 조합은 「① 장부 쓰기」와 「② 신고하기」만으로 충분합니다. 다만 아래 <b>세무 담당자·대표 연락처</b>는 신고를 승인·제출할 사람이므로 모든 조합이 등록해 두세요.</p>
+    </div>
     ${!taxContactsOk() ? `<div class="card" style="border-left:4px solid var(--danger);margin-bottom:16px;">
       <strong>먼저 세무 담당자와 대표 연락처를 등록하세요.</strong>
       <p class="text-mute" style="margin:4px 0 8px;font-size:13px;">세무사가 첫째로 꼽은 조건은 "연락되는 담당자"입니다. 담당자·부담당자·대표 3인이 등록돼야 패키지를 보낼 수 있습니다.</p>
@@ -17127,48 +17236,6 @@ function memAccounting(){
     </div>
 
     <div class="card mt-20">
-      <div class="card-title"><h3 class="serif">🏦 통장 거래내역 — 원본 + 보조 시트</h3>
-        <div style="display:flex;gap:6px;">
-          <label class="btn btn-primary btn-sm" style="cursor:pointer;">📁 은행 CSV 올리기<input type="file" accept=".csv,.txt" style="display:none;" onchange="taxImportBank(this.files)"></label>
-          <button class="btn btn-outline btn-sm" onclick="taxSampleBank()">예시 거래 넣기</button>
-        </div></div>
-      <p class="text-mute" style="font-size:12.5px;margin-top:0;">적요는 절대 고치지 않습니다(원본은 해시와 함께 보관). 거래처는 자동 추천 뒤 사람이 확정하고, 현금 인출에는 사유를 꼭 적습니다. 계정과목 태그는 세무사에게 보내지 않습니다.</p>
-      ${T.bankFiles.length ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">${T.bankFiles.map(f => `<span class="badge badge-mute" title="해시 ${f.hash}">🔒 ${escapeHtml(f.name)} · ${f.rows}건 · ${f.date}</span>`).join('')}</div>` : ''}
-      ${T.bank.length ? `
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
-        <select class="select" id="tax-bank-ym" style="width:auto;" onchange="refresh()">${[...new Set(T.bank.map(t=>t.date.slice(0,7)))].sort().reverse().map(v => `<option value="${v}"${v===(window._taxBankYm||ym)?' selected':''}>${v}</option>`).join('')}</select>
-        <button class="btn btn-outline btn-sm" onclick="taxConfirmAllSuggested()">추천 거래처 전체 확정</button>
-        <button class="btn btn-outline btn-sm" onclick="taxExportGrant()">📥 보조금 정산용 추출(e나라도움)</button>
-        <button class="btn btn-ghost btn-sm" onclick="taxClearBank()">전체 삭제</button>
-      </div>
-      <div style="overflow-x:auto;"><table class="tbl" style="font-size:13px;min-width:900px;">
-        <thead><tr><th>일자</th><th>적요(원본·잠금)</th><th>입금</th><th>출금</th><th>거래처</th><th>계정</th><th>현금인출</th><th>사유·메모</th><th>보조금코드</th><th>증빙</th><th></th></tr></thead>
-        <tbody>${T.bank.filter(t => t.date.slice(0,7) === (document.getElementById('tax-bank-ym') ? document.getElementById('tax-bank-ym').value : (window._taxBankYm||ym))).map(t => {
-          const v = taxVendor(t.vendorId);
-          return `<tr style="${t.cash && !t.cashReason ? 'background:#FDECEC;' : ''}">
-            <td>${t.date}</td><td title="원본 적요는 수정할 수 없습니다">🔒 ${escapeHtml(t.desc)}</td>
-            <td>${t.inn ? t.inn.toLocaleString() : ''}</td><td>${t.out ? t.out.toLocaleString() : ''}</td>
-            <td><select class="select" style="width:150px;padding:3px 6px;font-size:12.5px;" onchange="taxSetVendor('${escapeJs(t.id)}', this.value)">
-              <option value="">— 선택 —</option>${T.vendors.map(x => `<option value="${x.id}"${x.id===t.vendorId?' selected':''}>${escapeHtml(x.name)}</option>`).join('')}</select>
-              ${t.vendorId ? (t.confirmed ? '<span class="badge badge-success">확정</span>' : `<span class="badge badge-gold">추천</span>`) : ''}</td>
-            <td>${t.out ? (t.cardBill ? `<span class="badge badge-mute" title="카드 사용 ${t.cardBill.length}건 합과 같음">카드대금 ${t.cardBill.length}건</span>` : (t.expIds && t.expIds.length) ? `<span class="badge badge-success" title="지출결의 계정을 따릅니다">🧾 영수증 ${t.expIds.length}장</span>` : `<select class="select" style="width:130px;padding:3px 6px;font-size:12.5px;" onchange="taxSetAcct('${escapeJs(t.id)}', this.value)"><option value="">${escapeHtml((v && v.acct) ? '거래처 계정(' + v.acct + ')' : '— 계정 —')}</option>${EXP_ACCTS.map(a => `<option${a === t.acctSel ? ' selected' : ''}>${escapeHtml(a)}</option>`).join('')}</select>`) : ''}</td>
-            <td><input type="checkbox" ${t.cash?'checked':''} onchange="taxSetCash('${escapeJs(t.id)}', this.checked)"></td>
-            <td><input class="input" style="width:170px;padding:3px 6px;font-size:12.5px;" value="${escapeHtml(t.cash ? t.cashReason : t.memo)}" placeholder="${t.cash ? '인출 사유(필수)' : '메모'}" onchange="taxSetMemo('${escapeJs(t.id)}', this.value)"></td>
-            <td><input class="input" style="width:90px;padding:3px 6px;font-size:12.5px;" value="${escapeHtml(t.grant||'')}" placeholder="사업코드" onchange="taxSetGrant('${escapeJs(t.id)}', this.value)"></td>
-            <td>${t.evId ? '📎' : `<button class="btn btn-ghost btn-sm" onclick="taxMatchEvidence('${escapeJs(t.id)}')">연결</button>`}</td>
-            <td>${t.vendorId && !t.confirmed ? `<button class="btn btn-ghost btn-sm" onclick="taxConfirmVendor('${escapeJs(t.id)}')">확정</button>` : ''}</td></tr>`; }).join('')}
-        </tbody></table></div>` : '<p class="text-mute text-center" style="padding:14px 0;">아직 거래내역이 없습니다. 은행에서 내려받은 CSV를 그대로 올리세요.</p>'}
-    </div>
-
-    <div class="card mt-20">
-      <div class="card-title"><h3 class="serif">📎 증빙 보관함 (5년 보존)</h3><button class="btn btn-primary btn-sm" onclick="taxAddEvidence()">+ 증빙 등록</button></div>
-      <p class="text-mute" style="font-size:12.5px;margin-top:0;">영수증은 세무사에게 보내지 않지만 품목 정리를 위해 조합이 5년 보관합니다. 계약서는 거래일·금액·거래처·사업자번호 4가지가 없으면 저장되지 않습니다. 파일명은 <code>조합코드_날짜_거래처_금액_종류</code> 규칙으로 자동 정리됩니다.</p>
-      ${T.evidence.length ? `<div style="overflow-x:auto;"><table class="tbl" style="font-size:13px;min-width:760px;"><thead><tr><th>종류</th><th>거래일</th><th>거래처</th><th>금액</th><th>사업자번호</th><th>부가세</th><th>보조금</th><th>정리 파일명</th><th>보존기한</th><th></th></tr></thead><tbody>
-        ${T.evidence.slice().reverse().map(e => `<tr><td><span class="badge ${e.kind==='보조금 교부결정서'?'badge-gold':'badge-mute'}">${escapeHtml(e.kind)}</span></td><td>${escapeHtml(e.date)}</td><td>${escapeHtml(e.vendor)}</td><td>${Number(e.amount).toLocaleString()}</td><td>${escapeHtml(e.bizNo||'—')}</td><td>${e.vatIncl?'포함':'미포함'}</td><td>${e.grant ? escapeHtml(e.grantCode||'보조금') : '—'}</td><td class="text-mute" style="font-size:12px;">${escapeHtml(e.fileName)}</td><td>${escapeHtml(e.keepUntil)}</td><td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="taxRemoveEvidence('${escapeJs(e.id)}')">삭제</button></td></tr>`).join('')}
-      </tbody></table></div>` : '<p class="text-mute text-center" style="padding:14px 0;">등록된 증빙이 없습니다.</p>'}
-    </div>
-
-    <div class="card mt-20">
       <div class="card-title"><h3 class="serif">↩ 보정 요청(되묻기) ${openReturns.length ? `<span class="badge badge-danger">${openReturns.length}건 열림</span>` : ''}</h3></div>
       <p class="text-mute" style="font-size:12.5px;margin-top:0;">세무사가 패키지 항목에 사유 코드와 기한을 붙여 보내면 담당자에게 알림이 가고, 기한 초과 시 부담당→대표→연합회로 올라갑니다.</p>
       ${T.returns.length ? `<table class="tbl" style="font-size:13px;"><thead><tr><th>대상 월</th><th>항목</th><th>사유 코드</th><th>내용</th><th>기한</th><th>상태</th><th></th></tr></thead><tbody>
@@ -17177,18 +17244,19 @@ function memAccounting(){
       </tbody></table>` : '<p class="text-mute text-center" style="padding:14px 0;">보정 요청이 없습니다.</p>'}
     </div>
 
+`;
+  return acHead() + acTabs(tab) + (tab === 'agent' ? 맡김 : bookSectionHtml() + 장부) + `
     <div class="card mt-20">
       <div class="card-title"><h3 class="serif">🚫 이 화면이 하지 않는 것</h3></div>
       <ul style="padding-left:20px;color:var(--ink-soft);font-size:13.5px;margin:0;">
-        <li>통장 적요를 고치거나 정리하지 않습니다 — 원본 그대로, 메모만 붙입니다.</li>
-        <li>세무 신고서를 만들지 않습니다 — 신고는 기장을 맡은 세무사가 합니다. 시스템은 제출 전 누락·불일치만 점검합니다.</li>
-        <li>세금계산서·카드·현금영수증을 세무사에게 보내지 않습니다 — 홈택스 수임동의로 직접 조회합니다.</li>
-        <li>조합이 복식부기 장부를 따로 만들지 않습니다 — 가공된 자료는 확인 시간을 늘립니다.</li>
+        <li>신고를 대신 하지 않습니다 — 사교원 계정은 조합 홈택스·위택스·4대보험 정보연계센터에 들어가지 않습니다. 제출은 조합 담당자가 직접 합니다.</li>
+        <li>장부·세액을 대신 확정하지 않습니다 — 분개와 계산값은 「제안」이고, 확정은 조합 사람이 합니다. 사교원 AI 는 조합의 장부 확정·세액 확정·신고서 작성에 쓰지 않습니다.</li>
+        <li>통장 적요를 고치지 않습니다 — 원본 그대로, 메모만 붙입니다.</li>
+        <li>세무사를 소개하고 대가를 받지 않습니다 — 세무사에게 맡길 일이 있으면 조합이 직접 계약합니다.</li>
       </ul>
     </div>
   `;
 }
-
 /* 담당자·연락망 */
 function taxEditContacts(){
   const c = MOCK.tax.contacts, p = MOCK.tax.profile;
@@ -17455,10 +17523,14 @@ function taxPayrollCalc(base, bonus){
    화면 원본은 /opt/sakyowon/taxops/static/tax.html 한 벌이고 배포_햇소자.sh 가 hatsoja/tax.html 로 복사한다.
    권한(자기 조합만·연합회는 상태만)은 서버가 판정한다. */
 function memTaxOps(){
+  const u = currentUser(), fed = !!(u && normalizeRole(u.role) === 'federation');
+  const frame = `<iframe src="tax.html" title="세금·4대보험 직접 신고" style="width:100%;height:calc(100vh - 170px);min-height:640px;border:1px solid var(--line);border-radius:12px;background:#fff;"></iframe>`;
+  if(!fed) return acHead() + acTabs('file')   // 11-26 회계·세무 자진신고의 둘째 화면
+    + `<p class="text-mute" style="font-size:12.5px;margin:-6px 0 10px;">원천세·부가세·법인세와 직원 4대보험 신고를 기한 순서로 챙깁니다. 「① 장부 쓰기」에서 「📤 세금 신고 일로 보내기」를 누르면 장부 값이 여기로 옵니다. 대표가 값을 승인하면 조합 담당자가 직접 넣고 제출합니다.</p>` + frame;
   return `
     <div class="sec-head"><h1>🗓️ 세금·4대보험 직접 신고 도우미</h1>
       <p class="sec-desc">원천세·부가세·법인세와 직원 4대보험 신고를 기한 순서로 챙기는 계산·기록 도구입니다. 조합 대표가 값을 승인하면, 조합 담당자가 홈택스·위택스·4대보험 정보연계센터에 직접 로그인해 넣고 제출합니다. 신고를 대신 해 주는 기능이 아닙니다.</p></div>
-    <iframe src="tax.html" title="세금·4대보험 직접 신고" style="width:100%;height:calc(100vh - 170px);min-height:640px;border:1px solid var(--line);border-radius:12px;background:#fff;"></iframe>`;
+    ${frame}`;
 }
 function memTaxPay(){
   const T = MOCK.tax, ym = _ymPrev();
@@ -17760,7 +17832,7 @@ function memTaxJoin(){
           <tr><td>조직유형</td><td>${escapeHtml(a.orgType)}</td></tr><tr><td>사업자등록번호</td><td>${escapeHtml(a.bizNo)}</td></tr><tr><td>담당자</td><td>${escapeHtml(a.mgr)} · ${escapeHtml(a.mgrTel)} · ${escapeHtml(a.mgrEmail)}</td></tr>
           <tr><td>상태</td><td><span class="badge badge-primary">${a.status}</span></td></tr></tbody></table>
           <h4 style="margin:14px 0 6px;">다음 단계</h4>
-          <ol style="padding-left:20px;font-size:13.5px;"><li>${taxContactsOk() ? '✅' : '⬜'} 세무 담당자·부담당·대표 연락처 등록 ${taxContactsOk() ? '' : '<a href="#/mem/accounting" style="color:var(--primary);">(등록하기)</a>'}</li>
+          <ol style="padding-left:20px;font-size:13.5px;"><li>${taxContactsOk() ? '✅' : '⬜'} 세무 담당자·부담당·대표 연락처 등록 ${taxContactsOk() ? '' : '<a href="#/mem/accounting" onclick="_acTab=\'agent\'" style="color:var(--primary);">(등록하기)</a>'}</li>
             <li>${T.profile.hometax ? '✅' : '⬜'} 홈택스 세무사 수임동의</li><li>⬜ 연합회 표준 단가 통지 수령</li><li>⬜ 조합–세무사 사무소 개별 계약</li><li>⬜ 첫 달: 급여대장·통장 패키지·담당자 등록 3가지만</li></ol>
           <button class="btn btn-ghost btn-sm" onclick="taxApplyReset()">신청 취소</button>`
         : `<div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><div><label>기관명 *</label><input class="input" id="ap-org" value="${escapeHtml(v.name + ' 마을협동조합')}"></div><div><label>조직유형</label><select class="select" id="ap-type"><option>일반협동조합</option><option>사회적협동조합</option><option>마을기업</option><option>기타</option></select></div></div>
