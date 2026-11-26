@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>우리 조합 현황판 — 햇소자</title>
+<meta property="og:title" content="우리 조합 현황판">
+<meta property="og:description" content="햇빛발전 협동조합의 현황·공지·자료실">
+<meta property="og:type" content="website">
+<!-- 2026-11-26 햇소자 조합 공개 현황판 — 조합이 고른 현황·조합 공지·공개 자료만 보인다(로그인 없음).
+     자료는 /api/public/coop/{열쇠}. 열쇠는 주소의 ?t= 이고, 조합이 링크를 바꾸거나 공개를 끄면 바로 닫힌다. -->
+<style>
+:root{--green:#2E5741;--green-soft:#E8F0EA;--ink:#1F2A24;--mute:#6B7A70;--line:#E3E7E1;--paper:#F7F5EE;--gold:#B8860B}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Pretendard","Noto Sans KR",system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.6}
+.wrap{max-width:880px;margin:0 auto;padding:20px 16px 48px}
+header{background:var(--green);color:#fff;border-radius:16px;padding:22px 22px 18px}
+header h1{margin:0;font-size:24px}
+header p{margin:6px 0 0;opacity:.9;white-space:pre-wrap}
+.meta{font-size:12.5px;opacity:.8;margin-top:8px}
+.tabs{display:flex;gap:6px;margin:18px 0 12px;position:sticky;top:0;background:var(--paper);padding:6px 0;z-index:2}
+.tabs button{flex:1;border:1px solid var(--line);background:#fff;border-radius:999px;padding:10px 6px;font-size:15px;cursor:pointer;color:var(--ink)}
+.tabs button.on{background:var(--green);color:#fff;border-color:var(--green);font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px}
+.kpi .l{font-size:13px;color:var(--mute)}
+.kpi .n{font-size:26px;font-weight:700;color:var(--green)}
+.kpi .n small{font-size:14px;font-weight:500;color:var(--ink)}
+.kpi .s{font-size:12px;color:var(--mute)}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:4px 16px;margin-bottom:10px}
+.row{padding:12px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.tag{display:inline-block;font-size:12px;background:var(--green-soft);color:var(--green);border-radius:999px;padding:1px 8px;margin-right:6px}
+.body{white-space:pre-wrap;margin-top:6px;font-size:14.5px;display:none}
+.row.open .body{display:block}
+.title{font-weight:600;cursor:pointer}
+.date{font-size:12.5px;color:var(--mute)}
+.dl{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.btn{display:inline-block;border:1px solid var(--green);color:var(--green);background:#fff;border-radius:8px;padding:6px 12px;font-size:14px;text-decoration:none;white-space:nowrap}
+.empty{color:var(--mute);text-align:center;padding:28px 0}
+.hidden{display:none}
+.share{display:flex;gap:8px;justify-content:center;margin-top:24px;flex-wrap:wrap}
+.foot{font-size:12px;color:var(--mute);text-align:center;margin-top:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><h1 id="hTitle">우리 조합 현황판</h1><p id="hIntro"></p><div class="meta" id="hMeta"></div></header>
+  <div id="err" class="empty hidden"></div>
+  <div id="main" class="hidden">
+    <div class="tabs"><button data-v="stat" class="on">📊 현황</button><button data-v="notice">📢 공지</button><button data-v="file">📁 자료실</button></div>
+    <section id="v-stat"></section>
+    <section id="v-notice" class="hidden"></section>
+    <section id="v-file" class="hidden"></section>
+    <div class="share"><button class="btn" id="bShare">이 현황판 공유하기</button></div>
+  </div>
+  <p class="foot">햇빛발전 협동조합이 조합원께 공개한 화면입니다 · 사회혁신교육원사회적협동조합 햇소자</p>
+</div>
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const num = v => v == null ? "—" : Number(v).toLocaleString("ko-KR");
+const size = b => b > 1048576 ? (b / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(b / 1024)) + " KB";
+const T = new URLSearchParams(location.search).get("t") || "";
+function fail(m){ $("err").textContent = m; $("err").classList.remove("hidden"); }
+function stat(s){
+  if (s.key === "schedule") return `<div class="kpi" style="grid-column:1/-1"><div class="l">${esc(s.label)} <span class="s">${esc(s.asof)}</span></div>` +
+    ((s.events || []).length ? s.events.map(e => `<div style="padding:4px 0"><b>${esc(e.date.slice(5).replace("-", "/"))}</b> ${esc(e.title)} ${e.kind ? `<span class="tag">${esc(e.kind)}</span>` : ""}</div>`).join("") : `<div class="s">다가오는 일정이 없습니다.</div>`) + `</div>`;
+  if (s.key === "dist") return `<div class="kpi"><div class="l">${esc(s.label)}</div>` + ((s.parts || []).length ? s.parts.map(p => `<div style="font-size:14px">${esc(p.name)} <b>${num(p.value)}</b>원</div>`).join("") : `<div class="s">자료 없음</div>`) + `<div class="s">${esc(s.asof)}</div></div>`;
+  if (s.key === "phase") return `<div class="kpi"><div class="l">${esc(s.label)}</div><div class="n" style="font-size:20px">${esc(s.text || "—")}</div><div class="s">진행 ${num(s.value)}%</div></div>`;
+  return `<div class="kpi"><div class="l">${esc(s.label)}</div><div class="n">${num(s.value)} <small>${esc(s.unit || "")}</small></div>${s.sub ? `<div class="s">${esc(s.sub)}</div>` : ""}<div class="s">${esc(s.asof || "")}</div></div>`;
+}
+async function boot(){
+  if (!/^[A-Za-z0-9_\-]{16,64}$/.test(T)) { fail("링크 주소가 올바르지 않습니다. 받은 링크를 그대로 열어 주세요."); return; }
+  let j;
+  try { const r = await fetch("/api/public/coop/" + encodeURIComponent(T), {credentials: "omit"}); j = await r.json(); }
+  catch (e) { fail("잠시 연결되지 않습니다. 조금 뒤 다시 열어 주세요."); return; }
+  if (!j.ok) { fail("닫혔거나 바뀐 링크입니다. 조합에 새 링크를 받아 주세요."); return; }
+  const title = j.title || ((j.name || "우리 조합") + " 현황판");
+  document.title = title + " — 햇소자";
+  $("hTitle").textContent = title;
+  $("hIntro").textContent = j.intro || "";
+  $("hMeta").textContent = [j.name, j.region].filter(Boolean).join(" · ") + (j.updated_at ? " · 고친 날 " + j.updated_at.slice(0, 10) : "");
+  $("v-stat").innerHTML = (j.stats || []).length ? `<div class="grid">${j.stats.map(stat).join("")}</div>` : `<div class="empty">공개한 현황이 없습니다.</div>`;
+  $("v-notice").innerHTML = (j.notices || []).length ? `<div class="card">${j.notices.map(n => `<div class="row"><div class="title" onclick="this.parentNode.classList.toggle('open')"><span class="tag">${esc(n.tag)}</span>${esc(n.title)}</div><div class="date">${esc((n.created_at || "").slice(0, 10))}</div><div class="body">${esc(n.body || "(내용 없음)")}</div></div>`).join("")}</div>` : `<div class="empty">공지가 없습니다.</div>`;
+  $("v-file").innerHTML = (j.files || []).length ? `<div class="card">${j.files.map(f => `<div class="row dl"><div><div class="title" style="cursor:default">${esc(f.title)}</div><div class="date">${esc(f.kind || "")} · ${size(f.size || 0)} · ${esc(f.date || "")}</div></div><a class="btn" href="/api/public/coop/${encodeURIComponent(T)}/file/${Number(f.id)}" rel="noopener">받기</a></div>`).join("")}</div>` : `<div class="empty">공개한 자료가 없습니다.</div>`;
+  $("main").classList.remove("hidden");
+}
+document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => {
+  document.querySelectorAll(".tabs button").forEach(x => x.classList.toggle("on", x === b));
+  ["stat", "notice", "file"].forEach(v => $("v-" + v).classList.toggle("hidden", v !== b.dataset.v));
+});
+$("bShare").onclick = () => {
+  const url = location.href;
+  if (navigator.share) { navigator.share({title: document.title, url}).catch(() => {}); return; }
+  (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(() => { $("bShare").textContent = "링크를 복사했습니다"; }).catch(() => prompt("링크를 복사하세요", url));
+};
+boot();
+</script>
+</body>
+</html>

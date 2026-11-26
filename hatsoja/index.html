@@ -2665,6 +2665,7 @@ function navigate(){
     if(scope === 'mem' && FIN_PAGES.indexOf(page) !== -1) finLoad(page);
     if(scope === 'adm' && page === 'consult') admFinLoad();
     if(scope === 'mem' && page === 'dist') distLoad();
+    if(scope === 'mem' && page === 'library') shareLoad();
     if(scope === 'mem' && page === 'power' && _MY_MONTHLY === null) powerLoadMine();
     if(scope === 'mem' && page === 'power' && _MY_PLANTS === null) plantLoad();
     if(scope === 'mem' && page === 'power' && _MY_DOCS === null) docsLoad();
@@ -10259,15 +10260,167 @@ function removeClosing(id){
   refresh();
 }
 
+/* ─── 조합 공개 현황판 (2026-11-26 이사장 지시) ───
+   조합 관리자가 조합원에게 보일 정보 종류를 골라 현황판을 만들고, 링크 하나로 현황·공지·자료실을 공개한다.
+   링크는 복사·메일·휴대폰 공유(SNS)로 보낸다. 받는 사람은 로그인 없이 hatsoja/board.html?t=… 를 연다.
+   서버 /api/my/share(관리, 자기 조합만) · /api/public/coop/{열쇠}(공개). 공개로는 집계 숫자·조합이 쓴 공지·고른 서류만 나간다. */
+let _SHARE = null;          // 서버 응답 {share, choices, preview, notices, docs}
+let _SHARE_EDIT = false;    // 꾸미기 열림
+let _SHARE_NOTICE = null;   // 고치는 공지 id(새 공지는 0)
+function shareCanManage(){
+  const u = currentUser(); if(!u) return false;
+  const r = normalizeRole(u.role);
+  return r === 'coop' || (r === 'admin' && !!u.viewVillage);
+}
+async function shareLoad(){
+  const box = document.getElementById('coopShareBox'); if(!box) return;
+  if(!shareCanManage()){ box.innerHTML = ''; return; }
+  if(!REAL_API){ _SHARE = {체험:true}; shareRedraw(); return; }
+  try{
+    const j = await fetch('/api/my/share', {credentials:'same-origin'}).then(function(r){ return r.json(); });
+    _SHARE = j.ok ? j : {막힘: j.error || '불러오지 못했습니다'};
+  }catch(e){ _SHARE = {막힘:'서버에 닿지 못했습니다'}; }
+  shareRedraw();
+}
+function _shareVal(s){
+  if(s.key === 'schedule') return (s.events || []).length ? (s.events || []).slice(0, 3).map(function(e){ return '<div style="font-size:13px;">' + escapeHtml(e.date.slice(5)) + ' ' + escapeHtml(e.title) + '</div>'; }).join('') : '<div class="text-mute" style="font-size:13px;">일정 없음</div>';
+  if(s.key === 'dist') return (s.parts || []).length ? s.parts.map(function(p){ return '<div style="font-size:12.5px;">' + escapeHtml(p.name) + ' ' + Number(p.value).toLocaleString() + '원</div>'; }).join('') : '<div class="text-mute" style="font-size:13px;">자료 없음</div>';
+  if(s.key === 'phase') return '<div class="kpi-n" style="font-size:20px;">' + escapeHtml(s.text || '—') + '</div><div class="kpi-sub">진행 ' + (s.value || 0) + '%</div>';
+  return '<div class="kpi-n">' + (s.value == null ? '—' : Number(s.value).toLocaleString()) + '<span style="font-size:13px;font-weight:500;"> ' + escapeHtml(s.unit || '') + '</span></div>' + (s.sub ? '<div class="kpi-sub">' + escapeHtml(s.sub) + '</div>' : '');
+}
+function shareRedraw(){
+  const box = document.getElementById('coopShareBox'); if(!box || !_SHARE) return;
+  if(_SHARE.체험){
+    box.innerHTML = '<div class="card" style="border:2px solid var(--primary);margin-bottom:20px;"><h3 class="serif" style="margin-top:0;">📣 우리 조합 현황판 — 조합원에게 링크로 공개</h3>'
+      + '<p class="text-mute" style="margin:0;">조합원 수·출자금·발전량·판매 수입·일정 가운데 보일 것을 골라 현황판을 만들고, 조합 공지와 자료를 함께 링크 하나로 보냅니다. 실제 조합 계정으로 로그인하면 쓸 수 있습니다(체험 모드에서는 링크를 만들지 않습니다).</p></div>';
+    return;
+  }
+  if(_SHARE.막힘){ box.innerHTML = '<div class="card" style="margin-bottom:20px;"><b>우리 조합 현황판</b> <span class="text-mute">— ' + escapeHtml(_SHARE.막힘) + '</span></div>'; return; }
+  const s = _SHARE.share, 고른 = s.items || [];
+  const 값 = (_SHARE.preview || []).filter(function(p){ return 고른.indexOf(p.key) !== -1; });
+  const 고른서류 = (_SHARE.docs || []).filter(function(d){ return (s.doc_ids || []).indexOf(d.id) !== -1; });
+  const 링크 = s.link;
+  let h = '<div class="card" style="border:2px solid var(--primary);margin-bottom:20px;">'
+    + '<div class="card-title"><h3 class="serif">📣 ' + escapeHtml(s.title || '우리 조합 현황판') + '</h3>'
+    + '<span class="badge ' + (링크 ? 'badge-success' : 'badge-mute') + '">' + (링크 ? '링크 공개 중 · 열람 ' + (s.views || 0) + '회' : '공개 안 함') + '</span></div>'
+    + (s.intro ? '<p style="white-space:pre-wrap;margin-top:0;">' + escapeHtml(s.intro) + '</p>' : '')
+    + (값.length ? '<div class="grid grid-4" style="gap:10px;">' + 값.map(function(p){ return '<div class="kpi"><div class="kpi-l">' + escapeHtml(p.label) + '</div>' + _shareVal(p) + '<div class="kpi-sub text-mute" style="font-size:11px;">' + escapeHtml(p.asof || '') + '</div></div>'; }).join('') + '</div>'
+              : '<p class="text-mute">아직 보일 현황을 고르지 않았습니다. 「현황판 꾸미기」에서 고르세요.</p>')
+    + '<div class="grid grid-2 mt-20" style="gap:16px;"><div><h4 style="margin:0 0 6px;">📢 조합 공지 (' + (_SHARE.notices || []).length + ')</h4>'
+    + ((_SHARE.notices || []).length ? _SHARE.notices.slice(0, 5).map(function(n){ return '<div style="display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--line-soft);"><span style="cursor:pointer;" onclick="shareNoticeView(' + n.id + ')"><span class="badge badge-primary">' + escapeHtml(n.tag) + '</span> ' + escapeHtml(n.title) + ' <span class="text-mute text-small">' + escapeHtml((n.created_at || '').slice(0, 10)) + '</span></span><span style="white-space:nowrap;"><button class="btn btn-ghost btn-sm" onclick="shareNoticeForm(' + n.id + ')">고치기</button><button class="btn btn-ghost btn-sm" onclick="shareNoticeDel(' + n.id + ')">지우기</button></span></div>'; }).join('') : '<p class="text-mute text-small">조합 공지가 없습니다.</p>')
+    + '<button class="btn btn-outline btn-sm" style="margin-top:8px;" onclick="shareNoticeForm(0)">+ 조합 공지 쓰기</button></div>'
+    + '<div><h4 style="margin:0 0 6px;">📁 공개 자료 (' + 고른서류.length + ')</h4>'
+    + (고른서류.length ? 고른서류.map(function(d){ return '<div style="padding:6px 0;border-bottom:1px solid var(--line-soft);font-size:13.5px;">' + escapeHtml(d.filename) + ' <span class="text-mute text-small">' + escapeHtml(d.kind || '') + '</span></div>'; }).join('') : '<p class="text-mute text-small">공개할 자료를 고르지 않았습니다. 서류는 「서류 보관함」에 올린 것 가운데서 고릅니다.</p>')
+    + '</div></div>'
+    + '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;padding-top:12px;border-top:1px solid var(--line-soft);">'
+    + '<button class="btn btn-outline" onclick="_SHARE_EDIT=!_SHARE_EDIT;shareRedraw()">⚙️ 현황판 꾸미기</button>'
+    + (링크 ? '<button class="btn btn-primary" onclick="shareCopy()">🔗 링크 복사</button>'
+             + '<button class="btn btn-outline" onclick="shareSend(\'mail\')">✉️ 메일로 보내기</button>'
+             + '<button class="btn btn-outline" onclick="shareSend(\'sns\')">💬 문자·SNS로 공유</button>'
+             + '<a class="btn btn-ghost" href="' + escapeHtml(링크) + '" target="_blank" rel="noopener">받는 사람 화면 보기 ↗</a>'
+           : '<span class="text-mute" style="align-self:center;font-size:13px;">꾸미기에서 「링크로 공개」를 켜고 저장하면 링크가 생깁니다.</span>')
+    + '</div>'
+    + (링크 ? '<input class="input" readonly value="' + escapeHtml(링크) + '" style="margin-top:8px;font-size:12.5px;" onclick="this.select()">' : '');
+  if(_SHARE_EDIT) h += shareEditHtml();
+  if(_SHARE_NOTICE !== null) h += shareNoticeHtml();
+  h += '</div>';
+  box.innerHTML = h;
+}
+function shareEditHtml(){
+  const s = _SHARE.share, 고른 = s.items || [];
+  const 미리 = {}; (_SHARE.preview || []).forEach(function(p){ 미리[p.key] = p; });
+  return '<div style="background:var(--paper-soft);border-radius:10px;padding:14px 16px;margin-top:14px;">'
+    + '<h4 style="margin:0 0 8px;">⚙️ 현황판 꾸미기 — 조합원에게 보일 것을 고르세요</h4>'
+    + '<div class="form-row"><label>현황판 제목</label><input class="input" id="shTitle" maxlength="60" value="' + escapeHtml(s.title || '') + '" placeholder="예: ○○햇빛발전협동조합 조합원 소식"></div>'
+    + '<div class="form-row"><label>인사말·소개(선택)</label><textarea class="textarea" id="shIntro" maxlength="600" placeholder="조합원께 드리는 짧은 인사">' + escapeHtml(s.intro || '') + '</textarea></div>'
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:6px;">'
+    + (_SHARE.choices || []).map(function(c){ const p = 미리[c.key];
+        const 지금 = p ? (p.value != null ? Number(p.value).toLocaleString() + (p.unit ? ' ' + p.unit : '') : (p.events ? p.events.length + '건' : (p.parts ? p.parts.length + '항목' : (p.text || '')))) : '';
+        return '<label style="display:flex;gap:8px;align-items:flex-start;background:#fff;border:1px solid var(--line-soft);border-radius:8px;padding:8px;"><input type="checkbox" data-shitem="' + c.key + '"' + (고른.indexOf(c.key) !== -1 ? ' checked' : '') + '><span><b>' + escapeHtml(c.label) + '</b><br><span class="text-mute" style="font-size:12px;">' + escapeHtml(c.desc) + (지금 !== '' ? ' · 지금 ' + escapeHtml(String(지금)) : '') + '</span></span></label>'; }).join('')
+    + '</div>'
+    + '<h4 style="margin:14px 0 6px;">📁 공개할 자료 고르기 <span class="text-mute" style="font-weight:400;font-size:12.5px;">— 고른 파일은 링크를 받은 누구나 내려받습니다. 대표자 생년월일·연락처가 든 서류는 고르지 마세요.</span></h4>'
+    + ((_SHARE.docs || []).length ? '<div style="max-height:220px;overflow:auto;background:#fff;border:1px solid var(--line-soft);border-radius:8px;padding:6px 10px;">' + _SHARE.docs.map(function(d){ return '<label style="display:flex;gap:8px;padding:4px 0;font-size:13.5px;"><input type="checkbox" data-shdoc="' + d.id + '"' + ((s.doc_ids || []).indexOf(d.id) !== -1 ? ' checked' : '') + '>' + escapeHtml(d.filename) + ' <span class="text-mute">' + escapeHtml(d.kind || '') + ' · ' + escapeHtml((d.uploaded_at || '').slice(0, 10)) + '</span></label>'; }).join('') + '</div>'
+                              : '<p class="text-mute text-small">서류 보관함에 올린 자료가 없습니다. 「발전·정산·배당」의 서류 보관함에 먼저 올리세요.</p>')
+    + '<label style="display:flex;gap:8px;align-items:center;margin-top:12px;font-weight:600;"><input type="checkbox" id="shOn"' + (s.link ? ' checked' : '') + '> 링크로 공개하기(링크를 받은 누구나 로그인 없이 봅니다)</label>'
+    + '<div style="display:flex;gap:8px;margin-top:10px;"><button class="btn btn-primary" onclick="shareSave()">저장</button>'
+    + (s.token ? '<button class="btn btn-ghost" onclick="shareRotate()">링크 바꾸기(옛 링크 닫기)</button>' : '')
+    + '<button class="btn btn-ghost" onclick="_SHARE_EDIT=false;shareRedraw()">닫기</button></div></div>';
+}
+async function _shareApi(method, path, body){
+  const r = await fetch(path, {method:method, credentials:'same-origin', headers:{'Content-Type':'application/json'}, body: body ? JSON.stringify(body) : undefined});
+  const j = await r.json().catch(function(){ return {}; });
+  if(!r.ok || !j.ok) throw new Error(j.error || ('HTTP ' + r.status));
+  return j;
+}
+async function shareSave(){
+  const items = Array.from(document.querySelectorAll('[data-shitem]')).filter(function(x){ return x.checked; }).map(function(x){ return x.getAttribute('data-shitem'); });
+  const docs = Array.from(document.querySelectorAll('[data-shdoc]')).filter(function(x){ return x.checked; }).map(function(x){ return Number(x.getAttribute('data-shdoc')); });
+  const on = document.getElementById('shOn').checked;
+  if(on && docs.length && !confirm('고른 자료 ' + docs.length + '건은 링크를 받은 누구나 내려받을 수 있습니다. 개인정보가 없는 자료인지 확인했습니까?')) return;
+  try{
+    const j = await _shareApi('PUT', '/api/my/share', {enabled:on, title:document.getElementById('shTitle').value, intro:document.getElementById('shIntro').value, items:items, doc_ids:docs});
+    _SHARE.share = j.share; _SHARE_EDIT = false;
+    toast(on ? '저장했습니다. 이제 링크를 복사해 보내세요.' : '저장했습니다. 링크 공개는 꺼져 있습니다.');
+    shareRedraw();
+  }catch(e){ toast('저장하지 못했습니다: ' + e.message); }
+}
+async function shareRotate(){
+  if(!confirm('링크를 바꾸면 지금까지 보낸 링크는 바로 열리지 않습니다. 바꿀까요?')) return;
+  try{ const j = await _shareApi('POST', '/api/my/share/rotate'); _SHARE.share = j.share; toast('새 링크를 만들었습니다. 옛 링크는 닫혔습니다.'); shareRedraw(); }
+  catch(e){ toast('바꾸지 못했습니다: ' + e.message); }
+}
+function _shareMsg(){
+  const s = _SHARE.share;
+  return (s.title || '우리 조합 현황판') + '\n조합 현황·공지·자료를 여기서 보세요.\n' + s.link;
+}
+function shareCopy(){
+  const t = _SHARE.share.link;
+  (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function(){ toast('링크를 복사했습니다. 카카오톡·문자·밴드에 붙여 넣으세요.'); })
+    .catch(function(){ prompt('아래 링크를 복사하세요', t); });
+}
+function shareSend(how){
+  const s = _SHARE.share;
+  if(how === 'mail'){ location.href = 'mailto:?subject=' + encodeURIComponent(s.title || '우리 조합 현황판') + '&body=' + encodeURIComponent(_shareMsg()); return; }
+  if(navigator.share){ navigator.share({title: s.title || '우리 조합 현황판', text: '조합 현황·공지·자료를 여기서 보세요.', url: s.link}).catch(function(){}); return; }
+  shareCopy();
+}
+function shareNoticeForm(id){ _SHARE_NOTICE = id; shareRedraw(); const t = document.getElementById('shNTitle'); if(t){ t.scrollIntoView({block:'center'}); t.focus(); } }
+function shareNoticeHtml(){
+  const n = (_SHARE.notices || []).filter(function(x){ return x.id === _SHARE_NOTICE; })[0] || {title:'', body:'', tag:'공지'};
+  return '<div style="background:var(--paper-soft);border-radius:10px;padding:14px 16px;margin-top:14px;">'
+    + '<h4 style="margin:0 0 8px;">' + (_SHARE_NOTICE ? '조합 공지 고치기' : '조합 공지 쓰기') + ' <span class="text-mute" style="font-weight:400;font-size:12.5px;">— 링크를 받은 사람이 봅니다. 개인 연락처는 적지 마세요.</span></h4>'
+    + '<div style="display:flex;gap:8px;"><select class="select" id="shNTag" style="width:auto;">' + ['공지','총회','이사회','배당','발전','행사','기타'].map(function(t){ return '<option' + (n.tag === t ? ' selected' : '') + '>' + t + '</option>'; }).join('') + '</select>'
+    + '<input class="input" id="shNTitle" maxlength="80" placeholder="제목" value="' + escapeHtml(n.title) + '"></div>'
+    + '<textarea class="textarea" id="shNBody" maxlength="5000" style="margin-top:8px;min-height:120px;" placeholder="내용">' + escapeHtml(n.body) + '</textarea>'
+    + '<div style="display:flex;gap:8px;margin-top:8px;"><button class="btn btn-primary" onclick="shareNoticeSave()">저장</button><button class="btn btn-ghost" onclick="_SHARE_NOTICE=null;shareRedraw()">취소</button></div></div>';
+}
+async function shareNoticeSave(){
+  const b = {title:document.getElementById('shNTitle').value, body:document.getElementById('shNBody').value, tag:document.getElementById('shNTag').value};
+  if(!b.title.trim()){ toast('제목을 쓰세요.'); return; }
+  try{ await _shareApi('POST', '/api/my/share/notices' + (_SHARE_NOTICE ? '/' + _SHARE_NOTICE : ''), b); _SHARE_NOTICE = null; toast('공지를 저장했습니다.'); await shareLoad(); }
+  catch(e){ toast('저장하지 못했습니다: ' + e.message); }
+}
+async function shareNoticeDel(id){
+  if(!confirm('이 공지를 지울까요? 링크를 받은 사람에게도 사라집니다.')) return;
+  try{ await _shareApi('DELETE', '/api/my/share/notices/' + id); toast('지웠습니다.'); await shareLoad(); }
+  catch(e){ toast('지우지 못했습니다: ' + e.message); }
+}
+function shareNoticeView(id){
+  const n = (_SHARE.notices || []).filter(function(x){ return x.id === id; })[0]; if(!n) return;
+  showDyn({title:n.title, sub:(n.created_at || '').slice(0, 10) + ' · ' + n.tag, body:'<div style="white-space:pre-wrap;line-height:1.7;">' + escapeHtml(n.body || '(내용 없음)') + '</div>', foot:'<button class="btn btn-primary" onclick="closeDyn()">확인</button>'});
+}
+
 function memLibrary(){
   const notices = MOCK.contents.notices;
   const files   = MOCK.contents.files;
   return `
     <div class="sec-head">
       <h1>공지·자료실</h1>
-      <p class="sec-desc">공지사항과 참고 자료를 확인합니다.</p>
+      <p class="sec-desc">우리 조합 현황판을 꾸며 조합원에게 링크로 공개하고, 사교원 공지사항과 참고 자료를 확인합니다.</p>
     </div>
+    <div id="coopShareBox"></div>
 
+    <h3 class="serif" style="margin:4px 0 10px;">사교원 공지·자료실</h3>
     <div class="grid grid-2">
       <div class="card">
         <h3 class="serif">📢 공지사항 (${notices.length})</h3>
