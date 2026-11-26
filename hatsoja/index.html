@@ -2421,6 +2421,8 @@ async function doSignup(){
 /* SSO 자동 로그인: 통합 관리자 등에서 이미 로그인돼 있으면 그 세션을 그대로 인식 */
 async function ssoBoot(){
   const cu = currentUser();
+  /* 2026-11-26: 로그인해 둔 통합 계정으로 새로 고치면 실데이터·조합 자료(서버)를 다시 읽는다 — 전엔 처음 로그인 때만 읽어 새로고침하면 예시 화면이 나왔다 */
+  if(REAL_API && cu && cu.unified && (cu.hubRole || Array.isArray(cu.perms))){ loadRealData(); return; }
   if(!REAL_API || (cu && (cu.hubRole || Array.isArray(cu.perms) || !cu.unified))) return;   // 11-07 알파언니 🟠2: 11-07 전 저장값(hubRole·perms 없음)은 허브에 다시 물어 등급 재판정(C8-① 이 옛 저장값에도 먹게)
   try{
     const res = await fetch('/api/auth/me', {credentials:'same-origin'});
