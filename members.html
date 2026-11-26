@@ -248,7 +248,7 @@ function openInvoices() { return S.data.members.filter(m => m.open_invoice).map(
 function render() {
   const D = S.data, sum = D.summary, n = D.members.length;
   const ap = applies().length, oi = openInvoices().length;
-  let h = '<div class="wrap" id="app"><section class="sec"><h1>회원 · 납부 · 발송</h1>' +
+  let h = '<div class="wrap" id="app"><section class="sec"><h1>회원 · 신청 · 납부 · 발송</h1>' +
     '<p class="lead">전체 회원 ' + n + '명' + (D.trial ? ' · 지금은 무료 시범 기간입니다(청구 시작 ' + esc(D.billing_from) + ')' : '') + '</p>' +
     '<div class="kp" aria-label="등급별 인원">' + D.tiers.map(t => '<span class="chip"><i class="d" style="background:' + (TIER_COLOR[t.code] || '#999') + '"></i>' + esc(t.label) + ' <b>' + (sum.tiers[t.code] || 0) + '명</b></span>').join('') +
     '<button type="button" class="chip gold" data-tab="rc">현금영수증·계산서 발행 대기 <b>' + sum.receipt_wait + '건</b></button></div>' +
@@ -262,6 +262,7 @@ function render() {
   view.innerHTML = h;
   if (S.tab === 'mem') memRows();
   selbar();
+  if (location.hash === '#applyBox' && !S.jumped) { S.jumped = true; const b = document.getElementById('applyBox'); if (b) { try { b.scrollIntoView({ block: 'start' }); } catch (_) {} } }   // 11-26 내 페이지 「서비스 신청 확인」에서 왔을 때
 }
 
 /* 회원 */
@@ -269,11 +270,13 @@ function paneMem() {
   const D = S.data, f = S.f, sv = svcNames(), pays = Array.from(new Set(D.members.map(m => m.pay_status)));
   const ap = applies();
   let h = '';
-  if (ap.length) h += '<div class="apply" id="applyBox"><h2>승인 대기 ' + ap.length + '건 — 승인하면 납부(또는 무료 시범)가 열립니다</h2><ul>' + ap.map(a =>
+  /* 11-26 이사장 지시: 서비스 이용 신청을 관리자가 바로 찾게 — 건수가 0이어도 상자를 보인다(내 페이지 「서비스 신청 확인」이 여기로 온다) */
+  if (!ap.length) h += '<div class="apply" id="applyBox"><h2>서비스 이용 신청 — 승인 대기 없음</h2><p class="note" style="margin:0">회원이 햇소자 협동조합·연합회 이용을 신청하면 여기에 뜹니다. 아카데미는 승인 없이 바로 열립니다.</p></div>';
+  if (ap.length) h += '<div class="apply" id="applyBox"><h2>서비스 이용 신청 — 승인 대기 ' + ap.length + '건</h2><ul>' + ap.map(a =>
     '<li><div class="who"><b>' + esc(a.m.name) + '</b> · ' + esc(a.x.name) + (a.x.options.length ? ' (선택 기능 ' + a.x.options.length + '개)' : '') + ' · 월 ' + won(a.x.amount) +
-    '<small>' + esc(a.m.email || a.m.username) + (a.m.contact ? ' · ' + esc(a.m.contact) : '') + '</small></div>' +
+    '<small>지금 등급 ' + esc(a.m.tier_ko || a.m.tier || '') + ' · ' + esc(a.m.email || a.m.username) + (a.m.contact ? ' · ' + esc(a.m.contact) : '') + '</small></div>' +
     '<button type="button" class="btn sm p" data-approve="' + a.x.id + '">승인</button><button type="button" class="btn sm dg" data-reject="' + a.x.id + '">거절</button></li>').join('') + '</ul>' +
-    '<p class="note" style="margin-top:8px">등급(협동조합회원·연합회원)은 승인만으로 오르지 않고, 이용권이 실제로 열릴 때 오릅니다.</p></div>';
+    '<p class="note" style="margin-top:8px">승인하면 무료 시범 기간에는 바로 열리고, 청구가 시작된 뒤에는 입금이 확인될 때 열립니다. 등급(협동조합회원·연합회원)은 이용권이 열릴 때 오릅니다 — 협동조합회원이 연합회를 승인받으면 연합회원이 되고, 연합회 이용을 그만두면 협동조합회원으로 돌아갑니다.</p></div>';
   h += '<div class="tools"><input type="search" id="fq" placeholder="이름·아이디·이메일·전화로 찾기" aria-label="회원 찾기" value="' + esc(f.q) + '">' +
     '<select id="fTier" aria-label="등급으로 거르기"><option value="">등급 전체</option>' + D.tiers.map(t => '<option value="' + esc(t.code) + '"' + (f.tier === t.code ? ' selected' : '') + '>' + esc(t.label) + '</option>').join('') + '</select>' +
     '<select id="fSvc" aria-label="이용 서비스로 거르기"><option value="">서비스 전체</option>' + Object.keys(sv).map(k => '<option value="' + esc(k) + '"' + (f.svc === k ? ' selected' : '') + '>' + esc(sv[k]) + '</option>').join('') + '<option value="-"' + (f.svc === '-' ? ' selected' : '') + '>이용 서비스 없음</option></select>' +
