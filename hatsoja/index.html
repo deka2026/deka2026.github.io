@@ -2067,7 +2067,7 @@ function updateConvenienceUI(scope, page){
     db.classList.toggle('on', demo);
     const sw = document.getElementById('demoSwitch');
     if(sw && demo) sw.innerHTML = Object.entries(ROLES).map(([k, r]) =>
-      `<button class="${k === role ? 'on' : ''}" onclick="demoLogin('${k}')" title="${escapeHtml(r.desc)}">${r.emoji} ${r.label}</button>`).join('');
+      `<button class="${k === role ? 'on' : ''}" onclick="demoLogin('${escapeJs(k)}')" title="${escapeHtml(r.desc)}">${r.emoji} ${r.label}</button>`).join('');
   }
   const dockFab = !!document.querySelector('#sk-ai-dock[data-mode="fab"]');   // 11-07 (C2) 공용 상담창이 휴대폰 단추로 떠 있으면 햇소자 💬 는 숨김(CSS :has 와 이중)
   if(fab) fab.classList.toggle('on', !dockFab && !!u && role !== 'guest' && scope !== 'pub' && page !== 'chat' && page !== 'ask');
@@ -2188,7 +2188,14 @@ async function loadRealData(){
       fetch('/api/my/village', opt).then(r => r.json()),
       fetch('/api/my/documents', opt).then(r => r.json()),
     ]);
-    if(!vRes.ok) return;
+    if(!vRes.ok || mvRes.error === 'unauthorized'){
+      if(mvRes.error === 'unauthorized' || vRes.error === 'unauthorized'){   // 26-11-26 알파언니 🟠6: 세션이 끝났는데 로그인된 척하지 않는다
+        try{ storeClearLocal(); }catch(e){}
+        setUser(null); location.hash = '#/pub/home';
+        toast('로그인이 끝났습니다. 다시 로그인해 주세요.');
+      }
+      return;
+    }
     _realMode = true;
     if(!window._demoVillages) window._demoVillages = MOCK.villages.filter(v => !v._srv);
     if(Array.isArray(vRes.items)){
@@ -2491,6 +2498,8 @@ const DEMO_ACCOUNTS = {
   guest:      {email:'guest@example.com',  name:'손님',         role:'guest',      village:''},
 };
 function demoLogin(role){
+  if(typeof _storeSync !== 'undefined' && _storeSync.on) storeClearLocal();   // 26-11-26 알파언니 🔴3: 실계정 자료가 체험으로 새지 않게
+  window._edu = null; try{ eduBar(); }catch(e){}
   const acc = DEMO_ACCOUNTS[normalizeRole(role)] || DEMO_ACCOUNTS.coop;
   try{ sessionStorage.removeItem('sv_preview_admin'); }catch(e){}
   setUser({...acc, loginAt:new Date().toISOString()});
@@ -2813,7 +2822,7 @@ function renderPubSidebar(active){
     <button class="side-item" onclick="location.href='tel:070-4196-4677'" title="대표전화로 바로 전화"><span class="side-emoji">📞</span>전화 상담 070-4196-4677</button>
   </div>`;
   const cta = u
-    ? `<div class="side-cta"><button class="btn btn-primary btn-sm" onclick="location.hash='${roleHome(u.role)}'">${ROLES[normalizeRole(u.role)].emoji} 내 화면으로 가기</button></div>
+    ? `<div class="side-cta"><button class="btn btn-primary btn-sm" onclick="location.hash='${escapeJs(roleHome(u.role))}'">${ROLES[normalizeRole(u.role)].emoji} 내 화면으로 가기</button></div>
        <div class="side-note">${escapeHtml(u.name || '')} · ${roleLabel(normalizeRole(u.role))} 등급으로 로그인 중</div>`
     : `<div class="side-cta"><button class="btn btn-primary btn-sm" onclick="openLogin()">로그인</button>
          <button class="btn btn-outline btn-sm" onclick="openLogin();toggleSignup(true)">회원가입 (승인제)</button>
@@ -3167,7 +3176,7 @@ function memFinance(){
           ['📊','자금수지계획서','20년 발전수익 대비 원리금 상환계획 — 심사 핵심 서류'],
           ['💰','자부담 조달계획서','설치비 15% 조달 구성 — 공모 인정 재원 기준'],
         ].map(([icon, title, desc]) => `
-          <div class="feature" style="cursor:pointer;" onclick="startDoc('${escapeHtml(title)}')">
+          <div class="feature" style="cursor:pointer;" onclick="startDoc('${escapeJs(title)}')">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;">
               <div class="feature-icon">${icon}</div>
               <span class="badge badge-mute">금융</span>
@@ -3973,7 +3982,7 @@ function memSuccess(){
         <div class="card-title">
           <h3 class="serif">${s.icon} 조건 ${s.no} — ${s.name}</h3>
           <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            ${s.links.map(([t, h]) => `<button class="btn btn-ghost btn-sm" onclick="location.hash='${h}'">${t} →</button>`).join('')}
+            ${s.links.map(([t, h]) => `<button class="btn btn-ghost btn-sm" onclick="location.hash='${escapeJs(h)}'">${t} →</button>`).join('')}
           </div>
         </div>
         <p style="margin-top:0;">${s.why}</p>
@@ -6147,9 +6156,9 @@ function spPlansHtml(){
   const o = spPlans(), ys = Object.keys(o.plans).sort().reverse();
   if(!ys.length) return '<div id="sp-plans" class="text-mute" style="font-size:13px;margin-top:10px;">아직 저장한 처분안이 없습니다.</div>';
   return `<div id="sp-plans" style="margin-top:12px;"><table class="tbl" style="font-size:13px;"><thead><tr><th>회계연도</th><th>상태</th><th>저장</th><th></th></tr></thead><tbody>
-    ${ys.map(y => { const p = o.plans[y]; return `<tr><td><b>${y}</b></td><td>${escapeHtml(p.state)}</td><td class="text-mute">${escapeHtml(p.by || '')} ${String(p.at).slice(0, 10)}</td>
-      <td style="white-space:nowrap;"><button class="btn btn-outline btn-sm" onclick="spToDoc('${y}','결산 보고서')">결산 보고서</button>
-      <button class="btn btn-outline btn-sm" onclick="spToDoc('${y}','정기총회 회의록')">총회 안건·회의록</button></td></tr>`; }).join('')}</tbody></table></div>`;
+    ${ys.map(y => { const p = o.plans[y]; return `<tr><td><b>${escapeHtml(y)}</b></td><td>${escapeHtml(p.state)}</td><td class="text-mute">${escapeHtml(p.by || '')} ${String(p.at).slice(0, 10)}</td>
+      <td style="white-space:nowrap;"><button class="btn btn-outline btn-sm" onclick="spToDoc('${escapeJs(y)}','결산 보고서')">결산 보고서</button>
+      <button class="btn btn-outline btn-sm" onclick="spToDoc('${escapeJs(y)}','정기총회 회의록')">총회 안건·회의록</button></td></tr>`; }).join('')}</tbody></table></div>`;
 }
 function spPlanText(p){
   return p.rows.filter(r => r[2] || r[0] !== '').map(r => '・ ' + r[1] + ': ' + (Math.round(r[2] * 10) / 10).toLocaleString('ko-KR') + ' 만원').join('\n');
@@ -6481,7 +6490,7 @@ function todoStrip(village){
     ${todos.map(t => `
       <div class="todo-card${t.urgent ? ' urgent' : ''}">
         <div class="todo-txt">${escapeHtml(t.txt)}<span class="todo-sub">${escapeHtml(t.sub)}</span></div>
-        <button class="btn btn-primary btn-sm" onclick="location.hash='${t.go}'">${escapeHtml(t.cta)} →</button>
+        <button class="btn btn-primary btn-sm" onclick="location.hash='${escapeJs(t.go)}'">${escapeHtml(t.cta)} →</button>
       </div>`).join('')}
   </div>`;
 }
@@ -6522,7 +6531,7 @@ function memRegister(k){
     <div class="card">
       <div class="card-title"><h3 class="serif">${R.이름} (${rows.length})</h3>
         <div style="display:flex;gap:6px;"><button class="btn btn-outline btn-sm" onclick="location.hash='#/mem/inbox'">📥 자료로 넣기</button>
-        <button class="btn btn-primary btn-sm" onclick="regEdit('${k}','')">+ 직접 넣기</button></div></div>
+        <button class="btn btn-primary btn-sm" onclick="regEdit('${escapeJs(k)}','')">+ 직접 넣기</button></div></div>
       ${k === 'expenses' && rows.length ? `<p style="margin:0 0 8px;">합계 <b>${Math.round(합).toLocaleString()}원</b> · 이체 확인 안 된 것 <b>${rows.filter(r => !/^예/.test(r.paid || '')).length}건</b></p>` : ''}
       ${rows.length ? `<div style="overflow-x:auto;"><table class="tbl" style="font-size:13px;min-width:640px;"><thead><tr>${표칸.map(c => `<th>${c[1]}</th>`).join('')}<th></th></tr></thead><tbody>
         ${rows.map(r => `<tr>${표칸.map(([key, , , t]) => {
@@ -6530,8 +6539,8 @@ function memRegister(k){
             if(t === 'num' && v) v = Math.round(_regWon(v)).toLocaleString();
             const 만기 = k === 'contracts' && key === 'end' && v && v >= 오늘 && v <= new Date(Date.now() + 90 * 864e5).toISOString().slice(0, 10);
             return `<td${t === 'num' ? ' style="text-align:right;"' : ''}>${escapeHtml(v)}${만기 ? ' <span class="badge badge-warn">만기 임박</span>' : ''}</td>`; }).join('')}
-          <td style="white-space:nowrap;"><button class="btn btn-outline btn-sm" onclick="regEdit('${k}','${r.id}')">고치기</button>
-          <button class="btn btn-ghost btn-sm" onclick="regDelete('${k}','${r.id}')">지우기</button></td></tr>
+          <td style="white-space:nowrap;"><button class="btn btn-outline btn-sm" onclick="regEdit('${escapeJs(k)}','${escapeJs(r.id)}')">고치기</button>
+          <button class="btn btn-ghost btn-sm" onclick="regDelete('${escapeJs(k)}','${escapeJs(r.id)}')">지우기</button></td></tr>
           ${r.src ? `<tr><td colspan="${표칸.length + 1}" class="text-mute" style="font-size:11.5px;padding-top:0;">출처: ${escapeHtml(r.src)}</td></tr>` : ''}`).join('')}
       </tbody></table></div>` : '<p class="text-mute">아직 없습니다. 「📥 자료로 넣기」로 파일을 올리거나 「+ 직접 넣기」를 누르세요.</p>'}
     </div>`;
@@ -6543,7 +6552,7 @@ function regEdit(k, id, pre){
       ${key === 'memo' || key === 'result' ? `<textarea class="textarea" id="rg-${key}" placeholder="${escapeHtml(hint || '')}">${escapeHtml(r[key] || '')}</textarea>`
         : `<input class="input" id="rg-${key}" type="${t === 'date' ? 'date' : 'text'}" value="${escapeHtml(r[key] == null ? '' : String(r[key]))}" placeholder="${escapeHtml(t === 'num' ? '예: 1,200,000' : (hint || ''))}">`}</div>`).join('')
       + `<input type="hidden" id="rg-src" value="${escapeHtml(r.src || '')}">`,
-    foot: `<button class="btn btn-outline" onclick="closeDyn()">취소</button><button class="btn btn-primary" onclick="regSaveForm('${k}','${id || ''}')">저장</button>`});
+    foot: `<button class="btn btn-outline" onclick="closeDyn()">취소</button><button class="btn btn-primary" onclick="regSaveForm('${escapeJs(k)}','${escapeJs(id || '')}')">저장</button>`});
 }
 function regSaveForm(k, id){
   const R = REG[k], a = regLoad(k), u = currentUser();
@@ -6597,11 +6606,12 @@ const CYCLE_BASE = [
   {id:'q-div', 주기:'분기', 달:'정관에 따라', 날:'', 제목:'배당·마을연금 지급(지역화폐), 지급 기록', 메뉴:'#/mem/power'},
   {id:'h-report', 주기:'반기', 달:'1·7월', 날:'', 제목:'반기 경영보고(조합원 보고회)', 메뉴:'#/mem/closing'},
   {id:'y-settle', 주기:'연', 달:'1~2월', 날:'', 제목:'결산(세무대리인) — 재무상태표·손익계산서·잉여금 처분안', 메뉴:'#/mem/surplus'},
-  {id:'y-audit', 주기:'연', 달:'정기총회 7일 전', 날:'', 제목:'결산보고서를 감사에게 제출·사무소 비치(법 제52조)', 메뉴:'#/mem/docs'},
+  {id:'y-audit', 주기:'연', 달:'정기총회 7일 전', 날:'', 제목:'결산보고서를 감사에게 제출(법 제52조①)·사무소에 갖춰 둠(법 제49조②)', 메뉴:'#/mem/docs'},
   {id:'y-gm', 주기:'연', 달:'3월(정관에 정한 기한)', 날:'', 제목:'정기총회 — 결산·처분안·사업계획·예산 의결, 의사록 서명', 메뉴:'#/mem/minutes'},
   {id:'y-cit', 주기:'연', 달:'3월', 날:'31일', 제목:'법인세 신고·납부(12월 결산)', 메뉴:'#/mem/taxops'},
+  {id:'y-lit', 주기:'연', 달:'4월', 날:'30일', 제목:'법인지방소득세 신고·납부(12월 결산)', 메뉴:'#/mem/taxops'},
   {id:'y-divslip', 주기:'연', 달:'2월', 날:'말일', 제목:'배당소득 지급명세서 제출(배당했을 때)', 메뉴:'#/mem/taxops'},
-  {id:'y-disclose', 주기:'연', 달:'결산일부터 4개월 안(4월)', 날:'', 제목:'경영공시·햇빛소득마을 통합플랫폼 게재', 메뉴:'#/mem/closing'},
+  {id:'y-disclose', 주기:'연', 달:'결산일부터 4개월 안(4월)', 날:'', 제목:'경영공시(사회적협동조합은 법 제96조의2로 모두, 일반협동조합은 일정 규모 이상·햇빛소득마을 공고·정관에 따라)·통합플랫폼 게재', 메뉴:'#/mem/closing'},
   {id:'y-village', 주기:'연', 달:'연 1회', 날:'', 제목:'마을총회에 결산·운영 현황 보고(정관 예시 제11조②)', 메뉴:'#/mem/minutes'},
 ];
 function taskLoad(){ const o = _loadObj(TASK_KEY) || {}; o.custom = o.custom || []; o.done = o.done || {}; return o; }
@@ -6624,19 +6634,19 @@ function memCycle(){
   const o = taskLoad(), all = CYCLE_BASE.map(t => Object.assign({기본: true}, t)).concat(o.custom), now = new Date();
   const 이번 = tasksThisMonth(), 남음 = 이번.filter(t => !t.완료).length;
   const 줄 = t => { const d = o.done[t.id + '|' + _period(t.주기, now)];
-    return `<tr><td style="text-align:center;"><input type="checkbox" ${d ? 'checked' : ''} onchange="taskToggle('${t.id}','${t.주기}',this.checked)" title="이번 ${t.주기 === '연' ? '해' : t.주기}에 했으면 표시"></td>
+    return `<tr><td style="text-align:center;"><input type="checkbox" ${d ? 'checked' : ''} onchange="taskToggle('${escapeJs(t.id)}','${escapeJs(t.주기)}',this.checked)" title="이번 ${t.주기 === '연' ? '해' : t.주기}에 했으면 표시"></td>
       <td>${escapeHtml(t.제목)}${t.기본 ? '' : ' <span class="badge badge-info">우리 조합</span>'}${t.담당 ? '<div class="text-mute" style="font-size:11.5px;">담당 ' + escapeHtml(t.담당) + '</div>' : ''}</td>
       <td style="white-space:nowrap;">${escapeHtml(t.달 || '')} ${escapeHtml(t.날 || '')}</td>
       <td class="text-mute" style="font-size:12px;">${d ? '✅ ' + escapeHtml(d.by || '') + ' ' + String(d.at).slice(0, 10) : ''}</td>
-      <td style="white-space:nowrap;">${t.메뉴 ? `<a class="btn btn-outline btn-sm" href="${t.메뉴}">열기</a>` : ''}${t.기본 ? '' : ` <button class="btn btn-ghost btn-sm" onclick="taskDelete('${t.id}')">지우기</button>`}</td></tr>`; };
+      <td style="white-space:nowrap;">${t.메뉴 ? `<a class="btn btn-outline btn-sm" href="${t.메뉴}">열기</a>` : ''}${t.기본 ? '' : ` <button class="btn btn-ghost btn-sm" onclick="taskDelete('${escapeJs(t.id)}')">지우기</button>`}</td></tr>`; };
   return `
     <div class="sec-head"><h1>📆 업무 달력</h1><p class="sec-desc">월·분기·반기·연마다 할 일. 법과 정관에서 오는 업무는 미리 들어 있고, 우리 조합 업무를 더할 수 있습니다. 했으면 표시하세요 — 누가 언제 했는지 남습니다.</p></div>
     <div class="card"><div class="card-title"><h3 class="serif">이번 달(${now.getMonth() + 1}월) 업무 — 남은 것 ${남음}건</h3>
       <button class="btn btn-primary btn-sm" onclick="taskEdit()">+ 업무 더하기</button></div>
-      <table class="tbl" style="font-size:13px;"><thead><tr><th style="width:44px;">했음</th><th>업무</th><th style="width:150px;">때</th><th style="width:150px;">완료</th><th style="width:120px;"></th></tr></thead>
-      <tbody>${이번.length ? 이번.map(줄).join('') : '<tr><td colspan="5" class="text-mute">이번 달 업무가 없습니다.</td></tr>'}</tbody></table></div>
+      <div style="overflow-x:auto;"><table class="tbl" style="font-size:13px;min-width:560px;"><thead><tr><th style="width:44px;">했음</th><th>업무</th><th style="width:150px;">때</th><th style="width:150px;">완료</th><th style="width:120px;"></th></tr></thead>
+      <tbody>${이번.length ? 이번.map(줄).join('') : '<tr><td colspan="5" class="text-mute">이번 달 업무가 없습니다.</td></tr>'}</tbody></table></div></div>
     ${['월', '분기', '반기', '연', '한 번'].map(c => { const ts = all.filter(t => t.주기 === c); return ts.length ? `<div class="card mt-20"><div class="card-title"><h3 class="serif">${c === '한 번' ? '한 번 할 일' : c + '마다'} (${ts.length})</h3></div>
-      <table class="tbl" style="font-size:13px;"><thead><tr><th style="width:44px;">했음</th><th>업무</th><th style="width:150px;">때</th><th style="width:150px;">완료(이번 ${c === '연' ? '해' : c === '한 번' ? '' : c})</th><th style="width:120px;"></th></tr></thead><tbody>${ts.map(줄).join('')}</tbody></table></div>` : ''; }).join('')}
+      <div style="overflow-x:auto;"><table class="tbl" style="font-size:13px;min-width:560px;"><thead><tr><th style="width:44px;">했음</th><th>업무</th><th style="width:150px;">때</th><th style="width:150px;">완료(이번 ${c === '연' ? '해' : c === '한 번' ? '' : c})</th><th style="width:120px;"></th></tr></thead><tbody>${ts.map(줄).join('')}</tbody></table></div></div>` : ''; }).join('')}
     <p class="text-mute" style="font-size:12.5px;">※ 기한은 12월 결산·일반과세 법인 기준의 일반적인 날짜입니다. 우리 조합의 정관과 세무대리인 안내가 우선입니다.</p>`;
 }
 function taskEdit(){
@@ -6749,8 +6759,8 @@ function memAi(){
       ${_aiState.log && _aiState.log.length ? `<table class="tbl" style="font-size:12.5px;"><tbody>${_aiState.log.map(l => `<tr><td>${String(l.at).slice(0, 16).replace('T', ' ')}</td><td>${escapeHtml(l.name || '')}</td><td>${escapeHtml(l.tool || '')}</td><td>${l.ok ? '✅' : '⚠ 오류'}</td></tr>`).join('')}</tbody></table>` : '<p class="text-mute" style="margin:0;">아직 기록이 없습니다.</p>'}</div>`;
   const 내기능 = `<div class="card mt-20"><div class="card-title"><h3 class="serif">🧩 내 기능 — 우리 AI 가 만든 칸 (${ext.tiles.length})</h3>${ext.by ? `<span class="badge badge-mute">${escapeHtml(ext.by)}</span>` : ''}</div>
     <p class="text-mute" style="font-size:13px;margin-top:0;">AI 가 만든 칸은 현황 대시보드의 「내 기능」에 보입니다. 사람이 끄거나 지울 수 있고, 지워도 서버에 이력이 남습니다.</p>
-    ${ext.tiles.length ? ext.tiles.map(t => `<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;"><label style="padding-top:14px;"><input type="checkbox" ${ext.off[t.id] ? '' : 'checked'} onchange="extToggle('${escapeHtml(String(t.id))}', this.checked)"></label>
-      <div style="flex:1;">${extTileHtml(t)}</div><button class="btn btn-ghost btn-sm" style="margin-top:10px;" onclick="extDelete('${escapeHtml(String(t.id))}')">지우기</button></div>`).join('') : '<p class="text-mute" style="margin:0;">아직 없습니다. 연결한 AI 에게 「현황에 ○○ 칸을 만들어 줘」라고 시켜 보세요.</p>'}</div>`;
+    ${ext.tiles.length ? ext.tiles.map(t => `<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;"><label style="padding-top:14px;"><input type="checkbox" ${ext.off[t.id] ? '' : 'checked'} onchange="extToggle('${escapeJs(String(t.id))}', this.checked)"></label>
+      <div style="flex:1;">${extTileHtml(t)}</div><button class="btn btn-ghost btn-sm" style="margin-top:10px;" onclick="extDelete('${escapeJs(String(t.id))}')">지우기</button></div>`).join('') : '<p class="text-mute" style="margin:0;">아직 없습니다. 연결한 AI 에게 「현황에 ○○ 칸을 만들어 줘」라고 시켜 보세요.</p>'}</div>`;
   return `<div class="sec-head"><h1>🤖 내 AI·내 기능</h1><p class="sec-desc">우리 조합이 쓰는 AI 를 연결해, 우리 조합만의 칸·업무·대장을 AI 와 함께 키웁니다. 사이트의 기본 기능은 바뀌지 않습니다.</p></div>${연결}${열쇠}${내기능}`;
 }
 
@@ -6883,7 +6893,7 @@ function memDashboard(u){
         <div><div style="font-weight:600;">${escapeHtml(d.title)}</div><div class="text-small text-mute">${d.type} · ${d.date}</div></div>
         <span class="badge ${d.status === '완료' ? 'badge-success' : 'badge-info'}">${d.status}</span></div>`).join('')}</div>`;
   tile.cycle = () => { const ts = tasksThisMonth(), 남 = ts.filter(t => !t.완료); return `<div class="card"><div class="card-title"><h3 class="serif">📆 이번 달 업무 — 남은 것 ${남.length}건</h3><a href="#/mem/cycle" class="text-small">업무 달력 →</a></div>
-      ${남.slice(0, 6).map(t => `<div style="display:flex;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line-soft);"><input type="checkbox" onchange="taskToggle('${t.id}','${t.주기}',this.checked)"><div style="flex:1;">${escapeHtml(t.제목)}</div><span class="text-small text-mute">${escapeHtml((t.달 || '') + ' ' + (t.날 || ''))}</span></div>`).join('') || '<p class="text-mute" style="margin:0;">이번 달 업무를 다 했습니다.</p>'}</div>`; };
+      ${남.slice(0, 6).map(t => `<div style="display:flex;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line-soft);"><input type="checkbox" onchange="taskToggle('${escapeJs(t.id)}','${escapeJs(t.주기)}',this.checked)"><div style="flex:1;">${escapeHtml(t.제목)}</div><span class="text-small text-mute">${escapeHtml((t.달 || '') + ' ' + (t.날 || ''))}</span></div>`).join('') || '<p class="text-mute" style="margin:0;">이번 달 업무를 다 했습니다.</p>'}</div>`; };
   tile.expire = () => { const 오늘 = new Date().toISOString().slice(0, 10), 끝 = new Date(Date.now() + 90 * 864e5).toISOString().slice(0, 10);
     const cs = regLoad('contracts').filter(c => c.end && c.end >= 오늘 && c.end <= 끝).sort((a, b) => a.end.localeCompare(b.end));
     return `<div class="card"><div class="card-title"><h3 class="serif">📑 90일 안에 끝나는 계약 (${cs.length})</h3><a href="#/mem/contracts" class="text-small">계약서 대장 →</a></div>
@@ -6904,7 +6914,7 @@ function memDashboard(u){
       <div style="font-weight:600;margin-bottom:6px;">볼 항목 고르기</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px 16px;">
         ${DASH_TILES.map(([id, n]) => `<label style="display:flex;align-items:center;gap:5px;cursor:pointer;">
-          <input type="checkbox" ${has(id) ? 'checked' : ''} onchange="dashToggle('${id}', this.checked)"> ${n}</label>`).join('')}
+          <input type="checkbox" ${has(id) ? 'checked' : ''} onchange="dashToggle('${escapeJs(id)}', this.checked)"> ${n}</label>`).join('')}
       </div>
     </div>
     ${full}
@@ -6939,7 +6949,7 @@ function memDocs(){
       <h3 class="serif">📁 문서 템플릿</h3>
       <div class="grid grid-3 mt-20">
         ${templates.map(t => `
-          <div class="feature" style="cursor:pointer;" onclick="startDoc('${escapeHtml(t.title)}')">
+          <div class="feature" style="cursor:pointer;" onclick="startDoc('${escapeJs(t.title)}')">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;">
               <div class="feature-icon">${t.icon}</div>
               <span class="badge badge-mute">${t.tag}</span>
@@ -6963,8 +6973,8 @@ function memDocs(){
               <td>${d.date}</td>
               <td><span class="badge ${d.status === '완료' ? 'badge-success' : 'badge-info'}">${d.status}</span></td>
               <td class="tbl-actions">
-                <button class="btn btn-ghost btn-sm" onclick="viewDoc('${d.id}')">보기</button>
-                <button class="btn btn-ghost btn-sm" onclick="downloadDoc('${d.id}')">다운로드</button>
+                <button class="btn btn-ghost btn-sm" onclick="viewDoc('${escapeJs(d.id)}')">보기</button>
+                <button class="btn btn-ghost btn-sm" onclick="downloadDoc('${escapeJs(d.id)}')">다운로드</button>
               </td>
             </tr>
           `).join('')}
@@ -7335,10 +7345,10 @@ function stRender(){
           const cur = (L.확정 || {})[f.k];
           const val = cur ? String(cur.값) : '';
           const input = f.opts
-            ? '<select class="select" onchange="stSave(\'' + f.k + '\', this.value)"><option value="">(없음)</option>'
+            ? '<select class="select" onchange="stSave(\'' + escapeJs(f.k) + '\', this.value)"><option value="">(없음)</option>'
               + f.opts.map(function(o){ return '<option value="' + o + '"' + (o === val ? ' selected' : '') + '>' + o + '</option>'; }).join('')
               + '</select>'
-            : '<input class="input" value="' + escapeHtml(val) + '" onchange="stSave(\'' + f.k + '\', this.value)">';
+            : '<input class="input" value="' + escapeHtml(val) + '" onchange="stSave(\'' + escapeJs(f.k) + '\', this.value)">';
           return '<tr><td><b>' + escapeHtml(f.label) + '</b></td><td>' + input + '</td>'
             + '<td class="text-mute" style="font-size:12px;">' + (cur ? escapeHtml(cur.출처) : '—') + '</td></tr>';
         }).join('')
@@ -8258,8 +8268,8 @@ function linksCard(){
       + '<td><span class="badge ' + cls + '">' + escapeHtml(s.state) + '</span>' + (s.last_at ? '<br><span style="font-size:12px;">' + escapeHtml(s.last_at) + ' ' + escapeHtml(s.last_result) + '</span>' : '')
       + (s.hint ? '<br><span style="font-size:12px;color:var(--danger);">' + escapeHtml(s.hint) + '</span>' : '')
       + (s.derived ? '<br><span class="text-mute" style="font-size:12px;">' + escapeHtml(s.derived) + '</span>' : '') + '</td>'
-      + '<td class="tbl-actions"><button class="btn btn-outline btn-sm" onclick="linksSave(\'' + s.service + '\', false)">저장</button> '
-      + '<button class="btn btn-outline btn-sm" onclick="linksSave(\'' + s.service + '\', true)">오늘 받음</button></td></tr>'; }).join('');
+      + '<td class="tbl-actions"><button class="btn btn-outline btn-sm" onclick="linksSave(\'' + escapeJs(s.service) + '\', false)">저장</button> '
+      + '<button class="btn btn-outline btn-sm" onclick="linksSave(\'' + escapeJs(s.service) + '\', true)">오늘 받음</button></td></tr>'; }).join('');
   return '<div class="card" id="linksCardBox" style="border:2px solid #2f6f4f;margin-bottom:18px;">' + 머리 + 경고
     + '<p class="text-mute" style="font-size:12.5px;margin-top:0;">자료가 어디서 어떤 방식으로 들어오는지 적어 둡니다. <b>비밀번호는 적지 않습니다.</b> 계정 이름이나 고객번호처럼 발전소를 찾는 데 쓰는 번호만 적습니다. 달마다 받는 자료가 45일 넘게 안 들어오면 「끊김 의심」으로 표시합니다. 「오늘 받음」은 조합이 직접 누른 표시입니다.</p>'
     + '<div style="overflow-x:auto;"><table class="tbl"><thead><tr><th>서비스</th><th>들어오는 방식</th><th>계정 이름·번호</th><th>상태·마지막으로 받은 날</th><th></th></tr></thead><tbody>' + 줄 + '</tbody></table></div></div>';
@@ -8714,7 +8724,7 @@ function inboxRender(){
           const k = docKindById(it.kind);
           return '<tr><td><b>' + escapeHtml(it.name) + '</b>'
             + '<div class="text-mute" style="font-size:11.5px;">' + Math.max(1, Math.round((it.size||0)/1024)) + ' KB</div></td>'
-            + '<td><select class="select" style="font-size:12.5px;" onchange="inboxSetKind(\'' + it.id + '\', this.value)">'
+            + '<td><select class="select" style="font-size:12.5px;" onchange="inboxSetKind(\'' + escapeJs(it.id) + '\', this.value)">'
             + '<option value="">(고르세요)</option>'
             + DOC_KINDS.map(function(d){
                 return '<option value="' + d.id + '"' + (d.id === it.kind ? ' selected' : '') + '>' + escapeHtml(d.이름) + '</option>';
@@ -8723,9 +8733,9 @@ function inboxRender(){
             + (it.불확실 ? '<div class="text-mute" style="font-size:11.5px;color:var(--danger);">종류를 확인해 주세요</div>' : '')
             + '</td>'
             + '<td><span class="badge ' + (it.상태 === '완료' ? 'badge-success' : it.상태 === '중복' ? 'badge-danger' : 'badge-info') + '">' + escapeHtml(it.상태) + '</span></td>'
-            + '<td><button class="btn btn-primary btn-sm" onclick="inboxProcess(\'' + it.id + '\')">처리</button> '
-            + (INBOX_TO_REG[it.kind] && it.상태 !== '대기' && it.상태 !== '처리중' ? '<button class="btn btn-outline btn-sm" onclick="inboxToRegister(\'' + it.id + '\')">' + (it.대장 ? '✅ 대장에 들어감' : '📒 대장에 넣기') + '</button> ' : '')
-            + '<button class="btn btn-outline btn-sm" onclick="inboxRemove(\'' + it.id + '\')">삭제</button></td></tr>'
+            + '<td><button class="btn btn-primary btn-sm" onclick="inboxProcess(\'' + escapeJs(it.id) + '\')">처리</button> '
+            + (INBOX_TO_REG[it.kind] && it.상태 !== '대기' && it.상태 !== '처리중' ? '<button class="btn btn-outline btn-sm" onclick="inboxToRegister(\'' + escapeJs(it.id) + '\')">' + (it.대장 ? '✅ 대장에 들어감' : '📒 대장에 넣기') + '</button> ' : '')
+            + '<button class="btn btn-outline btn-sm" onclick="inboxRemove(\'' + escapeJs(it.id) + '\')">삭제</button></td></tr>'
             + (it.요약
                 ? '<tr><td colspan="4" style="font-size:12.5px;padding-top:0;">'
                   + '<b>' + (it.상태 === '중복' ? '⚠ ' : '✅ ') + '</b>' + escapeHtml(it.요약)
@@ -8746,8 +8756,8 @@ function inboxRender(){
           return '<tr><td><b>' + escapeHtml(p.field) + '</b></td>'
             + '<td>' + escapeHtml(String(p.value)) + ' <span class="badge badge-warn">제안</span></td>'
             + '<td class="text-mute" style="font-size:12px;">' + escapeHtml(p.src) + '<br>' + escapeHtml(p.note) + '</td>'
-            + '<td><button class="btn btn-primary btn-sm" onclick="inboxConfirm(\'' + p.id + '\')">확정</button> '
-            + '<button class="btn btn-outline btn-sm" onclick="inboxReject(\'' + p.id + '\')">버림</button></td></tr>';
+            + '<td><button class="btn btn-primary btn-sm" onclick="inboxConfirm(\'' + escapeJs(p.id) + '\')">확정</button> '
+            + '<button class="btn btn-outline btn-sm" onclick="inboxReject(\'' + escapeJs(p.id) + '\')">버림</button></td></tr>';
         }).join('')
       + '</tbody></table>'
       : '<p class="text-mute">확인을 기다리는 값이 없습니다.</p>';
@@ -13363,6 +13373,8 @@ function _storeQueue(key, val){
   _storeSync.timers[kind] = setTimeout(() => _storePush(kind, key), 700);
 }
 async function _storePush(kind, key){
+  const _cu = currentUser();
+  if(!_cu || !_cu.unified || !_storeSync.on){ _storeSync.on = false; return; }   // 계정이 바뀌었으면 보내지 않는다
   let data; try{ data = JSON.parse(localStorage.getItem(key) || 'null'); }catch(e){ return; }
   if(data === null) data = [];
   _storeSync.busy++;
@@ -13406,7 +13418,7 @@ async function storePull(){
   });
   if(옮길것.length && owner !== String(vid)){
     const 말 = 옮길것.map(([, k]) => ({members:'조합원 명부', events:'일정', uploads:'올린 자료', closings:'월마감 보고서', accounting:'회계 기록', inbox:'자료함 목록', ledger:'조합 원장', power:'발전 대장', tax:'세무 자료', dash:'대시보드 설정'}[k] || k)).join(', ');
-    if(!confirm('이 브라우저에만 저장돼 있던 자료가 있습니다: ' + 말 + '.\n\n우리 조합 서버로 옮길까요? (옮기면 다른 PC·휴대폰·다른 임원도 같은 자료를 봅니다. 「취소」를 누르면 이 브라우저에서 지웁니다)')){
+    if(!confirm('이 브라우저에 예전에 저장된 자료가 있습니다: ' + 말 + '.\n\n⚠ 다른 사람이 이 PC 에서 쓰던 자료일 수 있습니다. 우리 조합 자료가 확실할 때만 「확인」을 누르세요 — 우리 조합 서버로 옮겨 다른 임원도 보게 됩니다.\n\n잘 모르면 「취소」(이 브라우저에서 지우고 옮기지 않음).')){
       옮길것.forEach(([key]) => localStorage.removeItem(key)); 옮길것.length = 0;
     }
   }
@@ -14413,7 +14425,7 @@ function submitAddContent(kind){
   toast('등록되었습니다.');
   refresh();
 }
-function escapeJs(s){ return String(s).replace(/'/g, "\\'"); }
+function escapeJs(s){ return String(s == null ? '' : s).replace(/[\\'"<>&\n\r`$]/g, c => '\\x' + c.charCodeAt(0).toString(16).padStart(2, '0')); }   // 26-11-26 알파언니 🔴1: ' 만 막던 것을 HTML·JS 둘 다 안전하게
 
 /* ─── Admin pages ─── */
 function renderAdminPage(page){
@@ -15410,7 +15422,7 @@ function vidStep6(){
   const 가로 = d.화면비 === '16:9', base = VID_API + '/projects/' + encodeURIComponent(VID.pid);
   const fonts = (VID.st && VID.st.fonts) || [{key:'square_b', label:'나눔스퀘어 굵게'}];
   const colors = (VID.st && VID.st.colors) || {'흰색':'#FFFFFF'};
-  const 지금단추 = (kind, i, k) => `<button class="btn btn-sm btn-ghost" style="padding:2px 6px;" onclick="vidEdNow('${kind}',${i},'${k}')">지금</button>`;
+  const 지금단추 = (kind, i, k) => `<button class="btn btn-sm btn-ghost" style="padding:2px 6px;" onclick="vidEdNow('${escapeJs(kind)}',${i},'${escapeJs(k)}')">지금</button>`;
   const 자르기 = e.자르기.map((c, i) => `
     <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:6px 0;border-bottom:1px solid var(--line-soft);">
       <span class="text-small">구간 ${i + 1}</span>
@@ -16058,7 +16070,7 @@ function memAccounting(){
           <span class="badge ${h.status==='완료'?'badge-success':'badge-danger'}">${h.status}</span>
           <span>${escapeHtml(h.from)} → ${escapeHtml(h.to)} · ${h.start} ~ ${h.end}</span>
           <span class="text-mute" style="margin-left:auto;">체크 ${h.done.filter(Boolean).length}/${h.done.length}</span>
-          ${h.status !== '완료' ? `<button class="btn btn-ghost btn-sm" onclick="taxHandoverView('${h.id}')">체크리스트</button>` : ''}
+          ${h.status !== '완료' ? `<button class="btn btn-ghost btn-sm" onclick="taxHandoverView('${escapeJs(h.id)}')">체크리스트</button>` : ''}
         </div>`).join('')}</div>` : ''}
     </div>
 
@@ -16078,8 +16090,8 @@ function memAccounting(){
         <strong style="color:var(--danger);">마감 차단 ${blockers.length}종</strong>
         <ul style="margin:4px 0 0;padding-left:18px;">${blockers.map(b => `<li><b>${b.code}</b> ${b.n}건 — ${b.fix}</li>`).join('')}</ul></div>` : ''}
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
-        <button class="btn btn-outline" onclick="taxCheckReport('${ym}')">🔍 제출 전 점검</button>
-        <button class="btn btn-primary" onclick="taxBuildPackage('${ym}')" ${blockers.length ? 'disabled title="마감 차단 항목을 먼저 해결하세요"' : ''}>📤 패키지 만들기·전송</button>
+        <button class="btn btn-outline" onclick="taxCheckReport('${escapeJs(ym)}')">🔍 제출 전 점검</button>
+        <button class="btn btn-primary" onclick="taxBuildPackage('${escapeJs(ym)}')" ${blockers.length ? 'disabled title="마감 차단 항목을 먼저 해결하세요"' : ''}>📤 패키지 만들기·전송</button>
         <select class="select" style="width:auto;" onchange="taxBuildPackage(this.value)"><option value="">다른 달 선택…</option>${[0,1,2,3].map(k => { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth()-k); const v = _ymd(d).slice(0,7); return `<option value="${v}">${v}</option>`; }).join('')}</select>
       </div>
       ${T.packages.length ? `<h4 class="text-small" style="margin:16px 0 6px;color:var(--ink-soft);">전송 이력</h4>
@@ -16087,7 +16099,7 @@ function memAccounting(){
         ${T.packages.slice().reverse().map(p => `<tr><td><strong>${p.ym}</strong></td><td>v${p.ver}</td><td>${p.sentAt ? p.sentAt.slice(0,16).replace('T',' ') : '—'}</td>
           <td>${p.openedAt ? p.openedAt.slice(0,16).replace('T',' ') : '<span class="text-mute">미열람</span>'}</td>
           <td>${T.returns.filter(r => r.pkgId === p.id).length}건</td>
-          <td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="taxViewPackage('${p.id}')">보기</button>${!p.openedAt ? `<button class="btn btn-ghost btn-sm" onclick="taxMarkOpened('${p.id}')">열람 확인(세무사)</button>` : ''}<button class="btn btn-ghost btn-sm" onclick="taxNewReturn('${p.id}')">보정 요청(세무사)</button></td></tr>`).join('')}
+          <td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="taxViewPackage('${escapeJs(p.id)}')">보기</button>${!p.openedAt ? `<button class="btn btn-ghost btn-sm" onclick="taxMarkOpened('${escapeJs(p.id)}')">열람 확인(세무사)</button>` : ''}<button class="btn btn-ghost btn-sm" onclick="taxNewReturn('${escapeJs(p.id)}')">보정 요청(세무사)</button></td></tr>`).join('')}
       </tbody></table>` : ''}
     </div>
 
@@ -16113,14 +16125,14 @@ function memAccounting(){
           return `<tr style="${t.cash && !t.cashReason ? 'background:#FDECEC;' : ''}">
             <td>${t.date}</td><td title="원본 적요는 수정할 수 없습니다">🔒 ${escapeHtml(t.desc)}</td>
             <td>${t.inn ? t.inn.toLocaleString() : ''}</td><td>${t.out ? t.out.toLocaleString() : ''}</td>
-            <td><select class="select" style="width:150px;padding:3px 6px;font-size:12.5px;" onchange="taxSetVendor('${t.id}', this.value)">
+            <td><select class="select" style="width:150px;padding:3px 6px;font-size:12.5px;" onchange="taxSetVendor('${escapeJs(t.id)}', this.value)">
               <option value="">— 선택 —</option>${T.vendors.map(x => `<option value="${x.id}"${x.id===t.vendorId?' selected':''}>${escapeHtml(x.name)}</option>`).join('')}</select>
               ${t.vendorId ? (t.confirmed ? '<span class="badge badge-success">확정</span>' : `<span class="badge badge-gold">추천</span>`) : ''}</td>
-            <td><input type="checkbox" ${t.cash?'checked':''} onchange="taxSetCash('${t.id}', this.checked)"></td>
-            <td><input class="input" style="width:170px;padding:3px 6px;font-size:12.5px;" value="${escapeHtml(t.cash ? t.cashReason : t.memo)}" placeholder="${t.cash ? '인출 사유(필수)' : '메모'}" onchange="taxSetMemo('${t.id}', this.value)"></td>
-            <td><input class="input" style="width:90px;padding:3px 6px;font-size:12.5px;" value="${escapeHtml(t.grant||'')}" placeholder="사업코드" onchange="taxSetGrant('${t.id}', this.value)"></td>
-            <td>${t.evId ? '📎' : `<button class="btn btn-ghost btn-sm" onclick="taxMatchEvidence('${t.id}')">연결</button>`}</td>
-            <td>${t.vendorId && !t.confirmed ? `<button class="btn btn-ghost btn-sm" onclick="taxConfirmVendor('${t.id}')">확정</button>` : ''}</td></tr>`; }).join('')}
+            <td><input type="checkbox" ${t.cash?'checked':''} onchange="taxSetCash('${escapeJs(t.id)}', this.checked)"></td>
+            <td><input class="input" style="width:170px;padding:3px 6px;font-size:12.5px;" value="${escapeHtml(t.cash ? t.cashReason : t.memo)}" placeholder="${t.cash ? '인출 사유(필수)' : '메모'}" onchange="taxSetMemo('${escapeJs(t.id)}', this.value)"></td>
+            <td><input class="input" style="width:90px;padding:3px 6px;font-size:12.5px;" value="${escapeHtml(t.grant||'')}" placeholder="사업코드" onchange="taxSetGrant('${escapeJs(t.id)}', this.value)"></td>
+            <td>${t.evId ? '📎' : `<button class="btn btn-ghost btn-sm" onclick="taxMatchEvidence('${escapeJs(t.id)}')">연결</button>`}</td>
+            <td>${t.vendorId && !t.confirmed ? `<button class="btn btn-ghost btn-sm" onclick="taxConfirmVendor('${escapeJs(t.id)}')">확정</button>` : ''}</td></tr>`; }).join('')}
         </tbody></table></div>` : '<p class="text-mute text-center" style="padding:14px 0;">아직 거래내역이 없습니다. 은행에서 내려받은 CSV를 그대로 올리세요.</p>'}
     </div>
 
@@ -16128,7 +16140,7 @@ function memAccounting(){
       <div class="card-title"><h3 class="serif">📎 증빙 보관함 (5년 보존)</h3><button class="btn btn-primary btn-sm" onclick="taxAddEvidence()">+ 증빙 등록</button></div>
       <p class="text-mute" style="font-size:12.5px;margin-top:0;">영수증은 세무사에게 보내지 않지만 품목 정리를 위해 조합이 5년 보관합니다. 계약서는 거래일·금액·거래처·사업자번호 4가지가 없으면 저장되지 않습니다. 파일명은 <code>조합코드_날짜_거래처_금액_종류</code> 규칙으로 자동 정리됩니다.</p>
       ${T.evidence.length ? `<table class="tbl" style="font-size:13px;"><thead><tr><th>종류</th><th>거래일</th><th>거래처</th><th>금액</th><th>사업자번호</th><th>부가세</th><th>보조금</th><th>정리 파일명</th><th>보존기한</th><th></th></tr></thead><tbody>
-        ${T.evidence.slice().reverse().map(e => `<tr><td><span class="badge ${e.kind==='보조금 교부결정서'?'badge-gold':'badge-mute'}">${e.kind}</span></td><td>${e.date}</td><td>${escapeHtml(e.vendor)}</td><td>${Number(e.amount).toLocaleString()}</td><td>${escapeHtml(e.bizNo||'—')}</td><td>${e.vatIncl?'포함':'미포함'}</td><td>${e.grant ? escapeHtml(e.grantCode||'보조금') : '—'}</td><td class="text-mute" style="font-size:12px;">${escapeHtml(e.fileName)}</td><td>${e.keepUntil}</td><td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="taxRemoveEvidence('${e.id}')">삭제</button></td></tr>`).join('')}
+        ${T.evidence.slice().reverse().map(e => `<tr><td><span class="badge ${e.kind==='보조금 교부결정서'?'badge-gold':'badge-mute'}">${e.kind}</span></td><td>${e.date}</td><td>${escapeHtml(e.vendor)}</td><td>${Number(e.amount).toLocaleString()}</td><td>${escapeHtml(e.bizNo||'—')}</td><td>${e.vatIncl?'포함':'미포함'}</td><td>${e.grant ? escapeHtml(e.grantCode||'보조금') : '—'}</td><td class="text-mute" style="font-size:12px;">${escapeHtml(e.fileName)}</td><td>${e.keepUntil}</td><td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="taxRemoveEvidence('${escapeJs(e.id)}')">삭제</button></td></tr>`).join('')}
       </tbody></table>` : '<p class="text-mute text-center" style="padding:14px 0;">등록된 증빙이 없습니다.</p>'}
     </div>
 
@@ -16137,7 +16149,7 @@ function memAccounting(){
       <p class="text-mute" style="font-size:12.5px;margin-top:0;">세무사가 패키지 항목에 사유 코드와 기한을 붙여 보내면 담당자에게 알림이 가고, 기한 초과 시 부담당→대표→연합회로 올라갑니다.</p>
       ${T.returns.length ? `<table class="tbl" style="font-size:13px;"><thead><tr><th>대상 월</th><th>항목</th><th>사유 코드</th><th>내용</th><th>기한</th><th>상태</th><th></th></tr></thead><tbody>
         ${T.returns.slice().reverse().map(r => `<tr><td>${r.ym}</td><td>${escapeHtml(r.item)}</td><td><span class="badge badge-danger">${r.code}</span></td><td>${escapeHtml(r.note||'')}</td><td>${r.due} ${r.status==='열림' ? `<span class="badge ${dday(r.due) < 0 ? 'badge-danger' : 'badge-mute'}">${ddayLabel(r.due)}</span>` : ''}</td><td>${r.status}${r.resolvedAt ? ' · ' + r.resolvedAt.slice(0,10) : ''}</td>
-          <td class="tbl-actions">${r.status==='열림' ? `<button class="btn btn-primary btn-sm" onclick="taxResolveReturn('${r.id}')">보정 완료</button>` : ''}</td></tr>`).join('')}
+          <td class="tbl-actions">${r.status==='열림' ? `<button class="btn btn-primary btn-sm" onclick="taxResolveReturn('${escapeJs(r.id)}')">보정 완료</button>` : ''}</td></tr>`).join('')}
       </tbody></table>` : '<p class="text-mute text-center" style="padding:14px 0;">보정 요청이 없습니다.</p>'}
     </div>
 
@@ -16204,8 +16216,8 @@ function taxHandoverSave(){
 function taxHandoverView(id){
   const h = MOCK.tax.handover.find(x => x.id === id); if(!h) return;
   showDyn({title:`인수인계 체크리스트 — ${h.from} → ${h.to}`, sub:`${h.start} ~ ${h.end}`,
-    body: TAX_HANDOVER_CHECK.map((t,i) => `<label style="display:block;padding:6px 0;border-bottom:1px solid var(--line-soft);"><input type="checkbox" ${h.done[i]?'checked':''} onchange="taxHandoverTick('${h.id}',${i},this.checked)"> ${t}</label>`).join(''),
-    foot:`<button class="btn btn-outline" onclick="closeDyn()">닫기</button><button class="btn btn-primary" onclick="taxHandoverFinish('${h.id}')">인수인계 완료 → 담당자 교체</button>`});
+    body: TAX_HANDOVER_CHECK.map((t,i) => `<label style="display:block;padding:6px 0;border-bottom:1px solid var(--line-soft);"><input type="checkbox" ${h.done[i]?'checked':''} onchange="taxHandoverTick('${escapeJs(h.id)}',${i},this.checked)"> ${t}</label>`).join(''),
+    foot:`<button class="btn btn-outline" onclick="closeDyn()">닫기</button><button class="btn btn-primary" onclick="taxHandoverFinish('${escapeJs(h.id)}')">인수인계 완료 → 담당자 교체</button>`});
 }
 function taxHandoverTick(id, i, v){ const h = MOCK.tax.handover.find(x => x.id === id); if(h){ h.done[i] = v; persistTax(); } }
 function taxHandoverFinish(id){
@@ -16273,9 +16285,9 @@ function taxMatchEvidence(id){
   const amt = t.out || t.inn;
   const cands = MOCK.tax.evidence.filter(e => Math.abs(Number(e.amount) - amt) <= 0 || Math.abs(Number(e.amount) * 1.1 - amt) < 2 || Math.abs(Number(e.amount) / 1.1 - amt) < 2);
   showDyn({title:'증빙 연결', sub:`${t.date} · ${t.desc} · ${amt.toLocaleString()}원`,
-    body: cands.length ? cands.map(e => `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line-soft);"><span>${e.kind} · ${e.date} · ${escapeHtml(e.vendor)} · ${Number(e.amount).toLocaleString()}원 ${Number(e.amount)!==amt?'<span class="badge badge-gold">부가세 차이</span>':''}</span><button class="btn btn-primary btn-sm" onclick="taxLinkEvidence('${t.id}','${e.id}')">연결</button></div>`).join('')
+    body: cands.length ? cands.map(e => `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line-soft);"><span>${e.kind} · ${e.date} · ${escapeHtml(e.vendor)} · ${Number(e.amount).toLocaleString()}원 ${Number(e.amount)!==amt?'<span class="badge badge-gold">부가세 차이</span>':''}</span><button class="btn btn-primary btn-sm" onclick="taxLinkEvidence('${escapeJs(t.id)}','${escapeJs(e.id)}')">연결</button></div>`).join('')
       : '<p class="text-mute">금액이 일치하는 증빙이 없습니다. 증빙 보관함에 먼저 등록하세요. (부가세 포함·미포함 10% 차이도 함께 찾습니다)</p>',
-    foot:`<button class="btn btn-outline" onclick="closeDyn()">닫기</button><button class="btn btn-primary" onclick="closeDyn();taxAddEvidence('${t.id}')">+ 새 증빙 등록</button>`});
+    foot:`<button class="btn btn-outline" onclick="closeDyn()">닫기</button><button class="btn btn-primary" onclick="closeDyn();taxAddEvidence('${escapeJs(t.id)}')">+ 새 증빙 등록</button>`});
 }
 function taxLinkEvidence(txId, evId){ const t = _taxTx(txId); if(t){ t.evId = evId; persistTax(); } closeDyn(); toast('증빙을 연결했습니다.'); refresh(); }
 function taxExportGrant(){
@@ -16296,7 +16308,7 @@ function taxAddEvidence(txId){
       <div class="form-row" style="display:flex;gap:16px;flex-wrap:wrap;"><label><input type="checkbox" id="ev-vat" checked> 부가세 포함 금액</label><label><input type="checkbox" id="ev-grant" onchange="document.getElementById('ev-grantcode').style.display=this.checked?'':'none'"> 보조금 집행분</label><input class="input" id="ev-grantcode" placeholder="보조금 사업코드" style="display:none;width:160px;"></div>
       <div class="form-row" id="ev-lease" style="display:none;"><label>임대차 계약이면</label><select class="select" id="ev-leasetype"><option value="">해당 없음</option><option>토지 임차</option><option>시설(지붕) 임차</option></select></div>
       <div class="form-row"><label>파일 (스캔·사진·PDF)</label><input type="file" id="ev-file" accept="image/*,.pdf"></div>`,
-    foot:`<button class="btn btn-outline" onclick="closeDyn()">취소</button><button class="btn btn-primary" onclick="taxSaveEvidence('${txId||''}')">저장</button>`});
+    foot:`<button class="btn btn-outline" onclick="closeDyn()">취소</button><button class="btn btn-primary" onclick="taxSaveEvidence('${escapeJs(txId||'')}')">저장</button>`});
 }
 function taxSaveEvidence(txId){
   const g = id => (document.getElementById(id).value || '').trim();
@@ -16371,7 +16383,7 @@ function taxViewPackage(id, justSent){
     <span class="text-mute">제외 항목: 세금계산서 합계표·법인카드·현금영수증(홈택스 조회). 세무사 열람 링크는 14일 후 만료됩니다.</span></p>`;
   showDyn({title:`세무 패키지 ${p.ym} v${p.ver}`, sub: justSent ? '전송되었습니다. 세무사가 열면 열람 시각이 기록됩니다.' : `전송 ${p.sentAt.slice(0,10)} · ${p.openedAt ? '열람 ' + p.openedAt.slice(0,10) : '미열람'}`,
     body, size:'xl',
-    foot:`<button class="btn btn-ghost" onclick="closeDyn()">닫기</button><button class="btn btn-outline" onclick="taxDownloadPackage('${p.id}')">📥 패키지 표지 다운로드</button>`});
+    foot:`<button class="btn btn-ghost" onclick="closeDyn()">닫기</button><button class="btn btn-outline" onclick="taxDownloadPackage('${escapeJs(p.id)}')">📥 패키지 표지 다운로드</button>`});
 }
 function taxDownloadPackage(id){
   const p = MOCK.tax.packages.find(x => x.id === id); if(!p) return;
@@ -16387,7 +16399,7 @@ function taxNewReturn(pkgId){
       <div class="form-row"><label>사유 코드</label><select class="select" id="rt-code">${TAX_RETURN_CODES.map(c=>`<option>${c}</option>`).join('')}</select></div>
       <div class="form-row"><label>내용</label><textarea class="textarea" id="rt-note" placeholder="예: 9/20 ATM 현금출금 300,000원 사용처"></textarea></div>
       <div class="form-row"><label>보정 기한</label><input class="input" type="date" id="rt-due" value="${due}" style="width:auto;"></div>`,
-    foot:`<button class="btn btn-outline" onclick="closeDyn()">취소</button><button class="btn btn-primary" onclick="taxSaveReturn('${p.id}')">요청 보내기</button>`});
+    foot:`<button class="btn btn-outline" onclick="closeDyn()">취소</button><button class="btn btn-primary" onclick="taxSaveReturn('${escapeJs(p.id)}')">요청 보내기</button>`});
 }
 function taxSaveReturn(pkgId){
   const p = MOCK.tax.packages.find(x => x.id === pkgId); if(!p) return;
@@ -16441,12 +16453,12 @@ function memTaxPay(){
     </div>
 
     <div class="card mt-20" style="border-color:var(--primary);">
-      <div class="card-title"><h3 class="serif">① 급여대장 — ${ym}분</h3><div style="display:flex;gap:6px;"><button class="btn btn-outline btn-sm" onclick="taxEditStaff()">직원 관리</button>${pr ? `<button class="btn btn-outline btn-sm" onclick="taxReopenPayroll('${ym}')">마감 해제</button>` : `<button class="btn btn-primary btn-sm" onclick="taxClosePayroll('${ym}')">📌 급여대장 마감 (5일까지)</button>`}</div></div>
+      <div class="card-title"><h3 class="serif">① 급여대장 — ${ym}분</h3><div style="display:flex;gap:6px;"><button class="btn btn-outline btn-sm" onclick="taxEditStaff()">직원 관리</button>${pr ? `<button class="btn btn-outline btn-sm" onclick="taxReopenPayroll('${escapeJs(ym)}')">마감 해제</button>` : `<button class="btn btn-primary btn-sm" onclick="taxClosePayroll('${escapeJs(ym)}')">📌 급여대장 마감 (5일까지)</button>`}</div></div>
       <p class="text-mute" style="font-size:12.5px;margin-top:0;">직원으로 등록된 사람의 강사료·회의수당은 따로 책정할 수 없고 상여로 합산됩니다. 4대보험·소득세는 근사치이며 최종값은 세무사 사무소가 확정합니다. 4대보험 신고는 세무사 사무소가 서비스로 처리하고, 그 이상의 노무는 연합회 노무사 협약 대상입니다.</p>
       <table class="tbl" style="font-size:13px;"><thead><tr><th>성명</th><th>기본급</th><th>상여(강사료·수당 합산)</th><th>4대보험(본인)</th><th>소득세+지방세</th><th>실지급액</th></tr></thead><tbody>
         ${T.staff.map(s => { const bonus = pr ? (pr.rows.find(r=>r.id===s.id)||{}).bonus||0 : (s.bonus||0); const c = taxPayrollCalc(s.base, bonus);
           return `<tr><td><strong>${escapeHtml(s.name)}</strong></td><td>${s.base.toLocaleString()}</td>
-            <td>${pr ? bonus.toLocaleString() : `<input class="input" type="number" style="width:120px;padding:3px 6px;" value="${bonus}" onchange="taxSetBonus('${s.id}', this.value)">`}</td>
+            <td>${pr ? bonus.toLocaleString() : `<input class="input" type="number" style="width:120px;padding:3px 6px;" value="${bonus}" onchange="taxSetBonus('${escapeJs(s.id)}', this.value)">`}</td>
             <td>${c.ins.toLocaleString()} <span class="text-mute" style="font-size:11px;">(연금 ${c.pension.toLocaleString()} · 건강 ${(c.health+c.ltc).toLocaleString()} · 고용 ${c.emp.toLocaleString()})</span></td>
             <td>${c.tax.toLocaleString()}</td><td><strong>${c.net.toLocaleString()}</strong></td></tr>`; }).join('')}
         ${!T.staff.length ? '<tr><td colspan="6" class="text-mute text-center">직원이 없습니다. [직원 관리]에서 등록하세요.</td></tr>' : ''}
@@ -16477,14 +16489,14 @@ function memTaxPay(){
       <p class="text-mute" style="font-size:12.5px;margin-top:0;">결산 → 정관상 적립금 차감 → 출자배당·이용실적배당 산정 → <b>총회 의결(필수)</b> → 원천징수 → 세후 지급 → 다음 달 10일 원천세 신고. 조합원은 배당소득 15.4%, 비조합원 주민은 기타소득이 원칙입니다. 수령자 안내문에 건강보험료·기초연금·기초생활수급 영향 안내가 자동으로 들어갑니다.</p>
       ${T.sunIncome.length ? `<table class="tbl" style="font-size:13px;"><thead><tr><th>회차</th><th>총회 의결</th><th>조합원 배당</th><th>주민 햇빛소득</th><th>원천징수 합계</th><th>세후 지급 합계</th><th>원천세 신고</th><th></th></tr></thead><tbody>
         ${T.sunIncome.slice().reverse().map(s=>`<tr><td><strong>${s.ym}</strong></td><td>${s.decidedAt}</td><td>${s.memberN}명 · ${s.memberTotal.toLocaleString()}</td><td>${s.residentN}명 · ${s.residentTotal.toLocaleString()}</td><td>${s.whTotal.toLocaleString()}</td><td><b>${s.netTotal.toLocaleString()}</b></td><td>${s.due}</td>
-          <td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="taxSunIncomeView('${s.id}')">통지문·명세</button></td></tr>`).join('')}</tbody></table>` : '<p class="text-mute text-center" style="padding:14px 0;">아직 지급 회차가 없습니다.</p>'}
+          <td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="taxSunIncomeView('${escapeJs(s.id)}')">통지문·명세</button></td></tr>`).join('')}</tbody></table>` : '<p class="text-mute text-center" style="padding:14px 0;">아직 지급 회차가 없습니다.</p>'}
     </div>
   `;
 }
 function taxEditStaff(){
   const T = MOCK.tax;
   showDyn({title:'직원 관리', sub:'상시근로자만 등록합니다. 단발 용역·강사는 지급 유형 판별기로 처리합니다.',
-    body:`<div id="st-list">${T.staff.map(s=>`<div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line-soft);"><span style="flex:1;">${escapeHtml(s.name)} · 기본급 ${s.base.toLocaleString()}원</span><button class="btn btn-ghost btn-sm" onclick="taxRemoveStaff('${s.id}')">삭제</button></div>`).join('') || '<p class="text-mute">직원 없음</p>'}</div>
+    body:`<div id="st-list">${T.staff.map(s=>`<div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line-soft);"><span style="flex:1;">${escapeHtml(s.name)} · 기본급 ${s.base.toLocaleString()}원</span><button class="btn btn-ghost btn-sm" onclick="taxRemoveStaff('${escapeJs(s.id)}')">삭제</button></div>`).join('') || '<p class="text-mute">직원 없음</p>'}</div>
       <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:6px;margin-top:12px;"><input class="input" id="st-name" placeholder="성명"><input class="input" id="st-base" type="number" placeholder="월 기본급"><button class="btn btn-primary" onclick="taxAddStaff()">추가</button></div>`,
     foot:`<button class="btn btn-primary" onclick="closeDyn();refresh()">닫기</button>`});
 }
@@ -16513,7 +16525,7 @@ function taxClassify(){
       <div class="grid grid-3" style="gap:8px;"><div><div class="kpi-l">세전</div><div class="kpi-n" style="font-size:20px;">${amt.toLocaleString()}</div></div><div><div class="kpi-l">원천징수</div><div class="kpi-n" style="font-size:20px;">${wh.toLocaleString()}</div></div><div><div class="kpi-l">실지급</div><div class="kpi-n" style="font-size:20px;">${net.toLocaleString()}</div></div></div>
       <p style="font-size:13px;margin:8px 0 4px;"><b>필요 서류:</b> ${r.docs.join(' · ')}</p>
       <p style="font-size:13px;margin:0;color:var(--danger);"><b>주의:</b> ${r.warn}${extra.map(e=>'<br>'+e).join('')}</p>
-      <div style="margin-top:10px;display:flex;gap:6px;"><button class="btn btn-primary btn-sm" onclick="taxRecordPayment('${k}','${escapeJs(nature)}',${amt},${wh},${net})">📒 원천징수 대장에 기록</button></div>
+      <div style="margin-top:10px;display:flex;gap:6px;"><button class="btn btn-primary btn-sm" onclick="taxRecordPayment('${escapeJs(k)}','${escapeJs(nature)}',${amt},${wh},${net})">📒 원천징수 대장에 기록</button></div>
     </div>`;
 }
 function taxRecordPayment(k, nature, gross, wh, net){
@@ -16564,7 +16576,7 @@ function taxSunIncomeView(id){
     body:`<table class="tbl" style="font-size:12.5px;"><thead><tr><th>수령자</th><th>구분</th><th>세전</th><th>원천징수</th><th>세후 지급</th></tr></thead><tbody>${s.rows.map(r=>`<tr><td>${escapeHtml(r.name)}</td><td>${r.kind}</td><td>${r.gross.toLocaleString()}</td><td>${r.wh.toLocaleString()}</td><td><b>${r.net.toLocaleString()}</b></td></tr>`).join('')}</tbody></table>
       <h4 style="margin:14px 0 8px;">통지문 미리보기 (앞 2명)</h4>${s.rows.slice(0,2).map(notice).join('')}
       <p class="text-mute" style="font-size:12.5px;">주민환원사업 관리대장에 환원사업명·대상·집행금액·집행일·지급방법·의사결정·증빙이 기록됩니다. 수령자 주민등록번호는 암호화 저장되며 지급명세서 생성 시에만 사용합니다.</p>`,
-    foot:`<button class="btn btn-ghost" onclick="closeDyn()">닫기</button><button class="btn btn-outline" onclick="_downloadAccountingHtml('햇빛소득 지급 명세·통지문 ${s.ym}','${s.ym}',document.getElementById('dynBody').innerHTML,'햇빛소득_${s.ym}.html')">📥 명세·통지문 다운로드</button></div>`});
+    foot:`<button class="btn btn-ghost" onclick="closeDyn()">닫기</button><button class="btn btn-outline" onclick="_downloadAccountingHtml('햇빛소득 지급 명세·통지문 ${s.ym}','${escapeJs(s.ym)}',document.getElementById('dynBody').innerHTML,'햇빛소득_${s.ym}.html')">📥 명세·통지문 다운로드</button></div>`});
 }
 
 /* ─── 페이지 3. 표준장부·거래처 ─── */
@@ -16586,14 +16598,14 @@ function memLedgers(){
       <div class="card-title"><h3 class="serif">🏷 거래처 마스터 — 거래처별 표준 계정</h3><button class="btn btn-primary btn-sm" onclick="taxEditVendor('')">+ 거래처 추가</button></div>
       <p class="text-mute" style="font-size:12.5px;margin-top:0;">"품목별 계정 세분화는 어렵지만, 거래처별로 계정을 통일하면 재무제표가 일치한다"는 세무사 답변에 따라 거래처마다 표준 계정 하나를 둡니다. 연합회 공통 거래처는 미리 들어 있습니다.</p>
       <table class="tbl" style="font-size:13px;"><thead><tr><th>거래처</th><th>유형</th><th>표준 계정</th><th>사업자번호</th><th>적요 추천 키워드</th><th></th></tr></thead><tbody>
-        ${T.vendors.map(v=>`<tr><td><strong>${escapeHtml(v.name)}</strong></td><td>${escapeHtml(v.type)}</td><td><span class="badge badge-primary">${escapeHtml(v.acct)}</span></td><td>${escapeHtml(v.bizNo||'—')}</td><td class="text-mute" style="font-size:12px;">${escapeHtml(v.kw||'')}</td><td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="taxEditVendor('${v.id}')">수정</button></td></tr>`).join('')}
+        ${T.vendors.map(v=>`<tr><td><strong>${escapeHtml(v.name)}</strong></td><td>${escapeHtml(v.type)}</td><td><span class="badge badge-primary">${escapeHtml(v.acct)}</span></td><td>${escapeHtml(v.bizNo||'—')}</td><td class="text-mute" style="font-size:12px;">${escapeHtml(v.kw||'')}</td><td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="taxEditVendor('${escapeJs(v.id)}')">수정</button></td></tr>`).join('')}
       </tbody></table>
     </div>
 
     <div class="card mt-20">
       <div class="card-title"><h3 class="serif">📚 표준 관리대장 12종</h3></div>
       <div class="grid grid-3">
-        ${TAX_LEDGERS.map(([name, desc, key]) => `<div class="feature" style="cursor:pointer;" onclick="taxLedgerView('${key}')">
+        ${TAX_LEDGERS.map(([name, desc, key]) => `<div class="feature" style="cursor:pointer;" onclick="taxLedgerView('${escapeJs(key)}')">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;"><h3 style="font-size:15px;">${name}</h3><span class="badge ${cnt[key] ? 'badge-success' : 'badge-mute'}">${cnt[key] || 0}건</span></div>
           <p style="font-size:12.5px;">${desc}</p></div>`).join('')}
       </div>
@@ -16633,7 +16645,7 @@ function taxEditVendor(id){
     body:`<div class="form-row"><label>거래처명 *</label><input class="input" id="vd-name" value="${escapeHtml(v.name)}"></div>
       <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><div><label>유형</label><select class="select" id="vd-type">${['매출처','매입처','교부기관','조합원','임대인','금융','공공','직원','주민'].map(t=>`<option${t===v.type?' selected':''}>${t}</option>`).join('')}</select></div><div><label>표준 계정 *</label><input class="input" id="vd-acct" value="${escapeHtml(v.acct)}" placeholder="예: 발전설비유지관리비"></div></div>
       <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><div><label>사업자번호</label><input class="input" id="vd-bizno" value="${escapeHtml(v.bizNo)}"></div><div><label>적요 추천 키워드(|로 구분)</label><input class="input" id="vd-kw" value="${escapeHtml(v.kw)}"></div></div>`,
-    foot:`${id && !TAX_VENDOR_SEED.some(s=>s.id===id) ? `<button class="btn btn-danger btn-sm" style="margin-right:auto;" onclick="taxRemoveVendor('${id}')">삭제</button>` : ''}<button class="btn btn-outline" onclick="closeDyn()">취소</button><button class="btn btn-primary" onclick="taxSaveVendor('${id}')">저장</button>`});
+    foot:`${id && !TAX_VENDOR_SEED.some(s=>s.id===id) ? `<button class="btn btn-danger btn-sm" style="margin-right:auto;" onclick="taxRemoveVendor('${escapeJs(id)}')">삭제</button>` : ''}<button class="btn btn-outline" onclick="closeDyn()">취소</button><button class="btn btn-primary" onclick="taxSaveVendor('${escapeJs(id)}')">저장</button>`});
 }
 function taxSaveVendor(id){
   const g = k => (document.getElementById(k).value || '').trim();
