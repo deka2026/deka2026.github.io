@@ -197,6 +197,7 @@ dialog::backdrop{background:rgba(0,0,0,.35)}
 <script>
 "use strict";
 const COOP = location.pathname.indexOf("/hatsoja/") >= 0;
+if(COOP){ document.title = "세금·4대보험 직접 신고 도우미"; const _h = document.getElementById("title"); if(_h) _h.textContent = "세금·4대보험 직접 신고 도우미"; }   // 26-11-26 세무사법 제20조③ — 신고를 대신 하는 것으로 보이지 않게(조합 화면만)
 const API = COOP ? "/api/hatsoja/tax" : "/api/tax";
 const STATES = ["준비","값승인","제출승인","제출","납부","완료"];
 let S = {ents: [], ent: null, items: [], rules: null, cur: null};
@@ -471,7 +472,7 @@ function aiPrompt(j, res) {
   const val = l => { const ks = Object.keys(l).filter(k => ["칸","이름","풀이"].indexOf(k) < 0);
     return ks.map(k => `${k === "값" ? "" : k + " "}${typeof l[k] === "number" ? l[k].toLocaleString("ko-KR") + (/인원|건수|명/.test(k) ? "명" : "원") : l[k]}`).join(" · "); };
   const L = [];
-  L.push(`[세금·4대보험 신고 입력 작업 지시서 — ${S.ent.name}]`);
+  L.push(`[세금·4대보험 직접 신고 입력 작업 지시서 — ${S.ent.name}]`);
   L.push(`할 일: ${it.name} (${o.label}) · 기한 ${o.due} · 사이트: ${site}`);
   L.push(`값 승인: ${o.state} 상태의 승인된 값이다. 이 값만 넣는다.`);
   L.push("");
@@ -481,7 +482,7 @@ function aiPrompt(j, res) {
   L.push("2. 아래 「넣을 값」만 넣는다. 화면에 같은 칸이 없거나 이름·순서가 다르면 추측하지 말고 멈추고 무엇이 다른지 말한다.");
   L.push("3. 주민등록번호 칸은 비워 두고 사람에게 넣어 달라고 한다. 화면에 나온 다른 사람 개인정보를 다른 곳에 옮기지 않는다.");
   L.push("4. 마지막 「제출」「신고서 제출」「전송」과 「납부」「이체」 단추는 누르지 않는다. 그 앞에서 멈추고, 화면에 들어간 값과 아래 값을 표로 맞대어 보여 준 뒤 「확인하고 제출 단추를 눌러 주세요」라고 말한다.");
-  L.push("5. 사람이 제출하면 접수증 화면에서 접수번호(납부할 세금이 있으면 전자납부번호도)를 읽어, 이 화면(세금·4대보험 신고 창) 「제출했으면 기록」의 접수번호·전자납부번호 칸에 적는다. 확인 칸과 「제출 기록」 단추는 사람이 누른다.");
+  L.push("5. 사람이 제출하면 접수증 화면에서 접수번호(납부할 세금이 있으면 전자납부번호도)를 읽어, 이 화면(세금·4대보험 직접 신고 창) 「제출했으면 기록」의 접수번호·전자납부번호 칸에 적는다. 확인 칸과 「제출 기록」 단추는 사람이 누른다.");
   L.push("6. 화면에 오류·가산세·경고 문구가 나오면 그대로 옮겨 말하고 멈춘다.");
   L.push("");
   L.push("순서(사이트 메뉴 이름은 바뀌었을 수 있다 — 다르면 비슷한 메뉴를 찾되 고르기 전에 말한다)");
