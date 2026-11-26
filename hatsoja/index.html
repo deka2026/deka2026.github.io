@@ -4964,8 +4964,29 @@ function _pwInputs(){
   const g = function(id){ const el = document.getElementById(id); return el && el.value !== '' ? Number(el.value) : null; };
   return {rev:g('pw-rev'), debt:g('pw-debt'), mem:g('pw-mem'), eld:g('pw-eld'), age:g('pw-age'), opex:g('pw-opex'), tax:g('pw-tax'), legal:g('pw-legal')};
 }
+/* 11-26 밤 이사장 「우리 전략으로 선택이 저장이 안 돼」: 관리자 계정(미리보기 포함)은 연결된 조합이 없어 서버가 no_village 로 거절했고,
+   화면은 영어 코드만 띄웠다. 저장 창을 열기 전에 저장할 조합이 있는지 보고, 없으면 갈 길을 알려 준다. */
+function pwStratWhere(){
+  const u = currentUser() || {};
+  if(!REAL_API || _isDemoUser()) return {msg:'체험 모드에서는 저장되지 않습니다. 실제 조합 계정으로 로그인하면 정할 수 있습니다.'};
+  if(u.viewVillage || _myVillage) return null;   // 조합 계정이거나, 관리자가 「🚪 조합 화면」으로 들어온 경우
+  if(u.preview || u.role === 'admin' || u.hubRole === 'admin')
+    return {admin:true, msg:'통합관리자 계정에는 연결된 조합이 없어 전략을 저장할 곳이 없습니다'
+      + (u.preview ? '(지금은 화면 미리보기입니다)' : '') + '. 관리자 화면 「🏘 조합·마을 현황」에서 그 조합의 「🚪 조합 화면」으로 들어가 정하세요.'};
+  return {msg:'이 계정은 아직 조합에 연결되지 않았습니다. 사교원 관리자에게 조합 배정을 요청한 뒤 정하세요.'};
+}
+function pwStratBlocked(){
+  const w = pwStratWhere(); if(!w) return false;
+  if(!w.admin){ toast(w.msg); return true; }
+  const u = currentUser() || {};
+  showDyn({title:'어느 조합의 전략인지 먼저 고르세요', size:'md', body:'<p style="margin:0;">' + escapeHtml(w.msg) + '</p>',
+    foot:'<button class="btn btn-outline" onclick="closeDyn()">닫기</button><button class="btn btn-primary" onclick="closeDyn();'
+      + (u.preview ? 'endPreview().then(function(){ location.hash=\'#/adm/villages\'; })' : 'location.hash=\'#/adm/villages\'')
+      + '">🏘 조합·마을 현황으로 가기</button>'});
+  return true;
+}
 function pwStratForm(i){
-  if(!REAL_API){ toast('체험 모드에서는 저장되지 않습니다. 실제 조합 계정으로 로그인하면 정할 수 있습니다.'); return; }
+  if(pwStratBlocked()) return;
   const base = i == null ? null : PW_STRAT[i];
   const cur = _MY_STRAT || {};
   const mix = base ? base.mix : (cur.mix || {조합원배당:20, 마을연금:20, 공동사업:30, 조기상환:10, 재투자:20});
@@ -4995,7 +5016,11 @@ async function pwStratSave(){
   try{
     const r = await fetch('/api/my/strategy', {method:'PUT', credentials:'same-origin', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
     const j = await r.json().catch(function(){ return {}; });
-    if(!j.ok){ toast('저장하지 못했습니다: ' + (j.error || r.status)); return; }
+    if(!j.ok){
+      const 말 = {no_village:'이 계정에 연결된 조합이 없어 저장할 곳이 없습니다. 관리자는 「🏘 조합·마을 현황 → 🚪 조합 화면」으로 들어가 정하세요.',
+        forbidden:'이 계정으로는 조합 전략을 정할 수 없습니다.', bad_request:'보낸 값을 읽지 못했습니다. 다시 시도해 주세요.', not_found:'조합을 찾지 못했습니다.'};
+      toast('저장하지 못했습니다 — ' + (말[j.error] || j.error || ('서버 응답 ' + r.status))); return;
+    }
     _MY_STRAT = j.strategy; closeDyn(); pwMineRender(); distStratRender(); rvTabLabel();
     if(document.getElementById('pw-strategy') && document.getElementById('pw-strategy').innerHTML) pwStrategy();
     toast('「' + j.strategy.name + '」을 우리 조합 전략으로 정했습니다.');
