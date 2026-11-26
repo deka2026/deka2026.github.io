@@ -74,7 +74,7 @@ dialog::backdrop{background:rgba(0,0,0,.35)}
 </head>
 <body>
 <div class="hs-top" id="hsTop" hidden><div class="hs-top-in"><b>☀ 햇소자</b><a href="./#/mem/taxops">← 햇소자로 돌아가기</a></div></div>
-<script>try{ if(window.top === window) document.getElementById('hsTop').hidden = false; }catch(e){}</script>
+<script>try{ if(window.top === window && location.pathname.indexOf('/hatsoja/') >= 0) document.getElementById('hsTop').hidden = false; }catch(e){}</script>
 <div class="wrap">
   <h1 id="title">세금·4대보험 신고</h1>
   <p class="lead" id="lead">원천세·부가세·법인세와 인사변동 4대보험 신고를 기한 순서로 챙기는 계산·기록 도구입니다. 값을 승인하면 숫자가 고정되고, 홈택스·위택스·4대보험 정보연계센터에는 사업장 담당자가 직접 로그인해 넣고 제출합니다.</p>
