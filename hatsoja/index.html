@@ -7932,12 +7932,13 @@ async function powerSubmitAll(){
   await powerLoadMine();
 }
 
-/* ─── 조합원 명부 CSV — 브라우저 안에서만 처리한다 (2026-09-28) ───
+/* ─── 조합원 명부 파일 — 브라우저 안에서만 처리한다 (2026-09-28, 11-26 엑셀·조합원 관리 화면 올리기) ───
    🔴 개인정보다. 설계 원칙 셋:
-     ① 서버로 절대 안 보낸다 — 파싱도 저장도 브라우저 안에서 끝낸다
-     ② 최소수집 — 명부에 필요한 4개(성명·직위·가입일·출자금)만 가져오고 나머지 열은 버린다
+     ① 서버로 절대 안 보낸다 — 파싱도 저장도 브라우저 안에서 끝낸다(엑셀도 브라우저가 직접 푼다)
+     ② 최소수집 — 명부에 필요한 것(성명·직위·가입일·출자금·출자좌수)만 가져오고 나머지 열은 버린다
      ③ 주민등록번호가 섞여 있으면 아예 들이지 않는다 — 열을 지우고 다시 올리게 한다
-   재업로드는 성명(+가입일)으로 맞춰 갱신하므로 여러 번 올려도 중복되지 않는다. */
+   재업로드는 성명(+가입일)으로 맞춰 갱신하므로 여러 번 올려도 중복되지 않는다.
+   자료함(#/mem/inbox)과 조합원 관리(#/mem/members) 두 곳이 같은 함수를 쓴다. */
 const _RRN = /\b\d{6}\s*[-–—]\s*[1-4]\d{6}\b/;           // 주민등록번호 형태
 
 function _rosterWon(v){
@@ -7950,66 +7951,172 @@ function _rosterWon(v){
   return n >= 10000 ? Math.round(n / 10000) : Math.round(n);   // 원 단위로 보이면 만원으로
 }
 
+/* xlsx 는 zip 이다 — 외부 라이브러리 없이 브라우저의 DecompressionStream 으로 첫 시트만 푼다 */
+async function _xlsxRows(file){
+  const buf = new Uint8Array(await file.arrayBuffer());
+  const dv = new DataView(buf.buffer);
+  let eocd = -1;
+  for(let i = buf.length - 22; i >= Math.max(0, buf.length - 65600); i--){
+    if(dv.getUint32(i, true) === 0x06054b50){ eocd = i; break; }
+  }
+  if(eocd < 0) throw new Error('엑셀(xlsx) 파일이 아닙니다');
+  const 개수 = dv.getUint16(eocd + 10, true);
+  let p = dv.getUint32(eocd + 16, true);
+  const 목록 = {};
+  for(let k = 0; k < 개수; k++){
+    const 방식 = dv.getUint16(p + 10, true), 크기 = dv.getUint32(p + 20, true);
+    const nl = dv.getUint16(p + 28, true), el = dv.getUint16(p + 30, true), cl = dv.getUint16(p + 32, true);
+    const 위치 = dv.getUint32(p + 42, true);
+    목록[new TextDecoder().decode(buf.subarray(p + 46, p + 46 + nl))] = {방식, 크기, 위치};
+    p += 46 + nl + el + cl;
+  }
+  async function 꺼내기(name){
+    const e = 목록[name]; if(!e) return null;
+    const 시작 = e.위치 + 30 + dv.getUint16(e.위치 + 26, true) + dv.getUint16(e.위치 + 28, true);
+    const raw = buf.subarray(시작, 시작 + e.크기);
+    if(e.방식 === 0) return new TextDecoder().decode(raw);
+    const s = new Blob([raw]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+    return await new Response(s).text();
+  }
+  const xml = t => new DOMParser().parseFromString(t, 'application/xml');
+  const 글 = el => Array.from(el.getElementsByTagName('t')).map(t => t.textContent).join('');
+  const ss = await 꺼내기('xl/sharedStrings.xml');
+  const 공유 = ss ? Array.from(xml(ss).getElementsByTagName('si')).map(글) : [];
+  // 첫 번째 시트 — workbook 순서가 정본이지만 대개 sheet1 이다
+  const 시트이름 = Object.keys(목록).filter(n => /^xl\/worksheets\/sheet\d+\.xml$/.test(n))
+    .sort((a, b) => parseInt(a.replace(/\D/g, '')) - parseInt(b.replace(/\D/g, '')))[0];
+  if(!시트이름) throw new Error('시트를 찾지 못했습니다');
+  const doc = xml(await 꺼내기(시트이름));
+  const 열번호 = ref => { let n = 0; for(const ch of ref.replace(/\d/g, '')) n = n * 26 + ch.charCodeAt(0) - 64; return n - 1; };
+  const rows = [];
+  Array.from(doc.getElementsByTagName('row')).forEach(function(r){
+    const row = [];
+    Array.from(r.getElementsByTagName('c')).forEach(function(c, j){
+      const i = c.getAttribute('r') ? 열번호(c.getAttribute('r')) : j;
+      const t = c.getAttribute('t'), v = c.getElementsByTagName('v')[0];
+      let val = '';
+      if(t === 's') val = v ? (공유[+v.textContent] || '') : '';
+      else if(t === 'inlineStr') val = 글(c);
+      else val = v ? v.textContent : '';
+      row[i] = val;
+    });
+    for(let i = 0; i < row.length; i++) if(row[i] == null) row[i] = '';
+    rows.push(row);
+  });
+  return rows.filter(r => r.some(x => String(x).trim() !== ''));
+}
+
+/* 파일 → 표(행 배열). 실패하면 cb(null, 까닭) */
+function _rosterReadRows(file, cb){
+  const ext = (file.name.split('.').pop() || '').toLowerCase();
+  if(ext === 'xls' || ext === 'hwp' || ext === 'hwpx' || ext === 'pdf'){
+    cb(null, '이 형식(.' + ext + ')은 아직 바로 읽지 못합니다. 엑셀에서 「다른 이름으로 저장」 → Excel 통합 문서(.xlsx) 또는 CSV 로 저장해 다시 올려 주세요.');
+    return;
+  }
+  if(ext === 'xlsx'){
+    if(typeof DecompressionStream === 'undefined'){ cb(null, '이 브라우저는 엑셀을 바로 못 읽습니다. CSV 로 저장해 올리거나 크롬·엣지 최신판을 써 주세요.'); return; }
+    _xlsxRows(file).then(function(rows){ cb(rows); }).catch(function(e){ cb(null, '엑셀을 읽지 못했습니다 — ' + (e && e.message || e)); });
+    return;
+  }
+  _readTextFile(file, function(text){ cb(_closingCsvParse(text || '')); });
+}
+
+/* 엑셀 날짜 일련번호(45123)·'2024.3.5'·'2024년 3월 5일' → YYYY-MM-DD */
+function _rosterDate(v){
+  const s = String(v == null ? '' : v).trim();
+  if(!s) return '';
+  if(/^\d{5}(\.\d+)?$/.test(s)){
+    const n = Math.floor(Number(s));
+    if(n > 20000 && n < 80000) return new Date(Date.UTC(1899, 11, 30) + n * 86400000).toISOString().slice(0, 10);
+  }
+  const m = s.match(/(\d{4})\s*[-./년]\s*(\d{1,2})\s*[-./월]\s*(\d{1,2})/);
+  return m ? m[1] + '-' + m[2].padStart(2, '0') + '-' + m[3].padStart(2, '0') : '';
+}
+
+/* 표 → 명부 기록. 머리글 위에 제목 줄이 있어도 「성명」이 든 줄을 머리글로 잡는다 */
+function _rosterBuild(rows){
+  const 머리줄 = rows.slice(0, 10).findIndex(function(r){
+    return r.some(function(c){ return /성\s*명|이\s*름|조합원명/.test(String(c)); });
+  });
+  if(머리줄 < 0) return {오류: '머리글에서 「성명」(또는 이름) 열을 찾지 못했습니다. 첫 줄에 성명·직위·가입일·출자금 같은 열 이름을 넣어 주세요.'};
+  const head = rows[머리줄].map(function(h){ return String(h).replace(/\s+/g, '').trim(); });
+  // ③ 주민번호 — 값의 꼴로 한 번, 머리글에 「주민」이 있는 열이 비어 있지 않은지로 한 번
+  const 주민열 = head.findIndex(function(h){ return /주민|생년월일및/.test(h); });
+  const 본문 = rows.slice(머리줄 + 1);
+  if(본문.some(function(r){ return r.some(function(c){ return _RRN.test(String(c)); }); })
+     || (주민열 >= 0 && 본문.some(function(r){ return /\d{6,}/.test(String(r[주민열] || '').replace(/\D/g, '')); }))){
+    return {주민: true};
+  }
+  const iName  = _colOf(head, ['성명','이름','조합원명'], 0);
+  const iRole  = _colOf(head, ['직위','역할','구분'], -1);
+  const iJoin  = _colOf(head, ['가입일','가입','등록일'], -1);
+  // ⚠ '출자' 로 찾으면 '출자좌수' 에 먼저 걸린다 — 좌수와 금액을 반드시 갈라야 한다
+  const iUnit  = head.findIndex(function(h){ return h.indexOf('좌') !== -1; });
+  const iShare = head.findIndex(function(h){
+    return h.indexOf('좌') === -1 && (h.indexOf('출자') !== -1 || h.indexOf('납입') !== -1);
+  });
+  // ② 최소수집 — 쓰는 열 말고는 전부 버린다. 무엇을 버렸는지 사람에게 알린다
+  const 쓰는열 = [iName, iRole, iJoin, iShare, iUnit].filter(function(i){ return i >= 0; });
+  const 버린열 = head.filter(function(h, i){ return 쓰는열.indexOf(i) === -1 && h; });
+  const recs = []; let 건너뜀 = 0;
+  본문.forEach(function(r){
+    const name = String(r[iName] || '').trim();
+    if(!name || /^(합계|소계|계|총계)$/.test(name.replace(/\s/g, ''))){ 건너뜀++; return; }
+    const 만원 = iShare >= 0 ? _rosterWon(r[iShare]) : 0;
+    const rec = {
+      name: name,
+      role: (iRole >= 0 ? String(r[iRole] || '').trim() : '') || '조합원',
+      joinDate: iJoin >= 0 ? _rosterDate(r[iJoin]) : '',
+      share: 만원 ? 만원 + '만원' : '0만원',
+      voting: true
+    };
+    if(iUnit >= 0) rec.shares = Number(String(r[iUnit] || '').replace(/[^\d]/g, '')) || 0;
+    recs.push(rec);
+  });
+  return {recs: recs, 버린열: 버린열, 건너뜀: 건너뜀};
+}
+
+/* 기록을 명부에 넣는다 — 같은 성명(+가입일)은 갱신 */
+function _rosterApply(recs){
+  loadUserMembers();
+  let 새로 = 0, 갱신 = 0;
+  recs.forEach(function(rec){
+    const 같음 = MOCK.members.filter(function(m){
+      return m.name === rec.name && (!rec.joinDate || !m.joinDate || m.joinDate === rec.joinDate);
+    })[0];
+    if(같음){ Object.assign(같음, rec); 갱신++; } else { MOCK.members.push(rec); 새로++; }
+  });
+  persistMembers();
+  return {새로: 새로, 갱신: 갱신};
+}
+
+function _rosterRrnNotice(name){
+  showDyn({
+    title: '주민등록번호가 들어 있습니다 — 들이지 않았습니다',
+    sub: name,
+    body: '<p style="margin-top:0;">명부 안에서 <b>주민등록번호 형태의 값</b>(또는 값이 든 주민번호 열)을 찾았습니다.'
+        + ' 햇소자는 주민번호를 받지 않습니다 — 저장도, 전송도 하지 않습니다.</p>'
+        + '<p style="font-size:13.5px;"><b>이렇게 해 주세요.</b> 원본에서 주민번호 열을 통째로 지운 뒤 다시 올려 주세요.'
+        + ' 조합원 명부에 필요한 것은 <b>성명·직위·가입일·출자금</b> 네 가지뿐입니다.</p>'
+        + '<p class="text-mute" style="font-size:12.5px;">주민번호가 필요한 서류(원천징수 등)는 그때그때 원본을 보고 직접 적으시고,'
+        + ' 플랫폼에는 남기지 마세요.</p>',
+    foot: '<button class="btn btn-primary" onclick="closeDyn()">알겠습니다</button>'
+  });
+}
+
 function inboxParseRoster(file, fid){
-  _readTextFile(file, function(text){
-    // ③ 주민번호가 있으면 들이지 않는다
-    if(_RRN.test(text)){
-      showDyn({
-        title: '주민등록번호가 들어 있습니다 — 들이지 않았습니다',
-        sub: file.name,
-        body: '<p style="margin-top:0;">명부 안에서 <b>주민등록번호 형태의 값</b>을 찾았습니다.'
-            + ' 햇소자는 주민번호를 받지 않습니다 — 저장도, 전송도 하지 않습니다.</p>'
-            + '<p style="font-size:13.5px;"><b>이렇게 해 주세요.</b> 원본에서 주민번호 열을 통째로 지운 뒤 다시 올려 주세요.'
-            + ' 조합원 명부에 필요한 것은 <b>성명·직위·가입일·출자금</b> 네 가지뿐입니다.</p>'
-            + '<p class="text-mute" style="font-size:12.5px;">주민번호가 필요한 서류(원천징수 등)는 그때그때 원본을 보고 직접 적으시고,'
-            + ' 플랫폼에는 남기지 마세요.</p>',
-        foot: '<button class="btn btn-primary" onclick="closeDyn()">알겠습니다</button>'
-      });
+  _rosterReadRows(file, function(rows, 까닭){
+    if(!rows){ toast(까닭); _inboxFinish(fid, '거부', 까닭); return; }
+    if(rows.length < 2){ toast('명부에서 조합원을 읽지 못했습니다. 첫 줄이 머리글인지 확인해 주세요.'); return; }
+    const b = _rosterBuild(rows);
+    if(b.주민){
+      _rosterRrnNotice(file.name);
       _inboxFinish(fid, '거부', '주민등록번호가 있어 들이지 않았습니다 — 해당 열을 지우고 다시 올려 주세요');
       return;
     }
-
-    const rows = _closingCsvParse(text);
-    if(rows.length < 2){ toast('CSV에서 조합원을 읽지 못했습니다. 첫 줄이 머리글인지 확인해 주세요.'); return; }
-
-    const head = rows[0].map(function(h){ return String(h).trim(); });
-    const iName  = _colOf(head, ['성명','이름','조합원명'], 0);
-    const iRole  = _colOf(head, ['직위','역할','구분'], -1);
-    const iJoin  = _colOf(head, ['가입일','가입','등록일'], -1);
-    // ⚠ '출자' 로 찾으면 '출자좌수' 에 먼저 걸린다 — 좌수와 금액을 반드시 갈라야 한다
-    const iUnit  = head.findIndex(function(h){ return h.indexOf('좌') !== -1; });
-    const iShare = head.findIndex(function(h){
-      return h.indexOf('좌') === -1 && (h.indexOf('출자') !== -1 || h.indexOf('납입') !== -1);
-    });
-
-    // ② 최소수집 — 쓰는 열 말고는 전부 버린다. 무엇을 버렸는지 사람에게 알린다
-    const 쓰는열 = [iName, iRole, iJoin, iShare, iUnit].filter(function(i){ return i >= 0; });
-    const 버린열 = head.filter(function(h, i){ return 쓰는열.indexOf(i) === -1 && h; });
-
-    loadUserMembers();
-    let 새로 = 0, 갱신 = 0, 건너뜀 = 0;
-    rows.slice(1).forEach(function(r){
-      const name = String(r[iName] || '').trim();
-      if(!name){ 건너뜀++; return; }
-      const join  = iJoin >= 0 ? String(r[iJoin] || '').trim().replace(/[./]/g, '-').slice(0, 10) : '';
-      const 만원  = iShare >= 0 ? _rosterWon(r[iShare]) : 0;
-      const rec = {
-        name: name,
-        role: (iRole >= 0 ? String(r[iRole] || '').trim() : '') || '조합원',
-        joinDate: /^\d{4}-\d{2}-\d{2}$/.test(join) ? join : '',
-        share: 만원 ? 만원 + '만원' : '0만원',
-        voting: true
-      };
-      if(iUnit >= 0) rec.shares = Number(String(r[iUnit] || '').replace(/[^\d]/g, '')) || 0;
-
-      const 같음 = MOCK.members.filter(function(m){
-        return m.name === name && (!rec.joinDate || !m.joinDate || m.joinDate === rec.joinDate);
-      })[0];
-      if(같음){ Object.assign(같음, rec); 갱신++; } else { MOCK.members.push(rec); 새로++; }
-    });
-
-    if(!새로 && !갱신){ toast('성명을 알아보지 못했습니다. 머리글에 「성명」 열이 있는지 확인해 주세요.'); return; }
-    persistMembers();
+    if(b.오류){ toast(b.오류); return; }
+    if(!b.recs.length){ toast('성명을 알아보지 못했습니다. 머리글에 「성명」 열이 있는지 확인해 주세요.'); return; }
+    const n = _rosterApply(b.recs), 새로 = n.새로, 갱신 = n.갱신, 버린열 = b.버린열, 건너뜀 = b.건너뜀;
 
     const 총출자 = MOCK.members.reduce(function(s, m){ return s + (parseInt(m.share) || 0); }, 0);
     _inboxFinish(fid, '완료',
@@ -8025,6 +8132,53 @@ function inboxParseRoster(file, fid){
     inboxRender();
     toast((새로 + 갱신) + '명을 명부에 넣었습니다. 서버로 보내지 않았습니다.');
   });
+}
+
+/* 조합원 관리 화면의 「명부 파일 올리기」 — 읽은 결과를 먼저 보여 주고, 사람이 「명부에 넣기」를 눌러야 들어간다 */
+let _rosterPending = null;
+function memRosterUpload(input){
+  const file = input.files && input.files[0];
+  input.value = '';
+  if(!file) return;
+  _rosterReadRows(file, function(rows, 까닭){
+    if(!rows){ toast(까닭); return; }
+    if(rows.length < 2){ toast('명부에서 조합원을 읽지 못했습니다. 첫 줄이 머리글인지 확인해 주세요.'); return; }
+    const b = _rosterBuild(rows);
+    if(b.주민){ _rosterRrnNotice(file.name); return; }
+    if(b.오류){ toast(b.오류); return; }
+    if(!b.recs.length){ toast('성명을 알아보지 못했습니다. 머리글에 「성명」 열이 있는지 확인해 주세요.'); return; }
+    loadUserMembers();
+    _rosterPending = {recs: b.recs, name: file.name};
+    const 있음 = function(r){ return MOCK.members.some(function(m){ return m.name === r.name && (!r.joinDate || !m.joinDate || m.joinDate === r.joinDate); }); };
+    const 갱신수 = b.recs.filter(있음).length;
+    const 합계 = b.recs.reduce(function(s, r){ return s + (parseInt(r.share) || 0); }, 0);
+    showDyn({
+      title: '명부 파일을 읽었습니다 — 확인 후 넣어 주세요',
+      sub: file.name,
+      body: '<p style="margin-top:0;"><b>' + b.recs.length + '명</b>을 읽었습니다(새로 ' + (b.recs.length - 갱신수) + '명 · 이미 있어 갱신 ' + 갱신수 + '명)'
+          + ' · 출자금 합계 ' + 합계.toLocaleString() + '만원</p>'
+          + (b.버린열.length ? '<p class="text-mute" style="font-size:12.5px;">안 쓰는 열은 버렸습니다: ' + b.버린열.map(escapeHtml).join(', ') + '</p>' : '')
+          + (b.건너뜀 ? '<p class="text-mute" style="font-size:12.5px;">성명이 비었거나 합계 줄이라 건너뛴 줄: ' + b.건너뜀 + '줄</p>' : '')
+          + '<div style="max-height:320px;overflow:auto;"><table class="tbl"><thead><tr><th>성명</th><th>직위</th><th>가입일</th><th>출자금</th><th></th></tr></thead><tbody>'
+          + b.recs.map(function(r){
+              return '<tr><td>' + escapeHtml(r.name) + '</td><td>' + escapeHtml(r.role) + '</td><td>' + escapeHtml(r.joinDate || '—') + '</td><td>'
+                + escapeHtml(r.share) + (r.shares ? ' (' + r.shares + '좌)' : '') + '</td><td>' + (있음(r) ? '<span class="badge badge-mute">갱신</span>' : '<span class="badge badge-success">새로</span>') + '</td></tr>';
+            }).join('')
+          + '</tbody></table></div>'
+          + '<p class="text-mute" style="font-size:12.5px;margin-bottom:0;">🔒 파일은 서버로 보내지 않았습니다. 이 기기(브라우저) 안에서만 읽고 저장합니다.</p>',
+      foot: '<button class="btn btn-outline" onclick="_rosterPending=null;closeDyn()">취소</button>'
+          + '<button class="btn btn-primary" onclick="memRosterConfirm()">명부에 넣기</button>'
+    });
+  });
+}
+function memRosterConfirm(){
+  if(!_rosterPending) return closeDyn();
+  const p = _rosterPending; _rosterPending = null;
+  const n = _rosterApply(p.recs);
+  addProposal('조합원수', String(MOCK.members.length), p.name, '명부에서 셈');
+  closeDyn();
+  toast((n.새로 + n.갱신) + '명을 명부에 넣었습니다(새로 ' + n.새로 + ', 갱신 ' + n.갱신 + '). 서버로 보내지 않았습니다.');
+  refresh();
 }
 
 function inboxRender(){
@@ -8993,6 +9147,8 @@ function memMembers(){
       <div class="card-title">
         <h3 class="serif">👥 조합원 명부</h3>
         <div style="display:flex;gap:6px;">
+          <label class="btn btn-outline btn-sm" style="cursor:pointer;" title="성명·직위·가입일·출자금 열이 있는 엑셀(.xlsx)·CSV — 서버로 보내지 않습니다">📤 명부 파일 올리기
+            <input type="file" accept=".xlsx,.csv,.txt" style="display:none;" onchange="memRosterUpload(this)"></label>
           <button class="btn btn-outline btn-sm" onclick="downloadMembers()">📥 명부 다운로드 (Excel · A4)</button>
           <button class="btn btn-primary btn-sm" onclick="addMember()">+ 조합원 추가</button>
         </div>
