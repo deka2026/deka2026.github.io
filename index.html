@@ -619,7 +619,7 @@ svg.ic.s{width:17px;height:17px}
 .u2 .msg{margin:8px 0 0}
 .app>main{min-width:0}
 .flist td[colspan].n{white-space:normal}   /* 빈 목록 안내 글이 줄을 안 바꿔 휴대폰에서 표가 669px 로 늘던 것 */
-#fClosed{display:none}#vFiles.closed>:not(#fClosed){display:none!important}#vFiles.closed>#fClosed{display:block}
+[data-apn].on{color:#8a4b00;font-weight:700}.btn.p [data-apn].on{color:#ffe08a}#fClosed{display:none}#vFiles.closed>:not(#fClosed){display:none!important}#vFiles.closed>#fClosed{display:block}
 #myBox{margin:0 0 16px}#myGreet{margin:0 0 4px}
 #vMap .mapbar{background:var(--bg)}
 @media(min-width:761px){#vCustom .cgrid{grid-template-columns:1fr 230px}}
@@ -1147,7 +1147,9 @@ function renderSideHome() {
   const keys = myServiceKeys(), staff = (RANK[me.role] || 0) >= RANK.staff;
   let h = `<div class="me"><b>${esc(me.name || me.email || me.username)}</b> 님<br>${esc(tierKo(me))}</div>` + (preview ? `<div class="pvnote">🧪 미리보기 — 화면만 바뀌고 저장되지 않습니다</div>` : '') +
     `<nav aria-label="내 메뉴"><ul class="sfix"><li><a href="#/"${cur('home')}>${ic('home', 's')}내 페이지</a></li>${noFolder() ? '' : `<li><a href="#/files"${cur('files')}>${ic('folder', 's')}내 폴더</a></li>`}</ul>`;
-  if (keys.length) h += `<div class="cap" id="capSvc">내가 고른 서비스</div><div id="sgSvc">` + keys.map((k, i) => sgHTML(k, SVC[k].n, SVC[k], svcItems(k).map(sgLi).join(''), i === 0)).join('') + `</div>`;
+  const adm = me.role === 'admin';   // 11-26 이사장 지시: 통합관리자는 고르지 않고 전 서비스를 쓴다
+  if (keys.length) h += `<div class="cap" id="capSvc">${adm ? '전 서비스' : '내가 고른 서비스'}</div><div id="sgSvc">` + keys.map((k, i) => sgHTML(k, SVC[k].n, SVC[k], svcItems(k).map(sgLi).join(''), i === 0)).join('') + `</div>`;
+  if (adm) h += sgHTML('etc', '그 밖의 서비스', { c: 'c-rs', icn: 'map' }, [['시민주권 모니터링(시범)', '/simin/'], ['연구자료', HOME + 'research']].map(sgLi).join(''), false);
   if (!staff) h += sgHTML('look', keys.length ? '무료로 둘러보기' : '무료로 써 보기', { c: 'c-rs', icn: 'map' }, lookItems(keys).map(sgLi).join(''), !keys.length);
   if (staff) {   // 그룹웨어 밖의 직원·관리 화면(근태·인사·입찰·관리자 화면…) — 그룹웨어 자체는 머리 단추로
     const sc = SECTIONS.find(x => x.key === '직원 · 관리');
@@ -1156,8 +1158,10 @@ function renderSideHome() {
       : (requestable(it.need) ? `<li class="locked"><a href="#locked" data-need="${esc(it.need || '')}" data-t="${esc(it.t)}"><span>🔒 ${esc(it.t)}</span><span class="rq">${esc(needText(it.need))}</span></a></li>` : '')).join('');
     if (lis) h += `<div class="cap">직원 · 관리</div>` + sgHTML('staff', '직원 · 관리', { c: 'c-g', icn: 'tool' }, lis, false);
   }
-  h += `<div class="smore"><a href="#/join">${ic('plus', 's')}서비스 더 고르기</a></div><div class="sfoot"><a href="#/map">🗺️ 둘러보기(사이트맵)</a></div></nav>`;
+  h += (adm ? `<div class="smore"><a href="/members.html#applyBox" id="sideApply">${ic('list', 's')}서비스 신청 확인<span class="apn" data-apn></span></a></div>` : `<div class="smore"><a href="#/join">${ic('plus', 's')}서비스 더 고르기</a></div>`)
+    + `<div class="sfoot"><a href="#/map">🗺️ 둘러보기(사이트맵)</a></div></nav>`;
   $('#side').innerHTML = h;
+  if (adm && !preview) loadApplyN();
 }
 $('#side').addEventListener('click', e => {
   const b = e.target.closest('button[data-grp]'); if (!b) return;
@@ -1246,7 +1250,7 @@ document.addEventListener('click', e => { if (!e.target.closest('.lockDrop') && 
 /* 11-18 이사장 지시: 머리 오른쪽 단추 — 매니저·통합관리자에게만 「그룹웨어」, 통합관리자에게만 「관리」·「회원·납부」. 다른 등급에는 요소를 아예 그리지 않는다 */
 function renderHdrStaff() {
   const staff = !!me && (RANK[me.role] || 0) >= RANK.staff, adm = !!me && me.role === 'admin';
-  const L = staff ? [['btnGw', 'https://gw.sakyowon.co.kr', ic('grid', 's') + '그룹웨어', 'btn gold']].concat(adm ? [['btnAdm', '/admin.html', '관리', 'btn'], ['btnMembers', '/members.html', '회원·납부', 'btn']] : []) : [];
+  const L = staff ? [['btnGw', 'https://gw.sakyowon.co.kr', ic('grid', 's') + '그룹웨어', 'btn gold']].concat(adm ? [['btnAdm', '/admin.html', '관리', 'btn'], ['btnMembers', '/members.html', '회원·신청·납부', 'btn']] : []) : [];
   $('#hdrStaff').innerHTML = L.map(x => `<a class="${x[3]}" id="${x[0]}" href="${x[1]}">${x[2]}</a>`).join('');
   $('#acctStaff').innerHTML = L.map(x => `<a class="btn" href="${x[1]}">${x[2]}</a>`).join('');   // 휴대폰은 계정 메뉴 안에(머리가 좁다)
 }
@@ -1541,7 +1545,7 @@ function priceHTML() {
   });
   PLANS.products.filter(p => !seen[p.product]).forEach(p => { cards += prod(p); });
   (PLANS.external || []).filter(x => !seen[x.product]).forEach(x => { cards += ext(x); });
-  return ((PLANS.open === false) ? `<div class="notice" id="openNote"><b>유료 서비스 신청은 ${openWhen()}.</b> 지금은 무료이용회원으로 가입할 수 있고, 가입할 때 고른 서비스는 신청이 열리면 이어서 할 수 있습니다.</div>` : '') + (tl && b ? `<div class="notice" id="trialNote"><b>${tl}</b> — 이용료는 ${b.y}년 ${b.m}월부터 받습니다.</div>` : '') + `<div class="pgrid" id="pgrid">${cards}${staffCard}</div>` +
+  return (applyShut() ? `<div class="notice" id="openNote"><b>유료 서비스 신청은 ${openWhen()}.</b> 지금은 무료이용회원으로 가입할 수 있고, 가입할 때 고른 서비스는 신청이 열리면 이어서 할 수 있습니다.</div>` : '') + (tl && b ? `<div class="notice" id="trialNote"><b>${tl}</b> — 이용료는 ${b.y}년 ${b.m}월부터 받습니다.</div>` : '') + `<div class="pgrid" id="pgrid">${cards}${staffCard}</div>` +
     `<p class="note" style="margin-top:10px">교육 서비스는 면세, 그 밖의 서비스는 부가세를 포함한 값입니다. 이용료는 이체 또는 자동이체로 냅니다.</p>`;
 }
 function startHTML() {
@@ -1651,7 +1655,10 @@ function renderMyBox() {
       (s.paid_until ? `<span class="note" style="flex-basis:100%">이용 기간 ${esc(ymd(s.paid_until))} 까지</span>` : '') +
       (['apply', 'wait_pay', 'trial', 'active'].includes(s.status) ? `<button type="button" class="btn sm" data-cancel="${esc(s.product)}" data-n="${esc(s.name || s.product)}">그만두기</button>` : '') + `</li>`).join('') + `</ul>`;
   else t1 += `<p class="note" style="margin-top:6px">${me.role === 'admin' ? '통합관리자는 전 서비스를 이용료 없이 씁니다.' : staff ? '매니저는 이용료 없이, 체크권한으로 열린 서비스(' + keys.map(k => SVC[k].n).join(' · ') + ')를 씁니다.' : keys.length ? '지금 등급으로 쓰는 서비스: ' + keys.map(k => SVC[k].n).join(' · ') : '고른 유료 서비스가 없습니다. 필요한 서비스를 골라 보세요.'}</p>`;
-  t1 += `<div class="myacts"><a class="btn sm p" href="#/join" id="myMore">${ic('plus', 's')}서비스 더 고르기</a></div><div class="msg" id="myMsg" aria-live="polite"></div></div>`;
+  t1 += (me.role === 'admin' && !preview
+    ? `<div class="myacts"><a class="btn sm p" href="/members.html#applyBox" id="myApply">${ic('list', 's')}서비스 신청 확인<span class="apn" data-apn></span></a><a class="btn sm" href="/members.html">회원·납부 관리</a></div>`
+    : `<div class="myacts"><a class="btn sm p" href="#/join" id="myMore">${ic('plus', 's')}서비스 더 고르기</a></div>`) + `<div class="msg" id="myMsg" aria-live="polite"></div></div>`;
+  if (me.role === 'admin' && !preview) loadApplyN();
   // ② 이용료·납부 상태
   let t2 = `<div class="tile" id="tilePay"><div class="hd">${ic('card', 's')}이용료 · 납부 상태</div>`;
   if (staff) t2 += `<div class="v">이용료 없음 <small>사교원 내부</small></div>`;
@@ -1697,7 +1704,14 @@ $('#myBox').addEventListener('click', async e => {
   if (r.ok && Array.isArray(r.subs)) { setMB(r); await refreshMe(); renderGreet(); renderMyBox(); renderSideHome(); const m = $('#myMsg'); if (m) { m.className = 'msg ok'; m.textContent = '그만두기를 받았습니다.'; } }
   else { b.disabled = false; const m = $('#myMsg'); if (m) { m.className = 'msg err'; m.textContent = (r.status === 403 && r.error === 'not_open') ? '지금은 여기서 그만두기를 받을 수 없습니다. 문의하기로 알려 주세요.' : mbText(r); } }
 });
-function renderResume() { const b = $('#joinResume'); if (!b) return; b.hidden = !(stashGet() && !preview); const w = $('#joinResumeWhen'); if (w) w.textContent = (PLANS && PLANS.ok && PLANS.open === false && !(me && me.role === 'admin')) ? `유료 서비스 신청은 ${openWhen()}. ` : ''; if (!PLANS) loadPlans().then(() => { if (onHome()) renderResume(); }); }
+/* 11-26: 통합관리자 내 페이지·사이드바의 「서비스 신청 확인」 옆에 승인 대기 건수를 붙인다(회원·납부 화면의 승인 대기 상자로 간다) */
+let APPLY_N = null, applyNP = null;
+function showApplyN() { document.querySelectorAll('[data-apn]').forEach(e => { e.textContent = APPLY_N ? ' · 승인 대기 ' + APPLY_N + '건' : (APPLY_N === 0 ? ' · 대기 없음' : ''); e.classList.toggle('on', !!APPLY_N); }); }
+function loadApplyN() {
+  if (APPLY_N !== null) { showApplyN(); return; }
+  if (!applyNP) applyNP = api('/api/admin/membership/members').then(r => { APPLY_N = (r.ok && Array.isArray(r.members)) ? r.members.reduce((a, m) => a + (m.services || []).filter(x => x.status === 'apply').length, 0) : null; applyNP = null; showApplyN(); });
+}
+function renderResume() { const b = $('#joinResume'); if (!b) return; b.hidden = !(stashGet() && !preview); const w = $('#joinResumeWhen'); if (w) w.textContent = (applyShut() && !(me && me.role === 'admin')) ? `유료 서비스 신청은 ${openWhen()}. ` : ''; if (!PLANS) loadPlans().then(() => { if (onHome()) renderResume(); }); }
 $('#joinResumeX').addEventListener('click', () => { stashSet(null); renderResume(); });
 function renderHome() {
   renderTfBanner(); renderResume(); renderGreet(); renderMyBox();
@@ -1714,8 +1728,10 @@ let J = null, REG = null;
 /* 신청·문의 창구가 닫혀 있나 — plans 응답의 open 이 거짓이거나 서버에 모듈이 없을 때(404·실패). 통합관리자는 닫혀 있어도 서버가 받는다.
    닫혀 있으면 납부 정보(입금자명·현금영수증 번호)나 문의 글을 아예 받지 않는다 — 닫힌 서버로 개인정보가 한 글자도 나가지 않게(11-18 알파언니) */
 /* 닫혀 있을 때 「언제 열리나」 — plans 응답의 open_from(YYYY-MM-DD)이 있으면 그 날짜로, 없으면 「곧」. 날짜를 화면에 박지 않는다 */
-function openWhen() { const m = (PLANS && PLANS.ok && PLANS.open === false) ? /^(\d{4})-(\d{2})-(\d{2})$/.exec(PLANS.open_from || '') : null; return m ? `${+m[2]}월 ${+m[3]}일부터 열립니다` : '곧 열립니다'; }
-function mbClosed() { return !!PLANS && (!PLANS.ok || PLANS.open === false) && !(me && me.role === 'admin' && PLANS.ok && !preview); }
+/* 11-26 이사장 지시: 서비스 이용 신청은 지금 받는다 — 서버 plans.apply_open(없으면 옛 open)으로 본다. 유료 잠금·문의는 open(12-07) 그대로 */
+function applyShut() { return !!(PLANS && PLANS.ok) && (PLANS.apply_open === undefined ? PLANS.open === false : PLANS.apply_open === false); }
+function openWhen() { const m = applyShut() ? /^(\d{4})-(\d{2})-(\d{2})$/.exec(PLANS.open_from || '') : null; return m ? `${+m[2]}월 ${+m[3]}일부터 열립니다` : '곧 열립니다'; }
+function mbClosed() { return !!PLANS && (!PLANS.ok || applyShut()) && !(me && me.role === 'admin' && PLANS.ok && !preview); }
 function joinNew() { return { step: me ? 2 : 1, sel: {}, held: {}, f: {}, pay: { method: 'transfer', auto_day: 5, cycle: 'month', depositor: '', receipt_kind: 'income', receipt_no: '', invoice: false, biz_no: '' }, payMode: 'new', payOnly: false, err: '', busy: false, done: null, created: false, seeded: false }; }
 const jProd = k => (PLANS && PLANS.ok) ? PLANS.products.find(p => p.product === k) : null;
 function jPrice(p, s) { const sum = (+p.base || 0) + (p.options || []).filter(o => s.opts.includes(o.key)).reduce((a, o) => a + (+o.amount || 0), 0); return p.allin ? Math.min(sum, +p.allin) : sum; }
