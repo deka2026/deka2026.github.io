@@ -4966,23 +4966,28 @@ function _pwInputs(){
 }
 /* 11-26 밤 이사장 「우리 전략으로 선택이 저장이 안 돼」: 관리자 계정(미리보기 포함)은 연결된 조합이 없어 서버가 no_village 로 거절했고,
    화면은 영어 코드만 띄웠다. 저장 창을 열기 전에 저장할 조합이 있는지 보고, 없으면 갈 길을 알려 준다. */
-function pwStratWhere(){
+function pwStratWhere(일){
+  일 = 일 || '전략을 저장할';
   const u = currentUser() || {};
   if(!REAL_API || _isDemoUser()) return {msg:'체험 모드에서는 저장되지 않습니다. 실제 조합 계정으로 로그인하면 정할 수 있습니다.'};
   if(u.viewVillage || _myVillage) return null;   // 조합 계정이거나, 관리자가 「🚪 조합 화면」으로 들어온 경우
   if(u.preview || u.role === 'admin' || u.hubRole === 'admin')
-    return {admin:true, msg:'통합관리자 계정에는 연결된 조합이 없어 전략을 저장할 곳이 없습니다'
-      + (u.preview ? '(지금은 화면 미리보기입니다)' : '') + '. 관리자 화면 「🏘 조합·마을 현황」에서 그 조합의 「🚪 조합 화면」으로 들어가 정하세요.'};
-  return {msg:'이 계정은 아직 조합에 연결되지 않았습니다. 사교원 관리자에게 조합 배정을 요청한 뒤 정하세요.'};
+    return {admin:true, msg:'통합관리자 계정에는 연결된 조합이 없어 ' + 일 + ' 곳이 없습니다'
+      + (u.preview ? '(지금은 화면 미리보기입니다)' : '') + '. 관리자 화면 「🏘 조합·마을 현황」에서 그 조합의 「🚪 조합 화면」으로 들어가세요.'};
+  return {msg:'이 계정은 아직 조합에 연결되지 않았습니다. 사교원 관리자에게 조합 배정을 요청하세요.'};
+}
+/* 관리자를 「조합·마을 현황」으로 보내는 단추(미리보기면 먼저 관리자로 돌아간다) — 전략 저장·공개 현황판 공용 */
+function coopPickBtn(cls){
+  const u = currentUser() || {};
+  return '<button class="btn ' + (cls || 'btn-primary') + '" onclick="closeDyn();'
+    + (u.preview ? 'endPreview().then(function(){ location.hash=\'#/adm/villages\'; })' : 'location.hash=\'#/adm/villages\'')
+    + '">🏘 조합·마을 현황으로 가기</button>';
 }
 function pwStratBlocked(){
   const w = pwStratWhere(); if(!w) return false;
   if(!w.admin){ toast(w.msg); return true; }
-  const u = currentUser() || {};
   showDyn({title:'어느 조합의 전략인지 먼저 고르세요', size:'md', body:'<p style="margin:0;">' + escapeHtml(w.msg) + '</p>',
-    foot:'<button class="btn btn-outline" onclick="closeDyn()">닫기</button><button class="btn btn-primary" onclick="closeDyn();'
-      + (u.preview ? 'endPreview().then(function(){ location.hash=\'#/adm/villages\'; })' : 'location.hash=\'#/adm/villages\'')
-      + '">🏘 조합·마을 현황으로 가기</button>'});
+    foot:'<button class="btn btn-outline" onclick="closeDyn()">닫기</button>' + coopPickBtn()});
   return true;
 }
 function pwStratForm(i){
@@ -10952,10 +10957,14 @@ function shareCanManage(){
 async function shareLoad(){
   const box = document.getElementById('coopShareBox'); if(!box) return;
   if(!shareCanManage()){ box.innerHTML = ''; return; }
-  if(!REAL_API){ _SHARE = {체험:true}; shareRedraw(); return; }
+  if(!REAL_API || _isDemoUser()){ _SHARE = {체험:true}; shareRedraw(); return; }
+  /* 11-26 밤 이사장 「공개 현황판도 같이 고쳐」: 연결된 조합이 없는 계정(관리자 화면 미리보기·미배정)은 서버가 no_village 로 거절했고
+     화면엔 영어 코드만 떴다. 묻기 전에 판정해 갈 길을 보인다. */
+  const w = pwStratWhere('현황판을 만들');
+  if(w){ _SHARE = {조합없음:w}; shareRedraw(); return; }
   try{
     const j = await fetch('/api/my/share', {credentials:'same-origin'}).then(function(r){ return r.json(); });
-    _SHARE = j.ok ? j : {막힘: j.error || '불러오지 못했습니다'};
+    _SHARE = j.ok ? j : {막힘: _shareErr(j.error) || '불러오지 못했습니다'};
   }catch(e){ _SHARE = {막힘:'서버에 닿지 못했습니다'}; }
   shareRedraw();
 }
@@ -10971,6 +10980,12 @@ function shareRedraw(){
   if(_SHARE.체험){
     box.innerHTML = '<div class="card" style="border:2px solid var(--primary);margin-bottom:20px;"><h3 class="serif" style="margin-top:0;">📣 우리 조합 현황판 — 조합원에게 링크로 공개</h3>'
       + '<p class="text-mute" style="margin:0;">조합원 수·출자금·발전량·판매 수입·일정 가운데 보일 것을 골라 현황판을 만들고, 조합 공지와 자료를 함께 링크 하나로 보냅니다. 실제 조합 계정으로 로그인하면 쓸 수 있습니다(체험 모드에서는 링크를 만들지 않습니다).</p></div>';
+    return;
+  }
+  if(_SHARE.조합없음){
+    const w = _SHARE.조합없음;
+    box.innerHTML = '<div class="card" style="border:2px solid var(--line-soft);margin-bottom:20px;"><h3 class="serif" style="margin-top:0;">📣 우리 조합 현황판 — 조합원에게 링크로 공개</h3>'
+      + '<p style="margin:0 0 10px;">' + escapeHtml(w.msg) + '</p>' + (w.admin ? coopPickBtn('btn-outline btn-sm') : '') + '</div>';
     return;
   }
   if(_SHARE.막힘){ box.innerHTML = '<div class="card" style="margin-bottom:20px;"><b>우리 조합 현황판</b> <span class="text-mute">— ' + escapeHtml(_SHARE.막힘) + '</span></div>'; return; }
@@ -11028,8 +11043,12 @@ function shareEditHtml(){
 async function _shareApi(method, path, body){
   const r = await fetch(path, {method:method, credentials:'same-origin', headers:{'Content-Type':'application/json'}, body: body ? JSON.stringify(body) : undefined});
   const j = await r.json().catch(function(){ return {}; });
-  if(!r.ok || !j.ok) throw new Error(j.error || ('HTTP ' + r.status));
+  if(!r.ok || !j.ok) throw new Error(_shareErr(j.error) || ('서버 응답 ' + r.status));
   return j;
+}
+function _shareErr(code){
+  return ({no_village:'이 계정에 연결된 조합이 없습니다. 관리자는 「🏘 조합·마을 현황 → 🚪 조합 화면」으로 들어가세요.',
+    forbidden:'이 계정으로는 조합 현황판을 다룰 수 없습니다.', not_found:'조합을 찾지 못했습니다.', bad_request:'보낸 값을 읽지 못했습니다. 다시 시도해 주세요.'})[code] || code;
 }
 async function shareSave(){
   const items = Array.from(document.querySelectorAll('[data-shitem]')).filter(function(x){ return x.checked; }).map(function(x){ return x.getAttribute('data-shitem'); });
