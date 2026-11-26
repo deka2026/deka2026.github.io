@@ -815,6 +815,11 @@ details.prc-rule[open]>summary{margin-bottom:8px;}
 @media (max-width:600px){.pub-photo{height:110px;}}
 /* H-04 덧: 데스크톱에서도 표가 든 카드는 카드 안에서만 옆으로 민다(재무제표 1,407px 넘침) */
 #v-app .main .card:has(table){overflow-x:auto;}
+/* H-08: 휴대폰 진단 화면의 두 칸 표(머리행 없는 것)는 줄마다 제목 위·값 아래 카드로 */
+@media (max-width:640px){
+  #v-pub-diagnose table.tbl:not(:has(thead)) tr{display:block;padding:10px 0;border-bottom:1px solid var(--line-soft);}
+  #v-pub-diagnose table.tbl:not(:has(thead)) td{display:block;width:auto!important;border:0;padding:2px 0;}
+}
 /* H-01: 휴대폰 로그인 화면 — 사이드바는 ☰ 로만 연다(머리띠 아래 덮개) */
 @media (max-width:900px){
   #v-app .app>.sidebar{display:none;}
@@ -5707,7 +5712,7 @@ function fedOfficePage(){
           <td><span class="badge ${x.status==='완료'?'badge-success':'badge-info'}">${escapeHtml(x.status)}</span></td>
           <td>${escapeHtml(x.owner||'—')}</td>
           <td class="num">${x.amount ? _fmtN(x.amount)+'원' : '—'}</td>
-          <td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="fedAffairDel('${escapeJs(x.id)}')">삭제</button></td>
+          <td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="fedAffairDel('${escapeJs(x.id)}')">지우기</button></td>
         </tr>`).join('')}</tbody></table>` : fedEmptyCard('사무 기록')}
       ${fedStamp()}
     </div>
@@ -5772,7 +5777,7 @@ function fedDuesPage(){
         <thead><tr><th>시행일</th><th class="num">요율</th><th>의결 근거</th><th></th></tr></thead>
         <tbody>${hist.map(h => `<tr><td>${escapeHtml(h.시행)}</td><td class="num">${(h.rate*100).toFixed(2)}%</td>
           <td>${escapeHtml(h.근거 || '—')}</td>
-          <td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="fedAffairDel('${escapeJs(h.id)}')">삭제</button></td></tr>`).join('')}
+          <td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="fedAffairDel('${escapeJs(h.id)}')">지우기</button></td></tr>`).join('')}
         </tbody></table>`
         : `<p class="text-mute" style="margin:0;">등록된 개정이 없어 기본 요율 ${(FED_DUES_RATE*100).toFixed(1)}%를 씁니다.</p>`}
       <div class="grid grid-3" style="margin-top:10px;">
@@ -6820,7 +6825,7 @@ function memMyPage(u){
               <td><span class="badge ${d.status==='완료'?'badge-success':'badge-info'}">${d.status}</span></td>
               <td class="tbl-actions" style="white-space:nowrap;">
                 <button class="btn btn-ghost btn-sm" onclick="viewDoc('${escapeJs(d.id)}')">보기</button>
-                <button class="btn btn-outline btn-sm" onclick="downloadDoc('${escapeJs(d.id)}')">📥 다운로드</button>
+                <button class="btn btn-outline btn-sm" onclick="downloadDoc('${escapeJs(d.id)}')">📥 내려받기</button>
               </td>
             </tr>`).join('')}
         </tbody>
@@ -7747,7 +7752,7 @@ function memDocs(){
               <td><span class="badge ${d.status === '완료' ? 'badge-success' : 'badge-info'}">${d.status}</span></td>
               <td class="tbl-actions">
                 <button class="btn btn-ghost btn-sm" onclick="viewDoc('${escapeJs(d.id)}')">보기</button>
-                <button class="btn btn-ghost btn-sm" onclick="downloadDoc('${escapeJs(d.id)}')">다운로드</button>
+                <button class="btn btn-ghost btn-sm" onclick="downloadDoc('${escapeJs(d.id)}')">내려받기</button>
               </td>
             </tr>
           `).join('')}
@@ -9509,7 +9514,7 @@ function inboxRender(){
             + '<td><span class="badge ' + (it.상태 === '완료' ? 'badge-success' : it.상태 === '중복' ? 'badge-danger' : 'badge-info') + '">' + escapeHtml(it.상태) + '</span></td>'
             + '<td><button class="btn btn-primary btn-sm" onclick="inboxProcess(\'' + escapeJs(it.id) + '\')">처리</button> '
             + (INBOX_TO_REG[it.kind] && it.상태 !== '대기' && it.상태 !== '처리중' ? '<button class="btn btn-outline btn-sm" onclick="inboxToRegister(\'' + escapeJs(it.id) + '\')">' + (it.대장 ? '✅ 대장에 들어감' : '📒 대장에 넣기') + '</button> ' : '')
-            + '<button class="btn btn-outline btn-sm" onclick="inboxRemove(\'' + escapeJs(it.id) + '\')">삭제</button></td></tr>'
+            + '<button class="btn btn-outline btn-sm" onclick="inboxRemove(\'' + escapeJs(it.id) + '\')">지우기</button></td></tr>'
             + (it.요약
                 ? '<tr><td colspan="4" style="font-size:12.5px;padding-top:0;">'
                   + '<b>' + (it.상태 === '중복' ? '⚠ ' : '✅ ') + '</b>' + escapeHtml(it.요약)
@@ -10221,7 +10226,7 @@ function generateAccounting(kind){
     document.getElementById('dynFoot').innerHTML = `
       <button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
       <button class="btn btn-outline" onclick="startAccounting('${escapeJs(kind)}')">↻ 다시 생성</button>
-      <button class="btn btn-outline" onclick="downloadAccountingCurrent()">📥 다운로드</button>
+      <button class="btn btn-outline" onclick="downloadAccountingCurrent()">📥 내려받기</button>
       <button class="btn btn-primary" onclick="saveAccounting()">💾 저장</button>`;
   }, 900);
 }
@@ -10257,7 +10262,7 @@ function viewAccounting(id){
     sub: `${a.typeLabel} · ${a.period} · 생성일 ${a.date}`,
     body: `<div class="doc-preview" style="font-family:var(--font-sans);font-size:12.5px;">${a._content}</div>`,
     foot: `<button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
-           <button class="btn btn-outline" onclick="downloadAccounting('${escapeJs(id)}')">📥 다운로드</button>`,
+           <button class="btn btn-outline" onclick="downloadAccounting('${escapeJs(id)}')">📥 내려받기</button>`,
     size: 'lg'
   });
 }
@@ -10709,8 +10714,8 @@ function memClosing(){
               <td>${escapeHtml(c.date)}</td>
               <td class="tbl-actions">
                 <button class="btn btn-ghost btn-sm" onclick="viewClosing('${escapeJs(c.id)}')">보기</button>
-                <button class="btn btn-ghost btn-sm" onclick="downloadClosing('${escapeJs(c.id)}')">다운로드</button>
-                <button class="btn btn-ghost btn-sm" onclick="removeClosing('${escapeJs(c.id)}')">삭제</button>
+                <button class="btn btn-ghost btn-sm" onclick="downloadClosing('${escapeJs(c.id)}')">내려받기</button>
+                <button class="btn btn-ghost btn-sm" onclick="removeClosing('${escapeJs(c.id)}')">지우기</button>
               </td>
             </tr>`).join('')}
         </tbody>
@@ -10902,7 +10907,7 @@ function _closingProcess(village, ym, csvText, fileName){
     body: `<div class="doc-preview" style="font-family:var(--font-sans);font-size:12.5px;">${content}</div>`,
     foot: `<button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
            <button class="btn btn-outline" onclick="closingStart()">↻ 다시 실행</button>
-           <button class="btn btn-outline" onclick="downloadClosingCurrent()">📥 다운로드</button>
+           <button class="btn btn-outline" onclick="downloadClosingCurrent()">📥 내려받기</button>
            <button class="btn btn-primary" onclick="saveClosing()">💾 저장</button>`,
     size: 'xl'
   });
@@ -11040,7 +11045,7 @@ function viewClosing(id){
     sub: `대상 ${c.period} · 생성일 ${c.date}`,
     body: `<div class="doc-preview" style="font-family:var(--font-sans);font-size:12.5px;">${c._content}</div>`,
     foot: `<button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
-           <button class="btn btn-outline" onclick="downloadClosing('${escapeJs(id)}')">📥 다운로드</button>`,
+           <button class="btn btn-outline" onclick="downloadClosing('${escapeJs(id)}')">📥 내려받기</button>`,
     size: 'xl'
   });
 }
@@ -11264,7 +11269,7 @@ function memLibrary(){
               <div style="font-weight:600;">${escapeHtml(f.title)}</div>
               <div class="text-small text-mute">${escapeHtml(f.size)}${f.date ? ' · ' + escapeHtml(f.date) : ''}</div>
             </div>
-            <button class="btn btn-ghost btn-sm" onclick="downloadFile('${escapeJs(f.title)}')">다운로드</button>
+            <button class="btn btn-ghost btn-sm" onclick="downloadFile('${escapeJs(f.title)}')">내려받기</button>
           </div>
         `).join('') : '<p class="text-mute text-center" style="padding:20px 0;">등록된 자료가 없습니다.</p>'}
       </div>
@@ -13375,7 +13380,7 @@ function _docResultFoot(name){
   return `
     <button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
     <button class="btn btn-outline" onclick="startDoc('${escapeJs(name)}')">↻ 다시 생성</button>
-    <button class="btn btn-outline" onclick="downloadStub('${escapeJs(name)}')">📥 다운로드</button>
+    <button class="btn btn-outline" onclick="downloadStub('${escapeJs(name)}')">📥 내려받기</button>
     <button class="btn btn-outline" onclick="reviewFromDoc()">🔍 이 문서 AI 검토받기</button>
     <button class="btn btn-primary" onclick="saveDocStub('${escapeJs(name)}')">💾 저장</button>
   `;
@@ -13475,7 +13480,7 @@ function showDocPreview(name, values, fallbackNote){
   document.getElementById('dynFoot').innerHTML = `
     <button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
     <button class="btn btn-outline" onclick="startDoc('${escapeJs(name)}')">↻ 다시 생성</button>
-    <button class="btn btn-outline" onclick="downloadStub('${escapeJs(name)}')">📥 다운로드</button>
+    <button class="btn btn-outline" onclick="downloadStub('${escapeJs(name)}')">📥 내려받기</button>
     <button class="btn btn-outline" onclick="reviewFromDoc()">🔍 이 문서 AI 검토받기</button>
     <button class="btn btn-primary" onclick="saveDocStub('${escapeJs(name)}')">💾 저장</button>
   `;
@@ -14142,7 +14147,7 @@ function viewDoc(id){
     sub: `${doc.type} · ${doc.date} · ${doc.status}`,
     body: `<div class="doc-preview">${content}</div>`,
     foot: `<button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
-           <button class="btn btn-outline" onclick="downloadDoc('${escapeJs(doc.id)}')">📥 다운로드</button>
+           <button class="btn btn-outline" onclick="downloadDoc('${escapeJs(doc.id)}')">📥 내려받기</button>
            <button class="btn btn-primary" onclick="editDoc('${escapeJs(doc.id)}')">✏ 편집</button>`,
     size:'lg'
   });
@@ -14247,7 +14252,7 @@ function viewReview(name){
       <em>* 이 검토 결과는 예시입니다. 실제 문서를 올리면 AI가 항목별로 검토해 드립니다.</em>
     </div>`,
     foot: `<button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
-           <button class="btn btn-primary" onclick="downloadReviewReport('${escapeJs(name)}')">📄 보고서 다운로드</button>`,
+           <button class="btn btn-primary" onclick="downloadReviewReport('${escapeJs(name)}')">📄 보고서 내려받기</button>`,
     size:'lg'
   });
 }
@@ -14528,7 +14533,7 @@ function editMember(originalName){
       <div class="form-row"><label>가입일</label><input class="input" id="em-date" type="date" value="${m.joinDate}"></div>
       <div class="form-row"><label>연락처</label><input class="input" id="em-phone" value="${escapeHtml(m.phone || '')}"></div>
       <div class="form-row"><label><input type="checkbox" id="em-voting"${m.voting?' checked':''}> 의결권 부여</label></div>`,
-    foot: `<button class="btn btn-danger btn-sm" onclick="removeMember('${escapeJs(originalName)}')" style="margin-right:auto;">🗑 삭제</button>
+    foot: `<button class="btn btn-danger btn-sm" onclick="removeMember('${escapeJs(originalName)}')" style="margin-right:auto;">🗑 지우기</button>
            <button class="btn btn-outline" onclick="closeDyn()">취소</button>
            <button class="btn btn-primary" onclick="submitEditMember('${escapeJs(originalName)}')">저장</button>`
   });
@@ -14748,7 +14753,7 @@ function viewEvent(title){
         <li>회의록 서기 지정</li>
         <li>공지 발송 (최소 7일 전)</li>
       </ul>`,
-    foot: `<button class="btn btn-danger btn-sm" onclick="removeEvent('${escapeJs(title)}')" style="margin-right:auto;">🗑 삭제</button>
+    foot: `<button class="btn btn-danger btn-sm" onclick="removeEvent('${escapeJs(title)}')" style="margin-right:auto;">🗑 지우기</button>
            <button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
            <button class="btn btn-outline" onclick="editEvent('${escapeJs(title)}')">✏ 편집</button>
            <button class="btn btn-primary" onclick="closeDyn();location.hash='#/mem/docs'">📝 관련 문서 만들기</button>`
@@ -14850,7 +14855,7 @@ function viewVillage(name){
         <div class="prog"><div class="prog-fill" style="width:${v?v.progress:0}%;"></div></div>
       </div>`,
     foot: isAdminUser()
-      ? `<button class="btn btn-danger btn-sm" onclick="removeVillage('${escapeJs(name)}')" style="margin-right:auto;">🗑 삭제</button>
+      ? `<button class="btn btn-danger btn-sm" onclick="removeVillage('${escapeJs(name)}')" style="margin-right:auto;">🗑 지우기</button>
          <button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
          <button class="btn btn-outline" onclick="editVillage('${escapeJs(name)}')">✏ 편집</button>
          <button class="btn btn-primary" onclick="assignManager('${escapeJs(name)}')">👤 담당자 배정</button>`
@@ -15337,7 +15342,7 @@ function manageContent(kind){
         <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(title)}</div>
         <div class="text-small text-mute">${escapeHtml(meta)}</div>
       </div>
-      <button class="btn btn-danger btn-sm" onclick="removeContent('${escapeJs(kind)}','${escapeJs(x.id)}')">삭제</button>
+      <button class="btn btn-danger btn-sm" onclick="removeContent('${escapeJs(kind)}','${escapeJs(x.id)}')">지우기</button>
     </div>`;
   }).join('');
   showDyn({
@@ -15656,7 +15661,7 @@ async function admVillageDocs(vid){
               <td><span class="badge ${d.status==='완료'?'badge-success':'badge-info'}">${d.status}</span></td>
               <td class="tbl-actions" style="white-space:nowrap;">
                 <button class="btn btn-ghost btn-sm" onclick="viewDoc('${escapeJs(d.id)}')">보기</button>
-                <button class="btn btn-outline btn-sm" onclick="downloadDoc('${escapeJs(d.id)}')">📥 다운로드</button>
+                <button class="btn btn-outline btn-sm" onclick="downloadDoc('${escapeJs(d.id)}')">📥 내려받기</button>
               </td>
             </tr>`).join('')}
         </tbody></table>`).join('');
@@ -15704,7 +15709,7 @@ async function genVillageReport(vid){
       </table>
       <p class="form-hint" style="margin-top:10px;">이 수치는 플랫폼에 기록된 데이터에서 자동 집계되며, 조합원·지자체에 투명하게 공유할 수 있습니다.</p>`,
     foot: `<button class="btn btn-ghost" onclick="closeDyn()">닫기</button>
-           <button class="btn btn-primary" onclick="downloadVillageReport('${escapeJs(vid)}')">📥 리포트 다운로드 (A4)</button>`,
+           <button class="btn btn-primary" onclick="downloadVillageReport('${escapeJs(vid)}')">📥 리포트 내려받기 (A4)</button>`,
     size:'lg'
   });
 }
@@ -15889,7 +15894,7 @@ function admContent(){
       </div>
       <div class="card">
         <div class="card-title"><h3 class="serif">📁 자료실</h3>
-          <button class="btn btn-primary btn-sm" onclick="addContent('files')">+ 파일 업로드</button></div>
+          <button class="btn btn-primary btn-sm" onclick="addContent('files')">+ 파일 올리기</button></div>
         <p class="text-mute">등록된 파일 ${MOCK.contents.files.length}건</p>
         <button class="btn btn-outline" style="width:100%;" onclick="manageContent('files')">자료실 관리 →</button>
       </div>
@@ -17342,7 +17347,7 @@ function memAccounting(){
         <select class="select" id="tax-bank-ym" style="width:auto;" onchange="refresh()">${[...new Set(T.bank.map(t=>t.date.slice(0,7)))].sort().reverse().map(v => `<option value="${v}"${v===(window._taxBankYm||ym)?' selected':''}>${v}</option>`).join('')}</select>
         <button class="btn btn-outline btn-sm" onclick="taxConfirmAllSuggested()">추천 거래처 전체 확정</button>
         <button class="btn btn-outline btn-sm" onclick="taxExportGrant()">📥 보조금 정산용 추출(e나라도움)</button>
-        <button class="btn btn-ghost btn-sm" onclick="taxClearBank()">전체 삭제</button>
+        <button class="btn btn-ghost btn-sm" onclick="taxClearBank()">전체 지우기</button>
       </div>
       <div style="overflow-x:auto;"><table class="tbl" style="font-size:13px;min-width:900px;">
         <thead><tr><th>일자</th><th>적요(원본·잠금)</th><th>입금</th><th>출금</th><th>거래처</th><th>계정</th><th>현금인출</th><th>사유·메모</th><th>보조금코드</th><th>증빙</th><th></th></tr></thead>
@@ -17367,7 +17372,7 @@ function memAccounting(){
       <div class="card-title"><h3 class="serif">📎 증빙 보관함 (5년 보존)</h3><button class="btn btn-primary btn-sm" onclick="taxAddEvidence()">+ 증빙 등록</button></div>
       <p class="text-mute" style="font-size:12.5px;margin-top:0;">영수증은 세무사에게 보내지 않지만 품목 정리를 위해 조합이 5년 보관합니다. 계약서는 거래일·금액·거래처·사업자번호 4가지가 없으면 저장되지 않습니다. 파일명은 <code>조합코드_날짜_거래처_금액_종류</code> 규칙으로 자동 정리됩니다.</p>
       ${T.evidence.length ? `<div style="overflow-x:auto;"><table class="tbl" style="font-size:13px;min-width:760px;"><thead><tr><th>종류</th><th>거래일</th><th>거래처</th><th>금액</th><th>사업자번호</th><th>부가세</th><th>보조금</th><th>정리 파일명</th><th>보존기한</th><th></th></tr></thead><tbody>
-        ${T.evidence.slice().reverse().map(e => `<tr><td><span class="badge ${e.kind==='보조금 교부결정서'?'badge-gold':'badge-mute'}">${escapeHtml(e.kind)}</span></td><td>${escapeHtml(e.date)}</td><td>${escapeHtml(e.vendor)}</td><td>${Number(e.amount).toLocaleString()}</td><td>${escapeHtml(e.bizNo||'—')}</td><td>${e.vatIncl?'포함':'미포함'}</td><td>${e.grant ? escapeHtml(e.grantCode||'보조금') : '—'}</td><td class="text-mute" style="font-size:12px;">${escapeHtml(e.fileName)}</td><td>${escapeHtml(e.keepUntil)}</td><td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="taxRemoveEvidence('${escapeJs(e.id)}')">삭제</button></td></tr>`).join('')}
+        ${T.evidence.slice().reverse().map(e => `<tr><td><span class="badge ${e.kind==='보조금 교부결정서'?'badge-gold':'badge-mute'}">${escapeHtml(e.kind)}</span></td><td>${escapeHtml(e.date)}</td><td>${escapeHtml(e.vendor)}</td><td>${Number(e.amount).toLocaleString()}</td><td>${escapeHtml(e.bizNo||'—')}</td><td>${e.vatIncl?'포함':'미포함'}</td><td>${e.grant ? escapeHtml(e.grantCode||'보조금') : '—'}</td><td class="text-mute" style="font-size:12px;">${escapeHtml(e.fileName)}</td><td>${escapeHtml(e.keepUntil)}</td><td class="tbl-actions"><button class="btn btn-ghost btn-sm" onclick="taxRemoveEvidence('${escapeJs(e.id)}')">지우기</button></td></tr>`).join('')}
       </tbody></table></div>` : '<p class="text-mute text-center" style="padding:14px 0;">등록된 증빙이 없습니다.</p>'}
     </div>
 
@@ -17677,7 +17682,7 @@ function taxViewPackage(id, justSent){
     <span class="text-mute">제외 항목: 세금계산서 합계표·법인카드·현금영수증(홈택스 조회). 세무사 열람 링크는 14일 후 만료됩니다.</span></p>`;
   showDyn({title:`세무 패키지 ${p.ym} v${p.ver}`, sub: justSent ? '전송되었습니다. 세무사가 열면 열람 시각이 기록됩니다.' : `전송 ${p.sentAt.slice(0,10)} · ${p.openedAt ? '열람 ' + p.openedAt.slice(0,10) : '미열람'}`,
     body, size:'xl',
-    foot:`<button class="btn btn-ghost" onclick="closeDyn()">닫기</button><button class="btn btn-outline" onclick="taxDownloadPackage('${escapeJs(p.id)}')">📥 패키지 표지 다운로드</button>`});
+    foot:`<button class="btn btn-ghost" onclick="closeDyn()">닫기</button><button class="btn btn-outline" onclick="taxDownloadPackage('${escapeJs(p.id)}')">📥 패키지 표지 내려받기</button>`});
 }
 function taxDownloadPackage(id){
   const p = MOCK.tax.packages.find(x => x.id === id); if(!p) return;
@@ -17794,7 +17799,7 @@ function memTaxPay(){
 function taxEditStaff(){
   const T = MOCK.tax;
   showDyn({title:'직원 관리', sub:'상시근로자만 등록합니다. 단발 용역·강사는 지급 유형 판별기로 처리합니다.',
-    body:`<div id="st-list">${T.staff.map(s=>`<div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line-soft);"><span style="flex:1;">${escapeHtml(s.name)} · 기본급 ${s.base.toLocaleString()}원</span><button class="btn btn-ghost btn-sm" onclick="taxRemoveStaff('${escapeJs(s.id)}')">삭제</button></div>`).join('') || '<p class="text-mute">직원 없음</p>'}</div>
+    body:`<div id="st-list">${T.staff.map(s=>`<div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line-soft);"><span style="flex:1;">${escapeHtml(s.name)} · 기본급 ${s.base.toLocaleString()}원</span><button class="btn btn-ghost btn-sm" onclick="taxRemoveStaff('${escapeJs(s.id)}')">지우기</button></div>`).join('') || '<p class="text-mute">직원 없음</p>'}</div>
       <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:6px;margin-top:12px;"><input class="input" id="st-name" placeholder="성명"><input class="input" id="st-base" type="number" placeholder="월 기본급"><button class="btn btn-primary" onclick="taxAddStaff()">추가</button></div>`,
     foot:`<button class="btn btn-primary" onclick="closeDyn();refresh()">닫기</button>`});
 }
@@ -17874,7 +17879,7 @@ function taxSunIncomeView(id){
     body:`<table class="tbl" style="font-size:12.5px;"><thead><tr><th>수령자</th><th>구분</th><th>세전</th><th>원천징수</th><th>세후 지급</th></tr></thead><tbody>${s.rows.map(r=>`<tr><td>${escapeHtml(r.name)}</td><td>${r.kind}</td><td>${r.gross.toLocaleString()}</td><td>${r.wh.toLocaleString()}</td><td><b>${r.net.toLocaleString()}</b></td></tr>`).join('')}</tbody></table>
       <h4 style="margin:14px 0 8px;">통지문 미리보기 (앞 2명)</h4>${s.rows.slice(0,2).map(notice).join('')}
       <p class="text-mute" style="font-size:12.5px;">주민환원사업 관리대장에 환원사업명·대상·집행금액·집행일·지급방법·의사결정·증빙이 기록됩니다. 수령자 주민등록번호는 암호화 저장되며 지급명세서 생성 시에만 사용합니다.</p>`,
-    foot:`<button class="btn btn-ghost" onclick="closeDyn()">닫기</button><button class="btn btn-outline" onclick="_downloadAccountingHtml('햇빛소득 지급 명세·통지문 ${s.ym}','${escapeJs(s.ym)}',document.getElementById('dynBody').innerHTML,'햇빛소득_${s.ym}.html')">📥 명세·통지문 다운로드</button></div>`});
+    foot:`<button class="btn btn-ghost" onclick="closeDyn()">닫기</button><button class="btn btn-outline" onclick="_downloadAccountingHtml('햇빛소득 지급 명세·통지문 ${s.ym}','${escapeJs(s.ym)}',document.getElementById('dynBody').innerHTML,'햇빛소득_${s.ym}.html')">📥 명세·통지문 내려받기</button></div>`});
 }
 
 /* ─── 페이지 3. 표준장부·거래처 ─── */
@@ -17943,7 +17948,7 @@ function taxEditVendor(id){
     body:`<div class="form-row"><label>거래처명 *</label><input class="input" id="vd-name" value="${escapeHtml(v.name)}"></div>
       <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><div><label>유형</label><select class="select" id="vd-type">${['매출처','매입처','교부기관','조합원','임대인','금융','공공','직원','주민'].map(t=>`<option${t===v.type?' selected':''}>${t}</option>`).join('')}</select></div><div><label>표준 계정 *</label><input class="input" id="vd-acct" value="${escapeHtml(v.acct)}" placeholder="예: 발전설비유지관리비"></div></div>
       <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><div><label>사업자번호</label><input class="input" id="vd-bizno" value="${escapeHtml(v.bizNo)}"></div><div><label>적요 추천 키워드(|로 구분)</label><input class="input" id="vd-kw" value="${escapeHtml(v.kw)}"></div></div>`,
-    foot:`${id && !TAX_VENDOR_SEED.some(s=>s.id===id) ? `<button class="btn btn-danger btn-sm" style="margin-right:auto;" onclick="taxRemoveVendor('${escapeJs(id)}')">삭제</button>` : ''}<button class="btn btn-outline" onclick="closeDyn()">취소</button><button class="btn btn-primary" onclick="taxSaveVendor('${escapeJs(id)}')">저장</button>`});
+    foot:`${id && !TAX_VENDOR_SEED.some(s=>s.id===id) ? `<button class="btn btn-danger btn-sm" style="margin-right:auto;" onclick="taxRemoveVendor('${escapeJs(id)}')">지우기</button>` : ''}<button class="btn btn-outline" onclick="closeDyn()">취소</button><button class="btn btn-primary" onclick="taxSaveVendor('${escapeJs(id)}')">저장</button>`});
 }
 function taxSaveVendor(id){
   const g = k => (document.getElementById(k).value || '').trim();
