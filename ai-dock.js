@@ -243,24 +243,46 @@
         ':host{all:initial}.bar{position:fixed;top:0;left:0;right:0;height:44px;z-index:2147482500;background:#14352b;color:#fff;display:flex;align-items:center;gap:10px;padding:0 12px;box-shadow:0 2px 8px rgba(0,0,0,.18);font:14px/1.3 Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}' +
         '.bar b{color:#f2c94c;white-space:nowrap}.bar .t{opacity:.8;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}' +
         'button{font:inherit;cursor:pointer;border-radius:999px;border:1px solid rgba(255,255,255,.35);background:#24453a;color:#fff;padding:6px 14px;font-weight:600;white-space:nowrap}button:focus-visible{outline:2px solid #f2c94c;outline-offset:2px}' +
-        '.pan{display:none;position:fixed;top:44px;left:0;right:0;z-index:2147482400;background:#fff;font:14px/1.4 Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;box-shadow:0 10px 28px rgba(0,0,0,.25);padding:8px 12px 12px}.pan.on{display:block}' +
+        '.pan{display:none;position:fixed;top:44px;left:var(--dk-left,0px);right:0;z-index:2147482400;border-radius:0 0 0 12px;background:#fff;font:14px/1.4 Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;box-shadow:0 10px 28px rgba(0,0,0,.25);padding:8px 12px 12px;box-sizing:border-box;height:max(300px,calc(50vh - 44px))}.pan.on{display:flex;flex-direction:column}#sHost{flex:1;min-height:0;display:flex;flex-direction:column}' +
         '.pan .n{font-size:12.5px;color:#5b5f66;margin:2px 0 8px;line-height:1.5}.pan .n a{color:#24453a}' +
-        'iframe{display:block;width:100%;height:min(75vh,760px);border:1px solid #d9d2c0;border-radius:10px;background:#15130f}' +
-        '@media(max-width:760px){.bar .t{display:none}.pan{padding:6px 6px 8px}iframe{height:calc(100dvh - 128px)}}' +
+        'iframe{display:block;width:100%;flex:1;min-height:0;height:auto;border:1px solid #d9d2c0;border-radius:10px;background:#15130f}' +   // 11-26 이사장 지시: 화면 절반까지만
+        '@media(max-width:760px){.bar .t{display:none}.pan{padding:6px 6px 8px;left:0;border-radius:0;height:auto}iframe{flex:none;height:calc(100dvh - 128px)}}' +
         '</style>' +
         '<div class="bar" role="region" aria-label="데카 서버 작업대"><b>🛠️ 데카</b><span class="t">서버 작업대 — 사이트 개선 지시(이사장님 계정 전용)</span><button type="button" id="sOpen" aria-expanded="false" aria-controls="sPan">데카 창 열기 ▾</button></div>' +
         '<div class="pan" id="sPan"><div class="n">다른 화면으로 옮겨도 하던 일은 끝까지 하고, 결과는 왼쪽 「지난 대화」에서 봅니다. 데스크탑 웹 방과 대화를 같이 씁니다. sudo 가 필요한 일은 데스크탑앱에서. <a href="https://deka.sakyowon.co.kr/" target="_blank" rel="noopener">새 창으로 크게 ↗</a></div><div id="sHost"></div></div>';
       document.documentElement.appendChild(strip);
       sroot.getElementById('sOpen').addEventListener('click', function () {
         var pan = sroot.getElementById('sPan'), on = !pan.classList.contains('on');
+        if (on) dekaLeft();
         pan.classList.toggle('on', on); this.textContent = on ? '데카 창 닫기 ▴' : '데카 창 열기 ▾'; this.setAttribute('aria-expanded', on ? 'true' : 'false');
         if (on && !sroot.getElementById('sHost').firstChild) { var f = document.createElement('iframe'); f.src = DEKA; f.title = '데카 — 서버 작업대'; f.setAttribute('allow', 'clipboard-write'); sroot.getElementById('sHost').appendChild(f); }
       });
       sroot.addEventListener('keydown', function (e) { if (e.key === 'Escape') { var pan = sroot.getElementById('sPan'); if (pan.classList.contains('on')) sroot.getElementById('sOpen').click(); } });
+      // 11-26 이사장 지시: 데카 창 밖(사이드바·본문)을 누르면 접는다. 창 안(띠·안내·데카 화면)은 그대로 — 데카 화면은 다른 문서(iframe)라 여기 클릭이 오지 않는다
+      document.addEventListener('pointerdown', function (e) {
+        var pan = sroot.getElementById('sPan'); if (!pan || !pan.classList.contains('on')) return;
+        var p = e.composedPath ? e.composedPath() : []; if (p.indexOf(strip) !== -1) return;
+        sroot.getElementById('sOpen').click();
+      }, true);
+      window.addEventListener('resize', function () { var pan = sroot.getElementById('sPan'); if (pan && pan.classList.contains('on')) dekaLeft(); });
     }
     if (strip) strip.style.display = want ? '' : 'none';
     if (want !== stripOn) { stripOn = want; unpushPage(); if (stripOn) pushPage(); }
     if (!want && strip) { var pan = sroot.getElementById('sPan'); if (pan.classList.contains('on')) sroot.getElementById('sOpen').click(); sroot.getElementById('sHost').innerHTML = ''; }
+  }
+  // 11-26 이사장 지시: 데카 창은 사이드바를 가리지 않는다 — 화면 왼쪽의 사이드바(사이트마다 이름이 달라 모양으로 찾는다) 오른쪽 끝부터 연다. 못 찾으면 왼쪽 끝부터
+  function dekaLeft() {
+    var W = window.innerWidth || 0, best = 0;
+    if (W > 760) Array.prototype.forEach.call(document.querySelectorAll('#sidebar, .sidebar, aside, .side, #sideWrap, #sidebarNav, nav[class*=side]'), function (el) {
+      try {
+        if (el === strip || el === host) return;
+        var r = el.getBoundingClientRect(), cs = getComputedStyle(el);
+        if (cs.display === 'none' || cs.visibility === 'hidden' || r.width < 120 || r.width > 420 || r.height < 20) return;
+        if (r.left > W * 0.35 || r.right > W * 0.5 || r.bottom < 60 || r.top > window.innerHeight * 0.6) return;
+        if (r.right > best) best = r.right;
+      } catch (e) {}
+    });
+    if (sroot) sroot.getElementById('sPan').style.setProperty('--dk-left', (best ? Math.round(best + 12) : 0) + 'px');
   }
   function dekaFrame() {
     if (!isAdmin() || $('dkHost').firstChild) return;
