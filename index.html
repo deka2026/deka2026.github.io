@@ -1750,6 +1750,8 @@ async function renderJoin(fresh) {
   if (fresh || !J) {
     J = joinNew();
     const st = stashGet(); if (st) st.picks.forEach(p => { J.sel[p.product] = { on: true, opts: p.options || [] }; });
+    /* 11-27: 햇소자 「유료회원 신청」 단추는 #/join?pick=coop(,fed) 로 온다 — 그 서비스를 미리 골라 둔다 */
+    const pk = /[?&]pick=([a-z,]+)/.exec(location.hash || ''); if (pk) pk[1].split(',').forEach(k => { if (['academy', 'coop', 'fed'].includes(k)) J.sel[k] = { on: true, opts: (J.sel[k] && J.sel[k].opts) || [] }; });
     if (me && /^#\/join\/pay/.test(location.hash || '')) { J.payOnly = true; J.step = 3; }
   }
   const wantPay = !!me && /^#\/join\/pay/.test(location.hash || '');       // #/join/pay = 납부 정보만 고치기(회원 정보를 받은 뒤에 판단한다)
