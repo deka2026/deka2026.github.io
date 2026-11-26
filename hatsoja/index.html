@@ -1807,6 +1807,13 @@ const ROLE_MENUS = {
       ['mem','inbox','📥','자료 입력'],
       ['mem','docs','📝','문서 생성'],
     ]],
+    ['조합 대장·업무', [
+      ['mem','cycle','📆','업무 달력'],
+      ['mem','contracts','📑','계약서 대장'],
+      ['mem','minutes','🗂','회의록 대장'],
+      ['mem','expenses','🧾','지출결의'],
+      ['mem','ledgers','📒','거래처·표준장부'],
+    ]],
     ['내 조합', [
       ['mem','mypage','👤','마이페이지'],
       ['pub','pricing','💳','요금 안내'],
@@ -2070,6 +2077,10 @@ function updateConvenienceUI(scope, page){
 /* 사이드바 메뉴 한 줄 설명 (개선안 4-3) — [메뉴명, 설명]. AI 상담 맥락 전달에도 재사용 */
 const MENU_DESC = {
   stat:['전남 발전 현황','전남 태양광의 전국 순위·월별 흐름·월 이용률·추세와 22개 시군 설비·발전량을 공개 통계로 봅니다'],
+  cycle:['업무 달력','월·분기·반기·연 업무 — 법·정관 업무가 미리 들어 있고 우리 조합 업무를 더합니다'],
+  contracts:['계약서 대장','조합이 맺은 계약과 만기'],
+  minutes:['회의록 대장','총회·이사회·마을총회 회의록과 의결사항'],
+  expenses:['지출결의','영수증마다 계정·예산·이체 확인'],
   home:['업무 시작','상담·자료 입력·문서 생성 세 가지 업무 창을 한 화면에서 엽니다'],
   dashboard:['현황 대시보드','보고 싶은 항목을 골라 우리 조합 현황을 한 화면에 모아 봅니다'],
   admDashboard:['통계 대시보드','플랫폼 전체 현황과 처리 대기 항목을 확인합니다'],
@@ -2791,6 +2802,10 @@ function renderMemberPage(page){
     case 'state':     return memState();
     case 'todo':      return memTodo();
     case 'home':      return memHome(u);
+    case 'cycle':     return memCycle();
+    case 'contracts': return memRegister('contracts');
+    case 'minutes':   return memRegister('minutes');
+    case 'expenses':  return memRegister('expenses');
     case 'dashboard': return memDashboard(u);
     case 'mypage':    return memMyPage(u);
     case 'structure': return memStructure();
@@ -5735,6 +5750,7 @@ function memFinStat(){
           : '<span style="color:var(--danger);"> — 기초값(설비·차입금·출자금·기초현금)을 다시 확인하세요</span>'}</p>
     </div>
 
+    ${finCapitalSplitCard(S)}
     ${finFindingsCard(S.findings)}
     ${finConsultCard()}
     <p class="text-mute" style="font-size:12px;margin-top:10px;">
@@ -5972,6 +5988,15 @@ function memSurplus(){
       </div>
     </div>
     <div id="sp-out" class="mt-20">${spResultHtml(spRead(true))}</div>
+    <div class="card mt-20">
+      <div class="card-title"><h3 class="serif">💾 결산 확정본으로 저장</h3><span class="badge badge-info">재무상태표·결산 보고서·총회 안건으로 이어짐</span></div>
+      <p class="text-mute" style="font-size:13px;margin-top:0;">결산이 끝나고 처분안을 정했으면 회계연도를 붙여 저장하세요. 저장한 처분안은 재무제표의 「자본 나눔」, 결산 보고서, 정기총회 안건에 그대로 쓰입니다. 총회에서 고쳐 의결하면 다시 저장하세요.</p>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <label style="display:flex;gap:6px;align-items:center;">회계연도 <input class="input" id="sp-year" type="number" value="${new Date().getFullYear() - (new Date().getMonth() < 6 ? 1 : 0)}" style="width:90px;"></label>
+        <label style="display:flex;gap:6px;align-items:center;">상태 <select class="input" id="sp-state" style="width:130px;"><option>처분안(총회 전)</option><option>총회 의결</option></select></label>
+        <button class="btn btn-primary" onclick="spSavePlan()">저장</button></div>
+      ${spPlansHtml()}
+    </div>
     <div class="card mt-20" style="background:var(--paper-soft);box-shadow:none;">
       <div class="card-title"><h3 class="serif">읽는 법</h3></div>
       <ul style="margin:0;padding-left:18px;font-size:13.5px;line-height:1.8;">
@@ -6045,7 +6070,74 @@ function spResultHtml(v){
   if(rest < -0.05) warn.push('나눈 금액이 처분 전 잉여금보다 ' + f(-rest) + ' 많습니다. 비율이나 배당을 줄이세요.');
   return spTable(rows, warn, ok);
 }
+const SURPLUS_KEY = 'hsj_surplus';
+function spPlans(){ const o = _loadObj(SURPLUS_KEY) || {}; o.plans = o.plans || {}; return o; }
+function spLatest(){ const o = spPlans(), ys = Object.keys(o.plans).sort(); return ys.length ? Object.assign({year: ys[ys.length - 1]}, o.plans[ys[ys.length - 1]]) : null; }
+function spSavePlan(){
+  const y = String((document.getElementById('sp-year') || {}).value || '').trim();
+  if(!/^\d{4}$/.test(y)){ toast('회계연도를 네 자리로 넣어 주세요.'); return; }
+  const L = window._spLast; if(!L){ toast('처분 결과가 없습니다.'); return; }
+  if(L.warn.length && !confirm('경고 ' + L.warn.length + '건이 있습니다. 그래도 저장할까요?\n\n' + L.warn.join('\n'))) return;
+  const o = spPlans(), u = currentUser();
+  o.plans[y] = {input: spRead(false), rows: L.rows, state: (document.getElementById('sp-state') || {}).value || '처분안(총회 전)', by: u ? u.name : '', at: new Date().toISOString()};
+  _save(SURPLUS_KEY, o); spCalc(); const box = document.querySelector('#sp-plans'); if(box) box.outerHTML = spPlansHtml();
+  toast(y + '회계연도 처분안을 저장했습니다.');
+}
+function spPlansHtml(){
+  const o = spPlans(), ys = Object.keys(o.plans).sort().reverse();
+  if(!ys.length) return '<div id="sp-plans" class="text-mute" style="font-size:13px;margin-top:10px;">아직 저장한 처분안이 없습니다.</div>';
+  return `<div id="sp-plans" style="margin-top:12px;"><table class="tbl" style="font-size:13px;"><thead><tr><th>회계연도</th><th>상태</th><th>저장</th><th></th></tr></thead><tbody>
+    ${ys.map(y => { const p = o.plans[y]; return `<tr><td><b>${y}</b></td><td>${escapeHtml(p.state)}</td><td class="text-mute">${escapeHtml(p.by || '')} ${String(p.at).slice(0, 10)}</td>
+      <td style="white-space:nowrap;"><button class="btn btn-outline btn-sm" onclick="spToDoc('${y}','결산 보고서')">결산 보고서</button>
+      <button class="btn btn-outline btn-sm" onclick="spToDoc('${y}','정기총회 회의록')">총회 안건·회의록</button></td></tr>`; }).join('')}</tbody></table></div>`;
+}
+function spPlanText(p){
+  return p.rows.filter(r => r[2] || r[0] !== '').map(r => '・ ' + r[1] + ': ' + (Math.round(r[2] * 10) / 10).toLocaleString('ko-KR') + ' 만원').join('\n');
+}
+function spToDoc(y, name){
+  const p = spPlans().plans[y]; if(!p) return;
+  startDoc(name);
+  setTimeout(function(){
+    const set = (k, v) => { const el = document.querySelector('#dfForm [data-k="' + k + '"]'); if(el && v != null && v !== '') el.value = v; };
+    set('year', y);
+    if(name === '결산 보고서'){
+      set('coop_type', p.input.type); set('prior', p.input.prior); set('legal_rate', p.input.rate);
+      set('reserve', p.input.items.map(([n, r]) => n + ' ' + r + '%').join(', ') + (p.input.free ? ', 임의적립 ' + p.input.free + '%' : ''));
+      set('note', '잉여금 처분안(' + p.state + '):\n' + spPlanText(p));
+    } else {
+      set('agenda', '1. ' + y + '년도 결산보고서 및 감사보고서 승인의 건\n2. ' + y + '년도 잉여금 처분(안) 승인의 건\n' + spPlanText(p) + '\n3. ' + (Number(y) + 1) + '년도 사업계획 및 수지예산 승인의 건');
+    }
+  }, 120);
+}
+/* 재무제표에 붙는 두 칸 — ① 자본 나눔(저장한 처분안 반영) ② 이익 대 통장 */
+function finCapitalSplitCard(S){
+  const p = spLatest();
+  const ms = S && S.statements ? S.statements.months || [] : [], last = ms[ms.length - 1] || {};
+  const c = S && S.statements ? S.statements.cumulative || {} : {}, b = S && S.statements ? S.statements.base || {} : {};
+  const f = n => Math.round(Number(n) || 0).toLocaleString('ko-KR');
+  const 순이익 = Number(c['당기순이익'] || 0), 현금증가 = Number(last['현금'] || 0) - Number(b.opening_cash || 0);
+  const 감가 = Number(c['감가상각비'] || 0);
+  const 통장 = `<div class="card mt-20"><div class="card-title"><h3 class="serif">💡 이익과 통장은 다르다</h3><span class="badge badge-mute">누적 기준</span></div>
+    <div class="grid grid-3">
+      <div class="kpi"><div class="kpi-n">${f(순이익)}</div><div class="kpi-l">당기순이익(장부, 원)</div></div>
+      <div class="kpi"><div class="kpi-n">${f(현금증가)}</div><div class="kpi-l">통장(현금) 증가(원)</div><div class="kpi-sub">월말 현금 − 기초 현금</div></div>
+      <div class="kpi"><div class="kpi-n">${f(순이익 - 현금증가)}</div><div class="kpi-l">차이(원)</div></div></div>
+    <p class="text-mute" style="font-size:13px;margin:10px 0 0;">감가상각비 ${f(감가)}원은 비용이지만 통장에서 나가지 않고, 대출 원금 상환은 비용이 아니지만 통장에서 나갑니다. 배당·지원금은 현금으로 나가므로 이 「통장 증가」와 다음 해 운영자금을 같이 보세요.</p></div>`;
+  if(!p) return 통장 + `<div class="card mt-20"><div class="card-title"><h3 class="serif">🏛 자본 나눔(잉여금 처분 반영)</h3></div>
+    <p class="text-mute" style="margin:0;">저장한 처분안이 없습니다. 「🧮 잉여금 처분 계산」에서 결산 확정본을 저장하면, 재무상태표의 이익잉여금이 법정적립금·임의적립금·이월이익잉여금·미지급배당금으로 어떻게 나뉘는지 여기에 보입니다.</p>
+    <button class="btn btn-outline btn-sm mt-20" onclick="location.hash='#/mem/surplus'">🧮 잉여금 처분 계산</button></div>`;
+  const 묶 = {자본_적립: 0, 부채_배당: 0, 자본_이월: 0};
+  p.rows.forEach(([n, t, a]) => { if(n === '1' || n === '2' || n === '3') 묶.자본_적립 += a; else if(n === '4') 묶.부채_배당 += a; else if(n === '5') 묶.자본_이월 += a; });
+  return 통장 + `<div class="card mt-20"><div class="card-title"><h3 class="serif">🏛 자본 나눔 — ${escapeHtml(p.year)}회계연도 처분안</h3><span class="badge ${p.state === '총회 의결' ? 'badge-success' : 'badge-warn'}">${escapeHtml(p.state)}</span></div>
+    <table class="tbl" style="font-size:13px;"><thead><tr><th>처분</th><th class="num">금액(만 원)</th><th>재무상태표에서</th></tr></thead><tbody>
+    ${p.rows.filter(r => r[0] !== '').map(([n, t, a]) => `<tr><td>${escapeHtml(t)}</td><td class="num">${(Math.round(a * 10) / 10).toLocaleString('ko-KR')}</td><td class="text-mute">${n === '4' ? '부채(미지급배당금) → 지급하면 현금 감소' : n === '5' ? '자본(이월이익잉여금)' : n === '0' ? '자본(결손 보전)' : '자본(적립금 — 계정별로 쌓임)'}</td></tr>`).join('')}
+    </tbody></table>
+    <p class="text-mute" style="font-size:12.5px;margin:8px 0 0;">총회 의결 뒤: 적립금 ${(Math.round(묶.자본_적립 * 10) / 10).toLocaleString('ko-KR')}만 원과 이월 ${(Math.round(묶.자본_이월 * 10) / 10).toLocaleString('ko-KR')}만 원은 자본에 남고, 배당 ${(Math.round(묶.부채_배당 * 10) / 10).toLocaleString('ko-KR')}만 원은 미지급배당금(부채)이 되었다가 지급하면 현금에서 빠집니다. 위 월말 재무상태표의 「이익잉여금」 한 줄이 이렇게 나뉩니다.</p>
+    <button class="btn btn-outline btn-sm" onclick="location.hash='#/mem/surplus'" style="margin-top:8px;">🧮 처분안 고치기</button></div>`;
+}
+
 function spTable(rows, warn, ok){
+  window._spLast = {rows: rows.map(r => r.slice()), warn: warn.slice()};
   const f = n => (Math.round(n * 10) / 10).toLocaleString('ko-KR');
   return `<div class="card">
     <div class="card-title"><h3 class="serif">📋 처분 결과</h3><span class="badge badge-info">총회 의결 사항 — 잉여금처분안</span></div>
@@ -6337,6 +6429,172 @@ function todoStrip(village){
 /* 2026-11-26 업무 시작 — 회원조합 첫 화면. 업무 세 창만 둔다(이사장 지시).
    상담은 AI 상담과 같은 chatIn/chatBody/sendChat 을 쓴다. 자료 입력은 자료함으로 넘겨 확정까지 거기서 한다. */
 const HOME_DOCS = ['결산 보고서','정기총회 회의록','이사회 회의록','사업계획서','자금수지계획서','조합 정관','창립총회 회의록','차입 의결 총회 의사록','분양 계약서'];
+/* ==================== 조합 대장 · 업무 달력 (2026-11-26 이사장 지시) ====================
+   계약서·회의록·지출결의 대장은 서버(/api/my/store: contracts·minutes·expenses)에 둔다. 거래처는 표준장부의 거래처 마스터(MOCK.tax.vendors).
+   자료함에서 읽은 값(제안·확정)을 「대장에 넣기」 한 번으로 옮기고, 메뉴에서 직접 넣을 수도 있다. */
+const REG = {
+  contracts: {이름:'계약서 대장', icon:'📑', 설명:'시공·부지 임대·유지관리·보험 등 조합이 맺은 계약. 종료일 90일 전부터 현황·업무 달력에 뜹니다.',
+    칸:[['title','계약명'],['party','상대방'],['kind','종류','시공 · 부지 임대 · 유지관리 · 보험 · 융자 · 기타'],['amount','계약금액(원)','num'],['start','시작일','date'],['end','종료일','date'],['memo','메모']]},
+  minutes: {이름:'회의록 대장', icon:'🗂', 설명:'총회·이사회·마을총회 회의록. 의결사항은 업무 달력에 할 일로 더할 수 있습니다(협동조합 기본법 제30조 — 의장과 선출 조합원 3인 이상 서명).',
+    칸:[['date','회의일','date'],['type','회의','정기총회 · 임시총회 · 이사회 · 마을총회'],['title','안건'],['result','의결 결과'],['attend','출석/재적'],['signed','서명(의장·선출 조합원 3인)','예 / 아니오'],['memo','메모']]},
+  expenses: {이름:'지출결의', icon:'🧾', 설명:'영수증·세금계산서 한 장마다 한 줄. 예산 항목과 계정을 붙이고, 이체했는지 표시합니다.',
+    칸:[['date','지출일','date'],['vendor','거래처'],['item','내용'],['amount','금액(원)','num'],['acct','계정','발전설비유지관리비 · 보험료 · 지급임차료 · 지급수수료 · 통신비 · 회의비 · 기타'],['budget','예산 항목'],['paid','이체 확인','예 / 아니오'],['memo','메모']]},
+};
+const REG_KEY = k => 'hsj_reg_' + k;
+function regLoad(k){ return _loadArr(REG_KEY(k)) || []; }
+function regSave(k, a){ _save(REG_KEY(k), a); }
+const INBOX_TO_REG = {contract:'contracts', board:'minutes', minutes:'minutes', invoice:'expenses', bizreg:'vendors'};
+const REG_FIELD_MAP = {
+  contracts: {'계약명':'title','상대방':'party','계약금액':'amount','시작일':'start','종료일':'end'},
+  minutes:   {'개최일':'date','안건':'title','의결사항':'result','의결 결과':'result','참석/의결 정족수':'attend','출석/재적':'attend'},
+  expenses:  {'작성일':'date','거래처':'vendor','공급가액':'amount','세액':'memo'},
+};
+const _regWon = v => { const t = String(v == null ? '' : v).replace(/[,\s원]/g, ''); const n = parseFloat(t) || 0; return /억/.test(t) ? n * 1e8 : /만/.test(t) ? n * 1e4 : n; };
+function memRegister(k){
+  const R = REG[k], rows = regLoad(k).slice().sort((a, b) => String(b.date || b.start || b.at || '').localeCompare(String(a.date || a.start || a.at || '')));
+  const 표칸 = R.칸.filter(c => c[0] !== 'memo');
+  const 오늘 = new Date().toISOString().slice(0, 10);
+  const 합 = k === 'expenses' ? rows.reduce((a, r) => a + _regWon(r.amount), 0) : 0;
+  return `
+    <div class="sec-head"><h1>${R.icon} ${R.이름}</h1><p class="sec-desc">${R.설명}</p></div>
+    <div class="card">
+      <div class="card-title"><h3 class="serif">${R.이름} (${rows.length})</h3>
+        <div style="display:flex;gap:6px;"><button class="btn btn-outline btn-sm" onclick="location.hash='#/mem/inbox'">📥 자료로 넣기</button>
+        <button class="btn btn-primary btn-sm" onclick="regEdit('${k}','')">+ 직접 넣기</button></div></div>
+      ${k === 'expenses' && rows.length ? `<p style="margin:0 0 8px;">합계 <b>${Math.round(합).toLocaleString()}원</b> · 이체 확인 안 된 것 <b>${rows.filter(r => !/^예/.test(r.paid || '')).length}건</b></p>` : ''}
+      ${rows.length ? `<div style="overflow-x:auto;"><table class="tbl" style="font-size:13px;min-width:640px;"><thead><tr>${표칸.map(c => `<th>${c[1]}</th>`).join('')}<th></th></tr></thead><tbody>
+        ${rows.map(r => `<tr>${표칸.map(([key, , , t]) => {
+            let v = r[key] == null ? '' : String(r[key]);
+            if(t === 'num' && v) v = Math.round(_regWon(v)).toLocaleString();
+            const 만기 = k === 'contracts' && key === 'end' && v && v >= 오늘 && v <= new Date(Date.now() + 90 * 864e5).toISOString().slice(0, 10);
+            return `<td${t === 'num' ? ' style="text-align:right;"' : ''}>${escapeHtml(v)}${만기 ? ' <span class="badge badge-warn">만기 임박</span>' : ''}</td>`; }).join('')}
+          <td style="white-space:nowrap;"><button class="btn btn-outline btn-sm" onclick="regEdit('${k}','${r.id}')">고치기</button>
+          <button class="btn btn-ghost btn-sm" onclick="regDelete('${k}','${r.id}')">지우기</button></td></tr>
+          ${r.src ? `<tr><td colspan="${표칸.length + 1}" class="text-mute" style="font-size:11.5px;padding-top:0;">출처: ${escapeHtml(r.src)}</td></tr>` : ''}`).join('')}
+      </tbody></table></div>` : '<p class="text-mute">아직 없습니다. 「📥 자료로 넣기」로 파일을 올리거나 「+ 직접 넣기」를 누르세요.</p>'}
+    </div>`;
+}
+function regEdit(k, id, pre){
+  const R = REG[k], r = id ? (regLoad(k).filter(x => x.id === id)[0] || {}) : Object.assign({}, pre || {});
+  showDyn({title: R.이름 + (id ? ' — 고치기' : ' — 넣기'), sub: pre && pre.src ? '자료에서 읽은 값입니다. 원본과 맞는지 보고 저장하세요.' : '',
+    body: R.칸.map(([key, label, hint, t]) => `<div class="form-row"><label>${label}</label>
+      ${key === 'memo' || key === 'result' ? `<textarea class="textarea" id="rg-${key}" placeholder="${escapeHtml(hint || '')}">${escapeHtml(r[key] || '')}</textarea>`
+        : `<input class="input" id="rg-${key}" type="${t === 'date' ? 'date' : 'text'}" value="${escapeHtml(r[key] == null ? '' : String(r[key]))}" placeholder="${escapeHtml(t === 'num' ? '예: 1,200,000' : (hint || ''))}">`}</div>`).join('')
+      + `<input type="hidden" id="rg-src" value="${escapeHtml(r.src || '')}">`,
+    foot: `<button class="btn btn-outline" onclick="closeDyn()">취소</button><button class="btn btn-primary" onclick="regSaveForm('${k}','${id || ''}')">저장</button>`});
+}
+function regSaveForm(k, id){
+  const R = REG[k], a = regLoad(k), u = currentUser();
+  const rec = id ? (a.filter(x => x.id === id)[0] || {}) : {id: 'r' + Date.now() + Math.floor(Math.random() * 1000), at: new Date().toISOString()};
+  R.칸.forEach(([key]) => { const el = document.getElementById('rg-' + key); if(el) rec[key] = el.value.trim(); });
+  const src = document.getElementById('rg-src'); if(src && src.value) rec.src = src.value;
+  if(!R.칸.some(([key]) => rec[key])){ toast('넣은 값이 없습니다.'); return; }
+  rec.by = u ? u.name : ''; rec.updated = new Date().toISOString();
+  if(!id) a.push(rec);
+  regSave(k, a); closeDyn(); navigate(); toast(R.이름 + '에 저장했습니다.');
+  if(_regAfter){ const f = _regAfter; _regAfter = null; f(); }
+}
+let _regAfter = null;
+function regDelete(k, id){ if(!confirm('지울까요? (서버에 30판까지 이력이 남아 되돌릴 수 있습니다)')) return; regSave(k, regLoad(k).filter(x => x.id !== id)); navigate(); }
+function _inboxValues(name){
+  const L = loadLedger(), v = {};
+  Object.entries(L.확정 || {}).forEach(([f, o]) => { if(o && o.출처 === name) v[f] = o.값; });
+  (L.제안 || []).forEach(p => { if(p.src === name && v[p.field] == null) v[p.field] = p.value; });
+  return v;
+}
+function inboxToRegister(fid){
+  const list = loadInbox(), it = list.filter(x => x.id === fid)[0];
+  if(!it) return;
+  const k = INBOX_TO_REG[it.kind]; if(!k) return;
+  const v = _inboxValues(it.name);
+  const 끝 = () => { const l = loadInbox(), i = l.filter(x => x.id === fid)[0]; if(i){ i.대장 = true; i.요약 = (i.요약 ? i.요약 + ' · ' : '') + '대장에 들어감'; saveInbox(l); } inboxRender(); };
+  if(k === 'vendors'){
+    const T = MOCK.tax; T.vendors = T.vendors || [];
+    const name = v['상호'] || it.name.replace(/\.[^.]+$/, '');
+    if(!confirm('거래처 대장에 넣을까요?\n상호: ' + name + '\n사업자번호: ' + (v['사업자번호'] || '(없음)') + '\n\n표준 계정은 「표준장부·거래처」에서 정합니다.')) return;
+    T.vendors.push({id: 'ven' + Date.now(), name, type: v['업종'] || '매입처', acct: '(미정)', bizno: v['사업자번호'] || '', kw: name, src: it.name});
+    persistTax(); 끝(); toast('거래처 대장에 넣었습니다. 「표준장부·거래처」에서 표준 계정을 정하세요.'); return;
+  }
+  const pre = {src: it.name}, M = REG_FIELD_MAP[k] || {};
+  Object.entries(v).forEach(([f, val]) => { if(M[f]) pre[M[f]] = pre[M[f]] ? pre[M[f]] + ' / ' + val : val; });
+  if(k === 'minutes') pre.type = it.kind === 'board' ? '이사회' : '정기총회';
+  if(k === 'expenses' && v['세액']) pre.memo = '세액 ' + v['세액'];
+  _regAfter = 끝; regEdit(k, '', pre);
+}
+
+/* 업무 달력 — 법·정관에서 오는 정해진 업무 + 조합이 더한 반복 업무. 완료 표시는 서버(store tasks)에 남는다.
+   날짜는 12월 결산·일반과세 법인 기준의 일반적인 기한이다. 실제 기한은 정관·세무대리인과 확인한다. */
+const TASK_KEY = 'hsj_tasks';
+const CYCLE_BASE = [
+  {id:'m-bank', 주기:'월', 달:'매월', 날:'말일', 제목:'통장·증빙 정리, 지출결의 이체 확인', 메뉴:'#/mem/expenses'},
+  {id:'m-power', 주기:'월', 달:'매월', 날:'15일 무렵', 제목:'발전량·한전 정산금 확인', 메뉴:'#/mem/power'},
+  {id:'m-close', 주기:'월', 달:'매월', 날:'말일', 제목:'월 마감 실행(통장 → 월간 운영보고서)', 메뉴:'#/mem/closing'},
+  {id:'m-wht', 주기:'월', 달:'매월', 날:'10일', 제목:'원천세 신고·납부(전달에 급여·강사료 등 지급했을 때)', 메뉴:'#/mem/taxops'},
+  {id:'q-vat', 주기:'분기', 달:'1·4·7·10월', 날:'25일', 제목:'부가가치세 신고·납부(4·10월 예정, 1·7월 확정)', 메뉴:'#/mem/taxops'},
+  {id:'q-board', 주기:'분기', 달:'정관에 따라', 날:'', 제목:'이사회(분기 실적·지출 승인)', 메뉴:'#/mem/minutes'},
+  {id:'q-div', 주기:'분기', 달:'정관에 따라', 날:'', 제목:'배당·마을연금 지급(지역화폐), 지급 기록', 메뉴:'#/mem/power'},
+  {id:'h-report', 주기:'반기', 달:'1·7월', 날:'', 제목:'반기 경영보고(조합원 보고회)', 메뉴:'#/mem/closing'},
+  {id:'y-settle', 주기:'연', 달:'1~2월', 날:'', 제목:'결산(세무대리인) — 재무상태표·손익계산서·잉여금 처분안', 메뉴:'#/mem/surplus'},
+  {id:'y-audit', 주기:'연', 달:'정기총회 7일 전', 날:'', 제목:'결산보고서를 감사에게 제출·사무소 비치(법 제52조)', 메뉴:'#/mem/docs'},
+  {id:'y-gm', 주기:'연', 달:'3월(정관에 정한 기한)', 날:'', 제목:'정기총회 — 결산·처분안·사업계획·예산 의결, 의사록 서명', 메뉴:'#/mem/minutes'},
+  {id:'y-cit', 주기:'연', 달:'3월', 날:'31일', 제목:'법인세 신고·납부(12월 결산)', 메뉴:'#/mem/taxops'},
+  {id:'y-divslip', 주기:'연', 달:'2월', 날:'말일', 제목:'배당소득 지급명세서 제출(배당했을 때)', 메뉴:'#/mem/taxops'},
+  {id:'y-disclose', 주기:'연', 달:'결산일부터 4개월 안(4월)', 날:'', 제목:'경영공시·햇빛소득마을 통합플랫폼 게재', 메뉴:'#/mem/closing'},
+  {id:'y-village', 주기:'연', 달:'연 1회', 날:'', 제목:'마을총회에 결산·운영 현황 보고(정관 예시 제11조②)', 메뉴:'#/mem/minutes'},
+];
+function taskLoad(){ const o = _loadObj(TASK_KEY) || {}; o.custom = o.custom || []; o.done = o.done || {}; return o; }
+function taskSave(o){ _save(TASK_KEY, o); }
+function _period(주기, d){ d = d || new Date(); const y = d.getFullYear(), m = d.getMonth() + 1;
+  return 주기 === '월' ? y + '-' + String(m).padStart(2, '0') : 주기 === '분기' ? y + '-Q' + Math.ceil(m / 3) : 주기 === '반기' ? y + '-H' + (m <= 6 ? 1 : 2) : 주기 === '연' ? String(y) : 'once'; }
+function _monthsOf(t){ const m = String(t.달 || ''); if(/매월/.test(m) || t.주기 === '월') return 'all';
+  const ms = (m.match(/\d{1,2}(?=[·~월])/g) || []).map(Number); if(/~/.test(m) && ms.length === 2){ const r = []; for(let i = ms[0]; i <= ms[1]; i++) r.push(i); return r; } return ms.length ? ms : 'any'; }
+function tasksThisMonth(){
+  const o = taskLoad(), now = new Date(), m = now.getMonth() + 1;
+  return CYCLE_BASE.concat(o.custom).filter(t => { const ms = _monthsOf(t); return ms === 'all' || (Array.isArray(ms) && ms.includes(m)); })
+    .map(t => Object.assign({}, t, {완료: o.done[t.id + '|' + _period(t.주기, now)]}));
+}
+function taskToggle(id, 주기, on){
+  const o = taskLoad(), key = id + '|' + _period(주기), u = currentUser();
+  if(on) o.done[key] = {by: u ? u.name : '', at: new Date().toISOString()}; else delete o.done[key];
+  taskSave(o); navigate();
+}
+function memCycle(){
+  const o = taskLoad(), all = CYCLE_BASE.map(t => Object.assign({기본: true}, t)).concat(o.custom), now = new Date();
+  const 이번 = tasksThisMonth(), 남음 = 이번.filter(t => !t.완료).length;
+  const 줄 = t => { const d = o.done[t.id + '|' + _period(t.주기, now)];
+    return `<tr><td style="text-align:center;"><input type="checkbox" ${d ? 'checked' : ''} onchange="taskToggle('${t.id}','${t.주기}',this.checked)" title="이번 ${t.주기 === '연' ? '해' : t.주기}에 했으면 표시"></td>
+      <td>${escapeHtml(t.제목)}${t.기본 ? '' : ' <span class="badge badge-info">우리 조합</span>'}${t.담당 ? '<div class="text-mute" style="font-size:11.5px;">담당 ' + escapeHtml(t.담당) + '</div>' : ''}</td>
+      <td style="white-space:nowrap;">${escapeHtml(t.달 || '')} ${escapeHtml(t.날 || '')}</td>
+      <td class="text-mute" style="font-size:12px;">${d ? '✅ ' + escapeHtml(d.by || '') + ' ' + String(d.at).slice(0, 10) : ''}</td>
+      <td style="white-space:nowrap;">${t.메뉴 ? `<a class="btn btn-outline btn-sm" href="${t.메뉴}">열기</a>` : ''}${t.기본 ? '' : ` <button class="btn btn-ghost btn-sm" onclick="taskDelete('${t.id}')">지우기</button>`}</td></tr>`; };
+  return `
+    <div class="sec-head"><h1>📆 업무 달력</h1><p class="sec-desc">월·분기·반기·연마다 할 일. 법과 정관에서 오는 업무는 미리 들어 있고, 우리 조합 업무를 더할 수 있습니다. 했으면 표시하세요 — 누가 언제 했는지 남습니다.</p></div>
+    <div class="card"><div class="card-title"><h3 class="serif">이번 달(${now.getMonth() + 1}월) 업무 — 남은 것 ${남음}건</h3>
+      <button class="btn btn-primary btn-sm" onclick="taskEdit()">+ 업무 더하기</button></div>
+      <table class="tbl" style="font-size:13px;"><thead><tr><th style="width:44px;">했음</th><th>업무</th><th style="width:150px;">때</th><th style="width:150px;">완료</th><th style="width:120px;"></th></tr></thead>
+      <tbody>${이번.length ? 이번.map(줄).join('') : '<tr><td colspan="5" class="text-mute">이번 달 업무가 없습니다.</td></tr>'}</tbody></table></div>
+    ${['월', '분기', '반기', '연', '한 번'].map(c => { const ts = all.filter(t => t.주기 === c); return ts.length ? `<div class="card mt-20"><div class="card-title"><h3 class="serif">${c === '한 번' ? '한 번 할 일' : c + '마다'} (${ts.length})</h3></div>
+      <table class="tbl" style="font-size:13px;"><thead><tr><th style="width:44px;">했음</th><th>업무</th><th style="width:150px;">때</th><th style="width:150px;">완료(이번 ${c === '연' ? '해' : c === '한 번' ? '' : c})</th><th style="width:120px;"></th></tr></thead><tbody>${ts.map(줄).join('')}</tbody></table></div>` : ''; }).join('')}
+    <p class="text-mute" style="font-size:12.5px;">※ 기한은 12월 결산·일반과세 법인 기준의 일반적인 날짜입니다. 우리 조합의 정관과 세무대리인 안내가 우선입니다.</p>`;
+}
+function taskEdit(){
+  showDyn({title:'업무 더하기', sub:'우리 조합만의 반복 업무를 더합니다',
+    body:`<div class="form-row"><label>업무</label><input class="input" id="tk-t" placeholder="예: 경로당 난방비 지급 확인"></div>
+      <div class="form-row"><label>주기</label><select class="select" id="tk-c"><option>월</option><option>분기</option><option>반기</option><option>연</option><option>한 번</option></select></div>
+      <div class="form-row"><label>달(주기가 월이면 비워 둠)</label><input class="input" id="tk-m" placeholder="예: 1·4·7·10월 · 12월 · 1~2월"></div>
+      <div class="form-row"><label>날</label><input class="input" id="tk-d" placeholder="예: 25일 · 말일"></div>
+      <div class="form-row"><label>담당</label><input class="input" id="tk-w" placeholder="예: 회계 이사"></div>`,
+    foot:`<button class="btn btn-outline" onclick="closeDyn()">취소</button><button class="btn btn-primary" onclick="taskSaveForm()">더하기</button>`});
+}
+function taskSaveForm(){
+  const g = id => (document.getElementById(id) || {}).value || '';
+  const 제목 = g('tk-t').trim(); if(!제목){ toast('업무를 적어 주세요.'); return; }
+  const 주기 = g('tk-c'), o = taskLoad();
+  o.custom.push({id: 'c' + Date.now(), 주기, 달: 주기 === '월' ? '매월' : (g('tk-m').trim() || (주기 === '한 번' ? '' : '정해서')), 날: g('tk-d').trim(), 담당: g('tk-w').trim(), 제목});
+  taskSave(o); closeDyn(); navigate(); toast('업무 달력에 더했습니다.');
+}
+function taskDelete(id){ if(!confirm('이 업무를 지울까요?')) return; const o = taskLoad(); o.custom = o.custom.filter(t => t.id !== id); taskSave(o); navigate(); }
+
 function memHome(u){
   const village = myVillage();
   return `
@@ -6393,11 +6651,13 @@ const DASH_TILES = [
   ['members','조합원·출자금'],
   ['events', '다가오는 일정'],
   ['docs',   '최근 문서'],
+  ['cycle',  '이번 달 업무'],
+  ['expire', '계약 만기'],
 ];
 const DASH_KEY = 'hsj_dash_tiles';
 function dashPicked(){
   try{ const v = JSON.parse(localStorage.getItem(DASH_KEY) || 'null'); if(Array.isArray(v)) return v; }catch(e){}
-  return ['todo','stage','kpi','fin','events','docs'];
+  return ['cycle','todo','stage','kpi','fin','events','docs','expire'];
 }
 function dashToggle(id, on){
   let v = dashPicked().filter(x => x !== id); if(on) v.push(id);
@@ -6461,7 +6721,13 @@ function memDashboard(u){
       ${MOCK.documents.slice(0,4).map(d => `<div style="padding:8px 0;border-bottom:1px solid var(--line-soft);display:flex;justify-content:space-between;align-items:center;">
         <div><div style="font-weight:600;">${escapeHtml(d.title)}</div><div class="text-small text-mute">${d.type} · ${d.date}</div></div>
         <span class="badge ${d.status === '완료' ? 'badge-success' : 'badge-info'}">${d.status}</span></div>`).join('')}</div>`;
-  const pairs = ['events','docs','ledger','members'];
+  tile.cycle = () => { const ts = tasksThisMonth(), 남 = ts.filter(t => !t.완료); return `<div class="card"><div class="card-title"><h3 class="serif">📆 이번 달 업무 — 남은 것 ${남.length}건</h3><a href="#/mem/cycle" class="text-small">업무 달력 →</a></div>
+      ${남.slice(0, 6).map(t => `<div style="display:flex;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line-soft);"><input type="checkbox" onchange="taskToggle('${t.id}','${t.주기}',this.checked)"><div style="flex:1;">${escapeHtml(t.제목)}</div><span class="text-small text-mute">${escapeHtml((t.달 || '') + ' ' + (t.날 || ''))}</span></div>`).join('') || '<p class="text-mute" style="margin:0;">이번 달 업무를 다 했습니다.</p>'}</div>`; };
+  tile.expire = () => { const 오늘 = new Date().toISOString().slice(0, 10), 끝 = new Date(Date.now() + 90 * 864e5).toISOString().slice(0, 10);
+    const cs = regLoad('contracts').filter(c => c.end && c.end >= 오늘 && c.end <= 끝).sort((a, b) => a.end.localeCompare(b.end));
+    return `<div class="card"><div class="card-title"><h3 class="serif">📑 90일 안에 끝나는 계약 (${cs.length})</h3><a href="#/mem/contracts" class="text-small">계약서 대장 →</a></div>
+      ${cs.map(c => `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line-soft);"><span>${escapeHtml(c.title || '')} · ${escapeHtml(c.party || '')}</span><span class="badge badge-warn">${escapeHtml(c.end)} (${ddayLabel(c.end)})</span></div>`).join('') || '<p class="text-mute" style="margin:0;">곧 끝나는 계약이 없습니다.</p>'}</div>`; };
+  const pairs = ['events','docs','ledger','members','expire'];
   const full = pick.filter(id => !pairs.includes(id)).map(id => `<div class="mt-20">${tile[id]()}</div>`).join('');
   const halves = pick.filter(id => pairs.includes(id)).map(id => tile[id]());
   return `
@@ -8293,6 +8559,7 @@ function inboxRender(){
             + '</td>'
             + '<td><span class="badge ' + (it.상태 === '완료' ? 'badge-success' : it.상태 === '중복' ? 'badge-danger' : 'badge-info') + '">' + escapeHtml(it.상태) + '</span></td>'
             + '<td><button class="btn btn-primary btn-sm" onclick="inboxProcess(\'' + it.id + '\')">처리</button> '
+            + (INBOX_TO_REG[it.kind] && it.상태 !== '대기' && it.상태 !== '처리중' ? '<button class="btn btn-outline btn-sm" onclick="inboxToRegister(\'' + it.id + '\')">' + (it.대장 ? '✅ 대장에 들어감' : '📒 대장에 넣기') + '</button> ' : '')
             + '<button class="btn btn-outline btn-sm" onclick="inboxRemove(\'' + it.id + '\')">삭제</button></td></tr>'
             + (it.요약
                 ? '<tr><td colspan="4" style="font-size:12.5px;padding-top:0;">'
@@ -8335,6 +8602,13 @@ const STORE_LEDGER = 'sunvillage_auto_ledger';   // 조합 현황(원장)
 /* 자료 유형 사전 — 파일명·확장자로 1차 분류한다(무료·즉시).
    ext: 허용 확장자, kw: 파일명 키워드, 필드: 이 자료에서 뽑을 것, 작업: 뒤따르는 일 */
 const DOC_KINDS = [
+  /* 2026-11-26 조합 대장으로 가는 자료 셋 — 계약서·사업자등록증(거래처)·이사회 회의록. 읽은 값은 제안 → 「대장에 넣기」 */
+  { id:'contract', 이름:'계약서', ext:['pdf','hwp','hwpx','docx','jpg','jpeg','png'], kw:['계약서','계약','협약서','임대차','도급','위탁'],
+    필드:['계약명','상대방','계약금액','시작일','종료일'], 작업:['계약서 대장 기록','만기 알림(업무 달력·현황)','거래처 대장 연결'], 파싱:'server' },
+  { id:'bizreg', 이름:'사업자등록증(거래처)', ext:['pdf','jpg','jpeg','png'], kw:['사업자등록증','사업자등록'],
+    필드:['상호','사업자번호','대표자','업종'], 작업:['거래처 대장 기록','표준 계정 배정'], 파싱:'server' },
+  { id:'board', 이름:'이사회 회의록', ext:['pdf','hwp','hwpx','docx'], kw:['이사회'],
+    필드:['개최일','안건','의결 결과','출석/재적'], 작업:['회의록 대장 기록','의결사항 → 업무 달력'], 파싱:'server' },
   { id:'bank',      이름:'통장 거래내역',   ext:['csv','txt','xls','xlsx'], kw:['통장','거래내역','입출금','계좌','거래명세'],
     필드:['거래일','적요','입금','출금','잔액'],
     작업:['회계 기장 자동 분류','월마감','배분 기준액 대조','월간 운영보고서'], 파싱:'client' },
@@ -12853,7 +13127,8 @@ function _storeKinds(){
   return {
     [STORE.members]:'members', [STORE.events]:'events', [STORE.uploads]:'uploads', [STORE.closings]:'closings',
     [STORE.accounting]:'accounting', [STORE_INBOX]:'inbox', [STORE_LEDGER]:'ledger', [STORE_POWER]:'power',
-    [TAX_STORE]:'tax', [DASH_KEY]:'dash',
+    [TAX_STORE]:'tax', [DASH_KEY]:'dash', [REG_KEY('contracts')]:'contracts', [REG_KEY('minutes')]:'minutes',
+    [REG_KEY('expenses')]:'expenses', [TASK_KEY]:'tasks', [SURPLUS_KEY]:'surplus',
   };
 }
 function _storeQueue(key, val){
