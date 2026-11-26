@@ -820,6 +820,19 @@ details.prc-rule[open]>summary{margin-bottom:8px;}
   #v-pub-diagnose table.tbl:not(:has(thead)) tr{display:block;padding:10px 0;border-bottom:1px solid var(--line-soft);}
   #v-pub-diagnose table.tbl:not(:has(thead)) td{display:block;width:auto!important;border:0;padding:2px 0;}
 }
+/* 11-27 2차(알파언니 재검증): 로그인 뒤 권유 단추 숨김 · 통합사이트 가는 길 · 휴대폰 떠 있는 단추 */
+body.hs-in .hs-login-only{display:none!important;}
+.hub-back{font-size:12.5px;color:var(--ink-soft);text-decoration:none;border:1px solid var(--line-soft);border-radius:999px;padding:4px 10px;white-space:nowrap;background:#fff;}
+.hub-back:hover{background:var(--primary-50);color:var(--ink);}
+@media (min-width:901px){ .topnav-in>.brand{margin-right:0;} .topnav-in>.hub-back{margin-right:auto;} }
+@media (max-width:760px){
+  .call-fab{padding:0;width:46px;height:46px;line-height:46px;text-align:center;font-size:20px;left:12px;bottom:12px;}
+  .call-fab .cf-t{display:none;}
+  body{padding-bottom:72px;}
+}
+@media (max-width:560px){ .topnav-in>.hub-back{display:none;} }   /* 휴대폰은 ☰ 메뉴 안에 있다 */
+.side-hub{display:none;}
+@media (max-width:900px){ .side-hub{display:inline-block;} }
 /* H-01: 휴대폰 로그인 화면 — 사이드바는 ☰ 로만 연다(머리띠 아래 덮개) */
 @media (max-width:900px){
   #v-app .app>.sidebar{display:none;}
@@ -839,6 +852,7 @@ details.prc-rule[open]>summary{margin-bottom:8px;}
       <span class="brand-icon">☀</span>
       <span>햇소자</span>
     </a>
+    <a class="hub-back" href="/" title="사교원 통합사이트로 갑니다">← 통합사이트</a>
 
     <!-- Public nav (visible when logged out) -->
     <div class="pub-nav" id="pubNav">
@@ -852,6 +866,7 @@ details.prc-rule[open]>summary{margin-bottom:8px;}
       <a href="#/pub/contact">상담신청</a>
       <a href="https://center.sakyowon.co.kr/" target="_blank" rel="noopener" title="시민자산육성지원센터 업무포털 — 별도 로그인 · 새 창">시민자산육성지원센터</a>
       <a href="manual.html">이용안내</a>
+      <a href="/" class="pn-hub">← 통합사이트</a>
     </div>
 
     <!-- 등급별 메뉴 (로그인 후 — renderRoleNav()가 채움) -->
@@ -883,7 +898,7 @@ details.prc-rule[open]>summary{margin-bottom:8px;}
 </div>
 
 <!-- 전화 상담(모바일 고정) · AI 상담 플로팅 · 홈 화면 설치 안내 -->
-<a class="call-fab" href="tel:070-4196-4677">📞 전화 상담</a>
+<a class="call-fab" href="tel:070-4196-4677" aria-label="전화 상담 070-4196-4677">📞<span class="cf-t"> 전화 상담</span></a>
 <button class="chat-fab" id="chatFab" onclick="location.hash='#/mem/chat'" aria-label="AI 상담 열기">💬</button>
 <div class="pwa-bar" id="pwaBar">
   📱 홈 화면에 추가하면 다음부터 주소 입력 없이 바로 열 수 있어요.
@@ -904,7 +919,7 @@ details.prc-rule[open]>summary{margin-bottom:8px;}
   <div class="hero hero-photo" style="--hero-img:url('/img/unified/c_hat.jpg')">
     <div class="hero-in">
       <div class="tag-row hero-tags">
-        <span class="hero-pill">사교원 사회적협동조합</span>
+        <span class="hero-pill">사회혁신교육원사회적협동조합</span>
         <span class="hero-pill">햇빛소득마을 사업 지원</span>
       </div>
       <h1>신청부터 배당까지,<br>햇빛소득마을의 모든 업무를 한 곳에서.</h1>
@@ -915,7 +930,7 @@ details.prc-rule[open]>summary{margin-bottom:8px;}
       </p>
       <div class="hero-cta">
         <a class="btn btn-primary btn-lg btn-pill-gold" href="#/pub/diagnose">무료 자가진단·수익 계산</a>
-        <button class="btn btn-outline btn-lg btn-pill-white" onclick="openLogin()">로그인하고 시작하기</button>
+        <button class="btn btn-outline btn-lg btn-pill-white hs-login-only" onclick="openLogin()">로그인하고 시작하기</button>
         <a class="btn btn-outline btn-lg btn-pill-ghost" href="#/pub/about">사업 자세히 보기 ›</a>
       </div>
       <div class="hero-chips"><span>진단·신청</span><span>조합 설립</span><span>정산·배당</span><span>마을사업</span></div>
@@ -975,7 +990,7 @@ details.prc-rule[open]>summary{margin-bottom:8px;}
         <h3>지금 바로 무료로 시작하세요</h3>
         <p>햇빛소득마을 조합원·예비조합원 대상 · 2026년 12월까지 모두 무료 · 이후에도 상업발전 전 무료</p>
       </div>
-      <button class="btn btn-primary btn-pill-gold" onclick="openLogin()">로그인 · 회원가입</button>
+      <button class="btn btn-primary btn-pill-gold hs-login-only" onclick="openLogin()">로그인 · 회원가입</button>
     </div>
   </div>
 </section>
@@ -1013,7 +1028,7 @@ details.prc-rule[open]>summary{margin-bottom:8px;}
         사업 선정 후 협동조합의 일상적인 <strong>세무회계, 기타 사무 업무</strong>에도 어려움을 겪습니다.
       </p>
       <p>
-        본 플랫폼은 <strong>사교원 사회적협동조합</strong>이 축적한 마을협동조합 실무 지식과
+        본 플랫폼은 <strong>사회혁신교육원사회적협동조합</strong>(사교원)이 축적한 마을협동조합 실무 지식과
         AI(생성형 언어모델)를 결합하여, 각 마을이 자신의 상황을 몇 가지 항목으로 입력하면
         서류 초안·검토·법령 답변을 자동 생성합니다.
         또한 매월 수행해야 하는 행정사무, 세무회계 업무를 자동화합니다.
@@ -1312,7 +1327,7 @@ details.prc-rule[open]>summary{margin-bottom:8px;}
     </div>
 
     <div class="text-center mt-32">
-      <button class="btn btn-primary btn-lg" onclick="openLogin()">지금 가입하기</button>
+      <button class="btn btn-primary btn-lg hs-login-only" onclick="openLogin()">지금 가입하기</button>
     </div>
   </div>
 </section>
@@ -1514,7 +1529,7 @@ details.prc-rule[open]>summary{margin-bottom:8px;}
       <h3 class="serif">4. 이용자의 권리</h3>
       <p>이용자는 언제든 본인 개인정보의 열람·정정·삭제·처리정지를 요구할 수 있습니다. 아래 연락처로 요청하시면 지체 없이 처리합니다.</p>
       <h3 class="serif">5. 개인정보 보호책임자</h3>
-      <p>사회혁신교육원 사회적협동조합 · 이메일 <a href="mailto:sakyowon@sakyowon.co.kr">sakyowon@sakyowon.co.kr</a></p>
+      <p>사회혁신교육원사회적협동조합 · 이메일 <a href="mailto:sakyowon@sakyowon.co.kr">sakyowon@sakyowon.co.kr</a></p>
       <p class="text-mute" style="font-size:12.5px;">이 방침이 변경되면 이 페이지에 게시하고 시행일을 갱신합니다.</p>
     </div>
   </div>
@@ -1571,7 +1586,7 @@ details.prc-rule[open]>summary{margin-bottom:8px;}
           <div style="margin-top:14px;font-size:14px;line-height:2;">
             📞 대표전화 · <a href="tel:070-4196-4677">070-4196-4677</a><br>
             📮 이메일 · <a href="mailto:sakyowon@sakyowon.co.kr">sakyowon@sakyowon.co.kr</a><br>
-            🏢 사교원 사회적협동조합<br>
+            🏢 사회혁신교육원사회적협동조합<br>
             🌐 <a href="https://sakyowon.co.kr/" target="_blank">sakyowon.co.kr</a>
           </div>
         </div>
@@ -1607,7 +1622,7 @@ details.prc-rule[open]>summary{margin-bottom:8px;}
   <div class="foot-in">
     <div>
       <div class="serif" style="font-weight:700;color:var(--ink);margin-bottom:4px;">햇소자 — 햇빛소득마을 통합 운영 플랫폼</div>
-      운영: 사회혁신교육원 사회적협동조합 · 협력: 품앗이 본부
+      운영: 사회혁신교육원사회적협동조합 · 협력: 품앗이 본부
       <div style="margin-top:6px;line-height:1.8;">
         본사 : 대전광역시 서구 관저중로80번길 8, 3층<br>
         사업자등록번호 : 397-82-00424 · 사업 : 교육, 컨설팅, IT
@@ -1872,7 +1887,6 @@ const ROLE_MENUS = {
       ['mem','chat','💬','AI 상담'],
       ['mem','video','🎬','활동 영상 만들기'],
       ['mem','mypage','👤','내 페이지'],
-      ['pub','pricing','💳','요금 안내'],
     ]],
   ],
   coop: [
@@ -1929,8 +1943,7 @@ const ROLE_MENUS = {
     ]],
     /* 11-26 이사장 지시: 내 조합은 사이드바 맨 아래로, 그 아래 이용안내(사용 설명서·내 AI 연결 안내) */
     ['내 조합', [
-      ['mem','mypage','👤','내 페이지'],
-      ['pub','pricing','💳','요금 안내'],
+      ['mem','mypage','👤','내 페이지'],   // 11-27 요금 안내는 사이드바 맨 위 「💳 이용 서비스·요금」 한 곳
     ]],
     ['이용안내', [
       ['href','manual.html','📖','사용 설명서'],
@@ -2654,6 +2667,7 @@ function renderTopActions(){
     `;
   }
   renderRoleNav();
+  document.body.classList.toggle('hs-in', !!u);   // 11-27 로그인했으면 「로그인하고 시작하기」 같은 권유 단추를 숨긴다
   { const fa = document.getElementById('footAdmin');   // 11-27 보라 E-8: 꼬리말 「통합 관리자」는 매니저·통합관리자에게만
     if(fa) fa.hidden = !(u && u.unified && !u.preview && (role === 'admin' || ['admin','staff','manager'].indexOf(String(u.hubRole || '').toLowerCase()) !== -1)); }
 }
@@ -2815,7 +2829,7 @@ const PRICING = {
     기본: {값: 10000, 한도: '사용자 3명 · 저장 2GB', 메뉴: [
       '현황·업무 — 현황 대시보드 · 조합 원장 · 할 일 · 업무 시작(상담·자료함·문서)',
       '조합 대장·업무 — 업무 달력 · 계약서 대장 · 회의록 대장 · 지출결의 · 거래처·표준장부',
-      '내 조합 — 내 페이지 · 요금 안내',
+      '내 조합 — 내 페이지',
       '설립·건설 — 마을회·조합 설계 · 설립 내비게이터·청약 · 사업비·부품 구성 · 자부담·융자 신청 · 사업자(ReSCO) 선정',
       '운영관리 — 발전·정산·배당 · 수익 시뮬레이션·배분 계획 · 회계·세무 자진신고 · 잉여금 처분 계산 · 재무제표·컨설팅 · 월마감·보고서 · 조합원 관리 · 일정·마감 · 20년 성공 조건',
       '확장 — 마을비즈니스 · 연합체·커뮤니티 · 전남 발전 현황 · 공지·자료실 · 활동 영상 만들기']},
@@ -3081,6 +3095,7 @@ function renderRoleSidebar(role, scope, active){
     <div class="side-top">
       <button class="side-pill gold" onclick="location.hash='#/pub/pricing'" title="쓰는 서비스와 이용료를 봅니다">💳 이용 서비스·요금</button>
       <button class="side-pill" onclick="sideEditToggle()" title="안 쓰는 메뉴를 감추거나 다시 보이게 합니다">⚙ 메뉴 정리</button>
+      <a class="side-pill side-hub" href="/">← 통합사이트</a>
     </div>`) + (ROLE_MENUS[role] || []).map(([label, items], gi) => {
     const 보일 = items.filter(([s,p]) => !menuHidden(s, p)).filter(([s,p]) => {
       const h = sideIsHidden(s, p); if(h) 감춤수++;
@@ -3115,8 +3130,7 @@ function renderRoleSidebar(role, scope, active){
            <button onclick="sideHideSuggested('${escapeJs(role)}')">💤 30일 넘게 안 쓴 메뉴 한 번에 감추기</button>
            ${감춤수 ? `<button onclick="sideShowAll()">👁 감춘 메뉴 ${감춤수}개 모두 보이기</button>` : ''}
            <button onclick="sideEditToggle()">✔ 정리 끝내기</button>`
-        : `<button onclick="sideEditToggle()">⚙ 메뉴 정리(감추기·보이기)</button>
-           ${감춤수 ? `<button onclick="sideEditToggle()">👁 감춘 메뉴 ${감춤수}개 다시 보이기</button>` : ''}`}
+        : `${감춤수 ? `<button onclick="sideEditToggle()">👁 감춘 메뉴 ${감춤수}개 다시 보이기</button>` : ''}`}
     </div>`);
   if(role !== 'admin') return html;
   return html + `
