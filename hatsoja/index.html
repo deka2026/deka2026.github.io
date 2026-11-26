@@ -1986,6 +1986,7 @@ function startPreview(role){
   toast(`${roleLabel(role)} 화면 미리보기를 시작합니다.`);
 }
 async function endPreview(){
+  _MY_STRAT = undefined; _SHARE = null;   // 11-26 알파언니 🟠2: 앞 조합의 배분 전략·현황판이 남지 않게
   const cur = currentUser();
   const viewing = !!(cur && cur.viewVillage);
   let admin = null;
@@ -2018,6 +2019,7 @@ async function viewCoopClear(){
   }catch(e){}
 }
 async function viewCoop(vid){
+  _MY_STRAT = undefined; _SHARE = null;
   const u = currentUser();
   if(!REAL_API || !u || !u.unified || u.hubRole !== 'admin' || u.preview){ toast('통합관리자만 조합 화면으로 들어갈 수 있습니다.'); return; }
   let d = null;
@@ -4968,7 +4970,7 @@ function distStratRender(){
   const box = document.getElementById('distStratBox'); if(!box) return;
   const s = _MY_STRAT;
   if(!s){ box.innerHTML = '<div class="card mt-20" style="font-size:13.5px;">아직 우리 조합 배분 전략을 정하지 않았습니다. <a href="#/mem/power">⚡ 발전·정산·배당 → 수익금 배분 전략</a>에서 네 모델을 비교하고 정하세요.</div>'; return; }
-  const biz = Math.round((100 - (s.mix.조합원배당 || 0))) / 100;
+  const biz = Math.round((100 - (s.mix.조합원배당 || 0)) * 10) / 1000;
   box.innerHTML = '<div class="card mt-20" style="border-left:4px solid var(--primary);"><div class="card-title"><h3 class="serif">✅ 우리 조합 배분 전략: ' + escapeHtml(s.name) + '</h3>'
     + '<span class="badge ' + (s.resolved_on ? 'badge-success' : 'badge-mute') + '">' + (s.resolved_on ? '총회 의결 ' + escapeHtml(s.resolved_on) : '총회 의결 전') + '</span></div>'
     + '<p style="margin:0 0 6px;">' + escapeHtml(pwMixText(s.mix)) + '</p>'
@@ -10855,6 +10857,7 @@ function shareEditHtml(){
     + ((_SHARE.docs || []).length ? '<div style="max-height:220px;overflow:auto;background:#fff;border:1px solid var(--line-soft);border-radius:8px;padding:6px 10px;">' + _SHARE.docs.map(function(d){ return '<label style="display:flex;gap:8px;padding:4px 0;font-size:13.5px;"><input type="checkbox" data-shdoc="' + d.id + '"' + ((s.doc_ids || []).indexOf(d.id) !== -1 ? ' checked' : '') + '>' + escapeHtml(d.filename) + ' <span class="text-mute">' + escapeHtml(d.kind || '') + ' · ' + escapeHtml((d.uploaded_at || '').slice(0, 10)) + '</span></label>'; }).join('') + '</div>'
                               : '<p class="text-mute text-small">서류 보관함에 올린 자료가 없습니다. 「발전·정산·배당」의 서류 보관함에 먼저 올리세요.</p>')
     + '<label style="display:flex;gap:8px;align-items:center;margin-top:12px;font-weight:600;"><input type="checkbox" id="shOn"' + (s.link ? ' checked' : '') + '> 링크로 공개하기(링크를 받은 누구나 로그인 없이 봅니다)</label>'
+    + '<p class="text-mute" style="font-size:12px;margin:4px 0 0;">공개를 껐다 다시 켜면 같은 링크가 다시 열립니다. 보냈던 링크를 영영 닫으려면 「링크 바꾸기」를 누르세요.</p>'
     + '<div style="display:flex;gap:8px;margin-top:10px;"><button class="btn btn-primary" onclick="shareSave()">저장</button>'
     + (s.token ? '<button class="btn btn-ghost" onclick="shareRotate()">링크 바꾸기(옛 링크 닫기)</button>' : '')
     + '<button class="btn btn-ghost" onclick="_SHARE_EDIT=false;shareRedraw()">닫기</button></div></div>';
@@ -16728,9 +16731,9 @@ function _bookInvoices(){ if(!Array.isArray(MOCK.tax.invoices)) MOCK.tax.invoice
 function bookAcctOf(t){
   if(t.acct && BOOK_ACCTS[t.acct]) return {acct:t.acct, why:'사람이 정함'};
   const d = t.desc || '';
+  if(t.out && /법인세|법인지방소득세|법인소득분/.test(d)) return {acct:'법인세비용', why:'법인세·법인지방소득세 납부'};
   if(t.out && /원천세|지방소득세/.test(d)) return {acct:'예수금', why:'원천세 납부 = 떼어 둔 세금 내기'};
   if(t.out && /부가세|부가가치세/.test(d)) return {acct:'부가세예수금', why:'부가세 납부'};
-  if(t.out && /법인세/.test(d)) return {acct:'법인세비용', why:'법인세 납부'};
   if(t.inn && /이자/.test(d) && !/대출|융자/.test(d)) return {acct:'이자수익', why:'예금 이자'};
   const v = (MOCK.tax.vendors || []).find(function(x){ return x.id === t.vendorId; });
   let a = v ? v.acct : '';
@@ -16741,6 +16744,19 @@ function bookAcctOf(t){
   return {acct:'', why:'계정을 정해 주세요', check:true};
 }
 /* 세금계산서 찾기 — 같은 방향·합계 ±1원·45일 안, 아직 안 쓴 것 */
+/* 11-26 알파언니 🟠4: 짝짓기를 장부 기간마다 따로 하면 같은 계산서가 1분기·2분기 장부에 두 번 쓰였다.
+   통장 전체를 날짜순으로 한 번에 짝지어 {거래 id: 계산서} 를 만들고, 모든 장부가 그 표를 쓴다. */
+function _bookMatchAll(){
+  const used = {}, m = {};
+  MOCK.tax.bank.slice().sort(function(a, b){ return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; }).forEach(function(t){
+    const a = bookAcctOf(t).acct, info = BOOK_ACCTS[a] || {};
+    const want = t.inn ? !!info.vat : (info.t === '비용' || a === '발전설비');
+    if(!want) return;
+    const inv = _bookMatchInv(t, used);
+    if(inv){ used[inv.id] = 1; m[t.id] = {inv:inv, acct:a}; }
+  });
+  return m;
+}
 function _bookMatchInv(t, used){
   const kind = t.inn ? '매출' : '매입', amt = t.inn || t.out, d0 = Date.parse(t.date);
   return _bookInvoices().find(function(v){
@@ -16748,7 +16764,7 @@ function _bookMatchInv(t, used){
   });
 }
 function bookJournal(from, to){
-  const out = [], used = {};
+  const out = [], M = _bookMatchAll();
   MOCK.tax.bank.filter(function(t){ return t.date >= from && t.date <= to; }).forEach(function(t){
     const r = bookAcctOf(t), amt = t.inn || t.out, a = r.acct || '미분류', lines = [];
     let note = r.why, check = !!r.check, inv = null;
@@ -16756,14 +16772,14 @@ function bookJournal(from, to){
     if(t.inn){
       lines.push({dr:'보통예금', amt:amt});
       if(info.vat){
-        inv = _bookMatchInv(t, used);
+        inv = M[t.id] ? M[t.id].inv : null;
         const tax = inv ? inv.tax : Math.round(amt / 11);
-        if(inv) used[inv.id] = 1; else { check = true; note = '세금계산서를 못 찾아 공급가·세액을 1/11로 나눴습니다'; }
+        if(!inv){ check = true; note = '세금계산서를 못 찾아 공급가·세액을 1/11로 나눴습니다'; }
         lines.push({cr:a, amt:amt - tax}); lines.push({cr:'부가세예수금', amt:tax});
       } else lines.push({cr:a, amt:amt});
     } else {
-      inv = (info.t === '비용' || a === '발전설비') ? _bookMatchInv(t, used) : null;
-      if(inv){ used[inv.id] = 1; lines.push({dr:a, amt:amt - inv.tax}); lines.push({dr:'부가세대급금', amt:inv.tax}); }
+      inv = M[t.id] ? M[t.id].inv : null;
+      if(inv){ lines.push({dr:a, amt:amt - inv.tax}); lines.push({dr:'부가세대급금', amt:inv.tax}); }
       else if(a === '차입금' && t.interest > 0){ lines.push({dr:'차입금', amt:amt - t.interest}); lines.push({dr:'이자비용', amt:t.interest}); }
       else lines.push({dr:a, amt:amt});
       lines.push({cr:'보통예금', amt:amt});
@@ -16787,10 +16803,11 @@ function bookPL(from, to){
 }
 function bookVat(from, to){
   const r = {s1_amt:0, s1_tax:0, p10_tax:0, p11_tax:0, n:0};
+  const 설비 = {}; const M = _bookMatchAll(); Object.keys(M).forEach(function(k){ if(M[k].acct === '발전설비') 설비[M[k].inv.id] = 1; });
   _bookInvoices().filter(function(v){ return v.date >= from && v.date <= to; }).forEach(function(v){
     r.n++;
     if(v.kind === '매출'){ r.s1_amt += v.supply; r.s1_tax += v.tax; }
-    else if(v.fixed) r.p11_tax += v.tax; else r.p10_tax += v.tax;
+    else if(v.fixed || 설비[v.id]) r.p11_tax += v.tax; else r.p10_tax += v.tax;
   });
   return r;
 }
@@ -16823,7 +16840,9 @@ function bookSectionHtml(){
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
         <button class="btn btn-outline" onclick="bookShowJournal()">📋 분개장·계정 고치기</button>
         <button class="btn btn-outline" onclick="bookShowTrial()">⚖️ 시산표·손익</button>
-        <label class="btn btn-outline" style="cursor:pointer;">🧾 세금계산서 목록 올리기<input type="file" accept=".xlsx,.csv,.txt" style="display:none;" onchange="bookImportInv(this)"></label>
+        <label class="btn btn-outline" style="cursor:pointer;">🧾 매출 세금계산서 올리기<input type="file" accept=".xlsx,.csv,.txt" style="display:none;" data-kind="매출" onchange="bookImportInv(this)"></label>
+        <label class="btn btn-outline" style="cursor:pointer;">🧾 매입 세금계산서 올리기<input type="file" accept=".xlsx,.csv,.txt" style="display:none;" data-kind="매입" onchange="bookImportInv(this)"></label>
+        <button class="btn btn-ghost" onclick="bookShowInv()">📑 올린 세금계산서 보기</button>
         <button class="btn btn-ghost" onclick="bookAiFetch()">🤖 크롬 AI로 목록 내려받기</button>
         <button class="btn btn-primary" onclick="bookSendTax()">📤 세금 신고 일로 보내기</button>
       </div>
@@ -16863,7 +16882,7 @@ function bookShowTrial(){
 /* 홈택스 「월/분기별 목록조회」에서 내려받은 엑셀·CSV. 승인번호로 겹침을 막는다. 사업자번호·상호만 쓰고 담당자 메일 등은 버린다. */
 function bookImportInv(input){
   const file = input.files && input.files[0]; input.value = ''; if(!file) return;
-  const kind = confirm('이 파일이 「매출」 세금계산서 목록입니까?\n\n확인 = 매출(우리가 발급) · 취소 = 매입(우리가 받음)') ? '매출' : '매입';
+  const kind = input.getAttribute('data-kind') === '매입' ? '매입' : '매출';
   _rosterReadRows(file, function(rows, 까닭){
     if(!rows){ toast(까닭); return; }
     const h = rows.findIndex(function(r){ return r.join('|').indexOf('승인번호') !== -1 && r.join('|').indexOf('공급가액') !== -1; });
@@ -16873,20 +16892,31 @@ function bookImportInv(input){
     const iD = c(['작성일자','작성일']), iA = c(['승인번호']), iS = c(['공급가액']), iT = c(['세액']), iTot = c(['합계금액','합계']), iItem = c(['품목명','품목']);
     const iName = kind === '매출' ? c(['공급받는자상호','상호(공급받는자)','공급받는자명']) : c(['공급자상호','상호(공급자)','공급자명']);
     const iBiz = kind === '매출' ? c(['공급받는자사업자등록번호','공급받는자등록번호']) : c(['공급자사업자등록번호','공급자등록번호']);
-    const list = _bookInvoices(), 있음 = {}; list.forEach(function(v){ 있음[v.approval] = 1; });
+    const list = _bookInvoices(), 있음 = {}; list.forEach(function(v){ 있음[v.kind + '|' + v.approval] = 1; });
     let 새로 = 0, 겹침 = 0;
     rows.slice(h + 1).forEach(function(r){
       const ap = String(r[iA] || '').trim(); if(!ap || !/\d/.test(ap)) return;
-      if(있음[ap]){ 겹침++; return; }
+      if(있음[kind + '|' + ap]){ 겹침++; return; }
       const num = function(i){ return i < 0 ? 0 : Math.round(Number(String(r[i] || '').replace(/[^\d.-]/g, '')) || 0); };
       const supply = num(iS), tax = num(iT);
       list.push({id:_tid('inv'), kind:kind, date:_rosterDate(r[iD]) || String(r[iD] || '').slice(0, 10), approval:ap.slice(0, 40), supply:supply, tax:tax, total:num(iTot) || supply + tax,
         name:String(iName >= 0 ? r[iName] : '').slice(0, 40), bizNo:String(iBiz >= 0 ? r[iBiz] : '').replace(/[^\d-]/g, '').slice(0, 12), item:String(iItem >= 0 ? r[iItem] : '').slice(0, 40), fixed:false});
-      있음[ap] = 1; 새로++;
+      있음[kind + '|' + ap] = 1; 새로++;
     });
     persistTax(); taxLog('세금계산서 목록', kind + ' ' + 새로 + '건'); toast(kind + ' 세금계산서 ' + 새로 + '건을 넣었습니다' + (겹침 ? '(겹친 ' + 겹침 + '건 뺌)' : '') + '.'); refresh();
   });
 }
+function bookShowInv(){
+  const list = _bookInvoices().filter(function(v){ return v.date >= _BOOK_P.from && v.date <= _BOOK_P.to; });
+  showDyn({title:'올린 세금계산서 — ' + _BOOK_P.label, sub:'종류를 잘못 올렸으면 지우고 맞는 단추로 다시 올리세요. 설비 매입은 「고정자산」을 켜면 부가세 (11)칸으로 갑니다.', size:'xl',
+    body: list.length ? '<div style="max-height:60vh;overflow:auto;"><table class="tbl" style="font-size:12.5px;"><thead><tr><th>종류</th><th>작성일</th><th>승인번호</th><th>상대</th><th class="num">공급가액</th><th class="num">세액</th><th>고정자산</th><th></th></tr></thead><tbody>'
+      + list.map(function(v){ return '<tr><td>' + v.kind + '</td><td>' + escapeHtml(v.date) + '</td><td>' + escapeHtml(v.approval) + '</td><td>' + escapeHtml(v.name || '') + '</td><td class="num">' + v.supply.toLocaleString() + '</td><td class="num">' + v.tax.toLocaleString() + '</td>'
+          + '<td>' + (v.kind === '매입' ? '<input type="checkbox"' + (v.fixed ? ' checked' : '') + ' onchange="bookInvFixed(\'' + escapeJs(v.id) + '\', this.checked)">' : '') + '</td><td><button class="btn btn-ghost btn-sm" onclick="bookInvDel(\'' + escapeJs(v.id) + '\')">지우기</button></td></tr>'; }).join('')
+      + '</tbody></table></div>' : '<p class="text-mute">이 기간에 올린 세금계산서가 없습니다.</p>',
+    foot:'<button class="btn btn-primary" onclick="closeDyn();refresh()">닫기</button>'});
+}
+function bookInvFixed(id, v){ const x = _bookInvoices().find(function(i){ return i.id === id; }); if(x){ x.fixed = !!v; persistTax(); } }
+function bookInvDel(id){ if(!confirm('이 세금계산서를 목록에서 지울까요?')) return; MOCK.tax.invoices = _bookInvoices().filter(function(i){ return i.id !== id; }); persistTax(); bookShowInv(); }
 function bookAiFetch(){
   const t = '[홈택스 전자세금계산서 목록 내려받기 — 크롬 AI 작업 지시서]\n'
     + '1. 홈택스(www.hometax.go.kr)가 로그인돼 있지 않으면 멈추고 「로그인해 주세요」라고 말한다. 비밀번호·인증서는 다루지 않는다. 「세무대리·납세관리」 메뉴는 쓰지 않는다.\n'
@@ -16917,9 +16947,12 @@ async function bookSendTax(){
       .map(function(o){ return Object.assign(o, {ent:ent.id}); });
     if(!_BOOK_OBS.length){ toast('보낼 부가세·법인세 신고 일이 없습니다(준비·값승인 상태만 받습니다).'); return; }
     showDyn({title:'📤 장부 값을 세금 신고 일로 보내기', sub:'신고 일의 기간으로 다시 계산한 값입니다. 보낸 뒤 「세금·4대보험 신고」에서 확인·승인합니다.', size:'lg',
-      body:_BOOK_OBS.map(function(o, i){ const v = bookObValues(o);
-          return '<label style="display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line-soft);"><input type="checkbox" data-bookob="' + i + '"' + (o.state === '준비' && v.has ? ' checked' : '') + '><span><b>' + escapeHtml(o.name || o.code) + '</b> · ' + escapeHtml(o.label) + ' · 기한 ' + escapeHtml(o.due) + (o.state === '값승인' ? ' <span class="badge badge-danger">이미 승인됨 — 보내면 승인이 풀릴 수 있음</span>' : '')
-            + '<br><span class="text-mute" style="font-size:12.5px;">' + Object.keys(v.inputs).map(function(k){ return (BOOK_INPUT_LABEL[k] || k) + ' ' + Number(v.inputs[k]).toLocaleString() + '원'; }).join(' · ') + (v.note ? '<br>⚠ ' + escapeHtml(v.note) : '') + '</span></span></label>'; }).join(''),
+      body:_BOOK_OBS.map(function(o, i){ const v = bookObValues(o), cur = o.inputs || {};
+          const 있던값 = Object.keys(v.inputs).some(function(k){ return cur[k] != null && cur[k] !== '' && Number(cur[k]) !== 0 && Number(cur[k]) !== Number(v.inputs[k]); });
+          const 체크 = o.state === '준비' && v.has && !있던값;
+          return '<label style="display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line-soft);' + (v.has ? '' : 'opacity:.55;') + '"><input type="checkbox" data-bookob="' + i + '"' + (체크 ? ' checked' : '') + (v.has ? '' : ' disabled') + '><span><b>' + escapeHtml(o.name || o.code) + '</b> · ' + escapeHtml(o.label) + ' · 기한 ' + escapeHtml(o.due) + (o.state === '값승인' ? ' <span class="badge badge-danger">이미 승인됨 — 보내면 승인이 풀릴 수 있음</span>' : '') + (있던값 ? ' <span class="badge badge-mute">이미 넣은 값이 있음 — 바꾸려면 직접 체크</span>' : '')
+            + '<table class="tbl" style="font-size:12.5px;margin:6px 0 0;"><thead><tr><th>칸</th><th class="num">지금 들어 있는 값</th><th class="num">장부 값(바꿀 값)</th></tr></thead><tbody>' + Object.keys(v.inputs).map(function(k){ return '<tr><td>' + (BOOK_INPUT_LABEL[k] || k) + '</td><td class="num">' + (cur[k] == null || cur[k] === '' ? '—' : Number(cur[k]).toLocaleString()) + '</td><td class="num"><b>' + Number(v.inputs[k]).toLocaleString() + '</b></td></tr>'; }).join('') + '</tbody></table>'
+            + (v.note ? '<div class="text-mute" style="font-size:12.5px;">⚠ ' + escapeHtml(v.note) + '</div>' : '') + '</span></label>'; }).join(''),
       foot:'<button class="btn btn-outline" onclick="closeDyn()">취소</button><button class="btn btn-primary" onclick="bookSendGo()">고른 일에 넣기</button>'});
   }catch(err){ toast('세금 신고 일을 불러오지 못했습니다.'); }
 }
@@ -16928,7 +16961,8 @@ function bookObValues(o){
   if(o.code === 'CORP'){
     const pl = bookPL(o.start_on, o.end_on);
     const 확인 = bookJournal(o.start_on, o.end_on).filter(function(j){ return j.check; }).length;
-    return {has:bookJournal(o.start_on, o.end_on).length > 0, inputs:{profit:Math.round(pl.profit), add:Math.round(pl.corpTax)}, note:'통장 기준 장부입니다 — 감가상각·미지급 등 결산 정리를 반영한 값으로 신고 화면에서 고치세요.' + (확인 ? ' 확인 필요 ' + 확인 + '건이 남아 있습니다.' : '')};
+    return {has:bookJournal(o.start_on, o.end_on).length > 0, inputs:{profit:Math.round(pl.profit)},
+      note:'통장 기준 장부입니다 — 감가상각·미지급 등 결산 정리를 반영한 값으로 신고 화면에서 고치세요.' + (pl.corpTax ? ' 장부의 법인세비용 ' + Math.round(pl.corpTax).toLocaleString() + '원은 신고 화면 「익금산입·손금불산입 합계」에 다른 조정과 함께 직접 더하세요(덮어쓰지 않습니다).' : '') + (확인 ? ' 확인 필요 ' + 확인 + '건이 남아 있습니다.' : '')};
   }
   const v = bookVat(o.start_on, o.end_on);
   return {has:v.n > 0, inputs:{s1_amt:v.s1_amt, s1_tax:v.s1_tax, p10_tax:v.p10_tax, p11_tax:v.p11_tax}, note:v.n ? '' : '이 기간 세금계산서 목록이 없습니다 — 먼저 올리세요.'};

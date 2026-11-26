@@ -225,7 +225,11 @@ document.querySelectorAll("#tabs button").forEach(b => b.onclick = () => {
 
 async function boot() {
   if (COOP) $("lead").textContent = "우리 조합의 원천세·부가세·법인세와 직원 4대보험 신고를 기한 순서로 챙기는 계산·기록 도구입니다. 신고서 작성과 제출은 조합 담당자가 홈택스·위택스에 직접 로그인해 합니다. 이 화면은 기한·계산값·입력 순서를 보여 주고 기록을 남깁니다.";
-  else document.querySelectorAll(".coop-only").forEach(x => x.classList.add("hidden"));
+  else {
+    document.querySelectorAll(".coop-only").forEach(x => x.classList.add("hidden"));
+    const a = $("v-ai");   // 그룹웨어(사교원 자기 신고)에서는 조합 문구를 사교원으로
+    if (a) a.innerHTML = a.innerHTML.replace("— 조합 이름으로 만든 계정. 사교원·다른 조합 계정을 빌려 쓰지 않습니다(세무사법: 신고는 조합이 직접).", "— 사교원 이름으로 만든 계정.").replace(/조합 PC/g, "사교원 PC").replace("조합 개인정보 처리방침", "사교원 개인정보 처리방침");
+  }
   const y = new Date().getFullYear();
   $("year").innerHTML = [y - 1, y, y + 1].map(v => `<option ${v === y ? "selected" : ""}>${v}</option>`).join("");
   try {
@@ -481,10 +485,10 @@ function aiPrompt(j, res) {
   L.push("6. 화면에 오류·가산세·경고 문구가 나오면 그대로 옮겨 말하고 멈춘다.");
   L.push("");
   L.push("순서(사이트 메뉴 이름은 바뀌었을 수 있다 — 다르면 비슷한 메뉴를 찾되 고르기 전에 말한다)");
-  (it.steps || []).forEach((st, i) => L.push(`${i + 1}) ${st}`));
+  (it.steps || []).forEach((st, i) => L.push(`${i + 1}) ${st}${/제출|납부/.test(st) ? " ← 이 단계의 제출·납부 단추는 사람이 누른다(AI는 그 앞에서 멈춘다)" : ""}`));
   L.push("");
   L.push("넣을 값");
-  lines.forEach(l => { const v = val(l); if (v) L.push(`- ${l["칸"] ? "(" + l["칸"] + ") " : ""}${l["이름"] || ""}: ${v}`); });
+  lines.forEach(l => { const v = val(l); const c = String(l["칸"] || ""); if (v) L.push(`- ${c ? (c.startsWith("(") ? c : "(" + c + ")") + " " : ""}${l["이름"] || ""}: ${v}`); });
   if ((res.pay || []).length) L.push("낼 돈: " + res.pay.map(p => `${p.기관} ${p.세목} ${Number(p.금액).toLocaleString("ko-KR")}원`).join(" · ") + " (납부는 사람이 한다)");
   if ((res.warnings || []).length) { L.push(""); L.push("승인 때 확인한 경고"); res.warnings.forEach(w => L.push("- " + w)); }
   return L.join("\n");
@@ -500,7 +504,7 @@ function aiPanel(j, res) {
   S.aiText = aiPrompt(j, res);
   return `<div class="card" style="margin-top:14px;border:2px solid var(--green)">
     <h3 style="margin:0 0 6px">🤖 크롬 AI로 입력하기</h3>
-    <p class="mute" style="margin:0 0 8px">⓪ 조합 PC·조합 Claude 계정에서만 씁니다(사교원이 대신 넣지 않습니다). ① 신고 사이트를 새 탭에 열고 직접 로그인합니다. ② 크롬 오른쪽 위 Claude 확장을 열고 아래 지시서를 붙여 넣습니다. ③ AI가 값을 다 넣고 멈추면 화면을 확인하고 <b>제출 단추는 사람이</b> 누릅니다. ④ AI가 접수번호를 아래 「제출했으면 기록」에 적어 두면 확인하고 기록합니다. ⑤ 세금 납부(이체)는 사람이 합니다. <a href="#" onclick="openGuide();return false">처음이면 설치 안내</a></p>
+    <p class="mute" style="margin:0 0 8px">⓪ ${COOP ? "조합 PC·조합 Claude 계정에서만 씁니다(사교원이 대신 넣지 않습니다)." : "사교원 PC·사교원 Claude 계정에서 씁니다."} ① 신고 사이트를 새 탭에 열고 직접 로그인합니다. ② 크롬 오른쪽 위 Claude 확장을 열고 아래 지시서를 붙여 넣습니다. ③ AI가 값을 다 넣고 멈추면 화면을 확인하고 <b>제출 단추는 사람이</b> 누릅니다. ④ AI가 접수번호를 아래 「제출했으면 기록」에 적어 두면 확인하고 기록합니다. ⑤ 세금 납부(이체)는 사람이 합니다. <a href="#" onclick="openGuide();return false">처음이면 설치 안내</a></p>
     <div class="bar"><button class="btn" onclick="cpAi()">지시서 복사</button><button class="btn ghost" onclick="var d=$('ai-txt');d.classList.toggle('hidden')">지시서 보기</button><span id="ai-msg" class="mute"></span></div>
     <pre id="ai-txt" class="hidden" style="white-space:pre-wrap;font-size:12.5px;background:#f7f7f2;border-radius:8px;padding:10px;max-height:320px;overflow:auto">${esc(S.aiText)}</pre>
   </div>`;
