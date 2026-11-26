@@ -2192,6 +2192,7 @@ async function loadRealData(){
       }));
       MOCK.documents = srvDocs.concat(MOCK.documents.filter(x => !x._user));
     }
+    await storePull();   // 2026-11-26 조합 자료 서버 저장
     // 세션이 앱 화면을 보고 있으면 실데이터로 다시 그린다
     if(currentRoute().startsWith('mem/') || currentRoute().startsWith('adm/')) navigate();
   }catch(e){ /* 서버 미연결 — 데모 데이터 유지 */ }
@@ -2436,6 +2437,7 @@ function logout(){
   if(u && u.unified && REAL_API){
     fetch('/api/auth/logout', {method:'POST', credentials:'same-origin'}).catch(() => {});
   }
+  if(_storeSync.on) storeClearLocal();   // 공용 PC 에 조합 자료를 남기지 않는다(서버에 있다)
   setUser(null);
   location.hash = '#/pub/home';
   if(_realMode){ location.reload(); return; }  // 서버 데이터를 데모로 되돌리기 위해 새로고침
@@ -6400,7 +6402,7 @@ function dashPicked(){
 function dashToggle(id, on){
   let v = dashPicked().filter(x => x !== id); if(on) v.push(id);
   v = DASH_TILES.map(t => t[0]).filter(x => v.includes(x));
-  try{ localStorage.setItem(DASH_KEY, JSON.stringify(v)); }catch(e){}
+  try{ _save(DASH_KEY, v); }catch(e){}
   const main = document.getElementById('appMain'); if(main) main.innerHTML = renderMemberPage('dashboard');
 }
 function memDashboard(u){
@@ -12840,7 +12842,89 @@ function _loadObj(key){
     return (s && typeof s === 'object' && !Array.isArray(s)) ? s : null;
   } catch { return null; }
 }
-function _save(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+function _save(key, val){ localStorage.setItem(key, JSON.stringify(val)); _storeQueue(key, val); }
+
+/* 2026-11-26 이사장 지시 「브라우저가 아니라 서버에 옮겨」 — 조합 자료를 서버(/api/my/store)에 둔다.
+   실계정 조합(또는 조합 보기 중인 관리자)이면: 들어올 때 서버 판을 받아 이 브라우저에 깔고(storePull),
+   _save 가 불릴 때마다 0.7초 모아 서버에 PUT 한다. 체험 모드·손님은 예전처럼 이 브라우저에만.
+   판(ver)이 어긋나면(다른 임원이 먼저 고침) 서버 판으로 맞추고 알린다. 로그아웃하면 이 브라우저의 조합 자료를 지운다. */
+var _storeSync = {on:false, vid:null, ver:{}, timers:{}, busy:0};
+function _storeKinds(){
+  return {
+    [STORE.members]:'members', [STORE.events]:'events', [STORE.uploads]:'uploads', [STORE.closings]:'closings',
+    [STORE.accounting]:'accounting', [STORE_INBOX]:'inbox', [STORE_LEDGER]:'ledger', [STORE_POWER]:'power',
+    [TAX_STORE]:'tax', [DASH_KEY]:'dash',
+  };
+}
+function _storeQueue(key, val){
+  if(typeof _storeSync === 'undefined' || !_storeSync || !_storeSync.on) return;
+  const kind = _storeKinds()[key];
+  if(!kind) return;
+  clearTimeout(_storeSync.timers[kind]);
+  _storeSync.timers[kind] = setTimeout(() => _storePush(kind, key), 700);
+}
+async function _storePush(kind, key){
+  let data; try{ data = JSON.parse(localStorage.getItem(key) || 'null'); }catch(e){ return; }
+  if(data === null) data = [];
+  _storeSync.busy++;
+  try{
+    const r = await fetch('/api/my/store/' + kind, {method:'PUT', credentials:'same-origin',
+      headers:{'content-type':'application/json'}, body: JSON.stringify({data, ver: _storeSync.ver[kind] || 0})});
+    const j = await r.json().catch(() => ({}));
+    if(r.status === 409 && j.error === 'conflict'){
+      _storeSync.ver[kind] = j.ver;
+      localStorage.setItem(key, JSON.stringify(j.data));
+      _storeReloadMemory(); navigate();
+      toast('다른 분이 먼저 고친 내용이 있어 서버 판으로 맞췄습니다. 다시 확인하고 고쳐 주세요.');
+    } else if(j.ok){
+      _storeSync.ver[kind] = j.ver;
+    } else {
+      toast(j.error && j.error.length > 20 ? j.error : '서버 저장에 실패했습니다(' + (j.error || r.status) + '). 잠시 뒤 다시 저장해 주세요.');
+    }
+  }catch(e){ toast('서버에 저장하지 못했습니다. 인터넷 연결을 확인하세요(이 기기에는 남아 있습니다).'); }
+  finally{ _storeSync.busy--; }
+}
+function _storeReloadMemory(){
+  try{ loadUserMembers(); loadEvents(); loadUploads(); loadClosings(); loadAccounting(); loadTax(); }catch(e){}
+}
+async function storePull(){
+  if(!REAL_API) return;
+  const u = currentUser();
+  if(!u || !u.unified || normalizeRole(u.role) !== 'coop') { _storeSync.on = false; return; }
+  let j;
+  try{ j = await fetch('/api/my/store', {credentials:'same-origin'}).then(r => r.json()); }catch(e){ return; }
+  if(!j || !j.ok || !j.village_id) { _storeSync.on = false; return; }
+  const vid = j.village_id, kinds = _storeKinds(), items = j.items || {};
+  const owner = localStorage.getItem('hsj_store_owner');
+  const 옮길것 = [];
+  Object.entries(kinds).forEach(([key, kind]) => {
+    const it = items[kind];
+    if(it){ localStorage.setItem(key, JSON.stringify(it.data)); _storeSync.ver[kind] = it.ver; return; }
+    _storeSync.ver[kind] = 0;
+    const raw = localStorage.getItem(key);
+    if(raw && owner !== String(vid) && owner) { localStorage.removeItem(key); return; }   // 다른 조합이 쓰던 브라우저 — 옮기지 않는다
+    if(raw && raw !== '[]' && raw !== '{}' && raw !== 'null') 옮길것.push([key, kind]);
+  });
+  if(옮길것.length && owner !== String(vid)){
+    const 말 = 옮길것.map(([, k]) => ({members:'조합원 명부', events:'일정', uploads:'올린 자료', closings:'월마감 보고서', accounting:'회계 기록', inbox:'자료함 목록', ledger:'조합 원장', power:'발전 대장', tax:'세무 자료', dash:'대시보드 설정'}[k] || k)).join(', ');
+    if(!confirm('이 브라우저에만 저장돼 있던 자료가 있습니다: ' + 말 + '.\n\n우리 조합 서버로 옮길까요? (옮기면 다른 PC·휴대폰·다른 임원도 같은 자료를 봅니다. 「취소」를 누르면 이 브라우저에서 지웁니다)')){
+      옮길것.forEach(([key]) => localStorage.removeItem(key)); 옮길것.length = 0;
+    }
+  }
+  localStorage.setItem('hsj_store_owner', String(vid));
+  _storeSync.vid = vid; _storeSync.on = true;
+  옮길것.forEach(([key, kind]) => _storePush(kind, key));
+  // 실계정 조합은 예시(데모) 자료를 보이지 않는다 — 서버에 없으면 빈 목록
+  ['members', 'events', 'uploads', 'closings'].forEach(k => { if(!items[k] && !옮길것.some(x => x[1] === k)) localStorage.setItem(STORE[k], '[]'); });
+  if(!items.members && !옮길것.some(x => x[1] === 'members')) MOCK.members = [];
+  if(!items.events && !옮길것.some(x => x[1] === 'events')) MOCK.events = [];
+  _storeReloadMemory();
+  if(currentRoute().startsWith('mem/')) navigate();
+}
+function storeClearLocal(){
+  try{ Object.keys(_storeKinds()).forEach(k => localStorage.removeItem(k)); localStorage.removeItem('hsj_store_owner'); }catch(e){}
+  _storeSync.on = false;
+}
 
 // Existing (kept for backward compat)
 function loadUserMembers(){
