@@ -2497,6 +2497,15 @@ const DEMO_ACCOUNTS = {
   guest:      {email:'guest@example.com',  name:'손님',         role:'guest',      village:''},
 };
 function demoLogin(role){
+  // 26-11-26 알파언니 재검증 🟡B: 실계정·교육 계정에서 체험으로 넘어가면 서버 로그아웃 뒤 새로고침 — 메모리의 실자료가 체험 화면에 남지 않게
+  { const cu = currentUser();
+    if((cu && cu.unified && !cu.preview) || window._edu){
+      try{ storeClearLocal(); }catch(e){}
+      try{ sessionStorage.setItem('sv_demo_after', normalizeRole(role)); }catch(e){}
+      setUser(null);
+      fetch('/api/auth/logout', {method:'POST', credentials:'same-origin'}).catch(() => {}).finally(() => { location.hash = '#/pub/home'; location.reload(); });
+      return;
+    } }
   if(typeof _storeSync !== 'undefined' && _storeSync.on) storeClearLocal();   // 26-11-26 알파언니 🔴3: 실계정 자료가 체험으로 새지 않게
   window._edu = null; try{ eduBar(); }catch(e){}
   const acc = DEMO_ACCOUNTS[normalizeRole(role)] || DEMO_ACCOUNTS.coop;
@@ -13382,10 +13391,13 @@ async function _storePush(kind, key){
       headers:{'content-type':'application/json'}, body: JSON.stringify({data, ver: _storeSync.ver[kind] || 0})});
     const j = await r.json().catch(() => ({}));
     if(r.status === 409 && j.error === 'conflict'){
+      // 26-11-26 알파언니 재검증: 내가 고친 판을 버리지 않고 이 세션에 보관 + 분명히 알림
+      try{ sessionStorage.setItem('hsj_conflict_' + kind, JSON.stringify({at: new Date().toISOString(), data})); }catch(e){}
       _storeSync.ver[kind] = j.ver;
       localStorage.setItem(key, JSON.stringify(j.data));
       _storeReloadMemory(); navigate();
-      toast('다른 분이 먼저 고친 내용이 있어 서버 판으로 맞췄습니다. 다시 확인하고 고쳐 주세요.');
+      try{ alert('다른 임원이 방금 같은 자료를 먼저 고쳤습니다.\n\n화면을 서버 판(' + (j.updated_by_name || '다른 분') + ' 수정)으로 맞췄습니다. 내가 고친 내용은 사라지지 않고 이 창이 열려 있는 동안 보관됩니다 — 화면을 확인한 뒤 바뀐 부분만 다시 입력해 주세요.'); }catch(e){}
+      toast('충돌: 서버 판으로 맞춤 · 내 수정은 보관됨', 6000);
     } else if(j.ok){
       _storeSync.ver[kind] = j.ver;
     } else {
@@ -16860,7 +16872,7 @@ function bootLand(){
   location.hash = roleHome(role);
   return true;
 }
-eduBoot().then(() => ssoBoot()).then(bootLand).then(() => eduCheck()).catch(() => {});   // 통합 계정 세션이 있으면 자동 로그인 (sakyowon.co.kr 서빙 시)
+eduBoot().then(() => ssoBoot()).then(bootLand).then(() => eduCheck()).then(() => { let r = null; try{ r = sessionStorage.getItem('sv_demo_after'); sessionStorage.removeItem('sv_demo_after'); }catch(e){} if(r) demoLogin(r); }).catch(() => {});   // 통합 계정 세션이 있으면 자동 로그인 (sakyowon.co.kr 서빙 시)
 viewCoopCheck();   // 조합 보기 중이었는데 서버에서 이미 풀렸으면 관리자로 되돌린다
 if(!bootLand()) navigate();
 
