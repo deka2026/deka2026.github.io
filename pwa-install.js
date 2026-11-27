@@ -1,6 +1,6 @@
 /* 사교원 공용 「설치」 단추 (2026-11-27 이사장 지시: 아카데미 우측 상단 「설치」 기능을 다른 사이트에도)
    쓰는 법:  <script src="/pwa-install.js" defer data-before="#btnLogin" data-class="btn"></script>
-     data-before  이 요소 바로 앞에 단추를 넣는다(없으면 data-into 안 맨 뒤, 그것도 없으면 화면 오른쪽 아래에 띄운다)
+     data-before  이 요소 바로 앞에 단추를 넣는다(없으면 data-into 안 맨 뒤. 둘 다 아직 없으면 생길 때까지 기다린다. 둘 다 안 주면 화면 오른쪽 아래에 띄운다)
      data-into    이 요소 안 맨 뒤에 넣는다
      data-class   단추에 줄 그 사이트의 단추 클래스
    앱처럼 이미 설치해 연 화면(standalone)에서는 단추를 그리지 않는다.
@@ -64,10 +64,17 @@
     var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
     var b = document.createElement('button'); b.type = 'button'; b.id = 'skpwaBtn'; b.textContent = '설치'; b.title = '홈 화면에 추가해 앱처럼 열기';
     b.addEventListener('click', click);
-    var ref = cfg.before && document.querySelector(cfg.before), box = cfg.into && document.querySelector(cfg.into);
-    if (ref && ref.parentNode) { b.className = cfg.cls; ref.parentNode.insertBefore(b, ref); }
-    else if (box) { b.className = cfg.cls; box.appendChild(b); }
-    else { b.className = 'skpwa-float'; document.body.appendChild(b); }
+    function place() {
+      var ref = cfg.before && document.querySelector(cfg.before), box = cfg.into && document.querySelector(cfg.into);
+      if (ref && ref.parentNode) { b.className = cfg.cls; ref.parentNode.insertBefore(b, ref); return true; }
+      if (box) { b.className = cfg.cls; box.appendChild(b); return true; }
+      return false;
+    }
+    if (place()) return;
+    if (!(cfg.before || cfg.into) || !window.MutationObserver) { b.className = 'skpwa-float'; document.body.appendChild(b); return; }
+    // 자리가 될 요소를 화면이 나중에 그리는 사이트(로그인 뒤 머리 단추 등) — 생길 때까지 기다린다. 끝내 없으면 그리지 않는다
+    var mo = new MutationObserver(function () { if (place()) mo.disconnect(); });
+    mo.observe(document.documentElement, { childList: true, subtree: true });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount); else mount();
 })();
