@@ -107,6 +107,10 @@ section.admin .path b{color:var(--gold-dark)}
 .cycle span{flex:1; min-width:72px; text-align:center; background:var(--card); border:1px solid var(--line); border-radius:8px; padding:8px 4px; font-size:13px}
 .cycle span i{display:block; font-style:normal; font-size:11px; color:var(--ink-faint)}
 .cycle span.free{border-color:var(--primary); background:var(--primary-50)}
+/* ── 화면 그림 (11-27) ── */
+figure.shot{margin:16px 0 20px; max-width:100%}
+figure.shot img{display:block; width:100%; max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:var(--card)}
+figure.shot figcaption{font-size:13px; color:var(--ink-soft); margin-top:6px}
 footer.page-foot{margin-top:70px; padding-top:18px; border-top:1px solid var(--line); font-size:13px; color:var(--ink-soft)}
 html{scroll-behavior:smooth}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
@@ -168,6 +172,7 @@ html{scroll-behavior:smooth}
 <section id="intro">
   <div class="eyebrow">시작하기</div>
   <h2>햇소자란 무엇인가요?</h2>
+  <figure class="shot"><img src="img/manual/intro.jpg" alt="햇소자 첫 화면 — 진단부터 배당까지 한곳에서" loading="lazy" width="900" height="605"><figcaption>햇소자 첫 화면 — 진단부터 배당까지 한곳에서 (체험·예시 화면)</figcaption></figure>
   <p class="sec-intro">햇소자는 햇빛소득마을 사업에 참여하는 마을협동조합의 <b>전 과정을 한 곳에서 처리하는 통합 운영 플랫폼</b>입니다. 후보지 진단과 신청서 작성부터 조합 설립, 발전소 정산·배당, 마을식당·점빵 같은 파생사업까지 이어집니다.</p>
   <p>로그인하면 이런 일을 할 수 있습니다.</p>
   <ul>
@@ -183,6 +188,7 @@ html{scroll-behavior:smooth}
 <section id="accounts">
   <div class="eyebrow">시작하기</div>
   <h2>계정의 종류 — 하나만 기억하세요</h2>
+  <figure class="shot"><img src="img/manual/accounts.jpg" alt="사교원 통합 계정 로그인 창 — 계정 하나로 여러 사이트에 들어갑니다" loading="lazy" width="900" height="605"><figcaption>사교원 통합 계정 로그인 창 — 계정 하나로 여러 사이트에 들어갑니다 (체험·예시 화면)</figcaption></figure>
   <p class="sec-intro">햇소자는 <b>사교원 통합 계정</b> 하나로 로그인합니다. 별도의 햇소자 전용 계정은 없습니다.</p>
   <div class="tblwrap"><table>
     <thead><tr><th>구분</th><th>누가 쓰나요</th><th>특징</th></tr></thead>
@@ -199,6 +205,7 @@ html{scroll-behavior:smooth}
 <section id="roles">
   <div class="eyebrow">시작하기</div>
   <h2>회원등급 4단계 — 내 등급에 맞는 메뉴만 보입니다 (2026-09-25 추가)</h2>
+  <figure class="shot"><img src="img/manual/roles.jpg" alt="체험 모드의 협동조합회원 화면 — 왼쪽 사이드바에 내 등급 메뉴만 보이고, 위 띠에서 등급을 바꿔 볼 수 있습니다" loading="lazy" width="900" height="605"><figcaption>체험 모드의 협동조합회원 화면 — 왼쪽 사이드바에 내 등급 메뉴만 보이고, 위 띠에서 등급을 바꿔 볼 수 있습니다 (체험·예시 화면)</figcaption></figure>
   <p class="sec-intro">햇소자의 계정은 <b>관리자 · 연합회 · 협동조합회원 · 손님</b> 네 등급 중 하나입니다. 로그인하면 왼쪽 <b>사이드바</b>(휴대전화는 오른쪽 위 <b>☰</b>)가 내 등급에 맞는 메뉴로 바뀌고, 이름 옆에 등급 표시가 붙습니다. 다른 등급의 메뉴로는 들어갈 수 없습니다.</p>
   <div class="tblwrap"><table>
     <thead><tr><th>등급</th><th>누가 쓰나요</th><th>로그인하면 처음 열리는 화면</th><th>상단 메뉴 묶음</th></tr></thead>
@@ -229,6 +236,7 @@ html{scroll-behavior:smooth}
 <section id="signup">
   <div class="eyebrow">시작하기</div>
   <h2>회원가입 (승인제)</h2>
+  <figure class="shot"><img src="img/manual/signup.jpg" alt="「가입절차」 화면 — 회원가입 신청 → 관리자 승인 → 마을 등록 순서" loading="lazy" width="900" height="605"><figcaption>「가입절차」 화면 — 회원가입 신청 → 관리자 승인 → 마을 등록 순서 (체험·예시 화면)</figcaption></figure>
   <p class="sec-intro">계정이 없다면 먼저 가입을 신청합니다. 신청 즉시 로그인되는 것이 아니라, <b>관리자가 승인한 뒤부터</b> 로그인할 수 있습니다.</p>
   <ol class="steps">
     <li><strong>sakyowon.co.kr/hatsoja</strong> 에 접속한 뒤, 화면 오른쪽 위의 <b>[회원가입]</b> 버튼을 누릅니다.<span class="why">첫 화면 가운데의 [로그인·회원가입] 버튼을 눌러도 같은 창이 열립니다.</span></li>
@@ -243,6 +251,7 @@ html{scroll-behavior:smooth}
 <section id="login">
   <div class="eyebrow">시작하기</div>
   <h2>로그인과 로그아웃</h2>
+  <figure class="shot"><img src="img/manual/login.jpg" alt="햇소자 로그인 창 — 통합 계정 로그인과 등급별 체험 단추" loading="lazy" width="900" height="605"><figcaption>햇소자 로그인 창 — 통합 계정 로그인과 등급별 체험 단추 (체험·예시 화면)</figcaption></figure>
   <h3>통합 계정으로 로그인</h3>
   <ol class="steps">
     <li>오른쪽 위 <b>[로그인]</b> 버튼을 누릅니다.</li>
@@ -276,6 +285,7 @@ html{scroll-behavior:smooth}
 <section id="pub">
   <div class="eyebrow">로그인 전 · 누구나</div>
   <h2>공개 메뉴 7가지</h2>
+  <figure class="shot"><img src="img/manual/pub.jpg" alt="공개 메뉴 「사업소개」 화면" loading="lazy" width="900" height="605"><figcaption>공개 메뉴 「사업소개」 화면 (체험·예시 화면)</figcaption></figure>
   <p class="sec-intro">로그인하지 않아도 화면 <b>왼쪽 사이드 메뉴</b>(둘러보기 · 시작하기 · 안내)와 상단 메뉴 어느 쪽으로든 같은 곳으로 갈 수 있습니다. 사이드 메뉴 아래에는 로그인·회원가입·가입 없이 체험하기 버튼과 전화 상담 번호가 있고, 휴대전화에서는 사이드 메뉴 대신 오른쪽 위 ☰ 버튼을 씁니다. (2026-09-26 추가)</p>
   <p class="sec-intro">로그인하지 않아도 상단 메뉴에서 아래 7가지를 이용할 수 있습니다. 휴대전화에서는 오른쪽 위 <b>☰</b> 버튼을 누르면 메뉴가 펼쳐집니다. 글자가 작게 느껴지면 화면 맨 위의 <b>[가 가 가]</b> 버튼으로 3단계까지 키울 수 있습니다.</p>
   <div class="tblwrap"><table>
@@ -295,6 +305,7 @@ html{scroll-behavior:smooth}
 <section id="diagnose">
   <div class="eyebrow">로그인 전 · 누구나</div>
   <h2>신청·진단 이용법</h2>
+  <figure class="shot"><img src="img/manual/diagnose.jpg" alt="「신청·진단」 화면 — 자가진단부터 신청서 초안까지" loading="lazy" width="900" height="605"><figcaption>「신청·진단」 화면 — 자가진단부터 신청서 초안까지 (체험·예시 화면)</figcaption></figure>
   <p class="sec-intro">우리 마을이 사업에 맞는지 궁금할 때 가장 먼저 써 보는 메뉴입니다. 로그인 없이, 전부 무료입니다. 세 가지 도구가 있습니다.</p>
   <h3>① 자가진단</h3>
   <ol class="steps">
@@ -317,6 +328,7 @@ html{scroll-behavior:smooth}
 <section id="contact">
   <div class="eyebrow">로그인 전 · 누구나</div>
   <h2>상담 신청하기</h2>
+  <figure class="shot"><img src="img/manual/contact.jpg" alt="「상담신청」 화면 — 신청서와 직접 문의 연락처" loading="lazy" width="900" height="605"><figcaption>「상담신청」 화면 — 신청서와 직접 문의 연락처 (체험·예시 화면)</figcaption></figure>
   <ol class="steps">
     <li>상단 메뉴에서 <b>상담신청</b>을 누릅니다.</li>
     <li><b>성함, 연락처</b>(필수)와 소속 마을·조직, 상담 유형을 입력합니다.</li>
@@ -330,6 +342,7 @@ html{scroll-behavior:smooth}
 <section id="mem-overview">
   <div class="eyebrow">일반 이용자</div>
   <h2>회원 화면 한눈에 보기</h2>
+  <figure class="shot"><img src="img/manual/mem-overview.jpg" alt="「업무 시작」 화면 — 상담·자료 입력·문서 생성을 한 화면에서" loading="lazy" width="900" height="605"><figcaption>「업무 시작」 화면 — 상담·자료 입력·문서 생성을 한 화면에서 (체험·예시 화면)</figcaption></figure>
   <p class="sec-intro"><b>협동조합회원 등급</b>으로 로그인하면 화면 왼쪽에 <b>사이드바(세로 메뉴)</b>가 나타납니다(휴대전화는 ☰). 메뉴는 업무 흐름에 따라 4개 묶음, 24개로 정리되어 있습니다.</p>
   <div class="tblwrap"><table>
     <thead><tr><th>묶음</th><th>메뉴</th><th>언제 쓰나요</th></tr></thead>
@@ -361,6 +374,7 @@ html{scroll-behavior:smooth}
 <section id="mem-cycle">
   <div class="eyebrow">일반 이용자</div>
   <h2>생애주기 7단계 — 화면이 우리 마을에 맞춰집니다</h2>
+  <figure class="shot"><img src="img/manual/mem-cycle.jpg" alt="「업무 달력」 화면 — 이번 달 할 일과 주기별 업무" loading="lazy" width="900" height="605"><figcaption>「업무 달력」 화면 — 이번 달 할 일과 주기별 업무 (체험·예시 화면)</figcaption></figure>
   <p class="sec-intro">햇소자는 마을의 진행 단계를 7단계로 나누어 관리합니다. 대시보드 위쪽의 스테퍼에서 <b>우리 마을이 지금 몇 단계인지</b> 확인할 수 있고, 단계가 오르면 같은 화면에서 다음 메뉴가 차례로 열립니다.</p>
   <div class="cycle">
     <span class="free">① 관심<i>무료</i></span><span class="free">② 신청<i>무료</i></span><span class="free">③ 선정<i>무료</i></span><span class="free">④ 설립<i>무료</i></span><span class="free">⑤ 건설<i>무료</i></span><span>⑥ 운영</span><span>⑦ 확장</span>
@@ -371,6 +385,7 @@ html{scroll-behavior:smooth}
 <section id="mem-my">
   <div class="eyebrow">일반 이용자 — 내 조합</div>
   <h2>내 조합: 대시보드 · 내 페이지</h2>
+  <figure class="shot"><img src="img/manual/mem-my.jpg" alt="「내 페이지」 화면 — 내 계정과 내가 만든 문서" loading="lazy" width="900" height="605"><figcaption>「내 페이지」 화면 — 내 계정과 내가 만든 문서 (체험·예시 화면)</figcaption></figure>
 
   <h3><span class="mico">🏠</span>대시보드</h3>
   <p class="path">사이드바 <b>내 조합 → 대시보드</b> (로그인하면 처음 열리는 화면)</p>
@@ -395,6 +410,7 @@ html{scroll-behavior:smooth}
 <section id="mem-setup">
   <div class="eyebrow">일반 이용자 — 설립·건설</div>
   <h2>설립·건설: 조합을 만들고 발전소를 짓기까지</h2>
+  <figure class="shot"><img src="img/manual/mem-setup.jpg" alt="「설립·건설」 화면 — 조합 설립 내비게이터와 구좌 청약 현황" loading="lazy" width="900" height="605"><figcaption>「설립·건설」 화면 — 조합 설립 내비게이터와 구좌 청약 현황 (체험·예시 화면)</figcaption></figure>
 
   <h3><span class="mico">🏗</span>설립 내비게이터·청약</h3>
   <p class="path">사이드바 <b>설립·건설 → 설립 내비게이터·청약</b></p>
@@ -436,6 +452,7 @@ html{scroll-behavior:smooth}
 <section id="mem-ops">
   <div class="eyebrow">일반 이용자 — 운영관리</div>
   <h2>운영관리: 발전소가 돌아가기 시작하면</h2>
+  <figure class="shot"><img src="img/manual/mem-ops.jpg" alt="「수익 시뮬레이션·배분 계획」 화면 — 세 단추로 시뮬레이션·전략·20년 계획을 오갑니다" loading="lazy" width="900" height="605"><figcaption>「수익 시뮬레이션·배분 계획」 화면 — 세 단추로 시뮬레이션·전략·20년 계획을 오갑니다 (체험·예시 화면)</figcaption></figure>
 
   <h3><span class="mico">⚡</span>발전·정산·배당</h3>
   <p class="path">사이드바 <b>운영관리 → 발전·정산·배당</b></p>
@@ -513,6 +530,7 @@ html{scroll-behavior:smooth}
 <section id="mem-ext">
   <div class="eyebrow">일반 이용자 — 확장</div>
   <h2>확장: 발전 수익 그다음</h2>
+  <figure class="shot"><img src="img/manual/mem-ext.jpg" alt="「마을비즈니스」 화면 — 발전 수익 다음 사업 모델" loading="lazy" width="900" height="605"><figcaption>「마을비즈니스」 화면 — 발전 수익 다음 사업 모델 (체험·예시 화면)</figcaption></figure>
 
   <h3><span class="mico">🧮</span>세무 공동구매 신청</h3>
   <p class="path">사이드바 <b>확장 → 세무 공동구매 신청</b></p>
@@ -557,6 +575,7 @@ html{scroll-behavior:smooth}
 <section id="adm-overview" class="admin">
   <div class="eyebrow adm">관리자</div>
   <h2>관리자 화면 한눈에 보기</h2>
+  <figure class="shot"><img src="img/manual/adm-overview.jpg" alt="관리자 대시보드 — 처리 대기 회원·미처리 문의를 한눈에" loading="lazy" width="900" height="605"><figcaption>관리자 대시보드 — 처리 대기 회원·미처리 문의를 한눈에 (체험·예시 화면)</figcaption></figure>
   <p class="sec-intro">관리자 계정으로 로그인하면 회원과 다른 <b>관리자 전용 사이드바</b>가 나타납니다. 아바타가 금색으로 표시되어 관리자임을 알 수 있습니다.</p>
   <div class="tblwrap"><table>
     <thead><tr><th>메뉴</th><th>무엇을 하는 곳인가요</th></tr></thead>
@@ -576,6 +595,7 @@ html{scroll-behavior:smooth}
 <section id="adm-approve" class="admin">
   <div class="eyebrow adm">관리자</div>
   <h2>회원 승인 — 관리자의 가장 중요한 일과</h2>
+  <figure class="shot"><img src="img/manual/adm-approve.jpg" alt="「회원 관리」 화면 — 승인대기 회원 옆 [승인] 단추" loading="lazy" width="900" height="605"><figcaption>「회원 관리」 화면 — 승인대기 회원 옆 [승인] 단추 (체험·예시 화면)</figcaption></figure>
   <p class="sec-intro">햇소자는 승인제입니다. 새로 가입 신청한 분은 <b>관리자가 승인하기 전까지 로그인할 수 없으므로</b>, 승인 대기자를 매일 확인해 주세요. 가입절차 안내상 승인 목표는 <b>영업일 기준 1~2일</b>입니다.</p>
   <ol class="steps">
     <li>관리자로 로그인하면 <b>통계 대시보드</b>가 열립니다.</li>
@@ -588,6 +608,7 @@ html{scroll-behavior:smooth}
 <section id="adm-menus" class="admin">
   <div class="eyebrow adm">관리자</div>
   <h2>관리자 메뉴 8가지 사용법</h2>
+  <figure class="shot"><img src="img/manual/adm-menus.jpg" alt="관리자 메뉴 「조합·마을 관리」 화면" loading="lazy" width="900" height="605"><figcaption>관리자 메뉴 「조합·마을 관리」 화면 (체험·예시 화면)</figcaption></figure>
 
   <h3><span class="mico">📊</span>통계 대시보드</h3>
   <p class="path">관리자 사이드바 <b>통계 대시보드</b> (로그인하면 처음 열리는 화면)</p>
@@ -661,6 +682,7 @@ html{scroll-behavior:smooth}
 <section id="modes">
   <div class="eyebrow">부록</div>
   <h2>체험 모드와 실데이터 모드</h2>
+  <figure class="shot"><img src="img/manual/modes.jpg" alt="체험 모드 화면 — 위쪽 노란 띠에 「체험 모드(입력 내용 저장 안 됨)」가 표시됩니다" loading="lazy" width="900" height="605"><figcaption>체험 모드 화면 — 위쪽 노란 띠에 「체험 모드(입력 내용 저장 안 됨)」가 표시됩니다 (체험·예시 화면)</figcaption></figure>
   <div class="tblwrap"><table>
     <thead><tr><th>구분</th><th>체험 모드</th><th>실데이터 모드</th></tr></thead>
     <tbody>
@@ -676,6 +698,7 @@ html{scroll-behavior:smooth}
 <section id="easy">
   <div class="eyebrow">부록</div>
   <h2>편하게 쓰는 기능 6가지 (2026-09-06 추가)</h2>
+  <figure class="shot"><img src="img/manual/easy.jpg" alt="글자 「아주 크게」를 고른 화면 — 맨 위 [가 가 가] 단추" loading="lazy" width="900" height="605"><figcaption>글자 「아주 크게」를 고른 화면 — 맨 위 [가 가 가] 단추 (체험·예시 화면)</figcaption></figure>
   <ul>
     <li><b>글자 크게 보기</b> — 화면 맨 위의 <b>[가 가 가]</b> 버튼으로 글자 크기를 3단계로 키울 수 있습니다. 한 번 고르면 이 기기에서는 계속 유지됩니다.</li>
     <li><b>전화 상담 버튼</b> — 휴대전화로 보면 화면 왼쪽 아래에 <b>[📞 전화 상담]</b> 버튼이 항상 떠 있습니다. 누르면 070-4196-4677로 바로 전화가 걸립니다.</li>
@@ -690,6 +713,7 @@ html{scroll-behavior:smooth}
 <section id="trouble">
   <div class="eyebrow">부록</div>
   <h2>문제 해결 — 이런 안내가 나올 때</h2>
+  <figure class="shot"><img src="img/manual/trouble.jpg" alt="「FAQ」 화면 — 자주 묻는 질문" loading="lazy" width="900" height="605"><figcaption>「FAQ」 화면 — 자주 묻는 질문 (체험·예시 화면)</figcaption></figure>
   <div class="tblwrap"><table>
     <thead><tr><th>화면의 안내</th><th>원인과 해결 방법</th></tr></thead>
     <tbody>
