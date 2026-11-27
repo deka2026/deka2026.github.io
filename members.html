@@ -163,7 +163,7 @@ const view = $('#view'), layer = $('#layer');
 /* 한 번에 보낼 수 있는 인원 — 회원 목록 응답의 send_max 를 쓴다(응답에 없으면 100). 넘으면 서버도 too_many 로 거절한다. */
 let SEND_MAX = 100;
 const SMS_WAIT = '문자 발송은 준비 중입니다';
-const TIER_COLOR = {admin:'#0d3b2c', staff:'#4a6741', federation:'#e8892b', coop:'#f6b52e', policy:'#1f3a6e', personal:'#2e7d4f', free:'#b9c4b3'};
+const TIER_COLOR = {admin:'#0d3b2c', staff:'#4a6741', federation:'#e8892b', coop:'#f6b52e', consultant:'#c2603a', policy:'#1f3a6e', personal:'#2e7d4f', free:'#b9c4b3'};
 const PAY_CLASS = {'완료':'ok', '미납':'no', '확인 대기':'wait', '승인 대기':'wait', '무료 시범':'tr'};
 const SUB_KO = {apply:'승인 대기', wait_pay:'입금 대기', trial:'무료 시범', active:'이용 중', cancel:'그만둠(기간 남음)'};
 const ERR_KO = {unauthorized:'로그인이 풀렸습니다. 다시 로그인해 주세요.', forbidden:'통합관리자만 할 수 있는 일입니다.',

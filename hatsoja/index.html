@@ -896,7 +896,8 @@ body.hs-in .hs-login-only{display:none!important;}
 <!-- 관리자 미리보기 / 데모 체험 안내 띠 -->
 <div class="mode-bar preview" id="previewBar">
   👀 <strong id="previewBarRole">회원 화면 미리보기 모드</strong><span id="previewBarNote">입니다. 실제 해당 등급 회원에게 보이는 화면 그대로예요.</span>
-  <button class="btn btn-primary btn-sm" onclick="endPreview()">관리자로 돌아가기</button>
+  <select id="previewBarSwitch" class="btn-sm" style="display:none;max-width:200px;margin-left:6px;" onchange="if(this.value) consultEnter(+this.value)" aria-label="맡은 조합 바꾸기"></select>
+  <button class="btn btn-primary btn-sm" id="previewBarBack" onclick="endPreview()">관리자로 돌아가기</button>
 </div>
 <div class="mode-bar demo" id="demoBar">
   🌱 <strong>체험 모드</strong>(입력 내용 저장 안 됨) · 등급 바꿔 보기:
@@ -1434,8 +1435,8 @@ body.hs-in .hs-login-only{display:none!important;}
       <details open>
         <summary>플랫폼 이용료가 있나요?</summary>
         <div class="faq-body">
-          <strong>2026년 12월까지는 모든 회원이 무료 시범</strong>이고, 요금은 2027년 1월부터 받습니다. 그 뒤에도 <strong>상업발전 전에는 무료</strong>이고, 상업운전을 시작한 다음 달부터 기본 이용료(협동조합 월 10,000원, 연합회 월 30,000원, 부가세 별도)가 붙고,
-          AI 상담·문서 생성·서류 검토 같은 메뉴는 필요한 것만 골라 더합니다. 2026년 안에 가입 신청한 조합·연합회는 2027년 한 해 반값(창립 회원)이고, 연합회가 회원조합 5곳 이상의 이용료를 한꺼번에 내면 20% 할인됩니다(두 할인은 겹치지 않고 큰 쪽 하나만). 자세한 값과 계산은 <a href="#/pub/pricing">요금 안내</a>를 보세요.
+          <strong>2026년 12월까지는 모든 회원이 무료 시범</strong>이고, 요금은 2027년 1월부터 받습니다. 그 뒤에도 <strong>상업발전 전에는 무료</strong>이고, 상업운전을 시작한 다음 달부터 기본 이용료(협동조합 월 20,000원, 연합회 단위조합 5·10·20곳 이내 월 45,000·90,000·135,000원, 컨설턴트 월 25,000원, 부가세 별도)가 붙습니다.
+          AI 상담·문서 생성·서류 검토는 기본에 들어 있고, 활동 영상 만들기만 관리하는 조합 수에 따라 월 1만·2만·3만원(부가세 별도)을 더합니다. 2026년 안에 가입 신청한 조합·연합회는 2027년 한 해 반값(창립 회원)이고, 연합회가 회원조합 5곳 이상의 이용료를 한꺼번에 내면 20% 할인됩니다(두 할인은 겹치지 않고 큰 쪽 하나만). 자세한 값과 계산은 <a href="#/pub/pricing">요금 안내</a>를 보세요.
         </div>
       </details>
       <details>
@@ -1488,13 +1489,14 @@ body.hs-in .hs-login-only{display:none!important;}
   <div class="wrap pub-page">
     <div class="sec-head">
       <h1>요금 안내 <span class="badge badge-gold">2027년 1월부터 적용</span></h1>
-      <p class="sec-desc">기본 이용료에 필요한 AI 메뉴만 골라 더합니다. 아래에서 메뉴를 고르면 한 달 요금이 바로 계산됩니다.</p>
+      <p class="sec-desc">AI 상담·문서 생성·서류 검토는 기본 이용료에 들어 있고, 활동 영상 만들기만 골라 더합니다. 아래에서 고르면 한 달 요금이 바로 계산됩니다.</p>
     </div>
     <div data-hs-apply></div>
     <div class="prc-free">🎁 <b>2026년 12월까지 모든 회원 무료 시범</b> · 이용료는 2027년 1월부터, 상업발전 전에는 계속 무료</div>
     <div class="prc-tabs" role="tablist">
       <button type="button" class="prc-tab on" data-prc="coop" role="tab" aria-selected="true">협동조합 회원</button>
       <button type="button" class="prc-tab" data-prc="fed" role="tab" aria-selected="false">연합회 회원</button>
+      <button type="button" class="prc-tab" data-prc="consult" role="tab" aria-selected="false">컨설턴트 회원</button>
     </div>
     <div id="prcBody"></div>
     <details class="card prc-rule"><summary>요금 규칙 자세히 (무료 시범·상업발전 전 무료·창립 회원 반값·결제)</summary>
@@ -1502,7 +1504,7 @@ body.hs-in .hs-login-only{display:none!important;}
         <li><strong>요금은 2027년 1월부터 받습니다.</strong> 2026년 12월까지는 모든 회원이 무료 시범으로 씁니다.</li>
         <li><strong>상업발전 전에는 모든 메뉴가 무료</strong>입니다. 2027년 1월 이후에도 요금은 상업운전을 시작한 다음 달부터 붙습니다.</li>
         <li><strong>창립 회원 반값</strong> — 2026년 안에 가입 신청한 협동조합·연합회는 2027년 한 해 요금을 반값으로 냅니다(추가 묶음 제외, 승인이 해를 넘겨도 신청일 기준). 할인이 여럿이면 겹치지 않고 큰 쪽 하나만 적용합니다.</li>
-        <li>요금은 모두 <strong>부가세 별도, 월 단위</strong>입니다. 1년치를 한 번에 내시면 10개월 값으로 12개월을 씁니다.</li>
+        <li>요금은 <strong>월 단위</strong>이고 위 큰 숫자는 부가세 별도 값입니다(내는 값은 부가세 포함). 1년치를 한 번에 내시면 10개월 값으로 12개월을 씁니다.</li>
         <li>한 달 한도를 넘으면 추가 묶음을 사서 이어 쓰고, 다음 달 1일에 한도가 다시 채워집니다.</li>
         <li>결제는 <strong>계좌이체</strong>로 받습니다 — 하나은행 380-910028-79905 (예금주 사회혁신교육원사회적협동조합). 현금영수증·세금계산서를 발행합니다.</li>
       </ul>
@@ -1797,7 +1799,7 @@ const MOCK = {
       {id:'n04', title:'완도군 시범사업 설명회 자료', date:'2026-07-01', tag:'자료', body:'설명회에서 배포된 슬라이드 및 Q&A.'},
     ],
     faq: [
-      {id:'q01', q:'플랫폼 이용료가 있나요?', a:'2026년 12월까지는 모든 회원이 무료 시범이고 요금은 2027년 1월부터 받습니다. 그 뒤에도 상업발전 전에는 무료이고, 상업운전을 시작한 다음 달부터 기본 이용료(협동조합 월 10,000원, 연합회 월 30,000원, 부가세 별도)에 필요한 메뉴만 골라 더합니다. 2026년 안에 가입 신청한 조합·연합회는 2027년 한 해 반값(창립 회원), 연합회가 회원조합 5곳 이상 이용료를 한꺼번에 내면 20% 할인입니다(겹치지 않고 큰 쪽 하나만). 자세한 값은 요금 안내 화면을 보세요.'},
+      {id:'q01', q:'플랫폼 이용료가 있나요?', a:'2026년 12월까지는 모든 회원이 무료 시범이고 요금은 2027년 1월부터 받습니다. 그 뒤에도 상업발전 전에는 무료이고, 상업운전을 시작한 다음 달부터 기본 이용료(협동조합 월 20,000원, 연합회 단위조합 수에 따라 월 45,000·90,000·135,000원, 컨설턴트 월 25,000원, 부가세 별도)를 내고, 활동 영상 만들기만 월 1만·2만·3만원을 더합니다. 2026년 안에 가입 신청한 조합·연합회는 2027년 한 해 반값(창립 회원), 연합회가 회원조합 5곳 이상 이용료를 한꺼번에 내면 20% 할인입니다(겹치지 않고 큰 쪽 하나만). 자세한 값은 요금 안내 화면을 보세요.'},
       {id:'q02', q:'우리 마을은 아직 협동조합이 없는데 이용 가능한가요?', a:'예비 조합원 자격으로 가입 가능합니다.'},
     ],
     files: [
@@ -1829,6 +1831,7 @@ const ROLES = {
   admin:      {label:'관리자',       emoji:'🔐', home:'#/adm/dashboard', desc:'플랫폼 전체 운영 · 회원 승인 · 콘텐츠 관리'},
   federation: {label:'연합회원',     emoji:'🤝', home:'#/mem/fedsupport', desc:'회원조합 지원업무 · 연합회 자체 사무'},
   coop:       {label:'협동조합회원', emoji:'🏘', home:'#/mem/home', desc:'우리 마을 조합의 설립·건설·운영 업무'},
+  consultant: {label:'컨설턴트회원', emoji:'🧑‍💼', home:'#/mem/consult', desc:'조합이 승인한 여러 조합의 햇빛소득마을 신청을 돕는 컨설턴트'},
   guest:      {label:'손님',         emoji:'👋', home:'#/pub/home',      desc:'사업 소개 · 자가진단 · 상담 신청 (승인 전)'},
 };
 /* 2026-11-07 이사장 지시 「햇소자 안으로 시민자산육성지원센터 메뉴」 — 별도 로그인·새 창. scope 'ext' = 바깥 주소(page 자리에 URL).
@@ -1923,6 +1926,7 @@ const ROLE_MENUS = {
       ['mem','vendor','🔍','사업자(ReSCO) 선정'],
       ['mem','review','📄','서류 AI 검토'],
       ['mem','law','⚖️','법령·인허가'],
+      ['mem','ctools','🧭','신청 과정 점검표'],   // 11-27 컨설턴트와 함께 보는 점검표
     ]],
     ['깊이 보기 · 운영관리', [
       ['mem','power','⚡','발전·정산·배당'],
@@ -1951,10 +1955,29 @@ const ROLE_MENUS = {
     /* 11-26 이사장 지시: 내 조합은 사이드바 맨 아래로, 그 아래 이용안내(사용 설명서·내 AI 연결 안내) */
     ['내 조합', [
       ['mem','mypage','👤','내 페이지'],   // 11-27 요금 안내는 사이드바 맨 위 「💳 이용 서비스·요금」 한 곳
+      ['mem','consultlink','🧑‍💼','컨설턴트 연결'],   // 11-27 조합이 컨설턴트를 승인·끊기
     ]],
     ['이용안내', [
       ['href','manual.html','📖','사용 설명서'],
       ['mem','ai','🤖','내 AI 연결 안내'],
+    ]],
+  ],
+  /* 11-27 이사장 지시: 컨설턴트 — 맡은 조합에 들어가면 그 조합의 조합 회원 메뉴(coop)를 쓰고, 맨 위에 「컨설턴트」 묶음이 붙는다(roleMenus) */
+  consultant: [
+    ['컨설턴트', [
+      ['mem','consult','🧑‍💼','맡은 조합'],
+      ['mem','ctools','🧭','신청 과정 점검표'],
+      ['mem','consultai','🤖','내 AI 연결'],
+    ]],
+    ['자료', [
+      ['pub','diagnose','🧭','신청·진단'],
+      ['mem','law','⚖️','법령·인허가'],
+      ['mem','stat','🗺','전남 발전 현황'],
+      ['mem','library','📚','공지·자료실'],
+    ]],
+    ['내 계정', [
+      ['mem','mypage','👤','내 페이지'],
+      ['href','manual.html','📖','사용 설명서'],
     ]],
   ],
   guest: [
@@ -1983,12 +2006,22 @@ function normalizeRole(r, status, perms){
     case 'staff': case 'manager':  return (Array.isArray(perms) && perms.includes('햇소자관리')) ? 'admin' : 'guest';
     case 'federation': case 'union': case 'fed': case '연합회':        return 'federation';
     case 'coop': case 'member': case 'village': case '회원협동조합': case '회원': return 'coop';
+    case 'consultant':                                                return 'consultant';   // 11-27 화면 저장값(서버 role 은 그대로, 이용권 consult 로 판정)
     case 'guest': case 'visitor': case 'pending': case '손님':         return 'guest';
     case 'general': case 'data':                                      return 'guest';   // 2026-10-05 사교원 일반·자료회원은 햇소자에선 손님
     default: return 'guest';  // 2026-10-13 통합 개편: 모르는 역할은 손님(이전엔 조합회원으로 열려 있었다)
   }
 }
 function roleLabel(r){ return (ROLES[normalizeRole(r)] || ROLES.guest).label; }
+/* 11-27 컨설턴트: 맡은 조합에 들어가 있으면 맨 위에 「컨설턴트」 묶음, 조합·연합회 회원이 컨설턴트를 겸하면 맨 끝에 같은 묶음 */
+function roleMenus(role){
+  const base = ROLE_MENUS[role] || [], u = currentUser();
+  if(!u) return base;
+  if(u.consultVillage) return [['컨설턴트', [['mem','consult','🧑‍💼','맡은 조합으로 돌아가기'], ['mem','ctools','🧭','신청 과정 점검표']]]]
+    .concat(base.map(([l, it]) => [l, it.filter(([sc, pg]) => pg !== 'consultlink' && pg !== 'ai')]));
+  if(u.consultant && role !== 'consultant' && role !== 'guest') return base.concat([['컨설턴트', [['mem','consult','🧑‍💼','맡은 조합'], ['mem','ctools','🧭','신청 과정 점검표'], ['mem','consultai','🤖','내 AI 연결(컨설턴트)']]]]);
+  return base;
+}
 function roleHome(r){ return (ROLES[normalizeRole(r)] || ROLES.guest).home; }
 /* 관리자만 편집 — 연합회는 관리 화면(조합·마을 등)을 열람만 한다 */
 function isAdminUser(){ const u = currentUser(); return !!u && normalizeRole(u.role) === 'admin'; }
@@ -2002,7 +2035,7 @@ function canAccess(u, scope, page){
   if(role === 'guest') return false;
   if(role === 'coop') return scope === 'mem';
   if(scope === 'mem' && page === 'ask') page = 'chat';   // 질문 모음(상세)은 AI 상담과 같은 권한
-  return (ROLE_MENUS[role] || []).some(([, items]) => items.some(([s, p]) => s === scope && p === page));
+  return roleMenus(role).some(([, items]) => items.some(([s, p]) => s === scope && p === page));
 }
 
 function currentUser(){
@@ -2080,6 +2113,7 @@ function startPreview(role){
   toast(`${roleLabel(role)} 화면 미리보기를 시작합니다.`);
 }
 async function endPreview(){
+  { const c0 = currentUser(); if(c0 && c0.consultVillage){ await consultLeave(); return; } }   // 11-27 컨설턴트로 들어간 조합에서 나오기
   _MY_STRAT = undefined; _SHARE = null;   // 11-26 알파언니 🟠2: 앞 조합의 배분 전략·현황판이 남지 않게
   const cur = currentUser();
   const viewing = !!(cur && cur.viewVillage);
@@ -2141,6 +2175,259 @@ async function viewCoopCheck(){
   endPreview();
 }
 
+/* ─── 햇소자 컨설턴트 회원 (2026-11-27 이사장 지시) ───
+   컨설턴트 = 이용권 「햇소자 컨설턴트」가 열린 회원(통합 계정 services 에 consult). 조합이 연결 번호를 만들어 건네고 요청을 승인하면
+   그 조합에 「들어가」 조합 회원 권한으로 쓴다. 서버(hatsoja_consult.py)가 쿠키로 「들어간 조합」을 기억하고 햇소자 화면의 요청을 그 조합처럼 답한다.
+   설계: ~/workspace/docs/햇소자/햇소자_컨설턴트회원_설계안_20261127.md */
+const CT_STAGES = [
+  {k:'s1', n:'1. 사전 진단', go:[['신청·진단','#/pub/diagnose']], items:[
+    ['s1a','후보지와 설비 규모(kW)를 정했다'], ['s1b','간이 수익 계산(20년 순수익)을 해 보았다'], ['s1c','한전 ON 전력계통 통합정보로 계통 여유를 1차 조회했다']]},
+  {k:'s2', n:'2. 주민 합의', go:[['마을회·조합 설계','#/mem/structure'],['20년 성공 조건','#/mem/success']], items:[
+    ['s2a','마을회–협동조합 구조와 역할을 정했다'], ['s2b','주민설명회를 열었다(자료·참석자 명부 보관)'], ['s2c','수익을 나눌 주민 범위와 배분 원칙 초안을 만들었다']]},
+  {k:'s3', n:'3. 조합 설립', go:[['설립 내비게이터·청약','#/mem/setup'],['조합원 관리','#/mem/members']], items:[
+    ['s3a','정관을 만들었다'], ['s3b','창립총회를 열고 의사록을 남겼다'], ['s3c','설립 신고·등기를 마쳤다'], ['s3d','조합원 청약·출자를 받았다']]},
+  {k:'s4', n:'4. 계통·부지', go:[['법령·인허가','#/mem/law'],['서류 보관함','#/mem/inbox']], items:[
+    ['s4a','한전 지사에 검토를 신청했다'], ['s4b','한전 검토의견 서류를 받았다(공모 제출 서류)'], ['s4c','부지 사용 권리를 확보했다(공공부지 우선)']]},
+  {k:'s5', n:'5. 사업비·재원', go:[['사업비·부품 구성','#/mem/cost'],['자부담·융자 신청','#/mem/finance']], items:[
+    ['s5a','kW당 설치비로 견적을 비교했다'], ['s5b','자부담 조달계획을 세웠다'], ['s5c','융자 상담을 하고 총회에서 차입을 의결했다']]},
+  {k:'s6', n:'6. 사업자 선정', go:[['사업자(ReSCO) 선정','#/mem/vendor']], items:[
+    ['s6a','사업자 후보를 비교했다(항목별 단가 내역서)'], ['s6b','총회 의결로 사업자를 정했다']]},
+  {k:'s7', n:'7. 신청 서류', go:[['문서 생성','#/mem/docs'],['서류 AI 검토','#/mem/review']], items:[
+    ['s7a','공모 신청서·사업계획서 초안을 만들었다'], ['s7b','서류 AI 검토로 보완점을 확인했다'], ['s7c','공고문의 제출 서류 목록과 하나씩 맞춰 보았다']]},
+  {k:'s8', n:'8. 제출·선정 뒤', go:[['일정·마감','#/mem/schedule'],['업무 달력','#/mem/cycle']], items:[
+    ['s8a','공고 마감일과 제출일을 일정에 넣었다'], ['s8b','신청서를 제출했다'], ['s8c','선정 뒤 인허가·착공 일정을 세웠다']]},
+];
+let _ctData = null, _ctVer = null, _ctBusy = false;
+const ctEsc = v => escapeHtml(String(v == null ? '' : v));
+async function ctApi(path, opt){
+  const o = Object.assign({credentials:'same-origin'}, opt || {});
+  if(o.body && typeof o.body !== 'string'){ o.headers = {'Content-Type':'application/json'}; o.body = JSON.stringify(o.body); }
+  try{ const r = await fetch(path, o); const j = await r.json().catch(() => ({})); j._status = r.status; return j; }catch(e){ return {ok:false, _status:0}; }
+}
+/* 컨설턴트로 조합에 들어가기·바꾸기·나오기 — 서버 쿠키(sk_consult_village)와 화면 계정을 함께 바꾼다 */
+async function consultEnter(vid){
+  const cur = currentUser();
+  if(!REAL_API || !cur || !cur.unified){ toast('통합 계정으로 로그인해야 합니다.'); return; }
+  const d = await ctApi('/api/consultant/current', {method:'POST', body:{village_id:+vid}});
+  if(!d.ok || !d.village){ toast(d.message || '조합에 들어가지 못했습니다. 조합의 승인과 이용권을 확인해 주세요.'); return; }
+  let self = null;
+  try{ self = JSON.parse(sessionStorage.getItem('sv_consult_self') || 'null'); }catch(e){}
+  if(!cur.consultVillage || !self){ try{ sessionStorage.setItem('sv_consult_self', JSON.stringify(cur.consultVillage ? self : cur)); }catch(e){} }
+  _MY_STRAT = undefined; _SHARE = null; _ctData = null;
+  try{ storeClearLocal(); }catch(e){}   // 앞 조합 자료가 이 브라우저에 남지 않게
+  setUser({email:cur.email, name:cur.name, role:'coop', hubRole:'coop', perms:[], village:d.village.name, loginAt:new Date().toISOString(),
+    unified:true, preview:true, consultant:true, consultVillage:{id:d.village.id, name:d.village.name}});
+  await loadRealData();
+  if(location.hash === '#/mem/ctools') navigate(); else location.hash = '#/mem/ctools';
+  toast(`「${d.village.name}」 조합에 컨설턴트로 들어왔습니다. 위 띠에서 다른 조합으로 바꾸거나 돌아갑니다.`);
+}
+async function consultLeave(silent){
+  await ctApi('/api/consultant/current', {method:'POST', body:{village_id:null}});
+  let self = null;
+  try{ self = JSON.parse(sessionStorage.getItem('sv_consult_self') || 'null'); sessionStorage.removeItem('sv_consult_self'); }catch(e){}
+  _MY_STRAT = undefined; _SHARE = null; _ctData = null;
+  try{ storeClearLocal(); }catch(e){}
+  if(!self){
+    try{ const d = await fetch('/api/auth/me', {credentials:'same-origin'}).then(r => r.json()); if(d.ok && d.user){ applyUnifiedUser(d.user, {redirect:false, silent:true}); self = currentUser(); } }catch(e){}
+  }
+  if(!self){ logout(); return; }
+  setUser(self);
+  await loadRealData();
+  if(location.hash === '#/mem/consult') navigate(); else location.hash = '#/mem/consult';
+  if(!silent) toast('컨설턴트 화면으로 돌아왔습니다.');
+}
+async function consultCheck(){   // 새로 열었을 때 서버의 「들어간 조합」이 풀렸으면(8시간·끊김·이용권) 본래 화면으로
+  const u = currentUser();
+  if(!REAL_API || !u || !u.consultVillage) return;
+  const d = await ctApi('/api/consultant/me');
+  if(d._status === 0) return;
+  if(d.ok && d.current && d.current.id === u.consultVillage.id) return;
+  toast('조합 연결이 끊겼거나 시간이 지나 컨설턴트 화면으로 돌아갑니다.');
+  consultLeave(true);
+}
+let _ctLinks = null;
+async function consultBarFill(){   // 위 띠의 「맡은 조합 바꾸기」
+  const sel = document.getElementById('previewBarSwitch'); const u = currentUser();
+  if(!sel) return;
+  if(!u || !u.consultVillage){ sel.style.display = 'none'; return; }
+  if(!_ctLinks){ const d = await ctApi('/api/consultant/me'); _ctLinks = (d.links || []).filter(l => l.status === 'active' && l.village); }
+  sel.innerHTML = '<option value="">맡은 조합 바꾸기…</option>' + _ctLinks.filter(l => l.village.id !== u.consultVillage.id).map(l => `<option value="${+l.village.id}">${ctEsc(l.village.name)}</option>`).join('');
+  sel.style.display = _ctLinks.length > 1 ? '' : 'none';
+}
+
+/* ① 맡은 조합 (#/mem/consult) */
+function memConsult(){
+  return `<div class="sec-head"><h1>🧑‍💼 맡은 조합</h1><p class="sec-desc">조합이 승인한 협동조합을 오가며 그 조합 회원 권한으로 일합니다. 맡은 조합 수와 관계없이 정액입니다.</p></div>
+    <div id="ctBox"><div class="card text-mute">불러오는 중…</div></div>`;
+}
+async function consultLoad(){
+  const box = document.getElementById('ctBox'); if(!box) return;
+  if(!REAL_API){ box.innerHTML = '<div class="card">체험 모드에서는 쓸 수 없습니다. 통합 계정으로 로그인해 주세요.</div>'; return; }
+  const d = await ctApi('/api/consultant/portfolio');
+  if(!d.ok){ box.innerHTML = '<div class="card">맡은 조합을 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.</div>'; return; }
+  _ctLinks = null;
+  const 입력 = `<div class="card"><h3 class="serif" style="margin-top:0;">조합 연결하기</h3>
+      <p class="text-small text-mute" style="margin-top:0;">조합이 햇소자 「내 조합 › 컨설턴트 연결」에서 만든 연결 번호(8자리, 7일 동안 한 번)를 받아 넣으세요. 넣은 뒤 조합이 승인하면 들어갈 수 있습니다.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;"><input id="ctCode" maxlength="12" placeholder="예: ABCD-2345" autocomplete="off" style="max-width:200px;text-transform:uppercase;">
+      <button class="btn btn-primary btn-sm" onclick="consultRedeem()">연결 요청</button></div><div id="ctCodeMsg" class="text-small" style="margin-top:6px;"></div></div>`;
+  if(!d.consultant){
+    box.innerHTML = `<div class="card"><h3 class="serif" style="margin-top:0;">컨설턴트 이용권이 필요합니다</h3>
+      <p>「햇소자 컨설턴트」 이용권(월 25,000원, 부가세 별도 · 여러 조합 정액)을 신청하고 사교원 승인을 받으면 열립니다. 2026년 12월까지는 무료 시범입니다.</p>
+      <a class="btn btn-primary btn-sm" href="/#/join?pick=consult">컨설턴트 이용권 신청</a> <a class="btn btn-ghost btn-sm" href="#/pub/pricing">요금 안내</a></div>`;
+    return;
+  }
+  const 대기 = d.items.filter(x => x.status === 'request'), 맡은 = d.items.filter(x => x.status === 'active');
+  box.innerHTML = 입력 +
+    (대기.length ? `<div class="card"><h3 class="serif" style="margin-top:0;">조합 승인 대기 ${대기.length}곳</h3>${대기.map(x => `<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;padding:6px 0;border-top:1px solid var(--line);">
+        <span>${ctEsc(x.village ? x.village.name : '조합')} <span class="text-small text-mute">요청 ${ctEsc((x.created_at || '').slice(0,10))}</span></span>
+        <button class="btn btn-ghost btn-sm" onclick="consultEnd(${+x.id})">요청 거두기</button></div>`).join('')}</div>` : '') +
+    `<div class="grid grid-2">${맡은.length ? 맡은.map(x => { const v = x.village || {}, pg = x.progress, pct = pg && pg.total ? Math.round(pg.done * 100 / pg.total) : null;
+      return `<div class="card"><div style="display:flex;justify-content:space-between;gap:8px;"><h3 class="serif" style="margin:0;">${ctEsc(v.name)}</h3><span class="badge badge-info">${ctEsc(x.phase || '단계 미정')}</span></div>
+        <div class="text-small text-mute">${ctEsc(v.region)}</div>
+        <div style="margin:10px 0 4px;" class="text-small">신청 과정 점검표 ${pct == null ? '<span class="text-mute">아직 없음</span>' : `<b>${pct}%</b> (${pg.done}/${pg.total})`}</div>
+        <div style="height:6px;background:var(--line);border-radius:4px;"><div style="height:6px;width:${pct || 0}%;background:var(--primary);border-radius:4px;"></div></div>
+        <div class="text-small" style="margin-top:8px;">다음 일정: ${x.next_event ? ctEsc(x.next_event.date) + ' ' + ctEsc(x.next_event.title) : '<span class="text-mute">없음</span>'}</div>
+        <div class="text-small text-mute">마지막 고친 날: ${ctEsc((x.updated_at || '—').slice(0,10))}</div>
+        <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;"><button class="btn btn-primary btn-sm" onclick="consultEnter(${+v.id})">들어가기</button>
+        <button class="btn btn-ghost btn-sm" onclick="consultEnd(${+x.id}, true)">그만 맡기</button></div></div>`; }).join('')
+      : '<div class="card text-mute">아직 승인된 조합이 없습니다. 위에서 연결 번호를 넣어 주세요.</div>'}</div>`;
+}
+async function consultRedeem(){
+  const el = document.getElementById('ctCode'), m = document.getElementById('ctCodeMsg');
+  const d = await ctApi('/api/consultant/redeem', {method:'POST', body:{code:(el && el.value) || ''}});
+  if(m){ m.textContent = d.message || (d.ok ? '요청했습니다.' : '연결하지 못했습니다.'); m.style.color = d.ok ? 'var(--primary)' : 'var(--danger,#b42318)'; }
+  if(d.ok){ if(el) el.value = ''; setTimeout(consultLoad, 600); }
+}
+async function consultEnd(id, active){
+  if(!confirm(active ? '이 조합을 그만 맡을까요? 다시 맡으려면 조합에서 새 연결 번호를 받아야 합니다.' : '연결 요청을 거둘까요?')) return;
+  const d = await ctApi(`/api/consultant/links/${+id}/end`, {method:'POST'});
+  toast(d.ok ? '정리했습니다.' : '처리하지 못했습니다.'); consultLoad();
+}
+
+/* ② 신청 과정 점검표 (#/mem/ctools) — 조합과 컨설턴트가 함께 본다(조합 업무 자료 consult) */
+function memCtools(){
+  const u = currentUser(), role = u ? normalizeRole(u.role) : 'guest';
+  if(role === 'consultant'){
+    return `<div class="sec-head"><h1>🧭 신청 과정 점검표</h1><p class="sec-desc">점검표는 조합마다 있습니다. 맡은 조합에 들어가면 그 조합의 점검표가 열립니다.</p></div><div id="ctBox"><div class="card text-mute">불러오는 중…</div></div>`;
+  }
+  return `<div class="sec-head"><h1>🧭 신청 과정 점검표</h1><p class="sec-desc">햇빛소득마을 신청 과정을 8단계로 나눠 함께 챙깁니다. 조합과 조합이 승인한 컨설턴트가 같은 점검표를 봅니다. 공모마다 다른 숫자(마감일·비율)는 공고문 기준으로 확인하세요.</p></div>
+    <div id="ctList"><div class="card text-mute">불러오는 중…</div></div>`;
+}
+function ctTotal(d){ return CT_STAGES.reduce((a, s) => a + s.items.length + (((d.extra || {})[s.k]) || []).length, 0); }
+function ctDone(d){ const dn = d.done || {}; return CT_STAGES.reduce((a, s) => a + s.items.filter(([k]) => dn[k]).length + (((d.extra || {})[s.k]) || []).filter(x => dn[x.k]).length, 0); }
+async function ctLoad(){
+  const u = currentUser();
+  if(u && normalizeRole(u.role) === 'consultant'){ await consultLoad(); return; }
+  const box = document.getElementById('ctList'); if(!box) return;
+  if(!REAL_API || !u || !u.unified){ _ctData = _ctData || {done:{}, notes:{}, extra:{}}; ctDraw(); return; }
+  const j = await ctApi('/api/my/store');
+  if(!j.ok || !j.village_id){ box.innerHTML = '<div class="card">조합 자료를 불러오지 못했습니다(조합 계정으로 들어와야 합니다).</div>'; return; }
+  const it = (j.items || {}).consult;
+  _ctData = (it && it.data && typeof it.data === 'object' && !Array.isArray(it.data)) ? it.data : {done:{}, notes:{}, extra:{}};
+  _ctData.done = _ctData.done || {}; _ctData.notes = _ctData.notes || {}; _ctData.extra = _ctData.extra || {};
+  _ctVer = it ? it.ver : null;
+  ctDraw();
+}
+function ctDraw(){
+  const box = document.getElementById('ctList'); if(!box || !_ctData) return;
+  const d = _ctData, dn = d.done, tot = ctTotal(d), done = ctDone(d), pct = tot ? Math.round(done * 100 / tot) : 0;
+  box.innerHTML = `<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;"><b>전체 진척 ${pct}% (${done}/${tot})</b>
+      <span class="text-small text-mute">${d.updated ? '마지막 저장 ' + ctEsc(d.updated.slice(0,16).replace('T',' ')) + (d.by ? ' · ' + ctEsc(d.by) : '') : ''}</span></div>
+      <div style="height:8px;background:var(--line);border-radius:4px;margin-top:8px;"><div style="height:8px;width:${pct}%;background:var(--primary);border-radius:4px;"></div></div></div>` +
+    CT_STAGES.map(s => { const ex = (d.extra[s.k] || []), all = s.items.map(([k, t]) => ({k, t})).concat(ex), sd = all.filter(x => dn[x.k]).length;
+      return `<div class="card"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;"><h3 class="serif" style="margin:0;">${ctEsc(s.n)} <span class="text-small text-mute">${sd}/${all.length}</span></h3>
+        <span>${s.go.map(([n, h]) => `<a class="btn btn-ghost btn-sm" href="${h}">${ctEsc(n)} ›</a>`).join(' ')}</span></div>
+        ${all.map(x => `<label style="display:flex;gap:8px;align-items:flex-start;padding:5px 0;border-top:1px solid var(--line);">
+          <input type="checkbox" ${dn[x.k] ? 'checked' : ''} onchange="ctToggle('${ctEsc(x.k)}', this.checked)" style="margin-top:3px;">
+          <span style="flex:1;">${ctEsc(x.t)}${dn[x.k] && dn[x.k].d ? ` <span class="text-small text-mute">· ${ctEsc(dn[x.k].d)}</span>` : ''}</span></label>`).join('')}
+        <div style="display:flex;gap:6px;margin-top:6px;"><input id="ctAdd-${s.k}" maxlength="80" placeholder="항목 더하기" style="flex:1;"><button class="btn btn-ghost btn-sm" onclick="ctAddItem('${s.k}')">더하기</button></div>
+        <textarea id="ctNote-${s.k}" rows="2" maxlength="1000" placeholder="메모(조합과 컨설턴트가 함께 봅니다)" style="width:100%;margin-top:6px;" onchange="ctNote('${s.k}', this.value)">${ctEsc(d.notes[s.k] || '')}</textarea></div>`; }).join('');
+}
+async function ctSave(){
+  if(!_ctData) return;
+  const u = currentUser();
+  _ctData.progress = {done: ctDone(_ctData), total: ctTotal(_ctData)};
+  _ctData.updated = new Date().toISOString(); _ctData.by = u ? (u.name || '') : '';
+  if(!REAL_API || !u || !u.unified){ ctDraw(); return; }
+  if(_ctBusy) return; _ctBusy = true;
+  const r = await ctApi('/api/my/store/consult', {method:'PUT', body:{data:_ctData, ver:_ctVer}});
+  _ctBusy = false;
+  if(r.ok){ _ctVer = r.ver; ctDraw(); return; }
+  if(r._status === 409){ toast('다른 사람이 먼저 고쳤습니다. 새 판을 불러옵니다 — 다시 표시해 주세요.'); await ctLoad(); return; }
+  toast(r.error && r.error.length > 20 ? r.error : '저장하지 못했습니다.'); await ctLoad();
+}
+function ctToggle(k, on){ if(!_ctData) return; if(on) _ctData.done[k] = {d: new Date().toISOString().slice(0,10)}; else delete _ctData.done[k]; ctSave(); }
+function ctNote(sk, v){ if(!_ctData) return; _ctData.notes[sk] = String(v || '').slice(0, 1000); ctSave(); }
+function ctAddItem(sk){
+  const el = document.getElementById('ctAdd-' + sk); const t = el ? el.value.trim() : '';
+  if(!t || !_ctData) return;
+  const L = _ctData.extra[sk] = _ctData.extra[sk] || [];
+  if(L.length >= 20){ toast('단계마다 20개까지 더할 수 있습니다.'); return; }
+  L.push({k: sk + 'x' + Date.now().toString(36), t: t.slice(0, 80)}); ctSave();
+}
+
+/* ③ 내 AI 연결 — 컨설턴트 (#/mem/consultai) */
+function memConsultAi(){
+  return `<div class="sec-head"><h1>🤖 내 AI 연결 (컨설턴트)</h1><p class="sec-desc">내 AI(클로드 등 MCP 를 쓰는 AI)에 열쇠를 넣으면 맡은 조합들의 자료를 그 AI 에서 읽고, 고른 경우 대장·업무 달력에 쓸 수 있습니다. 조합원 명부는 AI 로 보내지 않습니다.
+    내 AI 를 연결해 쓰면 이용권에서 「내 AI 연결」을 골라 기본요금을 30% 할인받을 수 있습니다(그때 사이트 AI 는 하루 10번까지).</p></div><div id="ctAiBox"><div class="card text-mute">불러오는 중…</div></div>`;
+}
+async function ctAiLoad(newKey){
+  const box = document.getElementById('ctAiBox'); if(!box) return;
+  if(!REAL_API){ box.innerHTML = '<div class="card">통합 계정으로 로그인해 주세요.</div>'; return; }
+  const d = await ctApi('/api/consultant/ai-keys');
+  if(!d.ok){ box.innerHTML = '<div class="card">불러오지 못했습니다.</div>'; return; }
+  box.innerHTML = (newKey ? `<div class="card" style="border-color:var(--gold);"><b>새 열쇠 — 지금 한 번만 보입니다. 복사해 두세요.</b><pre style="white-space:pre-wrap;word-break:break-all;user-select:all;">${ctEsc(newKey)}</pre></div>` : '') +
+    `<div class="card"><h3 class="serif" style="margin-top:0;">연결 주소</h3><pre style="white-space:pre-wrap;word-break:break-all;">${ctEsc(d.endpoint)}</pre>
+      <p class="text-small text-mute">AI 설정에서 MCP 서버(HTTP)로 이 주소를 넣고, 머리글 <code>Authorization: Bearer 열쇠</code> 를 붙입니다. 첫 도구 <code>list_my_coops</code> 로 맡은 조합 번호(village_id)를 확인한 뒤 도구마다 그 번호를 넣습니다.</p></div>
+    <div class="card"><h3 class="serif" style="margin-top:0;">열쇠 (${d.items.length}/5)</h3>
+      ${d.items.length ? d.items.map(k => `<div style="display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px solid var(--line);"><span>${ctEsc(k.name)} <span class="text-small text-mute">${ctEsc(k.scopes === 'read' ? '읽기만' : '읽기·쓰기')} · 만든 날 ${ctEsc((k.created_at || '').slice(0,10))} · 마지막 사용 ${ctEsc((k.last_used || '—').slice(0,10))}</span></span>
+        <button class="btn btn-ghost btn-sm" onclick="ctAiDel(${+k.id})">지우기</button></div>`).join('') : '<p class="text-mute">아직 열쇠가 없습니다.</p>'}
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;"><input id="ctAiName" maxlength="40" placeholder="열쇠 이름(예: 내 클로드)" style="max-width:220px;">
+        <label class="text-small"><input type="checkbox" id="ctAiWrite"> 쓰기도 허용(대장·업무 달력 더하기, 원장 제안)</label>
+        <button class="btn btn-primary btn-sm" onclick="ctAiNew()">열쇠 만들기</button></div></div>`;
+}
+async function ctAiNew(){
+  const n = document.getElementById('ctAiName'), w = document.getElementById('ctAiWrite');
+  const d = await ctApi('/api/consultant/ai-keys', {method:'POST', body:{name:(n && n.value) || '내 AI', scopes: (w && w.checked) ? ['read','write'] : ['read']}});
+  if(!d.ok){ toast(d.message || '만들지 못했습니다.'); return; }
+  ctAiLoad(d.key);
+}
+async function ctAiDel(id){ if(!confirm('이 열쇠를 지울까요? 그 열쇠를 쓰던 AI 는 바로 끊깁니다.')) return; await ctApi('/api/consultant/ai-keys/' + (+id), {method:'DELETE'}); ctAiLoad(); }
+
+/* ④ 컨설턴트 연결 — 조합 쪽 (#/mem/consultlink). 승인·끊기는 그 조합에 본래 속한 조합 회원 계정만 */
+function memConsultLink(){
+  return `<div class="sec-head"><h1>🧑‍💼 컨설턴트 연결</h1><p class="sec-desc">우리 조합의 햇빛소득마을 신청을 돕는 컨설턴트에게 조합 화면을 열어 줍니다. 연결 번호를 만들어 건네고, 요청이 오면 승인합니다.
+    승인한 컨설턴트는 조합 회원과 같은 권한으로 조합원 명부·업무 자료를 보고 고칠 수 있습니다(이용권·결제·컨설턴트 승인·AI 열쇠·공개 현황판은 빼고). 언제든 끊을 수 있습니다.</p></div>
+    <div id="clBox"><div class="card text-mute">불러오는 중…</div></div>`;
+}
+async function clLoad(code){
+  const box = document.getElementById('clBox'); if(!box) return;
+  const u = currentUser();
+  if(u && u.consultVillage){ box.innerHTML = '<div class="card">컨설턴트 연결은 조합 회원 본인 계정으로만 정할 수 있습니다.</div>'; return; }
+  if(!REAL_API){ box.innerHTML = '<div class="card">통합 계정으로 로그인해 주세요.</div>'; return; }
+  const d = await ctApi('/api/coop/consultants');
+  if(!d.ok){ box.innerHTML = `<div class="card">${ctEsc(d.message || '불러오지 못했습니다.')}</div>`; return; }
+  const KO = {request:'승인 대기', active:'연결됨', ended:'끊김', rejected:'거절'};
+  const 줄 = l => { const c = l.consultant || {}; return `<tr><td>${ctEsc(c.name)}<div class="text-small text-mute">${ctEsc(c.username)}${c.org ? ' · ' + ctEsc(c.org) : ''}</div></td>
+      <td>${ctEsc(KO[l.status] || l.status)}</td><td class="text-small">${ctEsc((l.decided_at || l.created_at || '').slice(0,10))}${l.ended_at ? ' ~ ' + ctEsc(l.ended_at.slice(0,10)) : ''}</td>
+      <td>${l.status === 'request' ? `<button class="btn btn-primary btn-sm" onclick="clAct(${+l.id},'approve')">승인</button> <button class="btn btn-ghost btn-sm" onclick="clAct(${+l.id},'reject')">거절</button>`
+        : l.status === 'active' ? `<button class="btn btn-ghost btn-sm" onclick="clAct(${+l.id},'end')">연결 끊기</button>` : ''}</td></tr>`; };
+  box.innerHTML = (code ? `<div class="card" style="border-color:var(--gold);"><b>연결 번호: <span style="font-size:1.4em;letter-spacing:2px;user-select:all;">${ctEsc(code.code)}</span></b>
+      <div class="text-small">${ctEsc(code.expires_at.slice(0,10))}까지 한 번만 쓸 수 있습니다. 믿을 수 있는 컨설턴트에게만 직접 건네세요. 요청이 오면 아래에서 승인합니다.</div></div>` : '') +
+    `<div class="card"><h3 class="serif" style="margin-top:0;">연결 번호 만들기</h3><p class="text-small text-mute" style="margin-top:0;">열린 번호 ${d.codes.length}개${d.codes.length ? ' (끝자리 ' + d.codes.map(c => ctEsc(c.tail)).join(', ') + ')' : ''} · 한 번에 3개까지, 7일 동안 유효</p>
+      <button class="btn btn-primary btn-sm" onclick="clCode()">새 연결 번호 만들기</button></div>
+    <div class="card"><h3 class="serif" style="margin-top:0;">컨설턴트</h3>${d.links.length ? `<div style="overflow-x:auto;"><table class="tbl"><thead><tr><th>컨설턴트</th><th>상태</th><th>날짜</th><th></th></tr></thead><tbody>${d.links.map(줄).join('')}</tbody></table></div>` : '<p class="text-mute">아직 없습니다.</p>'}</div>
+    <div class="card"><h3 class="serif" style="margin-top:0;">컨설턴트가 고친 기록 <span class="text-small text-mute">최근 100건 · 1년 보관</span></h3>
+      ${d.log.length ? `<div style="overflow-x:auto;"><table class="tbl"><thead><tr><th>시각</th><th>누가</th><th>무엇</th></tr></thead><tbody>${d.log.map(g => `<tr><td class="text-small">${ctEsc(g.at.slice(0,16).replace('T',' '))}</td><td>${ctEsc(g.who)}</td><td class="text-small">${ctEsc(g.method)} ${ctEsc(g.path)}</td></tr>`).join('')}</tbody></table></div>` : '<p class="text-mute">기록이 없습니다.</p>'}</div>`;
+}
+async function clCode(){ const d = await ctApi('/api/coop/consultants/code', {method:'POST'}); if(!d.ok){ toast(d.message || '만들지 못했습니다.'); return; } clLoad(d); }
+async function clAct(id, act){
+  const 말 = {approve:'이 컨설턴트를 승인할까요? 승인하면 우리 조합 화면(조합원 명부 포함)을 조합 회원 권한으로 쓰게 됩니다.', reject:'요청을 거절할까요?', end:'연결을 끊을까요? 컨설턴트는 바로 우리 조합 화면에 못 들어옵니다.'};
+  if(!confirm(말[act])) return;
+  const d = await ctApi(`/api/coop/consultants/${+id}/${act}`, {method:'POST'});
+  toast(d.ok ? '처리했습니다.' : (d.message || '처리하지 못했습니다.')); clLoad();
+}
+
 /* 데모 체험 → 가입 전환 (개선안 2-6) */
 function gotoSignupFromDemo(){
   const u = currentUser();
@@ -2163,9 +2450,12 @@ function updateConvenienceUI(scope, page){
   if(pv){
     pv.classList.toggle('on', preview);
     const t = document.getElementById('previewBarRole');
-    if(t) t.textContent = (u && u.viewVillage) ? `「${u.viewVillage.name}」 조합 화면(실제 자료)` : `${roleLabel(role)} 화면 미리보기 모드`;
+    const cv = u && u.consultVillage;
+    if(t) t.textContent = cv ? `「${cv.name}」 조합 화면(컨설턴트)` : (u && u.viewVillage) ? `「${u.viewVillage.name}」 조합 화면(실제 자료)` : `${roleLabel(role)} 화면 미리보기 모드`;
     const tn = document.getElementById('previewBarNote');
-    if(tn) tn.textContent = (u && u.viewVillage) ? '을 관리자 계정으로 보고 있습니다. 여기서 고치면 그 조합의 자료가 바뀝니다.' : '입니다. 실제 해당 등급 회원에게 보이는 화면 그대로예요.';
+    if(tn) tn.textContent = cv ? '을 컨설턴트로 보고 있습니다. 고치면 그 조합 자료가 바뀌고 조합 화면에 고친 기록이 남습니다.' : (u && u.viewVillage) ? '을 관리자 계정으로 보고 있습니다. 여기서 고치면 그 조합의 자료가 바뀝니다.' : '입니다. 실제 해당 등급 회원에게 보이는 화면 그대로예요.';
+    const bk = document.getElementById('previewBarBack'); if(bk) bk.textContent = cv ? '컨설턴트 화면으로' : '관리자로 돌아가기';
+    if(cv) consultBarFill(); else { const sw = document.getElementById('previewBarSwitch'); if(sw) sw.style.display = 'none'; }
   }
   if(db){
     db.classList.toggle('on', demo);
@@ -2205,6 +2495,10 @@ const MENU_DESC = {
   vendor:['사업자(ReSCO) 선정','시공·운영 사업자를 비교하고 선정합니다'],
   success:['20년 성공 조건','장기 운영을 위한 점검 항목을 확인합니다'],
   mypage:['내 페이지','내 정보와 출자·배당 내역을 확인합니다'],
+  consult:['맡은 조합','조합이 승인한 협동조합을 골라 그 조합 화면으로 들어갑니다(컨설턴트)'],
+  ctools:['신청 과정 점검표','햇빛소득마을 신청 8단계 — 조합과 컨설턴트가 함께 챙깁니다'],
+  consultai:['내 AI 연결(컨설턴트)','내 AI 에 열쇠를 넣어 맡은 조합 자료를 읽고 씁니다'],
+  consultlink:['컨설턴트 연결','연결 번호를 만들고 컨설턴트 요청을 승인·끊고, 고친 기록을 봅니다'],
   setup:['설립 내비게이터·청약','조합 설립 단계를 안내받고 조합원 청약을 진행합니다'],
   docs:['문서 자동 생성','정관·회의록·사업계획서 초안을 AI가 만들어 줍니다'],
   review:['서류 AI 검토','작성한 서류의 누락·오류를 AI가 점검합니다'],
@@ -2269,8 +2563,10 @@ function showGlossary(){
 function applyUnifiedUser(user, {redirect = true, silent = false} = {}){
   // 2026-10-13 통합 개편 · 11-07 normalizeRole 로 일원화: 매니저(staff)는 「햇소자관리」 체크권한이 있을 때만 관리자, 없으면 손님.
   const perms = Array.isArray(user.perms) ? user.perms : [];
-  const role = normalizeRole(user.role, user.status, perms);
-  setUser({email: user.username, name: user.name || user.username, role, hubRole: String(user.role || ''), perms,
+  const consultant = Array.isArray(user.services) && user.services.includes('consult');   // 11-27 컨설턴트 이용권(통합 계정 services)
+  let role = normalizeRole(user.role, user.status, perms);
+  if(role === 'guest' && consultant && user.status !== 'pending' && user.status !== 'rejected') role = 'consultant';
+  setUser({email: user.username, name: user.name || user.username, role, hubRole: String(user.role || ''), perms, consultant,
            village: '', loginAt: new Date().toISOString(), unified: true});
   if(redirect) location.hash = roleHome(role);
   if(!silent) toast(`${user.name || user.username}님, 사교원 통합 계정(${roleLabel(role)})으로 로그인했습니다.`);
@@ -2630,6 +2926,7 @@ async function ssoBoot0(){
     return;
   }
   if(체험 && !fromHome) return;
+  if(fromHome && cu && cu.consultVillage){ await fetch('/api/consultant/current', {method:'POST', credentials:'same-origin', headers:{'Content-Type':'application/json'}, body:'{"village_id":null}'}).catch(() => {}); try{ sessionStorage.removeItem('sv_consult_self'); }catch(e){} }
   if(fromHome && cu && cu.viewVillage){ await viewCoopClear(); }   // 관리자 「조합 보기」 중이었으면 첫 화면에서 올 때 본래 계정으로
   else if(cu && cu.unified && cu.email === hubU.username && (cu.hubRole || Array.isArray(cu.perms))){ loadRealData(); return; }
   if(cu && (cu.unified || 체험)){ try{ storeClearLocal(); }catch(e){} try{ sessionStorage.removeItem('sv_preview_admin'); }catch(e){} }
@@ -2668,6 +2965,7 @@ function demoLogin(role){
 function logout(){
   const u = currentUser();
   if(u && u.viewVillage && REAL_API) viewCoopClear();   // 조합 보기 중 로그아웃 — 서버의 「보는 조합」도 푼다
+  if(u && u.consultVillage && REAL_API){ fetch('/api/consultant/current', {method:'POST', credentials:'same-origin', headers:{'Content-Type':'application/json'}, body:'{"village_id":null}'}).catch(() => {}); try{ sessionStorage.removeItem('sv_consult_self'); }catch(e){} }
   if(u && u.unified && REAL_API){
     fetch('/api/auth/logout', {method:'POST', credentials:'same-origin'}).catch(() => {});
   }
@@ -2725,7 +3023,7 @@ function menuTitle(s, p){
 /* 11-26 한 메뉴로 합친 화면의 둘째 주소 — 메뉴에 없으면 합친 메뉴에 불을 켠다(연합회처럼 taxops 가 따로 있으면 그대로) */
 const MENU_ALIAS = {'mem/taxops':'mem/accounting', 'mem/dist':'mem/revenue', 'mem/chat':'mem/home'};   // 11-26 조합 회원 AI 상담 크게 보기 → 사이드바 불은 업무 시작
 function menuCur(role, cur){
-  const has = k => (ROLE_MENUS[role] || []).some(([, it]) => it.some(([s, p]) => s + '/' + p === k));
+  const has = k => roleMenus(role).some(([, it]) => it.some(([s, p]) => s + '/' + p === k));
   return (!has(cur) && MENU_ALIAS[cur] && has(MENU_ALIAS[cur])) ? MENU_ALIAS[cur] : cur;
 }
 /* 등급별 상단 메뉴바 — ROLE_MENUS의 묶음을 버튼(단일)·드롭다운(복수)으로 그린다 */
@@ -2738,7 +3036,7 @@ function renderRoleNav(){
   const [scope, page] = currentRoute().split('/');
   const cur = menuCur(role, scope + '/' + (page || 'dashboard'));
   el.style.display = '';
-  el.innerHTML = (ROLE_MENUS[role] || []).map(([label, items], gi) => {
+  el.innerHTML = roleMenus(role).map(([label, items], gi) => {
     const isOn = items.some(([s, p]) => s + '/' + p === cur);
     if(items.length === 1){
       const [s, p, e, n] = items[0];
@@ -2816,6 +3114,10 @@ function navigate(){
     if(scope === 'mem' && page === 'state') stRender();
     if(scope === 'mem' && page === 'minutes') minRecRender();
     if(scope === 'mem' && page === 'todo')  todoRender();
+    if(scope === 'mem' && page === 'consult') consultLoad();
+    if(scope === 'mem' && page === 'ctools') ctLoad();
+    if(scope === 'mem' && page === 'consultai') ctAiLoad();
+    if(scope === 'mem' && page === 'consultlink') clLoad();
     if(scope === 'mem' && page === 'law'){ lawFillSelects(); lawEvalNow(); }
     if(scope === 'mem' && page === 'finance') finRenderDocs();
     if(scope === 'mem' && page === 'vendor'){ venRender(); venRenderSite(); }
@@ -2865,129 +3167,90 @@ function renderApp(scope, page){
   main.innerHTML = scope === 'adm' ? renderAdminPage(page) : renderMemberPage(page);
 }
 
-/* 요금 안내(2026-11-15) — 값은 여기 한 곳만 고친다. 설계 근거: ~/workspace/docs/요금설계/햇소자·의정지원_메뉴별요금_설계안_20261115.md
-   모든 값 부가세 별도·월. 올인원(all)은 기본+선택 전부를 고른 값. 연납은 10개월 값. */
-const PRICING = {
-  coop: {
-    이름: '협동조합 회원',
-    기본: {값: 10000, 한도: '사용자 3명 · 저장 2GB', 메뉴: [
-      '현황·업무 — 현황 대시보드 · 조합 원장 · 할 일 · 업무 시작(상담·자료함·문서)',
-      '조합 대장·업무 — 업무 달력 · 계약서 대장 · 회의록 대장 · 지출결의 · 거래처·표준장부',
-      '내 조합 — 내 페이지',
-      '설립·건설 — 마을회·조합 설계 · 설립 내비게이터·청약 · 사업비·부품 구성 · 자부담·융자 신청 · 사업자(ReSCO) 선정',
-      '운영관리 — 발전·정산·배당 · 수익 시뮬레이션·배분 계획 · 회계·세무 자진신고 · 잉여금 처분 계산 · 재무제표·컨설팅 · 월마감·보고서 · 조합원 관리 · 일정·마감 · 20년 성공 조건',
-      '확장 — 마을비즈니스 · 연합체·커뮤니티 · 전남 발전 현황 · 공지·자료실 · 활동 영상 만들기']},
-    선택: [
-      {k:'chat',  이름:'💬 AI 상담·법령 안내', 메뉴:'물어보기 · AI 상담 · 법령·인허가', 한도:'월 100회', 값:5000},
-      {k:'docs',  이름:'📝 문서 자동 생성', 메뉴:'산출물 만들기 · 문서 자동 생성 · 수익 보고서', 한도:'월 30건', 값:5000},
-      {k:'review',이름:'📄 서류 AI 검토', 메뉴:'서류 AI 검토', 한도:'월 20건', 값:5000},
-      {k:'video', 이름:'🎬 활동 영상 만들기', 메뉴:'활동 영상 만들기', 한도:'월 3편', 값:3000},
-      {k:'tax',   이름:'🗓️ 세금·4대보험 직접 신고 도우미', 메뉴:'세금·4대보험 직접 신고 · 지급·원천징수', 한도:'사업장 1곳 · 직원 5명까지', 값:10000},
-    ],
-    올인원: 25000,
-    추가: ['AI 상담 100회 5,000원', '문서·검토 30건 5,000원', '활동 영상 5편 3,000원', '저장 10GB 3,000원'],
-    별도: ['컨설팅 보고서(사람이 쓰는 보고서) — 건별 견적', '세무 공동구매 — 조합이 세무사 사무소와 직접 계약·직접 지급(사교원은 소개·연결 대가를 받지 않습니다)'],
-  },
-  fed: {
-    이름: '연합회 회원',
-    기본: {값: 30000, 한도: '사용자 5명 · 회원조합 20곳까지(넘으면 1곳당 월 1,000원) · 저장 10GB', 메뉴: [
-      '회원 지원업무 — 회원조합 지원 현황판 · 지원요청 처리 · 조합·마을 현황 · 공모·심사 지원 · 세무 파일럿 KPI · 회원조합 신고 현황 · 공지·자료 배포',
-      '연합회 자체 사무 — 사무국 운영(총회·이사회) · 회비 부과·수납 · 공동사업 · 연합회 회계·결산 · 재무제표',
-      '소통 — 전남 발전 현황 · 내 페이지']},
-    선택: [
-      {k:'review',이름:'📄 서류 검토 대행', 메뉴:'회원조합 서류 AI 검토', 한도:'월 60건', 값:10000},
-      {k:'docs',  이름:'📝 문서 작성 지원', 메뉴:'문서 작성 지원', 한도:'월 60건', 값:10000},
-      {k:'chat',  이름:'💬 AI 상담·법령 안내', 메뉴:'AI 상담 · 법령·인허가 안내', 한도:'월 200회', 값:5000},
-      {k:'video', 이름:'🎬 활동 영상 만들기', 메뉴:'활동 영상 만들기', 한도:'월 5편', 값:3000},
-    ],
-    올인원: 50000,
-    추가: ['AI 상담 100회 5,000원', '문서·검토 30건 5,000원', '활동 영상 5편 3,000원', '저장 10GB 3,000원'],
-    별도: ['회원조합 수가 20곳을 넘으면 1곳당 월 1,000원(위 계산에 회원조합 수를 넣으면 더해집니다)', '회원조합 이용료 일괄 납부 — 5곳 이상이면 회원조합 요금 20% 할인'],
-    포함조합: 20, 초과값: 1000,
-  },
+/* 요금 안내 — 2026-11-27 판. 값은 통합사이트 이용권 서버(/api/membership/plans) 한 곳에서 읽는다(두 벌 금지).
+   11-27 오후 이사장 결정: 협동조합 20,000원 · 연합회 단위조합 5·10·20곳 이내 45,000·90,000·135,000원 · 컨설턴트 25,000원(모두 부가세 별도).
+   추가요금은 「활동 영상 만들기」 하나 — 관리하는 조합 수로 5곳 이내 1만·10곳 이내 2만·20곳 이내 3만원(협동조합은 1곳이라 1만원).
+   컨설턴트가 자기 AI 를 연결하면(내 AI 연결) 기본요금 30% 할인, 그때 사이트 AI 는 하루 10번. 서버가 응답하지 않을 때만 아래 PRC_FALLBACK 으로 그린다. */
+const PRC_MENUS = {
+  coop: ['현황·업무 — 현황 대시보드 · 조합 원장 · 할 일 · 업무 시작(상담·자료함·문서)',
+    '조합 대장·업무 — 업무 달력 · 계약서 대장 · 회의록 대장 · 지출결의 · 거래처·표준장부',
+    '설립·건설 — 마을회·조합 설계 · 설립 내비게이터·청약 · 신청 과정 점검표 · 사업비·부품 구성 · 자부담·융자 신청 · 사업자(ReSCO) 선정 · 서류 AI 검토 · 법령·인허가',
+    '운영관리 — 발전·정산·배당 · 수익 시뮬레이션·배분 계획 · 회계·세무 자진신고 · 세금·4대보험 신고 · 잉여금 처분 계산 · 재무제표 · 월마감·보고서 · 조합원 관리 · 일정·마감',
+    'AI — AI 상담·법령 안내 · 문서 자동 생성 · 서류 AI 검토 (기본요금에 포함)'],
+  fed: ['회원 지원업무 — 회원조합 지원 현황판 · 지원요청 처리 · 조합·마을 현황 · 공모·심사 지원 · 서류 검토 대행 · 문서 작성 지원 · 회원조합 신고 현황 · 공지·자료 배포',
+    '연합회 자체 사무 — 사무국 운영(총회·이사회) · 회비 부과·수납 · 공동사업 · 연합회 회계·결산 · 재무제표',
+    'AI — AI 상담·법령 안내 · 서류 검토 대행 · 문서 작성 지원 (기본요금에 포함)'],
+  consult: ['맡은 조합 — 조합이 승인한 협동조합 여러 곳을 오가며 그 조합 회원 권한으로 업무 화면 전부(조합 수와 관계없이 정액, 20곳까지)',
+    '신청 과정 점검표 — 사전 진단부터 제출·선정 뒤까지 8단계, 조합과 함께 봄',
+    'AI — AI 상담·문서 생성·서류 AI 검토 · 내 AI 연결(MCP)로 맡은 조합 자료를 내 AI 에서'],
 };
-const PRC_DISC = {창립해: 2027, 창립율: 0.5, 일괄최소: 5, 일괄율: 0.2};   // 11-15 이사장 결정: 창립 회원 첫해 반값, 연합회 일괄 납부 5곳 이상 20%
-let _prcFounder = false, _prcBulkN = 0;
-const PRC_FREE = ['2026년 12월까지 모든 회원의 모든 메뉴(무료 시범)', '손님 화면 전부 — 사업소개 · 사례 · FAQ · 신청·진단 · 간이 수익 계산 · 상담 신청', '상업발전 전 협동조합의 모든 메뉴', '회원조합 가운데 상업운전을 시작한 곳이 없는 동안 연합회의 모든 메뉴'];
-let _prcKind = 'coop';
-const _prcPick = {coop: {}, fed: {}};
-let _prcFedN = 20;   // 연합회 회원조합 수(계산기)
+const PRC_FALLBACK = {products: [
+  {product:'coop', name:'햇소자 협동조합', tax:'vat', base:22000, tiers:[], options:[{key:'video', name:'활동 영상 만들기', amount:11000}], tier_options:{}, included:[]},
+  {product:'fed', name:'햇소자 연합회', tax:'vat', base:49500, tiers:[{key:'c5', name:'단위조합 5곳 이내', amount:49500},{key:'c10', name:'단위조합 10곳 이내', amount:99000},{key:'c20', name:'단위조합 20곳 이내', amount:148500}],
+   options:[{key:'video', name:'활동 영상 만들기', amount:11000}], tier_options:{video:{c5:11000, c10:22000, c20:33000}}, included:[]},
+  {product:'consult', name:'햇소자 컨설턴트', tax:'vat', base:27500, tiers:[{key:'c5', name:'맡은 조합 5곳 이내', amount:27500},{key:'c10', name:'맡은 조합 10곳 이내', amount:27500},{key:'c20', name:'맡은 조합 20곳 이내', amount:27500}],
+   options:[{key:'video', name:'활동 영상 만들기', amount:11000},{key:'byo', name:'내 AI 연결 — 기본요금 30% 할인(사이트 AI 하루 10번)', amount:-8250}], tier_options:{video:{c5:11000, c10:22000, c20:33000}}, included:[]},
+], year_months: 10};
+const PRC_FREE = ['2026년 12월까지 모든 회원의 모든 메뉴(무료 시범)', '손님 화면 전부 — 사업소개 · 사례 · FAQ · 신청·진단 · 간이 수익 계산 · 상담 신청', '회원 가입과 승인 심사'];
+let _prcKind = 'coop', _prcPlans = null, _prcLoading = false;
+const _prcPick = {coop: {opts: []}, fed: {opts: []}, consult: {opts: []}};
 const prcWon = n => Number(n).toLocaleString('ko-KR') + '원';
+const prcSup = n => Math.round(n / 1.1);   // 부가세 포함 값 → 공급가
+function prcProd(k){ const L = (_prcPlans && _prcPlans.products) || PRC_FALLBACK.products; return L.find(p => p.product === k) || PRC_FALLBACK.products.find(p => p.product === k); }
+function prcTier(p, pick){ const t = p.tiers || []; return t.length ? (t.find(x => pick.tier === x.key) || t[0]) : null; }
+function prcOpt(p, o, t){ const to = (p.tier_options || {})[o.key]; return (to && t && to[t.key] != null) ? +to[t.key] : +o.amount; }
 function pricingRender(){
   const box = document.getElementById('prcBody'); if(!box) return;
+  if(!_prcPlans && !_prcLoading && REAL_API){
+    _prcLoading = true;
+    fetch('/api/membership/plans', {credentials:'same-origin'}).then(r => r.json()).then(d => { if(d && d.ok) _prcPlans = d; }).catch(() => {}).finally(() => { if(currentRoute() === 'pub/pricing') pricingRender(); });
+  }
   document.querySelectorAll('#v-pub-pricing .prc-tab').forEach(b => {
     const on = b.dataset.prc === _prcKind; b.classList.toggle('on', on); b.setAttribute('aria-selected', on ? 'true' : 'false');
     b.onclick = () => { _prcKind = b.dataset.prc; pricingRender(); };
   });
-  const P = PRICING[_prcKind], pick = _prcPick[_prcKind];
-  const 단품합 = P.기본.값 + P.선택.reduce((a, o) => a + o.값, 0);
+  const p = prcProd(_prcKind), pick = _prcPick[_prcKind], tiers = p.tiers || [], t = prcTier(p, pick);
+  const same = tiers.length > 1 && tiers.every(x => x.amount === tiers[0].amount);
+  const base = t ? t.amount : p.base;
   box.innerHTML = `
     <div class="card"><div class="prc-base"><div><h3 class="serif" style="margin-bottom:4px;">기본 이용료</h3>
-      <div class="text-small text-mute">${escapeHtml(P.기본.한도)} · AI를 쓰지 않는 운영·관리 메뉴 전부</div></div>
-      <div class="prc-amt">${prcWon(P.기본.값)}<small> / 월</small></div></div>
-      <ul class="prc-menus">${P.기본.메뉴.map(m => `<li>${escapeHtml(m)}</li>`).join('')}</ul></div>
-    <div class="card"><h3 class="serif" style="margin-bottom:4px;">필요한 메뉴 고르기</h3>
-      <p class="text-small text-mute" style="margin:0 0 4px;">고른 메뉴만큼 기본 이용료에 더해집니다.</p>
-      ${P.선택.map(o => `<label class="prc-opt"><input type="checkbox" data-k="${o.k}"${pick[o.k] ? ' checked' : ''}>
-        <div><div class="nm">${escapeHtml(o.이름)}</div><div class="ds">${escapeHtml(o.메뉴)} · ${escapeHtml(o.한도)}</div></div>
-        <div class="pr">+${prcWon(o.값)}</div></label>`).join('')}
-      <div style="margin-top:8px;"><button type="button" class="btn btn-outline btn-sm" id="prcAll">전부 고르기(올인원)</button>
-        <button type="button" class="btn btn-ghost btn-sm" id="prcNone">고른 것 지우기</button></div>
-      ${P.포함조합 ? `<label class="prc-opt" style="grid-template-columns:1fr auto;"><div><div class="nm">👥 회원조합 수</div><div class="ds">${P.포함조합}곳까지 기본 이용료에 들어 있고, 넘는 1곳마다 월 ${prcWon(P.초과값)}</div></div>
-        <input type="number" id="prcFedN" min="1" max="999" step="1" value="${_prcFedN}" inputmode="numeric" style="width:84px;height:36px;margin:0;padding:4px 8px;border:1px solid var(--line);border-radius:var(--radius-sm);"></label>` : ''}
-      <label class="prc-opt"><input type="checkbox" id="prcFounder"${_prcFounder ? ' checked' : ''}><div><div class="nm">🌱 창립 회원(2026년 안에 가입 신청)</div><div class="ds">${PRC_DISC.창립해}년 한 해 위 요금의 반값으로 계산합니다</div></div><div class="pr">−50%</div></label></div>
+      <div class="text-small text-mute">${_prcKind === 'consult' ? '맡은 조합이 몇 곳이든 같은 값' : 'AI 상담·문서 생성·서류 검토까지 포함'}</div></div>
+      <div class="prc-amt">${prcWon(prcSup(base))}<small> / 월 · 부가세 포함 ${prcWon(base)}</small></div></div>
+      <ul class="prc-menus">${(PRC_MENUS[_prcKind] || []).map(m => `<li>${escapeHtml(m)}</li>`).join('')}</ul></div>
+    <div class="card"><h3 class="serif" style="margin-bottom:4px;">${tiers.length ? (same ? '맡을 조합 수' : '포함할 단위조합 수') : '고르기'}</h3>
+      ${tiers.length ? `<p class="text-small text-mute" style="margin:0 0 4px;">${same ? '기본요금은 같고, 활동 영상 값만 달라집니다.' : '단위조합 수에 따라 기본 이용료가 정해집니다.'}</p>` + tiers.map(x => `<label class="prc-opt"><input type="radio" name="prcTier" data-tier="${escapeHtml(x.key)}"${t && t.key === x.key ? ' checked' : ''}>
+        <div><div class="nm">${escapeHtml(x.name)}</div></div><div class="pr">${same ? '' : prcWon(prcSup(x.amount))}</div></label>`).join('') : ''}
+      ${(p.options || []).map(o => { const v = prcOpt(p, o, t); return `<label class="prc-opt"><input type="checkbox" data-k="${escapeHtml(o.key)}"${pick.opts.includes(o.key) ? ' checked' : ''}>
+        <div><div class="nm">${o.key === 'video' ? '🎬 ' : o.key === 'byo' ? '🤖 ' : ''}${escapeHtml(o.name)}</div><div class="ds">${o.key === 'video' ? '관리하는 조합 수로 값이 정해집니다(5곳 이내 1만·10곳 이내 2만·20곳 이내 3만원, 부가세 별도)' : o.key === 'byo' ? '내 AI(클로드 등)를 맡은 조합 자료에 연결해 쓰는 대신 기본요금을 30% 깎습니다. 그때 사이트 AI 는 하루 10번까지' : ''}</div></div>
+        <div class="pr">${v < 0 ? '−' : '+'}${prcWon(prcSup(Math.abs(v)))}</div></label>`; }).join('')}
+    </div>
     <div class="card prc-sum" id="prcSum" aria-live="polite"></div>
-    ${_prcKind === 'fed' ? `<div class="card"><h3 class="serif">회원조합 이용료 일괄 납부</h3>
-      <p>연합회가 회원조합들의 이용료를 한꺼번에 내면, <strong>${PRC_DISC.일괄최소}곳 이상일 때 회원조합 요금을 ${Math.round(PRC_DISC.일괄율 * 100)}% 할인</strong>합니다.</p>
-      <label class="prc-opt" style="grid-template-columns:1fr auto;"><div><div class="nm">일괄 납부할 회원조합 수(조합 올인원 기준)</div><div class="ds">조합 올인원 월 ${prcWon(PRICING.coop.올인원)} × 곳 수</div></div>
-        <input type="number" id="prcBulkN" min="0" max="999" step="1" value="${_prcBulkN}" inputmode="numeric" style="width:84px;height:36px;margin:0;padding:4px 8px;border:1px solid var(--line);border-radius:var(--radius-sm);"></label>
-      <div id="prcBulkOut" class="text-small" style="margin-top:6px;"></div></div>` : ''}
-    <div class="card"><h3 class="serif">올인원</h3>
-      <p>기본 이용료와 선택 메뉴 전부를 <strong>월 ${prcWon(P.올인원)}</strong>에 씁니다(따로 사면 ${prcWon(단품합)}). 1년치를 한 번에 내시면 <strong>${prcWon(P.올인원 * 10)}</strong>입니다.</p></div>
     <div class="grid grid-2">
-      <div class="card"><h3 class="serif">한도를 넘으면 — 추가 묶음</h3><ul class="prc-list">${P.추가.map(m => `<li>${escapeHtml(m)}</li>`).join('')}</ul></div>
-      <div class="card"><h3 class="serif">무료로 쓰는 것</h3><ul class="prc-list">${PRC_FREE.map(m => `<li>${escapeHtml(m)}</li>`).join('')}</ul>
-        <h3 class="serif" style="margin-top:14px;">따로 정하는 것</h3><ul class="prc-list">${P.별도.map(m => `<li>${escapeHtml(m)}</li>`).join('')}</ul></div>
+      <div class="card"><h3 class="serif">무료로 쓰는 것</h3><ul class="prc-list">${PRC_FREE.map(m => `<li>${escapeHtml(m)}</li>`).join('')}</ul></div>
+      <div class="card"><h3 class="serif">신청</h3><ul class="prc-list"><li>신청은 통합사이트 「서비스 이용 신청」 한 곳에서 받고, 협동조합·연합회·컨설턴트는 사교원 승인을 거칩니다.</li>
+        <li>컨설턴트가 조합 자료를 보려면 그 조합이 「컨설턴트 연결」에서 연결 번호를 만들어 건네고 요청을 승인해야 합니다.</li>
+        <li><a href="${escapeHtml(HS_APPLY_URL[_prcKind] || '/#/join')}">서비스 이용 신청 ›</a></li></ul></div>
     </div>`;
-  box.querySelectorAll('.prc-opt input[type=checkbox]').forEach(c => c.onchange = () => { pick[c.dataset.k] = c.checked; prcCalc(); });
-  const fd = document.getElementById('prcFounder'); if(fd) fd.onchange = () => { _prcFounder = fd.checked; prcCalc(); };
-  const bn = document.getElementById('prcBulkN'); if(bn) bn.oninput = () => { const v = parseInt(bn.value, 10); _prcBulkN = (v >= 0 && v < 1000) ? v : 0; prcCalc(); };
-  const fn = document.getElementById('prcFedN');
-  if(fn) fn.oninput = () => { const v = parseInt(fn.value, 10); _prcFedN = (v > 0 && v < 1000) ? v : 20; prcCalc(); };
-  document.getElementById('prcAll').onclick = () => { P.선택.forEach(o => pick[o.k] = true); pricingRender(); };
-  document.getElementById('prcNone').onclick = () => { P.선택.forEach(o => pick[o.k] = false); pricingRender(); };
+  box.querySelectorAll('input[data-tier]').forEach(r => r.onchange = () => { pick.tier = r.dataset.tier; pricingRender(); });
+  box.querySelectorAll('input[data-k]').forEach(c => c.onchange = () => { const i = pick.opts.indexOf(c.dataset.k); if(c.checked && i < 0) pick.opts.push(c.dataset.k); if(!c.checked && i >= 0) pick.opts.splice(i, 1); prcCalc(); });
   prcCalc();
 }
 function prcCalc(){
   const el = document.getElementById('prcSum'); if(!el) return;
-  const P = PRICING[_prcKind], pick = _prcPick[_prcKind];
-  const 고른 = P.선택.filter(o => pick[o.k]);
-  const 단품 = P.기본.값 + 고른.reduce((a, o) => a + o.값, 0);
-  const 전부 = 고른.length === P.선택.length;
-  const 초과 = P.포함조합 ? Math.max(0, _prcFedN - P.포함조합) * P.초과값 : 0;   // 연합회 20곳 초과분은 올인원에도 따로 더한다
-  const 정월 = (전부 ? P.올인원 : Math.min(단품, P.올인원)) + 초과;
-  const 월 = _prcFounder ? Math.round((정월 - 초과) * (1 - PRC_DISC.창립율)) + 초과 : 정월;   // 20곳 초과분은 창립 반값에서 뺀다(정책 문서: 기본·선택·올인원만)
-  const bo = document.getElementById('prcBulkOut');
-  if(bo){ const n = _prcBulkN, 정 = n * PRICING.coop.올인원, 할 = n >= PRC_DISC.일괄최소 ? Math.round(정 * (1 - PRC_DISC.일괄율)) : 정;
-    const 창 = _prcFounder ? Math.round(정 * (1 - PRC_DISC.창립율)) : 정;   // 11-16 이사장 결정: 할인은 겹치지 않고 큰 쪽 하나만
-    bo.textContent = !n ? '' : (_prcFounder && 창 <= 할) ? `회원조합 ${n}곳: 월 ${prcWon(정)} → ${prcWon(창)}(창립 회원 반값 — 일괄 납부 할인과 겹치지 않고 큰 쪽만 적용, 부가세 별도)`
-      : (n >= PRC_DISC.일괄최소 ? `회원조합 ${n}곳 일괄 납부: 월 ${prcWon(정)} → ${prcWon(할)}(${Math.round(PRC_DISC.일괄율 * 100)}% 할인, 부가세 별도)` : `회원조합 ${n}곳: 월 ${prcWon(정)} — ${PRC_DISC.일괄최소}곳 이상부터 할인됩니다`); }
-  const 올인원이싸다 = !전부 && 단품 > P.올인원;
-  el.innerHTML = `<div class="row"><span>기본 이용료</span><span>${prcWon(P.기본.값)}</span></div>
-    ${고른.map(o => `<div class="row"><span>${escapeHtml(o.이름)}</span><span>+${prcWon(o.값)}</span></div>`).join('')}
-    ${(전부 || 올인원이싸다) ? `<div class="row"><span>올인원 할인</span><span>−${prcWon(단품 - P.올인원)}</span></div>` : ''}
-    ${초과 ? `<div class="row"><span>회원조합 ${P.포함조합}곳 초과 ${_prcFedN - P.포함조합}곳</span><span>+${prcWon(초과)}</span></div>` : ''}
-    ${_prcFounder ? `<div class="row"><span>창립 회원 ${PRC_DISC.창립해}년 반값</span><span>−${prcWon(정월 - 월)}</span></div>` : ''}
-    <div class="row" style="border-top:1px solid var(--primary-100);padding-top:8px;margin-top:8px;"><span>한 달 요금 <span class="text-small text-mute">(부가세 별도)</span></span><span class="tot">${prcWon(월)}</span></div>
-    <div class="row text-small text-mute"><span>부가세 포함</span><span>${prcWon(Math.round(월 * 1.1))}</span></div>
-    <div class="row text-small text-mute"><span>1년 한 번에(10개월 값, 부가세 별도)</span><span>${prcWon(월 * 10)}</span></div>
-    ${올인원이싸다 ? `<div class="prc-hint">고르신 메뉴는 올인원보다 비싸서 올인원 값(${prcWon(P.올인원)})으로 계산했습니다. 나머지 메뉴도 같이 쓰실 수 있습니다.</div>` : ''}`;
+  const p = prcProd(_prcKind), pick = _prcPick[_prcKind], t = prcTier(p, pick);
+  const base = t ? t.amount : p.base, 고른 = (p.options || []).filter(o => pick.opts.includes(o.key));
+  const 월 = base + 고른.reduce((a, o) => a + prcOpt(p, o, t), 0), ym = (_prcPlans && _prcPlans.year_months) || PRC_FALLBACK.year_months;
+  el.innerHTML = `<div class="row"><span>기본 이용료${t && !(p.tiers || []).every(x => x.amount === base) ? ' (' + escapeHtml(t.name) + ')' : ''}</span><span>${prcWon(prcSup(base))}</span></div>
+    ${고른.map(o => { const v = prcOpt(p, o, t); return `<div class="row"><span>${escapeHtml(o.name)}</span><span>${v < 0 ? '−' : '+'}${prcWon(prcSup(Math.abs(v)))}</span></div>`; }).join('')}
+    <div class="row" style="border-top:1px solid var(--primary-100);padding-top:8px;margin-top:8px;"><span>한 달 요금 <span class="text-small text-mute">(부가세 별도)</span></span><span class="tot">${prcWon(prcSup(월))}</span></div>
+    <div class="row text-small text-mute"><span>부가세 포함(실제 내는 값)</span><span>${prcWon(월)}</span></div>
+    <div class="row text-small text-mute"><span>1년 한 번에(${ym}개월 값, 부가세 포함)</span><span>${prcWon(월 * ym)}</span></div>`;
 }
 
 /* 11-27 이사장 「햇소자에 일반회원으로 로그인하고 유료회원을 신청하는 곳이 눈에 띄지 않아」:
    통합 계정으로 로그인했지만 햇소자에선 손님(일반·무료회원)인 사람에게 공개 화면 위 띠·사이드바·가입절차·요금 화면에 「유료회원 신청」 단추.
    신청은 통합사이트 한 곳(/#/join)에서 받고(승인은 통합관리자 「회원·신청·납부」), ?pick= 으로 협동조합·연합회를 미리 골라 둔다. */
-const HS_APPLY_URL = {coop:'/#/join?pick=coop', fed:'/#/join?pick=fed'};
+const HS_APPLY_URL = {coop:'/#/join?pick=coop', fed:'/#/join?pick=fed', consult:'/#/join?pick=consult'};
 function hsApplyWho(){
   const u = currentUser();
   if(!u || !u.unified || u.preview || u.viewVillage) return null;       // 비로그인·체험·관리자 미리보기는 해당 없음
@@ -3105,7 +3368,7 @@ function sideSuggest(role){
   const o = _sideUse(), 쌓임 = _sideDaysAgo(o.since);
   if(쌓임 < 14) return {ready:false, days:쌓임, list:[]};
   const list = [];
-  (ROLE_MENUS[role] || []).forEach(([, items]) => items.forEach(([s, p, e, n]) => {
+  roleMenus(role).forEach(([, items]) => items.forEach(([s, p, e, n]) => {
     if(menuHidden(s, p) || _sideKeep(s, p) || sideIsHidden(s, p)) return;
     const d = _sideDaysAgo(o.last[_sideKey(s, p)]);
     if(d === null || d > 30) list.push(_sideKey(s, p));
@@ -3140,7 +3403,7 @@ function renderRoleSidebar(role, scope, active){
       <button class="side-pill gold" onclick="location.hash='#/pub/pricing'" title="쓰는 서비스와 이용료를 봅니다">💳 이용 서비스·요금</button>
       <button class="side-pill" onclick="sideEditToggle()" title="안 쓰는 메뉴를 감추거나 다시 보이게 합니다">⚙ 메뉴 정리</button>
       <a class="side-pill side-hub" href="/">← 통합사이트</a>
-    </div>`) + (ROLE_MENUS[role] || []).map(([label, items], gi) => {
+    </div>`) + roleMenus(role).map(([label, items], gi) => {
     const 보일 = items.filter(([s,p]) => !menuHidden(s, p)).filter(([s,p]) => {
       const h = sideIsHidden(s, p); if(h) 감춤수++;
       return _sideEdit || !h || s + '/' + p === cur; });
@@ -3244,6 +3507,10 @@ function renderMemberPage(page){
     case 'chat':      return memChat();
     case 'ask':       return memAsk();
     case 'video':     return memVideo();
+    case 'consult':   return memConsult();
+    case 'ctools':    return memCtools();
+    case 'consultai': return memConsultAi();
+    case 'consultlink': return memConsultLink();
     default:          return memDashboard(u);
   }
 }
@@ -18535,6 +18802,7 @@ function bootLand(){
   return true;
 }
 eduBoot().then(() => ssoBoot()).then(bootLand).then(() => eduCheck()).then(() => { let r = null; try{ r = sessionStorage.getItem('sv_demo_after'); sessionStorage.removeItem('sv_demo_after'); }catch(e){} if(r) demoLogin(r); }).catch(() => {});   // 통합 계정 세션이 있으면 자동 로그인 (sakyowon.co.kr 서빙 시)
+consultCheck();   // 11-27 컨설턴트로 들어간 조합이 서버에서 풀렸으면 본래 화면으로
 viewCoopCheck();   // 조합 보기 중이었는데 서버에서 이미 풀렸으면 관리자로 되돌린다
 if(!bootLand()) navigate();
 

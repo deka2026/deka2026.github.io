@@ -1032,7 +1032,7 @@ const TREE = [
 const RANK = { admin: 5, staff: 4, federation: 3, coop: 2, general: 1 };
 const ROLE_KO = { admin: '통합관리자', staff: '매니저회원', federation: '연합회회원', coop: '조합회원', general: '일반이용자' };
 /* 11-18 등급 일곱: 저장값(role)은 다섯 그대로, 정책회원·개인회원·무료이용회원은 서버(membership)가 tier 로 판정해 준다. tier 칸이 없는 서버에서는 role·체크권한으로 어림한다 */
-const TIER_KO = { admin: '통합관리자', staff: '매니저', federation: '연합회원', coop: '협동조합회원', policy: '정책회원', personal: '개인회원', free: '무료이용회원' };
+const TIER_KO = { admin: '통합관리자', staff: '매니저', federation: '연합회원', coop: '협동조합회원', consultant: '컨설턴트회원', policy: '정책회원', personal: '개인회원', free: '무료이용회원' };
 function tierOf(u) {
   if (!u) return '';
   if (u.tier && TIER_KO[u.tier]) return u.tier;
@@ -1154,15 +1154,19 @@ const HS = '/hatsoja/#/', AC = '/academy-site/#';
 const SVC = {
   acad: { n: '아카데미', c: 'c-aca', img: 's_aca.jpg', icn: 'book', items: [['아카데미 홈', '/academy-site/'], ['실습 15단계', AC + 'course-practice'], ['학습 개요', AC + 'course-overview'], ['지식 검증 게임', AC + 'verify-game'], ['팀러닝', AC + 'tl-home'], ['화상회의', AC + 'meeting']] },
   policy: { n: '의정지원시스템', c: 'c-pol', icn: 'gov', items: [['의정지원시스템 열기', HOME + 'policy'], ['의정지원 사이트(공약·조례·문서작성·브리핑)', 'https://talk.sakyowon.co.kr/system', 1], ['의정소통(대화방)', 'https://talk.sakyowon.co.kr/chat', 1]] },
-  coop: { n: '햇소자', c: 'c-hat', img: 's_hat.jpg', icn: 'sun', items: [['업무 시작', HS + 'mem/home'], ['현황 대시보드', HS + 'mem/dashboard'], ['조합 원장', HS + 'mem/state'], ['업무 달력', HS + 'mem/cycle'], ['발전·정산·배당', HS + 'mem/power']] },   // 11-27: 햇소자 11-26 메뉴(업무 시작 중심)와 맞춤
-  fed: { n: '햇소자 연합회', c: 'c-hat', img: 's_fed.jpg', icn: 'users', items: [['회원조합 지원 현황판', HS + 'mem/fedsupport'], ['지원요청 처리', HS + 'mem/fedqueue'], ['조합·마을 현황', HS + 'adm/villages'], ['공지·자료 배포', HS + 'mem/library'], ['사무국 운영', HS + 'mem/fedoffice'], ['전남 발전 현황', HS + 'mem/stat']] },
+  coop: { n: '햇소자', c: 'c-hat', img: 's_hat.jpg', icn: 'sun', items: [['업무 시작', HS + 'mem/home'], ['현황 대시보드', HS + 'mem/dashboard'], ['조합 원장', HS + 'mem/state'], ['업무 달력', HS + 'mem/cycle'], ['발전·정산·배당', HS + 'mem/power'], ['AI 상담', HS + 'mem/chat'], ['문서 자동 생성', HS + 'mem/docs'], ['서류 AI 검토', HS + 'mem/review'], ['세금·4대보험 신고', HS + 'mem/taxops']] },   // 11-27: 햇소자 11-26 메뉴(업무 시작 중심)와 맞춤
+  fed: { n: '햇소자 연합회', c: 'c-hat', img: 's_fed.jpg', icn: 'users', items: [['회원조합 지원 현황판', HS + 'mem/fedsupport'], ['지원요청 처리', HS + 'mem/fedqueue'], ['조합·마을 현황', HS + 'adm/villages'], ['공지·자료 배포', HS + 'mem/library'], ['사무국 운영', HS + 'mem/fedoffice'], ['전남 발전 현황', HS + 'mem/stat'], ['서류 검토 대행', HS + 'mem/review'], ['문서 작성 지원', HS + 'mem/docs'], ['AI 상담', HS + 'mem/chat']] },
+  /* 11-27 이사장 지시: 햇소자 컨설턴트 — 조합이 승인한 여러 조합을 오가며 신청 과정 도구를 쓴다 */
+  consult: { n: '햇소자 컨설턴트', c: 'c-hat', img: 's_hat.jpg', icn: 'tool', items: [['맡은 조합', HS + 'mem/consult'], ['신청 과정 점검표', HS + 'mem/ctools'], ['내 AI 연결', HS + 'mem/consultai']] },
 };
 /* 햇소자 선택 기능(이용권 options 키) → 세부 메뉴. 이용권이 있으면 고른 것만, 등급으로 물러선 회원(이용권 없음)은 전부 */
 const SVC_OPT = {
-  coop: { chat: ['AI 상담', HS + 'mem/chat'], docs: ['문서 자동 생성', HS + 'mem/docs'], review: ['서류 AI 검토', HS + 'mem/review'], video: ['활동 영상 만들기', HS + 'mem/video'], tax: ['세금·4대보험 신고', HS + 'mem/taxops'] },
-  fed: { review: ['서류 검토 대행', HS + 'mem/review'], docs: ['문서 작성 지원', HS + 'mem/docs'], chat: ['AI 상담', HS + 'mem/chat'], video: ['활동 영상 만들기', HS + 'mem/video'] },
+  /* 11-27 오후 이사장 결정: 추가요금은 「활동 영상 만들기」 하나 — 나머지 기능은 기본요금에 포함(위 SVC items) */
+  coop: { video: ['활동 영상 만들기', HS + 'mem/video'] },
+  fed: { video: ['활동 영상 만들기', HS + 'mem/video'] },
+  consult: { video: ['활동 영상 만들기', HS + 'mem/video'] },
 };
-const PROD_SVC = { academy: 'acad', coop: 'coop', fed: 'fed', policy: 'policy' };
+const PROD_SVC = { academy: 'acad', coop: 'coop', fed: 'fed', consult: 'consult', policy: 'policy' };
 let MB = null, MB_STATE = '';         // /api/membership/me 응답 · '' 아직 | 'ok' | 'none'(서버에 모듈 없음) | 'err'
 /* 내가 쓰는 서비스 = 서버의 services(고른 이용권) + 등급으로 물러서기(아무도 쓰던 메뉴를 잃지 않게):
    통합관리자는 전 서비스, 매니저는 아카데미 + 체크권한으로 열린 것(「햇소자관리」→ 햇소자·연합회, 「정책지원관」→ 의정지원 — 실제로 열리는 것만 보인다),
@@ -1178,6 +1182,7 @@ function myServiceKeys(u) {
   if (pol) out.push('policy');
   if (hs || sv.includes('coop') || u.role === 'coop') out.push('coop');
   if (hs || sv.includes('fed') || u.role === 'federation') out.push('fed');
+  if (sv.includes('consult')) out.push('consult');   // 11-27 컨설턴트(이용권으로만)
   return out;
 }
 function svcItems(k) {
@@ -1601,6 +1606,7 @@ const PM = {   // 상품별 그림·설명(값 없음 — 이름·이용료는 �
   policy: { c: 'c-pol', i: 'gov', who: '의정지원시스템 회원', lines: ['공약 · 조례', '문서작성 · 브리핑', '행감 자료실 · 의정소통'] },
   coop: { c: 'c-hat', i: 'sun', who: '햇빛소득마을 협동조합', lines: ['햇소자 조합 메뉴', '자료함 · 우리 조합 현황 · 설립 · 운영관리'] },
   fed: { c: 'c-hat', i: 'users', who: '햇빛소득마을 연합회', lines: ['햇소자 연합회 메뉴', '회원조합 지원 · 공지·자료 배포'] },
+  consult: { c: 'c-hat', i: 'tool', who: '햇빛소득마을 신청 컨설턴트', lines: ['맡은 조합 화면(조합이 승인한 곳, 조합 회원 권한)', '신청 과정 점검표 · 여러 조합 정액', '내 AI 연결(기본요금 30% 할인)'] },
 };
 const pmOf = k => PM[k] || { c: 'c-g', i: 'grid', who: '', lines: [] };
 
@@ -1627,12 +1633,19 @@ function svcCards() {
     return `<article class="card tcard ${s.c}" data-mc data-svc="${esc(s.id)}"><div class="th">${s.img ? pic(s.img[0], s.img[1]) : ILL[s.ill]()}</div><div class="tb"><h3>${esc(s.n)}</h3><p class="one">${esc(s.one)}</p><div class="who2">${s.who.map(w => `<span class="cchip">${esc(w)}</span>`).join('')}</div><p class="more">${esc(s.more)}${s.open ? '' : ' 로그인하면 사이드바에서 세부 메뉴를 엽니다.'}</p><div>${btn}</div></div></article>`;
   }).join('') + '</div>';
 }
-const MX_HEAD = ['통합관리자', '매니저', '연합회원', '협동조합회원', '정책회원', '개인회원', '무료이용회원'];
+const MX_HEAD = ['통합관리자', '매니저', '연합회원', '협동조합회원', '컨설턴트회원', '정책회원', '개인회원', '무료이용회원'];
 const isStaffView = () => !!me && (RANK[me.role] || 0) >= RANK.staff;   // 11-19 이사장 지시: 직원(매니저·통합관리자) 전용 권한·메뉴 안내는 직원에게만
 const MX_HIDE = 2;   // 11-19 이사장 지시: 첫 화면 표에서 통합관리자·매니저 열은 숨긴다(내부 직원 등급). 숨긴 열만 ● 인 줄(그룹웨어·관리)도 뺀다
-const MX = [['사이트 소개·문의·공개 자료', '●', '●', '●', '●', '●', '●', '●'], ['AI 대화창', '●', '●', '●', '●', '●', '●', '하루 한도'], ['내 폴더', '●', '●', '●', '●', '●', '●', '—'],
-  ['아카데미(실습·학습·팀러닝·화상회의)', '●', '●', '●', '●', '●', '●', '맛보기'], ['햇소자 조합 메뉴', '●', '체크권한', '—', '●', '—', '—', '—'], ['햇소자 연합회 메뉴', '●', '체크권한', '●', '—', '—', '—', '—'],
-  ['의정지원시스템', '●', '체크권한', '선택', '선택', '●', '선택', '둘러보기'], ['그룹웨어(머리 단추)', '●', '●', '—', '—', '—', '—', '—'], ['관리(회원·납부·발송)', '●', '체크권한', '—', '—', '—', '—', '—']];
+const MX = [['사이트 소개·문의·공개 자료', '●', '●', '●', '●', '●', '●', '●', '●'],
+  ['AI 대화창', '●', '●', '●', '●', '●', '●', '●', '하루 한도'],
+  ['내 폴더', '●', '●', '●', '●', '●', '●', '●', '—'],
+  ['아카데미(실습·학습·팀러닝·화상회의)', '●', '●', '●', '●', '선택', '●', '●', '맛보기'],
+  ['햇소자 조합 메뉴', '●', '체크권한', '—', '●', '맡은 조합', '—', '—', '—'],
+  ['햇소자 연합회 메뉴', '●', '체크권한', '●', '—', '—', '—', '—', '—'],
+  ['햇소자 컨설턴트(맡은 조합·신청 과정 점검표)', '●', '—', '선택', '선택', '●', '선택', '선택', '선택'],
+  ['의정지원시스템', '●', '체크권한', '선택', '선택', '선택', '●', '선택', '둘러보기'],
+  ['그룹웨어(머리 단추)', '●', '●', '—', '—', '—', '—', '—', '—'],
+  ['관리(회원·납부·발송)', '●', '체크권한', '—', '—', '—', '—', '—', '—']];
 function pcard(c, i, n, sub, price, tag, lines, extra) {
   return `<article class="card pcard ${c}"><div class="pn"><span class="bub">${ic(i)}</span><span><b>${esc(n)}</b><small>${esc(sub)}</small></span></div>${price}${tag ? `<div>${tag}</div>` : ''}<ul>${lines.map(l => `<li>${ic('check', 's')}<span>${l}</span></li>`).join('')}</ul>${extra || ''}</article>`;
 }
@@ -1643,17 +1656,20 @@ function priceHTML() {
   if (!PLANS.ok) {   // 서버에 이용권 모듈이 아직 없거나 응답 실패 — 화면은 그대로, 값만 「준비 중」
     const wait = '<div class="pp" style="font-size:1.2rem">이용료 안내 준비 중</div>';
     return `<div class="notice" id="priceNone"><b>이용료 안내 준비 중</b> — 등급별 이용료는 곧 이 자리에 안내합니다. 무료이용회원은 지금 바로 가입할 수 있습니다.</div><div class="pgrid">` + freeCard +
-      ['academy', 'policy', 'coop', 'fed'].map(k => pcard(PM[k].c, PM[k].i, TIER_KO[{ academy: 'personal', policy: 'policy', coop: 'coop', fed: 'federation' }[k]], PM[k].who, wait, '', PM[k].lines, k === 'policy' ? `<a class="btn sm" href="${JOIN_POLICY}" target="_blank" rel="noopener" data-ext="policy">의정지원 사이트에서 가입 ↗</a>` : '')).join('') + '</div>' + (staffCard ? '<div class="pgrid pstaff" style="margin-top:14px;grid-auto-flow:row;grid-template-columns:minmax(0,360px)">' + staffCard + '</div>' : '');
+      ['academy', 'policy', 'coop', 'consult', 'fed'].map(k => pcard(PM[k].c, PM[k].i, TIER_KO[{ academy: 'personal', policy: 'policy', coop: 'coop', consult: 'consultant', fed: 'federation' }[k]], PM[k].who, wait, '', PM[k].lines, k === 'policy' ? `<a class="btn sm" href="${JOIN_POLICY}" target="_blank" rel="noopener" data-ext="policy">의정지원 사이트에서 가입 ↗</a>` : '')).join('') + '</div>' + (staffCard ? '<div class="pgrid pstaff" style="margin-top:14px;grid-auto-flow:row;grid-template-columns:minmax(0,360px)">' + staffCard + '</div>' : '');
   }
   const b = billStart(PLANS.billing_from), tl = trialLine(PLANS);
   const prod = p => {
     const m = pmOf(p.product), opts = Array.isArray(p.options) ? p.options : [];
     const lines = m.lines.map(esc);
-    const tiers = Array.isArray(p.tiers) ? p.tiers : [];
-    if (tiers.length) lines.unshift('기본 이용료: ' + tiers.map(x => `${esc(x.name.replace(' 포함', ''))} ${won(x.amount)}`).join(' · '));
-    if (opts.length) lines.push('선택 기능: ' + opts.map(o => `${esc(o.name)} ${won(o.amount)}`).join(' · '));
+    const tiers = Array.isArray(p.tiers) ? p.tiers : [], same = tiersSame(p);   // 컨설턴트는 구간이 기본요금을 바꾸지 않는다(영상 값만)
+    if (tiers.length && !same) lines.unshift('기본 이용료: ' + tiers.map(x => `${esc(x.name.replace(' 포함', ''))} ${won(x.amount)}`).join(' · '));
+    if (Array.isArray(p.included) && p.included.length) lines.push('기본에 포함: ' + p.included.map(esc).join(' · '));
+    opts.forEach(o => { const to = (p.tier_options || {})[o.key];
+      lines.push(o.amount < 0 ? `${esc(o.name)}: ${won(-o.amount)} 할인` : `추가: ${esc(o.name)} ` + (to && tiers.length ? tiers.map(x => `${esc(x.name.replace(' 포함', ''))} ${won(to[x.key])}`).join(' · ') : won(o.amount))); });
     if (p.approve) lines.push('신청 뒤 사교원의 승인을 거칩니다');
-    return pcard(m.c, m.i, p.tier_ko || p.name, m.who || p.name, `<div class="pp">${won(p.base)} <small>/ ${perU(p)}${tiers.length ? '부터' : ''}</small></div>` + (p.tax === 'vat' ? `<div class="p2" style="font-size:.85rem;color:var(--mute)">부가세 포함 · 공급가 ${won(Math.round(p.base / 1.1))}${tiers.length ? '부터' : ''}</div>` : '') + (opts.length ? `<div class="p2">기본 ${tiers.length ? '이용료' : won(p.base)} + 선택 기능${tiers.length && p.allin_gap ? ` · 올인원 = 기본 이용료 + <b>${won(p.allin_gap)}</b>` : p.allin ? ` · 올인원 <b>${won(p.allin)}</b>` : ''}</div>` : ''), taxTag(p.tax), lines);
+    const many = tiers.length && !same;
+    return pcard(m.c, m.i, p.tier_ko || p.name, m.who || p.name, `<div class="pp">${won(p.base)} <small>/ ${perU(p)}${many ? '부터' : ''}</small></div>` + (p.tax === 'vat' ? `<div class="p2" style="font-size:.85rem;color:var(--mute)">부가세 포함 · 공급가 ${won(Math.round(p.base / 1.1))}${many ? '부터' : ''}</div>` : '') + (opts.length ? `<div class="p2">기본 ${many ? '이용료' : won(p.base)}${opts.some(o => o.amount > 0) ? ' + 활동 영상(고르면)' : ''}</div>` : ''), taxTag(p.tax), lines);
   };
   const ext = x => {
     const m = pmOf(x.product), ps = Array.isArray(x.prices) ? x.prices : [], lo = ps.length ? Math.min.apply(null, ps.map(q => +q.amount || 0)) : 0;
@@ -1688,7 +1704,7 @@ function startHTML() {
     `<div class="card feat"><div class="row">${feat('c-g', 'key', '한 계정')}${feat('c-team', 'list', '고른 메뉴만')}${feat('c-fld', 'server', '자체 서버 보관')}${feat('c-pol', 'shield', '개인정보 가림')}</div><h3>무엇이 다른가요</h3><p>자료는 사교원 서버에, AI 는 개인정보를 가린 뒤 처리합니다.<br>자신의 AI 를 연결하여 사용할 수 있습니다.</p></div>` +
     `</div></section></div>` +
     `<div class="band"><div class="uw"><section class="usec" aria-labelledby="hSvc"><div class="sech"><h2 id="hSvc">회원서비스</h2><p>필요한 것만 고르세요.</p></div>${svcCards()}</section></div></div>` +
-    `<div class="uw"><section class="usec" aria-labelledby="hPrice"><div class="sech"><h2 id="hPrice">회원 등급과 이용료</h2><p>등급은 ${isStaffView() ? '일곱' : '다섯'} 가지이고, 고른 서비스에 따라 이용료가 정해집니다.</p></div><div id="priceBox">${priceHTML()}</div></section></div>` +
+    `<div class="uw"><section class="usec" aria-labelledby="hPrice"><div class="sech"><h2 id="hPrice">회원 등급과 이용료</h2><p>등급은 ${isStaffView() ? '여덟' : '여섯'} 가지이고, 고른 서비스에 따라 이용료가 정해집니다.</p></div><div id="priceBox">${priceHTML()}</div></section></div>` +
     `<div class="band"><div class="uw"><section class="usec" aria-labelledby="hMx"><div class="sech"><h2 id="hMx">회원별 이용 메뉴</h2><p>● 이용 가능 · <span class="mxopt">선택</span> 골라서 이용료를 내면 열림</p></div>` +
     `<div class="scroll mx"><table id="mxTable"><thead><tr><th scope="col">메뉴</th>${MX_HEAD.slice(MX_HIDE).map(x => `<th scope="col" class="c">${x}</th>`).join('')}</tr></thead><tbody>${MX.filter(r => r.slice(1 + MX_HIDE).some(v => v !== '—')).map(r => `<tr><th scope="row">${r[0]}</th>${r.slice(1 + MX_HIDE).map(cell).join('')}</tr>`).join('')}</tbody></table></div>` +
     `</section></div></div>` +
@@ -1949,7 +1965,9 @@ function mbClosed() { return !!PLANS && (!PLANS.ok || applyShut()) && !(me && me
 function joinNew() { return { step: me ? 2 : 1, sel: {}, held: {}, f: {}, pay: { method: 'transfer', auto_day: 5, cycle: 'month', depositor: '', receipt_kind: 'income', receipt_no: '', invoice: false, biz_no: '' }, payMode: 'new', payOnly: false, err: '', busy: false, done: null, created: false, seeded: false }; }
 const jProd = k => (PLANS && PLANS.ok) ? PLANS.products.find(p => p.product === k) : null;
 function jTier(p, s) { const t = p.tiers || []; return t.length ? (t.find(x => s.opts.includes(x.key)) || t[0]) : null; }   // 11-27: 연합회 「단위조합 N곳 포함」 구간
-function jPrice(p, s) { const t = jTier(p, s), base = t ? +t.amount : (+p.base || 0); const sum = base + (p.options || []).filter(o => s.opts.includes(o.key)).reduce((a, o) => a + (+o.amount || 0), 0); const cap = t && p.allin_gap ? base + (+p.allin_gap) : (+p.allin || 0); return cap ? Math.min(sum, cap) : sum; }
+function tiersSame(p) { const t = p.tiers || []; return t.length > 1 && t.every(x => +x.amount === +t[0].amount); }
+function optAmt(p, o, t) { const to = (p.tier_options || {})[o.key]; return (to && t && to[t.key] != null) ? +to[t.key] : (+o.amount || 0); }   // 11-27 구간마다 값이 다른 선택 기능(활동 영상)
+function jPrice(p, s) { const t = jTier(p, s), base = t ? +t.amount : (+p.base || 0); const sum = base + (p.options || []).filter(o => s.opts.includes(o.key)).reduce((a, o) => a + optAmt(p, o, t), 0); const cap = t && p.allin_gap ? base + (+p.allin_gap) : (+p.allin || 0); return cap ? Math.min(sum, cap) : sum; }
 function joinPicks() { if (!J || !(PLANS && PLANS.ok)) return []; return PLANS.products.filter(p => J.sel[p.product] && J.sel[p.product].on).map(p => { const t = jTier(p, J.sel[p.product]); return { product: p.product, options: (t ? [t.key] : []).concat((p.options || []).map(o => o.key).filter(k => J.sel[p.product].opts.includes(k))) }; }); }
 function joinTotal() { return joinPicks().reduce((a, x) => { const p = jProd(x.product); return a + (p ? jPrice(p, J.sel[x.product]) : 0); }, 0); }
 function joinSeed() {                 // 로그인한 회원: 지금 이용권을 미리 고른 것으로(뺄 수는 없다 — 그만두기는 내 페이지에서)
@@ -1966,7 +1984,7 @@ async function renderJoin(fresh) {
     J = joinNew();
     const st = stashGet(); if (st) st.picks.forEach(p => { J.sel[p.product] = { on: true, opts: p.options || [] }; });
     /* 11-27: 햇소자 「유료회원 신청」 단추는 #/join?pick=coop(,fed) 로 온다 — 그 서비스를 미리 골라 둔다 */
-    const pk = /[?&]pick=([a-z,]+)/.exec(location.hash || ''); if (pk) pk[1].split(',').forEach(k => { if (['academy', 'coop', 'fed'].includes(k)) J.sel[k] = { on: true, opts: (J.sel[k] && J.sel[k].opts) || [] }; });
+    const pk = /[?&]pick=([a-z,]+)/.exec(location.hash || ''); if (pk) pk[1].split(',').forEach(k => { if (['academy', 'coop', 'fed', 'consult'].includes(k)) J.sel[k] = { on: true, opts: (J.sel[k] && J.sel[k].opts) || [] }; });
     if (me && /^#\/join\/pay/.test(location.hash || '')) { J.payOnly = true; J.step = 3; }
   }
   const wantPay = !!me && /^#\/join\/pay/.test(location.hash || '');       // #/join/pay = 납부 정보만 고치기(회원 정보를 받은 뒤에 판단한다)
@@ -2002,11 +2020,13 @@ function pickerHTML() {
     const all = opts.length > 0 && opts.every(o => s.opts.includes(o.key));
     h += `<div class="svc ${m.c}${s.on ? ' sel' : ''}" data-prodbox="${esc(k)}"><div class="hd"><input type="checkbox" id="j-${esc(k)}" data-prod="${esc(k)}"${s.on ? ' checked' : ''}${held ? ' disabled' : ''}><label class="t" for="j-${esc(k)}"><b>${esc(p.name)}</b> <span class="chip">${esc(p.tier_ko || '')}</span><small>${m.lines.map(esc).join(' · ')}${p.approve ? ' <b>(승인 필요)</b>' : ''}${held ? ' · <b>' + esc(SUB_KO[held] || '이용 중') + '</b> — 그만두기는 내 페이지에서' : ''}</small></label><span class="pr">${opts.length ? '기본 ' : ''}${perU(p)} ${won(p.base)}<br><small class="an">${taxWord(p.tax)}</small></span></div>`;
     const tiers = Array.isArray(p.tiers) ? p.tiers : [], tsel = jTier(p, s);
-    if (s.on && tiers.length) h += `<div class="sub"><span class="note">포함할 단위조합 수(기본 이용료)</span>` + tiers.map(x => `<div class="row"><label class="ck"><input type="radio" name="j-${esc(k)}-tier" id="j-${esc(k)}-${esc(x.key)}" data-tier="${esc(k)}:${esc(x.key)}"${tsel && tsel.key === x.key ? ' checked' : ''}>${esc(x.name)}</label><span class="p">${won(x.amount)}</span></div>`).join('') + `</div>`;
+    const same = tiersSame(p);
+    if (s.on && tiers.length) h += `<div class="sub"><span class="note">${same ? '맡을 조합 수(활동 영상 값을 정합니다 — 기본요금은 같음)' : '포함할 단위조합 수(기본 이용료)'}</span>` + tiers.map(x => `<div class="row"><label class="ck"><input type="radio" name="j-${esc(k)}-tier" id="j-${esc(k)}-${esc(x.key)}" data-tier="${esc(k)}:${esc(x.key)}"${tsel && tsel.key === x.key ? ' checked' : ''}>${esc(x.name)}</label><span class="p">${same ? '' : won(x.amount)}</span></div>`).join('') + `</div>`;
     if (s.on && opts.length) {
       const base0 = tsel ? +tsel.amount : (+p.base || 0), cap0 = tsel && p.allin_gap ? base0 + (+p.allin_gap) : +p.allin;
-      const sum = base0 + opts.filter(o => s.opts.includes(o.key)).reduce((a, o) => a + (+o.amount || 0), 0);
-      h += `<div class="sub"><span class="note">선택 기능</span>` + opts.map(o => `<div class="row"><label class="ck"><input type="checkbox" id="j-${esc(k)}-${esc(o.key)}" data-opt="${esc(k)}:${esc(o.key)}"${s.opts.includes(o.key) ? ' checked' : ''}>${esc(o.name)}</label><span class="p">+${won(o.amount)}</span></div>`).join('') +
+      const sum = base0 + opts.filter(o => s.opts.includes(o.key)).reduce((a, o) => a + optAmt(p, o, tsel), 0);
+      h += (Array.isArray(p.included) && p.included.length ? `<div class="sub"><span class="note">기본에 포함: ${p.included.map(esc).join(' · ')}</span></div>` : '') +
+        `<div class="sub"><span class="note">선택 기능</span>` + opts.map(o => { const v = optAmt(p, o, tsel); return `<div class="row"><label class="ck"><input type="checkbox" id="j-${esc(k)}-${esc(o.key)}" data-opt="${esc(k)}:${esc(o.key)}"${s.opts.includes(o.key) ? ' checked' : ''}>${esc(o.name)}</label><span class="p">${v < 0 ? '−' + won(-v) : '+' + won(v)}</span></div>`; }).join('') +
         (cap0 ? `<div class="row"><label class="ck"><input type="checkbox" id="j-${esc(k)}-all" data-all="${esc(k)}"${all ? ' checked' : ''}><b>올인원</b>(선택 기능 전부)</label><span class="p">${won(cap0)}</span></div>` + (sum > cap0 ? `<span class="note" style="color:var(--gold)">고른 기능을 다 더하면 ${won(sum)}이지만 올인원 값 ${won(cap0)}만 냅니다.</span>` : '') : '') +
         (held && J.held[k] !== 'apply' ? `<span class="note">이미 낸 기간에는 낸 구성대로 쓰고, 바꾼 선택 기능은 다음 기간부터 적용됩니다.</span>` : '') + `</div>`;
     }
@@ -2233,14 +2253,14 @@ const ASK_KINDS = { ai_edu: 'AI교육', etc: '기타 문의' };   // 11-27 이�
    계약에 사이트 이용권 1년을 묶는다(정가, 부가세 포함 — 아카데미는 면세). 업무자동화 구축 사이트의 운영·유지 이용료는 미정이라 금액을 내지 않는다.
    컨설팅 문의는 이 화면 하나로 모은다. 접수 /api/axconsult(늘 열림) → 문의 접수함·텔레그램 알림. 계산 근거 docs/사이트수익화/사교원_컨설팅5상품·이용권1년묶음_비용계산_20261127.md */
 const AXC_P = {   // 이용권 한 달 값(부가세 포함, 아카데미는 2개월 10,000원 면세를 달로)
-  coopAll: ['햇소자 협동조합 올인원', 38500],   // 11-27 요금 개편: 협동조합 기본 22,000(공급가 20,000)+선택 기능, 올인원 38,500 · 연합회는 단위조합 수 구간(아래 axcFed)
+  coopAll: ['햇소자 협동조합(활동 영상 포함)', 33000],   // 11-27 오후 요금 개편: 협동조합 기본 22,000(공급가 20,000, 다른 기능 포함)+활동 영상 11,000 · 연합회는 단위조합 수 구간(아래 axcQuote)
   policy: ['의정지원 연결형', 22000], academy: ['아카데미 개인', 5000],
 };
 const AXC_TYPES = {
   coop: { n: '조합 설립·운영 컨설팅', c: 'c-hat', i: 'sun', times: 3, fee: 900000, one: '햇빛소득마을 조합을 세우고 꾸려 가는 길을 마을과 함께 짚습니다. 설립 서류·총회·운영 규칙과 햇소자 쓰는 법까지.',
-    bundle: '햇소자 협동조합 올인원 이용권 1년' },
+    bundle: '햇소자 협동조합 이용권 1년(활동 영상 포함)' },
   fed: { n: '연합회 사무국 셋업', c: 'c-hat', i: 'users', times: 5, fee: 1500000, one: '시군 연합회의 사무국을 세웁니다. 업무 체계·회원조합 지원·공지와 자료 배포를 햇소자 연합회 화면으로 굴러가게 합니다.',
-    bundle: '햇소자 연합회 올인원 이용권 1년(단위조합 5·10·20곳 포함 구간)' },
+    bundle: '햇소자 연합회 이용권 1년(단위조합 5·10·20곳 이내 구간, 활동 영상 포함)' },
   aiedu: { n: '의회·지자체 AI 교육', c: 'c-pol', i: 'gov', times: 3, fee: 900000, one: '의원실·의회 사무처·지자체 공무원이 AI 로 공약·조례·문서·브리핑 일을 해 보며 익힙니다.',
     bundle: '의회는 의정지원 연결형 1년(의원실마다), 지자체는 아카데미 개인 이용권 1년(사람마다)' },
   build: { n: 'AX 구축 컨설팅', c: 'c-pol', i: 'tool', times: 5, fee: 1500000, one: '우리 분야의 자료·서식으로 답하는 도메인AI 와 업무 화면(메일·결재·문서작성 등)을 기관에 맞춰 세웁니다.',
@@ -2259,8 +2279,8 @@ function axcQuote(t, f) {   // 즉시 견적 — 컨설팅(면세) + 묶는 이�
   const n = k => Math.max(0, parseInt(f[k], 10) || 0);
   let items = [], monthly = 0, note = '';
   if (t === 'coop') items.push([AXC_P.coopAll[0] + ' 1곳', AXC_P.coopAll[1]]);
-  if (t === 'fed') { const c = n('x_coops') || 5, T = c <= 5 ? [5, 55000] : c <= 10 ? [10, 110000] : c <= 20 ? [20, 165000] : null;
-    if (T) items.push(['햇소자 연합회 올인원(단위조합 ' + T[0] + '곳 포함)', T[1] + 22000]); else note = '단위조합 20곳이 넘으면 이용료는 견적서로 알려 드립니다.'; }
+  if (t === 'fed') { const c = n('x_coops') || 5, T = c <= 5 ? [5, 49500, 11000] : c <= 10 ? [10, 99000, 22000] : c <= 20 ? [20, 148500, 33000] : null;   // 11-27 오후: 기본 45,000·90,000·135,000 + 영상 1·2·3만(부가세 별도)
+    if (T) items.push(['햇소자 연합회(단위조합 ' + T[0] + '곳 이내·활동 영상 포함)', T[1] + T[2]]); else note = '단위조합 20곳이 넘으면 이용료는 견적서로 알려 드립니다.'; }
   if (t === 'aiedu') { if (f.x_target === '지자체') { if (n('x_people')) items.push([AXC_P.academy[0] + ' ' + n('x_people') + '명', AXC_P.academy[1] * n('x_people'), true]); }
     else if (n('x_offices')) items.push([AXC_P.policy[0] + ' 의원실 ' + n('x_offices') + '곳', AXC_P.policy[1] * n('x_offices')]); }
   if (t === 'teamlearning' && n('x_people')) items.push([AXC_P.academy[0] + ' ' + n('x_people') + '명', AXC_P.academy[1] * n('x_people'), true]);
