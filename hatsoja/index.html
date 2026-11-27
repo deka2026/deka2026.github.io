@@ -7317,7 +7317,7 @@ function memExpenses(){
       <div class="notice" style="margin:0 0 10px;font-size:13px;">영수증·카드전표·현금영수증 사진이나 PDF, 카드 사용내역 파일을 한꺼번에 올리세요. 자료를 읽어 <b>지출결의서를 자동으로 만들고</b> 통장·카드 기록과 대조합니다.
         자료에 없는 필수 항목(지출일·거래처·금액·결제 수단·증빙 종류)만 사람이 채운 뒤 「✅ 최종 지출」을 누르면 됩니다.
         <span class="text-mute">· <a href="javascript:void(0)" onclick="regEdit('expenses','')">자료 없이 직접 쓰기</a> · <a href="javascript:void(0)" onclick="expMatchAll(true)">대조 다시 하기</a></span></div>
-      <p class="text-mute" style="font-size:12.5px;margin:0 0 8px;">통장 출금 ${MOCK.tax.bank.filter(t => t.out).length}건 · 카드 사용 ${카드.length}건과 대조합니다(통장은 「세무 표준장부」에서 올립니다). 대조된 통장·카드 기록은 증빙 보관함(5년)에 바로 남고, 「🔗 통장·카드와 대조」나 아래 링크를 누르면 서버 서류함에 「통장·카드 대조 기록」 CSV 로 달마다 한 판씩 남습니다.
+      <p class="text-mute" style="font-size:12.5px;margin:0 0 8px;">통장 출금 ${MOCK.tax.bank.filter(t => t.out).length}건 · 카드 사용 ${카드.length}건과 대조합니다(통장은 「세무 표준장부」에서 올립니다). 대조된 통장·카드 기록은 증빙 보관함(5년)에 바로 남고, 위 「대조 다시 하기」나 아래 링크를 누르면 서버 서류함에 「통장·카드 대조 기록」 CSV 로 달마다 한 판씩 남습니다.
         ${rows.length ? ` <a href="javascript:void(0)" onclick="expSaveRecord(null)">대조 기록 지금 서류로 저장</a>` : ''}</p>
       ${rows.length ? `<div style="overflow-x:auto;"><table class="tbl" style="font-size:13px;min-width:860px;"><thead><tr><th>지출일</th><th>거래처</th><th>내용</th><th style="text-align:right;">금액</th><th>사업</th><th>계정</th><th>결제</th><th>증빙</th><th>대조</th><th></th></tr></thead><tbody>
         ${rows.map(r => `<tr><td>${escapeHtml(r.date || '')}</td><td>${escapeHtml(r.vendor || '')}</td><td>${escapeHtml(r.item || '')}</td><td style="text-align:right;">${_expAmt(r).toLocaleString()}</td>
@@ -7327,7 +7327,7 @@ function memExpenses(){
           <td style="white-space:nowrap;"><button class="btn btn-outline btn-sm" onclick="expPick('${escapeJs(r.id)}')">대조</button>
             <button class="btn btn-ghost btn-sm" onclick="regEdit('expenses','${escapeJs(r.id)}')">고치기</button>
             <button class="btn btn-ghost btn-sm" onclick="regDelete('expenses','${escapeJs(r.id)}')">지우기</button></td></tr>`).join('')}
-      </tbody></table></div>` : '<p class="text-mute">아직 없습니다. 영수증을 「📥 자료로 넣기」로 올리거나 「+ 영수증 넣기」를 누르세요. 현금으로 낸 돈은 「💵 현금 지출」로 현금영수증을 넣으면 통장 기록 없이도 씁니다.</p>'}
+      </tbody></table></div>` : '<p class="text-mute">아직 없습니다. 영수증·카드전표·현금영수증 사진이나 PDF 를 「📥 자료 넣기」로 올리면 지출결의서가 만들어집니다. 현금으로 낸 돈은 현금영수증을 올리면 통장 기록 없이도 씁니다.</p>'}
     </div>`;
 }
 /* 11-27 이사장 지시: 지출결의는 「📥 자료 넣기」 하나로 — 올린 영수증을 읽어 지출결의서를 자동으로 만든다.

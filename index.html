@@ -1602,7 +1602,7 @@ function priceHTML() {
   if (!PLANS.ok) {   // 서버에 이용권 모듈이 아직 없거나 응답 실패 — 화면은 그대로, 값만 「준비 중」
     const wait = '<div class="pp" style="font-size:1.2rem">이용료 안내 준비 중</div>';
     return `<div class="notice" id="priceNone"><b>이용료 안내 준비 중</b> — 등급별 이용료는 곧 이 자리에 안내합니다. 무료이용회원은 지금 바로 가입할 수 있습니다.</div><div class="pgrid">` + freeCard +
-      ['academy', 'policy', 'coop', 'fed'].map(k => pcard(PM[k].c, PM[k].i, TIER_KO[{ academy: 'personal', policy: 'policy', coop: 'coop', fed: 'federation' }[k]], PM[k].who, wait, '', PM[k].lines, k === 'policy' ? `<a class="btn sm" href="${JOIN_POLICY}" target="_blank" rel="noopener" data-ext="policy">의정지원 사이트에서 가입 ↗</a>` : '')).join('') + staffCard + '</div>';
+      ['academy', 'policy', 'coop', 'fed'].map(k => pcard(PM[k].c, PM[k].i, TIER_KO[{ academy: 'personal', policy: 'policy', coop: 'coop', fed: 'federation' }[k]], PM[k].who, wait, '', PM[k].lines, k === 'policy' ? `<a class="btn sm" href="${JOIN_POLICY}" target="_blank" rel="noopener" data-ext="policy">의정지원 사이트에서 가입 ↗</a>` : '')).join('') + '</div>' + (staffCard ? '<div class="pgrid pstaff" style="margin-top:14px;grid-auto-flow:row;grid-template-columns:minmax(0,360px)">' + staffCard + '</div>' : '');
   }
   const b = billStart(PLANS.billing_from), tl = trialLine(PLANS);
   const prod = p => {
@@ -1626,7 +1626,7 @@ function priceHTML() {
   });
   PLANS.products.filter(p => !seen[p.product]).forEach(p => { cards += prod(p); });
   (PLANS.external || []).filter(x => !seen[x.product]).forEach(x => { cards += ext(x); });
-  return (applyShut() ? `<div class="notice" id="openNote"><b>유료 서비스 신청은 ${openWhen()}.</b> 지금은 무료이용회원으로 가입할 수 있고, 가입할 때 고른 서비스는 신청이 열리면 이어서 할 수 있습니다.</div>` : '') + (tl && b ? `<div class="notice" id="trialNote"><b>${tl}</b> — 이용료는 ${b.y}년 ${b.m}월부터 받습니다.</div>` : '') + `<div class="pgrid" id="pgrid">${cards}${staffCard}</div>` +
+  return (applyShut() ? `<div class="notice" id="openNote"><b>유료 서비스 신청은 ${openWhen()}.</b> 지금은 무료이용회원으로 가입할 수 있고, 가입할 때 고른 서비스는 신청이 열리면 이어서 할 수 있습니다.</div>` : '') + (tl && b ? `<div class="notice" id="trialNote"><b>${tl}</b> — 이용료는 ${b.y}년 ${b.m}월부터 받습니다.</div>` : '') + `<div class="pgrid" id="pgrid">${cards}</div>${staffCard ? `<div class="pgrid pstaff" style="margin-top:14px;grid-auto-flow:row;grid-template-columns:minmax(0,360px)">${staffCard}</div>` : ''}` +
     `<p class="note" style="margin-top:10px">교육 서비스는 면세, 그 밖의 서비스는 부가세를 포함한 값입니다. 이용료는 이체 또는 자동이체로 냅니다.</p>`;
 }
 function startHTML() {
@@ -2091,44 +2091,76 @@ $('#joinBody').addEventListener('submit', e => {
 
 /* ── 문의(#/ask) — 분류 4개를 먼저 고르고 내용·연락처 → POST /api/contact. 닫혀 있거나 실패하면 사교원 홈페이지 문의 창구를 안내한다 */
 const ASK_KINDS = { ai_edu: 'AI교육', etc: '기타 문의' };   // 11-27 이사장 지시: 컨설팅(팀학습·업무자동화 구축) 문의는 「사회혁신AX컨설팅」(#/axc) 한 곳으로
-/* 11-27 이사장 지시: 회원서비스 「사회혁신AX컨설팅」 — 팀러닝 컨설팅 · 도메인AI 개발 컨설팅의 뜻, 대표 컨설턴트, 의뢰·견적 요청.
-   컨설팅 문의는 이 화면 하나로 모은다(문의하기의 팀학습 컨설팅·업무자동화 구축 의뢰는 여기로). 접수 /api/axconsult(늘 열림) → 문의 접수함·텔레그램 알림.
-   금액은 지어내지 않는다 — 컨설팅 비용은 조건을 보고 견적서로 보내고, 화면이 계산하는 것은 정해진 교육 단가(1인 1시간 15,000원 + 출장비, 아카데미 교육 신청과 같음)뿐. */
+/* 11-27 이사장 지시: 회원서비스 「사회혁신AX컨설팅」 — 사회혁신팀러닝·AX 의 뜻, 컨설팅 다섯 상품, 대표 컨설턴트, 의뢰·즉시 견적.
+   단가(이사장 확정 11-27, 모두 면세): 회당 30만 원 — 조합 설립·운영 3회 90만 · 연합회 사무국 셋업 5회 150만 · 의회·지자체 AI 교육 3회 90만 · 업무자동화 사이트 구축 5회 150만 · 팀러닝 4회 120만.
+   계약에 사이트 이용권 1년을 묶는다(정가, 부가세 포함 — 아카데미는 면세). 업무자동화 구축 사이트의 운영·유지 이용료는 미정이라 금액을 내지 않는다.
+   컨설팅 문의는 이 화면 하나로 모은다. 접수 /api/axconsult(늘 열림) → 문의 접수함·텔레그램 알림. 계산 근거 docs/사이트수익화/사교원_컨설팅5상품·이용권1년묶음_비용계산_20261127.md */
+const AXC_P = {   // 이용권 한 달 값(부가세 포함, 아카데미는 2개월 10,000원 면세를 달로)
+  coopAll: ['햇소자 협동조합 올인원', 27500], fedAll: ['햇소자 연합회 올인원', 55000], coopBase: ['햇소자 협동조합 기본', 11000],
+  policy: ['의정지원 연결형', 22000], academy: ['아카데미 개인', 5000],
+};
 const AXC_TYPES = {
-  teamlearning: { n: '팀러닝 컨설팅', c: 'c-team', i: 'users', one: '지역의 문제를 함께 풀 팀을 꾸리고, 팀이 스스로 배우며 해결하도록 설계·진행을 돕습니다.',
-    steps: [['문제 발견과 정의', '현장 관찰·인터뷰로 문제를 찾고 「우리가 풀 문제」를 한 문장으로 정합니다.'], ['사례 학습과 아이디어', '비슷한 문제를 푼 사례를 비교해 우리에게 맞는 아이디어를 추립니다.'], ['이해관계에 기초한 해결책', '이해관계자 지도로 각자의 이해와 자원을 나눠 함께 받아들일 해결책을 설계합니다.'], ['AI 로 기초자원 확보', '자료조사·통계·자원 목록·예산 근거를 AI 와 함께 빠르게 모읍니다.'], ['거버넌스형 실행계획', '행정·민간·당사자가 역할을 나누는 실행계획과 점검 체계를 만듭니다.']],
-    out: ['팀 구성과 진행 계획', '문제 정의서·이해관계자 지도', '실행계획(역할·점검표)', '팀 공간과 단계별 AI 도우미 사용 안내'] },
-  domain_ai: { n: '도메인AI 개발 컨설팅', c: 'c-pol', i: 'tool', one: '우리 분야의 자료·서식·말투를 얹은 분야 AI 를 설계해, 근거를 붙여 답하고 서식을 채우는 업무 도구로 세웁니다.',
-    steps: [['진단', '지금 일하는 방식과 자료가 어디에 흩어져 있는지 살핍니다.'], ['설계서와 자료 목록', '설계서 한 장과 자료 목록을 코드보다 먼저 만듭니다.'], ['분야 에이전트 구축', '출처·기준일을 붙여 답하는 우리 분야 AI 를 세웁니다.'], ['업무 연결', '상담·서식 작성·자료 찾기·업무 자동화를 실제 업무 흐름에 잇습니다.'], ['검수와 운영', '답을 검수하는 방법과 개인정보 가리기, 운영 규칙을 함께 정합니다.']],
-    out: ['진단 결과와 설계서', '분야 자료 목록과 정리 기준', '분야 AI(상담·서식·검색) 시험판', '운영·검수 안내'] },
+  coop: { n: '조합 설립·운영 컨설팅', c: 'c-hat', i: 'sun', times: 3, fee: 900000, one: '햇빛소득마을 조합을 세우고 꾸려 가는 길을 마을과 함께 짚습니다. 설립 서류·총회·운영 규칙과 햇소자 쓰는 법까지.',
+    bundle: '햇소자 협동조합 올인원 이용권 1년' },
+  fed: { n: '연합회 사무국 셋업', c: 'c-hat', i: 'users', times: 5, fee: 1500000, one: '시군 연합회의 사무국을 세웁니다. 업무 체계·회원조합 지원·공지와 자료 배포를 햇소자 연합회 화면으로 굴러가게 합니다.',
+    bundle: '햇소자 연합회 올인원 1년 + 소속 조합 기본 이용권 1년' },
+  aiedu: { n: '의회·지자체 AI 교육', c: 'c-pol', i: 'gov', times: 3, fee: 900000, one: '의원실·의회 사무처·지자체 공무원이 AI 로 공약·조례·문서·브리핑 일을 해 보며 익힙니다.',
+    bundle: '의회는 의정지원 연결형 1년(의원실마다), 지자체는 아카데미 개인 이용권 1년(사람마다)' },
+  build: { n: '업무자동화 사이트 구축', c: 'c-pol', i: 'tool', times: 5, fee: 1500000, one: '우리 분야의 자료·서식으로 답하는 도메인AI 와 업무 화면(메일·결재·문서작성 등)을 기관에 맞춰 세웁니다.',
+    steps: [['진단', '지금 일하는 방식과 자료가 어디에 흩어져 있는지 살핍니다.'], ['설계서와 자료 목록', '설계서 한 장과 자료 목록을 코드보다 먼저 만듭니다.'], ['구축', '출처·기준일을 붙여 답하는 분야 AI 와 업무 화면을 세웁니다.'], ['교육', '구성원이 실제 업무에 써 보며 익힙니다.'], ['검수와 운영', '답을 검수하는 법과 개인정보 가리기, 운영 규칙을 정합니다.']],
+    bundle: '구축한 사이트 운영·유지 1년(이용료는 견적서로 안내)' },
+  teamlearning: { n: '팀러닝 컨설팅', c: 'c-team', i: 'list', times: 4, fee: 1200000, one: '지역의 문제를 함께 풀 팀을 꾸리고, 팀이 스스로 배우며 해결하도록 설계·진행을 돕습니다.',
+    steps: [['문제 발견과 정의', '현장 관찰·인터뷰로 「우리가 풀 문제」를 한 문장으로 정합니다.'], ['사례 학습과 아이디어', '비슷한 문제를 푼 사례를 비교해 아이디어를 추립니다.'], ['이해관계에 기초한 해결책', '이해관계자 지도로 함께 받아들일 해결책을 설계합니다.'], ['거버넌스형 실행계획', '행정·민간·당사자가 역할을 나누는 실행계획과 점검 체계를 만듭니다.']],
+    bundle: '아카데미 개인 이용권 1년(참여자마다) — 팀 공간과 단계별 AI 도우미 포함' },
 };
 const AXC_PEOPLE = [
-  { n: '김일영', t: '사회혁신교육원사회적협동조합 이사장', lines: ['전 서울특별시 협치총괄지원관', '전 행정안전부 주민자치·지방소멸대응기금 컨설턴트', '주민자치·협치·사회적경제 정책 설계와 실행 지원 20년'] },
+  { n: '김일영', t: '사회혁신교육원사회적협동조합 이사장', lines: ['전 서울특별시 협치총괄지원관', '전 행정안전부 주민자치·지방소멸대응기금 컨설턴트'] },
   { n: '김성훈', t: '품앗이생협 이사장', lines: ['품앗이가 운영하는 연대지능 위키와 고성능컴퓨팅 AI 엔진으로 현장 조직의 AI 전환을 이끕니다', '「AX 는 조직 데이터의 배관공사」 — 아카데미 「AI 리터러시」 강의(2026-10-27)'] },
 ];
-const AXC_TRAVEL = [['전라권', 200000], ['충청권', 300000], ['경상권', 300000], ['수도권', 350000], ['강원권', 350000]];
+function axcQuote(t, f) {   // 즉시 견적 — 컨설팅(면세) + 묶는 이용권 1년(부가세 포함 정가) · 2년 차부터 달마다
+  const T = AXC_TYPES[t]; if (!T) return null;
+  const n = k => Math.max(0, parseInt(f[k], 10) || 0);
+  let items = [], monthly = 0, note = '';
+  if (t === 'coop') items.push([AXC_P.coopAll[0] + ' 1곳', AXC_P.coopAll[1]]);
+  if (t === 'fed') { items.push([AXC_P.fedAll[0] + ' 1곳', AXC_P.fedAll[1]]); if (n('x_coops')) items.push([AXC_P.coopBase[0] + ' ' + n('x_coops') + '곳', AXC_P.coopBase[1] * n('x_coops')]); }
+  if (t === 'aiedu') { if (f.x_target === '지자체') { if (n('x_people')) items.push([AXC_P.academy[0] + ' ' + n('x_people') + '명', AXC_P.academy[1] * n('x_people'), true]); }
+    else if (n('x_offices')) items.push([AXC_P.policy[0] + ' 의원실 ' + n('x_offices') + '곳', AXC_P.policy[1] * n('x_offices')]); }
+  if (t === 'teamlearning' && n('x_people')) items.push([AXC_P.academy[0] + ' ' + n('x_people') + '명', AXC_P.academy[1] * n('x_people'), true]);
+  if (t === 'build') note = '구축한 사이트의 운영·유지 1년 이용료는 기관 규모를 보고 견적서로 알려 드립니다.';
+  monthly = items.reduce((a, x) => a + x[1], 0);
+  const year = monthly * 12, total = T.fee + year;
+  return { fee: T.fee, times: T.times, items, year, total, monthly, note };
+}
 const AXC_FIELDS = {
-  teamlearning: [['x_people', '참여 인원', '예: 15', 'num'], ['x_teams', '팀 수', '예: 3', 'num'], ['x_months', '기간(개월)', '예: 3', 'num'], ['x_mode', '진행 방식', '대면 · 온라인 · 대면+온라인', 'sel'], ['x_region', '지역', AXC_TRAVEL.map(r => r[0]).join(' · '), 'sel'], ['x_topic', '다룰 문제(아는 만큼)', '예: 마을 어르신 이동 문제']],
-  domain_ai: [['x_field', '분야', '햇빛소득마을·협동조합 · 의정·행정 · 주민자치·마을 · 사회적경제 · 기타', 'sel'], ['x_docs', '쓸 자료 규모(대략)', '예: 한글·PDF 300건'], ['x_users', '쓸 사람 수', '예: 10', 'num'], ['x_when', '희망 시기', '예: 2027년 3월']],
+  coop: [['x_village', '마을·조합 이름', '예: ○○리 햇빛소득마을'], ['x_stage', '지금 단계', '준비 중 · 설립 중 · 운영 중', 'sel']],
+  fed: [['x_coops', '함께 묶을 소속 조합 수', '예: 10', 'num'], ['x_region', '시군', '예: 해남군']],
+  aiedu: [['x_target', '교육 대상', '의회 · 지자체', 'sel'], ['x_offices', '의원실 수(의회)', '예: 10', 'num'], ['x_people', '교육 인원(지자체)', '예: 20', 'num']],
+  build: [['x_staff', '직원 수', '예: 8', 'num'], ['x_docs', '쓸 자료 규모(대략)', '예: 한글·PDF 300건']],
+  teamlearning: [['x_people', '참여 인원', '예: 15', 'num'], ['x_teams', '팀 수', '예: 3', 'num'], ['x_topic', '다룰 문제(아는 만큼)', '예: 마을 어르신 이동 문제']],
 };
-const AXC_FEATS = ['근거를 붙인 상담', '서식·문서 작성', '자료 찾기', '업무 자동화', '기존 시스템 연결'];
+const AXC_FEATS = ['근거를 붙인 상담', '서식·문서 작성', '자료 찾기', '메일·결재', '기존 시스템 연결'];
 let X = null;
 function renderAxc(fresh) {
-  if (fresh || !X) { const q = (location.hash.split('?')[1] || ''); const t = /t=domain_ai/.test(q) ? 'domain_ai' : /t=teamlearning/.test(q) ? 'teamlearning' : ''; X = { t, ask: '견적', f: { name: (me && me.name) || '', email: (me && me.email) || '' }, feats: [], edu: false, err: '', done: '', busy: false }; }
+  if (fresh || !X) { const q = (location.hash.split('?')[1] || ''); const m = q.match(/t=([a-z_]+)/); let t = m ? m[1] : ''; if (t === 'domain_ai') t = 'build'; if (!AXC_TYPES[t]) t = '';
+    X = { t, ask: '견적', f: { name: (me && me.name) || '', email: (me && me.email) || '' }, feats: [], err: '', done: '', busy: false }; }
   axcDraw();
 }
 function axcSave() { const root = $('#axBody'); if (!root || !X) return; root.querySelectorAll('[data-x]').forEach(e => { X.f[e.dataset.x] = e.type === 'checkbox' ? e.checked : e.value; }); X.feats = Array.from(root.querySelectorAll('input[data-xf]:checked')).map(e => e.dataset.xf); }
-function axcEdu() {   // 정해진 교육 단가만 계산(아카데미 교육 신청과 같은 기준)
-  const n = parseInt(X.f.x_people, 10) || 0, h = parseInt(X.f.x_eduh, 10) || 0, r = AXC_TRAVEL.find(x => x[0] === X.f.x_region) || AXC_TRAVEL[0];
-  if (!X.edu || !n || !h) return '';
-  const base = n * h * 15000, trav = X.f.x_mode === '온라인' ? 0 : r[1];
-  return `<div class="notice" style="margin:4px 0 0"><b>함께 할 교육 예상 비용 ${(base + trav).toLocaleString()}원</b> — ${n}명 × ${h}시간 × 15,000원 = ${base.toLocaleString()}원${trav ? ` + 출장비(${r[0]}) ${trav.toLocaleString()}원` : ''}. 컨설팅 비용은 조건을 보고 견적서로 따로 보내 드립니다.</div>`;
+function axcQuoteHtml() {
+  const q = X && axcQuote(X.t, X.f); if (!q) return '';
+  return `<div class="card" style="background:var(--gold1);border-color:#e3cd92;margin-top:6px"><b>예상 견적 — ${esc(AXC_TYPES[X.t].n)}</b>
+    <table style="width:100%;margin-top:6px;font-size:.95rem"><tr><td>컨설팅 ${q.times}회(회당 30만 원, 면세)</td><td style="text-align:right">${won(q.fee)}</td></tr>` +
+    q.items.map(x => `<tr><td>이용권 1년 · ${esc(x[0])}${x[2] ? ' (면세)' : ' (부가세 포함)'}</td><td style="text-align:right">${won(x[1] * 12)}</td></tr>`).join('') +
+    `<tr style="border-top:1px solid #e3cd92"><td><b>계약 금액(1년)</b></td><td style="text-align:right"><b>${won(q.total)}</b></td></tr></table>` +
+    (q.monthly ? `<p style="margin:6px 0 0;font-size:.9rem">1년이 지나면 이용권만 이어서 달마다 <b>${won(q.monthly)}</b>씩 내고 씁니다.</p>` : '') +
+    (q.note ? `<p style="margin:6px 0 0;font-size:.9rem">${esc(q.note)}</p>` : '') +
+    `<p style="margin:6px 0 0;font-size:.85rem;color:var(--ink2)">출장이 필요하면 지역에 따라 출장비가 더해질 수 있습니다. 정식 견적서는 요청을 받은 뒤 보내 드립니다.</p></div>`;
 }
 function axcDraw() {
   const root = $('#axBody'); if (!root || !X) return;
   const act = document.activeElement && root.contains(document.activeElement) ? document.activeElement.id : '';
   const v = k => esc(X.f[k] || '');
-  let h = `<div class="sech"><h2>사회혁신AX컨설팅</h2><p>팀러닝 컨설팅 · 도메인AI 개발 컨설팅 — 의뢰와 견적을 이 화면에서 받습니다.</p></div>
+  let h = `<div class="sech"><h2>사회혁신AX컨설팅</h2><p>조합·연합회·의회·지자체·단체의 일하는 방식을 팀러닝과 AI 로 바꿉니다. 의뢰와 견적을 이 화면에서 받습니다.</p></div>
     <div class="g2" style="margin-bottom:16px">
       <div class="card c-team" style="border-top:6px solid var(--cb)"><h3 style="color:var(--c);margin-bottom:6px">사회혁신팀러닝이란</h3>
         <p>활동가·공무원·청년·주민이 한 팀이 되어, 함께 풀어야 할 지역의 문제를 팀으로 배우며 해결하는 방식입니다.</p>
@@ -2137,46 +2169,48 @@ function axcDraw() {
         <p>한 사람이 AI 를 잘 쓰는 데서 그치지 않고, 조직 전체가 AI 와 함께 일하도록 일하는 방식을 바꾸는 것입니다.</p>
         <p style="margin-top:6px">AX 는 조직 데이터의 배관공사입니다. 각자의 머리와 PC 에 갇힌 자료를 조직 전체가 함께 쓰고 덧붙일 수 있게 잇고, 그 위에 우리 분야의 자료로 답하는 <b>도메인AI</b>(분야 AI)를 세웁니다.</p></div>
     </div>
-    <div class="g2" style="margin-bottom:16px">` + Object.entries(AXC_TYPES).map(([k, T]) => `<div class="card ${T.c}"><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><span class="bub">${ic(T.i)}</span><h3 style="margin:0;color:var(--c)">${T.n}</h3></div>
-        <p>${T.one}</p>
-        <ol style="margin:10px 0 0 18px;display:grid;gap:4px;font-size:.95rem">${T.steps.map(s => `<li><b>${s[0]}</b> — ${s[1]}</li>`).join('')}</ol>
-        <p style="margin:10px 0 0;font-size:.92rem;color:var(--ink2)"><b>받는 것</b> · ${T.out.join(' · ')}</p>
-        <div style="margin-top:12px"><button type="button" class="btn sm p" data-xt="${k}">이 컨설팅 의뢰·견적 받기</button></div></div>`).join('') + `</div>
+    <h3 style="color:var(--g9);margin:0 0 10px">컨설팅 상품</h3>
+    <div class="g3" style="margin-bottom:16px">` + Object.entries(AXC_TYPES).map(([k, T]) => `<div class="card ${T.c}" style="border-top:6px solid var(--cb)"><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><span class="bub">${ic(T.i)}</span><h3 style="margin:0;color:var(--c);font-size:1.05rem">${T.n}</h3></div>
+        <p style="font-size:1.25rem;font-weight:800;color:var(--g9);margin:4px 0">${won(T.fee)} <small style="font-size:.85rem;font-weight:400;color:var(--ink2)">${T.times}회 · 면세</small></p>
+        <p style="font-size:.95rem">${T.one}</p>
+        ${T.steps ? `<ol style="margin:8px 0 0 18px;display:grid;gap:3px;font-size:.9rem">${T.steps.map(x => `<li><b>${x[0]}</b> — ${x[1]}</li>`).join('')}</ol>` : ''}
+        <p style="margin:8px 0 0;font-size:.9rem;color:var(--ink2)"><b>함께 드리는 것</b> · ${T.bundle}</p>
+        <div style="margin-top:10px"><button type="button" class="btn sm p" data-xt="${k}">견적 보기·의뢰</button></div></div>`).join('') + `</div>
     <div class="card" style="margin-bottom:16px"><h3 style="color:var(--g9);margin-bottom:10px">대표 컨설턴트</h3><div class="g2">` +
       AXC_PEOPLE.map(P => `<div style="display:flex;gap:12px;align-items:flex-start"><span class="bub" style="flex-shrink:0">${ic('user')}</span><div><b style="font-size:1.05rem">${P.n}</b> <span style="color:var(--ink2)">${P.t}</span><ul style="margin:6px 0 0 16px;font-size:.93rem;display:grid;gap:2px">${P.lines.map(l => `<li>${l}</li>`).join('')}</ul></div></div>`).join('') + `</div></div>`;
   if (X.done) {
-    root.innerHTML = h + `<div class="card done" id="axDone"><h2>${esc(X.done)}을 받았습니다</h2><p class="lead" style="margin:6px 0 0">사교원이 확인하고 적어 주신 연락처로 ${X.ask === '견적' ? '견적서를 보내' : '연락드리'}겠습니다.</p><div class="cta" style="margin-top:14px"><button type="button" class="btn" data-xact="again">다른 요청 하기</button></div></div>`;
+    root.innerHTML = h + `<div class="card done" id="axDone"><h2>${esc(X.done)}을 받았습니다</h2><p class="lead" style="margin:6px 0 0">사교원이 확인하고 적어 주신 연락처로 ${X.ask === '견적' ? '정식 견적서를 보내' : '연락드리'}겠습니다.</p><div class="cta" style="margin-top:14px"><button type="button" class="btn" data-xact="again">다른 요청 하기</button></div></div>`;
     return;
   }
-  h += `<div class="card" id="axForm"><h3 style="color:var(--g9);margin-bottom:10px">의뢰·견적 받기</h3>
-    <div class="cats" style="grid-template-columns:repeat(2,1fr)" role="group" aria-label="컨설팅 종류">` + Object.entries(AXC_TYPES).map(([k, T]) => `<button type="button" class="cat ${T.c}" data-xt="${k}" aria-pressed="${X.t === k}"><span class="bub">${ic(T.i)}</span><b>${T.n}</b></button>`).join('') + `</div>`;
-  if (!X.t) { root.innerHTML = h + `<p class="note">위 두 가지 가운데 하나를 고르면 조건을 적는 칸이 나옵니다.</p></div>`; if (act) { const e = document.getElementById(act); if (e) try { e.focus({ preventScroll: true }); } catch (_) {} } return; }
+  h += `<div class="card" id="axForm"><h3 style="color:var(--g9);margin-bottom:10px">견적 보기 · 의뢰하기</h3>
+    <div class="cats" style="grid-template-columns:repeat(auto-fill,minmax(170px,1fr))" role="group" aria-label="컨설팅 상품">` + Object.entries(AXC_TYPES).map(([k, T]) => `<button type="button" class="cat ${T.c}" data-xt="${k}" aria-pressed="${X.t === k}"><span class="bub">${ic(T.i)}</span><b>${T.n}</b><span>${won(T.fee)}</span></button>`).join('') + `</div>`;
+  if (!X.t) { root.innerHTML = h + `<p class="note">상품을 고르면 조건을 적는 칸과 예상 견적이 나옵니다.</p></div>`; if (act) { const e = document.getElementById(act); if (e) try { e.focus({ preventScroll: true }); } catch (_) {} } return; }
   const fld = x => x[3] === 'sel'
     ? `<div class="f"><label for="x-${x[0]}">${x[1]}</label><select id="x-${x[0]}" data-x="${x[0]}"><option value="">고르기</option>${x[2].split(' · ').map(o => `<option${X.f[x[0]] === o ? ' selected' : ''}>${o}</option>`).join('')}</select></div>`
     : `<div class="f"><label for="x-${x[0]}">${x[1]}</label><input type="${x[3] === 'num' ? 'number' : 'text'}"${x[3] === 'num' ? ' min="0" inputmode="numeric"' : ''} id="x-${x[0]}" data-x="${x[0]}" value="${v(x[0])}" placeholder="${x[2]}" autocomplete="off"></div>`;
   h += `<div class="form">
-      <div class="f w"><span class="lb">무엇을 받고 싶으세요?</span><div class="checks"><label><input type="radio" name="xask" data-xask="견적"${X.ask === '견적' ? ' checked' : ''}>견적서 받아 보기</label><label><input type="radio" name="xask" data-xask="의뢰"${X.ask === '의뢰' ? ' checked' : ''}>바로 컨설팅 의뢰</label></div></div>
-      <div class="f"><label for="x-org">기관(단체) 이름</label><input type="text" id="x-org" data-x="org" value="${v('org')}" maxlength="80"></div>
       ${(AXC_FIELDS[X.t] || []).map(fld).join('')}
-      ${X.t === 'domain_ai' ? `<div class="f w"><span class="lb">필요한 기능(여러 개 고를 수 있습니다)</span><div class="checks">${AXC_FEATS.map(x => `<label><input type="checkbox" data-xf="${x}"${X.feats.includes(x) ? ' checked' : ''}>${x}</label>`).join('')}</div></div>` : ''}
-      ${X.t === 'teamlearning' ? `<div class="f w"><label class="ck"><input type="checkbox" id="x-edu" data-x="x_edu"${X.edu ? ' checked' : ''}>팀원 교육(문제해결 팀러닝 강의)도 함께 받기</label>${X.edu ? `<div class="f" style="max-width:220px;margin-top:6px"><label for="x-x_eduh">교육 시간(합계)</label><input type="number" min="1" id="x-x_eduh" data-x="x_eduh" value="${v('x_eduh')}" placeholder="예: 10"></div>` : ''}<div id="axEdu">${axcEdu()}</div></div>` : ''}
+      ${X.t === 'build' ? `<div class="f w"><span class="lb">필요한 기능(여러 개 고를 수 있습니다)</span><div class="checks">${AXC_FEATS.map(x => `<label><input type="checkbox" data-xf="${x}"${X.feats.includes(x) ? ' checked' : ''}>${x}</label>`).join('')}</div></div>` : ''}
+      <div class="f w" id="axQuote">${axcQuoteHtml()}</div>
+      <div class="f w"><span class="lb">무엇을 받고 싶으세요?</span><div class="checks"><label><input type="radio" name="xask" data-xask="견적"${X.ask === '견적' ? ' checked' : ''}>정식 견적서 받아 보기</label><label><input type="radio" name="xask" data-xask="의뢰"${X.ask === '의뢰' ? ' checked' : ''}>바로 컨설팅 의뢰</label></div></div>
+      <div class="f"><label for="x-org">기관(단체) 이름</label><input type="text" id="x-org" data-x="org" value="${v('org')}" maxlength="80"></div>
       <div class="f"><label for="x-name">이름 <span class="req">*</span></label><input type="text" id="x-name" data-x="name" value="${v('name')}" maxlength="40" autocomplete="name"></div>
       <div class="f"><label for="x-phone">전화번호</label><input type="tel" id="x-phone" data-x="phone" value="${v('phone')}" placeholder="010-0000-0000" autocomplete="tel"></div>
-      <div class="f w"><label for="x-email">이메일</label><input type="email" id="x-email" data-x="email" value="${v('email')}" autocomplete="email"><span class="hint">전화번호와 이메일 가운데 하나는 꼭 적어 주세요.</span></div>
+      <div class="f"><label for="x-email">이메일</label><input type="email" id="x-email" data-x="email" value="${v('email')}" autocomplete="email"><span class="hint">전화번호와 이메일 가운데 하나는 꼭 적어 주세요.</span></div>
       <div class="f w"><label for="x-msg">상황과 바라는 점</label><textarea id="x-msg" data-x="message" maxlength="4000" placeholder="지금 어떤 상황이고 무엇을 바라는지 적어 주세요.">${v('message')}</textarea></div>
       <div class="f w"><label class="ck"><input type="checkbox" id="x-ok" data-x="consent"${X.f.consent ? ' checked' : ''}>개인정보 수집·이용에 동의합니다 <span class="req">*</span></label><span class="hint">이름·연락처·이메일은 이 요청에 답하는 데만 쓰고 1년 뒤 지웁니다. <a href="account-privacy.html" target="_blank" rel="noopener">처리방침</a></span></div>
     </div>
     <div id="eAx">${X.err ? `<div class="err" role="alert">${esc(X.err)}</div>` : ''}</div>
-    <div class="acts"><span class="note">컨설팅 비용은 조건을 보고 견적서로 알려 드립니다.</span><span class="r"><button type="button" class="btn p" id="axGo"${X.busy ? ' disabled' : ''}>${X.busy ? '보내는 중…' : X.ask === '견적' ? '견적 요청 보내기' : '컨설팅 의뢰 보내기'}</button></span></div></div>`;
+    <div class="acts"><span></span><span class="r"><button type="button" class="btn p" id="axGo"${X.busy ? ' disabled' : ''}>${X.busy ? '보내는 중…' : X.ask === '견적' ? '견적서 요청 보내기' : '컨설팅 의뢰 보내기'}</button></span></div></div>`;
   root.innerHTML = h;
   if (act) { const e = document.getElementById(act); if (e) { try { e.focus({ preventScroll: true }); } catch (_) {} } }
 }
-$('#axBody').addEventListener('input', e => { if (!X) return; if (e.target.closest('[data-x]')) { axcSave(); const b = $('#axEdu'); if (b) b.innerHTML = axcEdu(); } });
+function axcRequote() { axcSave(); const b = $('#axQuote'); if (b) b.innerHTML = axcQuoteHtml(); }
+$('#axBody').addEventListener('input', e => { if (X && e.target.closest('[data-x]')) axcRequote(); });
 $('#axBody').addEventListener('change', e => {
   if (!X) return;
   if (e.target.matches('[data-xask]')) { axcSave(); X.ask = e.target.dataset.xask; return axcDraw(); }
-  if (e.target.id === 'x-edu') { axcSave(); X.edu = e.target.checked; return axcDraw(); }
-  if (e.target.closest('[data-x]')) { axcSave(); const b = $('#axEdu'); if (b) b.innerHTML = axcEdu(); }
+  if (e.target.closest('[data-x]')) axcRequote();
 });
 $('#axBody').addEventListener('click', async e => {
   const t = e.target.closest('[data-xt]');
@@ -2189,13 +2223,13 @@ $('#axBody').addEventListener('click', async e => {
   if (msg) { X.err = msg; return axcDraw(); }
   const cond = {};
   (AXC_FIELDS[X.t] || []).forEach(x => { if (String(f[x[0]] || '').trim()) cond[x[1]] = String(f[x[0]]).trim(); });
-  if (X.t === 'domain_ai' && X.feats.length) cond['필요한 기능'] = X.feats.slice();
-  if (X.t === 'teamlearning' && X.edu) { cond['교육 함께'] = '예' + (f.x_eduh ? ` (${f.x_eduh}시간)` : ''); const q = axcEdu().replace(/<[^>]+>/g, ''); if (q) cond['교육 예상 비용'] = q.split(' — ')[0].replace('함께 할 교육 예상 비용 ', ''); }
+  if (X.t === 'build' && X.feats.length) cond['필요한 기능'] = X.feats.slice();
+  const q = axcQuote(X.t, f); if (q) cond['예상 견적'] = `컨설팅 ${won(q.fee)}` + (q.year ? ` + 이용권 1년 ${won(q.year)} = ${won(q.total)}` : '') + (q.note ? ' (운영·유지 별도 견적)' : '');
   X.err = ''; X.busy = true; axcDraw();
   const r = await api('/api/axconsult', { method: 'POST', body: { type: X.t, ask: X.ask, org: String(f.org || '').trim(), name: String(f.name).trim(), phone: String(f.phone || '').trim(), email: String(f.email || '').trim(), message: String(f.message || '').trim(), consent: true, cond } });
   X.busy = false;
-  if (r.ok) { X.done = AXC_TYPES[X.t].n + ' ' + (X.ask === '견적' ? '견적 요청' : '의뢰'); axcDraw(); const d = $('#axDone'); if (d) d.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
-  X.err = (r.message || r.error_message || '') || '보내지 못했습니다. 잠시 뒤 다시 해 주세요.'; axcDraw();
+  if (r.ok) { X.done = AXC_TYPES[X.t].n + ' ' + (X.ask === '견적' ? '견적서 요청' : '의뢰'); axcDraw(); const d = $('#axDone'); if (d) d.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+  X.err = (r.message || '') || '보내지 못했습니다. 잠시 뒤 다시 해 주세요.'; axcDraw();
 });
 const ASK_META = { team: { c: 'c-team', i: 'users', d: '조직의 팀 학습 설계와 진행' }, ai_edu: { c: 'c-aca', i: 'book', d: '주민·직원·활동가 AI 교육' }, ax_build: { c: 'c-pol', i: 'tool', d: '우리 기관에 맞춘 업무 시스템' }, etc: { c: 'c-rs', i: 'help', d: '그 밖의 궁금한 점' } };
 const ASK_EXTRA = { team: [['org', '기관(단체) 이름', ''], ['x_people', '참여 인원', '예: 12'], ['x_when', '희망 시기', '예: 2027년 3월']], ai_edu: [['x_target', '교육 대상', '예: 마을 주민, 조합 임원'], ['x_people', '인원', '예: 20'], ['x_times', '회차', '예: 4']], ax_build: [['org', '기관(단체) 이름', ''], ['x_staff', '직원 수', '예: 8']], etc: [] };
