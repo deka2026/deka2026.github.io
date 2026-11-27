@@ -1515,11 +1515,18 @@ const SVC2 = [
   { id: 'academy', c: 'c-aca', n: '연대지능활동가 아카데미', img: ['c_aca.jpg', '강의실에서 화면을 보며 수업을 듣는 뒷모습 사진'], one: '내 일을 AI 와 함께 해 보며 배웁니다.', more: '실습 15단계와 학습 7단계, 지식 검증 게임으로 이어지는 과정입니다.', who: ['개인회원'] },
   { id: 'teamlearning', c: 'c-team', n: '사회혁신팀러닝', img: ['c_team.jpg', '책상 위에 종이와 붙임쪽지를 펼쳐 놓고 함께 적는 손 사진'], one: '팀을 만들어 함께 배우고 기록합니다.', more: '화상회의와 기록으로 팀 학습을 이어 갑니다. 아카데미 회원이면 함께 쓸 수 있습니다.', who: ['개인회원'] },
 ];
+function fromHome(u) {   // 11-27: 소개·열기 링크에 「첫 화면에서 왔다」 표시 — 사교원 사이트(같은 주소·talk)만
+  if (!u || u[0] === '#' || !/^(\/(?!\/)|https:\/\/([a-z0-9-]+\.)?sakyowon\.co\.kr\/)/.test(u)) return u;
+  const i = u.indexOf('#'), base = i < 0 ? u : u.slice(0, i), hash = i < 0 ? '' : u.slice(i);
+  return base + (base.indexOf('?') < 0 ? '?' : '&') + 'from=home' + hash;
+}
 function svcCards() {
   return '<div class="g4">' + SVC2.map(s => {
     const it = itemById(s.id);
-    const btn = me ? `<a class="btn sm p" href="${esc(it.h)}">열기</a>`
-      : `<a class="btn sm p" href="#/join">회원가입</a>` + (it.need && !s.intro ? '' : ` <a class="lk2" href="${esc(s.intro || it.h)}">소개 화면 보기 ›</a>`);   // 11-27 이사장 지시: 의정지원도 소개 화면(로그인 전 안내 화면) 보기
+    const intro = (it.need && !s.intro) ? '' : ` <a class="lk2" href="${esc(fromHome(s.intro || it.h))}">소개 화면 보기 ›</a>`;
+    // 11-27 이사장 지시: 소개 화면은 첫 화면의 로그인 상태 그대로 — 손님이면 손님, 로그인했으면 같은 아이디로(from=home 을 받은 각 사이트가 맞춘다)
+    const btn = me ? `<a class="btn sm p" href="${esc(fromHome(it.h))}">열기</a>` + intro
+      : `<a class="btn sm p" href="#/join">회원가입</a>` + intro;   // 11-27 이사장 지시: 의정지원도 소개 화면(로그인 전 안내 화면) 보기
     return `<article class="card tcard ${s.c}" data-mc data-svc="${esc(s.id)}"><div class="th">${s.img ? pic(s.img[0], s.img[1]) : ILL[s.ill]()}</div><div class="tb"><h3>${esc(s.n)}</h3><p class="one">${esc(s.one)}</p><div class="who2">${s.who.map(w => `<span class="cchip">${esc(w)}</span>`).join('')}</div><p class="more">${esc(s.more)} 로그인하면 사이드바에서 세부 메뉴를 엽니다.</p><div>${btn}</div></div></article>`;
   }).join('') + '</div>';
 }

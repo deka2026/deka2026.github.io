@@ -2589,15 +2589,43 @@ async function ssoBoot(){
   try{ await ssoBoot0(); } finally { hsApplyRefresh(); }
 }
 async function ssoBoot0(){
-  const cu = currentUser();
-  /* 2026-11-26: 로그인해 둔 통합 계정으로 새로 고치면 실데이터·조합 자료(서버)를 다시 읽는다 — 전엔 처음 로그인 때만 읽어 새로고침하면 예시 화면이 나왔다 */
-  if(REAL_API && cu && cu.unified && (cu.hubRole || Array.isArray(cu.perms))){ loadRealData(); return; }
-  if(!REAL_API || (cu && (cu.hubRole || Array.isArray(cu.perms) || !cu.unified))) return;   // 11-07 알파언니 🟠2: 11-07 전 저장값(hubRole·perms 없음)은 허브에 다시 물어 등급 재판정(C8-① 이 옛 저장값에도 먹게)
+  /* 11-27 이사장 지시: 햇소자 로그인은 통합 계정(첫 화면)과 늘 같게 — 첫 화면에 로그인이 없으면 손님, 있으면 그 아이디.
+     전엔 브라우저에 저장된 계정이 있으면 허브에 묻지 않아, 예전에 쓴 다른 계정·체험 계정이 그대로 보였다.
+     체험 계정·관리자 미리보기는 햇소자 안에서 고른 것이라 그대로 두되, 첫 화면에서 들어올 때(?from=home)는 정리한다. */
+  let cu = currentUser(), fromHome = false;
+  try{
+    const q = new URLSearchParams(location.search);
+    if(q.get('from') === 'home'){ fromHome = true; q.delete('from');
+      history.replaceState(null, '', location.pathname + (q.toString() ? '?' + q.toString() : '') + (location.hash || '')); }
+  }catch(e){}
+  if(!REAL_API) return;
+  let hubU = null, reached = false;
   try{
     const res = await fetch('/api/auth/me', {credentials:'same-origin'});
     const d = await res.json().catch(() => ({}));
-    if(d.ok && d.user){ applyUnifiedUser(d.user, {redirect:false, silent:false}); hsApplyRefresh(); }
-  }catch(e){ /* 통합 계정 서버 미연결 — 조용히 무시 */ }
+    reached = res.ok || res.status === 401 || res.status === 403;
+    hubU = (d && d.ok && d.user) ? d.user : null;
+  }catch(e){ /* 통합 계정 서버 미연결 */ }
+  if(!reached){   // 허브에 못 닿으면 예전처럼 — 저장된 통합 계정이면 실데이터만 다시 읽는다
+    if(cu && cu.unified && (cu.hubRole || Array.isArray(cu.perms))) loadRealData();
+    return;
+  }
+  const 체험 = cu && !cu.unified;   // 체험 계정·관리자 미리보기(preview@)
+  if(!hubU){
+    if(cu && (cu.unified || fromHome)){
+      try{ storeClearLocal(); }catch(e){}
+      try{ sessionStorage.removeItem('sv_preview_admin'); }catch(e){}
+      setUser(null);
+      if(/^#\/(mem|fed|admin)\//.test(location.hash || '')) location.hash = '#/pub/home';
+    }
+    return;
+  }
+  if(체험 && !fromHome) return;
+  if(fromHome && cu && cu.viewVillage){ await viewCoopClear(); }   // 관리자 「조합 보기」 중이었으면 첫 화면에서 올 때 본래 계정으로
+  else if(cu && cu.unified && cu.email === hubU.username && (cu.hubRole || Array.isArray(cu.perms))){ loadRealData(); return; }
+  if(cu && (cu.unified || 체험)){ try{ storeClearLocal(); }catch(e){} try{ sessionStorage.removeItem('sv_preview_admin'); }catch(e){} }
+  applyUnifiedUser(hubU, {redirect: !!(cu && cu.email !== hubU.username), silent: !!(cu && cu.unified && cu.email === hubU.username)});
+  hsApplyRefresh();
 }
 /* 등급별 데모 계정 — 로그인 창의 등급 버튼·체험 띠의 등급 전환 버튼이 모두 여기로 온다 */
 const DEMO_ACCOUNTS = {
