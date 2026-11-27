@@ -178,6 +178,32 @@ try{var _h=location.hash||'';if(localStorage.getItem('sk_in')==='1'&&!/^#\/(map|
   #lgWho::-webkit-search-cancel-button,#lgWho::-webkit-search-decoration{-webkit-appearance:none;appearance:none}   /* 11-27 이사장 지시: 크롬 비밀번호 관리자가 아이디 칸에 옛 저장 계정 목록을 붙이지 않게 검색 칸으로(검색 칸에는 저장 계정을 띄우지 않는다) */
   .campPop{position:fixed;inset:0;z-index:90;background:rgba(10,30,20,.45);display:flex;align-items:center;justify-content:center;padding:16px}
   .campPop[hidden]{display:none}
+  /* 11-27 이사장 지시: 팝업에 산뜻한 사진·그림 기호 */
+  .cpx{background:#fff;border-radius:18px;max-width:460px;width:100%;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.28);max-height:92vh;overflow-y:auto;font-size:15px;line-height:1.55;color:#1e2b1c;font-family:inherit}
+  .cpx-hd{position:relative;height:190px;background:#0d3b2c}
+  .cpx-hd img{width:100%;height:100%;object-fit:cover;display:block}
+  .cpx-ov{position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,40,30,0) 15%,rgba(6,40,30,.88));display:flex;flex-direction:column;justify-content:flex-end;padding:16px 20px;color:#fff}
+  .cpx-bd{align-self:flex-start;background:#f2b134;color:#3a2a00;font-weight:800;font-size:12px;border-radius:999px;padding:3px 10px;margin-bottom:6px}
+  .cpx-ov h2{margin:0;font-size:23px;line-height:1.25;color:#fff!important;letter-spacing:-.3px;text-shadow:0 2px 8px rgba(0,0,0,.45)}
+.cpx-ov p{text-shadow:0 1px 6px rgba(0,0,0,.4)}
+  .cpx-ov p{margin:3px 0 0;font-size:14px;opacity:.92}
+  .cpx-bdy{padding:16px 18px 14px}
+  .cpx-g{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .cpx-t{border-radius:12px;padding:10px 6px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px}
+  .cpx-t svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;margin-bottom:2px}
+  .cpx-t b{font-size:14px;color:#14301f;white-space:nowrap}.cpx-t span{font-size:11.5px;color:#55684f;white-space:nowrap}
+  .cpx-t.t1{background:#e6f2ec;color:#2c7a55}.cpx-t.t2{background:#fdf1dc;color:#b47d14}.cpx-t.t3{background:#e4eefb;color:#2e5c9a}.cpx-t.t4{background:#f3e8f7;color:#7b4a94}
+  .cpx-need{display:flex;gap:10px;align-items:center;margin:12px 0 10px;background:#fff4f2;border:1px solid #f2c6bd;border-radius:12px;padding:9px 12px;font-size:13.5px;color:#7a2d22}
+  .cpx-need svg{width:26px;height:26px;flex-shrink:0;fill:none;stroke:#b03a3a;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .cpx-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}
+  .cpx-chips span{font-size:12px;border-radius:999px;padding:3px 9px;font-weight:600}
+  .cpx-chips .c1{background:#e6f2ec;color:#21603f}.cpx-chips .c2{background:#e4eefb;color:#244b80}.cpx-chips .c3{background:#efeae0;color:#5c4a1e}.cpx-chips .c4{background:#f3e8f7;color:#62397a}.cpx-chips .c5{background:#dff3f6;color:#155e6b}
+  .cpx-ac{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+  .cpx-ac label{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:#55684f}
+  .cpx-ac>span{display:flex;gap:6px}
+  .cpx-b{display:inline-flex;align-items:center;min-height:38px;padding:6px 14px;border-radius:999px;border:1px solid #ccd5c4;background:#fff;color:#1e2b1c;text-decoration:none;font:inherit;font-size:14px;cursor:pointer}
+  .cpx-b.p{background:#0d3b2c;border-color:#0d3b2c;color:#fff;font-weight:700}
+  @media(max-width:420px){.cpx-g{grid-template-columns:repeat(2,1fr)}.cpx-hd{height:150px}.cpx-ov h2{font-size:20px}}
   .campPop .box{background:#fff;border-radius:16px;max-width:440px;width:100%;padding:22px 22px 16px;box-shadow:0 20px 50px rgba(0,0,0,.25);border-top:6px solid #2c5842;max-height:90vh;overflow:auto}
   .campPop h2{margin:0 0 6px;font-size:1.25rem;color:#0d3b2c}
   .campPop ul{margin:8px 0 12px 18px;display:grid;gap:3px;font-size:.95rem}
@@ -1726,9 +1752,20 @@ function campPopMaybe() {
   if (Date.now() < until || window._campPopShown) return;
   window._campPopShown = true;
   const p = $('#campPop'); if (!p) return;
-  p.innerHTML = `<div class="box"><p class="note" style="margin:0 0 4px;color:#b47d14;font-weight:700">모집 안내</p><h2 id="campPopT">${CAMP.title}</h2>
-    <ul><li>3박 4일 합숙 · 숙식 제공 · 완도</li><li>수업 24시간 + 완도 여행</li><li>수강료 500,000원</li><li><b style="color:#b03a3a">준비물(필수)</b> 노트북, AI 유료 모델 계정(예: Claude Pro 이상 — 하네스 교육에 씁니다)</li><li>주민자치·협동조합·재생에너지 기본교육, AI 리터러시, 하네스·서버 설치, 컨설팅 방법론 워크숍, AX 기술 적용 실습, 과제 발표</li></ul>
-    <div class="acts2"><label class="ck" style="font-size:.9rem"><input type="checkbox" id="campPopDay">오늘 하루 보지 않기</label><span style="display:flex;gap:6px"><button type="button" class="btn sm" id="campPopX">닫기</button><a class="btn sm p" href="#/axcamp" id="campPopGo">자세히 보기·신청</a></span></div></div>`;
+  p.innerHTML = `<div class="cpx">
+  <div class="cpx-hd"><img src="/img/unified/hero.jpg" alt="완도 바다와 항구를 내려다본 사진" loading="eager"><div class="cpx-ov"><span class="cpx-bd">모집 안내</span><h2 id="campPopT">AX컨설턴트 양성과정</h2><p>완도에서 3박 4일, 현장을 아는 AX 컨설턴트로</p></div></div>
+  <div class="cpx-bdy">
+    <div class="cpx-g">
+      <div class="cpx-t t1"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><b>3박 4일</b><span>완도 합숙</span></div>
+      <div class="cpx-t t2"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18h18M5 18v-6a7 7 0 0 1 14 0v6M12 5V3"/></svg><b>숙식 제공</b><span>먹고 자며 배움</span></div>
+      <div class="cpx-t t3"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><b>수업 24시간</b><span>+ 완도 여행</span></div>
+      <div class="cpx-t t4"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20M6 15h4"/></svg><b>50만 원</b><span>수강료</span></div>
+    </div>
+    <div class="cpx-need"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M2 19h20"/></svg><span><b>준비물(필수)</b> 노트북 · AI 유료 모델 계정(예: Claude Pro 이상)</span></div>
+    <div class="cpx-chips"><span class="c1">기본교육</span><span class="c2">AI 리터러시</span><span class="c3">하네스</span><span class="c3">서버 설치</span><span class="c4">컨설팅 방법론</span><span class="c2">AX 기술 적용</span><span class="c1">과제 발표</span><span class="c5">완도 여행</span></div>
+    <div class="cpx-ac"><label><input type="checkbox" id="campPopDay">오늘 하루 보지 않기</label><span><button type="button" class="cpx-b" id="campPopX">닫기</button><a class="cpx-b p" id="campPopGo" href="#/axcamp">자세히 보기·신청</a></span></div>
+  </div>
+</div>`;
   p.hidden = false;
   const close = () => { if ($('#campPopDay') && $('#campPopDay').checked) { try { const t = new Date(); t.setHours(24, 0, 0, 0); localStorage.setItem(CAMP_POP_KEY, String(t.getTime())); } catch (_) {} } p.hidden = true; };
   $('#campPopX').onclick = close; $('#campPopGo').onclick = close;
