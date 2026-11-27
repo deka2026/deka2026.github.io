@@ -7302,18 +7302,17 @@ function memExpenses(){
     </div>
     <div class="card mt-20">
       <div class="card-title"><h3 class="serif">${R.이름} (${rows.length}) ${rows.length ? `<span class="badge badge-success">대조 ${상태.ok}</span> <span class="badge badge-gold">확인 ${상태.warn}</span> <span class="badge badge-danger">미대조 ${상태.bad}</span>` : ''}</h3>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          <button class="btn btn-outline btn-sm" onclick="location.hash='#/mem/inbox'">📥 자료로 넣기</button>
-          <label class="btn btn-outline btn-sm" style="cursor:pointer;">💳 카드 사용내역 올리기<input type="file" accept=".csv,.txt,.xlsx" style="display:none;" onchange="this.files[0] && expImportCard(this.files[0])"></label>
-          <button class="btn btn-outline btn-sm" onclick="expMatchAll(true)">🔗 통장·카드와 대조</button>
-          <button class="btn btn-outline btn-sm" onclick="regEdit('expenses','',{pay:'현금(현금영수증)', evKind:'현금영수증'})">💵 현금 지출(현금영수증)</button>
-          <button class="btn btn-primary btn-sm" onclick="regEdit('expenses','')">+ 영수증 넣기</button></div></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <label class="btn btn-primary" style="cursor:pointer;">📥 자료 넣기<input type="file" multiple accept="image/*,.pdf,.csv,.txt,.xlsx,.xls" style="display:none;" onchange="expIntake(this.files); this.value=''"></label></div></div>
+      <div class="notice" style="margin:0 0 10px;font-size:13px;">영수증·카드전표·현금영수증 사진이나 PDF, 카드 사용내역 파일을 한꺼번에 올리세요. 자료를 읽어 <b>지출결의서를 자동으로 만들고</b> 통장·카드 기록과 대조합니다.
+        자료에 없는 필수 항목(지출일·거래처·금액·결제 수단·증빙 종류)만 사람이 채운 뒤 「✅ 최종 지출」을 누르면 됩니다.
+        <span class="text-mute">· <a href="javascript:void(0)" onclick="regEdit('expenses','')">자료 없이 직접 쓰기</a> · <a href="javascript:void(0)" onclick="expMatchAll(true)">대조 다시 하기</a></span></div>
       <p class="text-mute" style="font-size:12.5px;margin:0 0 8px;">통장 출금 ${MOCK.tax.bank.filter(t => t.out).length}건 · 카드 사용 ${카드.length}건과 대조합니다(통장은 「세무 표준장부」에서 올립니다). 대조된 통장·카드 기록은 증빙 보관함(5년)에 바로 남고, 「🔗 통장·카드와 대조」나 아래 링크를 누르면 서버 서류함에 「통장·카드 대조 기록」 CSV 로 달마다 한 판씩 남습니다.
         ${rows.length ? ` <a href="javascript:void(0)" onclick="expSaveRecord(null)">대조 기록 지금 서류로 저장</a>` : ''}</p>
       ${rows.length ? `<div style="overflow-x:auto;"><table class="tbl" style="font-size:13px;min-width:860px;"><thead><tr><th>지출일</th><th>거래처</th><th>내용</th><th style="text-align:right;">금액</th><th>사업</th><th>계정</th><th>결제</th><th>증빙</th><th>대조</th><th></th></tr></thead><tbody>
         ${rows.map(r => `<tr><td>${escapeHtml(r.date || '')}</td><td>${escapeHtml(r.vendor || '')}</td><td>${escapeHtml(r.item || '')}</td><td style="text-align:right;">${_expAmt(r).toLocaleString()}</td>
           <td>${escapeHtml(r.biz || '')}</td><td>${escapeHtml(r.acct || '')}</td><td>${escapeHtml(r.pay || '')}</td>
-          <td style="font-size:12px;">${escapeHtml(r.evKind || '')}${r.docId ? ` <a href="/api/my/docs/${Number(r.docId)}/file" title="${escapeHtml(r.docName || '')}">📎</a>` : r.docName ? ' 📎' : ''}</td>
+          <td style="font-size:12px;">${r.auto ? '<span class="badge badge-info" title="올린 자료를 읽어 만든 지출결의서">자동</span> ' : ''}${escapeHtml(r.evKind || '')}${r.docId ? ` <a href="/api/my/docs/${Number(r.docId)}/file" title="${escapeHtml(r.docName || '')}">📎</a>` : r.docName ? ' 📎' : ''}</td>
           <td>${_expBadge(expStatus(r))}</td>
           <td style="white-space:nowrap;"><button class="btn btn-outline btn-sm" onclick="expPick('${escapeJs(r.id)}')">대조</button>
             <button class="btn btn-ghost btn-sm" onclick="regEdit('expenses','${escapeJs(r.id)}')">고치기</button>
@@ -7321,6 +7320,65 @@ function memExpenses(){
       </tbody></table></div>` : '<p class="text-mute">아직 없습니다. 영수증을 「📥 자료로 넣기」로 올리거나 「+ 영수증 넣기」를 누르세요. 현금으로 낸 돈은 「💵 현금 지출」로 현금영수증을 넣으면 통장 기록 없이도 씁니다.</p>'}
     </div>`;
 }
+/* 11-27 이사장 지시: 지출결의는 「📥 자료 넣기」 하나로 — 올린 영수증을 읽어 지출결의서를 자동으로 만든다.
+   필수 항목(지출일·거래처·금액·결제 수단·증빙 종류, 현금영수증이면 승인번호)이 자료에 없거나 읽은 값이 확실하지 않을 때만
+   입력 창을 띄워 사람이 채우고 「✅ 최종 지출」을 누른다. 읽기는 서버 /api/docs/ingest(kind=receipt) — 서버 안 글자 인식, 바깥 AI 없음.
+   카드 사용내역 파일(.csv·.xlsx)은 카드 내역으로 올린다. 저장 뒤 통장·카드 대조는 늘 하던 대로 돈다. */
+const EXP_REQ = [['date','지출일'],['vendor','거래처'],['amount','금액'],['pay','결제 수단'],['evKind','증빙 종류']];
+const EXP_SURE = 0.6;   // 이보다 확신이 낮게 읽힌 값은 사람이 보고 넣는다
+let _expQueue = [], _expMade = 0;
+async function expIntake(files){
+  const fs = Array.prototype.slice.call(files || []);
+  if(!fs.length) return;
+  const 카드파일 = fs.filter(f => /\.(csv|txt|xlsx|xls)$/i.test(f.name)), 영수증 = fs.filter(f => !/\.(csv|txt|xlsx|xls)$/i.test(f.name));
+  카드파일.forEach(f => expImportCard(f));
+  if(!영수증.length) return;
+  toast(영수증.length + '장을 읽는 중입니다…');
+  _expMade = 0;
+  for(const f of 영수증){
+    let d = null;
+    try{
+      const fd = new FormData(); fd.append('kind', 'receipt'); fd.append('file', f, f.name);
+      const res = await fetch('/api/docs/ingest', {method:'POST', body: fd, credentials:'same-origin'});
+      d = await res.json().catch(() => null);
+      if(!res.ok && d && d.error) d = {fields:{}, 말: d.error};
+    }catch(e){ d = {fields:{}, 말:'자료를 읽지 못했습니다'}; }
+    _expQueue.push({f, fields: (d && d.fields) || {}, 말: d && d.말});
+  }
+  expIntakeNext();
+}
+function _expPre(it){
+  const v = k => { const o = it.fields[k]; return o == null ? '' : (typeof o === 'object' ? (o.값 == null ? '' : String(o.값)) : String(o)); };
+  const 확 = k => { const o = it.fields[k]; return o && typeof o === 'object' && o.확신 != null ? +o.확신 : (o ? 1 : 0); };
+  const pre = {src: it.f.name, auto: true, date: v('지출일'), vendor: v('거래처'), amount: v('금액') ? Number(v('금액')).toLocaleString() : '',
+    pay: v('결제'), evKind: v('증빙'), item: ''};
+  if(/현금영수증/.test(pre.pay) && v('승인번호')) pre.cashNo = v('승인번호');
+  if(pre.pay && EXP_PAY.indexOf(pre.pay) === -1) pre.pay = '';
+  if(pre.evKind && EXP_EV.indexOf(pre.evKind) === -1) pre.evKind = '';
+  pre.acct = expAcctFor(pre.vendor, '') || '';
+  const 칸확신 = {date: 확('지출일'), vendor: 확('거래처'), amount: 확('금액'), pay: 확('결제'), evKind: 확('증빙')};
+  const 빈칸 = EXP_REQ.filter(([k]) => !pre[k] || 칸확신[k] < EXP_SURE).map(([k]) => k);
+  if(/현금영수증/.test(pre.pay) && !pre.cashNo) 빈칸.push('cashNo');
+  return {pre, 빈칸};
+}
+function expIntakeNext(){
+  const it = _expQueue.shift();
+  if(!it){ if(_expMade){ expMatchAll(false); navigate(); toast('지출결의서 ' + _expMade + '건을 만들었습니다. 통장·카드 기록과 대조했습니다.'); _expMade = 0; } return; }
+  const {pre, 빈칸} = _expPre(it);
+  if(!빈칸.length){   // 필수 항목이 다 있고 확실하면 바로 작성
+    const a = regLoad('expenses'), u = currentUser();
+    const rec = Object.assign({id: 'r' + Date.now() + Math.floor(Math.random() * 1000), at: new Date().toISOString()}, pre);
+    if(!rec.acct) rec.acct = '기타';
+    rec.by = u ? u.name : ''; rec.updated = new Date().toISOString();
+    a.push(rec); regSave('expenses', a); expUploadDoc(rec.id, it.f); _expMade++;
+    return expIntakeNext();
+  }
+  const fid = 'x' + Date.now() + Math.floor(Math.random() * 1000); _inboxFiles[fid] = it.f; pre._fid = fid; pre._need = 빈칸; pre._말 = it.말 || '';
+  _regAfter = () => { _expMade++; expIntakeNext(); };
+  _regCancel = () => { expIntakeNext(); };
+  regEdit('expenses', '', pre);
+}
+let _regCancel = null;
 /* 고치기 창 — 사업 구분·거래처로 계정 채우기, 결제 수단으로 증빙 종류 채우기, 영수증 파일 */
 function expFormWire(){
   const $ = id => document.getElementById(id);
@@ -7386,15 +7444,24 @@ function memRegister(k){
 }
 function regEdit(k, id, pre){
   const R = REG[k], r = id ? (regLoad(k).filter(x => x.id === id)[0] || {}) : Object.assign({}, pre || {});
-  showDyn({title: R.이름 + (id ? ' — 고치기' : ' — 넣기'), sub: pre && pre.src ? '자료에서 읽은 값입니다. 원본과 맞는지 보고 저장하세요.' : '',
+  const 자동 = !id && pre && pre.auto, 필요 = (자동 && pre._need) || [];
+  showDyn({title: R.이름 + (id ? ' — 고치기' : 자동 ? ' — 자료에서 만든 지출결의서' : ' — 넣기'),
+    sub: 자동 ? '「' + pre.src + '」에서 읽었습니다. ' + (pre._말 ? pre._말 + ' — ' : '') + '노란 칸(' + 필요.map(k => ({date:'지출일',vendor:'거래처',amount:'금액',pay:'결제 수단',evKind:'증빙 종류',cashNo:'현금영수증 승인번호'})[k] || k).join('·') + ')은 자료에 없거나 확실하지 않아 직접 확인해 넣어 주세요. 다 넣고 「✅ 최종 지출」을 누르면 지출결의서가 작성됩니다.'
+      : pre && pre.src ? '자료에서 읽은 값입니다. 원본과 맞는지 보고 저장하세요.' : '',
     body: R.칸.map(([key, label, hint, t]) => `<div class="form-row"><label>${label}</label>
       ${key === 'memo' || key === 'result' ? `<textarea class="textarea" id="rg-${key}" placeholder="${escapeHtml(hint || '')}">${escapeHtml(r[key] || '')}</textarea>`
         : t === 'sel' ? `<select class="select" id="rg-${key}"><option value="">— 고르기 —</option>${(function(){ const o = String(hint || '').split(' · '); if(r[key] && o.indexOf(r[key]) === -1) o.push(r[key]); return o; })().map(o => `<option${o === r[key] ? ' selected' : ''}>${escapeHtml(o)}</option>`).join('')}</select>`
         : `<input class="input" id="rg-${key}" type="${t === 'date' ? 'date' : 'text'}" value="${escapeHtml(r[key] == null ? '' : String(r[key]))}" placeholder="${escapeHtml(t === 'num' ? '예: 1,200,000' : (hint || ''))}">`}</div>`).join('')
       + `<input type="hidden" id="rg-src" value="${escapeHtml(r.src || '')}"><input type="hidden" id="rg-fid" value="${escapeHtml(r._fid || '')}">`
       + (k === 'expenses' ? expFormExtra(r) : ''),
-    foot: `<button class="btn btn-outline" onclick="closeDyn()">취소</button><button class="btn btn-primary" onclick="regSaveForm('${escapeJs(k)}','${escapeJs(id || '')}')">저장</button>`});
+    foot: `<button class="btn btn-outline" onclick="closeDyn(); if(_regCancel){ const f = _regCancel; _regCancel = null; _regAfter = null; f(); }">${자동 ? '이 자료 건너뛰기' : '취소'}</button><button class="btn btn-primary" onclick="regSaveForm('${escapeJs(k)}','${escapeJs(id || '')}')">${자동 ? '✅ 최종 지출' : '저장'}</button>`});
   if(k === 'expenses') expFormWire();
+  if(자동){
+    if(필요.indexOf('cashNo') !== -1){ const c = document.getElementById('rg-cashNo'); if(c) c.closest('.form-row').style.display = ''; }
+    필요.forEach(key => { const el = document.getElementById('rg-' + key); if(el){ el.style.background = '#fff7d6'; el.style.borderColor = '#e0a800'; } });
+    const f0 = document.getElementById('rg-' + 필요[0]); if(f0) setTimeout(() => f0.focus(), 50);
+    const src = document.getElementById('rg-src'); if(src) src.insertAdjacentHTML('afterend', '<input type="hidden" id="rg-auto" value="1">');
+  }
 }
 function regSaveForm(k, id){
   const R = REG[k], a = regLoad(k), u = currentUser();
@@ -7408,6 +7475,11 @@ function regSaveForm(k, id){
     const fe = document.getElementById('rg-file'), fid = (document.getElementById('rg-fid') || {}).value;
     파일 = fe && fe.files && fe.files[0] ? fe.files[0] : (fid && _inboxFiles[fid]) || null;
     if(!rec.date || !_expAmt(rec)){ toast('지출일과 금액은 꼭 넣어 주세요.'); return; }
+    if(document.getElementById('rg-auto')){
+      const 빈 = EXP_REQ.filter(([key]) => !rec[key]).map(([, l]) => l);
+      if(빈.length){ toast('아직 비어 있습니다: ' + 빈.join('·')); return; }
+      rec.auto = true;
+    }
     if(rec.cashNo && String(rec.cashNo).replace(/\D/g, '').length < 8){ toast('현금영수증 승인번호는 숫자 8자리 이상입니다(영수증에 적힌 번호 그대로).'); return; }
     if(/현금영수증/.test(rec.pay || '') && !rec.cashNo && !파일 && !rec.docId){ toast('현금 지출은 현금영수증 승인번호를 적거나 현금영수증 사진을 올려야 씁니다.'); return; }
     if(id && rec.match && _전 && (_전.a !== _expAmt(rec) || _전.p !== (rec.pay || '') || _전.d !== (rec.date || ''))){ _expUnlinkRow(rec); toast('금액·결제 수단·날짜가 바뀌어 대조를 다시 합니다.'); }
@@ -7419,6 +7491,7 @@ function regSaveForm(k, id){
   regSave(k, a); closeDyn();
   if(k === 'expenses'){ expMatchAll(false); if(파일) expUploadDoc(rec.id, 파일); }
   navigate(); toast(R.이름 + '에 저장했습니다.');
+  _regCancel = null;
   if(_regAfter){ const f = _regAfter; _regAfter = null; f(); }
 }
 let _regAfter = null;
