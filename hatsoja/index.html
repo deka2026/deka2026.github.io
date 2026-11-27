@@ -2804,6 +2804,7 @@ function navigate(){
     renderApp(scope, page || 'dashboard');
     if(scope === 'mem' && page === 'inbox') inboxRender();
     if(scope === 'mem' && page === 'state') stRender();
+    if(scope === 'mem' && page === 'minutes') minRecRender();
     if(scope === 'mem' && page === 'todo')  todoRender();
     if(scope === 'mem' && page === 'law'){ lawFillSelects(); lawEvalNow(); }
     if(scope === 'mem' && page === 'finance') finRenderDocs();
@@ -7434,8 +7435,11 @@ function memRegister(k){
     <div class="sec-head"><h1>${R.icon} ${R.이름}</h1><p class="sec-desc">${R.설명}</p></div>
     <div class="card">
       <div class="card-title"><h3 class="serif">${R.이름} (${rows.length})</h3>
-        <div style="display:flex;gap:6px;"><button class="btn btn-outline btn-sm" onclick="location.hash='#/mem/inbox'">📥 자료로 넣기</button>
+        <div style="display:flex;gap:6px;">${k === 'minutes'
+          ? `<label class="btn btn-outline btn-sm" style="cursor:pointer;" title="회의 녹음(m4a·mp3·wav·mp4 등)을 넣으면 받아써서 회의록 초안을 만듭니다. 회의록 문서(PDF·한글)는 자료함으로 갑니다">📥 자료로 넣기<input type="file" accept="audio/*,video/*,.m4a,.mp3,.wav,.aac,.ogg,.opus,.webm,.mp4,.mov,.amr,.3gp,.flac,.pdf,.hwp,.hwpx,.docx,.txt" style="display:none;" onchange="minRecPick(this.files); this.value=''"></label>`
+          : `<button class="btn btn-outline btn-sm" onclick="location.hash='#/mem/inbox'">📥 자료로 넣기</button>`}
         <button class="btn btn-primary btn-sm" onclick="regEdit('${escapeJs(k)}','')">+ 직접 넣기</button></div></div>
+      ${k === 'minutes' ? '<div id="minRecBox"></div><p class="text-mute" style="font-size:12.5px;margin:0 0 8px;">🎙️ 회의 녹음 파일을 「📥 자료로 넣기」에 넣으면 사교원 서버 안에서 받아써 회의록 초안(안건·결정·할 일)을 만듭니다. 내용을 검토하고 「제출」을 눌러야 대장에 들어갑니다. 녹음은 받아쓴 뒤 바로 지웁니다.</p>' : ''}
       ${k === 'expenses' && rows.length ? `<p style="margin:0 0 8px;">합계 <b>${Math.round(합).toLocaleString()}원</b> · 이체 확인 안 된 것 <b>${rows.filter(r => !/^예/.test(r.paid || '')).length}건</b></p>` : ''}
       ${rows.length ? `<div style="overflow-x:auto;"><table class="tbl" style="font-size:13px;min-width:640px;"><thead><tr>${표칸.map(c => `<th>${c[1]}</th>`).join('')}<th></th></tr></thead><tbody>
         ${rows.map(r => `<tr>${표칸.map(([key, , , t]) => {
@@ -7448,6 +7452,104 @@ function memRegister(k){
           ${r.src ? `<tr><td colspan="${표칸.length + 1}" class="text-mute" style="font-size:11.5px;padding-top:0;">출처: ${escapeHtml(r.src)}</td></tr>` : ''}`).join('')}
       </tbody></table></div>` : '<p class="text-mute">아직 없습니다. 「📥 자료로 넣기」로 파일을 올리거나 「+ 직접 넣기」를 누르세요.</p>'}
     </div>`;
+}
+/* 11-27 이사장 지시: 회의록 대장 「📥 자료로 넣기」에 회의 녹음을 넣으면 회의록 초안을 만들고, 사람이 검토해 「제출」하면 대장에 들어간다.
+   서버 /api/hatsoja/minutes/rec — 받아쓰기는 사교원 서버 CPU(바깥으로 소리 안 보냄), 정리는 이름 가린 글만 HPC 엔진. 진행 중인 작업 번호는 이 브라우저에 기억. */
+const MIN_JOB_KEY = 'hsj_min_rec_job';
+let _minPoll = null;
+function _minJob(){ try{ return localStorage.getItem(MIN_JOB_KEY) || ''; }catch(e){ return ''; } }
+function _minJobSet(v){ try{ v ? localStorage.setItem(MIN_JOB_KEY, v) : localStorage.removeItem(MIN_JOB_KEY); }catch(e){} }
+function minRecPick(files){
+  const f = files && files[0]; if(!f) return;
+  if(!/^(audio|video)\//.test(f.type || '') && !/\.(m4a|mp3|wav|aac|ogg|oga|opus|webm|mp4|mov|amr|3gp|flac|wma|mkv)$/i.test(f.name)){
+    inboxAddFiles([f]); location.hash = '#/mem/inbox'; return;   // 회의록 문서는 예전처럼 자료함으로
+  }
+  const u = currentUser();
+  if(!REAL_API || !u || !u.unified){ toast('녹음으로 회의록 만들기는 실제 조합 계정으로 로그인했을 때 쓸 수 있습니다(체험 화면은 저장되지 않음).'); return; }
+  if(_minJob()){ toast('이미 만드는 회의록이 있습니다. 끝난 뒤에 올려 주세요.'); minRecRender(); return; }
+  if(f.size > 95 * 1024 * 1024){ toast('녹음 파일은 95MB 까지 받습니다. 나눠서 올리거나 m4a 로 줄여 주세요.'); return; }
+  const 오늘 = new Date().toISOString().slice(0, 10);
+  showDyn({title:'🎙️ 회의 녹음으로 회의록 만들기', sub:'「' + f.name + '」(' + (f.size / 1048576).toFixed(1) + 'MB) — 아는 것만 적으세요. 참석자 이름을 적으면 받아쓴 이름이 더 정확해집니다.',
+    body:`<div class="form-row"><label>회의</label><select class="select" id="mr-type"><option>정기총회</option><option>임시총회</option><option selected>이사회</option><option>마을총회</option><option>기타 회의</option></select></div>
+      <div class="form-row"><label>회의일</label><input class="input" type="date" id="mr-date" value="${오늘}"></div>
+      <div class="form-row"><label>장소</label><input class="input" id="mr-place" placeholder="예: 마을회관"></div>
+      <div class="form-row"><label>참석자 (쉼표로)</label><input class="input" id="mr-att" placeholder="예: 김철수, 이영희, 박민수"></div>
+      <p class="text-mute" style="font-size:12px;margin:0;">녹음 소리는 사교원 서버 안에서만 받아쓰고 바로 지웁니다. 정리할 때는 참석자 이름을 「참석자1」처럼 바꾼 글만 AI 엔진에 보냅니다. 1시간 녹음은 15분쯤 걸립니다 — 창을 닫아도 계속 만듭니다.</p>
+      <div id="mr-prog" class="text-mute" style="font-size:12.5px;margin-top:8px;"></div>`,
+    foot:`<button class="btn btn-outline" onclick="closeDyn()">취소</button><button class="btn btn-primary" id="mr-go">올리고 만들기</button>`, size:'md'});
+  document.getElementById('mr-go').onclick = function(){
+    const fd = new FormData();
+    fd.append('file', f, f.name);
+    fd.append('title', document.getElementById('mr-type').value);
+    fd.append('date', document.getElementById('mr-date').value);
+    fd.append('place', document.getElementById('mr-place').value);
+    fd.append('attendees', document.getElementById('mr-att').value);
+    const x = new XMLHttpRequest(), pg = document.getElementById('mr-prog'), go = document.getElementById('mr-go');
+    go.disabled = true;
+    x.open('POST', '/api/hatsoja/minutes/rec'); x.withCredentials = true;
+    x.upload.onprogress = e => { if(e.lengthComputable && pg) pg.textContent = '올리는 중… ' + Math.round(e.loaded / e.total * 100) + '%'; };
+    x.onload = () => {
+      let j = {}; try{ j = JSON.parse(x.responseText); }catch(e){}
+      if(x.status === 200 && j.ok){ _minJobSet(j.job); closeDyn(); toast('녹음을 받았습니다. 회의록 초안을 만드는 중입니다(약 ' + j.예상분 + '분).'); minRecRender(); }
+      else { go.disabled = false; if(pg) pg.textContent = ''; toast(j.error || ('올리지 못했습니다(' + x.status + ')')); if(j.job){ _minJobSet(j.job); minRecRender(); } }
+    };
+    x.onerror = () => { go.disabled = false; toast('올리지 못했습니다. 연결을 확인해 주세요.'); };
+    x.send(fd);
+  };
+}
+async function minRecRender(){
+  const box = document.getElementById('minRecBox'), jid = _minJob();
+  if(_minPoll){ clearTimeout(_minPoll); _minPoll = null; }
+  if(!box || !jid) { if(box) box.innerHTML = ''; return; }
+  let j = null;
+  try{ const r = await fetch('/api/hatsoja/minutes/rec/' + encodeURIComponent(jid), {credentials:'same-origin'}); j = await r.json(); if(r.status === 404){ _minJobSet(''); box.innerHTML = ''; return; } }catch(e){}
+  if(!j || !j.ok){ box.innerHTML = '<div class="notice">회의록 만들기 상태를 불러오지 못했습니다. <a href="javascript:void(0)" onclick="minRecRender()">다시</a></div>'; return; }
+  const 분 = s => s >= 60 ? Math.floor(s / 60) + '분 ' + (s % 60) + '초' : s + '초';
+  const 이름 = escapeHtml(j.원래이름 || '녹음') + ' · ' + 분(j.길이초 || 0);
+  if(j.상태 === '완료'){
+    box.innerHTML = `<div class="notice" style="border-left:4px solid var(--primary);margin-bottom:10px;">✅ <b>회의록 초안이 준비됐습니다</b> — ${이름}${j.정리됨 ? '' : ' <span class="badge badge-warn">AI 정리 없이 받아쓴 글만</span>'}
+      <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;"><button class="btn btn-primary btn-sm" onclick="minRecReview()">검토하고 제출하기</button><button class="btn btn-ghost btn-sm" onclick="minRecDrop()">버리기</button></div></div>`;
+    window._minResult = j; return;
+  }
+  if(j.상태 === '실패'){
+    box.innerHTML = `<div class="notice" style="border-left:4px solid var(--danger);margin-bottom:10px;">⚠️ 회의록을 만들지 못했습니다 — ${이름}<br><span class="text-mute">${escapeHtml(j.말 || '')}</span> <button class="btn btn-ghost btn-sm" onclick="minRecDrop()">닫기</button></div>`; return;
+  }
+  const 줄 = j.상태 === '기다림' ? (j.앞 ? `앞에 ${j.앞}건이 있어 기다리는 중` : '곧 시작') : j.상태 === '정리 중' ? '받아쓰기 끝 — AI 가 안건·결정·할 일을 정리하는 중' : '받아쓰는 중' + (j.지난초 ? ` (${분(j.지난초)} 지남, 녹음 길이의 4분의 1쯤 걸립니다)` : '');
+  box.innerHTML = `<div class="notice" style="margin-bottom:10px;">⏳ <b>회의록 초안 만드는 중</b> — ${이름}<br><span class="text-mute">${줄}. 다른 화면에 가도 계속 만듭니다.</span></div>`;
+  _minPoll = setTimeout(() => { if(currentRoute() === 'mem/minutes') minRecRender(); else _minPoll = null; }, 15000);
+}
+function _minText(r){
+  const L = [], 목록 = (제목, a, f) => { if(a && a.length){ L.push('■ ' + 제목); a.forEach(x => L.push('- ' + f(x))); L.push(''); } };
+  if(!r) return '';
+  목록('요약', r.요약, x => typeof x === 'string' ? x : JSON.stringify(x));
+  목록('결정', r.결정, x => typeof x === 'string' ? x : (x.내용 || JSON.stringify(x)));
+  목록('할 일', r.할일, x => typeof x === 'string' ? x : [(x.일 || x.내용 || ''), x.담당 ? '담당 ' + x.담당 : '', x.기한 ? '기한 ' + x.기한 : ''].filter(Boolean).join(' · '));
+  목록('위험·걱정', r.위험, x => typeof x === 'string' ? x : [x.종류 ? '[' + x.종류 + ']' : '', x.내용 || ''].join(' '));
+  return L.join('\n').trim();
+}
+function minRecReview(){
+  const j = window._minResult; if(!j || !j.결과){ minRecRender(); return; }
+  const r = j.결과, 안건 = (r.안건 || []).map(x => typeof x === 'string' ? x : (x.안건 || x.내용 || JSON.stringify(x)));
+  const 결정 = (r.결정 || []).map(x => typeof x === 'string' ? x : (x.내용 || JSON.stringify(x)));
+  const 참석 = (j.참석자 || '').split(/[,，、]/).map(x => x.trim()).filter(Boolean);
+  const pre = {src: (j.원래이름 || '회의 녹음') + ' (녹음에서 만든 AI 초안 — 검토함)', auto_min: true, date: (j.일시 || '').slice(0, 10), type: j.회의명 || '',
+    title: 안건.join(' / ').slice(0, 300), result: 결정.join(' / ').slice(0, 500), attend: 참석.length ? 참석.length + '명 출석(' + 참석.join(', ') + ')' : '', signed: '아니오',
+    memo: (_minText(r) || '') + (r.실패 || r.없음 ? '\n※ ' + (r.실패 || r.없음) : '')};
+  _regAfter = () => { minRecDrop(true); };
+  regEdit('minutes', '', pre);
+  const dyn = document.getElementById('dynModalCard');
+  const 전사 = String(r.전사 || '');
+  const ta = document.getElementById('rg-memo'); if(ta){ ta.rows = 12; ta.style.minHeight = '220px'; }
+  const foot = dyn && dyn.querySelector('.btn-primary'); if(foot) foot.textContent = '✅ 제출(회의록 대장에 넣기)';
+  const sub = document.getElementById('dynSub'); if(sub) sub.innerHTML = '녹음을 받아써 AI 가 만든 <b>초안</b>입니다. 안건·의결 결과·메모를 녹음과 맞는지 보고 고친 뒤 「제출」을 누르면 회의록 대장에 들어갑니다. 출석/재적·서명은 실제 회의록대로 고치세요(협동조합 기본법 제30조).'
+    + (전사 ? ` <details style="margin-top:6px;"><summary>받아쓴 글 전체 보기 (${전사.length.toLocaleString()}자)</summary><div style="max-height:220px;overflow:auto;white-space:pre-wrap;font-size:12.5px;background:var(--paper-soft);padding:8px;border-radius:6px;margin-top:4px;">${escapeHtml(전사)}</div></details>` : '');
+}
+async function minRecDrop(제출){
+  const jid = _minJob(); if(!jid) return;
+  if(!제출 && !confirm('이 회의록 초안을 버릴까요? 받아쓴 글도 서버에서 지웁니다.')) return;
+  try{ await fetch('/api/hatsoja/minutes/rec/' + encodeURIComponent(jid), {method:'DELETE', credentials:'same-origin'}); }catch(e){}
+  _minJobSet(''); window._minResult = null; minRecRender();
+  if(제출) toast('회의록 대장에 넣었습니다. 받아쓴 글과 초안은 서버에서 지웠습니다.');
 }
 function regEdit(k, id, pre){
   const R = REG[k], r = id ? (regLoad(k).filter(x => x.id === id)[0] || {}) : Object.assign({}, pre || {});
