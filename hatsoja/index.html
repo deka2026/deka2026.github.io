@@ -2224,9 +2224,10 @@ async function consultEnter(vid){
   consultWipe();   // 앞 조합 자료가 이 브라우저에 남지 않게
   setUser({email:cur.email, name:cur.name, role:'coop', hubRole:'coop', perms:[], village:d.village.name, loginAt:new Date().toISOString(),
     unified:true, preview:true, consultant:true, consultVillage:{id:d.village.id, name:d.village.name}});
-  await loadRealData();
+  /* 26-11-27 알파언니 재검증 🔴: 메모리(회계·세무 등)에 남은 앞 조합 자료를 확실히 버리려고 화면을 새로 읽는다 — 새로 읽으면 ssoBoot 가 이 조합 자료를 서버에서 받는다 */
+  try{ sessionStorage.setItem('sv_consult_flash', `「${d.village.name}」 조합에 컨설턴트로 들어왔습니다. 위 띠에서 다른 조합으로 바꾸거나 돌아갑니다.`); }catch(e){}
   if(location.hash === '#/mem/ctools') navigate(); else location.hash = '#/mem/ctools';
-  toast(`「${d.village.name}」 조합에 컨설턴트로 들어왔습니다. 위 띠에서 다른 조합으로 바꾸거나 돌아갑니다.`);
+  try{ location.reload(); }catch(e){}
 }
 async function consultLeave(silent){
   try{ Object.values(_storeSync.timers || {}).forEach(t => clearTimeout(t)); _storeSync.timers = {}; _storeSync.on = false; }catch(e){}
@@ -2239,9 +2240,9 @@ async function consultLeave(silent){
   }
   if(!self){ logout(); return; }
   setUser(self);
-  await loadRealData();
+  try{ if(!silent) sessionStorage.setItem('sv_consult_flash', '컨설턴트 화면으로 돌아왔습니다.'); }catch(e){}
   if(location.hash === '#/mem/consult') navigate(); else location.hash = '#/mem/consult';
-  if(!silent) toast('컨설턴트 화면으로 돌아왔습니다.');
+  try{ location.reload(); }catch(e){}
 }
 async function consultCheck(){   // 새로 열었을 때 서버의 「들어간 조합」이 풀렸으면(8시간·끊김·이용권) 본래 화면으로
   const u = currentUser();
@@ -2421,7 +2422,7 @@ async function ctAiDel(id){ if(!confirm('이 열쇠를 지울까요? 그 열쇠�
 /* ④ 컨설턴트 연결 — 조합 쪽 (#/mem/consultlink). 승인·끊기는 그 조합에 본래 속한 조합 회원 계정만 */
 function memConsultLink(){
   return `<div class="sec-head"><h1>🧑‍💼 컨설턴트 연결</h1><p class="sec-desc">우리 조합의 햇빛소득마을 신청을 돕는 컨설턴트에게 조합 화면을 열어 줍니다. 연결 번호를 만들어 건네고, 요청이 오면 승인합니다.
-    승인한 컨설턴트는 조합 회원과 같은 권한으로 조합원 명부·업무 자료를 보고 고칠 수 있습니다(이용권·결제·컨설턴트 승인·AI 열쇠·공개 현황판은 빼고). 컨설턴트가 연결한 자기 AI 도 조합원 명부를 뺀 자료를 읽습니다. 언제든 끊을 수 있고, 끊으면 바로 막힙니다.</p></div>
+    승인한 컨설턴트는 조합 회원과 같은 권한으로 조합원 명부·업무 자료를 보고 고칠 수 있습니다(이용권·결제·세금·4대보험 신고·컨설턴트 승인·AI 열쇠와 사용 기록·공개 현황판은 빼고). 컨설턴트가 연결한 자기 AI 도 조합원 명부를 뺀 자료를 읽습니다. 언제든 끊을 수 있고, 끊으면 바로 막힙니다.</p></div>
     <div id="clBox"><div class="card text-mute">불러오는 중…</div></div>`;
 }
 async function clLoad(code){
@@ -15055,6 +15056,8 @@ async function storePull(){
   // 실계정 조합은 예시(데모) 자료를 보이지 않는다 — 서버에 없으면 빈 목록
   ['members', 'events', 'uploads', 'closings'].forEach(k => { if(!items[k] && !옮길것.some(x => x[1] === k)) localStorage.setItem(STORE[k], '[]'); });
   if(!items.members && !옮길것.some(x => x[1] === 'members')) MOCK.members = [];
+  if(!items.accounting && !옮길것.some(x => x[1] === 'accounting')){ localStorage.setItem(STORE.accounting, '[]'); MOCK.accounting = []; }   // 11-27 알파언니: 앞 조합·예시 회계가 남아 새 조합으로 올라가지 않게
+  if(!items.tax && !옮길것.some(x => x[1] === 'tax')){ localStorage.removeItem(TAX_STORE); try{ MOCK.tax = TAX_DEFAULT(); }catch(e){} }
   if(!items.events && !옮길것.some(x => x[1] === 'events')) MOCK.events = [];
   _storeReloadMemory();
   if(currentRoute().startsWith('mem/')) navigate();
@@ -18827,6 +18830,7 @@ function bootLand(){
 }
 eduBoot().then(() => ssoBoot()).then(bootLand).then(() => eduCheck()).then(() => { let r = null; try{ r = sessionStorage.getItem('sv_demo_after'); sessionStorage.removeItem('sv_demo_after'); }catch(e){} if(r) demoLogin(r); }).catch(() => {});   // 통합 계정 세션이 있으면 자동 로그인 (sakyowon.co.kr 서빙 시)
 consultCheck();   // 11-27 컨설턴트로 들어간 조합이 서버에서 풀렸으면 본래 화면으로
+try{ const _cf = sessionStorage.getItem('sv_consult_flash'); if(_cf){ sessionStorage.removeItem('sv_consult_flash'); setTimeout(() => toast(_cf), 300); } }catch(e){}
 viewCoopCheck();   // 조합 보기 중이었는데 서버에서 이미 풀렸으면 관리자로 되돌린다
 if(!bootLand()) navigate();
 
