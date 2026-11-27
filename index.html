@@ -502,7 +502,7 @@ svg.ic.s{width:17px;height:17px}
 .u2 .feat{text-align:center;padding:22px 18px}
 .u2 .feat h3{font-size:1.15rem;color:var(--g9);margin:0 0 4px;justify-content:center}
 .u2 .greet .dogr{object-position:50% 15%}
-.u2 .feat p{color:var(--ink2);font-size:.95rem}
+.u2 .feat p{color:var(--ink2);font-size:.95rem;word-break:keep-all;overflow-wrap:break-word}
 .u2 .feat .row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:6px 0 14px}
 .u2 .feat .it{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:.82rem;color:var(--ink2);width:92px;line-height:1.3;word-break:keep-all}
 .u2 .sech{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
@@ -1372,9 +1372,9 @@ function remSet(ui, id) {
     if (!a.length) localStorage.removeItem(REM_KEY);
   } catch (_) {}
 }
-function recShow(on) {
+function recShow(on, 거르기) {
   const box = $('#lgRecent'), inp = $('#lgEmail'); if (!box || !inp) return;
-  const q = (inp.value || '').trim().toLowerCase(), a = recGet().filter(x => !q || x.toLowerCase().indexOf(q) >= 0 && x.toLowerCase() !== q);
+  const q = 거르기 ? (inp.value || '').trim().toLowerCase() : '', a = recGet().filter(x => !q || x.toLowerCase().indexOf(q) >= 0);   // 누를 때는 칸이 채워져 있어도 최근 목록 전체를, 칠 때는 거른다
   if (!on || !a.length) { box.hidden = true; return; }
   box.innerHTML = '<div class="h">최근 로그인한 아이디</div>' + a.map(x => `<button type="button" class="i" role="option" data-id="${esc(x)}"><span>${esc(x)}</span><span class="x" data-del="${esc(x)}" title="목록에서 지우기" aria-label="목록에서 지우기">✕</span></button>`).join('');
   box.hidden = false;
@@ -1383,7 +1383,7 @@ function recShow(on) {
   const box = $('#lgRecent'), inp = $('#lgEmail'); if (!box || !inp) return;
   inp.addEventListener('focus', () => recShow(true));
   inp.addEventListener('click', () => recShow(true));
-  inp.addEventListener('input', () => recShow(true));
+  inp.addEventListener('input', () => recShow(true, true));
   inp.addEventListener('keydown', e => { if (e.key === 'Escape') box.hidden = true; if (e.key === 'ArrowDown' && !box.hidden) { const f = box.querySelector('button'); if (f) { e.preventDefault(); f.focus(); } } });
   inp.addEventListener('blur', () => setTimeout(() => { if (!box.contains(document.activeElement)) box.hidden = true; }, 150));
   box.addEventListener('mousedown', e => e.preventDefault());
@@ -1630,8 +1630,8 @@ function startHTML() {
     `<div class="dots"><span class="cchip c-hat">햇소자</span><span class="cchip c-pol">의정지원</span><span class="cchip c-aca">아카데미</span><span class="cchip c-team">팀러닝</span></div></div></section>` +
     `<div class="uw"><section class="usec" aria-labelledby="hIntro"><div class="sech"><h2 id="hIntro">어떤 사이트인가요</h2></div><div class="g3">` +
     `<div class="card feat"><div class="row">${feat('c-hat', 'sun', '협동조합·연합회')}${feat('c-pol', 'gov', '의원실')}${feat('c-aca', 'user', '활동가')}</div><h3>누가 쓰나요</h3><p>지역의 협동조합·연합회·의원실·활동가가 하나의 계정으로 다양한 서비스를 이용합니다.</p></div>` +
-    `<div class="card feat"><div class="row">${feat('c-hat', 'sun', '조합 운영')}${feat('c-pol', 'doc', '의정지원')}${feat('c-aca', 'book', '아카데미')}${feat('c-g', 'chat', 'AI 대화창')}${feat('c-rs', 'folder', '내 폴더')}</div><h3>무엇을 하나요</h3><p>업무와 배움을 한곳에서 합니다. 선택한 서비스만 내 사이트에 정렬할 수 있습니다.</p></div>` +
-    `<div class="card feat"><div class="row">${feat('c-g', 'key', '한 계정')}${feat('c-team', 'list', '고른 메뉴만')}${feat('c-fld', 'server', '자체 서버 보관')}${feat('c-pol', 'shield', '개인정보 가림')}</div><h3>무엇이 다른가요</h3><p>자료는 사교원 서버에, AI 는 개인정보를 가린 뒤 처리합니다. 자신의 AI 를 연결하여 사용할 수 있습니다.</p></div>` +
+    `<div class="card feat"><div class="row">${feat('c-hat', 'sun', '조합 운영')}${feat('c-pol', 'doc', '의정지원')}${feat('c-aca', 'book', '아카데미')}${feat('c-g', 'chat', 'AI 대화창')}${feat('c-rs', 'folder', '내 폴더')}</div><h3>무엇을 하나요</h3><p>업무와 배움을 한곳에서 합니다.<br>선택한 서비스만 내 사이트에 정렬할 수 있습니다.</p></div>` +
+    `<div class="card feat"><div class="row">${feat('c-g', 'key', '한 계정')}${feat('c-team', 'list', '고른 메뉴만')}${feat('c-fld', 'server', '자체 서버 보관')}${feat('c-pol', 'shield', '개인정보 가림')}</div><h3>무엇이 다른가요</h3><p>자료는 사교원 서버에, AI 는 개인정보를 가린 뒤 처리합니다.<br>자신의 AI 를 연결하여 사용할 수 있습니다.</p></div>` +
     `</div></section></div>` +
     `<div class="band"><div class="uw"><section class="usec" aria-labelledby="hSvc"><div class="sech"><h2 id="hSvc">회원서비스</h2><p>필요한 것만 고르세요.</p></div>${svcCards()}</section></div></div>` +
     `<div class="uw"><section class="usec" aria-labelledby="hPrice"><div class="sech"><h2 id="hPrice">회원 등급과 이용료</h2><p>등급은 ${isStaffView() ? '일곱' : '다섯'} 가지이고, 고른 서비스에 따라 이용료가 정해집니다.</p></div><div id="priceBox">${priceHTML()}</div></section></div>` +

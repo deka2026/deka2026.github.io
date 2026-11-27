@@ -716,6 +716,8 @@ h1,h2,h3{font-weight:800;letter-spacing:-.02em;}
 .role-btn{white-space:nowrap;}
 @media (max-width:1200px){.pub-nav a{padding:7px 8px;font-size:13.5px;}.fontsize-btns{display:none;}}
 @media (max-width:900px){.topnav-in{flex-wrap:nowrap;}.topnav-in.nav-open{flex-wrap:wrap;}.pub-nav{overflow:visible;}.top-actions{margin-left:auto;}}
+/* 11-27 이사장 지시: 휴대폰 폭 넘침 — 머리 줄(로고·설치·사용자·로그아웃·☰)이 390px 보다 넓어 ☰ 가 화면 밖으로 밀렸다. 좁은 화면에서는 사용자 칩을 얼굴 글자만, 줄이 줄어들게 */
+@media (max-width:480px){.top-actions{flex-shrink:1;min-width:0;gap:4px;}.top-actions .user-chip{padding:2px;}.top-actions .user-chip>div:not(.avatar){display:none;}.top-actions .btn-sm{padding-left:8px;padding-right:8px;}}
 @media (max-width:900px){.nav-toggle{flex-shrink:0;}.top-actions{min-width:0;}.top-actions .user-chip{min-width:0;overflow:hidden;}.top-actions .user-chip .user-name,.top-actions .user-chip .user-role{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}}
 @media (max-width:560px){.top-actions .user-chip .user-role,.top-actions .user-chip .role-tag{display:none;}.top-actions .user-chip{padding:4px 10px 4px 4px;}}
 @media (max-width:420px){.topnav-in{padding:10px 12px;gap:8px;}.brand{font-size:17px;}.brand-icon{width:32px;height:32px;}.top-actions{gap:6px;}.top-actions .btn{padding:6px 11px;font-size:13px;}}
