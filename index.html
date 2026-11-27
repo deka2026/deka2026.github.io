@@ -884,7 +884,7 @@ svg.ic.s{width:17px;height:17px}
       <h2 id="lgTitle">로그인</h2><p class="sub">사교원 통합 계정 하나로 모든 사이트에 들어갑니다. 로그인하면 내 페이지로 갑니다.</p>
       <div class="f" style="position:relative"><label for="lgWho">이메일 <span style="color:var(--mute);font-weight:400">(옛 아이디도 당분간 됩니다)</span></label><input id="lgWho" type="search" name="sk-q-lgw" enterkeyhint="next" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore data-form-type="other" placeholder="name@example.com" aria-autocomplete="list" aria-controls="lgRecent"><div id="lgRecent" class="lgrec" role="listbox" hidden></div></div>
       <div class="f"><label for="lgPw">비밀번호</label><input id="lgPw" type="text" class="pwmask" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore aria-describedby="lgPwHint"><span class="sr-only" id="lgPwHint">입력한 비밀번호는 화면에 가려져 보입니다.</span></div>
-      <label class="remid"><input type="checkbox" id="lgRem"> <b>아이디 기억하기</b> <span>(공용 PC에서는 끄세요)</span></label>
+      <label class="remid"><input type="checkbox" id="lgRem"> <b>아이디 기억하기</b> <span>(다음에 아이디 칸을 미리 채웁니다 · 공용 PC에서는 끄고, 최근 목록은 ✕로 지우세요)</span></label>
       <div class="f" id="lgCodeBox" hidden><label for="lgCode">2단계 인증 코드</label><input id="lgCode" inputmode="numeric" autocomplete="one-time-code" placeholder="인증 앱 6자리 · 이메일 코드 · 백업 코드"></div>
       <div class="msg" id="lgMsg" aria-live="polite"></div>
       <button class="mbtn" id="lgBtn">로그인</button>
@@ -1402,7 +1402,7 @@ const LG = { email: '#lgWho', pw: '#lgPw', code: '#lgCode', box: '#lgCodeBox', m
 const REM_KEY = 'sk_last_id';
 /* 11-27 이사장 지시: 아이디 칸을 누르면 최근에 로그인한 아이디가 최신순으로 뜬다(크롬이 예전에 저장한 옛 아이디 목록 대신).
    아이디 기억하기를 켜고 로그인에 성공한 아이디만 최대 5개, 가장 최근 것이 맨 위. 끄고 로그인하면 그 아이디는 목록에서 뺀다. 비밀번호는 남기지 않는다. */
-const REC_KEY = 'sk_recent_ids', REC_MAX = 5;
+const REC_KEY = 'sk_recent_ids', REC_MAX = 3;   // 11-27 이사장 지시: 최근 로그인한 아이디 3개까지
 function recGet() {
   let a = [];
   try { a = JSON.parse(localStorage.getItem(REC_KEY) || '[]'); } catch (_) {}
@@ -1411,14 +1411,15 @@ function recGet() {
   return a.filter(x => typeof x === 'string' && x).slice(0, REC_MAX);
 }
 function recPut(a) { try { localStorage.setItem(REC_KEY, JSON.stringify(a.slice(0, REC_MAX))); } catch (_) {} }
-function remGet() { return recGet()[0] || ''; }
+function remGet() { try { return localStorage.getItem(REM_KEY) || ''; } catch (_) { return ''; } }   // 칸을 미리 채우는 것은 「아이디 기억하기」를 켠 아이디만
 function remSet(ui, id) {
   try {
+    // 11-27 이사장 지시: 로그인에 성공한 아이디는 최근 목록에 3개까지(맨 앞이 가장 최근). 「아이디 기억하기」는 다음에 칸을 미리 채울지만 정한다
     let a = recGet().filter(x => x !== id);
-    if ($(ui.rem) && $(ui.rem).checked && id) { a.unshift(id); localStorage.setItem(REM_KEY, id); }
+    if (id) a.unshift(id);
+    if ($(ui.rem) && $(ui.rem).checked && id) localStorage.setItem(REM_KEY, id);
     else if (localStorage.getItem(REM_KEY) === id) localStorage.removeItem(REM_KEY);
     recPut(a);
-    if (!a.length) localStorage.removeItem(REM_KEY);
   } catch (_) {}
 }
 function recShow(on, 거르기) {
