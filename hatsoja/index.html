@@ -7708,9 +7708,12 @@ function memDashboard(u){
   const tile = {};
   tile.todo = () => todoStrip(village);
   tile.stage = () => lifecycleStepper(village);
+  // 11-27 이사장 지시: 원장(우리 조합 현황)에 확정한 조합원 수·설비용량이 있으면 그 값을 먼저 보인다(전엔 마을 기본 정보만 읽었다)
+  const 원장값 = k => { try{ return ledgerGet(k); }catch(e){ return ''; } };
+  const 원장명 = 원장값('조합원수'), 원장kW = 원장값('설비용량kW');
   tile.kpi = () => `<div class="grid grid-4">
-      <div class="kpi"><div class="kpi-n">${village.members}</div><div class="kpi-l">조합원 수</div></div>
-      <div class="kpi"><div class="kpi-n">${village.capacity}</div><div class="kpi-l">설비 규모</div></div>
+      <div class="kpi"><div class="kpi-n">${원장명 !== '' ? escapeHtml(String(원장명)) : village.members}</div><div class="kpi-l">조합원 수</div>${원장명 !== '' ? '<div class="kpi-sub">원장 값</div>' : ''}</div>
+      <div class="kpi"><div class="kpi-n">${원장kW !== '' ? escapeHtml(String(원장kW)) + (/[a-zA-Z]/.test(String(원장kW)) ? '' : 'kW') : village.capacity}</div><div class="kpi-l">설비 규모</div>${원장kW !== '' ? '<div class="kpi-sub">원장 값</div>' : ''}</div>
       <div class="kpi"><div class="kpi-n">${village.progress}%</div><div class="kpi-l">준비 진행률</div><div class="kpi-sub">${village.phase}</div></div>
       <div class="kpi"><div class="kpi-n">${ddayLabel(village.deadline)}</div><div class="kpi-l">1차 마감</div><div class="kpi-sub">${village.deadline}</div></div>
     </div>`;
@@ -8207,15 +8210,20 @@ function stRender(){
       + LEDGER_FIELDS.map(function(f){
           const cur = (L.확정 || {})[f.k];
           const val = cur ? String(cur.값) : '';
+          const da = ' data-st="' + escapeHtml(f.k) + '" data-was="' + escapeHtml(val) + '" oninput="stDirty()" onchange="stDirty()"';
           const input = f.opts
-            ? '<select class="select" onchange="stSave(\'' + escapeJs(f.k) + '\', this.value)"><option value="">(없음)</option>'
+            ? '<select class="select"' + da + '><option value="">(없음)</option>'
               + f.opts.map(function(o){ return '<option value="' + o + '"' + (o === val ? ' selected' : '') + '>' + o + '</option>'; }).join('')
               + '</select>'
-            : '<input class="input" value="' + escapeHtml(val) + '" onchange="stSave(\'' + escapeJs(f.k) + '\', this.value)">';
+            : '<input class="input" value="' + escapeHtml(val) + '"' + da + '>';
           return '<tr><td><b>' + escapeHtml(f.label) + '</b></td><td>' + input + '</td>'
             + '<td class="text-mute" style="font-size:12px;">' + (cur ? escapeHtml(cur.출처) : '—') + '</td></tr>';
         }).join('')
       + '</tbody></table>'
+      + '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;">'
+      + '<button class="btn btn-primary" id="stSaveBtn" onclick="stSaveAll()" disabled>💾 저장</button>'
+      + '<button class="btn btn-outline btn-sm" id="stUndoBtn" onclick="_stPending={};stRender()" hidden>고친 것 되돌리기</button>'
+      + '<span class="text-mute" id="stDirtyMsg" style="font-size:12.5px;">값을 고친 뒤 「저장」을 눌러야 원장·현황 대시보드·진단·할 일에 반영됩니다.</span></div>'
       + '<p class="text-mute" style="font-size:12.5px;margin-top:10px;">갱신 '
       + (L.갱신일 ? escapeHtml(String(L.갱신일).slice(0,10)) : '없음') + '</p>';
   }
@@ -8227,6 +8235,40 @@ function stRender(){
   }
 }
 function stSave(k, v){ ledgerSet(k, String(v).trim()); stRender(); toast('현황을 고쳤습니다.'); }
+/* 11-27 이사장 지시: 원장에 저장 단추 — 전엔 칸을 벗어나는 순간 저장돼 단추가 없었다. 이제 고친 칸을 모아 「💾 저장」으로 한 번에. */
+function stChanged(){
+  return Array.prototype.slice.call(document.querySelectorAll('#stForm [data-st]'))
+    .filter(function(el){ return String(el.value).trim() !== String(el.getAttribute('data-was') || ''); });
+}
+let _stPending = {};   // 저장 안 한 고침 {항목: 값} — 화면이 먼저 바뀌어도 물어볼 수 있게 따로 기억
+function stDirty(){
+  _stPending = {}; stChanged().forEach(function(el){ _stPending[el.getAttribute('data-st')] = String(el.value).trim(); });
+  const n = stChanged().length, b = document.getElementById('stSaveBtn'), u = document.getElementById('stUndoBtn'), m = document.getElementById('stDirtyMsg');
+  if(b){ b.disabled = !n; b.textContent = n ? '💾 저장 (' + n + '건)' : '💾 저장'; }
+  if(u) u.hidden = !n;
+  if(m) m.innerHTML = n ? '<b style="color:var(--warn,#b45309);">저장하지 않은 고침 ' + n + '건</b> — 「저장」을 눌러야 반영됩니다.'
+                        : '값을 고친 뒤 「저장」을 눌러야 원장·현황 대시보드·진단·할 일에 반영됩니다.';
+}
+function stSaveAll(){
+  const ch = stChanged();
+  if(!ch.length){ toast('바뀐 값이 없습니다.'); return; }
+  ch.forEach(function(el){ ledgerSet(el.getAttribute('data-st'), String(el.value).trim()); });
+  _stPending = {};
+  stRender();
+  toast(ch.length + '건을 저장했습니다' + ((typeof _storeSync !== 'undefined' && _storeSync.on) ? '(조합 자료 서버)' : '(체험 — 이 브라우저)') + '. 현황 대시보드에도 반영됩니다.');
+}
+window.addEventListener('hashchange', function(e){   // 저장하지 않고 다른 화면으로 가려 하면 묻는다
+  try{
+    if(!/#\/mem\/state\b/.test(e.oldURL || '') || /#\/mem\/state\b/.test(e.newURL || '')) return;
+    const 고침 = _stPending, ks = Object.keys(고침); _stPending = {};
+    if(!ks.length) return;
+    if(confirm('원장에 저장하지 않은 고침이 ' + ks.length + '건 있습니다. 저장할까요?\n(「취소」를 누르면 고친 것을 버립니다)')){
+      ks.forEach(function(k){ ledgerSet(k, 고침[k]); });
+      toast(ks.length + '건을 저장했습니다. 현황 대시보드에도 반영됩니다.');
+      setTimeout(function(){ try{ const main = document.getElementById('appMain'); if(main && /#\/mem\/dashboard/.test(location.hash)) navigate(); }catch(e){} }, 0);
+    }
+  }catch(err){}
+}, true);
 
 /* ─── 화면: 할 일 ─── */
 function memTodo(){
