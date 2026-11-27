@@ -2587,8 +2587,15 @@ async function eduConsentOk(){
 function hsApplyRefresh(){
   try{ const [sc, pg] = currentRoute().split('/'); if(sc === 'pub'){ renderPubSidebar(document.getElementById('v-pub-' + pg) ? pg : 'home'); hsApplyRender(); } }catch(e){}
 }
+/* 11-27 이사장 지시: 통합사이트에서 로그인한 뒤 사이드바의 햇소자 메뉴(#/mem/…)를 누르면 둘러보기를 거치지 않고 바로 그 화면으로.
+   전엔 통합 계정 확인이 끝나기 전에 문지기가 「로그인이 필요합니다」로 둘러보기에 보냈다 → 확인하는 동안은 기다렸다가 원래 화면을 그린다 */
+let _ssoPending = !!REAL_API;
 async function ssoBoot(){
-  try{ await ssoBoot0(); } finally { hsApplyRefresh(); }
+  try{ await ssoBoot0(); } finally {
+    hsApplyRefresh();
+    const 기다림 = _ssoPending; _ssoPending = false;
+    if(기다림 && /^#\/(mem|fed|admin)\//.test(location.hash || '')) navigate();
+  }
 }
 async function ssoBoot0(){
   /* 11-27 이사장 지시: 햇소자 로그인은 통합 계정(첫 화면)과 늘 같게 — 첫 화면에 로그인이 없으면 손님, 있으면 그 아이디.
@@ -2767,6 +2774,7 @@ function navigate(){
   const [scope, page] = route.split('/');
 
   // Access control — 등급별 허용 메뉴(ROLE_MENUS) 기준
+  if(scope !== 'pub' && !u && _ssoPending){ const m = document.getElementById('appMain'); if(m) m.innerHTML = '<div class="card" style="margin:24px 0;text-align:center;color:var(--ink-mute,#6e8469)">통합 계정을 확인하는 중입니다…</div>'; return; }   // 11-27: 확인 끝나면 ssoBoot 가 다시 그린다
   if(scope !== 'pub' && !u){ location.hash = '#/pub/home'; openLogin(); toast('로그인이 필요합니다.'); return; }
   if(!canAccess(u, scope, page || 'dashboard')){
     const role = normalizeRole(u.role);
