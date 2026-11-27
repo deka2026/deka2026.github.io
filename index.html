@@ -1635,7 +1635,7 @@ function startHTML() {
     `</div></section></div>` +
     `<div class="band"><div class="uw"><section class="usec" aria-labelledby="hSvc"><div class="sech"><h2 id="hSvc">회원서비스</h2><p>필요한 것만 고르세요.</p></div>${svcCards()}</section></div></div>` +
     `<div class="uw"><section class="usec" aria-labelledby="hPrice"><div class="sech"><h2 id="hPrice">회원 등급과 이용료</h2><p>등급은 ${isStaffView() ? '일곱' : '다섯'} 가지이고, 고른 서비스에 따라 이용료가 정해집니다.</p></div><div id="priceBox">${priceHTML()}</div></section></div>` +
-    `<div class="band"><div class="uw"><section class="usec" aria-labelledby="hMx"><div class="sech"><h2 id="hMx">회원별 이용 메뉴</h2><p>● 이용 가능 · <span class="mxopt">선택</span> 골라서 이용료를 내면 열림 · — 이용 안 함</p></div>` +
+    `<div class="band"><div class="uw"><section class="usec" aria-labelledby="hMx"><div class="sech"><h2 id="hMx">회원별 이용 메뉴</h2><p>● 이용 가능 · <span class="mxopt">선택</span> 골라서 이용료를 내면 열림</p></div>` +
     `<div class="scroll mx"><table id="mxTable"><thead><tr><th scope="col">메뉴</th>${MX_HEAD.slice(MX_HIDE).map(x => `<th scope="col" class="c">${x}</th>`).join('')}</tr></thead><tbody>${MX.filter(r => r.slice(1 + MX_HIDE).some(v => v !== '—')).map(r => `<tr><th scope="row">${r[0]}</th>${r.slice(1 + MX_HIDE).map(cell).join('')}</tr>`).join('')}</tbody></table></div>` +
     `</section></div></div>` +
     `<section class="band2" aria-labelledby="hCta">${pic('cta.jpg', '')}<div class="uw"><h2 id="hCta">지금 시작해 보세요</h2><div class="cta">${cta}</div></div></section>` +
