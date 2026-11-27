@@ -7554,6 +7554,7 @@ async function minRecDrop(제출){
   if(제출) toast('회의록 대장에 넣었습니다. 받아쓴 글과 초안은 서버에서 지웠습니다.');
 }
 function regEdit(k, id, pre){
+  if(!(pre && (pre.src || pre.auto || pre.auto_min))){ _regAfter = null; _regCancel = null; }   // 11-27 알파언니: 검토 창을 저장 없이 닫은 뒤 다른 대장을 저장하면 남은 뒤처리(회의록 초안 지우기)가 돌던 결함
   const R = REG[k], r = id ? (regLoad(k).filter(x => x.id === id)[0] || {}) : Object.assign({}, pre || {});
   const 자동 = !id && pre && pre.auto, 필요 = (자동 && pre._need) || [];
   showDyn({title: R.이름 + (id ? ' — 고치기' : 자동 ? ' — 자료에서 만든 지출결의서' : ' — 넣기'),

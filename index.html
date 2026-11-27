@@ -7,10 +7,10 @@ try{var _h=location.hash||'';if(localStorage.getItem('sk_in')==='1'&&!/^#\/(map|
 <style>html.booting #shell,html.booting #vMap,html.booting footer{visibility:hidden}html.booting body::after{content:'불러오는 중…';position:fixed;left:0;right:0;top:42%;text-align:center;color:#8a8f98;font-size:14px}</style>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>사교원 통합사이트 — 로컬리스트 플랫폼 · 사회혁신교육원사회적협동조합</title>
-<meta name="description" content="사회혁신교육원사회적협동조합(사교원) 통합사이트 — 지역의 협동조합·연합회·의원실·활동가가 한 계정으로, 내가 고른 서비스만 쓰는 로컬리스트 플랫폼. 햇소자 · 의정지원시스템 · 연대지능활동가 아카데미 · 사회혁신팀러닝.">
+<meta name="description" content="사회혁신교육원사회적협동조합(사교원) 통합사이트 — 지역의 협동조합·연합회·의원실·활동가가 한 계정으로, 내가 고른 서비스만 쓰는 로컬리스트 플랫폼. 햇소자 · 의정지원시스템 · 연대지능활동가 아카데미(팀러닝 포함).">
 <link rel="canonical" href="https://sakyowon.co.kr/">
 <meta property="og:title" content="사교원 통합사이트 — 로컬리스트 플랫폼">
-<meta property="og:description" content="한 계정으로, 내가 고른 서비스만 — 햇소자 · 의정지원시스템 · 연대지능활동가 아카데미 · 사회혁신팀러닝">
+<meta property="og:description" content="한 계정으로, 내가 고른 서비스만 — 햇소자 · 의정지원시스템 · 연대지능활동가 아카데미(팀러닝 포함)">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://sakyowon.co.kr/">
 <meta property="og:image" content="https://sakyowon.co.kr/icon-512.png">
@@ -944,7 +944,7 @@ const TREE = [
       { id: 'simin', t: '시민주권 모니터링 플랫폼', d: '시정·의정 묻고 답하기 · 시민제보 → AI 이슈브리핑 · 회의록·조례·보도자료·입찰 자동 수집 감시판', h: '/simin/', tmp: '시범', al: '시민주권 모니터링|시민주권 모니터링 플랫폼|시정 감시|의정 감시|시민제보|이슈브리핑|시민주권' },
       { id: 'academy', t: '연대지능활동가 아카데미', d: '실습 15단계 · 학습 7단계 · 지식 검증 게임 · 연대지능활동가 교육 신청(아카데미 안)', h: '/academy-site/' },
       { id: 'edu-ai', t: '연대지능활동가 교육 신청', d: '필요 진단 · 예상 비용 · 신청', h: '/academy-site/#edu-apply', sub: true, hide: true, al: '교육 신청|교육신청|교육프로그램 신청|교육프로그램|연대지능 교육 신청' },
-      { id: 'teamlearning', t: '사회혁신팀러닝', d: '팀러닝 자문·컨설팅 · 주민자치·지역문제해결 교육 신청(팀러닝 안)', h: '/academy-site/#tl-home', al: '팀러닝' },
+      { id: 'teamlearning', t: '팀러닝 (아카데미 교육과정)', d: '아카데미 안 「다. 팀러닝」 — 팀러닝 자문·컨설팅 · 주민자치·지역문제해결 교육 신청', h: '/academy-site/#tl-home', sub: true, al: '팀러닝|사회혁신팀러닝' },
       { id: 'tl-apply', t: '주민자치·지역문제해결 교육 신청', d: '필요 진단 · 예상 비용 · 신청', h: '/academy-site/#tl-apply', sub: true, hide: true, al: '주민자치 교육 신청|지역문제해결 교육 신청|팀러닝 신청|팀러닝 교육 신청' },
       { id: 'ax-build', t: 'AI업무자동화 사이트 구축 의뢰', d: '우리 기관용 업무 시스템 구축 의뢰 — 문의하기(업무자동화 시스템 구축 의뢰)로 모았다', h: '/ax-build/', hide: true, al: '구축 의뢰|사이트 구축|업무자동화|그룹웨어 구축|AI 업무자동화' },
     ]},
@@ -1111,7 +1111,7 @@ const ILL = {
    세부 메뉴 주소는 각 사이트의 실제 화면 주소(아카데미 #쪽이름 · 햇소자 #/mem/… ). 의정지원시스템은 화면 안에서 탭을 고르는 구조라 들어가는 문만 놓는다. */
 const HS = '/hatsoja/#/', AC = '/academy-site/#';
 const SVC = {
-  acad: { n: '아카데미', c: 'c-aca', img: 's_aca.jpg', icn: 'book', items: [['아카데미 홈', '/academy-site/'], ['실습 15단계', AC + 'course-practice'], ['학습 개요', AC + 'course-overview'], ['지식 검증 게임', AC + 'verify-game'], ['사회혁신팀러닝', AC + 'tl-home'], ['화상회의', AC + 'meeting']] },
+  acad: { n: '아카데미', c: 'c-aca', img: 's_aca.jpg', icn: 'book', items: [['아카데미 홈', '/academy-site/'], ['실습 15단계', AC + 'course-practice'], ['학습 개요', AC + 'course-overview'], ['지식 검증 게임', AC + 'verify-game'], ['팀러닝', AC + 'tl-home'], ['화상회의', AC + 'meeting']] },
   policy: { n: '의정지원시스템', c: 'c-pol', icn: 'gov', items: [['의정지원시스템 열기', HOME + 'policy'], ['의정지원 사이트(공약·조례·문서작성·브리핑)', 'https://talk.sakyowon.co.kr/system', 1], ['의정소통(대화방)', 'https://talk.sakyowon.co.kr/chat', 1]] },
   coop: { n: '햇소자', c: 'c-hat', img: 's_hat.jpg', icn: 'sun', items: [['업무 시작', HS + 'mem/home'], ['현황 대시보드', HS + 'mem/dashboard'], ['조합 원장', HS + 'mem/state'], ['업무 달력', HS + 'mem/cycle'], ['발전·정산·배당', HS + 'mem/power']] },   // 11-27: 햇소자 11-26 메뉴(업무 시작 중심)와 맞춤
   fed: { n: '햇소자 연합회', c: 'c-hat', img: 's_fed.jpg', icn: 'users', items: [['회원조합 지원 현황판', HS + 'mem/fedsupport'], ['지원요청 처리', HS + 'mem/fedqueue'], ['조합·마을 현황', HS + 'adm/villages'], ['공지·자료 배포', HS + 'mem/library'], ['사무국 운영', HS + 'mem/fedoffice'], ['전남 발전 현황', HS + 'mem/stat']] },
@@ -1149,7 +1149,7 @@ function svcItems(k) {
 /* 고르지 않은 서비스의 공개 화면 — 지금까지 사이드바로 가던 길을 남긴다 */
 function lookItems(keys) {
   const a = [];
-  if (!keys.includes('acad')) a.push(['아카데미 맛보기', '/academy-site/'], ['사회혁신팀러닝', AC + 'tl-home']);
+  if (!keys.includes('acad')) a.push(['아카데미 맛보기', '/academy-site/'], ['아카데미 팀러닝', AC + 'tl-home']);
   if (!keys.includes('policy')) a.push(['의정지원 둘러보기', HOME + 'policy']);
   if (!keys.includes('coop') && !keys.includes('fed')) a.push(['햇소자 둘러보기', '/hatsoja/']);
   a.push(['시민주권 모니터링(시범)', '/simin/']);
@@ -1559,8 +1559,7 @@ const pmOf = k => PM[k] || { c: 'c-g', i: 'grid', who: '', lines: [] };
 const SVC2 = [
   { id: 'hatsoja', c: 'c-hat', n: '햇소자', img: ['c_hat.jpg', '태양광 패널을 올린 건물 지붕을 위에서 본 사진'], one: '햇빛소득마을 조합을 세우고 꾸려 갑니다.', more: '협동조합과 연합회가 설립부터 건설, 운영, 세금신고까지 걸음마다 챙깁니다. 자료함과 AI 상담도 함께 씁니다.', who: ['협동조합회원', '연합회원'] },
   { id: 'policy', c: 'c-pol', n: '의정지원시스템', ill: 'policy', one: '지방의회 의정 활동을 AI 가 돕습니다.', more: '공약·조례·문서작성·브리핑·행감 자료실로 의원실의 하루 업무를 돕습니다.', who: ['정책회원'], intro: 'https://talk.sakyowon.co.kr/system' },
-  { id: 'academy', c: 'c-aca', n: '연대지능활동가 아카데미', img: ['c_aca.jpg', '강의실에서 화면을 보며 수업을 듣는 뒷모습 사진'], one: '내 일을 AI 와 함께 해 보며 배웁니다.', more: '실습 15단계와 학습 7단계, 지식 검증 게임으로 이어지는 과정입니다.', who: ['개인회원'] },
-  { id: 'teamlearning', c: 'c-team', n: '사회혁신팀러닝', img: ['c_team.jpg', '책상 위에 종이와 붙임쪽지를 펼쳐 놓고 함께 적는 손 사진'], one: '팀을 만들어 함께 배우고 기록합니다.', more: '화상회의와 기록으로 팀 학습을 이어 갑니다. 아카데미 회원이면 함께 쓸 수 있습니다.', who: ['개인회원'] },
+  { id: 'academy', c: 'c-aca', n: '연대지능활동가 아카데미', img: ['c_aca.jpg', '강의실에서 화면을 보며 수업을 듣는 뒷모습 사진'], one: '내 일을 AI 와 함께 해 보며 배우고, 팀러닝으로 함께 풉니다.', more: '나의 AI 작업대 만들기·도메인AI 구축하기·팀러닝·혼자하기 꿀팁 20 교육과정과 화상회의·위키 같은 교육도구를 한곳에서 씁니다.', who: ['개인회원'] },
 ];
 function fromHome(u) {   // 11-27: 소개·열기 링크에 「첫 화면에서 왔다」 표시 — 사교원 사이트(같은 주소·talk)만
   if (!u || u[0] === '#' || !/^(\/(?!\/)|https:\/\/([a-z0-9-]+\.)?sakyowon\.co\.kr\/)/.test(u)) return u;
@@ -1568,7 +1567,7 @@ function fromHome(u) {   // 11-27: 소개·열기 링크에 「첫 화면에서 
   return base + (base.indexOf('?') < 0 ? '?' : '&') + 'from=home' + hash;
 }
 function svcCards() {
-  return '<div class="g4">' + SVC2.map(s => {
+  return '<div class="g3">' + SVC2.map(s => {
     const it = itemById(s.id);
     const intro = (it.need && !s.intro) ? '' : ` <a class="lk2" href="${esc(fromHome(s.intro || it.h))}">소개 화면 보기 ›</a>`;
     // 11-27 이사장 지시: 소개 화면은 첫 화면의 로그인 상태 그대로 — 손님이면 손님, 로그인했으면 같은 아이디로(from=home 을 받은 각 사이트가 맞춘다)
@@ -1628,7 +1627,7 @@ function startHTML() {
     : `<a class="btn y big" href="#/join" data-cta="join">회원가입</a><a class="btn w big" href="#/ask" data-cta="ask">문의하기</a>`;
   return `<section class="hero2" aria-labelledby="hHero">${pic('hero.jpg', '').replace('loading="lazy"', 'loading="eager"')}<div class="uw"><span class="eyebrow">지역에서 일하는 사람들의 업무·학습 플랫폼</span>` +
     `<h2 class="h1" id="hHero">로컬리스트 플랫폼,<br>사교원 통합사이트</h2><p>한 계정으로, 내가 고른 서비스만.</p><div class="cta">${cta}</div>` +
-    `<div class="dots"><span class="cchip c-hat">햇소자</span><span class="cchip c-pol">의정지원</span><span class="cchip c-aca">아카데미</span><span class="cchip c-team">팀러닝</span></div></div></section>` +
+    `<div class="dots"><span class="cchip c-hat">햇소자</span><span class="cchip c-pol">의정지원</span><span class="cchip c-aca">아카데미 · 팀러닝</span></div></div></section>` +
     `<div class="uw"><section class="usec" aria-labelledby="hIntro"><div class="sech"><h2 id="hIntro">어떤 사이트인가요</h2></div><div class="g3">` +
     `<div class="card feat"><div class="row">${feat('c-hat', 'sun', '협동조합·연합회')}${feat('c-pol', 'gov', '의원실')}${feat('c-aca', 'user', '활동가')}</div><h3>누가 쓰나요</h3><p>지역의 협동조합·연합회·의원실·활동가가 하나의 계정으로 다양한 서비스를 이용합니다.</p></div>` +
     `<div class="card feat"><div class="row">${feat('c-hat', 'sun', '조합 운영')}${feat('c-pol', 'doc', '의정지원')}${feat('c-aca', 'book', '아카데미')}${feat('c-g', 'chat', 'AI 대화창')}${feat('c-rs', 'folder', '내 폴더')}</div><h3>무엇을 하나요</h3><p>업무와 배움을 한곳에서 합니다.<br>선택한 서비스만 내 사이트에 정렬할 수 있습니다.</p></div>` +
@@ -1659,7 +1658,7 @@ function mapIcard(id, lead) {
 function renderMap() {
   $('#mapChips').innerHTML = [['map-svc', '① 회원서비스'], ['map-field', '현장사업'], ['map-research', '연구'], ['map-about', '소개']].map(x => `<a href="#/map" data-jump="${x[0]}">${x[1]}</a>`).join('');
   $('#mapBody').innerHTML =
-    `<div class="uw"><section class="usec mapgrp" id="map-svc" style="padding-top:10px" aria-label="회원서비스"><div class="bigh"><span class="ord">1</span><h2 style="margin:0;font-size:1.3rem">회원서비스</h2></div><p class="lead">햇소자 · 의정지원시스템 · 연대지능활동가 아카데미 · 사회혁신팀러닝 — 고른 서비스만 내 사이드바에 놓이고, 세부 메뉴는 로그인한 뒤 사이드바에서 엽니다.</p>${svcCards()}</section></div>` +
+    `<div class="uw"><section class="usec mapgrp" id="map-svc" style="padding-top:10px" aria-label="회원서비스"><div class="bigh"><span class="ord">1</span><h2 style="margin:0;font-size:1.3rem">회원서비스</h2></div><p class="lead">햇소자 · 의정지원시스템 · 연대지능활동가 아카데미(팀러닝 포함) — 고른 서비스만 내 사이드바에 놓이고, 세부 메뉴는 로그인한 뒤 사이드바에서 엽니다.</p>${svcCards()}</section></div>` +
     `<div class="band" style="margin-top:24px"><div class="uw"><section class="usec mapgrp" id="map-home" aria-label="사교원 홈페이지"><div class="bigh"><span class="ord">2</span><h2 style="margin:0;font-size:1.3rem">사교원 홈페이지</h2></div><p class="lead" style="margin-bottom:0">누구나 보는 공개 페이지입니다.</p>` +
     `<div class="mapsec" id="map-field"><h3 class="sub3"><span class="bub c-fld">${ic('wave')}</span>현장사업</h3><div class="g3">` +
       mapBlog('mangnam', 'c-fld', pic('b_mn1.jpg', '전복을 물로 씻는 손 사진'), '현장 소식') + mapBlog('yangyang', 'c-fld', ILL.yang(), '현장 소식') + mapBlog('mangnam-coop', 'c-fld', pic('b_co1.jpg', '화분과 물건을 늘어놓은 마을 가게 사진'), '조합 소식') + `</div></div>` +
