@@ -1711,10 +1711,10 @@ function renderCamp(fresh) {
   if (fresh || !CA) CA = { f: { name: (me && me.name) || '', email: (me && me.email) || '' }, err: '', done: false, busy: false };
   const root = $('#campBody'); if (!root) return;
   const v = k => esc(CA.f[k] || '');
-  let h = `<div class="sech"><h2>${CAMP.title}</h2><p>주민자치·협동조합·재생에너지 현장을 아는 AX 컨설턴트를 3박 4일 합숙으로 키웁니다.</p></div>
+  let h = `<div class="sech"><h2>${CAMP.title}</h2><p>2026년 12월 중, 주민자치·협동조합·재생에너지 현장을 아는 AX 컨설턴트를 3박 4일 합숙으로 키웁니다.</p></div>
     <div class="g2" style="margin-bottom:16px">
       <div class="card" style="border-top:6px solid var(--g7,#2c5842)"><h3 style="color:var(--g9);margin-bottom:8px">과정 개요</h3>
-        <ul style="margin:0 0 0 18px;display:grid;gap:4px"><li><b>수강료</b> 500,000원(숙식 제공)</li><li><b>기간</b> 3박 4일 합숙 — 수업 24시간 + 완도 여행</li><li><b>장소</b> 완도</li><li><b>일정</b> 확정되면 신청하신 분께 먼저 알려 드립니다</li><li><b style="color:#b03a3a">준비물(필수)</b> 수강생이 직접 준비합니다 — 노트북, AI 유료 모델 계정(예: Claude Pro 이상). 하네스 교육·서버 설치·AX 기술 적용 실습을 내 노트북과 내 계정으로 합니다.</li></ul></div>
+        <ul style="margin:0 0 0 18px;display:grid;gap:4px"><li><b>수강료</b> 500,000원(숙식 제공)</li><li><b>기간</b> 3박 4일 합숙 — 수업 24시간 + 완도 여행</li><li><b>장소</b> 완도</li><li><b>일정</b> 2026년 12월 중 — 날짜는 확정되면 신청하신 분께 먼저 알려 드립니다</li><li><b style="color:#b03a3a">준비물(필수)</b> 수강생이 직접 준비합니다 — 노트북, AI 유료 모델 계정(예: Claude Pro 이상). 하네스 교육·서버 설치·AX 기술 적용 실습을 내 노트북과 내 계정으로 합니다.</li></ul></div>
       <div class="card"><h3 style="color:var(--g9);margin-bottom:8px">이런 분께</h3>
         <p>마을·조합·의회·지자체 현장에서 AI 로 일하는 방식을 바꾸고 싶은 활동가, 그리고 사회혁신AX컨설팅(조합 설립·운영, 연합회 사무국 셋업, 의회·지자체 AI 교육, AX 구축 컨설팅, 팀러닝)을 함께 할 컨설턴트를 꿈꾸는 분.</p>
         <p style="margin-top:6px"><a href="#/axc">사회혁신AX컨설팅 보기 ›</a></p></div>
@@ -1753,10 +1753,10 @@ function campPopMaybe() {
   window._campPopShown = true;
   const p = $('#campPop'); if (!p) return;
   p.innerHTML = `<div class="cpx">
-  <div class="cpx-hd"><img src="/img/unified/hero.jpg" alt="완도 바다와 항구를 내려다본 사진" loading="eager"><div class="cpx-ov"><span class="cpx-bd">모집 안내</span><h2 id="campPopT">AX컨설턴트 양성과정</h2><p>완도에서 3박 4일, 현장을 아는 AX 컨설턴트로</p></div></div>
+  <div class="cpx-hd"><img src="/img/unified/hero.jpg" alt="완도 바다와 항구를 내려다본 사진" loading="eager"><div class="cpx-ov"><span class="cpx-bd">모집 안내</span><h2 id="campPopT">AX컨설턴트 양성과정</h2><p><b>2026년 12월 중</b> · 완도에서 3박 4일, 현장을 아는 AX 컨설턴트로</p></div></div>
   <div class="cpx-bdy">
     <div class="cpx-g">
-      <div class="cpx-t t1"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><b>3박 4일</b><span>완도 합숙</span></div>
+      <div class="cpx-t t1"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><b>3박 4일</b><span>2026년 12월 중</span></div>
       <div class="cpx-t t2"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18h18M5 18v-6a7 7 0 0 1 14 0v6M12 5V3"/></svg><b>숙식 제공</b><span>먹고 자며 배움</span></div>
       <div class="cpx-t t3"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><b>수업 24시간</b><span>+ 완도 여행</span></div>
       <div class="cpx-t t4"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20M6 15h4"/></svg><b>50만 원</b><span>수강료</span></div>
