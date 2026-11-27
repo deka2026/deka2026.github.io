@@ -176,6 +176,13 @@ try{var _h=location.hash||'';if(localStorage.getItem('sk_in')==='1'&&!/^#\/(map|
   .f{margin-bottom:10px}.f label{display:block;font-size:0.8667rem;color:var(--ink2);margin-bottom:4px}.f input,.f select{width:100%;height:38px;border:1px solid var(--line);border-radius:8px;padding:0 10px;font-size:0.9333rem;font-family:inherit;background:#fff}
   .f .two{display:flex;gap:6px}.f .two select{flex:1}
   #lgWho::-webkit-search-cancel-button,#lgWho::-webkit-search-decoration{-webkit-appearance:none;appearance:none}   /* 11-27 이사장 지시: 크롬 비밀번호 관리자가 아이디 칸에 옛 저장 계정 목록을 붙이지 않게 검색 칸으로(검색 칸에는 저장 계정을 띄우지 않는다) */
+  .campPop{position:fixed;inset:0;z-index:90;background:rgba(10,30,20,.45);display:flex;align-items:center;justify-content:center;padding:16px}
+  .campPop[hidden]{display:none}
+  .campPop .box{background:#fff;border-radius:16px;max-width:440px;width:100%;padding:22px 22px 16px;box-shadow:0 20px 50px rgba(0,0,0,.25);border-top:6px solid #2c5842;max-height:90vh;overflow:auto}
+  .campPop h2{margin:0 0 6px;font-size:1.25rem;color:#0d3b2c}
+  .campPop ul{margin:8px 0 12px 18px;display:grid;gap:3px;font-size:.95rem}
+  .campPop .acts2{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+  .camptl td,.camptl th{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;font-size:.95rem}.camptl{width:100%;border-collapse:collapse}.camptl th{background:var(--g0,#edf2e5);white-space:nowrap}
   .pwmask{-webkit-text-security:disc;text-security:disc}   /* 11-27 이사장 지시: 크롬이 로그인 양식으로 알아보고 옛 저장 계정 목록을 띄우지 않게 — 비밀번호 칸은 가림 글꼴의 보통 칸 */
   .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   .lgrec{position:absolute;left:0;right:0;top:100%;z-index:30;background:var(--bg,#fff);border:1px solid var(--line,#ddd);border-radius:10px;box-shadow:0 8px 22px rgba(0,0,0,.12);margin-top:2px;overflow:hidden}
@@ -728,6 +735,8 @@ svg.ic.s{width:17px;height:17px}
       <!-- 문의 4분류 (#/ask) -->
       <main id="vAsk" class="view u2" aria-label="문의하기"><div class="uw"><section class="usec" id="askBody"></section></div></main>
       <main id="vAx" class="view u2" aria-label="사회혁신AX컨설팅"><div class="uw"><section class="usec" id="axBody"></section></div></main>
+      <main id="vCamp" class="view u2" aria-label="AX컨설턴트 양성과정"><div class="uw"><section class="usec" id="campBody"></section></div></main>
+      <div id="campPop" class="campPop" role="dialog" aria-modal="true" aria-labelledby="campPopT" hidden></div>
 
       <!-- ③ 내 페이지 (로그인 #/) — 인사 카드 → AI 대화창 → 내 정보·이용료 → 대시보드 칸 → 공지 -->
       <main id="homeMain" class="view" aria-label="내 페이지">
@@ -949,6 +958,7 @@ const TREE = [
       { id: 'academy', t: '연대지능활동가 아카데미', d: '실습 15단계 · 학습 7단계 · 지식 검증 게임 · 연대지능활동가 교육 신청(아카데미 안)', h: '/academy-site/' },
       { id: 'edu-ai', t: '연대지능활동가 교육 신청', d: '필요 진단 · 예상 비용 · 신청', h: '/academy-site/#edu-apply', sub: true, hide: true, al: '교육 신청|교육신청|교육프로그램 신청|교육프로그램|연대지능 교육 신청' },
       { id: 'teamlearning', t: '팀러닝 (아카데미 교육과정)', d: '아카데미 안 「다. 팀러닝」 — 주민자치·지역문제해결 교육 신청', h: '/academy-site/#tl-home', sub: true, hide: true, al: '팀러닝|사회혁신팀러닝' },
+      { id: 'axcamp', t: 'AX컨설턴트 양성과정', d: '3박 4일 합숙 · 숙식 제공 · 수업 24시간 · 수강료 50만 원 — 신청', h: '#/axcamp', sub: true, al: '양성과정|컨설턴트 양성|AX 양성|AX컨설턴트' },
       { id: 'axc', t: '사회혁신AX컨설팅', d: '팀러닝 컨설팅 · 도메인AI 개발 컨설팅 — 뜻과 과정, 대표 컨설턴트, 의뢰·견적', h: '#/axc', al: 'AX컨설팅|컨설팅|팀러닝 컨설팅|팀학습 컨설팅|도메인AI|도메인 AI|견적|컨설팅 의뢰' },
       { id: 'tl-apply', t: '주민자치·지역문제해결 교육 신청', d: '필요 진단 · 예상 비용 · 신청', h: '/academy-site/#tl-apply', sub: true, hide: true, al: '주민자치 교육 신청|지역문제해결 교육 신청|팀러닝 신청|팀러닝 교육 신청' },
       { id: 'ax-build', t: 'AI업무자동화 사이트 구축 의뢰', d: '우리 기관용 업무 시스템 구축 — 사회혁신AX컨설팅 「도메인AI 개발 컨설팅」으로 모았다', h: '#/axc?t=domain_ai', hide: true, al: '구축 의뢰|사이트 구축|업무자동화|그룹웨어 구축|AI 업무자동화' },
@@ -1297,6 +1307,7 @@ function currentRoute() {
   const h = location.hash || '';
   if (h.startsWith('#/map')) return 'map';
   if (h.startsWith('#/join') || h.startsWith('#/signup') || h === '#signup') return 'join';
+  if (h.startsWith('#/axcamp')) return 'axcamp';   // 11-27 AX컨설턴트 양성과정
   if (h.startsWith('#/axc')) return 'axc';   // 11-27 사회혁신AX컨설팅
   if (h.startsWith('#/ask') || h.startsWith('#/contact')) return 'ask';   // 옛 문의 주소 #/contact 도 문의 화면
   if (h.startsWith('#/custom')) return 'custom';
@@ -1333,7 +1344,7 @@ function route() {
 
   const side = !!me && SIDE_ROUTES.includes(r);          // 사이드바는 로그인 뒤 내 페이지·내 폴더·꾸미기에만(11-18: 비로그인·첫 화면·둘러보기에서 뺌)
   const show = (id, on) => $(id).classList.toggle('on', !!on);
-  show('#shell', true); show('#vStart', r === 'start'); show('#vMap', r === 'map'); show('#vJoin', r === 'join'); show('#vAsk', r === 'ask'); show('#vAx', r === 'axc');
+  show('#shell', true); show('#vStart', r === 'start'); show('#vMap', r === 'map'); show('#vJoin', r === 'join'); show('#vAsk', r === 'ask'); show('#vAx', r === 'axc'); show('#vCamp', r === 'axcamp');
   show('#homeMain', !!me && r === 'home'); show('#vFiles', !!me && r === 'files'); show('#vCustom', !!me && r === 'custom');
   $('#topnav').hidden = false;
   $('#topnav').querySelectorAll('a').forEach(a => { a.classList.toggle('cur', a.dataset.r === r); if (a.dataset.r === r) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); a.hidden = (a.classList.contains('needin') && !me) || (a.classList.contains('needout') && !!me) || (a.dataset.r === 'files' && noFolder()); });
@@ -1347,6 +1358,8 @@ function route() {
   if (r === 'join') renderJoin(lastRoute !== 'join');
   if (r === 'ask') renderAsk(lastRoute !== 'ask');
   if (r === 'axc') renderAxc(lastRoute !== 'axc');
+  if (r === 'axcamp') renderCamp(lastRoute !== 'axcamp');
+  if (r === 'start' || r === 'home') campPopMaybe();
   if (me && r === 'home') { renderSideHome(); renderHome(); }
   if (me && r === 'files') { renderSideHome(); $('#vFiles').classList.toggle('closed', noFolder()); if (!noFolder()) renderFiles(); }
   if (me && r === 'custom') { renderSideHome(); renderCustom(); }
@@ -1639,6 +1652,7 @@ function startHTML() {
   return `<section class="hero2" aria-labelledby="hHero">${pic('hero.jpg', '').replace('loading="lazy"', 'loading="eager"')}<div class="uw"><span class="eyebrow">지역에서 일하는 사람들의 업무·학습 플랫폼</span>` +
     `<h2 class="h1" id="hHero">로컬리스트 플랫폼,<br>사교원 통합사이트</h2><p>한 계정으로, 내가 고른 서비스만.</p><div class="cta">${cta}</div>` +
     `<div class="dots"><span class="cchip c-hat">햇소자</span><span class="cchip c-pol">의정지원</span><span class="cchip c-aca">아카데미</span><span class="cchip c-team">AX컨설팅</span></div></div></section>` +
+    `<div class="uw"><div id="startNotice" style="margin-top:14px"></div></div>` +
     `<div class="uw"><section class="usec" aria-labelledby="hIntro"><div class="sech"><h2 id="hIntro">어떤 사이트인가요</h2></div><div class="g3">` +
     `<div class="card feat"><div class="row">${feat('c-hat', 'sun', '협동조합·연합회')}${feat('c-pol', 'gov', '의원실')}${feat('c-aca', 'user', '활동가')}</div><h3>누가 쓰나요</h3><p>지역의 협동조합·연합회·의원실·활동가가 하나의 계정으로 다양한 서비스를 이용합니다.</p></div>` +
     `<div class="card feat"><div class="row">${feat('c-hat', 'sun', '조합 운영')}${feat('c-pol', 'doc', '의정지원')}${feat('c-aca', 'book', '아카데미')}${feat('c-g', 'chat', 'AI 대화창')}${feat('c-rs', 'folder', '내 폴더')}</div><h3>무엇을 하나요</h3><p>업무와 배움을 한곳에서 합니다.<br>선택한 서비스만 내 사이트에 정렬할 수 있습니다.</p></div>` +
@@ -1652,8 +1666,84 @@ function startHTML() {
     `<section class="band2" aria-labelledby="hCta">${pic('cta.jpg', '')}<div class="uw"><h2 id="hCta">지금 시작해 보세요</h2><div class="cta">${cta}</div></div></section>` +
     `<div class="uw"><div class="publinks" aria-label="공개 자료" style="padding-top:22px"><a href="${esc(itemById('about').h)}">사교원 소개</a><a href="${esc(itemById('disclosure').h)}">경영공시</a><a href="${esc(itemById('research').h)}">연구자료</a><a href="${esc(itemById('mangnam').h)}">현장사업 소식</a><a href="#/map">둘러보기</a></div></div>`;
 }
+/* 11-27 이사장 지시: 「AX컨설턴트 양성과정」 — 첫 화면·아카데미 공지와 팝업, 상세 화면 #/axcamp, 신청은 /api/axconsult(type camp)로.
+   수강료 50만 원 · 3박 4일 · 숙식 제공 · 수업 24시간(+완도 여행 4시간). 날짜·장소 세부·인원은 이사장 확정 전이라 「확정되면 안내」. */
+const CAMP = { fee: 500000, title: 'AX컨설턴트 양성과정',
+  days: [
+    ['1일차', [['오후', '입소·오리엔테이션'], ['4시간', '기본교육 — 주민자치·협동조합·재생에너지']]],
+    ['2일차', [['4시간', 'AI 리터러시'], ['2시간', '하네스 교육 — 내 PC 에 AI 작업대(하네스) 설치·사용'], ['2시간', '서버 설치 — 기관 업무 서버를 직접 세우기']]],
+    ['3일차', [['4시간', '비즈니스 컨설팅 방법론 워크숍 — 진단·견적·계약·이용권 묶음까지 컨설팅 한 바퀴'], ['4시간', '사이트 제작 실습 — 우리 기관 업무 사이트 만들기']]],
+    ['4일차', [['4시간', '과제물 발표와 후기 나눔 · 수료'], ['4시간', '완도 여행 뒤 해산']]],
+  ] };
+function campProgHtml() {
+  return `<table class="camptl"><thead><tr><th>날</th><th>시간</th><th>내용</th></tr></thead><tbody>` +
+    CAMP.days.map(d => d[1].map((x, i) => `<tr>${i === 0 ? `<th rowspan="${d[1].length}">${d[0]}</th>` : ''}<td style="white-space:nowrap">${x[0]}</td><td>${esc(x[1])}</td></tr>`).join('')).join('') +
+    `</tbody></table><p class="note" style="margin-top:6px">수업 24시간(기본교육 4 · AI 리터러시 4 · 하네스 2 · 서버 설치 2 · 컨설팅 방법론 워크숍 4 · 사이트 제작 실습 4 · 발표와 후기 4) + 완도 여행 4시간</p>`;
+}
+let CA = null;
+function renderCamp(fresh) {
+  if (fresh || !CA) CA = { f: { name: (me && me.name) || '', email: (me && me.email) || '' }, err: '', done: false, busy: false };
+  const root = $('#campBody'); if (!root) return;
+  const v = k => esc(CA.f[k] || '');
+  let h = `<div class="sech"><h2>${CAMP.title}</h2><p>주민자치·협동조합·재생에너지 현장을 아는 AX 컨설턴트를 3박 4일 합숙으로 키웁니다.</p></div>
+    <div class="g2" style="margin-bottom:16px">
+      <div class="card" style="border-top:6px solid var(--g7,#2c5842)"><h3 style="color:var(--g9);margin-bottom:8px">과정 개요</h3>
+        <ul style="margin:0 0 0 18px;display:grid;gap:4px"><li><b>수강료</b> 500,000원(숙식 제공)</li><li><b>기간</b> 3박 4일 합숙 — 수업 24시간 + 완도 여행</li><li><b>장소</b> 완도</li><li><b>일정</b> 확정되면 신청하신 분께 먼저 알려 드립니다</li></ul></div>
+      <div class="card"><h3 style="color:var(--g9);margin-bottom:8px">이런 분께</h3>
+        <p>마을·조합·의회·지자체 현장에서 AI 로 일하는 방식을 바꾸고 싶은 활동가, 그리고 사회혁신AX컨설팅(조합 설립·운영, 연합회 사무국 셋업, 의회·지자체 AI 교육, 업무자동화 사이트 구축, 팀러닝)을 함께 할 컨설턴트를 꿈꾸는 분.</p>
+        <p style="margin-top:6px"><a href="#/axc">사회혁신AX컨설팅 보기 ›</a></p></div>
+    </div>
+    <div class="card" style="margin-bottom:16px"><h3 style="color:var(--g9);margin-bottom:8px">프로그램</h3>${campProgHtml()}</div>`;
+  if (CA.done) { root.innerHTML = h + `<div class="card done" id="campDone"><h2>수강 신청을 받았습니다</h2><p class="lead" style="margin:6px 0 0">일정이 확정되면 적어 주신 연락처로 안내드리겠습니다.</p></div>`; return; }
+  h += `<div class="card" id="campForm"><h3 style="color:var(--g9);margin-bottom:10px">수강 신청</h3><div class="form">
+      <div class="f"><label for="c-name">이름 <span class="req">*</span></label><input type="text" id="c-name" data-c="name" value="${v('name')}" maxlength="40" autocomplete="name"></div>
+      <div class="f"><label for="c-org">소속(선택)</label><input type="text" id="c-org" data-c="org" value="${v('org')}" maxlength="80"></div>
+      <div class="f"><label for="c-phone">전화번호</label><input type="tel" id="c-phone" data-c="phone" value="${v('phone')}" placeholder="010-0000-0000" autocomplete="tel"></div>
+      <div class="f"><label for="c-email">이메일</label><input type="email" id="c-email" data-c="email" value="${v('email')}" autocomplete="email"><span class="hint">전화번호와 이메일 가운데 하나는 꼭 적어 주세요.</span></div>
+      <div class="f w"><label for="c-msg">하고 있는 일·바라는 점(선택)</label><textarea id="c-msg" data-c="message" maxlength="2000">${v('message')}</textarea></div>
+      <div class="f w"><label class="ck"><input type="checkbox" id="c-ok" data-c="consent"${CA.f.consent ? ' checked' : ''}>개인정보 수집·이용에 동의합니다 <span class="req">*</span></label><span class="hint">이름·연락처·이메일은 수강 안내에만 쓰고 1년 뒤 지웁니다. <a href="account-privacy.html" target="_blank" rel="noopener">처리방침</a></span></div>
+    </div><div id="eCamp">${CA.err ? `<div class="err" role="alert">${esc(CA.err)}</div>` : ''}</div>
+    <div class="acts"><span class="note">수강료 500,000원은 일정이 확정된 뒤 안내드리는 방법으로 냅니다.</span><span class="r"><button type="button" class="btn p" id="campGo"${CA.busy ? ' disabled' : ''}>${CA.busy ? '보내는 중…' : '수강 신청 보내기'}</button></span></div></div>`;
+  root.innerHTML = h;
+}
+$('#campBody').addEventListener('click', async e => {
+  if (!e.target.closest('#campGo') || !CA || CA.busy) return;
+  $('#campBody').querySelectorAll('[data-c]').forEach(x => { CA.f[x.dataset.c] = x.type === 'checkbox' ? x.checked : x.value; });
+  const f = CA.f, num = String(f.phone || '').replace(/\D/g, ''), mailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(f.email || '').trim());
+  const m = !String(f.name || '').trim() ? '이름을 적어 주세요.' : (num.length < 9 && !mailOk) ? '전화번호나 이메일 가운데 하나를 바르게 적어 주세요.' : !f.consent ? '개인정보 수집·이용에 동의해 주세요.' : '';
+  if (m) { CA.err = m; return renderCamp(); }
+  CA.err = ''; CA.busy = true; renderCamp();
+  const r = await api('/api/axconsult', { method: 'POST', body: { type: 'camp', ask: '신청', org: String(f.org || '').trim(), name: String(f.name).trim(), phone: String(f.phone || '').trim(), email: String(f.email || '').trim(), message: String(f.message || '').trim(), consent: true, cond: { 과정: 'AX컨설턴트 양성과정 3박 4일', 수강료: '500,000원' } } });
+  CA.busy = false;
+  if (r.ok) { CA.done = true; renderCamp(); const d = $('#campDone'); if (d) d.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+  CA.err = r.message || '보내지 못했습니다. 잠시 뒤 다시 해 주세요.'; renderCamp();
+});
+/* 팝업 — 첫 화면·내 페이지에서 하루 한 번. 「오늘 하루 보지 않기」는 이 브라우저에만 남긴다 */
+const CAMP_POP_KEY = 'sk_axcamp_pop_until';
+function campPopMaybe() {
+  let until = 0; try { until = +localStorage.getItem(CAMP_POP_KEY) || 0; } catch (_) {}
+  if (Date.now() < until || window._campPopShown) return;
+  window._campPopShown = true;
+  const p = $('#campPop'); if (!p) return;
+  p.innerHTML = `<div class="box"><p class="note" style="margin:0 0 4px;color:#b47d14;font-weight:700">모집 안내</p><h2 id="campPopT">${CAMP.title}</h2>
+    <ul><li>3박 4일 합숙 · 숙식 제공 · 완도</li><li>수업 24시간 + 완도 여행</li><li>수강료 500,000원</li><li>주민자치·협동조합·재생에너지 기본교육, AI 리터러시, 하네스·서버 설치, 컨설팅 방법론 워크숍, 사이트 제작 실습, 과제 발표</li></ul>
+    <div class="acts2"><label class="ck" style="font-size:.9rem"><input type="checkbox" id="campPopDay">오늘 하루 보지 않기</label><span style="display:flex;gap:6px"><button type="button" class="btn sm" id="campPopX">닫기</button><a class="btn sm p" href="#/axcamp" id="campPopGo">자세히 보기·신청</a></span></div></div>`;
+  p.hidden = false;
+  const close = () => { if ($('#campPopDay') && $('#campPopDay').checked) { try { const t = new Date(); t.setHours(24, 0, 0, 0); localStorage.setItem(CAMP_POP_KEY, String(t.getTime())); } catch (_) {} } p.hidden = true; };
+  $('#campPopX').onclick = close; $('#campPopGo').onclick = close;
+  p.onclick = e => { if (e.target === p) close(); };
+  document.addEventListener('keydown', function esc1(e) { if (e.key === 'Escape' && !p.hidden) { close(); document.removeEventListener('keydown', esc1); } });
+}
+/* 첫 화면 공지 띠 — 사교원 공지(/api/notices) 최근 3건 */
+async function startNotices() {
+  const box = $('#startNotice'); if (!box) return;
+  const r = await api('/api/notices?limit=3');
+  const items = (r.ok && Array.isArray(r.items)) ? r.items.slice(0, 3) : [];
+  box.innerHTML = items.length ? `<div class="card" style="padding:12px 16px"><b style="color:var(--g9)">공지</b> <span style="display:inline-flex;flex-wrap:wrap;gap:4px 14px;margin-left:8px">${items.map(n => n.href ? `<a href="${esc(n.href)}">${esc(n.title)}</a>` : `<span>${esc(n.title)}</span>`).join('')}</span></div>` : '';
+}
 function renderStart() {
   $('#startBody').innerHTML = startHTML();
+  startNotices();
   if (!PLANS) loadPlans().then(() => { if (currentRoute() === 'start') { const b = $('#priceBox'); if (b) b.innerHTML = priceHTML(); } });
 }
 
