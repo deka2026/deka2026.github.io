@@ -175,6 +175,7 @@ try{var _h=location.hash||'';if(localStorage.getItem('sk_in')==='1'&&!/^#\/(map|
   .tabs{display:flex;gap:6px;margin-bottom:12px}.tabs button{flex:1;border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px;cursor:pointer;font-family:inherit}.tabs button.on{background:var(--g7);color:#fff;border-color:var(--g7)}
   .f{margin-bottom:10px}.f label{display:block;font-size:0.8667rem;color:var(--ink2);margin-bottom:4px}.f input,.f select{width:100%;height:38px;border:1px solid var(--line);border-radius:8px;padding:0 10px;font-size:0.9333rem;font-family:inherit;background:#fff}
   .f .two{display:flex;gap:6px}.f .two select{flex:1}
+  #lgWho::-webkit-search-cancel-button,#lgWho::-webkit-search-decoration{-webkit-appearance:none;appearance:none}   /* 11-27 이사장 지시: 크롬 비밀번호 관리자가 아이디 칸에 옛 저장 계정 목록을 붙이지 않게 검색 칸으로(검색 칸에는 저장 계정을 띄우지 않는다) */
   .pwmask{-webkit-text-security:disc;text-security:disc}   /* 11-27 이사장 지시: 크롬이 로그인 양식으로 알아보고 옛 저장 계정 목록을 띄우지 않게 — 비밀번호 칸은 가림 글꼴의 보통 칸 */
   .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   .lgrec{position:absolute;left:0;right:0;top:100%;z-index:30;background:var(--bg,#fff);border:1px solid var(--line,#ddd);border-radius:10px;box-shadow:0 8px 22px rgba(0,0,0,.12);margin-top:2px;overflow:hidden}
@@ -846,7 +847,7 @@ svg.ic.s{width:17px;height:17px}
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="lgTitle">
     <div id="vLogin">
       <h2 id="lgTitle">로그인</h2><p class="sub">사교원 통합 계정 하나로 모든 사이트에 들어갑니다. 로그인하면 내 페이지로 갑니다.</p>
-      <div class="f" style="position:relative"><label for="lgEmail">이메일 <span style="color:var(--mute);font-weight:400">(옛 아이디도 당분간 됩니다)</span></label><input id="lgEmail" inputmode="email" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="name@example.com" aria-autocomplete="list" aria-controls="lgRecent"><div id="lgRecent" class="lgrec" role="listbox" hidden></div></div>
+      <div class="f" style="position:relative"><label for="lgWho">이메일 <span style="color:var(--mute);font-weight:400">(옛 아이디도 당분간 됩니다)</span></label><input id="lgWho" type="search" name="sk-q-lgw" enterkeyhint="next" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore data-form-type="other" placeholder="name@example.com" aria-autocomplete="list" aria-controls="lgRecent"><div id="lgRecent" class="lgrec" role="listbox" hidden></div></div>
       <div class="f"><label for="lgPw">비밀번호</label><input id="lgPw" type="text" class="pwmask" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore aria-describedby="lgPwHint"><span class="sr-only" id="lgPwHint">입력한 비밀번호는 화면에 가려져 보입니다.</span></div>
       <label class="remid"><input type="checkbox" id="lgRem"> <b>아이디 기억하기</b> <span>(공용 PC에서는 끄세요)</span></label>
       <div class="f" id="lgCodeBox" hidden><label for="lgCode">2단계 인증 코드</label><input id="lgCode" inputmode="numeric" autocomplete="one-time-code" placeholder="인증 앱 6자리 · 이메일 코드 · 백업 코드"></div>
@@ -1356,7 +1357,7 @@ function route() {
 /* ── 로그인 창(머리 「로그인」 단추·#login) — 11-18: 첫 화면의 로그인 칸은 없앴다(머리에 로고·로그인·회원가입만) */
 /* 가림 글꼴을 못 쓰는 브라우저(일부 파이어폭스)에서는 보통 비밀번호 칸으로 되돌린다 — 비밀번호가 화면에 드러나면 안 된다 */
 try { if (!(window.CSS && (CSS.supports('-webkit-text-security', 'disc') || CSS.supports('text-security', 'disc')))) { const p = $('#lgPw'); if (p) { p.type = 'password'; p.autocomplete = 'current-password'; } } } catch (_) { const p = $('#lgPw'); if (p) p.type = 'password'; }
-const LG = { email: '#lgEmail', pw: '#lgPw', code: '#lgCode', box: '#lgCodeBox', msg: '#lgMsg', btn: '#lgBtn', rem: '#lgRem', pending: false };
+const LG = { email: '#lgWho', pw: '#lgPw', code: '#lgCode', box: '#lgCodeBox', msg: '#lgMsg', btn: '#lgBtn', rem: '#lgRem', pending: false };
 /* 11-07 이사장 지시: 아이디 기억하기 — 체크하고 로그인에 성공하면 이 기기(브라우저)에 마지막 아이디만 남긴다. 비밀번호는 절대 남기지 않는다.
    체크를 풀고 로그인하면 지운다. 다음에 열면 아이디를 채우고 비밀번호 칸에 커서를 둔다. */
 const REM_KEY = 'sk_last_id';
@@ -1382,14 +1383,14 @@ function remSet(ui, id) {
   } catch (_) {}
 }
 function recShow(on, 거르기) {
-  const box = $('#lgRecent'), inp = $('#lgEmail'); if (!box || !inp) return;
+  const box = $('#lgRecent'), inp = $('#lgWho'); if (!box || !inp) return;
   const q = 거르기 ? (inp.value || '').trim().toLowerCase() : '', a = recGet().filter(x => !q || x.toLowerCase().indexOf(q) >= 0);   // 누를 때는 칸이 채워져 있어도 최근 목록 전체를, 칠 때는 거른다
   if (!on || !a.length) { box.hidden = true; return; }
   box.innerHTML = '<div class="h">최근 로그인한 아이디</div>' + a.map(x => `<button type="button" class="i" role="option" data-id="${esc(x)}"><span>${esc(x)}</span><span class="x" data-del="${esc(x)}" title="목록에서 지우기" aria-label="목록에서 지우기">✕</span></button>`).join('');
   box.hidden = false;
 }
 (function () {
-  const box = $('#lgRecent'), inp = $('#lgEmail'); if (!box || !inp) return;
+  const box = $('#lgRecent'), inp = $('#lgWho'); if (!box || !inp) return;
   inp.addEventListener('focus', () => recShow(true));
   inp.addEventListener('click', () => recShow(true));
   inp.addEventListener('input', () => recShow(true, true));
@@ -2631,7 +2632,7 @@ function openAuth(tab, note) {
   const rid = remFill(), m = $('#lgMsg');
   if (LG.pending) { $('#lgCodeBox').hidden = false; $('#lgBtn').textContent = '코드 확인'; if (!m.textContent) { m.className = 'msg ok'; m.textContent = '비밀번호가 확인되었습니다. 2단계 인증 코드를 입력해 주세요.'; } }
   else if (note && !m.textContent) { m.className = 'msg'; m.textContent = note; }
-  setTimeout(() => { const f = $(LG.pending ? '#lgCode' : (rid && $('#lgEmail').value ? '#lgPw' : '#lgEmail')); if (f) f.focus(); }, 0);
+  setTimeout(() => { const f = $(LG.pending ? '#lgCode' : (rid && $('#lgWho').value ? '#lgPw' : '#lgWho')); if (f) f.focus(); }, 0);
 }
 /* 11-27 전수개선: 로그인 창을 띄운 채 다른 화면(#/join·#/ask…)으로 옮기면 창이 남던 것 */
 window.addEventListener('hashchange', () => { if (!['#login', '#signup', '#/login', '#/signup'].includes(location.hash)) $('#authModal').classList.remove('on'); });
@@ -2710,7 +2711,7 @@ $('#lgPw').addEventListener('input', e => {   // 11-27 알파언니: 가림 글�
 });
 $('#lgCode').addEventListener('keydown', e => { if (e.key === 'Enter') $('#lgBtn').click(); });
 $('#lgBtn').addEventListener('click', () => doLogin(LG));
-$('#lgForgot').addEventListener('click', e => { e.preventDefault(); forgot('#lgEmail', '#lgMsg'); });
+$('#lgForgot').addEventListener('click', e => { e.preventDefault(); forgot('#lgWho', '#lgMsg'); });
 $('#btnLogout').addEventListener('click', async () => { try { localStorage.removeItem('sk_in'); } catch (_) {} MB = null; MB_STATE = ''; await api('/api/auth/logout', { method: 'POST' }); FOLDER_403 = false; me = realMe = null; preview = null; tf = null; setWho(); location.reload(); });
 $('#btnPw').addEventListener('click', () => openPw(false));
 $('#btnTwofa').addEventListener('click', openTf);
