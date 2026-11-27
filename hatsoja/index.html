@@ -1436,7 +1436,7 @@ body.hs-in .hs-login-only{display:none!important;}
         <summary>플랫폼 이용료가 있나요?</summary>
         <div class="faq-body">
           <strong>2026년 12월까지는 모든 회원이 무료 시범</strong>이고, 요금은 2027년 1월부터 받습니다. 그 뒤에도 <strong>상업발전 전에는 무료</strong>이고, 상업운전을 시작한 다음 달부터 기본 이용료(협동조합 월 20,000원, 연합회 단위조합 5·10·20곳 이내 월 45,000·90,000·135,000원, 컨설턴트 월 25,000원, 부가세 별도)가 붙습니다.
-          AI 상담·문서 생성·서류 검토는 기본에 들어 있고, 활동 영상 만들기만 관리하는 조합 수에 따라 월 1만·2만·3만원(부가세 별도)을 더합니다. 2026년 안에 가입 신청한 조합·연합회는 2027년 한 해 반값(창립 회원)이고, 연합회가 회원조합 5곳 이상의 이용료를 한꺼번에 내면 20% 할인됩니다(두 할인은 겹치지 않고 큰 쪽 하나만). 자세한 값과 계산은 <a href="#/pub/pricing">요금 안내</a>를 보세요.
+          AI 상담·문서 생성·서류 검토는 기본에 들어 있고, 활동 영상 만들기만 관리하는 조합 수에 따라 월 1만·2만·3만원(부가세 별도)을 더합니다. 자세한 값과 계산은 <a href="#/pub/pricing">요금 안내</a>를 보세요.
         </div>
       </details>
       <details>
@@ -1499,11 +1499,10 @@ body.hs-in .hs-login-only{display:none!important;}
       <button type="button" class="prc-tab" data-prc="consult" role="tab" aria-selected="false">컨설턴트 회원</button>
     </div>
     <div id="prcBody"></div>
-    <details class="card prc-rule"><summary>요금 규칙 자세히 (무료 시범·상업발전 전 무료·창립 회원 반값·결제)</summary>
+    <details class="card prc-rule"><summary>요금 규칙 자세히 (무료 시범·상업발전 전 무료·결제)</summary>
       <ul>
         <li><strong>요금은 2027년 1월부터 받습니다.</strong> 2026년 12월까지는 모든 회원이 무료 시범으로 씁니다.</li>
         <li><strong>상업발전 전에는 모든 메뉴가 무료</strong>입니다. 2027년 1월 이후에도 요금은 상업운전을 시작한 다음 달부터 붙습니다.</li>
-        <li><strong>창립 회원 반값</strong> — 2026년 안에 가입 신청한 협동조합·연합회는 2027년 한 해 요금을 반값으로 냅니다(추가 묶음 제외, 승인이 해를 넘겨도 신청일 기준). 할인이 여럿이면 겹치지 않고 큰 쪽 하나만 적용합니다.</li>
         <li>요금은 <strong>월 단위</strong>이고 위 큰 숫자는 부가세 별도 값입니다(내는 값은 부가세 포함). 1년치를 한 번에 내시면 10개월 값으로 12개월을 씁니다.</li>
         <li>한 달 한도를 넘으면 추가 묶음을 사서 이어 쓰고, 다음 달 1일에 한도가 다시 채워집니다.</li>
         <li>결제는 <strong>계좌이체</strong>로 받습니다 — 하나은행 380-910028-79905 (예금주 사회혁신교육원사회적협동조합). 현금영수증·세금계산서를 발행합니다.</li>
@@ -1799,7 +1798,7 @@ const MOCK = {
       {id:'n04', title:'완도군 시범사업 설명회 자료', date:'2026-07-01', tag:'자료', body:'설명회에서 배포된 슬라이드 및 Q&A.'},
     ],
     faq: [
-      {id:'q01', q:'플랫폼 이용료가 있나요?', a:'2026년 12월까지는 모든 회원이 무료 시범이고 요금은 2027년 1월부터 받습니다. 그 뒤에도 상업발전 전에는 무료이고, 상업운전을 시작한 다음 달부터 기본 이용료(협동조합 월 20,000원, 연합회 단위조합 수에 따라 월 45,000·90,000·135,000원, 컨설턴트 월 25,000원, 부가세 별도)를 내고, 활동 영상 만들기만 월 1만·2만·3만원을 더합니다. 2026년 안에 가입 신청한 조합·연합회는 2027년 한 해 반값(창립 회원), 연합회가 회원조합 5곳 이상 이용료를 한꺼번에 내면 20% 할인입니다(겹치지 않고 큰 쪽 하나만). 자세한 값은 요금 안내 화면을 보세요.'},
+      {id:'q01', q:'플랫폼 이용료가 있나요?', a:'2026년 12월까지는 모든 회원이 무료 시범이고 요금은 2027년 1월부터 받습니다. 그 뒤에도 상업발전 전에는 무료이고, 상업운전을 시작한 다음 달부터 기본 이용료(협동조합 월 20,000원, 연합회 단위조합 수에 따라 월 45,000·90,000·135,000원, 컨설턴트 월 25,000원, 부가세 별도)를 내고, 활동 영상 만들기만 월 1만·2만·3만원을 더합니다. 자세한 값은 요금 안내 화면을 보세요.'},
       {id:'q02', q:'우리 마을은 아직 협동조합이 없는데 이용 가능한가요?', a:'예비 조합원 자격으로 가입 가능합니다.'},
     ],
     files: [
@@ -2204,17 +2203,25 @@ async function ctApi(path, opt){
   if(o.body && typeof o.body !== 'string'){ o.headers = {'Content-Type':'application/json'}; o.body = JSON.stringify(o.body); }
   try{ const r = await fetch(path, o); const j = await r.json().catch(() => ({})); j._status = r.status; return j; }catch(e){ return {ok:false, _status:0}; }
 }
+/* 26-11-27 알파언니 🟠3: 조합을 바꾸기 전 — 보내려고 기다리던 저장을 멈추고, 조합 자료 저장소 밖의 조합 관련 열쇠도 비운다 */
+function consultWipe(){
+  try{ Object.values(_storeSync.timers || {}).forEach(t => clearTimeout(t)); _storeSync.timers = {}; _storeSync.on = false; }catch(e){}
+  try{ storeClearLocal(); }catch(e){}
+  ['sunvillage_auto_docs', 'hatsoja_village_check', 'hsj_min_rec_job'].forEach(k => { try{ localStorage.removeItem(k); }catch(e){} });
+  try{ MOCK.documents = (MOCK.documents || []).filter(x => !x._user); }catch(e){}
+  _MY_STRAT = undefined; _SHARE = null; _ctData = null; _ctVer = null; _ctLinks = null;
+}
 /* 컨설턴트로 조합에 들어가기·바꾸기·나오기 — 서버 쿠키(sk_consult_village)와 화면 계정을 함께 바꾼다 */
 async function consultEnter(vid){
   const cur = currentUser();
   if(!REAL_API || !cur || !cur.unified){ toast('통합 계정으로 로그인해야 합니다.'); return; }
+  try{ Object.values(_storeSync.timers || {}).forEach(t => clearTimeout(t)); _storeSync.timers = {}; _storeSync.on = false; }catch(e){}   // 쿠키를 바꾸기 전에 앞 조합 저장 예약을 멈춘다
   const d = await ctApi('/api/consultant/current', {method:'POST', body:{village_id:+vid}});
   if(!d.ok || !d.village){ toast(d.message || '조합에 들어가지 못했습니다. 조합의 승인과 이용권을 확인해 주세요.'); return; }
   let self = null;
   try{ self = JSON.parse(sessionStorage.getItem('sv_consult_self') || 'null'); }catch(e){}
   if(!cur.consultVillage || !self){ try{ sessionStorage.setItem('sv_consult_self', JSON.stringify(cur.consultVillage ? self : cur)); }catch(e){} }
-  _MY_STRAT = undefined; _SHARE = null; _ctData = null;
-  try{ storeClearLocal(); }catch(e){}   // 앞 조합 자료가 이 브라우저에 남지 않게
+  consultWipe();   // 앞 조합 자료가 이 브라우저에 남지 않게
   setUser({email:cur.email, name:cur.name, role:'coop', hubRole:'coop', perms:[], village:d.village.name, loginAt:new Date().toISOString(),
     unified:true, preview:true, consultant:true, consultVillage:{id:d.village.id, name:d.village.name}});
   await loadRealData();
@@ -2222,11 +2229,11 @@ async function consultEnter(vid){
   toast(`「${d.village.name}」 조합에 컨설턴트로 들어왔습니다. 위 띠에서 다른 조합으로 바꾸거나 돌아갑니다.`);
 }
 async function consultLeave(silent){
+  try{ Object.values(_storeSync.timers || {}).forEach(t => clearTimeout(t)); _storeSync.timers = {}; _storeSync.on = false; }catch(e){}
   await ctApi('/api/consultant/current', {method:'POST', body:{village_id:null}});
   let self = null;
   try{ self = JSON.parse(sessionStorage.getItem('sv_consult_self') || 'null'); sessionStorage.removeItem('sv_consult_self'); }catch(e){}
-  _MY_STRAT = undefined; _SHARE = null; _ctData = null;
-  try{ storeClearLocal(); }catch(e){}
+  consultWipe();
   if(!self){
     try{ const d = await fetch('/api/auth/me', {credentials:'same-origin'}).then(r => r.json()); if(d.ok && d.user){ applyUnifiedUser(d.user, {redirect:false, silent:true}); self = currentUser(); } }catch(e){}
   }
@@ -2277,7 +2284,8 @@ async function consultLoad(){
     return;
   }
   const 대기 = d.items.filter(x => x.status === 'request'), 맡은 = d.items.filter(x => x.status === 'active');
-  box.innerHTML = 입력 +
+  const vt = d.video_tier, 넘음 = vt && 맡은.length > vt.cap;   // 알파언니 🟠7: 활동 영상 구간보다 맡은 조합이 많으면 알린다
+  box.innerHTML = (넘음 ? `<div class="card" style="border-color:var(--gold);"><b>활동 영상 요금 구간을 확인해 주세요.</b> 지금 맡은 조합 ${맡은.length}곳이 고른 구간(${vt.cap}곳 이내)보다 많습니다. 통합사이트 「서비스 이용 신청」에서 구간을 올려 주세요(다음 기간부터 적용).</div>` : '') + 입력 +
     (대기.length ? `<div class="card"><h3 class="serif" style="margin-top:0;">조합 승인 대기 ${대기.length}곳</h3>${대기.map(x => `<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;padding:6px 0;border-top:1px solid var(--line);">
         <span>${ctEsc(x.village ? x.village.name : '조합')} <span class="text-small text-mute">요청 ${ctEsc((x.created_at || '').slice(0,10))}</span></span>
         <button class="btn btn-ghost btn-sm" onclick="consultEnd(${+x.id})">요청 거두기</button></div>`).join('')}</div>` : '') +
@@ -2313,6 +2321,18 @@ function memCtools(){
   return `<div class="sec-head"><h1>🧭 신청 과정 점검표</h1><p class="sec-desc">햇빛소득마을 신청 과정을 8단계로 나눠 함께 챙깁니다. 조합과 조합이 승인한 컨설턴트가 같은 점검표를 봅니다. 공모마다 다른 숫자(마감일·비율)는 공고문 기준으로 확인하세요.</p></div>
     <div id="ctList"><div class="card text-mute">불러오는 중…</div></div>`;
 }
+const CT_KEY = /^[a-z0-9]{1,40}$/, CT_STAGE_KEYS = CT_STAGES.map(s => s.k);
+function ctClean(d){   // 서버 자료라도 꼴이 다른 값은 버린다(알파언니 🔴1, 서버도 같은 검사)
+  const o = {done:{}, notes:{}, extra:{}};
+  Object.entries((d && typeof d.done === 'object' && d.done) || {}).forEach(([k, v]) => { if(CT_KEY.test(k) && v && typeof v === 'object') o.done[k] = {d: /^\d{4}-\d{2}-\d{2}$/.test(v.d || '') ? v.d : undefined}; });
+  CT_STAGE_KEYS.forEach(sk => {
+    const n = d && d.notes && d.notes[sk]; if(typeof n === 'string') o.notes[sk] = n.slice(0, 1000);
+    const L = d && d.extra && d.extra[sk]; if(Array.isArray(L)) o.extra[sk] = L.filter(x => x && CT_KEY.test(x.k || '') && typeof x.t === 'string').slice(0, 20).map(x => ({k:x.k, t:x.t.slice(0, 80)}));
+  });
+  if(d && typeof d.updated === 'string') o.updated = d.updated.slice(0, 40);
+  if(d && typeof d.by === 'string') o.by = d.by.slice(0, 60);
+  return o;
+}
 function ctTotal(d){ return CT_STAGES.reduce((a, s) => a + s.items.length + (((d.extra || {})[s.k]) || []).length, 0); }
 function ctDone(d){ const dn = d.done || {}; return CT_STAGES.reduce((a, s) => a + s.items.filter(([k]) => dn[k]).length + (((d.extra || {})[s.k]) || []).filter(x => dn[x.k]).length, 0); }
 async function ctLoad(){
@@ -2324,7 +2344,7 @@ async function ctLoad(){
   if(!j.ok || !j.village_id){ box.innerHTML = '<div class="card">조합 자료를 불러오지 못했습니다(조합 계정으로 들어와야 합니다).</div>'; return; }
   const it = (j.items || {}).consult;
   _ctData = (it && it.data && typeof it.data === 'object' && !Array.isArray(it.data)) ? it.data : {done:{}, notes:{}, extra:{}};
-  _ctData.done = _ctData.done || {}; _ctData.notes = _ctData.notes || {}; _ctData.extra = _ctData.extra || {};
+  _ctData = ctClean(_ctData);
   _ctVer = it ? it.ver : null;
   ctDraw();
 }
@@ -2338,10 +2358,14 @@ function ctDraw(){
       return `<div class="card"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;"><h3 class="serif" style="margin:0;">${ctEsc(s.n)} <span class="text-small text-mute">${sd}/${all.length}</span></h3>
         <span>${s.go.map(([n, h]) => `<a class="btn btn-ghost btn-sm" href="${h}">${ctEsc(n)} ›</a>`).join(' ')}</span></div>
         ${all.map(x => `<label style="display:flex;gap:8px;align-items:flex-start;padding:5px 0;border-top:1px solid var(--line);">
-          <input type="checkbox" ${dn[x.k] ? 'checked' : ''} onchange="ctToggle('${ctEsc(x.k)}', this.checked)" style="margin-top:3px;">
+          <input type="checkbox" ${dn[x.k] ? 'checked' : ''} data-ctk="${ctEsc(x.k)}" style="margin-top:3px;">
           <span style="flex:1;">${ctEsc(x.t)}${dn[x.k] && dn[x.k].d ? ` <span class="text-small text-mute">· ${ctEsc(dn[x.k].d)}</span>` : ''}</span></label>`).join('')}
-        <div style="display:flex;gap:6px;margin-top:6px;"><input id="ctAdd-${s.k}" maxlength="80" placeholder="항목 더하기" style="flex:1;"><button class="btn btn-ghost btn-sm" onclick="ctAddItem('${s.k}')">더하기</button></div>
-        <textarea id="ctNote-${s.k}" rows="2" maxlength="1000" placeholder="메모(조합과 컨설턴트가 함께 봅니다)" style="width:100%;margin-top:6px;" onchange="ctNote('${s.k}', this.value)">${ctEsc(d.notes[s.k] || '')}</textarea></div>`; }).join('');
+        <div style="display:flex;gap:6px;margin-top:6px;"><input id="ctAdd-${s.k}" maxlength="80" placeholder="항목 더하기" style="flex:1;"><button class="btn btn-ghost btn-sm" data-ctadd="${s.k}">더하기</button></div>
+        <textarea id="ctNote-${s.k}" data-ctnote="${s.k}" rows="2" maxlength="1000" placeholder="메모(조합과 컨설턴트가 함께 봅니다)" style="width:100%;margin-top:6px;">${ctEsc(d.notes[s.k] || '')}</textarea></div>`; }).join('');
+  /* 26-11-27 알파언니 🔴1: 서버에 저장된 값(항목 키)을 인라인 onchange 에 넣지 않는다 — data 속성 + addEventListener */
+  box.querySelectorAll('input[data-ctk]').forEach(el => el.addEventListener('change', () => ctToggle(el.dataset.ctk, el.checked)));
+  box.querySelectorAll('[data-ctadd]').forEach(el => el.addEventListener('click', () => ctAddItem(el.dataset.ctadd)));
+  box.querySelectorAll('textarea[data-ctnote]').forEach(el => el.addEventListener('change', () => ctNote(el.dataset.ctnote, el.value)));
 }
 async function ctSave(){
   if(!_ctData) return;
@@ -2356,14 +2380,14 @@ async function ctSave(){
   if(r._status === 409){ toast('다른 사람이 먼저 고쳤습니다. 새 판을 불러옵니다 — 다시 표시해 주세요.'); await ctLoad(); return; }
   toast(r.error && r.error.length > 20 ? r.error : '저장하지 못했습니다.'); await ctLoad();
 }
-function ctToggle(k, on){ if(!_ctData) return; if(on) _ctData.done[k] = {d: new Date().toISOString().slice(0,10)}; else delete _ctData.done[k]; ctSave(); }
-function ctNote(sk, v){ if(!_ctData) return; _ctData.notes[sk] = String(v || '').slice(0, 1000); ctSave(); }
+function ctToggle(k, on){ if(!_ctData || !CT_KEY.test(String(k))) return; if(on) _ctData.done[k] = {d: new Date().toISOString().slice(0,10)}; else delete _ctData.done[k]; ctSave(); }
+function ctNote(sk, v){ if(!_ctData || !CT_STAGE_KEYS.includes(sk)) return; _ctData.notes[sk] = String(v || '').slice(0, 1000); ctSave(); }
 function ctAddItem(sk){
   const el = document.getElementById('ctAdd-' + sk); const t = el ? el.value.trim() : '';
   if(!t || !_ctData) return;
   const L = _ctData.extra[sk] = _ctData.extra[sk] || [];
   if(L.length >= 20){ toast('단계마다 20개까지 더할 수 있습니다.'); return; }
-  L.push({k: sk + 'x' + Date.now().toString(36), t: t.slice(0, 80)}); ctSave();
+  L.push({k: sk + 'x' + Date.now().toString(36).toLowerCase(), t: t.slice(0, 80)}); ctSave();
 }
 
 /* ③ 내 AI 연결 — 컨설턴트 (#/mem/consultai) */
@@ -2397,7 +2421,7 @@ async function ctAiDel(id){ if(!confirm('이 열쇠를 지울까요? 그 열쇠�
 /* ④ 컨설턴트 연결 — 조합 쪽 (#/mem/consultlink). 승인·끊기는 그 조합에 본래 속한 조합 회원 계정만 */
 function memConsultLink(){
   return `<div class="sec-head"><h1>🧑‍💼 컨설턴트 연결</h1><p class="sec-desc">우리 조합의 햇빛소득마을 신청을 돕는 컨설턴트에게 조합 화면을 열어 줍니다. 연결 번호를 만들어 건네고, 요청이 오면 승인합니다.
-    승인한 컨설턴트는 조합 회원과 같은 권한으로 조합원 명부·업무 자료를 보고 고칠 수 있습니다(이용권·결제·컨설턴트 승인·AI 열쇠·공개 현황판은 빼고). 언제든 끊을 수 있습니다.</p></div>
+    승인한 컨설턴트는 조합 회원과 같은 권한으로 조합원 명부·업무 자료를 보고 고칠 수 있습니다(이용권·결제·컨설턴트 승인·AI 열쇠·공개 현황판은 빼고). 컨설턴트가 연결한 자기 AI 도 조합원 명부를 뺀 자료를 읽습니다. 언제든 끊을 수 있고, 끊으면 바로 막힙니다.</p></div>
     <div id="clBox"><div class="card text-mute">불러오는 중…</div></div>`;
 }
 async function clLoad(code){
@@ -2422,7 +2446,7 @@ async function clLoad(code){
 }
 async function clCode(){ const d = await ctApi('/api/coop/consultants/code', {method:'POST'}); if(!d.ok){ toast(d.message || '만들지 못했습니다.'); return; } clLoad(d); }
 async function clAct(id, act){
-  const 말 = {approve:'이 컨설턴트를 승인할까요? 승인하면 우리 조합 화면(조합원 명부 포함)을 조합 회원 권한으로 쓰게 됩니다.', reject:'요청을 거절할까요?', end:'연결을 끊을까요? 컨설턴트는 바로 우리 조합 화면에 못 들어옵니다.'};
+  const 말 = {approve:'이 컨설턴트를 승인할까요? 승인하면 우리 조합 화면(조합원 명부 포함)을 조합 회원 권한으로 쓰게 됩니다. 컨설턴트가 자기 AI 를 연결해 쓰면 그 AI 도 우리 조합 자료(조합원 명부 제외 — 회의록 참석자·계약 상대는 포함)를 읽고, 컨설턴트가 허락한 경우 대장·업무 달력에 씁니다.', reject:'요청을 거절할까요?', end:'연결을 끊을까요? 컨설턴트는 바로 우리 조합 화면에 못 들어옵니다.'};
   if(!confirm(말[act])) return;
   const d = await ctApi(`/api/coop/consultants/${+id}/${act}`, {method:'POST'});
   toast(d.ok ? '처리했습니다.' : (d.message || '처리하지 못했습니다.')); clLoad();
@@ -3191,7 +3215,7 @@ const PRC_FALLBACK = {products: [
   {product:'consult', name:'햇소자 컨설턴트', tax:'vat', base:27500, tiers:[{key:'c5', name:'맡은 조합 5곳 이내', amount:27500},{key:'c10', name:'맡은 조합 10곳 이내', amount:27500},{key:'c20', name:'맡은 조합 20곳 이내', amount:27500}],
    options:[{key:'video', name:'활동 영상 만들기', amount:11000},{key:'byo', name:'내 AI 연결 — 기본요금 30% 할인(사이트 AI 하루 10번)', amount:-8250}], tier_options:{video:{c5:11000, c10:22000, c20:33000}}, included:[]},
 ], year_months: 10};
-const PRC_FREE = ['2026년 12월까지 모든 회원의 모든 메뉴(무료 시범)', '손님 화면 전부 — 사업소개 · 사례 · FAQ · 신청·진단 · 간이 수익 계산 · 상담 신청', '회원 가입과 승인 심사'];
+const PRC_FREE = ['2026년 12월까지 모든 회원의 모든 메뉴(무료 시범)', '상업발전 전 협동조합의 모든 메뉴(상업운전을 시작한 다음 달부터 요금)', '손님 화면 전부 — 사업소개 · 사례 · FAQ · 신청·진단 · 간이 수익 계산 · 상담 신청', '회원 가입과 승인 심사'];
 let _prcKind = 'coop', _prcPlans = null, _prcLoading = false;
 const _prcPick = {coop: {opts: []}, fed: {opts: []}, consult: {opts: []}};
 const prcWon = n => Number(n).toLocaleString('ko-KR') + '원';
