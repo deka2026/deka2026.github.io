@@ -1405,7 +1405,7 @@ function recShow(on, 거르기) {
 })();
 function remFill() {                              // 로그인 창에 기억한 아이디를 채운다 — 이미 무언가 쳐 둔 칸은 건드리지 않는다
   const id = remGet();
-  [LG].forEach(ui => { const e = $(ui.email), c = $(ui.rem); if (!e || !c) return; c.checked = !!id; if (id && !e.value) e.value = id; });
+  [LG].forEach(ui => { const e = $(ui.email), c = $(ui.rem); if (!e || !c) return; c.checked = false; if (id && !e.value) e.value = id; });   // 11-27 알파언니: 공용 PC 에서 다음 사람 이메일까지 쌓이지 않게 체크는 늘 꺼진 채로 연다(켜고 로그인한 사람만 목록에)
   return id;
 }
 remFill();
@@ -1567,7 +1567,7 @@ const pmOf = k => PM[k] || { c: 'c-g', i: 'grid', who: '', lines: [] };
 const SVC2 = [
   { id: 'hatsoja', c: 'c-hat', n: '햇소자', img: ['c_hat.jpg', '태양광 패널을 올린 건물 지붕을 위에서 본 사진'], one: '햇빛소득마을 조합을 세우고 꾸려 갑니다.', more: '협동조합과 연합회가 설립부터 건설, 운영, 세금신고까지 걸음마다 챙깁니다. 자료함과 AI 상담도 함께 씁니다.', who: ['협동조합회원', '연합회원'] },
   { id: 'policy', c: 'c-pol', n: '의정지원시스템', ill: 'policy', one: '지방의회 의정 활동을 AI 가 돕습니다.', more: '공약·조례·문서작성·브리핑·행감 자료실로 의원실의 하루 업무를 돕습니다.', who: ['정책회원'], intro: 'https://talk.sakyowon.co.kr/system' },
-  { id: 'axc', c: 'c-team', n: '사회혁신AX컨설팅', img: ['c_team.jpg', '책상 위에 종이와 붙임쪽지를 펼쳐 놓고 함께 적는 손 사진'], one: '팀러닝과 도메인AI 로 조직의 일하는 방식을 바꿉니다.', more: '팀러닝 컨설팅과 도메인AI 개발 컨설팅을 의뢰하고 견적을 받아 볼 수 있습니다. 대표 컨설턴트 김일영·김성훈.', who: ['기관·단체 누구나'], open: true },
+  { id: 'axc', c: 'c-team', n: '사회혁신AX컨설팅', img: ['c_team.jpg', '책상 위에 종이와 붙임쪽지를 펼쳐 놓고 함께 적는 손 사진'], one: '팀러닝과 도메인AI 로 조직의 일하는 방식을 바꿉니다.', more: '조합 설립·운영, 연합회 사무국 셋업, 의회·지자체 AI 교육, 업무자동화 사이트 구축, 팀러닝 — 다섯 컨설팅의 견적을 바로 보고 의뢰합니다. 대표 컨설턴트 김일영·김성훈.', who: ['기관·단체 누구나'], open: true },
   { id: 'academy', c: 'c-aca', n: '연대지능활동가 아카데미', img: ['c_aca.jpg', '강의실에서 화면을 보며 수업을 듣는 뒷모습 사진'], one: '내 일을 AI 와 함께 해 보며 배우고, 팀러닝으로 함께 풉니다.', more: '나의 AI 작업대 만들기·도메인AI 구축하기·팀러닝·혼자하기 꿀팁 20 교육과정과 화상회의·위키 같은 교육도구를 한곳에서 씁니다.', who: ['개인회원'] },
 ];
 function fromHome(u) {   // 11-27: 소개·열기 링크에 「첫 화면에서 왔다」 표시 — 사교원 사이트(같은 주소·talk)만
@@ -1583,7 +1583,7 @@ function svcCards() {
     const btn = s.open ? `<a class="btn sm p" href="#/axc">의뢰·견적 받기</a> <a class="lk2" href="#/axc">자세히 보기 ›</a>`   // 11-27: 컨설팅은 가입 없이 누구나
       : me ? `<a class="btn sm p" href="${esc(fromHome(it.h))}">열기</a>` + intro
       : `<a class="btn sm p" href="#/join">회원가입</a>` + intro;   // 11-27 이사장 지시: 의정지원도 소개 화면(로그인 전 안내 화면) 보기
-    return `<article class="card tcard ${s.c}" data-mc data-svc="${esc(s.id)}"><div class="th">${s.img ? pic(s.img[0], s.img[1]) : ILL[s.ill]()}</div><div class="tb"><h3>${esc(s.n)}</h3><p class="one">${esc(s.one)}</p><div class="who2">${s.who.map(w => `<span class="cchip">${esc(w)}</span>`).join('')}</div><p class="more">${esc(s.more)} 로그인하면 사이드바에서 세부 메뉴를 엽니다.</p><div>${btn}</div></div></article>`;
+    return `<article class="card tcard ${s.c}" data-mc data-svc="${esc(s.id)}"><div class="th">${s.img ? pic(s.img[0], s.img[1]) : ILL[s.ill]()}</div><div class="tb"><h3>${esc(s.n)}</h3><p class="one">${esc(s.one)}</p><div class="who2">${s.who.map(w => `<span class="cchip">${esc(w)}</span>`).join('')}</div><p class="more">${esc(s.more)}${s.open ? '' : ' 로그인하면 사이드바에서 세부 메뉴를 엽니다.'}</p><div>${btn}</div></div></article>`;
   }).join('') + '</div>';
 }
 const MX_HEAD = ['통합관리자', '매니저', '연합회원', '협동조합회원', '정책회원', '개인회원', '무료이용회원'];
@@ -2134,7 +2134,7 @@ function axcQuote(t, f) {   // 즉시 견적 — 컨설팅(면세) + 묶는 이�
 const AXC_FIELDS = {
   coop: [['x_village', '마을·조합 이름', '예: ○○리 햇빛소득마을'], ['x_stage', '지금 단계', '준비 중 · 설립 중 · 운영 중', 'sel']],
   fed: [['x_coops', '함께 묶을 소속 조합 수', '예: 10', 'num'], ['x_region', '시군', '예: 해남군']],
-  aiedu: [['x_target', '교육 대상', '의회 · 지자체', 'sel'], ['x_offices', '의원실 수(의회)', '예: 10', 'num'], ['x_people', '교육 인원(지자체)', '예: 20', 'num']],
+  aiedu: [['x_target', '교육 대상', '의회 · 지자체', 'sel0'], ['x_offices', '의원실 수(의회)', '예: 10', 'num'], ['x_people', '교육 인원(지자체)', '예: 20', 'num']],
   build: [['x_staff', '직원 수', '예: 8', 'num'], ['x_docs', '쓸 자료 규모(대략)', '예: 한글·PDF 300건']],
   teamlearning: [['x_people', '참여 인원', '예: 15', 'num'], ['x_teams', '팀 수', '예: 3', 'num'], ['x_topic', '다룰 문제(아는 만큼)', '예: 마을 어르신 이동 문제']],
 };
@@ -2185,8 +2185,8 @@ function axcDraw() {
   h += `<div class="card" id="axForm"><h3 style="color:var(--g9);margin-bottom:10px">견적 보기 · 의뢰하기</h3>
     <div class="cats" style="grid-template-columns:repeat(auto-fill,minmax(170px,1fr))" role="group" aria-label="컨설팅 상품">` + Object.entries(AXC_TYPES).map(([k, T]) => `<button type="button" class="cat ${T.c}" data-xt="${k}" aria-pressed="${X.t === k}"><span class="bub">${ic(T.i)}</span><b>${T.n}</b><span>${won(T.fee)}</span></button>`).join('') + `</div>`;
   if (!X.t) { root.innerHTML = h + `<p class="note">상품을 고르면 조건을 적는 칸과 예상 견적이 나옵니다.</p></div>`; if (act) { const e = document.getElementById(act); if (e) try { e.focus({ preventScroll: true }); } catch (_) {} } return; }
-  const fld = x => x[3] === 'sel'
-    ? `<div class="f"><label for="x-${x[0]}">${x[1]}</label><select id="x-${x[0]}" data-x="${x[0]}"><option value="">고르기</option>${x[2].split(' · ').map(o => `<option${X.f[x[0]] === o ? ' selected' : ''}>${o}</option>`).join('')}</select></div>`
+  const fld = x => (x[3] === 'sel' || x[3] === 'sel0')
+    ? `<div class="f"><label for="x-${x[0]}">${x[1]}</label><select id="x-${x[0]}" data-x="${x[0]}">${x[3] === 'sel0' ? '' : '<option value="">고르기</option>'}${x[2].split(' · ').map(o => `<option${X.f[x[0]] === o ? ' selected' : ''}>${o}</option>`).join('')}</select></div>`
     : `<div class="f"><label for="x-${x[0]}">${x[1]}</label><input type="${x[3] === 'num' ? 'number' : 'text'}"${x[3] === 'num' ? ' min="0" inputmode="numeric"' : ''} id="x-${x[0]}" data-x="${x[0]}" value="${v(x[0])}" placeholder="${x[2]}" autocomplete="off"></div>`;
   h += `<div class="form">
       ${(AXC_FIELDS[X.t] || []).map(fld).join('')}
@@ -2703,6 +2703,11 @@ document.addEventListener('click', e => {
 /* 모든 창은 Esc 로 닫힌다 */
 document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; const open = document.querySelectorAll('.modal-back.on'); if (!open.length) return; open.forEach(m => m.classList.remove('on')); if ($('#keyModal') && open[0] && [...open].includes($('#keyModal'))) $('#kmKey').textContent = ''; if (['#login', '#signup', '#/login', '#/signup'].includes(location.hash)) { history.replaceState(null, '', location.pathname); route(); } });
 $('#lgPw').addEventListener('keydown', e => { if (e.key === 'Enter') $('#lgBtn').click(); });
+$('#lgPw').addEventListener('input', e => {   // 11-27 알파언니: 가림 글꼴 칸은 한글 입력기가 꺼지지 않는다 — 한글이 섞이면 알린다
+  const m = $('#lgMsg'); if (!m) return;
+  if (/[\u3131-\u318e\uac00-\ud7a3]/.test(e.target.value)) { m.className = 'msg err'; m.textContent = '비밀번호에 한글이 들어갔습니다. 한/영 키를 눌러 영문으로 바꾼 뒤 다시 입력해 주세요.'; }
+  else if (/한\/영/.test(m.textContent || '')) { m.className = 'msg'; m.textContent = ''; }
+});
 $('#lgCode').addEventListener('keydown', e => { if (e.key === 'Enter') $('#lgBtn').click(); });
 $('#lgBtn').addEventListener('click', () => doLogin(LG));
 $('#lgForgot').addEventListener('click', e => { e.preventDefault(); forgot('#lgEmail', '#lgMsg'); });

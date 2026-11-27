@@ -7344,6 +7344,7 @@ async function expIntake(files){
   카드파일.forEach(f => expImportCard(f));
   if(!영수증.length) return;
   toast(영수증.length + '장을 읽는 중입니다…');
+  _expQueue = []; _regCancel = null; _regAfter = null;   // 11-27 알파언니: 지난번 창을 ×로 닫아 남은 대기열을 끌고 오지 않게
   _expMade = 0;
   for(const f of 영수증){
     let d = null;
@@ -7600,7 +7601,8 @@ function regSaveForm(k, id){
   }
   rec.by = u ? u.name : ''; rec.updated = new Date().toISOString();
   if(!id) a.push(rec);
-  regSave(k, a); closeDyn();
+  const _뒤 = _regAfter; _regCancel = null;   // 저장으로 닫는 것은 「건너뛰기」가 아니다
+  regSave(k, a); closeDyn(); _regAfter = _뒤;
   if(k === 'expenses'){ expMatchAll(false); if(파일) expUploadDoc(rec.id, 파일); }
   navigate(); toast(R.이름 + '에 저장했습니다.');
   _regCancel = null;
@@ -8440,8 +8442,9 @@ function stSaveAll(){
   ch.forEach(function(el){ ledgerSet(el.getAttribute('data-st'), String(el.value).trim()); });
   _stPending = {};
   stRender();
-  toast(ch.length + '건을 저장했습니다' + ((typeof _storeSync !== 'undefined' && _storeSync.on) ? '(조합 자료 서버)' : '(체험 — 이 브라우저)') + '. 현황 대시보드에도 반영됩니다.');
+  toast(ch.length + '건을 저장했습니다' + ((typeof _storeSync !== 'undefined' && _storeSync.on) ? '(조합 자료 서버)' : '(체험 — 이 브라우저에만 남고 서버에는 저장되지 않습니다)') + '. 현황 대시보드에도 반영됩니다.');
 }
+window.addEventListener('beforeunload', function(e){ try{ if(Object.keys(_stPending || {}).length || (document.getElementById('stForm') && stChanged().length)){ e.preventDefault(); e.returnValue = ''; } }catch(err){} });   // 11-27 알파언니: 새로고침·탭 닫기에도
 window.addEventListener('hashchange', function(e){   // 저장하지 않고 다른 화면으로 가려 하면 묻는다
   try{
     if(!/#\/mem\/state\b/.test(e.oldURL || '') || /#\/mem\/state\b/.test(e.newURL || '')) return;
@@ -12321,6 +12324,8 @@ function showDyn(opts){
   document.getElementById('dynModal').classList.add('on');
 }
 function closeDyn(){
+  /* 11-27 알파언니: 「자료 넣기」 검토 창을 ×·Esc 로 닫아도 남은 영수증을 이어서 처리한다(전엔 대기열에 걸려 남았다) */
+  if(_regCancel && !closeDyn._inCancel){ const f = _regCancel; _regCancel = null; _regAfter = null; closeDyn._inCancel = true; try{ document.getElementById('dynModal').classList.remove('on'); }finally{ closeDyn._inCancel = false; } setTimeout(f, 0); return; }
   /* 11-26 이사장 지적: 문서 생성 중 창이 닫혀 작성하던 것이 사라졌다 — 작성 중이면 한 번 묻고, 닫아도 작성은 계속된다 */
   if(_docGen.busy && document.getElementById('aiDocOut')
      && !confirm('AI가 문서를 작성하는 중입니다.\n\n창을 닫아도 작성은 계속되고, 끝나면 「문서 자동 생성」 화면의 「방금 만든 문서 다시 열기」로 볼 수 있습니다.\n\n창을 닫을까요?')) return;
