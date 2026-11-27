@@ -226,6 +226,11 @@ input,select,textarea{font-family:inherit;font-size:14px;}
 .subtab{border:1px solid var(--line-soft);background:var(--card);border-radius:999px;padding:7px 14px;font-size:13.5px;cursor:pointer;color:var(--ink);}
 .subtab:hover{background:var(--primary-50);}
 .subtab.on{background:var(--primary);border-color:var(--primary);color:#fff;font-weight:600;}
+/* 11-27 H-05: 깊이 보기 화면(발전·성공조건·전남현황·설계·융자·재무) — 탭으로 나눈 칸 안의 작은 글씨 바닥 12.5px */
+.dt-pane .badge,.dt-pane .kpi-sub,.dt-pane .form-hint,.dt-pane .tbl th,.dt-pane table th,.dt-pane table td{font-size:12.5px;}
+.dt-pane [style*="font-size:9px"],.dt-pane [style*="font-size:9.5px"],.dt-pane [style*="font-size:10px"],.dt-pane [style*="font-size:10.5px"],
+.dt-pane [style*="font-size:11px"],.dt-pane [style*="font-size:11.5px"],.dt-pane [style*="font-size:12px"],
+.dt-pane [style*="font-size: 10px"],.dt-pane [style*="font-size: 11px"],.dt-pane [style*="font-size: 12px"]{font-size:12.5px !important;}
 .rv-pane[hidden]{display:none!important;}
 @media (max-width:720px){ .rv-pane table.tbl{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;} }  /* 20년 표는 휴대폰에서 표 안에서만 옆으로 굴림 */
 .ac-flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:-4px 0 14px;font-size:12.5px;color:var(--ink-soft);}
@@ -3350,6 +3355,8 @@ function memFinance(){
       <span class="badge badge-mute">절차 안내 도구 — 실제 승인·조건은 해당 신협이 결정합니다</span></p>
     </div>
 
+    ${dtTabs('finance', [['ok','✅ 인정 재원·규모 계산'],['decide','🧭 약정 전 결정 5가지'],['steps','📝 신청 절차·서류·서식']])}
+    ${dtPane('finance', 'ok', `
     <div class="card" style="margin-bottom:16px;border-left:4px solid var(--primary);">
       <div class="card-title"><h3 class="serif">신협 융자가 공모에서 인정되는 재원인가?</h3>
         <span class="badge badge-success">인정 재원</span></div>
@@ -3393,6 +3400,8 @@ function memFinance(){
       <div id="fin-result" style="margin-top:14px;"></div>
     </div>
 
+    `)}
+    ${dtPane('finance', 'decide', `
     <div class="card" style="margin-bottom:16px;border-left:4px solid #c9a227;">
       <div class="card-title"><h3 class="serif">융자 약정 전, 마을이 먼저 결정해야 할 5가지</h3>
         <span class="badge badge-info">총회 안건</span></div>
@@ -3431,6 +3440,8 @@ function memFinance(){
       <p class="text-mute" style="font-size:12.5px;">※ 위 5가지를 정리하면 <b>차입 의결 총회 의사록</b>과 <b>자금수지계획서</b> 작성이 훨씬 쉬워집니다 — 아래 ④에서 서식을 만들 수 있습니다.</p>
     </div>
 
+    `)}
+    ${dtPane('finance', 'steps', `
     <div class="card" style="margin-bottom:16px;">
       <div class="card-title"><h3 class="serif">② 신청 절차 7단계</h3>
         <span class="badge badge-info">상담부터 인출까지 통상 2~3개월</span></div>
@@ -3475,6 +3486,7 @@ function memFinance(){
       <p class="text-mute" style="font-size:12.5px;">※ 햇소자는 <b>서식 작성과 절차 안내를 돕는 도구</b>입니다. 대출 신청·약정은 조합이 직접 신협과 진행하며,
       금리·한도·담보 조건은 신협의 심사로 결정됩니다. 햇소자는 자금을 모집하거나 중개하지 않습니다.</p>
     </div>
+    `)}
   `;
 }
 
@@ -3944,6 +3956,8 @@ function memStructure(){
       <b>가장 먼저이자 가장 오래 남는 결정</b>입니다. 유형별 장단점을 비교하고 우리 마을에 맞는 조합을 찾으세요.</p>
     </div>
 
+    ${dtTabs('structure', [['rule','📌 공모 제약'],['type','👪 마을회·조합 유형'],['dist','💧 수익금 배분'],['find','🔎 우리 유형 찾기·문서']])}
+    ${dtPane('structure', 'rule', `
     <div class="card" style="margin-bottom:16px;border-left:4px solid var(--primary);">
       <div class="card-title"><h3 class="serif">먼저 알아 둘 공모 제약</h3><span class="badge badge-info">지침 요건</span></div>
       <table class="tbl">
@@ -3959,6 +3973,8 @@ function memStructure(){
       </table>
     </div>
 
+    `)}
+    ${dtPane('structure', 'type', `
     <div class="card" style="margin-bottom:16px;">
       <div class="card-title"><h3 class="serif">① 마을회 구성 — 네 가지 유형</h3></div>
       <p class="text-mute" style="margin-top:0;">마을회 구성원은 <b>공동사업·마을연금의 혜택을 받는 범위</b>이자 총회 의결의 기초가 됩니다.</p>
@@ -3971,6 +3987,8 @@ function memStructure(){
       ${ST_COOP.map(m => card(m)).join('')}
     </div>
 
+    `)}
+    ${dtPane('structure', 'dist', `
     <div class="card" style="margin-bottom:16px;">
       <div class="card-title"><h3 class="serif">③ 수익금 배분 — 네 가지 방법</h3></div>
       <p class="text-mute" style="margin-top:0;">운영비와 원리금을 뺀 잉여를 어떤 <b>방식</b>으로 나눌지에 관한 선택입니다.
@@ -3978,6 +3996,8 @@ function memStructure(){
       ${ST_DIST.map(m => card(m, 'dist')).join('')}
     </div>
 
+    `)}
+    ${dtPane('structure', 'find', `
     <div class="card" style="margin-bottom:16px;">
       <div class="card-title"><h3 class="serif">④ 우리 마을 유형 찾기</h3></div>
       <p class="text-mute" style="margin-top:0;">마을 현황을 넣으면 유형별 구성원 수·1인당 출자액·배분 결과를 계산해 조합을 추천합니다.</p>
@@ -4022,6 +4042,7 @@ function memStructure(){
         <button class="btn btn-ghost btn-sm" onclick="location.hash='#/mem/docs'">조합 정관 만들기 →</button>
       </div>
     </div>
+    `)}
   `;
 }
 
@@ -4264,7 +4285,8 @@ function memSuccess(){
       ③ 주민이 계속 의사결정에 참여하는가 ④ 그 수익이 주민 생활과 공동체 유지에 변화를 가져왔는가 — 이 네 가지입니다.</p>
     </div>
 
-    ${SUCCESS.map(s => `
+    ${dtTabs('success', [['c12','🗳💰 조건 1·2 결정권·순수익'],['c345','🔌🔧📜 조건 3~5 전력망·관리·규칙'],['check','✅ 우리 마을 점검표']])}
+    ${[['c12', SUCCESS.slice(0, 2)], ['c345', SUCCESS.slice(2)]].map(([pk, grp]) => dtPane('success', pk, grp.map(s => `
       <div class="card" style="margin-bottom:16px;border-left:4px solid var(--primary);">
         <div class="card-title">
           <h3 class="serif">${s.icon} 조건 ${s.no} — ${s.name}</h3>
@@ -4280,16 +4302,16 @@ function memSuccess(){
                 <td><b>${t}</b><div class="text-mute" style="font-size:12.5px;">${d}</div></td></tr>`).join('')}
           </tbody>
         </table>
-      </div>`).join('')}
+      </div>`).join(''))).join('')}
 
-    <div class="card">
+    ${dtPane('success', 'check', `<div class="card">
       <div class="card-title"><h3 class="serif">우리 마을 점검표</h3>
         <span class="badge badge-info">6문항 · 세부 ${SUCCESS_CHECK.reduce((a,g) => a + g.items.length, 0)}항목</span></div>
       <p class="text-mute" style="margin-top:0;">여섯 개 질문에 "예"라고 답하려면 무엇이 갖춰져 있어야 하는지를 세부 항목으로 나눴습니다.
       <b>증빙(문서·의사록·서류)으로 확인되는 것만 체크</b>하세요 — 운영위나 총회에서 함께 짚어 보시면 됩니다.</p>
       <div id="suc-result" style="margin-bottom:14px;"></div>
       <div id="suc-list"></div>
-    </div>
+    </div>`)}
   `;
 }
 
@@ -4639,6 +4661,7 @@ function cfCompareCard(real, capKw){
 
 /* ─── 2026-11-11 전남 발전 현황(1단계: 시도·광역 실측) — 수업 14회차 반영(합성 시연이 아니라 공개 통계 실데이터)
    서버 /api/hatsoja/dashboard (hatsoja_dashboard.py). 시군 단위는 자료 공급처 확정 뒤 2단계. 모든 카드에 기준일·출처를 적는다. */
+const STAT_DT_TABS = [['trade','📈 전력거래량'],['sigun','🗺 시군별 설비·발전량'],['trend','☀️ 이용률·추세'],['src','📚 자료 출처·읽는 법']];
 function memStat(){
   setTimeout(statLoad, 0);
   return `
@@ -4654,6 +4677,7 @@ function memStat(){
       <button class="btn btn-primary" type="button" id="stat-recollect" onclick="statRecollect()" title="전력거래소·에너지공단에서 새 자료를 다시 받아 옵니다(30분에 한 번, 하루 호출 한도를 씀)">다시 수집</button>
       <span id="stat-admin-msg" class="text-mute" style="font-size:12.5px;"></span>
     </div>` : ''}
+    ${dtTabs('stat', STAT_DT_TABS)}
     <div id="stat-body"><div class="card"><p class="text-mute" style="margin:0;">불러오는 중…</p></div></div>`;
 }
 /* 2026-11-23 수업 18회차: 「DB만 새로 고침」과 「파이프라인 다시 실행」을 나눈다 — 다시 그리기는 보관본만, 다시 수집은 관리자만·30분에 한 번(서버가 다시 확인) */
@@ -4714,6 +4738,7 @@ async function statLoad(){
     if(window.__statSE) statSERender();
   }catch(e){
     box.innerHTML = '<div class="card"><p style="margin:0;">현황 자료를 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.</p></div>';
+    const bar = document.querySelector('[data-dtbar="stat"]'); if(bar) bar.hidden = true;   // 자료가 없으면 탭 단추도 감춘다
   }
 }
 /* 시군 × 에너지원 카드 그리기 — 시군을 바꾸면 그 시군에 있는 에너지원만 고르게 하고, 고르던 것이 없으면 「전체」로 */
@@ -4892,6 +4917,7 @@ function statHtml(d){
     </div>`;
   }
   return `
+    ${dtPane('stat', 'trade', `
     <div class="card" style="margin-bottom:16px;border-left:4px solid var(--primary);">
       <div class="card-title"><h3 class="serif">시도 태양광 전력거래량 — 전남 ${Number(전남.순위)}위(${statFmt(전남.거래량_GWh)} GWh, 시도 17곳 거래량의 ${Number(전남.비중_pct)}%)</h3></div>
       ${rank}
@@ -4904,18 +4930,19 @@ function statHtml(d){
       ${statSrc(월)}
     </div>
     ${hourCard}
-    ${sigunCard}
-    ${seCard}
-    ${cfCard}
-    ${trendCard}
+    `)}
+    ${dtPane('stat', 'sigun', sigunCard + seCard)}
+    ${dtPane('stat', 'trend', cfCard + trendCard)}
+    ${dtPane('stat', 'src', `
     ${srcCard}
     <div class="card" style="margin-bottom:16px;background:var(--paper-soft);box-shadow:none;">
       <h3 class="serif" style="margin-top:0;">읽을 때 알아 두세요</h3>
       <ul style="margin:0;padding-left:18px;font-size:13.5px;line-height:1.7;">${(d.한계 || []).map(t => '<li>' + escapeHtml(t) + '</li>').join('')}</ul>
-    </div>`;
+    </div>`)}`;
 }
 
 /* ─── 발전·정산·배당 (운영 단계 핵심) ─── */
+const PW_DT_TABS = [['real','📊 발전 실적'],['money','💰 정산·배당'],['plant','🏭 발전소·서류'],['check','✅ 확인 대기·월마감']];
 function memPower(){
   /* 올린 자료가 있으면 그것으로 그린다. 없을 때만 1MW 표준모델 예시를 쓴다.
      2026-09-29 전에는 자료를 넣어도 아래 숫자가 예시 그대로여서, 조합원이 자기 마을 것으로
@@ -4958,15 +4985,6 @@ function memPower(){
   ];
   const fund = Math.round(settle * 0.1);
   return `
-    ${powerRealCard()}
-    ${queueCard()}
-    ${plantCard()}
-    ${plantOneCard()}
-    ${docsCard()}
-    ${linksCard()}
-    ${monthendCard()}
-    ${readyCard()}
-    ${powerSubmitCard()}
     <div class="sec-head">
       <h1>⚡ 발전·정산·배당</h1>
       <p class="sec-desc">발전 계량 데이터와 한전 정산내역을 자동 대조하고, 수익 배분·배당 적립·이상 감지까지 한 번에 — 조합원 누구나 같은 숫자를 봅니다.
@@ -4974,6 +4992,9 @@ function memPower(){
                : '<span class="badge badge-mute">예시 자료 (1MW 표준모델) — 자료함에 올리면 실측으로 바뀝니다</span>'}</p>
     </div>
 
+    ${dtTabs('power', PW_DT_TABS)}
+    ${dtPane('power', 'real', `
+    ${powerRealCard()}
     <div class="grid grid-4">
       <div class="kpi"><div class="kpi-n">${gen.toLocaleString()}</div><div class="kpi-l">${실측 ? '최근 달' : '이달'} 발전량 (kWh)</div>
         <div class="kpi-sub">${이용률 ? '이용률 ' + 이용률 + '% · 목표 15%' : '설비용량을 현황에 넣으면 이용률이 나옵니다'}</div></div>
@@ -4998,6 +5019,8 @@ function memPower(){
       <p class="text-mute" style="font-size:12.5px;">※ 무발전일·발전 급락·이용률 미달은 자동 감지되어 점검 지시와 함께 알림이 갑니다.</p>
     </div>
     ${cfCompareCard(실측 ? _real : [], capKw)}
+    `)}
+    ${dtPane('power', 'money', `
 
     <div class="card" style="margin-bottom:16px;">
       <div class="card-title"><h3 class="serif">${실측 ? '최근 달' : '이달'} 수익 배분 — 우선순위 폭포</h3>
@@ -5034,6 +5057,19 @@ function memPower(){
     </div>
 
     ${pwStrategyCard()}
+    `)}
+    ${dtPane('power', 'plant', `
+    ${plantCard()}
+    ${plantOneCard()}
+    ${docsCard()}
+    ${linksCard()}
+    `)}
+    ${dtPane('power', 'check', `
+    ${queueCard()}
+    ${monthendCard()}
+    ${readyCard()}
+    ${powerSubmitCard()}
+    `)}
   `;
 }
 
@@ -6171,6 +6207,8 @@ function memFinStat(){
     </div>
     ${_FIN.예시 ? DEMO_FIN_NOTE : ''}
 
+    ${dtTabs('finstat', [['base','⚙️ 기초값·요약'],['report','📄 손익·재무상태표'],['consult','🩺 자본·진단·컨설팅']])}
+    ${dtPane('finstat', 'base', `
     <div class="card">
       <div class="card-title"><h3 class="serif">⚙️ 재무제표 기초값</h3>
         <span class="badge badge-mute">한 번만 넣으면 됩니다</span></div>
@@ -6198,6 +6236,8 @@ function memFinStat(){
         <div class="kpi-sub">부채총계 ÷ 자본총계${(c['미지급이자']||0) > 0 ? ' · <span style="color:var(--danger);">미지급이자 ' + _fmtN(c['미지급이자']) + '원</span>' : ''}</div></div>
     </div>
 
+    `)}
+    ${dtPane('finstat', 'report', `
     <div class="card mt-20">
       <div class="card-title"><h3 class="serif">📄 월별 손익계산서</h3><span class="badge badge-success">서버 계산</span></div>
       <table class="tbl">
@@ -6238,12 +6278,15 @@ function memFinStat(){
           : '<span style="color:var(--danger);"> — 기초값(설비·차입금·출자금·기초현금)을 다시 확인하세요</span>'}</p>
     </div>
 
+    `)}
+    ${dtPane('finstat', 'consult', `
     ${finCapitalSplitCard(S)}
     ${finFindingsCard(S.findings)}
     ${finConsultCard()}
     <p class="text-mute" style="font-size:12px;margin-top:10px;">
       ${_FIN.때 ? '서버에서 읽은 때 ' + escapeHtml(_FIN.때.slice(0,16).replace('T',' ')) : ''}
       <button class="btn btn-ghost btn-sm" onclick="finRefresh()">↻ 새로 읽기</button></p>
+    `)}
   `;
 }
 
@@ -9936,6 +9979,25 @@ async function askLaw(){
   }
 }
 
+/* 11-27 H-05: 깊이 보기 화면은 맨 위 탭 단추로 카드 묶음을 나눈다(rvShow 방식 — 다 그려 두고 hidden 만 바꿈, 넣던 값·불러온 자료가 남는다).
+   고른 탭은 화면별로 기억해 다시 그려도(자료 도착 뒤 renderMemberPage) 같은 탭이 열린다. */
+const _DT = {};
+function dtTabs(pg, tabs){
+  if(!tabs.some(t => t[0] === _DT[pg])) _DT[pg] = tabs[0][0];
+  const cur = _DT[pg];
+  return `<div class="subtabs" data-dtbar="${pg}" role="tablist">${tabs.map(([k, n]) =>
+    `<button type="button" class="subtab ${k === cur ? 'on' : ''}" data-dt="${pg}:${k}" role="tab" aria-selected="${k === cur}" onclick="dtShow('${pg}','${k}')">${n}</button>`).join('')}</div>`;
+}
+function dtPane(pg, k, html){
+  return `<div class="dt-pane" data-dtpane="${pg}:${k}"${_DT[pg] === k ? '' : ' hidden'}>${html}</div>`;
+}
+function dtShow(pg, k){
+  _DT[pg] = k;
+  document.querySelectorAll('[data-dt^="' + pg + ':"]').forEach(b => { const on = b.dataset.dt === pg + ':' + k; b.classList.toggle('on', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
+  document.querySelectorAll('[data-dtpane^="' + pg + ':"]').forEach(el => { el.hidden = el.dataset.dtpane !== pg + ':' + k; });
+  const bar = document.querySelector('[data-dtbar="' + pg + '"]');
+  if(bar && bar.getBoundingClientRect().top < 0) bar.scrollIntoView({block:'start'});
+}
 /* 11-26 이사장 지시: 「수익 시뮬레이션·배분 계획」은 한 화면에 세 단추 — ①수익 시뮬레이션 ②배분 전략 선택 ③우리 조합 20년 배분 계획.
    단추를 누르면 다른 페이지로 가지 않고 아래 내용만 바뀐다(세 칸을 한 번에 그려 두고 보이기만 바꿈 — 넣던 값이 남는다).
    옛 주소 #/mem/revenue 는 ①, #/mem/dist 는 ③으로 열린다. */
