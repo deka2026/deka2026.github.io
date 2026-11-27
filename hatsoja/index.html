@@ -18322,5 +18322,7 @@ document.addEventListener('keydown', e => {
   hook(); try{ new MutationObserver(hook).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style','hidden']}); }catch(e){}
 })();
 </script>
+<!-- 11-27 이사장 지시: 아카데미의 「설치」 단추 기능을 공용 스크립트로 -->
+<script src="/pwa-install.js" defer data-before="#topActions" data-class="btn btn-outline btn-sm"></script>
 </body>
 </html>

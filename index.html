@@ -2548,5 +2548,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
   if (/iPhone|iPad|iPod/.test(navigator.userAgent)) bar.classList.add('show');
 })();
 </script>
+<!-- 11-27 이사장 지시: 아카데미의 「설치」 단추 기능을 공용 스크립트로 -->
+<script src="/pwa-install.js" defer data-before="#btnLogin" data-class="btn"></script>
 </body>
 </html>
