@@ -1672,13 +1672,13 @@ const CAMP = { fee: 500000, title: 'AX컨설턴트 양성과정',
   days: [
     ['1일차', [['오후', '입소·오리엔테이션'], ['4시간', '기본교육 — 주민자치·협동조합·재생에너지']]],
     ['2일차', [['4시간', 'AI 리터러시'], ['2시간', '하네스 교육 — 내 PC 에 AI 작업대(하네스) 설치·사용'], ['2시간', '서버 설치 — 기관 업무 서버를 직접 세우기']]],
-    ['3일차', [['4시간', '비즈니스 컨설팅 방법론 워크숍 — 진단·견적·계약·이용권 묶음까지 컨설팅 한 바퀴'], ['4시간', '사이트 제작 실습 — 우리 기관 업무 사이트 만들기']]],
+    ['3일차', [['4시간', '비즈니스 컨설팅 방법론 워크숍 — 진단·견적·계약·이용권 묶음까지 컨설팅 한 바퀴'], ['4시간', 'AX 기술 적용 실습 — 우리 기관 업무에 AI 기술을 직접 적용해 보기']]],
     ['4일차', [['4시간', '과제물 발표와 후기 나눔 · 수료'], ['4시간', '완도 여행 뒤 해산']]],
   ] };
 function campProgHtml() {
   return `<table class="camptl"><thead><tr><th>날</th><th>시간</th><th>내용</th></tr></thead><tbody>` +
     CAMP.days.map(d => d[1].map((x, i) => `<tr>${i === 0 ? `<th rowspan="${d[1].length}">${d[0]}</th>` : ''}<td style="white-space:nowrap">${x[0]}</td><td>${esc(x[1])}</td></tr>`).join('')).join('') +
-    `</tbody></table><p class="note" style="margin-top:6px">수업 24시간(기본교육 4 · AI 리터러시 4 · 하네스 2 · 서버 설치 2 · 컨설팅 방법론 워크숍 4 · 사이트 제작 실습 4 · 발표와 후기 4) + 완도 여행 4시간</p>`;
+    `</tbody></table><p class="note" style="margin-top:6px">수업 24시간(기본교육 4 · AI 리터러시 4 · 하네스 2 · 서버 설치 2 · 컨설팅 방법론 워크숍 4 · AX 기술 적용 실습 4 · 발표와 후기 4) + 완도 여행 4시간</p>`;
 }
 let CA = null;
 function renderCamp(fresh) {
@@ -1688,7 +1688,7 @@ function renderCamp(fresh) {
   let h = `<div class="sech"><h2>${CAMP.title}</h2><p>주민자치·협동조합·재생에너지 현장을 아는 AX 컨설턴트를 3박 4일 합숙으로 키웁니다.</p></div>
     <div class="g2" style="margin-bottom:16px">
       <div class="card" style="border-top:6px solid var(--g7,#2c5842)"><h3 style="color:var(--g9);margin-bottom:8px">과정 개요</h3>
-        <ul style="margin:0 0 0 18px;display:grid;gap:4px"><li><b>수강료</b> 500,000원(숙식 제공)</li><li><b>기간</b> 3박 4일 합숙 — 수업 24시간 + 완도 여행</li><li><b>장소</b> 완도</li><li><b>일정</b> 확정되면 신청하신 분께 먼저 알려 드립니다</li><li><b style="color:#b03a3a">준비물(필수)</b> 수강생이 직접 준비합니다 — 노트북, AI 유료 모델 계정(예: Claude Pro 이상). 하네스 교육·서버 설치·사이트 제작 실습을 내 노트북과 내 계정으로 합니다.</li></ul></div>
+        <ul style="margin:0 0 0 18px;display:grid;gap:4px"><li><b>수강료</b> 500,000원(숙식 제공)</li><li><b>기간</b> 3박 4일 합숙 — 수업 24시간 + 완도 여행</li><li><b>장소</b> 완도</li><li><b>일정</b> 확정되면 신청하신 분께 먼저 알려 드립니다</li><li><b style="color:#b03a3a">준비물(필수)</b> 수강생이 직접 준비합니다 — 노트북, AI 유료 모델 계정(예: Claude Pro 이상). 하네스 교육·서버 설치·AX 기술 적용 실습을 내 노트북과 내 계정으로 합니다.</li></ul></div>
       <div class="card"><h3 style="color:var(--g9);margin-bottom:8px">이런 분께</h3>
         <p>마을·조합·의회·지자체 현장에서 AI 로 일하는 방식을 바꾸고 싶은 활동가, 그리고 사회혁신AX컨설팅(조합 설립·운영, 연합회 사무국 셋업, 의회·지자체 AI 교육, AX 구축 컨설팅, 팀러닝)을 함께 할 컨설턴트를 꿈꾸는 분.</p>
         <p style="margin-top:6px"><a href="#/axc">사회혁신AX컨설팅 보기 ›</a></p></div>
@@ -1727,7 +1727,7 @@ function campPopMaybe() {
   window._campPopShown = true;
   const p = $('#campPop'); if (!p) return;
   p.innerHTML = `<div class="box"><p class="note" style="margin:0 0 4px;color:#b47d14;font-weight:700">모집 안내</p><h2 id="campPopT">${CAMP.title}</h2>
-    <ul><li>3박 4일 합숙 · 숙식 제공 · 완도</li><li>수업 24시간 + 완도 여행</li><li>수강료 500,000원</li><li><b style="color:#b03a3a">준비물(필수)</b> 노트북, AI 유료 모델 계정(예: Claude Pro 이상 — 하네스 교육에 씁니다)</li><li>주민자치·협동조합·재생에너지 기본교육, AI 리터러시, 하네스·서버 설치, 컨설팅 방법론 워크숍, 사이트 제작 실습, 과제 발표</li></ul>
+    <ul><li>3박 4일 합숙 · 숙식 제공 · 완도</li><li>수업 24시간 + 완도 여행</li><li>수강료 500,000원</li><li><b style="color:#b03a3a">준비물(필수)</b> 노트북, AI 유료 모델 계정(예: Claude Pro 이상 — 하네스 교육에 씁니다)</li><li>주민자치·협동조합·재생에너지 기본교육, AI 리터러시, 하네스·서버 설치, 컨설팅 방법론 워크숍, AX 기술 적용 실습, 과제 발표</li></ul>
     <div class="acts2"><label class="ck" style="font-size:.9rem"><input type="checkbox" id="campPopDay">오늘 하루 보지 않기</label><span style="display:flex;gap:6px"><button type="button" class="btn sm" id="campPopX">닫기</button><a class="btn sm p" href="#/axcamp" id="campPopGo">자세히 보기·신청</a></span></div></div>`;
   p.hidden = false;
   const close = () => { if ($('#campPopDay') && $('#campPopDay').checked) { try { const t = new Date(); t.setHours(24, 0, 0, 0); localStorage.setItem(CAMP_POP_KEY, String(t.getTime())); } catch (_) {} } p.hidden = true; };
