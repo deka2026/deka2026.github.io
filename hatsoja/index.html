@@ -3246,7 +3246,7 @@ function pricingRender(){
       ${tiers.length ? `<p class="text-small text-mute" style="margin:0 0 4px;">${same ? '기본요금은 같고, 활동 영상 값만 달라집니다.' : '단위조합 수에 따라 기본 이용료가 정해집니다.'}</p>` + tiers.map(x => `<label class="prc-opt"><input type="radio" name="prcTier" data-tier="${escapeHtml(x.key)}"${t && t.key === x.key ? ' checked' : ''}>
         <div><div class="nm">${escapeHtml(x.name)}</div></div><div class="pr">${same ? '' : prcWon(prcSup(x.amount))}</div></label>`).join('') : ''}
       ${(p.options || []).map(o => { const v = prcOpt(p, o, t); return `<label class="prc-opt"><input type="checkbox" data-k="${escapeHtml(o.key)}"${pick.opts.includes(o.key) ? ' checked' : ''}>
-        <div><div class="nm">${o.key === 'video' ? '🎬 ' : o.key === 'byo' ? '🤖 ' : ''}${escapeHtml(o.name)}</div><div class="ds">${o.key === 'video' ? '관리하는 조합 수로 값이 정해집니다(5곳 이내 1만·10곳 이내 2만·20곳 이내 3만원, 부가세 별도)' : o.key === 'byo' ? '내 AI(클로드 등)를 맡은 조합 자료에 연결해 쓰는 대신 기본요금을 20% 깎습니다. 그때 사이트 AI 는 하루 10번까지' : ''}</div></div>
+        <div><div class="nm">${o.key === 'video' ? '🎬 ' : o.key === 'byo' ? '🤖 ' : ''}${escapeHtml(o.name)}</div><div class="ds">${o.key === 'video' ? '관리하는 조합 수로 값이 정해집니다(5곳 이내 1만·10곳 이내 2만·20곳 이내 3만원, 부가세 별도)' : o.key === 'byo' ? '내 AI(클로드 등)를 맡은 조합 자료에 연결해 씁니다' : ''}</div></div>
         <div class="pr">${v < 0 ? '−' : '+'}${prcWon(prcSup(Math.abs(v)))}</div></label>`; }).join('')}
     </div>
     <div class="card prc-sum" id="prcSum" aria-live="polite"></div>
