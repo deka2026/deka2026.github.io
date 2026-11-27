@@ -175,6 +175,11 @@ try{var _h=location.hash||'';if(localStorage.getItem('sk_in')==='1'&&!/^#\/(map|
   .tabs{display:flex;gap:6px;margin-bottom:12px}.tabs button{flex:1;border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px;cursor:pointer;font-family:inherit}.tabs button.on{background:var(--g7);color:#fff;border-color:var(--g7)}
   .f{margin-bottom:10px}.f label{display:block;font-size:0.8667rem;color:var(--ink2);margin-bottom:4px}.f input,.f select{width:100%;height:38px;border:1px solid var(--line);border-radius:8px;padding:0 10px;font-size:0.9333rem;font-family:inherit;background:#fff}
   .f .two{display:flex;gap:6px}.f .two select{flex:1}
+  .lgrec{position:absolute;left:0;right:0;top:100%;z-index:30;background:var(--bg,#fff);border:1px solid var(--line,#ddd);border-radius:10px;box-shadow:0 8px 22px rgba(0,0,0,.12);margin-top:2px;overflow:hidden}
+  .lgrec .h{font-size:.78rem;color:var(--mute);padding:6px 12px 2px}
+  .lgrec button.i{display:flex;width:100%;align-items:center;justify-content:space-between;gap:8px;border:0;background:none;padding:9px 12px;font:inherit;text-align:left;cursor:pointer}
+  .lgrec button.i:hover,.lgrec button.i:focus{background:var(--paper-soft,#f4f1ea)}
+  .lgrec .x{color:var(--mute);font-size:.85rem;padding:0 4px}
   .remid{display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px;margin:-2px 0 10px;font-size:0.8667rem;color:var(--ink2);cursor:pointer}.remid input{width:16px;height:16px;margin:0}.remid b{font-weight:400;white-space:nowrap}.remid span{color:var(--mute);font-size:0.8rem;white-space:nowrap}
   .msg{font-size:0.8667rem;min-height:18px;margin:4px 0 8px}.msg.err{color:var(--danger)}.msg.ok{color:#2e8b57}
   .mbtn{width:100%;height:40px;border:none;background:var(--g7);color:#fff;border-radius:8px;font-size:0.9333rem;cursor:pointer;font-family:inherit}.mbtn:disabled{opacity:.5}
@@ -837,7 +842,7 @@ svg.ic.s{width:17px;height:17px}
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="lgTitle">
     <div id="vLogin">
       <h2 id="lgTitle">로그인</h2><p class="sub">사교원 통합 계정 하나로 모든 사이트에 들어갑니다. 로그인하면 내 페이지로 갑니다.</p>
-      <div class="f"><label for="lgEmail">이메일 <span style="color:var(--mute);font-weight:400">(옛 아이디도 당분간 됩니다)</span></label><input id="lgEmail" inputmode="email" autocomplete="username" placeholder="name@example.com"></div>
+      <div class="f" style="position:relative"><label for="lgEmail">이메일 <span style="color:var(--mute);font-weight:400">(옛 아이디도 당분간 됩니다)</span></label><input id="lgEmail" inputmode="email" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="name@example.com" aria-autocomplete="list" aria-controls="lgRecent"><div id="lgRecent" class="lgrec" role="listbox" hidden></div></div>
       <div class="f"><label for="lgPw">비밀번호</label><input id="lgPw" type="password" autocomplete="current-password"></div>
       <label class="remid"><input type="checkbox" id="lgRem"> <b>아이디 기억하기</b> <span>(공용 PC에서는 끄세요)</span></label>
       <div class="f" id="lgCodeBox" hidden><label for="lgCode">2단계 인증 코드</label><input id="lgCode" inputmode="numeric" autocomplete="one-time-code" placeholder="인증 앱 6자리 · 이메일 코드 · 백업 코드"></div>
@@ -1346,8 +1351,49 @@ const LG = { email: '#lgEmail', pw: '#lgPw', code: '#lgCode', box: '#lgCodeBox',
 /* 11-07 이사장 지시: 아이디 기억하기 — 체크하고 로그인에 성공하면 이 기기(브라우저)에 마지막 아이디만 남긴다. 비밀번호는 절대 남기지 않는다.
    체크를 풀고 로그인하면 지운다. 다음에 열면 아이디를 채우고 비밀번호 칸에 커서를 둔다. */
 const REM_KEY = 'sk_last_id';
-function remGet() { try { return localStorage.getItem(REM_KEY) || ''; } catch (_) { return ''; } }
-function remSet(ui, id) { try { if ($(ui.rem) && $(ui.rem).checked && id) localStorage.setItem(REM_KEY, id); else localStorage.removeItem(REM_KEY); } catch (_) {} }
+/* 11-27 이사장 지시: 아이디 칸을 누르면 최근에 로그인한 아이디가 최신순으로 뜬다(크롬이 예전에 저장한 옛 아이디 목록 대신).
+   아이디 기억하기를 켜고 로그인에 성공한 아이디만 최대 5개, 가장 최근 것이 맨 위. 끄고 로그인하면 그 아이디는 목록에서 뺀다. 비밀번호는 남기지 않는다. */
+const REC_KEY = 'sk_recent_ids', REC_MAX = 5;
+function recGet() {
+  let a = [];
+  try { a = JSON.parse(localStorage.getItem(REC_KEY) || '[]'); } catch (_) {}
+  if (!Array.isArray(a)) a = [];
+  try { const old = localStorage.getItem(REM_KEY); if (old && a.indexOf(old) < 0) a.unshift(old); } catch (_) {}
+  return a.filter(x => typeof x === 'string' && x).slice(0, REC_MAX);
+}
+function recPut(a) { try { localStorage.setItem(REC_KEY, JSON.stringify(a.slice(0, REC_MAX))); } catch (_) {} }
+function remGet() { return recGet()[0] || ''; }
+function remSet(ui, id) {
+  try {
+    let a = recGet().filter(x => x !== id);
+    if ($(ui.rem) && $(ui.rem).checked && id) { a.unshift(id); localStorage.setItem(REM_KEY, id); }
+    else if (localStorage.getItem(REM_KEY) === id) localStorage.removeItem(REM_KEY);
+    recPut(a);
+    if (!a.length) localStorage.removeItem(REM_KEY);
+  } catch (_) {}
+}
+function recShow(on) {
+  const box = $('#lgRecent'), inp = $('#lgEmail'); if (!box || !inp) return;
+  const q = (inp.value || '').trim().toLowerCase(), a = recGet().filter(x => !q || x.toLowerCase().indexOf(q) >= 0 && x.toLowerCase() !== q);
+  if (!on || !a.length) { box.hidden = true; return; }
+  box.innerHTML = '<div class="h">최근 로그인한 아이디</div>' + a.map(x => `<button type="button" class="i" role="option" data-id="${esc(x)}"><span>${esc(x)}</span><span class="x" data-del="${esc(x)}" title="목록에서 지우기" aria-label="목록에서 지우기">✕</span></button>`).join('');
+  box.hidden = false;
+}
+(function () {
+  const box = $('#lgRecent'), inp = $('#lgEmail'); if (!box || !inp) return;
+  inp.addEventListener('focus', () => recShow(true));
+  inp.addEventListener('click', () => recShow(true));
+  inp.addEventListener('input', () => recShow(true));
+  inp.addEventListener('keydown', e => { if (e.key === 'Escape') box.hidden = true; if (e.key === 'ArrowDown' && !box.hidden) { const f = box.querySelector('button'); if (f) { e.preventDefault(); f.focus(); } } });
+  inp.addEventListener('blur', () => setTimeout(() => { if (!box.contains(document.activeElement)) box.hidden = true; }, 150));
+  box.addEventListener('mousedown', e => e.preventDefault());
+  box.addEventListener('click', e => {
+    const d = e.target.closest('[data-del]');
+    if (d) { const id = d.getAttribute('data-del'); recPut(recGet().filter(x => x !== id)); try { if (localStorage.getItem(REM_KEY) === id) localStorage.removeItem(REM_KEY); } catch (_) {} recShow(true); return; }
+    const b = e.target.closest('[data-id]'); if (!b) return;
+    inp.value = b.getAttribute('data-id'); box.hidden = true; const pw = $('#lgPw'); if (pw) pw.focus();
+  });
+})();
 function remFill() {                              // 로그인 창에 기억한 아이디를 채운다 — 이미 무언가 쳐 둔 칸은 건드리지 않는다
   const id = remGet();
   [LG].forEach(ui => { const e = $(ui.email), c = $(ui.rem); if (!e || !c) return; c.checked = !!id; if (id && !e.value) e.value = id; });
