@@ -520,14 +520,15 @@ svg.ic.s{width:17px;height:17px}
 .u2 details.more[open] summary::after{content:"−"}
 .u2 details.more p{font-size:.9rem;color:var(--ink2);margin-top:6px}
 .u2 p.more{font-size:.9rem;color:var(--ink2)}
-.u2 .pgrid{display:grid;grid-template-columns:1fr;gap:14px}   /* 11-27 이사장 지시: 등급 카드는 한 줄에 하나씩 아래로 */
-@media(min-width:701px){.u2 .pgrid .pcard{display:grid;grid-template-columns:minmax(230px,300px) 1fr;column-gap:26px;align-items:start}.u2 .pgrid .pcard>*{grid-column:1}.u2 .pgrid .pcard>ul{grid-column:2;grid-row:1 / span 8;margin:0;padding:2px 0 0 20px;border-top:0;border-left:1px dashed var(--line);align-self:stretch;align-content:start}}
-.u2 .pcard{border-top:6px solid var(--cb);display:flex;flex-direction:column;gap:6px}
+.u2 .pgrid{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:14px}   /* 11-27 이사장 지시: 등급 카드 다섯 개를 한 줄에 나란히 */
+@media(max-width:1100px){.u2 .pgrid{grid-auto-columns:minmax(220px,1fr);overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px}.u2 .pgrid .pcard{scroll-snap-align:start}}   /* 다섯 칸이 안 들어가는 폭은 한 줄을 옆으로 밀어 본다 */
+@media(max-width:700px){.u2 .pgrid{grid-auto-flow:row;grid-auto-columns:auto;grid-template-columns:1fr;overflow-x:visible}}   /* 휴대폰은 위아래로 */
+.u2 .pcard{border-top:6px solid var(--cb);display:flex;flex-direction:column;gap:6px;word-break:keep-all;overflow-wrap:break-word}
 .u2 .pcard .pn{display:flex;align-items:center;gap:10px}
 .u2 .pcard .pn b{font-size:1.1rem;color:var(--c)}
 .u2 .pcard .pn small{display:block;color:var(--mute);font-size:.82rem}
 .u2 .pcard .pp{font-size:1.9rem;font-weight:800;color:var(--g9);line-height:1.2;margin-top:6px}
-.u2 .pcard .pp small{font-size:.9rem;font-weight:400;color:var(--mute)}
+.u2 .pcard .pp small{font-size:.9rem;font-weight:400;color:var(--mute);white-space:nowrap;display:inline-block}
 .u2 .pcard .p2{font-size:.95rem;color:var(--ink2)}
 .u2 .pcard .p2 b{color:var(--g9)}
 .u2 .pcard ul{list-style:none;margin:8px 0 0;padding:10px 0 0;border-top:1px dashed var(--line);display:grid;gap:5px;font-size:.93rem}
