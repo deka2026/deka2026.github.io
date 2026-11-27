@@ -1649,9 +1649,11 @@ function priceHTML() {
   const prod = p => {
     const m = pmOf(p.product), opts = Array.isArray(p.options) ? p.options : [];
     const lines = m.lines.map(esc);
+    const tiers = Array.isArray(p.tiers) ? p.tiers : [];
+    if (tiers.length) lines.unshift('기본 이용료: ' + tiers.map(x => `${esc(x.name.replace(' 포함', ''))} ${won(x.amount)}`).join(' · '));
     if (opts.length) lines.push('선택 기능: ' + opts.map(o => `${esc(o.name)} ${won(o.amount)}`).join(' · '));
     if (p.approve) lines.push('신청 뒤 사교원의 승인을 거칩니다');
-    return pcard(m.c, m.i, p.tier_ko || p.name, m.who || p.name, `<div class="pp">${won(p.base)} <small>/ ${perU(p)}</small></div>` + (opts.length ? `<div class="p2">기본 ${won(p.base)} + 선택 기능${p.allin ? ` · 올인원 <b>${won(p.allin)}</b>` : ''}</div>` : ''), taxTag(p.tax), lines);
+    return pcard(m.c, m.i, p.tier_ko || p.name, m.who || p.name, `<div class="pp">${won(p.base)} <small>/ ${perU(p)}${tiers.length ? '부터' : ''}</small></div>` + (p.tax === 'vat' ? `<div class="p2" style="font-size:.85rem;color:var(--mute)">부가세 포함 · 공급가 ${won(Math.round(p.base / 1.1))}${tiers.length ? '부터' : ''}</div>` : '') + (opts.length ? `<div class="p2">기본 ${tiers.length ? '이용료' : won(p.base)} + 선택 기능${tiers.length && p.allin_gap ? ` · 올인원 = 기본 이용료 + <b>${won(p.allin_gap)}</b>` : p.allin ? ` · 올인원 <b>${won(p.allin)}</b>` : ''}</div>` : ''), taxTag(p.tax), lines);
   };
   const ext = x => {
     const m = pmOf(x.product), ps = Array.isArray(x.prices) ? x.prices : [], lo = ps.length ? Math.min.apply(null, ps.map(q => +q.amount || 0)) : 0;
@@ -1946,8 +1948,9 @@ function openWhen() { const m = applyShut() ? /^(\d{4})-(\d{2})-(\d{2})$/.exec(P
 function mbClosed() { return !!PLANS && (!PLANS.ok || applyShut()) && !(me && me.role === 'admin' && PLANS.ok && !preview); }
 function joinNew() { return { step: me ? 2 : 1, sel: {}, held: {}, f: {}, pay: { method: 'transfer', auto_day: 5, cycle: 'month', depositor: '', receipt_kind: 'income', receipt_no: '', invoice: false, biz_no: '' }, payMode: 'new', payOnly: false, err: '', busy: false, done: null, created: false, seeded: false }; }
 const jProd = k => (PLANS && PLANS.ok) ? PLANS.products.find(p => p.product === k) : null;
-function jPrice(p, s) { const sum = (+p.base || 0) + (p.options || []).filter(o => s.opts.includes(o.key)).reduce((a, o) => a + (+o.amount || 0), 0); return p.allin ? Math.min(sum, +p.allin) : sum; }
-function joinPicks() { if (!J || !(PLANS && PLANS.ok)) return []; return PLANS.products.filter(p => J.sel[p.product] && J.sel[p.product].on).map(p => ({ product: p.product, options: (p.options || []).map(o => o.key).filter(k => J.sel[p.product].opts.includes(k)) })); }
+function jTier(p, s) { const t = p.tiers || []; return t.length ? (t.find(x => s.opts.includes(x.key)) || t[0]) : null; }   // 11-27: 연합회 「단위조합 N곳 포함」 구간
+function jPrice(p, s) { const t = jTier(p, s), base = t ? +t.amount : (+p.base || 0); const sum = base + (p.options || []).filter(o => s.opts.includes(o.key)).reduce((a, o) => a + (+o.amount || 0), 0); const cap = t && p.allin_gap ? base + (+p.allin_gap) : (+p.allin || 0); return cap ? Math.min(sum, cap) : sum; }
+function joinPicks() { if (!J || !(PLANS && PLANS.ok)) return []; return PLANS.products.filter(p => J.sel[p.product] && J.sel[p.product].on).map(p => { const t = jTier(p, J.sel[p.product]); return { product: p.product, options: (t ? [t.key] : []).concat((p.options || []).map(o => o.key).filter(k => J.sel[p.product].opts.includes(k))) }; }); }
 function joinTotal() { return joinPicks().reduce((a, x) => { const p = jProd(x.product); return a + (p ? jPrice(p, J.sel[x.product]) : 0); }, 0); }
 function joinSeed() {                 // 로그인한 회원: 지금 이용권을 미리 고른 것으로(뺄 수는 없다 — 그만두기는 내 페이지에서)
   if (!J || J.seeded || !me) return;
@@ -1998,10 +2001,13 @@ function pickerHTML() {
     const k = p.product, m = pmOf(k), s = J.sel[k] || { on: false, opts: [] }, held = J.held[k], opts = Array.isArray(p.options) ? p.options : [];
     const all = opts.length > 0 && opts.every(o => s.opts.includes(o.key));
     h += `<div class="svc ${m.c}${s.on ? ' sel' : ''}" data-prodbox="${esc(k)}"><div class="hd"><input type="checkbox" id="j-${esc(k)}" data-prod="${esc(k)}"${s.on ? ' checked' : ''}${held ? ' disabled' : ''}><label class="t" for="j-${esc(k)}"><b>${esc(p.name)}</b> <span class="chip">${esc(p.tier_ko || '')}</span><small>${m.lines.map(esc).join(' · ')}${p.approve ? ' <b>(승인 필요)</b>' : ''}${held ? ' · <b>' + esc(SUB_KO[held] || '이용 중') + '</b> — 그만두기는 내 페이지에서' : ''}</small></label><span class="pr">${opts.length ? '기본 ' : ''}${perU(p)} ${won(p.base)}<br><small class="an">${taxWord(p.tax)}</small></span></div>`;
+    const tiers = Array.isArray(p.tiers) ? p.tiers : [], tsel = jTier(p, s);
+    if (s.on && tiers.length) h += `<div class="sub"><span class="note">포함할 단위조합 수(기본 이용료)</span>` + tiers.map(x => `<div class="row"><label class="ck"><input type="radio" name="j-${esc(k)}-tier" id="j-${esc(k)}-${esc(x.key)}" data-tier="${esc(k)}:${esc(x.key)}"${tsel && tsel.key === x.key ? ' checked' : ''}>${esc(x.name)}</label><span class="p">${won(x.amount)}</span></div>`).join('') + `</div>`;
     if (s.on && opts.length) {
-      const sum = (+p.base || 0) + opts.filter(o => s.opts.includes(o.key)).reduce((a, o) => a + (+o.amount || 0), 0);
+      const base0 = tsel ? +tsel.amount : (+p.base || 0), cap0 = tsel && p.allin_gap ? base0 + (+p.allin_gap) : +p.allin;
+      const sum = base0 + opts.filter(o => s.opts.includes(o.key)).reduce((a, o) => a + (+o.amount || 0), 0);
       h += `<div class="sub"><span class="note">선택 기능</span>` + opts.map(o => `<div class="row"><label class="ck"><input type="checkbox" id="j-${esc(k)}-${esc(o.key)}" data-opt="${esc(k)}:${esc(o.key)}"${s.opts.includes(o.key) ? ' checked' : ''}>${esc(o.name)}</label><span class="p">+${won(o.amount)}</span></div>`).join('') +
-        (p.allin ? `<div class="row"><label class="ck"><input type="checkbox" id="j-${esc(k)}-all" data-all="${esc(k)}"${all ? ' checked' : ''}><b>올인원</b>(선택 기능 전부)</label><span class="p">${won(p.allin)}</span></div>` + (sum > +p.allin ? `<span class="note" style="color:var(--gold)">고른 기능을 다 더하면 ${won(sum)}이지만 올인원 값 ${won(p.allin)}만 냅니다.</span>` : '') : '') +
+        (cap0 ? `<div class="row"><label class="ck"><input type="checkbox" id="j-${esc(k)}-all" data-all="${esc(k)}"${all ? ' checked' : ''}><b>올인원</b>(선택 기능 전부)</label><span class="p">${won(cap0)}</span></div>` + (sum > cap0 ? `<span class="note" style="color:var(--gold)">고른 기능을 다 더하면 ${won(sum)}이지만 올인원 값 ${won(cap0)}만 냅니다.</span>` : '') : '') +
         (held && J.held[k] !== 'apply' ? `<span class="note">이미 낸 기간에는 낸 구성대로 쓰고, 바꾼 선택 기능은 다음 기간부터 적용됩니다.</span>` : '') + `</div>`;
     }
     h += `</div>`;
@@ -2186,8 +2192,9 @@ $('#joinBody').addEventListener('change', e => {
       J.sel[d.prod] = Object.assign({ opts: [] }, J.sel[d.prod] || {}, { on: true });
     } else if (J.sel[d.prod]) J.sel[d.prod].on = false;
   }
+  else if (d.tier) { const [k, o] = d.tier.split(':'), p = jProd(k), s = J.sel[k]; if (!p || !s) return; s.opts = s.opts.filter(x => !(p.tiers || []).some(y => y.key === x)).concat([o]); }
   else if (d.opt) { const [k, o] = d.opt.split(':'), s = J.sel[k]; if (!s) return; const i = s.opts.indexOf(o); if (t.checked && i < 0) s.opts.push(o); if (!t.checked && i >= 0) s.opts.splice(i, 1); }
-  else if (d.all) { const p = jProd(d.all), s = J.sel[d.all]; if (!p || !s) return; s.opts = t.checked ? (p.options || []).map(o => o.key) : []; }
+  else if (d.all) { const p = jProd(d.all), s = J.sel[d.all]; if (!p || !s) return; const t0 = jTier(p, s); s.opts = (t0 ? [t0.key] : []).concat(t.checked ? (p.options || []).map(o => o.key) : []); }
   else if (d.pay) { joinSave(); const i = d.pay.indexOf(':'); J.pay[d.pay.slice(0, i)] = d.pay.slice(i + 1); }
   else if (d.payck) { joinSave(); J.pay[d.payck] = t.checked; }
   else if (d.paymode) { joinSave(); J.payMode = d.paymode; }
@@ -2226,14 +2233,14 @@ const ASK_KINDS = { ai_edu: 'AI교육', etc: '기타 문의' };   // 11-27 이�
    계약에 사이트 이용권 1년을 묶는다(정가, 부가세 포함 — 아카데미는 면세). 업무자동화 구축 사이트의 운영·유지 이용료는 미정이라 금액을 내지 않는다.
    컨설팅 문의는 이 화면 하나로 모은다. 접수 /api/axconsult(늘 열림) → 문의 접수함·텔레그램 알림. 계산 근거 docs/사이트수익화/사교원_컨설팅5상품·이용권1년묶음_비용계산_20261127.md */
 const AXC_P = {   // 이용권 한 달 값(부가세 포함, 아카데미는 2개월 10,000원 면세를 달로)
-  coopAll: ['햇소자 협동조합 올인원', 27500], fedAll: ['햇소자 연합회 올인원', 55000], coopBase: ['햇소자 협동조합 기본', 11000],
+  coopAll: ['햇소자 협동조합 올인원', 38500],   // 11-27 요금 개편: 협동조합 기본 22,000(공급가 20,000)+선택 기능, 올인원 38,500 · 연합회는 단위조합 수 구간(아래 axcFed)
   policy: ['의정지원 연결형', 22000], academy: ['아카데미 개인', 5000],
 };
 const AXC_TYPES = {
   coop: { n: '조합 설립·운영 컨설팅', c: 'c-hat', i: 'sun', times: 3, fee: 900000, one: '햇빛소득마을 조합을 세우고 꾸려 가는 길을 마을과 함께 짚습니다. 설립 서류·총회·운영 규칙과 햇소자 쓰는 법까지.',
     bundle: '햇소자 협동조합 올인원 이용권 1년' },
   fed: { n: '연합회 사무국 셋업', c: 'c-hat', i: 'users', times: 5, fee: 1500000, one: '시군 연합회의 사무국을 세웁니다. 업무 체계·회원조합 지원·공지와 자료 배포를 햇소자 연합회 화면으로 굴러가게 합니다.',
-    bundle: '햇소자 연합회 올인원 1년 + 소속 조합 기본 이용권 1년' },
+    bundle: '햇소자 연합회 올인원 이용권 1년(단위조합 5·10·20곳 포함 구간)' },
   aiedu: { n: '의회·지자체 AI 교육', c: 'c-pol', i: 'gov', times: 3, fee: 900000, one: '의원실·의회 사무처·지자체 공무원이 AI 로 공약·조례·문서·브리핑 일을 해 보며 익힙니다.',
     bundle: '의회는 의정지원 연결형 1년(의원실마다), 지자체는 아카데미 개인 이용권 1년(사람마다)' },
   build: { n: 'AX 구축 컨설팅', c: 'c-pol', i: 'tool', times: 5, fee: 1500000, one: '우리 분야의 자료·서식으로 답하는 도메인AI 와 업무 화면(메일·결재·문서작성 등)을 기관에 맞춰 세웁니다.',
@@ -2252,7 +2259,8 @@ function axcQuote(t, f) {   // 즉시 견적 — 컨설팅(면세) + 묶는 이�
   const n = k => Math.max(0, parseInt(f[k], 10) || 0);
   let items = [], monthly = 0, note = '';
   if (t === 'coop') items.push([AXC_P.coopAll[0] + ' 1곳', AXC_P.coopAll[1]]);
-  if (t === 'fed') { items.push([AXC_P.fedAll[0] + ' 1곳', AXC_P.fedAll[1]]); if (n('x_coops')) items.push([AXC_P.coopBase[0] + ' ' + n('x_coops') + '곳', AXC_P.coopBase[1] * n('x_coops')]); }
+  if (t === 'fed') { const c = n('x_coops') || 5, T = c <= 5 ? [5, 55000] : c <= 10 ? [10, 110000] : c <= 20 ? [20, 165000] : null;
+    if (T) items.push(['햇소자 연합회 올인원(단위조합 ' + T[0] + '곳 포함)', T[1] + 22000]); else note = '단위조합 20곳이 넘으면 이용료는 견적서로 알려 드립니다.'; }
   if (t === 'aiedu') { if (f.x_target === '지자체') { if (n('x_people')) items.push([AXC_P.academy[0] + ' ' + n('x_people') + '명', AXC_P.academy[1] * n('x_people'), true]); }
     else if (n('x_offices')) items.push([AXC_P.policy[0] + ' 의원실 ' + n('x_offices') + '곳', AXC_P.policy[1] * n('x_offices')]); }
   if (t === 'teamlearning' && n('x_people')) items.push([AXC_P.academy[0] + ' ' + n('x_people') + '명', AXC_P.academy[1] * n('x_people'), true]);
@@ -2263,7 +2271,7 @@ function axcQuote(t, f) {   // 즉시 견적 — 컨설팅(면세) + 묶는 이�
 }
 const AXC_FIELDS = {
   coop: [['x_village', '마을·조합 이름', '예: ○○리 햇빛소득마을'], ['x_stage', '지금 단계', '준비 중 · 설립 중 · 운영 중', 'sel']],
-  fed: [['x_coops', '함께 묶을 소속 조합 수', '예: 10', 'num'], ['x_region', '시군', '예: 해남군']],
+  fed: [['x_coops', '포함할 단위조합 수', '예: 10 (5·10·20곳 구간)', 'num'], ['x_region', '시군', '예: 해남군']],
   aiedu: [['x_target', '교육 대상', '의회 · 지자체', 'sel0'], ['x_offices', '의원실 수(의회)', '예: 10', 'num'], ['x_people', '교육 인원(지자체)', '예: 20', 'num']],
   build: [['x_staff', '직원 수', '예: 8', 'num'], ['x_docs', '쓸 자료 규모(대략)', '예: 한글·PDF 300건']],
   teamlearning: [['x_people', '참여 인원', '예: 15', 'num'], ['x_teams', '팀 수', '예: 3', 'num'], ['x_topic', '다룰 문제(아는 만큼)', '예: 마을 어르신 이동 문제']],
